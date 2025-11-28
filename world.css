@@ -1,0 +1,151 @@
+.panel {
+	background-color: silver;
+}
+
+.panel-head {
+	padding: 0px 8px;
+	background-color: gainsboro;
+}
+
+.panel-body {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	padding: 12px;
+}
+
+.panel.autohide:has(.panel-body:empty) {
+	display: none;
+}
+
+body.hide-markers .decor { display: none }
+body.hide-markers .marker { display: none }
+body.hide-pieces .piece { display: none }
+
+.board { position: relative; }
+.board > svg { position: absolute; }
+.decor { position: absolute; }
+.space { position: absolute; }
+.layout { position: absolute; }
+.card { position: relative }
+.piece { position: relative; }
+.marker { position: relative; }
+
+.layout {
+	box-sizing: border-box;
+	pointer-events: none;
+}
+
+.layout > * {
+	pointer-events: auto;
+}
+
+.decor {
+	pointer-events: none;
+}
+
+.board, .decor, .marker, .piece, .card {
+	background-repeat: no-repeat;
+}
+
+/* LAYOUT */
+
+.layout {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-content: center;
+	align-items: center;
+}
+
+.layout > * {
+	flex: 0 0 auto;
+}
+
+.layout > .break {
+	flex-basis: 100%;
+}
+
+.layout.space-between { justify-content: space-between; align-content: space-between; }
+.layout.space-around { justify-content: space-around; align-content: space-around; }
+
+.layout.grav-n { justify-content: center; align-content: start; }
+.layout.grav-s { justify-content: center; align-content: end; }
+.layout.grav-w { justify-content: start; align-content: center; }
+.layout.grav-e { justify-content: end; align-content: center; }
+.layout.grav-ne { justify-content: end; align-content: start; }
+.layout.grav-nw { justify-content: start; align-content: start; }
+.layout.grav-se { justify-content: end; align-content: end; }
+.layout.grav-sw { justify-content: start; align-content: end; }
+
+.layout.grow-h { flex-direction: column; }
+.layout.grow-h.grav-n { align-content: center; justify-content: start; }
+.layout.grow-h.grav-s { align-content: center; justify-content: end; }
+.layout.grow-h.grav-w { align-content: start; justify-content: center; }
+.layout.grow-h.grav-e { align-content: end; justify-content: center; }
+.layout.grow-h.grav-ne { align-content: end; justify-content: start; }
+.layout.grow-h.grav-nw { align-content: start; justify-content: start; }
+.layout.grow-h.grav-se { align-content: end; justify-content: end; }
+.layout.grow-h.grav-sw { align-content: start; justify-content: end; }
+
+/* BUG: In chrome the width grows automatically in the non-specified inset direction! */
+/* BUG: However, in Safari and Firefox it does not.... */
+/* BUG: Set align-content to force overflow in the desired direction so it behaves the same everywhere. */
+.layout.grow-h.grow-e { align-content: start; }
+.layout.grow-h.grow-w { align-content: end; }
+
+/* SQUARE GRID LAYOUT -- NEEDS JS ASSISTANCE */
+
+.layout.square {
+	display: grid;
+	grid-template-columns: repeat(var(--square, 2), var(--cell-w, min-content));
+	grid-template-rows: repeat(var(--square, 2), var(--cell-h, min-content));
+}
+
+.layout.square .break {
+	grid-column: var(--square, 1);
+}
+
+/* STACK LAYOUT */
+
+.layout.stack { display: block; }
+.layout.stack > * { position: absolute; }
+
+.layout.stack > :nth-child(1) { top: calc(var(--stack-dy,-10px) * 0); left: calc(var(--stack-dx,-10px) * 0); }
+.layout.stack > :nth-child(2) { top: calc(var(--stack-dy,-10px) * 1); left: calc(var(--stack-dx,-10px) * 1); }
+.layout.stack > :nth-child(3) { top: calc(var(--stack-dy,-10px) * 2); left: calc(var(--stack-dx,-10px) * 2); }
+.layout.stack > :nth-child(4) { top: calc(var(--stack-dy,-10px) * 3); left: calc(var(--stack-dx,-10px) * 3); }
+.layout.stack > :nth-child(5) { top: calc(var(--stack-dy,-10px) * 4); left: calc(var(--stack-dx,-10px) * 4); }
+.layout.stack > :nth-child(6) { top: calc(var(--stack-dy,-10px) * 5); left: calc(var(--stack-dx,-10px) * 5); }
+.layout.stack > :nth-child(7) { top: calc(var(--stack-dy,-10px) * 6); left: calc(var(--stack-dx,-10px) * 6); }
+.layout.stack > :nth-child(8) { top: calc(var(--stack-dy,-10px) * 7); left: calc(var(--stack-dx,-10px) * 7); }
+.layout.stack > :nth-child(9) { top: calc(var(--stack-dy,-10px) * 8); left: calc(var(--stack-dx,-10px) * 8); }
+.layout.stack > :nth-child(10) { top: calc(var(--stack-dy,-10px) * 9); left: calc(var(--stack-dx,-10px) * 9); }
+.layout.stack > :nth-child(11) { top: calc(var(--stack-dy,-10px) * 10); left: calc(var(--stack-dx,-10px) * 10); }
+.layout.stack > :nth-child(12) { top: calc(var(--stack-dy,-10px) * 11); left: calc(var(--stack-dx,-10px) * 11); }
+.layout.stack > :nth-child(13) { top: calc(var(--stack-dy,-10px) * 12); left: calc(var(--stack-dx,-10px) * 12); }
+.layout.stack > :nth-child(14) { top: calc(var(--stack-dy,-10px) * 13); left: calc(var(--stack-dx,-10px) * 13); }
+.layout.stack > :nth-child(15) { top: calc(var(--stack-dy,-10px) * 14); left: calc(var(--stack-dx,-10px) * 14); }
+.layout.stack > :nth-child(16) { top: calc(var(--stack-dy,-10px) * 15); left: calc(var(--stack-dx,-10px) * 15); }
+.layout.stack > :nth-child(17) { top: calc(var(--stack-dy,-10px) * 16); left: calc(var(--stack-dx,-10px) * 16); }
+.layout.stack > :nth-child(18) { top: calc(var(--stack-dy,-10px) * 17); left: calc(var(--stack-dx,-10px) * 17); }
+.layout.stack > :nth-child(19) { top: calc(var(--stack-dy,-10px) * 18); left: calc(var(--stack-dx,-10px) * 18); }
+.layout.stack > :nth-child(20) { top: calc(var(--stack-dy,-10px) * 19); left: calc(var(--stack-dx,-10px) * 19); }
+
+.layout.stack.offset\:3 { --stack-dx: -3px; --stack-dy: -3px; }
+.layout.stack.offset\:4 { --stack-dx: -4px; --stack-dy: -4px; }
+.layout.stack.offset\:5 { --stack-dx: -5px; --stack-dy: -5px; }
+.layout.stack.offset\:6 { --stack-dx: -6px; --stack-dy: -6px; }
+.layout.stack.offset\:7 { --stack-dx: -7px; --stack-dy: -7px; }
+.layout.stack.offset\:8 { --stack-dx: -8px; --stack-dy: -8px; }
+.layout.stack.offset\:9 { --stack-dx: -9px; --stack-dy: -9px; }
+.layout.stack.offset\:10 { --stack-dx: -10px; --stack-dy: -10px; }
+.layout.stack.offset\:11 { --stack-dx: -11px; --stack-dy: -11px; }
+.layout.stack.offset\:12 { --stack-dx: -12px; --stack-dy: -12px; }
+.layout.stack.offset\:13 { --stack-dx: -13px; --stack-dy: -13px; }
+.layout.stack.offset\:14 { --stack-dx: -14px; --stack-dy: -14px; }
+.layout.stack.offset\:15 { --stack-dx: -15px; --stack-dy: -15px; }
+
+.layout.stack.hover-offset\:10:hover { --stack-dx: -10px; --stack-dy: -10px; }
+.layout.stack.hover-offset\:15:hover { --stack-dx: -15px; --stack-dy: -15px; }
+.layout.stack.hover-offset\:20:hover { --stack-dx: -20px; --stack-dy: -20px; }

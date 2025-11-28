@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="47" height="47">
+<g transform="translate(3.5,3.5)" stroke-width="1" stroke-linejoin="round" stroke-linecap="round">
+<g fill="#ff0" stroke="#ff0" stroke-width="7">
+<path d="M 0,0 0,20 20,20 20,0 0,0 z M 20,40 40,40 M 40,40 40,20 M 0,20 20,40 M 20,20 40,40 M 20,0 40,20"/>
+</g>
+</g>
+</svg>

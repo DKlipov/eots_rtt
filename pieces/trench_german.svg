@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="88" height="22">
+<g transform="translate(3.5,3.5)" stroke-width="1" stroke-linejoin="round" stroke-linecap="round">
+<path fill="#4e4e4e" d="M 0,10 76,10 81,15 5,15 z"/>
+<path fill="#4e4e4e" d="M 76,10 76,0 81,5 81,15 z"/>
+<path fill="#6c6c6c" d="M 0,0 0,10 76,10 76,0 0,0 z"/>
+<path fill="none" stroke="#000" d="
+M 0,0 0,10 76,10 76,0 0,0 z
+M 5,15 81,15 M 81,15 81,5
+M 0,10 5,15
+M 76,10 81,15
+M 76,0 81,5
+"/>
+</g>
+</svg>
