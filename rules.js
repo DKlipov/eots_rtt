@@ -13,7 +13,10 @@ exports.default_scenario = "1942"
 const P_GERMAN = 0
 const P_FRENCH = 1
 
-const {cards, edges} = require("./data.js")
+const JP = 0
+const AP = 1
+
+const {pieces, cards, edges} = require("./data.js")
 
 /* DATA */
 
@@ -257,9 +260,7 @@ function log_summary_end() {
 /* SEQUENCE OF PLAY */
 
 P.s1 = script(`
-	for G.turn in 1 to 3 {
-		call turn
-	}
+	call round
 `)
 
 P.s2 = script(`
@@ -343,10 +344,8 @@ P.month = script(`
 
 P.round = script(`
 	log ("=" + G.round)
-	set G.active (G.round & 1)
-	call check_supply
+	set G.active ((G.active + 1) % 2)
 	call choose_action_card
-	call stacking_limitation
 	call end_action
 `)
 
@@ -504,6 +503,7 @@ P.end_action = {
 
 P.choose_action_card = {
     prompt() {
+        console.log("choose")
         prompt(`Action Round ${G.round >> 1}: Play a card.`)
 
         if (G.morale[G.active] < 4)
@@ -518,16 +518,13 @@ P.choose_action_card = {
     },
     discard() {
         push_undo()
-        clear_barrage()
         goto("discard_cards", {n: 2})
     },
     card(c) {
         push_undo()
-        clear_barrage()
     },
     pass() {
         push_undo()
-        clear_barrage()
         log("Pass")
         end()
     },
@@ -896,17 +893,16 @@ P.setup_done = {
 }
 
 function construct_decks() {
-    var c
-
     G.draw = [[], []]
 
-    for (c = 1; c <= 51; ++c)
-        if (is_card_active_this_turn(c) && !set_has(G.removed, c) && !set_has(G.permanent, c) && !is_card_in_hand(P_FRENCH, c))
-            G.draw[P_FRENCH].push(c)
+    for (let c = 1; c < cards.length; ++c) {
+        if (cards[c].faction === "ap") {
+            G.draw[AP].push(c)
+        } else {
+            G.draw[JP].push(c)
+        }
 
-    for (c = 52; c <= 100; ++c)
-        if (is_card_active_this_turn(c) && !set_has(G.removed, c) && !set_has(G.permanent, c) && !is_card_in_hand(P_GERMAN, c))
-            G.draw[P_GERMAN].push(c)
+    }
 }
 
 function draw_card(side) {
@@ -936,17 +932,18 @@ function setup_scenario_1() {
     log("The German assault on Verdun (February to April 1916)")
 
     G.location = []
-    for (let i = 1; i < data.pieces; i++) {
-        G.location[i] = hex_to_int(data.pieces[i].start)
+    for (let i = 1; i < pieces; i++) {
+        G.location[i] = hex_to_int(pieces[i].start)
     }
 
     construct_decks()
 
-    while (G.hand[P_GERMAN].length < 10)
-        draw_card(P_GERMAN)
-    while (G.hand[P_FRENCH].length < 8)
-        draw_card(P_FRENCH)
+    while (G.hand[JP].length < 6)
+        draw_card(JP)
+    while (G.hand[AP].length < 6)
+        draw_card(AP)
 
+    console.log("setup")
     call("s1")
 }
 
@@ -985,6 +982,7 @@ function on_setup(scenario, options) {
         G.options |= OPT_FRENCH_CARDS
     }
 
+    G.active = JP
     G.turn = 1
     G.last = 6
     G.month = 1
@@ -996,30 +994,15 @@ function on_setup(scenario, options) {
     G.morale = [10, 10]
 
     G.played = [] // events in order of play
-    G.permanent = [] // played permanent events (both sides)
     G.removed = [] // removed one-time events (both sides)
     G.hand = [[], []]
 
-    G.control = [0, 0, 0]
-    G.units = new Array(120).fill(0)
-    G.trenches = new Array(40).fill(0)
-    G.vps = [[], []]
+    G.control = []
     G.oos = [[], []]
     G.moved = []
-    G.tm = 0
-    G.take_control = []
 
-    for (i = 0; i < 20; ++i) G.trenches[i] = Z_GERMAN_TRENCHES
-    for (i = 20; i < 40; ++i) G.trenches[i] = Z_FRENCH_TRENCHES
-    for (i = 0; i < 60; ++i) G.units[i] = Z_GERMAN_POOL
-    for (i = 60; i < 120; ++i) G.units[i] = Z_FRENCH_POOL
-
-    for (i = 0; i <= 86; ++i)
-        set_zone_control(i, P_FRENCH)
-
-
-    switch (parseInt(scenario)) {
-        case 1:
+    switch (scenario) {
+        case "1942":
             return setup_scenario_1()
     }
 }
