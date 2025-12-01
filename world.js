@@ -24,575 +24,699 @@
 var G, V, R // convenience aliases
 
 const world = {
-	things: {},
-	favicon: document.querySelector("link[rel='icon']"),
-	header: document.querySelector("header"),
-	status: document.getElementById("status"),
-	mapwrap: document.getElementById("mapwrap"),
-	panzoom: document.getElementById("pan_zoom_main"),
-	parent_list: [],
-	action_list: [],
-	animate_list: [],
-	parent: document.getElementById("map"),
+    things: {},
+    favicon: document.querySelector("link[rel='icon']"),
+    header: document.querySelector("header"),
+    status: document.getElementById("status"),
+    mapwrap: document.getElementById("mapwrap"),
+    panzoom: document.getElementById("pan_zoom_main"),
+    parent_list: [],
+    action_list: [],
+    animate_list: [],
+    focus_box: document.createElement("div"),
+    focus: null,
+    parent: document.getElementById("map"),
 }
 
 function get_preference(name, fallback) {
-	var key = params.title_id + "/" + name
-	var value = window.localStorage.getItem(key)
-	if (value)
-		return JSON.parse(value)
-	return fallback
+    var key = params.title_id + "/" + name
+    var value = window.localStorage.getItem(key)
+    if (value)
+        return JSON.parse(value)
+    return fallback
 }
 
 function set_preference(name, value) {
-	var key = params.title_id + "/" + name
-	window.localStorage.setItem(key, JSON.stringify(value))
-	return value
+    var key = params.title_id + "/" + name
+    window.localStorage.setItem(key, JSON.stringify(value))
+    return value
 }
 
 function define_preference_checkbox(name, initial) {
-	var input = document.getElementById(name)
-	var value = get_preference(name, initial)
-	input.checked = value
-	input.onchange = function () {
-		_update_preference_checkbox(name)
-		close_toolbar_menus()
-		on_update()
-	}
-	document.body.classList.toggle(name, value)
+    var input = document.getElementById(name)
+    var value = get_preference(name, initial)
+    input.checked = value
+    input.onchange = function () {
+        _update_preference_checkbox(name)
+        close_toolbar_menus()
+        on_update()
+    }
+    document.body.classList.toggle(name, value)
 }
 
 function _update_preference_checkbox(name) {
-	var input = document.getElementById(name)
-	var value = input.checked
-	set_preference(name, value)
-	document.body.classList.toggle(name, value)
+    var input = document.getElementById(name)
+    var value = input.checked
+    set_preference(name, value)
+    document.body.classList.toggle(name, value)
 }
 
 function define_preference_radio(name, initial) {
-	var value = get_preference(name, initial)
-	for (var input of document.querySelectorAll(`input[name="${name}"]`)) {
-		if (value === input.value) {
-			input.checked = true
-			document.body.dataset[name] = value
-		} else {
-			input.checked = false
-		}
-		input.onchange = function () {
-			_update_preference_radio(name)
-			close_toolbar_menus()
-			on_update()
-		}
-	}
+    var value = get_preference(name, initial)
+    for (var input of document.querySelectorAll(`input[name="${name}"]`)) {
+        if (value === input.value) {
+            input.checked = true
+            document.body.dataset[name] = value
+        } else {
+            input.checked = false
+        }
+        input.onchange = function () {
+            _update_preference_radio(name)
+            close_toolbar_menus()
+            on_update()
+        }
+    }
 }
 
 function _update_preference_radio(name) {
-	for (var input of document.querySelectorAll(`input[name="${name}"]`)) {
-		if (input.checked) {
-			set_preference(name, input.value)
-			document.body.dataset[name] = input.value
-		}
-	}
+    for (var input of document.querySelectorAll(`input[name="${name}"]`)) {
+        if (input.checked) {
+            set_preference(name, input.value)
+            document.body.dataset[name] = input.value
+        }
+    }
 }
 
 function toggle_pieces() {
-	document.body.classList.toggle("hide-pieces")
+    document.body.classList.toggle("hide-pieces")
 }
 
 function toggle_markers_and_pieces() {
-	// cycle between showing everything, only pieces, and nothing.
-	let hidden_pieces = document.body.classList.contains("hide-pieces")
-	let hidden_markers = document.body.classList.contains("hide-markers")
-	if (hidden_pieces && hidden_markers) {
-		document.body.classList.remove("hide-pieces")
-		document.body.classList.remove("hide-markers")
-	} else if (hidden_pieces) {
-		document.body.classList.add("hide-markers")
-	} else {
-		document.body.classList.add("hide-pieces")
-	}
+    // cycle between showing everything, only pieces, and nothing.
+    let hidden_pieces = document.body.classList.contains("hide-pieces")
+    let hidden_markers = document.body.classList.contains("hide-markers")
+    if (hidden_pieces && hidden_markers) {
+        document.body.classList.remove("hide-pieces")
+        document.body.classList.remove("hide-markers")
+    } else if (hidden_pieces) {
+        document.body.classList.add("hide-markers")
+    } else {
+        document.body.classList.add("hide-pieces")
+    }
 }
 
 function set_favicon(url) {
-	world.favicon.href = url
+    world.favicon.href = url
 }
 
 function is_action(action, id) {
-	if (view.actions) {
-		if (id === undefined)
-			return view.actions[action] === 1
-		if (view.actions[action] === undefined)
-			return false
-		if (!Array.isArray(view.actions[action]))
-			throw new Error("action is not a list: " + action)
-		return view.actions[action].includes(id)
-	}
-	return false
+    if (view.actions) {
+        if (id === undefined)
+            return view.actions[action] === 1
+        if (view.actions[action] === undefined)
+            return false
+        if (!Array.isArray(view.actions[action]))
+            throw new Error("action is not a list: " + action)
+        return view.actions[action].includes(id)
+    }
+    return false
 }
 
 function on_click_action(evt) {
-	if (evt.button === 0)
-		if (send_action(evt.target.my_action, evt.target.my_id))
-			evt.stopPropagation()
+    if (evt.button === 0)
+        if (send_action(evt.target.my_action, evt.target.my_id))
+            evt.stopPropagation()
 }
 
 function register_thing(action, id, e) {
-	if (!world.things[action])
-		world.things[action] = {}
-	world.things[action][id] = e
-	e.my_action = action
-	e.my_id = id
-	return e
+    if (!world.things[action])
+        world.things[action] = {}
+    world.things[action][id] = e
+    e.my_action = action
+    e.my_id = id
+    return e
 }
 
 function lookup_thing(action, id) {
-	var list = world.things[action]
-	if (list === undefined)
-		throw new Error(`cannot find thing: ${action} ${id}`)
-	var thing = list[id]
-	if (thing === undefined)
-		throw new Error(`cannot find thing: ${action} ${id}`)
-	return thing
+    var list = world.things[action]
+    if (list === undefined)
+        throw new Error(`cannot find thing: ${action} ${id}`)
+    var thing = list[id]
+    if (thing === undefined)
+        throw new Error(`cannot find thing: ${action} ${id}`)
+    return thing
 }
 
 function register_action(action, id, e) {
-	e.onmousedown = on_click_action
-	world.action_list.push(e)
+    e.onmousedown = on_click_action
+    world.action_list.push(e)
+}
+
+function register_focusable(e) {
+    e.onmousedown = () => {
+        if (world.focus !== e.parent) {
+            if (world.focus != null) {
+                world.focus.classList.remove("focus")
+            }
+            world.focus = e.parent
+            e.parent.classList.add("focus")
+            on_update()
+
+        }
+    }
 }
 
 function register_tooltip(action, id, tip) {
-	var e = lookup_thing(action, id)
-	e.onmouseenter = function () {
-		if (typeof tip === "function")
-			world.status.textContent = tip(id)
-		else
-			world.status.textContent = tip
-	}
-	e.onmouseleave = function () {
-		world.status.textContent = ""
-	}
+    var e = lookup_thing(action, id)
+    e.onmouseenter = function () {
+        if (typeof tip === "function")
+            world.status.textContent = tip(id)
+        else
+            world.status.textContent = tip
+    }
+    e.onmouseleave = function () {
+        world.status.textContent = ""
+    }
 }
 
 function _add_keywords(e, keywords) {
-	if (keywords) {
-		if (typeof keywords === "string")
-			keywords = keywords.trim().split(" ")
-		for (var word of keywords)
-			e.classList.add(word)
-	}
+    if (keywords) {
+        if (typeof keywords === "string")
+            keywords = keywords.trim().split(" ")
+        for (var word of keywords)
+            e.classList.add(word)
+    }
 }
 
 function _define_element(e, tag, action, id, keywords) {
-	if (tag)
-		e.classList.add(tag)
-	e.classList.add(action)
-	_add_keywords(e, keywords)
-	e.my_className = e.className
-	e.my_action = action
-	e.my_id = id
-	register_thing(action, id, e)
-	return e
+    if (tag)
+        e.classList.add(tag)
+    e.classList.add(action)
+    _add_keywords(e, keywords)
+    e.my_className = e.className
+    e.my_action = action
+    e.my_id = id
+    register_thing(action, id, e)
+    return e
 }
 
 function _create_element(tag, action, id, keywords) {
-	return _define_element(document.createElement("div"), tag, action, id, keywords)
+    return _define_element(document.createElement("div"), tag, action, id, keywords)
 }
 
 function _find_element(tag, action, id, selector, keywords) {
-	return _define_element(document.getElementById(selector), tag, action, id, keywords)
+    return _define_element(document.getElementById(selector), tag, action, id, keywords)
 }
 
 function _apply_layout(e, layout) {
-	if (Array.isArray(layout))
-		var [ x, y, w, h ] = layout
-	else
-		var { x, y, w, h } = layout
+    if (Array.isArray(layout))
+        var [x, y, w, h] = layout
+    else
+        var {x, y, w, h} = layout
 
-	e.my_x = x = Math.round(x)
-	e.my_y = y = Math.round(y)
-	e.my_w = w = Math.round(w ?? 0)
-	e.my_h = h = Math.round(h ?? 0)
+    e.my_x = x = Math.round(x)
+    e.my_y = y = Math.round(y)
+    e.my_w = w = Math.round(w ?? 0)
+    e.my_h = h = Math.round(h ?? 0)
 
-	var r = world.parent_w - (x + w)
-	var b = world.parent_h - (y + h)
+    var r = world.parent_w - (x + w)
+    var b = world.parent_h - (y + h)
 
-	var grow_n = e.classList.contains("grow-n")
-	var grow_e = e.classList.contains("grow-e")
-	var grow_s = e.classList.contains("grow-s")
-	var grow_w = e.classList.contains("grow-w")
+    var grow_n = e.classList.contains("grow-n")
+    var grow_e = e.classList.contains("grow-e")
+    var grow_s = e.classList.contains("grow-s")
+    var grow_w = e.classList.contains("grow-w")
 
-	if (!grow_n) e.style.top = Math.round(y) + "px"
-	if (!grow_s) e.style.bottom = Math.round(b) + "px"
-	if (!grow_e) e.style.right = Math.round(r) + "px"
-	if (!grow_w) e.style.left = Math.round(x) + "px"
+    if (!grow_n) e.style.top = Math.round(y) + "px"
+    if (!grow_s) e.style.bottom = Math.round(b) + "px"
+    if (!grow_e) e.style.right = Math.round(r) + "px"
+    if (!grow_w) e.style.left = Math.round(x) + "px"
 
-	if (grow_w || grow_e) {
-		e.classList.add("grow-h")
-		e.my_className = e.className
-	}
+    if (grow_w || grow_e) {
+        e.classList.add("grow-h")
+        e.my_className = e.className
+    }
 
-	e.style.minHeight = Math.round(h) + "px"
-	e.style.minWidth = Math.round(w) + "px"
+    e.style.minHeight = Math.round(h) + "px"
+    e.style.minWidth = Math.round(w) + "px"
 }
 
 function _apply_styles(e, styles) {
-	if (styles) {
-		for (var key in styles)
-			e.style.setProperty(key, styles[key])
-	}
+    if (styles) {
+        for (var key in styles)
+            e.style.setProperty(key, styles[key])
+    }
 }
 
 function _init_parent(tag) {
-	var parent = world.parent.querySelector("." + tag)
-	if (!parent) {
-		parent = document.createElement("div")
-		parent.className = tag
-		world.parent.appendChild(parent)
-	}
-	return parent
+    var parent = world.parent.querySelector("." + tag)
+    if (!parent) {
+        parent = document.createElement("div")
+        parent.className = tag
+        world.parent.appendChild(parent)
+    }
+    return parent
 }
 
 function _append_element(tag, e) {
-	_init_parent(tag).appendChild(e)
+    _init_parent(tag).appendChild(e)
 }
 
 function define_board(selector, w, h) {
-	world.parent = document.getElementById(selector)
-	if (!w || !h) {
-		var rect = world.parent.getBoundingClientRect()
-		w = rect.width
-		h = rect.height
-	}
-	world.parent_w = w
-	world.parent_h = h
-	_init_parent("space-parent")
-	_init_parent("decor-parent")
-	_init_parent("layout-parent")
+    world.parent = document.getElementById(selector)
+    if (!w || !h) {
+        var rect = world.parent.getBoundingClientRect()
+        w = rect.width
+        h = rect.height
+    }
+    world.parent_w = w
+    world.parent_h = h
+    _init_parent("space-parent")
+    _init_parent("decor-parent")
+    _init_parent("layout-parent")
 }
 
 function define_panel(action, id, selector) {
-	var panel = document.getElementById(selector)
-	var head = panel.querySelector(".panel-head")
-	var body = panel.querySelector(".panel-body")
-	body.my_panel = panel
-	body.my_head = head
-	register_thing(action, id, body)
-	world.parent_list.push(body)
-	return body
+    var panel = document.getElementById(selector)
+    var head = panel.querySelector(".panel-head")
+    var body = panel.querySelector(".panel-body")
+    body.my_panel = panel
+    body.my_head = head
+    register_thing(action, id, body)
+    world.parent_list.push(body)
+    return body
 }
 
 function define_layout(action, id, layout, keywords, styles) {
-	var e = _create_element("layout", action, id, keywords)
-	world.parent_list.push(e)
-	_append_element("layout-parent", e)
-	_apply_layout(e, layout)
-	_apply_styles(e, styles)
-	return e
+    var e = _create_element("layout", action, id, keywords)
+    world.parent_list.push(e)
+    register_action(action, id, e)
+    _append_element("layout-parent", e)
+    _apply_layout(e, layout)
+    _apply_styles(e, styles)
+    return e
 }
 
-function define_layout_track_h(action, a, b, layout, gap=0, keywords, styles) {
-	var [ x, y, w, h ] = layout
-	var n = 1 + Math.abs(b - a)
-	var cell_w = (w - gap * (n-1)) / n
-	if (a < b) {
-		for (var id = a; id <= b; ++id) {
-			define_layout(action, id, [ x, y, cell_w, h ], keywords, styles)
-			x += cell_w + gap
-		}
-	} else {
-		for (var id = a; id >= b; --id) {
-			define_layout(action, id, [ x, y, cell_w, h ], keywords, styles)
-			x += cell_w + gap
-		}
-	}
+function define_layout_track_h(action, a, b, layout, gap = 0, keywords, styles) {
+    var [x, y, w, h] = layout
+    var n = 1 + Math.abs(b - a)
+    var cell_w = (w - gap * (n - 1)) / n
+    if (a < b) {
+        for (var id = a; id <= b; ++id) {
+            define_layout(action, id, [x, y, cell_w, h], keywords, styles)
+            x += cell_w + gap
+        }
+    } else {
+        for (var id = a; id >= b; --id) {
+            define_layout(action, id, [x, y, cell_w, h], keywords, styles)
+            x += cell_w + gap
+        }
+    }
 }
 
-function define_layout_track_v(action, a, b, layout, gap=0, keywords, styles) {
-	var [ x, y, w, h ] = layout
-	var n = 1 + Math.abs(b - a)
-	var cell_h = (h - gap * (n-1)) / n
-	if (a < b) {
-		for (var id = a; id <= b; ++id) {
-			define_layout(action, id, [ x, y, w, cell_h ], keywords, styles)
-			y += cell_h + gap
-		}
-	} else {
-		for (var id = a; id >= b; --id) {
-			define_layout(action, id, [ x, y, w, cell_h ], keywords, styles)
-			y += cell_h + gap
-		}
-	}
+function define_layout_track_v(action, a, b, layout, gap = 0, keywords, styles) {
+    var [x, y, w, h] = layout
+    var n = 1 + Math.abs(b - a)
+    var cell_h = (h - gap * (n - 1)) / n
+    if (a < b) {
+        for (var id = a; id <= b; ++id) {
+            define_layout(action, id, [x, y, w, cell_h], keywords, styles)
+            y += cell_h + gap
+        }
+    } else {
+        for (var id = a; id >= b; --id) {
+            define_layout(action, id, [x, y, w, cell_h], keywords, styles)
+            y += cell_h + gap
+        }
+    }
 }
 
 function define_layout_grid(action, order, cols, rows, layout, gapx, gapy, keywords, styles) {
-	var [ x, y, w, h ] = layout
-	var cell_w = (w - gapx * (cols-1)) / cols
-	var cell_h = (h - gapy * (rows-1)) / rows
-	var r, c, i
-	i = 0
-	for (r = 0; r < rows; ++r) {
-		x = layout[0]
-		for (c = 0; c < cols; ++c) {
-			define_layout(action, order[i++], [ x, y, cell_w, cell_h ], keywords, styles)
-			x += cell_w + gapx
-		}
-		y += cell_h + gapy
-	}
+    var [x, y, w, h] = layout
+    var cell_w = (w - gapx * (cols - 1)) / cols
+    var cell_h = (h - gapy * (rows - 1)) / rows
+    var r, c, i
+    i = 0
+    for (r = 0; r < rows; ++r) {
+        x = layout[0]
+        for (c = 0; c < cols; ++c) {
+            define_layout(action, order[i++], [x, y, cell_w, cell_h], keywords, styles)
+            x += cell_w + gapx
+        }
+        y += cell_h + gapy
+    }
 }
 
 function define_html(action, id, selector, keywords) {
-	var e = _find_element(null, action, id, selector, keywords)
-	register_action(action, id, e)
-	return e
+    var e = _find_element(null, action, id, selector, keywords)
+    register_action(action, id, e)
+    return e
 }
 
 function define_html_parent(action, id, selector, keywords) {
-	var e = _find_element(null, action, id, selector, keywords)
-	world.parent_list.push(e)
-	return e
+    var e = _find_element(null, action, id, selector, keywords)
+    world.parent_list.push(e)
+    return e
 }
 
 function define_space(action, id, layout, keywords) {
-	var e = _create_element("space", action, id, keywords)
-	register_action(action, id, e)
-	_append_element("space-parent", e)
-	_apply_layout(e, layout)
-	return e
+    var e = _create_element("space", action, id, keywords)
+    register_action(action, id, e)
+    _append_element("space-parent", e)
+    _apply_layout(e, layout)
+    return e
 }
 
 function define_card(action, id, keywords) {
-	var e = _create_element("card", action, id, keywords)
-	register_action(action, id, e)
-	world.parent_list.push(e)
-	// world.animate_list.push(e)
-	return e
+    var e = _create_element("card", action, id, keywords)
+    register_action(action, id, e)
+    world.parent_list.push(e)
+    // world.animate_list.push(e)
+    return e
 }
 
-function define_piece(action, id, keywords) {
-	var e = _create_element("piece", action, id, keywords)
-	register_action(action, id, e)
-	world.parent_list.push(e)
-	world.animate_list.push(e)
-	return e
+function define_piece(action, id, keywords, size = 70) {
+    var e = _create_element("piece", action, id, keywords)
+    register_action(action, id, e)
+    register_focusable(e)
+    e.my_size = size
+    world.parent_list.push(e)
+    world.animate_list.push(e)
+    return e
 }
 
-function define_marker(action, id, keywords) {
-	var e = _create_element("marker", action, id, keywords)
-	register_action(action, id, e)
-	world.animate_list.push(e)
-	return e
+function define_marker(action, id, keywords, size = 70) {
+    var e = _create_element("marker", action, id, keywords)
+    register_action(action, id, e)
+    e.my_size = size
+    world.animate_list.push(e)
+    return e
 }
 
 function define_decor(action, id, [x, y, w, h], keywords) {
-	if (typeof keywords === "string")
-		keywords = keywords.split(" ")
-	if (typeof keywords === "undefined")
-		keywords = []
-	var e = _create_element("decor", action, id, keywords)
-	e.classList.add("hide")
-	e.style.left = Math.round(x + (w|0)/2) + "px"
-	e.style.top = Math.round(y + (h|0)/2) + "px"
-	_append_element("decor-parent", e)
-	return e
+    if (typeof keywords === "string")
+        keywords = keywords.split(" ")
+    if (typeof keywords === "undefined")
+        keywords = []
+    var e = _create_element("decor", action, id, keywords)
+    e.classList.add("hide")
+    e.style.left = Math.round(x + (w | 0) / 2) + "px"
+    e.style.top = Math.round(y + (h | 0) / 2) + "px"
+    _append_element("decor-parent", e)
+    return e
 }
 
 function show_decor(action, id, visible) {
-	lookup_thing(action, id).classList.toggle("hide", !visible)
+    lookup_thing(action, id).classList.toggle("hide", !visible)
 }
 
 function define_card_list(action, a, b, keywords_with_prefix) {
-	for (var i = a; i <= b; ++i)
-		define_card(action, i, keywords_with_prefix + i)
+    for (var i = a; i <= b; ++i)
+        define_card(action, i, keywords_with_prefix + i)
 }
 
 function define_piece_list(action, a, b, keywords) {
-	for (var i = a; i <= b; ++i)
-		define_piece(action, i, keywords)
+    for (var i = a; i <= b; ++i)
+        define_piece(action, i, keywords)
 }
 
 function define_marker_list(action, a, b, keywords) {
-	for (var i = a; i <= b; ++i)
-		define_marker(action, i, keywords)
+    for (var i = a; i <= b; ++i)
+        define_marker(action, i, keywords)
 }
 
 function populate_with_list(parent_action, parent_id, child_action, child_id_list) {
-	var parent = lookup_thing(parent_action, parent_id)
-	for (var child_id of child_id_list)
-		parent.appendChild(lookup_thing(child_action, child_id))
+    var parent = lookup_thing(parent_action, parent_id)
+    for (var child_id of child_id_list)
+        parent.appendChild(lookup_thing(child_action, child_id))
 }
 
 function populate(parent_action, parent_id, child_action, child_id) {
-	var parent = lookup_thing(parent_action, parent_id)
-	var child = lookup_thing(child_action, child_id)
-	parent.appendChild(child)
+    var parent = lookup_thing(parent_action, parent_id)
+    var child = lookup_thing(child_action, child_id)
+    child.parent = parent
+    parent.appendChild(child)
 }
 
-function populate_generic(parent_action, parent_id, keywords, n=1) {
-	var parent = lookup_thing(parent_action, parent_id)
-	while (n-- > 0) {
-		// TODO: use generic marker cache ?
-		var child = document.createElement("div")
-		child.className = keywords
-		parent.appendChild(child)
-	}
+function populate_generic(parent_action, parent_id, keywords, n = 1) {
+    var parent = lookup_thing(parent_action, parent_id)
+    while (n-- > 0) {
+        // TODO: use generic marker cache ?
+        var child = document.createElement("div")
+        child.className = keywords
+        parent.appendChild(child)
+    }
 }
 
 function update_position(action, id, x, y) {
-	var e = lookup_thing(action, id)
-	e.style.left = Math.round(x) + "px"
-	e.style.top = Math.round(y) + "px"
+    var e = lookup_thing(action, id)
+    e.style.left = Math.round(x) + "px"
+    e.style.top = Math.round(y) + "px"
 }
 
 function update_transform(action, id, transform) {
-	var e = lookup_thing(action, id)
-	e.style.transform = transform
+    var e = lookup_thing(action, id)
+    e.style.transform = transform
 }
 
 function update_keywords(action, id, keywords) {
-	var e = lookup_thing(action, id)
-	if (e instanceof SVGElement)
-		throw new Error("cannot update keywords on SVG elements")
-	e.className = e.my_className
-	_add_keywords(e, keywords)
+    var e = lookup_thing(action, id)
+    if (e instanceof SVGElement)
+        throw new Error("cannot update keywords on SVG elements")
+    e.className = e.my_className
+    _add_keywords(e, keywords)
 }
 
 function toggle_keyword(action, id, keyword, on) {
-	var e = lookup_thing(action, id)
-	e.classList.toggle(keyword, !!on)
+    var e = lookup_thing(action, id)
+    e.classList.toggle(keyword, !!on)
 }
 
 function update_text(action, id, text) {
-	var e = lookup_thing(action, id)
-	if (e.my_head)
-		e.my_head.textContent = text
-	else
-		e.textContent = text
+    var e = lookup_thing(action, id)
+    if (e.my_head)
+        e.my_head.textContent = text
+    else
+        e.textContent = text
 }
 
 function update_html(action, id, text) {
-	var e = lookup_thing(action, id)
-	if (e.my_head)
-		e.my_head.innerHTML = text
-	else
-		e.innerHTML = text
+    var e = lookup_thing(action, id)
+    if (e.my_head)
+        e.my_head.innerHTML = text
+    else
+        e.innerHTML = text
+}
+
+let style = "bevel"
+
+const style_dims = {
+    flat: {
+        border: 1,
+        gap: 3,
+        padding: 7,
+        stack_dx: 9,
+        stack_dy: 9,
+        stack_dx_tight: 3,
+        stack_dy_tight: 3,
+    },
+    bevel: {
+        border: 2,
+        gap: 5,
+        padding: 7,
+        stack_dx: 9,
+        stack_dy: 9,
+        stack_dx_tight: 3,
+        stack_dy_tight: 3,
+    },
+}
+
+const MINY = 50
+
+function layout_stack(stack, start_x, start_y) {
+    //console.log(`layout_stack: ${x}, ${y}, ${dx}. ${stack}`)
+
+    if (stack.length === 0)
+        return
+
+    let dim = style_dims[style]
+    let z = (stack === world.focus) ? 101 : 1
+
+    let dx = stack.length > 5 ? dim.stack_dx_tight : dim.stack_dx
+    let dy = stack.length > 5 ? dim.stack_dx_tight : dim.stack_dy
+    let dz = stack.length > 5 ? 1 : 3
+
+    // Lose focus if stack is small.
+    if (stack === world.focus && stack.length <= 1)
+        world.focus = null
+
+    if (stack === world.focus) {
+        let x = start_x
+        let y = start_y + (stack[0].my_size + dim.border * 2) / 2
+        z += dz
+        let minx = x, maxx = x, miny = y, maxy = y
+
+        // compute focus box height and move down if it would go past the top
+        let h = 0
+        for (let i = 1; i < stack.length; ++i)
+            h += stack[i].my_size + dim.border * 2 + dim.gap
+        if (y - h < MINY)
+            y = MINY + h
+
+        for (let elt of stack) {
+            let ex = Math.floor(x - elt.my_size / 2 - dim.border)
+            let ey = Math.floor(y - elt.my_size - dim.border * 2)
+            minx = Math.min(minx, ex)
+            miny = Math.min(miny, ey)
+            maxx = Math.max(maxx, ex + elt.my_size + dim.border * 2)
+            maxy = Math.max(maxy, ey + elt.my_size + dim.border * 2)
+            elt.style.left = ex + "px"
+            elt.style.top = ey + "px"
+            elt.style.zIndex = z
+            y -= elt.my_size + dim.border * 2 + dim.gap
+        }
+
+        world.focus_box.remove()
+        world.focus_box = document.createElement("div")
+        world.focus_box.id = "focus"
+        stack[0].parentNode.appendChild(world.focus_box)
+
+        world.focus_box.style.left = (minx - dim.padding) + "px"
+        world.focus_box.style.top = (miny - dim.padding) + "px"
+        world.focus_box.style.width = (maxx - minx + dim.padding * 2) + "px"
+        world.focus_box.style.height = (maxy - miny + dim.padding * 2) + "px"
+    } else {
+        let x = start_x - (stack[0].my_size + dim.border * 2) / 2
+        let y = start_y + (stack[0].my_size + dim.border * 2) / 2
+        for (let elt of stack) {
+            let ex = Math.floor(x)
+            let ey = Math.floor(y - elt.my_size - dim.border * 2)
+            elt.style.left = ex + "px"
+            elt.style.top = ey + "px"
+            elt.style.zIndex = z
+            x += dx
+            y -= dy
+            z += dz
+            if (y < MINY)
+                y = MINY
+        }
+    }
 }
 
 function _remember_position(e) {
-	if (e.offsetParent) {
-		let prect = e.offsetParent.getBoundingClientRect()
-		e.my_parent = e.offsetParent
-		e.my_px = prect.x
-		e.my_py = prect.y
-		e.my_x = prect.x + e.offsetLeft
-		e.my_y = prect.y + e.offsetTop
-	} else {
-		e.my_parent = null
-		e.my_px = e.my_py = e.my_x = e.my_y = 0
-	}
+    if (e.offsetParent) {
+        let prect = e.offsetParent.getBoundingClientRect()
+        e.my_parent = e.offsetParent
+        e.my_px = prect.x
+        e.my_py = prect.y
+        e.my_x = prect.x + e.offsetLeft
+        e.my_y = prect.y + e.offsetTop
+    } else {
+        e.my_parent = null
+        e.my_px = e.my_py = e.my_x = e.my_y = 0
+    }
 }
 
 function _animate_position(e, inv_scale) {
-	if (e.offsetParent && e.my_parent) {
-		let prect = e.offsetParent.getBoundingClientRect()
-		let new_x = prect.x + e.offsetLeft
-		let new_y = prect.y + e.offsetTop
-		let dx, dy
-		// TODO: fix dx,dy calculation with nested transform
-		if (e.offsetParent === e.my_parent) {
-			// animate pieces on pieces
-			dx = (e.my_x - e.my_px) - (new_x - prect.x)
-			dy = (e.my_y - e.my_py) - (new_y - prect.y)
-		} else {
-			dx = e.my_x - new_x
-			dy = e.my_y - new_y
-		}
-		if (dx !== 0 || dy !== 0) {
-			dx *= inv_scale
-			dy *= inv_scale
-			let dist = Math.hypot(dx, dy)
-			let time = Math.max(500, Math.min(1000, dist / 2))
-			e.animate(
-				[
-					{ transform: `translate(${dx}px, ${dy}px)`, },
-					{ transform: "translate(0, 0)", },
-				],
-				{ duration: time, easing: "ease" }
-			)
-		}
-	}
+    if (e.offsetParent && e.my_parent) {
+        let prect = e.offsetParent.getBoundingClientRect()
+        let new_x = prect.x + e.offsetLeft
+        let new_y = prect.y + e.offsetTop
+        let dx, dy
+        // TODO: fix dx,dy calculation with nested transform
+        if (e.offsetParent === e.my_parent) {
+            // animate pieces on pieces
+            dx = (e.my_x - e.my_px) - (new_x - prect.x)
+            dy = (e.my_y - e.my_py) - (new_y - prect.y)
+        } else {
+            dx = e.my_x - new_x
+            dy = e.my_y - new_y
+        }
+        if (dx !== 0 || dy !== 0) {
+            dx *= inv_scale
+            dy *= inv_scale
+            let dist = Math.hypot(dx, dy)
+            let time = Math.max(500, Math.min(1000, dist / 2))
+            e.animate(
+                [
+                    {transform: `translate(${dx}px, ${dy}px)`,},
+                    {transform: "translate(0, 0)",},
+                ],
+                {duration: time, easing: "ease"}
+            )
+        }
+    }
 }
 
 function _sort_z(parent) {
-	var list = Array.from(parent.childNodes)
-	list.sort((a,b) => {
-		var ra = a.getBoundingClientRect()
-		var rb = b.getBoundingClientRect()
-		var za = ra.top * 2 + ra.left
-		var zb = rb.top * 2 + rb.left
-		return za - zb
-	})
-	parent.replaceChildren()
-	for (var e of list)
-		parent.appendChild(e)
+    var list = Array.from(parent.childNodes)
+    list.sort((a, b) => {
+        var ra = a.getBoundingClientRect()
+        var rb = b.getBoundingClientRect()
+        var za = ra.top * 2 + ra.left
+        var zb = rb.top * 2 + rb.left
+        return za - zb
+    })
+    parent.replaceChildren()
+    for (var e of list)
+        parent.appendChild(e)
 }
 
 function sort_layout() {
-	_sort_z(document.querySelector(".layout-parent"))
+    _sort_z(document.querySelector(".layout-parent"))
 }
 
 function begin_update() {
-	G = V = view
-	R = player
-	for (var e of world.animate_list)
-		_remember_position(e)
-	for (var parent of world.parent_list)
-		parent.replaceChildren()
+    G = V = view
+    R = player
+    for (var e of world.animate_list)
+        _remember_position(e)
+    for (var parent of world.parent_list)
+        parent.replaceChildren()
 }
 
 function end_update() {
-	for (var item of world.action_list)
-		item.classList.toggle("action", is_action(item.my_action, item.my_id))
+    for (let item of world.parent_list) {
+        if (item.childNodes.length < 4) {
+            item.classList.add("small")
+        } else {
+            item.classList.remove("small")
+        }
+    }
 
-	for (var e of document.querySelectorAll(".layout.square"))
-		e.style.setProperty("--square", Math.ceil(Math.sqrt(e.childElementCount)))
+    for (let item of world.action_list)
+        item.classList.toggle("action", is_action(item.my_action, item.my_id))
 
-	var scale1 = Number(world.mapwrap?.dataset?.scale ?? 1)
-	var scale2 = Number(world.panzoom?.dataset?.scale ?? 1)
-	var inv_scale = 1 / (scale1 * scale2)
-	for (var e of world.animate_list)
-		_animate_position(e, inv_scale)
+    for (let e of document.querySelectorAll(".layout.square"))
+        e.style.setProperty("--square", Math.ceil(Math.sqrt(e.childElementCount)))
+
+    var scale1 = Number(world.mapwrap?.dataset?.scale ?? 1)
+    var scale2 = Number(world.panzoom?.dataset?.scale ?? 1)
+    var inv_scale = 1 / (scale1 * scale2)
+    for (let e of world.animate_list)
+        _animate_position(e, inv_scale)
 }
 
 function set_has(set, item) {
-	if (!set)
-		return false
-	var a = 0
-	var b = set.length - 1
-	while (a <= b) {
-		var m = (a + b) >> 1
-		var x = set[m]
-		if (item < x)
-			b = m - 1
-		else if (item > x)
-			a = m + 1
-		else
-			return true
-	}
-	return false
+    if (!set)
+        return false
+    var a = 0
+    var b = set.length - 1
+    while (a <= b) {
+        var m = (a + b) >> 1
+        var x = set[m]
+        if (item < x)
+            b = m - 1
+        else if (item > x)
+            a = m + 1
+        else
+            return true
+    }
+    return false
 }
 
 function map_get(map, key, missing) {
-	let a = 0
-	let b = (map.length >> 1) - 1
-	while (a <= b) {
-		let m = (a + b) >> 1
-		let x = map[m << 1]
-		if (key < x)
-			b = m - 1
-		else if (key > x)
-			a = m + 1
-		else
-			return map[(m << 1) + 1]
-	}
-	return missing
+    let a = 0
+    let b = (map.length >> 1) - 1
+    while (a <= b) {
+        let m = (a + b) >> 1
+        let x = map[m << 1]
+        if (key < x)
+            b = m - 1
+        else if (key > x)
+            a = m + 1
+        else
+            return map[(m << 1) + 1]
+    }
+    return missing
 }

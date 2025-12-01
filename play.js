@@ -2,6 +2,8 @@
 
 const P_GERMAN = 0
 
+const HEXES = []
+
 function on_focus_card_tip(c) {
     if (data.cards[c].type === "Barrage")
         document.getElementById("tooltip").classList = "card barrage c" + c
@@ -42,41 +44,30 @@ function vp_layout_x(vp) {
 }
 
 function on_init() {
-    var i
-
-    define_preference_checkbox("volko", false)
-
-    define_board("map", 2244, 1452)
-
-    define_panel("hand", P_GERMAN)
-
-    define_layout_track_v("track-turn", 1, 6, layout.nodes.track_turns, 0)
-
-    for (i = -15; i <= 50; ++i)
-        define_layout("track-vp", i, [vp_layout_x(i), vp_layout_y(i), 44, 34])
-
-
-    define_marker("marker", M_US_ENTRY, ["us", "border"])
-
-
-    define_space("zone", 79, layout.nodes.g_reserve)
-
-
-    for (i = 0; i < 60; ++i)
-        define_piece("unit", i, "german")
-    for (i = 60; i < 120; ++i)
-        define_piece("unit", i, "french")
-
-    for (i = 1; i <= 100; ++i) {
-        if ((i >= 1 && i <= 22) || (i >= 52 && i <= 68))
-            define_card("card", i, ["c" + i, "barrage"])
-        else
-            define_card("card", i, ["c" + i])
-        if (data.cards[i].text)
-            register_tooltip("card", i, data.cards[i].name + " \u2013 " + data.cards[i].text)
-        else
-            register_tooltip("card", i, data.cards[i].name)
+    let map = document.getElementById("map")
+    map.onclick = (a) => {
+        if (a.target === map && world.focus !== null) {
+            world.focus.classList.remove("focus")
+            world.focus = null
+            on_update()
+        }
     }
+    for (let i = 1; i < 1476; ++i) {
+        HEXES.push({
+            stack: [],
+        })
+        let center = hex_center(i)
+        define_layout("board_hex", i, [center[0] - 15, center[1] - 17, 45, 45], "stack offset:3")
+    }
+    for (let i = 1; i < data.pieces.length; ++i) {
+        let piece = data.pieces[i]
+        piece.element = define_piece("unit", i, piece.counter)
+    }
+}
+
+function push_stack(stk, elt) {
+    stk.unshift(elt)
+    elt.my_stack = stk
 }
 
 function update_hand(side, hand) {
@@ -91,38 +82,86 @@ function update_hand(side, hand) {
     }
 }
 
+function hex_to_int(i) {
+    return (Math.floor(i / 100) - 10) * 29 + i % 100
+}
+
+function hex_center(i) {
+    let column = (Math.floor(i / 29))
+    return [67 + column * 42.2, 46 + (i % 29) * 48.5 + (column % 2) * 25]
+}
+
+// for (let i = 1; i < 1476; ++i) {
+//     let elt = document.createElement("div")
+//     elt.style.borderColor = "red"
+//     elt.style.backgroundColor = "red"
+//     elt.style.height = "3px"
+//     elt.style.width = "3px"
+//     elt.style.position = "absolute"
+//     elt.style.left = hex_center(i)[0] + "px"
+//     elt.style.top = hex_center(i)[1] + "px"
+//     document.getElementById("map").appendChild(elt)
+// }
+
 function on_update() {
     var z, u
 
     begin_update()
 
-    var volko = get_preference("volko", false)
+    // console.log(G)
+    // console.log(V)
+    // console.log(R)
+    // G.actions={}
+    // G.actions.board_hex = []
+    // G.actions.board_hex.push(hex_to_int(piece.start))
 
-    populate("track-turn", G.turn, "marker", 5)
-
-    update_keywords("marker", 1, [(G.month & 1) ? "month1" : "month2"])
-
-
-    populate_generic("zone-markers", 15, "zone-marker french control")
-
-    toggle_keyword("zone", 15, "select", true)
-
-    for (z = 0; z <= 78; ++z) {
-        toggle_keyword("zone", z, "select", V.where === z)
+    for (let i = 1; i < HEXES.length; ++i) {
+        HEXES[i].stack = []
     }
 
-    populate_with_list("played", 0, "card", G.played)
+    for (let i = 1; i < data.pieces.length; ++i) {
+        let piece = data.pieces[i]
+        // push_stack(HEXES[i].stack, piece.element)
+        // piece.element.classList.remove('hide')
+        populate("board_hex", hex_to_int(piece.start), "unit", i)
 
-    populate_with_list("permanent", P_GERMAN, "card", G.permanent.filter(c => c >= 52))
+    }
 
-    update_hand(P_GERMAN, V.hand[P_GERMAN])
 
-    if (V.draw)
-        populate_with_list("draw", 0, "card", V.draw)
+    // for (let i = 1; i < HEXES.length; ++i) {
+    //     if (HEXES[i].stack.length > 0) {
+    //         let center = hex_center(i)
+    //         layout_stack(HEXES[i].stack, center[0], center[1])
+    //     }
+    // }
 
-    // maximum number of rerolls is double barrage with stockpile (10+8+4)
-    for (var i = 0; i <= 22; ++i)
-        action_button_with_argument("number", i, i)
+    // var volko = get_preference("volko", false)
+
+    // populate("track-turn", G.turn, "marker", 5)
+
+    // update_keywords("marker", 1, [(G.month & 1) ? "month1" : "month2"])
+
+
+    // populate_generic("zone-markers", 15, "zone-marker french control")
+
+    // toggle_keyword("zone", 15, "select", true)
+    //
+    // for (z = 0; z <= 78; ++z) {
+    //     toggle_keyword("zone", z, "select", V.where === z)
+    // }
+    //
+    // populate_with_list("played", 0, "card", G.played)
+    //
+    // populate_with_list("permanent", P_GERMAN, "card", G.permanent.filter(c => c >= 52))
+    //
+    // update_hand(P_GERMAN, V.hand[P_GERMAN])
+    //
+    // if (V.draw)
+    //     populate_with_list("draw", 0, "card", V.draw)
+    //
+    // // maximum number of rerolls is double barrage with stockpile (10+8+4)
+    // for (var i = 0; i <= 22; ++i)
+    //     action_button_with_argument("number", i, i)
 
     action_button("build_trench", "Trench")
     action_button("two_zone_barrage", "Two Zone")

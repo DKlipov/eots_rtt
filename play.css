@@ -218,8 +218,6 @@ path.zone.tip {
 	gap: 8px;
 }
 
-.unit.german { align-self: end; }
-.unit.french { align-self: start; }
 
 .layout.unit-pool {
 	gap: 0px;
@@ -241,7 +239,7 @@ body.volko .layout.unit-pool { gap: 0px; }
 /* PIECES */
 
 .piece {
-	pointer-events: none;
+	/*pointer-events: none;*/
 }
 
 .piece.action {
@@ -250,9 +248,7 @@ body.volko .layout.unit-pool { gap: 0px; }
 
 .cylinder {width: 55px; height: 55px; margin: -23px -4px -4px -23px; }
 .trench { width: 88px; height: 22px; margin: -8px -4px -4px -8px; }
-.unit { width: 47px; height: 47px; margin: -23px -4px -4px -23px; }
-.unit.volko { width: 57px; height: 37px; margin: -13px -4px -4px -13px; }
-.unit.exhausted { width: 37px; height: 57px; margin: -13px -4px -4px -13px; }
+
 
 .trench { border-radius: 0 10px }
 .unit { border-radius: 0 25px }
@@ -269,26 +265,15 @@ body.volko .layout.unit-pool { gap: 0px; }
 .trench.german { background-image: url(pieces/trench_german.svg); }
 .trench.french { background-image: url(pieces/trench_french.svg); }
 
-.unit.german { background-image: url(pieces/block_german_fresh.svg); }
-.unit.french { background-image: url(pieces/block_french_fresh.svg); }
-.unit.german.volko { background-image: url(pieces/block_german_volko.svg); }
-.unit.french.volko { background-image: url(pieces/block_french_volko.svg); }
-.unit.exhausted.german { background-image: url(pieces/block_german_exhausted.svg); }
-.unit.exhausted.french { background-image: url(pieces/block_french_exhausted.svg); }
-
-.unit.german.action { background-image: url(pieces/block_german_fresh.svg), url(pieces/block_action_fresh.svg); }
-.unit.french.action { background-image: url(pieces/block_french_fresh.svg), url(pieces/block_action_fresh.svg); }
-.unit.german.action.volko { background-image: url(pieces/block_german_volko.svg), url(pieces/block_action_volko.svg); }
-.unit.french.action.volko { background-image: url(pieces/block_french_volko.svg), url(pieces/block_action_volko.svg); }
-.unit.exhausted.german.action { background-image: url(pieces/block_german_exhausted.svg), url(pieces/block_action_exhausted.svg); }
-.unit.exhausted.french.action { background-image: url(pieces/block_french_exhausted.svg), url(pieces/block_action_exhausted.svg); }
-
-.unit.german.select { background-image: url(pieces/block_german_fresh.svg), url(pieces/block_select_fresh.svg); }
-.unit.french.select { background-image: url(pieces/block_french_fresh.svg), url(pieces/block_select_fresh.svg); }
-.unit.german.select.volko { background-image: url(pieces/block_german_volko.svg), url(pieces/block_select_volko.svg); }
-.unit.french.select.volko { background-image: url(pieces/block_french_volko.svg), url(pieces/block_select_volko.svg); }
-.unit.exhausted.german.select { background-image: url(pieces/block_german_exhausted.svg), url(pieces/block_select_exhausted.svg); }
-.unit.exhausted.french.select { background-image: url(pieces/block_french_exhausted.svg), url(pieces/block_select_exhausted.svg); }
+.unit{
+	transition: left 200ms, top 200ms;
+	position: absolute;
+	background-size: auto 100%;
+	background-repeat: no-repeat;
+	border-radius: 5px;
+	width:35px;
+	height:35px;
+}
 
 /* MARKER IMAGES */
 

@@ -1,0 +1,17 @@
+
+
+/* ARMIES (45x45) */
+.army_jp { background-image: url(pieces/army_jp.png); background-size: 35px 70px; }
+.air_jp { background-image: url(pieces/air_jp.png); background-size: 35px 70px; }
+.navy_jp { background-image: url(pieces/navy_jp.png); background-size: 35px 70px; }
+.hq_jp { background-image: url(pieces/hq_jp.png); background-size: 35px 70px; }
+.army_us { background-image: url(pieces/army_us.png); background-size: 35px 70px; }
+.air_us { background-image: url(pieces/air_us.png); background-size: 35px 70px; }
+.navy_us { background-image: url(pieces/navy_us.png); background-size: 35px 70px; }
+.hq_us { background-image: url(pieces/hq_us.png); background-size: 35px 70px; }
+
+
+/* CARDS */
+.card_ap_0{background-image:url(cards.1x/card_back_ap.avif)}
+.card_ap_1{background-image:url(cards.1x/card_ap_01.avif)}
+
