@@ -12,6 +12,19 @@
 
 
 /* CARDS */
-.card_ap_0{background-image:url(cards.1x/card_back_ap.avif)}
-.card_ap_1{background-image:url(cards.1x/card_ap_01.avif)}
+.card_ap_1{background-image:url(cards/card_ap_1.gif)}
+.card_ap_2{background-image:url(cards/card_ap_2.gif)}
+.card_ap_3{background-image:url(cards/card_ap_3.gif)}
+.card_ap_4{background-image:url(cards/card_ap_4.gif)}
+.card_ap_5{background-image:url(cards/card_ap_5.gif)}
+.card_ap_6{background-image:url(cards/card_ap_6.gif)}
+.card_ap_7{background-image:url(cards/card_ap_7.gif)}
+
+.card_jp_1{background-image:url(cards/card_jp_1.gif)}
+.card_jp_2{background-image:url(cards/card_jp_2.gif)}
+.card_jp_3{background-image:url(cards/card_jp_3.gif)}
+.card_jp_4{background-image:url(cards/card_jp_4.gif)}
+.card_jp_5{background-image:url(cards/card_jp_5.gif)}
+.card_jp_6{background-image:url(cards/card_jp_6.gif)}
+.card_jp_7{background-image:url(cards/card_jp_7.gif)}
 

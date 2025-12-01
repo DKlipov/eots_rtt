@@ -146,4 +146,4 @@ body.hide-pieces .piece { display: none }
 	/*border-radius: 5px;*/
 }
 
-.layout.stack.focus { --stack-dx: 0; --stack-dy: -40px; }
+.layout.stack.focus { --stack-dx: 0; --stack-dy: -40px; z-index: 100; }

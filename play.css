@@ -128,13 +128,11 @@ body.French header.your_turn { background-color: skyblue }
 
 #played_row { grid-row: 1; }
 
-body.French #french_hand { grid-row: 2; }
-body.French #draw { grid-row: 3; }
-body.French #german_hand { grid-row: 4; }
+body.Japan #jp_hand { grid-row: 2; }
+body.Japan #ap_hand { grid-row: 4; }
 
-body.German #german_hand { grid-row: 2; }
-body.German #draw { grid-row: 3; }
-body.German #french_hand { grid-row: 4; }
+body.Alies #ap_hand { grid-row: 2; }
+body.Alies #jp_hand { grid-row: 4; }
 
 #mapwrap {
 	width: 2244px;
@@ -197,10 +195,15 @@ path.zone.tip {
 }
 
 .card {
-	width: 246px;
-	height: 378px;
-	border: 1px solid black;
+	width: 250px;
+	height: 350px;
 	border-radius: 16px;
+	box-shadow: 1px 1px 4px #0004;
+	transition: transform 100ms;
+	background-color: white;
+	background-size: 100%;
+	background-repeat: no-repeat;
+	border: 1px solid black;
 }
 
 .card.barrage {
@@ -314,120 +317,3 @@ body.volko .layout.unit-pool { gap: 0px; }
 	height: 66px;
 	border: 1px solid black;
 }
-
-.marker.us.us_0 { background-image: url(markers75/us_0.png) }
-.marker.us.us_1 { background-image: url(markers75/us_1.png) }
-.marker.us.us_2 { background-image: url(markers75/us_2.png) }
-.marker.us.us_3 { background-image: url(markers75/us_3.png) }
-.marker.us.us_drm_0 { background-image: url(markers75/us_drm_0.png) }
-.marker.us.us_drm_2 { background-image: url(markers75/us_drm_2.png) }
-.marker.us.us_drm_3 { background-image: url(markers75/us_drm_3.png) }
-.marker.us.us_drm_5 { background-image: url(markers75/us_drm_5.png) }
-
-.marker.turn.month1 { background-image: url(markers75/month_1.png) }
-.marker.turn.month2 { background-image: url(markers75/month_2.png) }
-
-/* CARD IMAGES */
-
-.card.back.german{background-image:url(cards96/card_back_german.jpg)}
-.card.back.french{background-image:url(cards96/card_back_french.jpg)}
-.card.c1{background-image:url(cards96/card_1.jpg)}
-.card.c2{background-image:url(cards96/card_1.jpg)}
-.card.c3{background-image:url(cards96/card_1.jpg)}
-.card.c4{background-image:url(cards96/card_1.jpg)}
-.card.c5{background-image:url(cards96/card_5.jpg)}
-.card.c6{background-image:url(cards96/card_5.jpg)}
-.card.c7{background-image:url(cards96/card_5.jpg)}
-.card.c8{background-image:url(cards96/card_5.jpg)}
-.card.c9{background-image:url(cards96/card_9.jpg)}
-.card.c10{background-image:url(cards96/card_9.jpg)}
-.card.c11{background-image:url(cards96/card_9.jpg)}
-.card.c12{background-image:url(cards96/card_9.jpg)}
-.card.c13{background-image:url(cards96/card_13.jpg)}
-.card.c14{background-image:url(cards96/card_13.jpg)}
-.card.c15{background-image:url(cards96/card_15.jpg)}
-.card.c16{background-image:url(cards96/card_16.jpg)}
-.card.c17{background-image:url(cards96/card_17.jpg)}
-.card.c18{background-image:url(cards96/card_18.jpg)}
-.card.c19{background-image:url(cards96/card_18.jpg)}
-.card.c20{background-image:url(cards96/card_20.jpg)}
-.card.c21{background-image:url(cards96/card_21.jpg)}
-.card.c22{background-image:url(cards96/card_22.jpg)}
-.card.c23{background-image:url(cards96/card_23.jpg)}
-.card.c24{background-image:url(cards96/card_24.jpg)}
-.card.c25{background-image:url(cards96/card_25.jpg)}
-.card.c26{background-image:url(cards96/card_26.jpg)}
-.card.c27{background-image:url(cards96/card_27.jpg)}
-.card.c28{background-image:url(cards96/card_28.jpg)}
-.card.c29{background-image:url(cards96/card_29.jpg)}
-.card.c30{background-image:url(cards96/card_30.jpg)}
-.card.c31{background-image:url(cards96/card_31.jpg)}
-.card.c32{background-image:url(cards96/card_32.jpg)}
-.card.c33{background-image:url(cards96/card_33.jpg)}
-.card.c34{background-image:url(cards96/card_34.jpg)}
-.card.c35{background-image:url(cards96/card_35.jpg)}
-.card.c36{background-image:url(cards96/card_36.jpg)}
-.card.c37{background-image:url(cards96/card_37.jpg)}
-.card.c38{background-image:url(cards96/card_38.jpg)}
-.card.c39{background-image:url(cards96/card_39.jpg)}
-.card.c40{background-image:url(cards96/card_40.jpg)}
-.card.c41{background-image:url(cards96/card_41.jpg)}
-.card.c42{background-image:url(cards96/card_42.jpg)}
-.card.c43{background-image:url(cards96/card_43.jpg)}
-.card.c44{background-image:url(cards96/card_44.jpg)}
-.card.c45{background-image:url(cards96/card_45.jpg)}
-.card.c46{background-image:url(cards96/card_46.jpg)}
-.card.c47{background-image:url(cards96/card_47.jpg)}
-.card.c48{background-image:url(cards96/card_48.jpg)}
-.card.c49{background-image:url(cards96/card_48.jpg)}
-.card.c50{background-image:url(cards96/card_50.jpg)}
-.card.c51{background-image:url(cards96/card_51.jpg)}
-.card.c52{background-image:url(cards96/card_52.jpg)}
-.card.c53{background-image:url(cards96/card_52.jpg)}
-.card.c54{background-image:url(cards96/card_52.jpg)}
-.card.c55{background-image:url(cards96/card_52.jpg)}
-.card.c56{background-image:url(cards96/card_56.jpg)}
-.card.c57{background-image:url(cards96/card_56.jpg)}
-.card.c58{background-image:url(cards96/card_56.jpg)}
-.card.c59{background-image:url(cards96/card_59.jpg)}
-.card.c60{background-image:url(cards96/card_60.jpg)}
-.card.c61{background-image:url(cards96/card_61.jpg)}
-.card.c62{background-image:url(cards96/card_61.jpg)}
-.card.c63{background-image:url(cards96/card_61.jpg)}
-.card.c64{background-image:url(cards96/card_64.jpg)}
-.card.c65{background-image:url(cards96/card_64.jpg)}
-.card.c66{background-image:url(cards96/card_66.jpg)}
-.card.c67{background-image:url(cards96/card_66.jpg)}
-.card.c68{background-image:url(cards96/card_68.jpg)}
-.card.c69{background-image:url(cards96/card_69.jpg)}
-.card.c70{background-image:url(cards96/card_70.jpg)}
-.card.c71{background-image:url(cards96/card_71.jpg)}
-.card.c72{background-image:url(cards96/card_72.jpg)}
-.card.c73{background-image:url(cards96/card_73.jpg)}
-.card.c74{background-image:url(cards96/card_74.jpg)}
-.card.c75{background-image:url(cards96/card_75.jpg)}
-.card.c76{background-image:url(cards96/card_76.jpg)}
-.card.c77{background-image:url(cards96/card_77.jpg)}
-.card.c78{background-image:url(cards96/card_78.jpg)}
-.card.c79{background-image:url(cards96/card_79.jpg)}
-.card.c80{background-image:url(cards96/card_80.jpg)}
-.card.c81{background-image:url(cards96/card_81.jpg)}
-.card.c82{background-image:url(cards96/card_82.jpg)}
-.card.c83{background-image:url(cards96/card_83.jpg)}
-.card.c84{background-image:url(cards96/card_84.jpg)}
-.card.c85{background-image:url(cards96/card_85.jpg)}
-.card.c86{background-image:url(cards96/card_86.jpg)}
-.card.c87{background-image:url(cards96/card_87.jpg)}
-.card.c88{background-image:url(cards96/card_88.jpg)}
-.card.c89{background-image:url(cards96/card_89.jpg)}
-.card.c90{background-image:url(cards96/card_90.jpg)}
-.card.c91{background-image:url(cards96/card_91.jpg)}
-.card.c92{background-image:url(cards96/card_92.jpg)}
-.card.c93{background-image:url(cards96/card_92.jpg)}
-.card.c94{background-image:url(cards96/card_92.jpg)}
-.card.c95{background-image:url(cards96/card_92.jpg)}
-.card.c96{background-image:url(cards96/card_96.jpg)}
-.card.c97{background-image:url(cards96/card_96.jpg)}
-.card.c98{background-image:url(cards96/card_96.jpg)}
-.card.c99{background-image:url(cards96/card_99.jpg)}
-.card.c100{background-image:url(cards96/card_100.jpg)}

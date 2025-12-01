@@ -1,8 +1,7 @@
 "use strict"
 
-const P_GERMAN = 0
-
-const HEXES = []
+const JP = 0
+const AP = 1
 
 function on_focus_card_tip(c) {
     if (data.cards[c].type === "Barrage")
@@ -27,22 +26,6 @@ function on_blur_zone_tip(z) {
     lookup_thing("zone", z).classList.toggle("tip", false)
 }
 
-function vp_layout_y(vp) {
-    if (vp < 0) vp = -vp
-    if (vp < 1) vp = 0.5
-    if (vp > 37) vp = 37 + (37 - vp)
-    if (vp == 37) vp = 36.5
-    return 38 + (vp - 1) * 38.2
-}
-
-function vp_layout_x(vp) {
-    if (vp < 0) vp = -vp
-    if (vp < 1) vp = 0.5
-    if (vp > 37) vp = 37 + (37 - vp)
-    if (vp == 37) vp = 36.5
-    return 38 + (vp - 1) * 38.2
-}
-
 function on_init() {
     let map = document.getElementById("map")
     map.onclick = (a) => {
@@ -53,16 +36,19 @@ function on_init() {
         }
     }
     for (let i = 1; i < 1476; ++i) {
-        HEXES.push({
-            stack: [],
-        })
         let center = hex_center(i)
-        define_layout("board_hex", i, [center[0] - 15, center[1] - 17, 45, 45], "stack offset:3")
+        define_layout("board_hex", i, [center[0] - 15, center[1] - 17, 45, 45], "stack")
     }
     for (let i = 1; i < data.pieces.length; ++i) {
         let piece = data.pieces[i]
         piece.element = define_piece("unit", i, piece.counter)
     }
+    for (let i = 1; i < data.cards.length; ++i) {
+        let card = data.cards[i]
+        card.element = define_card("card", i, "card_" + card.faction + "_" + card.num)
+    }
+    define_panel("hand", JP, "jp_hand")
+    define_panel("hand", AP, "ap_hand")
 }
 
 function push_stack(stk, elt) {
@@ -115,10 +101,6 @@ function on_update() {
     // G.actions.board_hex = []
     // G.actions.board_hex.push(hex_to_int(piece.start))
 
-    for (let i = 1; i < HEXES.length; ++i) {
-        HEXES[i].stack = []
-    }
-
     for (let i = 1; i < data.pieces.length; ++i) {
         let piece = data.pieces[i]
         // push_stack(HEXES[i].stack, piece.element)
@@ -128,40 +110,10 @@ function on_update() {
     }
 
 
-    // for (let i = 1; i < HEXES.length; ++i) {
-    //     if (HEXES[i].stack.length > 0) {
-    //         let center = hex_center(i)
-    //         layout_stack(HEXES[i].stack, center[0], center[1])
-    //     }
-    // }
-
-    // var volko = get_preference("volko", false)
-
-    // populate("track-turn", G.turn, "marker", 5)
-
-    // update_keywords("marker", 1, [(G.month & 1) ? "month1" : "month2"])
-
-
-    // populate_generic("zone-markers", 15, "zone-marker french control")
-
-    // toggle_keyword("zone", 15, "select", true)
-    //
-    // for (z = 0; z <= 78; ++z) {
-    //     toggle_keyword("zone", z, "select", V.where === z)
-    // }
-    //
-    // populate_with_list("played", 0, "card", G.played)
-    //
-    // populate_with_list("permanent", P_GERMAN, "card", G.permanent.filter(c => c >= 52))
-    //
-    // update_hand(P_GERMAN, V.hand[P_GERMAN])
-    //
-    // if (V.draw)
-    //     populate_with_list("draw", 0, "card", V.draw)
-    //
-    // // maximum number of rerolls is double barrage with stockpile (10+8+4)
-    // for (var i = 0; i <= 22; ++i)
-    //     action_button_with_argument("number", i, i)
+    for (let i = 1; i < data.cards.length; i++) {
+        let card = data.cards[i]
+        populate("hand", card.faction === "ap" ? AP : JP, "card", i)
+    }
 
     action_button("build_trench", "Trench")
     action_button("two_zone_barrage", "Two Zone")

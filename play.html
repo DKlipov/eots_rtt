@@ -2,66 +2,72 @@
 <!-- vim:set nowrap: -->
 <html>
 <head>
-<meta name="viewport" content="width=device-width, height=device-height, user-scalable=no, interactive-widget=resizes-content, viewport-fit=cover">
-<meta name="theme-color" content="#444">
-<meta charset="UTF-8">
-<title>EMPIRE OF THE SUN</title>
-<link id="favicon" rel="icon" href="Roundel_of_France.svg">
-<link rel="stylesheet" href="/fonts/fonts.css">
-<link rel="stylesheet" href="/common/client.css">
-<link rel="stylesheet" href="world.css">
-<link rel="stylesheet" href="play.css">
-<link rel="stylesheet" href="images.css">
-<script defer src="/common/client.js"></script>
-<script defer src="world.js"></script>
-<script defer src="data.js"></script>
-<script defer src="layout.js"></script>
-<script defer src="play.js"></script>
+    <meta name="viewport"
+          content="width=device-width, height=device-height, user-scalable=no, interactive-widget=resizes-content, viewport-fit=cover">
+    <meta name="theme-color" content="#444">
+    <meta charset="UTF-8">
+    <title>EMPIRE OF THE SUN</title>
+    <link id="favicon" rel="icon" href="Roundel_of_France.svg">
+    <link rel="stylesheet" href="/fonts/fonts.css">
+    <link rel="stylesheet" href="/common/client.css">
+    <link rel="stylesheet" href="world.css">
+    <link rel="stylesheet" href="play.css">
+    <link rel="stylesheet" href="images.css">
+    <script defer src="/common/client.js"></script>
+    <script defer src="world.js"></script>
+    <script defer src="data.js"></script>
+    <script defer src="layout.js"></script>
+    <script defer src="play.js"></script>
 </head>
 <body>
 
 <div id="tooltip" class="hide"></div>
 
 <header>
-	<div id="toolbar">
-		<details>
-			<summary><img src="/images/cog.svg"></summary>
-			<menu>
-				<li><a href="info/readme.html" target="_blank">Read me!</a>
-				<li><a href="info/rules.html" target="_blank">Rules</a>
-				<li><a href="info/playbook.html" target="_blank">Playbook</a>
-				<li><a href="info/tables.html" target="_blank">Tables</a>
-				<li><a href="info/cards_german.html" target="_blank">German Cards</a>
-				<li><a href="info/cards_french.html" target="_blank">French Cards</a>
-				<li class="separator">
-				<li><label><input id="volko" type="checkbox">Volko-style</label>
-			</menu>
-		</details>
-		<button onclick="toggle_pieces()"><img src="/images/earth-africa-europe.svg"></button>
-	</div>
+    <div id="toolbar">
+        <details>
+            <summary><img src="/images/cog.svg"></summary>
+            <menu>
+                <li><a href="info/readme.html" target="_blank">Read me!</a>
+                <li><a href="info/rules.html" target="_blank">Rules</a>
+                <li><a href="info/playbook.html" target="_blank">Playbook</a>
+                <li><a href="info/tables.html" target="_blank">Tables</a>
+                <li><a href="info/cards_german.html" target="_blank">German Cards</a>
+                <li><a href="info/cards_french.html" target="_blank">French Cards</a>
+                <li class="separator">
+                <li><label><input id="volko" type="checkbox">Volko-style</label>
+            </menu>
+        </details>
+        <button onclick="toggle_pieces()"><img src="/images/earth-africa-europe.svg"></button>
+    </div>
 </header>
 
 <aside>
-	<div id="roles"></div>
-	<div id="log"></div>
+    <div id="roles"></div>
+    <div id="log"></div>
 </aside>
 
 <main>
 
-	<div id="mapwrap">
-		<div class="board" id="map">
+    <div id="mapwrap">
+        <div class="board" id="map">
+        </div>
 
 
-	</div>
+    </div>
 
-	<div id="panels">
+    <div id="panels">
+        <div class="panel" id="jp_hand">
+            <div class="panel-head">Japan Hand</div>
+            <div class="panel-body"></div>
+        </div>
 
-		<div class="panel" id="hand">
-			<div class="panel-head">Hand</div>
-			<div class="panel-body"></div>
-		</div>
+        <div class="panel" id="ap_hand">
+            <div class="panel-head">Alied Hand</div>
+            <div class="panel-body"></div>
+        </div>
 
-	</div>
+    </div>
 
 </main>
 
