@@ -894,7 +894,7 @@ P.setup_done = {
 
 function construct_decks() {
     G.draw = [[], []]
-
+//123
     for (let c = 1; c < cards.length; ++c) {
         if (cards[c].faction === "ap") {
             G.draw[AP].push(c)
