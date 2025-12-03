@@ -94,7 +94,7 @@ function on_update() {
 
     begin_update()
 
-    // console.log(G)
+    console.log(G)
     // console.log(V)
     // console.log(R)
     // G.actions={}
@@ -115,7 +115,7 @@ function on_update() {
         populate("hand", card.faction === "ap" ? AP : JP, "card", i)
     }
 
-    action_button("build_trench", "Trench")
+    action_button("roll", "Roll")
     action_button("two_zone_barrage", "Two Zone")
 
     action_button("pass", "Pass")

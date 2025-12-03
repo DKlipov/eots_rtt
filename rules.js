@@ -2,7 +2,7 @@
 
 var G, L, R, V, P = {}
 
-const ROLES = ["Alies", "Japan"]
+const ROLES = ["Japan", "Alies"]
 
 const SCENARIOS = [
     "1942",
@@ -259,359 +259,181 @@ function log_summary_end() {
 
 /* SEQUENCE OF PLAY */
 
-P.s1 = script(`
-	call round
+P.strategic_phase = script(`
+    log ("Turn " + G.turn + ", Strategic phase")
+    call reinforcement_segment
+    call replacement_segment
+    call strategic_warfare
+    call deal_cards
+    goto offensive_phase
 `)
 
-P.s2 = script(`
-	set G.active P_FRENCH
-	call setup_units { n: 34, zz: 46 }
-	call setup_trenches { n: 15 }
-	call setup_done
-	set G.active P_GERMAN
-	call setup_units { n: 34 }
-	call setup_exhaust { n: 4 }
-	call setup_trenches { n: 15 }
-	call setup_done
-	for G.turn in 5 to 6 {
-		call turn
-	}
-`)
-
-P.s3 = script(`
-	for G.turn in 1 to 6 {
-		call turn
-	}
-`)
-
-P.turn = script(`
-	eval {
-		log("#Turn " + G.turn)
-		filter_cards_for_this_turn()
-		construct_decks()
-	}
-
-	if (G.turn === 1) {
-		set G.month 2
-		call month
-	} else {
-		for G.month in 1 to 2 {
-			call month
-		}
-	}
-
-	if (G.nivelle && is_event_played(FE_NIVELLE)) {
-		set G.active P_FRENCH
-		call discard_nivelle
-	}
-
-	goto victory_check
-`)
-
-P.month = script(`
-	log ("#" + month_names[G.turn * 2 + G.month - 3])
-
-	if (is_event_played(FE_MANGIN)) {
-		set G.mangin 0
-	}
-
-	if (is_event_played(FE_JOFFRE)) {
-		set G.active P_FRENCH
-		call joffre
-	}
-
-	if (is_event_played(FE_HOSPITALS)) {
-		set G.active P_FRENCH
-		call hospitals
-	}
-
-	if (G.turn > 1) {
-		set G.active [ P_GERMAN, P_FRENCH ]
-		call draw_phase
-	}
-
-	for G.round in 2 to 15 {
-		call round
-	}
-
-	set G.round 0
-
-	set G.active [ P_GERMAN, P_FRENCH ]
-	call discard_phase
-
-	eval { clear_barrage() }
-`)
-
-P.round = script(`
-	log ("=" + G.round)
-	set G.active ((G.active + 1) % 2)
-	call choose_action_card
-	call end_action
-`)
-
-/* DRAW PHASE */
-
-P.draw_phase = {
-    _begin() {
-        L.undo = [0, 0]
-    },
-    prompt() {
-        V.draw = G.draw[R]
-        if (L.undo[R] < 1) {
-            prompt("Choose a card from your draw deck.")
-            for (var c of G.draw[R])
-                action_card(c)
-        } else {
-            prompt("Draw phase done.")
-            button("undo")
-            button("next")
-        }
-    },
-    card(c) {
-        set_delete(G.draw[R], c)
-        G.hand[R].push(c)
-        L.undo[R] = c
-    },
-    undo() {
-        array_delete_item(G.hand[R], L.undo[R])
-        set_add(G.draw[R], L.undo[R])
-        L.undo[R] = 0
-    },
-    next() {
-        set_delete(G.active, R)
-        if (G.active.length === 0)
-            end()
-    },
-    _end() {
-        while (G.hand[P_GERMAN].length < 8)
-            draw_card(P_GERMAN)
-        while (G.hand[P_FRENCH].length < 8)
-            draw_card(P_FRENCH)
-    },
-}
-
-/* DISCARD PHASE - END OF MONTH (SEE SIDEBAR) */
-
-P.discard_phase = {
-    _begin() {
-        L.undo = [[], []]
-        set_delete(G.active, P_FRENCH)
-        if (G.active.length === 0)
-            end()
-    },
-    prompt() {
-        prompt("You may discard cards in hand.")
-        for (var c of G.hand[R])
-            if (is_card_active_next_month(c))
-                action_card(c)
-        button("undo", L.undo[R].length > 0)
-        button("done")
-    },
-    card(c) {
-        array_delete_item(G.hand[R], c)
-        L.undo[R].push(c)
-    },
-    undo() {
-        G.hand[R].push(L.undo[R].pop())
-    },
-    done() {
-        for (var c of L.undo[R])
-            log("Discarded C" + c)
-        set_delete(G.active, R)
-        if (G.active.length === 0)
-            end()
-    },
-}
-
-/* END OF TURN PHASE - VPS AND VICTORY */
-
-P.victory_check = function () {
-    var z
-    var m = 1
-    var vps = G.vps.flat()
-
-    log("#Victory Check")
-
-    if (G.turn === G.last)
-        m = 2
-
-    log("German VPs:")
-    map_for_each(map_german_vp, (z, n) => {
-        if (is_german_zone(z)) {
-            log(">+" + (n * m) + " for Z" + z)
-            G.vp += (n * m)
-        }
-    })
-
-    clamp_vp()
-
-    // AUTOMATIC VICTORY CHECK
-
-    if (G.vp >= 50)
-        return finish(P_GERMAN, "Germans have 50 victory points!")
-
-    var red_stars = 0
-    if (red_stars >= 2)
-        return finish(P_GERMAN, `Germans control ${red_stars} red stars!`)
-
-    // LAST TURN VICTORY
-
-    if (G.turn === G.last) {
-        if (G.turn === 2) {
-            if (G.vp >= 20)
-                return finish(P_GERMAN, "German victory!")
-            else
-                return finish(P_FRENCH, "French victory!")
-        } else {
-            if (G.vp >= 0)
-                return finish(P_GERMAN, "German victory!")
-            else
-                return finish(P_FRENCH, "French victory!")
-        }
-    }
-
+P.reinforcement_segment = function () {
+    log("Reinforcements skipped")
     end()
 }
 
-/* ACTION ROUND: PLAY CARDS */
-
-function update_zone_control(z) {
+P.replacement_segment = function () {
+    log("Replacements skipped")
+    end()
 }
 
-function auto_skip_end_round() {
-    // automatically skip end_round confirmation
-    if (L.P === "end_action")
-        P.end_action.end_round()
+function submarine_success() {
+    log("Successful submarine attack")
+    G.strategic_warfare[0] = 1
+    if (G.amph_points[JP] > 1) {
+        G.amph_points[JP] -= 1
+        log("Japan amphibious shipping points reduced to: " + G.amph_points[JP])
+    }
 }
 
-P.end_action = {
-    prompt() {
-        prompt("End action round.")
-        button("end_round")
+P.strategic_warfare = {
+    _begin() {
+        G.strategic_warfare = [0, 0]
+        G.active = AP
     },
-    end_round() {
-        // en-route to reserve boxes
-        set_clear(G.take_control)
-
-        set_clear(G.played)
-        set_clear(G.moved)
-        G.tm = 0
-
+    prompt() {
+        prompt("Roll for a submarine warfare.")
+        button("roll")
+    },
+    roll() {
+        let result = random(10)
+        if (G.turn <= 4) {
+            result += 2
+        }
+        if (result - G.turn <= 0) {
+            submarine_success()
+        }
         end()
     },
 }
 
-P.choose_action_card = {
-    prompt() {
-        console.log("choose")
-        prompt(`Action Round ${G.round >> 1}: Play a card.`)
-
-        if (G.morale[G.active] < 4)
-            V.prompt += ` [i]Morale level is ${G.morale[G.active]}![/i]`
-
-        for (let c of G.hand[G.active])
-            action_card(c)
-
-        if (G.hand[G.active].length >= 2)
-            button("discard")
-        button("pass")
-    },
-    discard() {
-        push_undo()
-        goto("discard_cards", {n: 2})
-    },
-    card(c) {
-        push_undo()
-    },
-    pass() {
-        push_undo()
-        log("Pass")
-        end()
-    },
+P.deal_cards = function () {
+    let ap_cards = 4
+    G.passes[AP] = 0
+    if (G.turn === 2) {
+        ap_cards = 2
+        G.passes[AP] = 2
+    } else if (G.turn === 3) {
+        ap_cards = 3
+        G.passes[AP] = 1
+    }
+    log("Allied draw " + ap_cards + ", " + G.passes[AP] + " passes")
+    for (let i = 0; i < ap_cards; i++) {
+        draw_card(AP)
+    }
+    let jp_cards = 4
+    G.passes[JP] = 1
+    jp_cards -= G.strategic_warfare[0]
+    jp_cards -= G.strategic_warfare[1]
+    log("Japan draw " + jp_cards + ", " + G.passes[JP] + " passes")
+    for (let i = 0; i < jp_cards; i++) {
+        draw_card(JP)
+    }
+    end()
 }
 
-P.choose_action = {
-    prompt() {
-        prompt(`Take an action with "${cards[L.c].name}".`)
-        if (can_play_event(L.c))
-            button("event")
-        button("ap")
-    },
-    card(c) {
-        push_undo()
-        play_hand(G.active, c)
-        goto("double_or_two_zone_barrage", {c1: L.c, c2: c})
-    },
-    barrage() {
-        push_undo()
-        init_barrage(cards[L.c].barrage)
-        goto("barrage")
-    },
-    event() {
-        push_undo()
-        log("Event")
-        goto("play_event_and_use_ap", {c: L.c, ap: cards[L.c].ap2})
-    },
-    ap() {
-        push_undo()
-        goto("use_ap", {ap: cards[L.c].ap1})
-    },
-}
-
-P.play_event_and_use_ap = script(`
-	call play_event { c: L.c }
-	if (L.ap > 0) {
-		call use_ap { ap: L.ap }
-	}
+P.offensive_phase = script(`
+    log ("Offensives phase")
+    eval {console.log("Offensives phase")}
+    call initiative_segment
+    call offensive_segment
+    goto political_phase
 `)
 
-/* DISCARD TWO CARDS TO DRAW A NEW CARD */
+P.initiative_segment = function () {
+    console.log("initiative_segment")
+    if (G.hand[AP].length > G.hand[JP].length) {
+        G.active = AP
+    }
+    if (G.hand[JP].length > G.hand[AP].length) {
+        G.active = JP
+    } else {
+        G.active = G.turn <= 4 ? 0 : 1
+    }
 
-P.discard_cards = {
-    prompt() {
-        prompt("Discard two cards to draw a new card.")
-        for (let c of G.hand[G.active])
-            action_card(c)
-    },
-    card(c) {
-        push_undo()
-        discard_hand(G.active, c)
-        if (--L.n === 0)
-            goto("draw_replacement")
-    },
+    if (G.hand[JP].length !== G.hand[AP].length && G.future_offensive[(1 - G.active)][1] > 0) {
+        G.active = 1 - G.active
+        goto('future_offensive')
+    }
+    end()
 }
 
-P.draw_replacement = {
-    prompt() {
-        prompt("Draw a new card.")
-        V.draw = G.draw[G.active]
-        for (let c of G.draw[G.active])
-            action_card(c)
-    },
-    card(c) {
-        push_undo()
-        log("Drew 1 card")
-        set_delete(G.draw[G.active], c)
-        G.hand[G.active].push(c)
-        end()
-    },
+P.future_offensive = function () {
+    //todo
+    log("Future offensive not possible")
+    console.log("future offensive")
+    G.active = 1 - G.active
+    end()
 }
 
-/* STACKING LIMITATION */
-
-P.enforce_stacking_limitation = {
-    prompt() {
-        prompt("Eliminate units in over-stacked zones.")
-    },
-    unit(u) {
-        push_undo()
-        log("Over-stacked Z")
-        eliminate_unit(u)
-        log_morale(G.active)
-        if (true)
-            end()
-    },
+P.offensive_segment = function () {
+    //todo
+    log("Offensive segment")
+    console.log("Offensives segment")
+    while (G.hand[JP].length > 0) {
+        G.discard[JP].push(G.hand[JP][0])
+        array_delete(G.hand[JP], 0)
+    }
+    while (G.hand[AP].length > 0) {
+        G.discard[AP].push(G.hand[AP][0])
+        array_delete(G.hand[AP], 0)
+    }
+    end()
 }
+
+P.political_phase = script(`
+    log ("Political phase")
+  
+    call national_status_segment
+    call political_will_segment
+    goto attrition_phase
+`)
+
+P.national_status_segment = function () {
+    //todo
+    log("National status not changed")
+    end()
+}
+
+P.political_will_segment = function () {
+    //todo
+    if (random(10) % 2 === 0) {
+        G.political_will -= 1
+        log("Us political will reduced to " + G.political_will)
+    } else {
+        log("Political will not changed")
+    }
+    end()
+}
+
+P.attrition_phase = script(`
+    log ("Attrition phase")
+    
+    eval {
+    for (let i = 1; i < pieces.length; i++) {
+        if (random(10) % 5 === 0) {
+            set_add(G.reduced, i)
+            log(pieces[i].name + " reduced as attrition")
+        }
+    }
+    }
+    goto end_of_turn_phase
+`)
+
+P.end_of_turn_phase = script(`
+    log ("Turn " + G.turn + ", End of turn phase")
+    eval {
+    if (G.political_will <= 0) {
+        finish("Japan", "US surrenders")
+    }
+    if (G.turn >= G.finish) {
+        finish("Alies", "Japan surrenders")
+    }
+    }
+    incr G.turn
+    goto strategic_phase
+`)
 
 /* EVENTS */
 
@@ -894,7 +716,7 @@ P.setup_done = {
 
 function construct_decks() {
     G.draw = [[], []]
-//123
+
     for (let c = 1; c < cards.length; ++c) {
         if (cards[c].faction === "ap") {
             G.draw[AP].push(c)
@@ -906,6 +728,12 @@ function construct_decks() {
 }
 
 function draw_card(side) {
+    if (G.draw[side].length <= 0) {
+        G.draw[side] = G.discard[side]
+        G.discard[side] = []
+    }
+    console.log(side == 0 ? "JP" : "AP")
+    console.log(G.draw[side].length)
     var i = random(G.draw[side].length)
     var c = G.draw[side][i]
     array_delete(G.draw[side], i)
@@ -927,9 +755,9 @@ function setup_units(side, trenches, n, zones) {
     }
 }
 
-function setup_scenario_1() {
-    log("#Operation Gericht")
-    log("The German assault on Verdun (February to April 1916)")
+function setup_scenario_1942() {
+    log("#Japan Offensive")
+    log("The Japan assault on Asia (December 1941) caught allies off guard")
 
     G.location = []
     for (let i = 1; i < pieces; i++) {
@@ -938,72 +766,44 @@ function setup_scenario_1() {
 
     construct_decks()
 
-    while (G.hand[JP].length < 6)
+    while (G.hand[JP].length < 7)
         draw_card(JP)
-    while (G.hand[AP].length < 6)
+    while (G.hand[AP].length < 5)
         draw_card(AP)
+    G.passes[AP] = 2
+    G.passes[JP] = 0
+    G.turn = 2
+    G.amph_points = [7, 1]
+    G.political_will = 8
 
-    console.log("setup")
-    call("s1")
+    console.log("setup 1942")
+    call("offensive_phase")
 }
 
-const s2_german_zones = [
-    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
-    33, 37, 38, 39, 40, 48, 49, 50,
-    29, 30, 31, 32, 34, 35, 36, 46, 60, 47, 63, 64, 78
-]
-
-const s2_german_front = [
-    29, 30, 31, 32, 34, 35, 36, 46, 60, 47, 63, 64, 78
-]
-
-const s2_french_front = [
-    41, 42, 43, 44, 45, 58, 59, 61, 62, 77, 76, 46
-]
 
 /* HOOKS */
 
 function on_setup(scenario, options) {
-    var i
 
-    G.scenario = parseInt(scenario)
-
-    G.options = 0
-    if (options.no_dice) {
-        log("- No dice for VP events")
-        G.options |= OPT_NO_DICE
-    }
-    if (options.optional_german_cards) {
-        log("- Optional German cards")
-        G.options |= OPT_GERMAN_CARDS
-    }
-    if (options.optional_french_cards) {
-        log("- Optional French cards")
-        G.options |= OPT_FRENCH_CARDS
-    }
+    G.scenario = scenario
 
     G.active = JP
     G.turn = 1
-    G.last = 6
-    G.month = 1
-    G.round = 0
-    G.vp = 0
-    G.air = 0
-    G.us_entry = 0
-    G.us_drm = 0
-    G.morale = [10, 10]
-
-    G.played = [] // events in order of play
+    G.finish = 12
+    G.passes = [0, 0]
     G.removed = [] // removed one-time events (both sides)
     G.hand = [[], []]
+    G.future_offensive = [[0, 0], [0, 0]]
+    G.discard = [[], []]
+    G.amph_points = [0, 0]
 
-    G.control = []
-    G.oos = [[], []]
-    G.moved = []
+    G.location = []
+    G.reduced = []
+    G.oos = []
 
     switch (scenario) {
         case "1942":
-            return setup_scenario_1()
+            return setup_scenario_1942()
     }
 }
 
@@ -1063,6 +863,10 @@ function action_number_range(a, b) {
         action("number", x)
 }
 
+function hex_to_int(i) {
+    return (Math.floor(i / 100) - 10) * 29 + i % 100
+}
+
 /* FRAMEWORK */
 
 /*
@@ -1071,6 +875,7 @@ const ROLES = []
 const SCENARIOS = []
 var G, L, R, V, P = {}
 function on_setup(scenario, options) {}
+function on_static_view() {}
 function on_view() {}
 function on_query(q) {}
 function on_assert() {}
@@ -1155,6 +960,20 @@ exports.setup = function (seed, scenario, options) {
     return G
 }
 
+exports.static_view = function (game) {
+    var SV = null
+    if (typeof on_static_view === "function") {
+        G = state
+        L = null
+        R = role
+        V = null
+        _load()
+        SV = on_static_view()
+        _save()
+    }
+    return SV
+}
+
 exports.view = function (state, role) {
     G = state
     L = G.L
@@ -1170,10 +989,15 @@ exports.view = function (state, role) {
 
         V.actions = {}
 
-        if (P[L.P])
-            P[L.P].prompt()
-        else
-            V.prompt = "TODO: " + L.P
+        try {
+            if (P[L.P])
+                P[L.P].prompt()
+            else
+                V.prompt = "TODO: " + L.P
+        } catch (x) {
+            console.error(x)
+            V.prompt = x.toString()
+        }
 
         if (V.actions.undo === undefined)
             button("undo", G.undo?.length > 0)
@@ -1624,6 +1448,36 @@ function random(range) {
     return (G.seed = G.seed * 200105 % 34359738337) % range
 }
 
+function random_bigint(range) {
+    // Largest MLCG that will fit its state in a double.
+    // Uses BigInt for arithmetic, so is an order of magnitude slower.
+    // https://www.ams.org/journals/mcom/1999-68-225/S0025-5718-99-00996-5/S0025-5718-99-00996-5.pdf
+    // m = 2**53 - 111
+    return (G.seed = Number(BigInt(G.seed) * 5667072534355537n % 9007199254740881n)) % range
+}
+
+function shuffle(list) {
+    // Fisher-Yates shuffle
+    var i, j, tmp
+    for (i = list.length - 1; i > 0; --i) {
+        j = random(i + 1)
+        tmp = list[j]
+        list[j] = list[i]
+        list[i] = tmp
+    }
+}
+
+function shuffle_bigint(list) {
+    // Fisher-Yates shuffle
+    var i, j, tmp
+    for (i = list.length - 1; i > 0; --i) {
+        j = random_bigint(i + 1)
+        tmp = list[j]
+        list[j] = list[i]
+        list[i] = tmp
+    }
+}
+
 // Fast deep copy for objects without cycles
 function object_copy(original) {
     var copy, i, n, v
@@ -1649,6 +1503,35 @@ function object_copy(original) {
         }
         return copy
     }
+}
+
+// Fast deep object comparison for objects without cycles
+function object_diff(a, b) {
+    var i, key
+    var a_length
+    if (a === b)
+        return false
+    if (a !== null && b !== null && typeof a === "object" && typeof b === "object") {
+        if (Array.isArray(a)) {
+            if (!Array.isArray(b))
+                return true
+            a_length = a.length
+            if (b.length !== a_length)
+                return true
+            for (i = 0; i < a_length; ++i)
+                if (object_diff(a[i], b[i]))
+                    return true
+            return false
+        }
+        for (key in a)
+            if (object_diff(a[key], b[key]))
+                return true
+        for (key in b)
+            if (!(key in a))
+                return true
+        return false
+    }
+    return true
 }
 
 // Array remove and insert (faster than splice)
@@ -1716,7 +1599,7 @@ function set_add(set, item) {
     var b = set.length - 1
     // optimize fast case of appending items in order
     if (item > set[b]) {
-        set.push(item)
+        set[b + 1] = item
         return
     }
     while (a <= b) {
@@ -1749,7 +1632,29 @@ function set_delete(set, item) {
     }
 }
 
+function set_toggle(set, item) {
+    var a = 0
+    var b = set.length - 1
+    while (a <= b) {
+        var m = (a + b) >> 1
+        var x = set[m]
+        if (item < x)
+            b = m - 1
+        else if (item > x)
+            a = m + 1
+        else {
+            array_delete(set, m)
+            return
+        }
+    }
+    array_insert(set, a, item)
+}
+
 // Map as plain sorted array of key/value pairs
+
+function map_clear(map) {
+    map.length = 0
+}
 
 function map_has(map, key) {
     var a = 0
@@ -1830,6 +1735,52 @@ function map_for_each(map, f) {
         f(map[i], map[i + 1])
 }
 
-function hex_to_int(i) {
-    return (Math.floor(i / 100) - 10) * 29 + i % 100
+// same as Object.groupBy
+function object_group_by(items, callback) {
+    var item, key
+    var groups = {}
+    if (typeof callback === "function") {
+        for (item of items) {
+            key = callback(item)
+            if (key in groups)
+                groups[key].push(item)
+            else
+                groups[key] = [item]
+        }
+    } else {
+        for (item of items) {
+            key = item[callback]
+            if (key in groups)
+                groups[key].push(item)
+            else
+                groups[key] = [item]
+        }
+    }
+    return groups
+}
+
+// like Object.groupBy but for plain array maps
+function map_group_by(items, callback) {
+    var item, key, arr
+    var groups = []
+    if (typeof callback === "function") {
+        for (item of items) {
+            key = callback(item)
+            arr = map_get(groups, key)
+            if (arr)
+                arr.push(item)
+            else
+                map_set(groups, key, [item])
+        }
+    } else {
+        for (item of items) {
+            key = item[callback]
+            arr = map_get(groups, key)
+            if (arr)
+                arr.push(item)
+            else
+                map_set(groups, key, [item])
+        }
+    }
+    return groups
 }
