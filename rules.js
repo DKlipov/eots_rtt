@@ -342,7 +342,6 @@ P.offensive_phase = script(`
 `)
 
 P.initiative_segment = function () {
-    console.log("initiative_segment")
     if (G.hand[AP].length > G.hand[JP].length) {
         G.active = AP
     }
@@ -352,34 +351,95 @@ P.initiative_segment = function () {
         G.active = G.turn <= 4 ? 0 : 1
     }
 
-    if (G.hand[JP].length !== G.hand[AP].length && G.future_offensive[(1 - G.active)][1] > 0) {
+    if (G.hand[JP].length !== G.hand[AP].length) {
         G.active = 1 - G.active
         goto('future_offensive')
     }
     end()
 }
 
-P.future_offensive = function () {
-    //todo
-    log("Future offensive not possible")
-    console.log("future offensive")
-    G.active = 1 - G.active
-    end()
+P.future_offensive = {
+    _begin() {
+        if (G.future_offensive[(1 - G.active)][1] <= 0) {
+            end()
+        }
+        G.active = 1 - G.active
+    },
+    prompt() {
+        prompt("Play future offensive card or pass.")
+        button("pass")
+        action_card(G.future_offensive[R][1])
+    },
+    card() {
+        let card = G.future_offensive[R][1]
+        G.future_offensive[R] = [0, 0]
+        goto("play_event", {card: card})
+    },
+    pass() {
+        G.active = 1 - G.active
+        end()
+    }
 }
 
-P.offensive_segment = function () {
-    //todo
-    log("Offensive segment")
-    console.log("Offensives segment")
-    while (G.hand[JP].length > 0) {
-        G.discard[JP].push(G.hand[JP][0])
-        array_delete(G.hand[JP], 0)
+P.offensive_segment = {
+    _begin() {
+
+    },
+    prompt() {
+        prompt("Turn " + G.turn + " Take one action.")
+        if (G.passes[R] > 0) {
+            button("pass")
+        }
+        for (let i = 0; i < G.hand[R]; i++) {
+            action_card(G.hand[R][i])
+        }
+        if (G.future_offensive[R][0] < G.turn) {
+            action_card(G.future_offensive[R][1])
+        }
+    },
+    card(c) {
+        G.active_card = c
+        goto("choose_action", {c})
+    },
+    pass() {
+        G.passes[R] -= 1
+        end()
     }
-    while (G.hand[AP].length > 0) {
-        G.discard[AP].push(G.hand[AP][0])
-        array_delete(G.hand[AP], 0)
+}
+
+P.choose_action = {
+    _begin() {
+
+    },
+    prompt() {
+        let card = cards[L.c]
+        prompt(card.name + ". Choose action.")
+        button("event")
+        button("ops")
+        if (card.ops >= 3) {
+            button("inter_service")
+            button("infrastructure")
+            if (R === JP) {
+                button("china_offensive")
+            }
+        }
+        button("undo")
+    },
+    ops() {
+        goto("play_card")
+    },
+    event() {
+    },
+    inter_service() {
+    },
+    infrastructure() {
+    },
+    china_offensive() {
+    },
+    pass() {
+        G.passes[R] -= 1
+        end()
     }
-    end()
 }
 
 P.political_phase = script(`
@@ -793,13 +853,14 @@ function on_setup(scenario, options) {
     G.passes = [0, 0]
     G.removed = [] // removed one-time events (both sides)
     G.hand = [[], []]
-    G.future_offensive = [[0, 0], [0, 0]]
+    G.future_offensive = [[100, 0], [100, 0]]
     G.discard = [[], []]
     G.amph_points = [0, 0]
 
     G.location = []
     G.reduced = []
     G.oos = []
+    G.active_card = 0
 
     switch (scenario) {
         case "1942":
@@ -809,15 +870,11 @@ function on_setup(scenario, options) {
 
 function on_view() {
     V.turn = G.turn
-    V.month = G.month
-    V.round = G.round
-    V.vp = G.vp
-    V.air = G.air
-    V.us_entry = G.us_entry
-    V.us_drm = G.us_drm
-    V.morale = G.morale
+    V.active_card = G.active_card
+    V.location = G.location
+    V.reduced = G.reduced
+    V.political_will = G.political_will
 
-    V.played = G.played
     V.permanent = G.permanent
 
     V.control = G.control
@@ -826,20 +883,19 @@ function on_view() {
     V.vps = G.vps
     V.exhausted = G.exhausted
     V.oos = G.oos
+    V.hand = []
 
-    if (G.barrage) {
-        if (G.barrage2)
-            V.barrage = [G.barrage.target, G.barrage2.target]
-        else
-            V.barrage = [G.barrage.target]
+
+    if (R !== JP) {
+        V.hand[JP] = G.hand[JP].map(() => 0)
+    } else {
+        V.hand[JP] = G.hand[JP]
     }
-
-    if (R === P_FRENCH)
-        V.hand = [G.hand[P_GERMAN].length, G.hand[P_FRENCH]]
-    else if (R === P_GERMAN)
-        V.hand = [G.hand[P_GERMAN], G.hand[P_FRENCH].length]
-    else
-        V.hand = [G.hand[P_GERMAN].length, G.hand[P_FRENCH].length]
+    if (R !== AP) {
+        V.hand[AP] = G.hand[AP].map(() => 0)
+    } else {
+        V.hand[AP] = G.hand[AP]
+    }
 }
 
 function action_card(c) {

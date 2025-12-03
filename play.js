@@ -116,7 +116,12 @@ function on_update() {
     }
 
     action_button("roll", "Roll")
-    action_button("two_zone_barrage", "Two Zone")
+    action_button("ops", "Roll")
+    action_button("event", "Roll")
+    action_button("inter_service", "Roll")
+    action_button("infrastructure", "Roll")
+    action_button("china_offensive", "Roll")
+
 
     action_button("pass", "Pass")
     action_button("next", "Next")
