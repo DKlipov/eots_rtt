@@ -56,15 +56,22 @@ function push_stack(stk, elt) {
     elt.my_stack = stk
 }
 
-function update_hand(side, hand) {
-    var c
-    if (typeof hand === "number") {
-        for (c = 0; c < hand; ++c)
-            populate_generic("hand", side, side === P_GERMAN ? "card back german" : "card back french")
-    } else {
-        for (c of hand)
-            if (data.cards[c].type !== "Barrage")
-                populate("hand", side, "card", c)
+function update_hand(side) {
+    if (G.future_offensive[side][0] < 100) {
+        let card = G.future_offensive[side][1]
+        if (card <= 0) {
+            populate_generic("hand", side, side === JP ? "card card_jp_0" : "card card_ap_0")
+        } else {
+            populate("hand", side, "card", card)
+        }
+    }
+    for (let i = 0; i < G.hand[side].length; i++) {
+        let card = G.hand[side][i]
+        if (card <= 0) {
+            populate_generic("hand", side, side === JP ? "card card_jp_0" : "card card_ap_0")
+        } else {
+            populate("hand", side, "card", card)
+        }
     }
 }
 
@@ -109,18 +116,15 @@ function on_update() {
 
     }
 
-
-    for (let i = 1; i < data.cards.length; i++) {
-        let card = data.cards[i]
-        populate("hand", card.faction === "ap" ? AP : JP, "card", i)
-    }
+    update_hand(AP)
+    update_hand(JP)
 
     action_button("roll", "Roll")
-    action_button("ops", "Roll")
-    action_button("event", "Roll")
-    action_button("inter_service", "Roll")
-    action_button("infrastructure", "Roll")
-    action_button("china_offensive", "Roll")
+    action_button("ops", "Operations")
+    action_button("event", "Event")
+    action_button("inter_service", "Strategic Agreement")
+    action_button("infrastructure", "Build infrastructure")
+    action_button("china_offensive", "China offensive")
 
 
     action_button("pass", "Pass")

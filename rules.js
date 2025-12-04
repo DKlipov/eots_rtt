@@ -353,7 +353,7 @@ P.initiative_segment = function () {
 
     if (G.hand[JP].length !== G.hand[AP].length) {
         G.active = 1 - G.active
-        goto('future_offensive')
+        call('future_offensive')
     }
     end()
 }
@@ -371,6 +371,7 @@ P.future_offensive = {
         action_card(G.future_offensive[R][1])
     },
     card() {
+        push_undo()
         let card = G.future_offensive[R][1]
         G.future_offensive[R] = [0, 0]
         goto("play_event", {card: card})
@@ -390,7 +391,7 @@ P.offensive_segment = {
         if (G.passes[R] > 0) {
             button("pass")
         }
-        for (let i = 0; i < G.hand[R]; i++) {
+        for (let i = 0; i < G.hand[R].length; i++) {
             action_card(G.hand[R][i])
         }
         if (G.future_offensive[R][0] < G.turn) {
@@ -398,6 +399,7 @@ P.offensive_segment = {
         }
     },
     card(c) {
+        push_undo()
         G.active_card = c
         goto("choose_action", {c})
     },
@@ -423,12 +425,13 @@ P.choose_action = {
                 button("china_offensive")
             }
         }
-        button("undo")
     },
     ops() {
+        push_undo()
         goto("play_card")
     },
     event() {
+        push_undo()
     },
     inter_service() {
     },
@@ -870,7 +873,6 @@ function on_setup(scenario, options) {
 
 function on_view() {
     V.turn = G.turn
-    V.active_card = G.active_card
     V.location = G.location
     V.reduced = G.reduced
     V.political_will = G.political_will
@@ -884,17 +886,24 @@ function on_view() {
     V.exhausted = G.exhausted
     V.oos = G.oos
     V.hand = []
+    V.future_offensive = []
 
 
     if (R !== JP) {
-        V.hand[JP] = G.hand[JP].map(() => 0)
+        V.hand[JP] = G.hand[JP].map(a => a === G.active_card ? a : 0)
+        let jfo=G.future_offensive[JP][1]
+        V.future_offensive.push([G.future_offensive[JP][0],jfo === G.active_card ? jfo : 0])
     } else {
         V.hand[JP] = G.hand[JP]
+        V.future_offensive.push(G.future_offensive[JP])
     }
     if (R !== AP) {
-        V.hand[AP] = G.hand[AP].map(() => 0)
+        V.hand[AP] = G.hand[AP].map(a => a === G.active_card ? a : 0)
+        let jfo=G.future_offensive[AP][1]
+        V.future_offensive.push([G.future_offensive[AP][0],jfo === G.active_card ? jfo : 0])
     } else {
         V.hand[AP] = G.hand[AP]
+        V.future_offensive.push(G.future_offensive[AP])
     }
 }
 
