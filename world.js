@@ -133,9 +133,9 @@ function is_action(action, id) {
 }
 
 function on_click_action(evt) {
-    if (evt.button === 0)
-        if (send_action(evt.target.my_action, evt.target.my_id))
-            evt.stopPropagation()
+    if (evt.button === 0 && send_action(evt.target.my_action, evt.target.my_id)) {
+        evt.stopPropagation()
+    }
 }
 
 function register_thing(action, id, e) {
@@ -163,15 +163,15 @@ function register_action(action, id, e) {
 }
 
 function register_focusable(e) {
-    e.onmousedown = () => {
+    e.onmousedown = (evt) => {
         if (world.focus !== e.parent) {
+            evt.stopPropagation()
             if (world.focus != null) {
                 world.focus.classList.remove("focus")
             }
             world.focus = e.parent
             e.parent.classList.add("focus")
             on_update()
-
         }
     }
 }

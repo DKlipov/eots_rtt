@@ -337,7 +337,12 @@ P.offensive_phase = script(`
     log ("Offensives phase")
     eval {console.log("Offensives phase")}
     call initiative_segment
-    call offensive_segment
+    while (G.hand[AP].length > 0 || G.hand[JP].length > 0) {
+        if (G.hand[G.active].length > 0){
+            call offensive_segment
+        }
+        set G.active (1 - G.active)
+    }
     goto political_phase
 `)
 
@@ -400,7 +405,8 @@ P.offensive_segment = {
     },
     card(c) {
         push_undo()
-        G.active_card = c
+        G.offensive.active_card = c
+        G.offensive.attacker = R
         goto("choose_action", {c})
     },
     pass() {
@@ -428,7 +434,7 @@ P.choose_action = {
     },
     ops() {
         push_undo()
-        goto("play_card")
+        goto("offensive_sequence")
     },
     event() {
         push_undo()
@@ -444,6 +450,82 @@ P.choose_action = {
         end()
     }
 }
+
+P.choose_hq = {
+    prompt() {
+        prompt(cards[G.offensive.active_card].name + ". Choose HQ.")
+        for (let i = 1; i < pieces.length; i++) {
+            let piece = pieces[i]
+            let faction = R === AP ? "ap" : "jp"
+            if (piece.faction === faction && piece.class === "hq") {
+                action_unit(i)
+            }
+        }
+    },
+    unit(u) {
+        push_undo()
+        G.offensive.active_hq.push(u)
+        end()
+    },
+}
+
+function get_distance(first_hex, second_hex) {
+    return 1
+}
+
+P.activate_units = {
+    _begin() {
+        L.hq_bonus = pieces[G.offensive.active_hq[0]].cm
+    },
+    prompt() {
+        prompt(`${cards[G.offensive.active_card].name}. Activate units ${G.offensive.logistic} + ${L.hq_bonus} / ${G.offensive.active_units.length}.`)
+        for (let i = 1; i < pieces.length; i++) {
+            let piece = pieces[i]
+            let faction = R === AP ? "ap" : "jp"
+            let hq = G.offensive.active_hq[0]
+            if (piece.faction === faction && get_distance(G.location[hq], G.location[i]) <= pieces[hq].cr) {
+                action_unit(i)
+            }
+        }
+        button("pass")
+    },
+    unit(u) {
+        push_undo()
+        set_add(G.offensive.active_units, u)
+        if (G.offensive.active_units.length >= (G.offensive.logistic + L.hq_bonus)) {
+            end()
+        }
+    },
+    pass(){
+        push_undo()
+        end()
+    }
+}
+
+// call("move_offensive_units")
+// call("declare_battle_hexes")
+// call("special_reaction")
+// call("change_intelligence_condition")
+// call("choose_reaction_hq")
+// call("activate_units")
+// call("move_reaction_units")
+// call("resolve_battles")
+// call("post_battle_movement")
+// call("emergency_movement")
+P.offensive_sequence = script(`
+    set G.offensive.logistic cards[G.offensive.active_card].ops
+    call choose_hq
+    call activate_units
+    call move_offensive_units
+    eval {
+        console.log("end activation")
+        set_add(G.discard[G.offensive.attacker], G.offensive.active_card)
+        array_delete_item(G.hand[G.offensive.attacker], G.offensive.active_card)
+        G.active = G.offensive.attacker
+        reset_offensive()
+    }
+    
+`)
 
 P.political_phase = script(`
     log ("Political phase")
@@ -863,7 +945,7 @@ function on_setup(scenario, options) {
     G.location = []
     G.reduced = []
     G.oos = []
-    G.active_card = 0
+    reset_offensive()
 
     switch (scenario) {
         case "1942":
@@ -887,20 +969,21 @@ function on_view() {
     V.oos = G.oos
     V.hand = []
     V.future_offensive = []
+    V.offensive = []
 
 
     if (R !== JP) {
-        V.hand[JP] = G.hand[JP].map(a => a === G.active_card ? a : 0)
-        let jfo=G.future_offensive[JP][1]
-        V.future_offensive.push([G.future_offensive[JP][0],jfo === G.active_card ? jfo : 0])
+        V.hand[JP] = G.hand[JP].map(a => a === G.offensive.active_card ? a : 0)
+        let jfo = G.future_offensive[JP][1]
+        V.future_offensive.push([G.future_offensive[JP][0], jfo === G.offensive.active_card ? jfo : 0])
     } else {
         V.hand[JP] = G.hand[JP]
         V.future_offensive.push(G.future_offensive[JP])
     }
     if (R !== AP) {
-        V.hand[AP] = G.hand[AP].map(a => a === G.active_card ? a : 0)
-        let jfo=G.future_offensive[AP][1]
-        V.future_offensive.push([G.future_offensive[AP][0],jfo === G.active_card ? jfo : 0])
+        V.hand[AP] = G.hand[AP].map(a => a === G.offensive.active_card ? a : 0)
+        let jfo = G.future_offensive[AP][1]
+        V.future_offensive.push([G.future_offensive[AP][0], jfo === G.offensive.active_card ? jfo : 0])
     } else {
         V.hand[AP] = G.hand[AP]
         V.future_offensive.push(G.future_offensive[AP])
@@ -930,6 +1013,19 @@ function action_number_range(a, b) {
 
 function hex_to_int(i) {
     return (Math.floor(i / 100) - 10) * 29 + i % 100
+}
+
+function reset_offensive() {
+    G.offensive = {
+        attacker: JP,
+        active_card: 0,
+        logistic: 0,
+        active_hq: [],
+        active_units: [],
+        strat_moved_units: [],
+        paths: [],
+        active_stack: []
+    }
 }
 
 /* FRAMEWORK */
