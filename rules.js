@@ -10,252 +10,25 @@ const SCENARIOS = [
 
 exports.default_scenario = "1942"
 
-const P_GERMAN = 0
-const P_FRENCH = 1
-
 const JP = 0
 const AP = 1
+
+//Move types
+const ANY_MOVE = 0
+const AMPH_MOVE = 1
+const NAVAL_MOVE = 2
+const NAVAL_STRAT_MOVE = 4
+const AIR_STRAT_MOVE = 8
+const AIR_MOVE = 16
+const AIR_CLOSE_MOVE = 32
+const GROUND_MOVE = 64
+
+const LAST_BOARD_HEX = 1476
 
 const {pieces, cards, edges} = require("./data.js")
 
 /* DATA */
 
-/* non-map zones */
-
-const OPT_NO_DICE = 1
-const OPT_GERMAN_CARDS = 2
-const OPT_FRENCH_CARDS = 4
-
-const Z_GERMAN_RESERVE = 79
-const Z_FRENCH_RESERVE = 80
-
-const Z_GERMAN_EN_ROUTE = 81
-const Z_GERMAN_TRENCHES = 82
-const Z_GERMAN_POOL = 83
-
-const Z_FRENCH_EN_ROUTE = 84
-const Z_FRENCH_TRENCHES = 85
-const Z_FRENCH_POOL = 86
-
-const Z_RESERVE = [Z_GERMAN_RESERVE, Z_FRENCH_RESERVE]
-const Z_EN_ROUTE = [Z_GERMAN_EN_ROUTE, Z_FRENCH_EN_ROUTE]
-const Z_TRENCHES = [Z_GERMAN_TRENCHES, Z_FRENCH_TRENCHES]
-const Z_POOL = [Z_GERMAN_POOL, Z_FRENCH_POOL]
-
-const all_hill_zones = [14, 16, 17, 18, 23, 24, 25, 26, 29, 30, 31, 32, 33, 35, 37, 38, 42, 43, 46, 51, 53, 77]
-const all_fortress_zones = [38, 45, 46, 48, 56, 57, 59, 61, 62, 68, 69, 70, 71, 72, 74, 76, 77]
-const map_german_vp = [38, 1, 59, 1, 61, 1, 65, 1, 66, 1, 68, 1, 70, 1, 72, 1, 74, 1]
-const map_french_vp = [0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5, 2, 6, 2, 7, 2, 38, 3]
-const all_one_star = [68, 70, 72, 74]
-const all_two_star = [71]
-
-const first_unit = [0, 60]
-const last_unit = [59, 119]
-
-const first_zone = 0
-const last_zone = 78
-const last_zone_and_reserve = 80
-
-const FE_AIR_SUPPORT_1 = 23
-const FE_AIR_SUPPORT_2 = 24
-const FE_OFFENSIVE_IN_ITALY = 30
-const FE_PETAIN = 31
-const FE_CASTELNAU = 32
-const FE_RAYNAL = 33
-const FE_LA_NORIA = 35
-const FE_DRIANT = 36
-const FE_MANGIN = 40
-const FE_HOSPITALS = 41
-const FE_JOFFRE = 42
-const FE_NIVELLE = 43
-const FE_HEAVY_ARTILLERY = 44
-const FE_HAIG = 45
-const FE_JELLICOE = 46
-const FE_COORDINATED_TACTICS = 47
-const FE_UNKNOWN_HEROES = 51
-
-const GE_BARRAGE_6 = 59
-const GE_KRONPRINZ = 71
-const GE_FALKENHAYNS_LAST_PUSH = 72
-const GE_LUNAR_LANDSCAPE = 73
-const GE_DISARMED_FORTRESS = 74
-const GE_AIR_SUPPORT_1 = 75
-const GE_AIR_SUPPORT_2 = 76
-const GE_CHAOS_IN_THE_REAR = 83
-const GE_SUBMARINE_WARFARE = 84
-const GE_TOTAL_SUBMARINE_WARFARE = 85
-const GE_REINFORCEMENTS_TO_RUSSIA = 86
-const GE_REINFORCEMENTS_FROM_RUSSIA = 87
-const GE_FLAMETHROWERS = 88
-const GE_KAISERS_ORDER = 90
-const GE_OFFENSIVE_STOCKPILE = 91
-const GE_THE_RED_BARON = 99
-const GE_BAD_WEATHER = 100
-
-const french_air_superiority_cards = [FE_AIR_SUPPORT_1, FE_AIR_SUPPORT_2]
-
-
-/* CARDS & DECKS */
-
-function is_event_played(c) {
-    return set_has(G.permanent, c)
-}
-
-function discard_permanent(c) {
-    log("Discarded C" + c)
-    set_delete(G.permanent, c)
-}
-
-function is_card_in_hand(side, c) {
-    return G.hand[side].includes(c)
-}
-
-function play_hand(side, c) {
-    log("Played C" + c)
-    array_delete_item(G.hand[side], c)
-    G.played.push(c)
-}
-
-function discard_hand(side, c) {
-    log("Discarded C" + c)
-    array_delete_item(G.hand[side], c)
-}
-
-function remove_hand(side, c) {
-    discard_hand(side, c)
-    set_add(G.removed, c)
-}
-
-function is_card_active_this_turn(c) {
-    if ((c === GE_THE_RED_BARON || c === GE_BAD_WEATHER) && !(G.options & OPT_GERMAN_CARDS))
-        return false
-    if ((c === FE_UNKNOWN_HEROES) && !(G.options & OPT_FRENCH_CARDS))
-        return false
-    return (G.turn >= cards[c].turn1 && G.turn <= cards[c].turn2)
-}
-
-function is_card_active_next_month(c) {
-    var turn = (G.month === 1) ? G.turn : G.turn + 1
-    return (turn >= cards[c].turn1 && turn <= cards[c].turn2)
-}
-
-function keep_card_this_turn(c) {
-    return (G.turn <= cards[c].turn2)
-}
-
-function filter_cards_for_this_turn() {
-    for (var i = 0; i < 2; ++i) {
-        G.hand[i] = G.hand[i].filter(keep_card_this_turn)
-        G.draw[i] = G.draw[i].filter(keep_card_this_turn)
-    }
-    // TODO: log discarded permanent events
-    G.permanent = G.permanent.filter(keep_card_this_turn)
-}
-
-/* UNITS & ZONES */
-
-
-function is_german_zone(z) {
-    return get_zone_control(z) === P_GERMAN
-}
-
-
-function count_units(side, z) {
-    var n = 0
-    for (var u = first_unit[side]; u <= last_unit[side]; ++u)
-        if (is_unit_in_zone(u, z))
-            ++n
-    return n
-}
-
-
-function is_zone_unsupplied(z) {
-    return map_has(G.oos[G.active], z)
-}
-
-function is_zone_supplied(z) {
-    return !map_has(G.oos[G.active], z)
-}
-
-function roll_d6() {
-    clear_undo()
-    return random(6) + 1
-}
-
-function add_vp(n, msg) {
-    G.vp = Math.max(-15, Math.min(50, G.vp + n))
-    n = (n < 0) ? (n + " VP") : ("+" + n + " VP")
-    if (msg)
-        log(n + " " + msg)
-    else
-        log(n)
-}
-
-function clamp_vp() {
-    G.vp = Math.max(-15, Math.min(50, G.vp))
-}
-
-function eliminate_unit(u) {
-}
-
-function move_unit(u, to) {
-    log_summary(from, to)
-
-    set_add(G.take_control, from)
-    set_add(G.take_control, to)
-}
-
-/* MOVE SUMMARY */
-
-function log_morale(side) {
-    if (side === P_FRENCH)
-        log("%F" + G.morale[side])
-    else
-        log("%G" + G.morale[side])
-}
-
-function log_summary_begin() {
-    G.summary = []
-}
-
-function log_summary(from, to) {
-    if (G.summary) {
-        var mm = map_get_set(G.summary, from)
-        map_set(mm, to, map_get(mm, to, 0) + 1)
-    } else {
-        log(">Z" + from + " -> Z" + to)
-        if (from === Z_GERMAN_RESERVE)
-            log_morale(P_GERMAN)
-        if (from === Z_FRENCH_RESERVE)
-            log_morale(P_FRENCH)
-    }
-}
-
-function log_summary_end() {
-    if (G.summary) {
-        var morale = false
-        map_for_each(G.summary, (from, mm) => {
-            map_for_each(mm, (to, n) => {
-                if (to < 0) {
-                    if (n > 1)
-                        log(`>Z${from} (${n})`)
-                    else
-                        log(`>Z${from}`)
-                } else {
-                    if (n > 1)
-                        log(`>Z${from} -> Z${to} (${n})`)
-                    else
-                        log(`>Z${from} -> Z${to}`)
-                }
-                if (from === Z_GERMAN_RESERVE || from === Z_FRENCH_RESERVE)
-                    morale = true
-            })
-        })
-        if (morale)
-            log_morale(G.active)
-    }
-    delete G.summary
-}
 
 /* SEQUENCE OF PLAY */
 
@@ -405,7 +178,13 @@ P.offensive_segment = {
     },
     card(c) {
         push_undo()
-        G.offensive.active_card = c
+        G.offensive.active_cards.push(c)
+        if (G.future_offensive[R][1] === c) {
+            G.future_offensive[R] = [100, 0]
+        } else {
+            array_delete_item(G.hand[R], c)
+        }
+        G.discard[R].push(c)
         G.offensive.attacker = R
         goto("choose_action", {c})
     },
@@ -434,6 +213,7 @@ P.choose_action = {
     },
     ops() {
         push_undo()
+        log(`${R} played ${cards[L.c].name} as operation card`)
         goto("offensive_sequence")
     },
     event() {
@@ -453,7 +233,7 @@ P.choose_action = {
 
 P.choose_hq = {
     prompt() {
-        prompt(cards[G.offensive.active_card].name + ". Choose HQ.")
+        prompt(cards[G.offensive.active_cards[0]].name + ". Choose HQ.")
         for (let i = 1; i < pieces.length; i++) {
             let piece = pieces[i]
             let faction = R === AP ? "ap" : "jp"
@@ -465,12 +245,13 @@ P.choose_hq = {
     unit(u) {
         push_undo()
         G.offensive.active_hq.push(u)
+        log(`${pieces[u].name} activated`)
         end()
     },
 }
 
 function get_distance(first_hex, second_hex) {
-    return 1
+    return Math.abs(Math.floor(first_hex / 29) - Math.floor(second_hex / 29)) + Math.abs(first_hex % 29 - second_hex % 29)
 }
 
 P.activate_units = {
@@ -478,12 +259,13 @@ P.activate_units = {
         L.hq_bonus = pieces[G.offensive.active_hq[0]].cm
     },
     prompt() {
-        prompt(`${cards[G.offensive.active_card].name}. Activate units ${G.offensive.logistic} + ${L.hq_bonus} / ${G.offensive.active_units.length}.`)
+        prompt(`${cards[G.offensive.active_cards[0]].name}. Activate units ${G.offensive.logistic} + ${L.hq_bonus} / ${G.offensive.active_units.length}.`)
         for (let i = 1; i < pieces.length; i++) {
             let piece = pieces[i]
             let faction = R === AP ? "ap" : "jp"
             let hq = G.offensive.active_hq[0]
-            if (piece.faction === faction && get_distance(G.location[hq], G.location[i]) <= pieces[hq].cr) {
+            if (piece.faction === faction && get_distance(G.location[hq], G.location[i]) <= pieces[hq].cr && piece.class !== "hq" &&
+                !set_has(G.offensive.active_units, i)) {
                 action_unit(i)
             }
         }
@@ -496,15 +278,271 @@ P.activate_units = {
             end()
         }
     },
-    pass(){
+    pass() {
         push_undo()
         end()
     }
 }
 
-// call("move_offensive_units")
-// call("declare_battle_hexes")
-// call("special_reaction")
+function is_active_air() {
+    let active_air = false
+    for (let i = 0; i < G.offensive.active_stack.length; i++) {
+        if (pieces[G.offensive.active_stack[i]].class === "air") {
+            active_air = true
+        }
+    }
+    return active_air
+}
+
+P.move_offensive_units = {
+    _begin() {
+    },
+    prompt() {
+        prompt(`${cards[G.offensive.active_cards[0]].name}. Move activated units.`)
+        button("pass")
+        if (G.offensive.active_stack.length === 0) {
+            for (let i = 0; i < G.offensive.active_units.length; i++) {
+                if (!G.offensive.paths[i]) {
+                    action_unit(G.offensive.active_units[i])
+                }
+            }
+        } else {
+            let loc = G.location[G.offensive.active_stack[0]]
+            let active_air = is_active_air()
+            for (let i = 0; i < G.offensive.active_units.length; i++) {
+                let unit = G.offensive.active_units[i]
+                if (!G.offensive.paths[i] && loc === G.location[unit] &&
+                    (active_air === (pieces[unit].class === "air")) && !set_has(G.offensive.active_stack, unit)) {
+                    action_unit(unit)
+                }
+            }
+            button("move")
+            button("strat_move")
+            if (active_air) {
+                button("displace")
+            } else {
+                button("amphibious")
+            }
+        }
+    },
+    unit(u) {
+        push_undo()
+        set_add(G.offensive.active_stack, u)
+    },
+    move() {
+        push_undo()
+        goto("move_stack", {type: is_active_air() ? AIR_MOVE : ANY_MOVE})
+    },
+    displace() {
+        push_undo()
+        // end()
+    },
+    strat_move() {
+        push_undo()
+        goto("move_stack", {type: is_active_air() ? AIR_STRAT_MOVE : NAVAL_STRAT_MOVE})
+    },
+    amphibious() {
+        push_undo()
+        // end()
+    },
+    pass() {
+        push_undo()
+        let path = G.offensive.paths
+        for (let i = 0; i < G.offensive.active_units.length; i++) {
+            if (!path[i]) {
+                path[i] = [ANY_MOVE]
+            }
+        }
+        end()
+    },
+}
+
+function get_allowed_move_type() {
+    let active_air = false
+    let active_ground = false
+    let active_naval = false
+    let result = 0
+    for (let i = 0; i < G.offensive.active_stack.length; i++) {
+        switch (pieces[G.offensive.active_stack[i]].class) {
+            case "air":
+                active_air = true;
+                break;
+            case "ground":
+                active_ground = true;
+                break;
+            case "naval":
+                active_naval = true;
+                break;
+        }
+    }
+    if (active_air) {
+        return AIR_MOVE
+    }
+    if (active_ground && !active_naval) {
+        result += GROUND_MOVE
+    }
+    if (active_ground) {//todo hex==port
+        result += AMPH_MOVE
+    }
+    if (active_naval && !active_ground) {
+        result += NAVAL_MOVE
+    }
+    return result
+}
+
+function get_near_hexes(hex) {
+    let x = Math.floor(hex / 29)
+    let y = hex % 29
+    let y_diff = x % 2 ? 1 : -1
+    let result = []
+    if (y > 0) {
+        result.push(hex - 1)
+    }
+    if (y < 28) {
+        result.push(hex + 1)
+    }
+    if (x > 0) {
+        result.push(hex - 29)
+        result.push(hex - 29 + y_diff)
+    }
+    if (x < 50) {
+        result.push(hex + 29)
+        result.push(hex + 29 + y_diff)
+    }
+    return result
+}
+
+function get_allowed_hexes(distance_max) {
+    let queue = []
+    let distance_map = []
+    queue.push(L.location)
+    map_set(distance_map, L.location, 0)
+    let i = 0
+    while (true) {
+        let item = queue[i]
+        let distance = map_get(distance_map, item) + 1
+        if (distance <= distance_max) {
+            get_near_hexes(item).forEach(nh => {
+                let d = map_get(distance_map, nh, null)
+                if (d == null || distance < d) {
+                    map_set(distance_map, nh, distance)
+                    queue.push(nh)
+                }
+            })
+        }
+        i++
+        if (i >= queue.length) {
+            break
+        }
+    }
+    let result = []
+    for (let i = 1; i < queue.length; i++) {
+        set_add(result, queue[i])
+    }
+    return result
+}
+
+P.move_stack = {
+    _begin() {
+        if (!L.type) {
+            L.type = get_allowed_move_type()
+        }
+        L.location = G.location[G.offensive.active_stack[0]]
+        L.distance = cards[G.offensive.active_cards[0]].ops * 5
+        L.allowed_hexes = get_allowed_hexes(L.distance)
+        let last_from_stack = G.offensive.active_units.indexOf(G.offensive.active_stack[G.offensive.active_stack.length - 1])
+        L.last_from_stack = last_from_stack
+        for (let i = 0; i < G.offensive.active_stack.length; i++) {
+            G.offensive.paths[i] = last_from_stack
+        }
+        G.offensive.paths[last_from_stack] = [ANY_MOVE, L.location]
+    },
+    prompt() {
+        prompt(`${cards[G.offensive.active_cards[0]].name}. Move activated units.`)
+
+        for (let i = 0; i < L.allowed_hexes.length - 1; i++) {
+            action_hex(L.allowed_hexes[i])
+        }
+        button("stop")
+    },
+    board_hex(hex) {
+        push_undo()
+        for (let i = 0; i < G.offensive.active_stack.length; i++) {
+            G.location[G.offensive.active_stack[i]] = hex
+        }
+        L.distance -= get_distance(L.location, hex)
+        L.location = hex
+        L.allowed_hexes = get_allowed_hexes(L.distance)
+        G.offensive.paths[L.last_from_stack].push(hex)
+        if (L.distance <= 0) {
+            this.stop()
+        }
+    },
+    stop() {
+        push_undo()
+        G.offensive.active_stack = []
+        let path = G.offensive.paths[L.last_from_stack]
+        log(`Units moved to ${int_to_hex(path[path.length - 1])}`)
+        end()
+    },
+}
+
+P.declare_battle_hexes = {
+    _begin() {
+        L.possible_hexes = []
+        let jp_hexes = []
+        console.log(pieces.length)
+        for (let i = 1; i < pieces.length; i++) {
+            let location = G.location[i]
+            if (location > 0 && location < LAST_BOARD_HEX && pieces[i].faction === "jp") {
+                set_add(jp_hexes, location)
+            }
+        }
+        console.log(pieces.length)
+        for (let i = 1; i < pieces.length; i++) {
+            let location = G.location[i]
+            if (pieces[i].faction === "ap" && set_has(jp_hexes, location) && !set_has(G.offensive.battle_hexes, location)) {
+                set_add(L.possible_hexes, location)
+            }
+        }
+        console.log(pieces.length)
+    },
+    prompt() {
+        prompt(`${cards[G.offensive.active_cards[0]].name}. Declare battle hexes.`)
+        console.log(L)
+        console.log(L.possible_hexes.length)
+        for (let i = 0; i < L.possible_hexes.length; i++) {
+            let location = L.possible_hexes[i]
+            if (!set_has(G.offensive.battle_hexes, location)) {
+                action_hex(location)
+            }
+        }
+
+        button("stop")
+    },
+    board_hex(hex) {
+        push_undo()
+        set_add(G.offensive.battle_hexes, hex)
+        if (G.offensive.battle_hexes.length >= L.possible_hexes.length) {
+            end()
+        }
+    },
+    stop() {
+        push_undo()
+        end()
+    },
+}
+
+P.commit_offensive = {
+    prompt() {
+        prompt(`${cards[G.offensive.active_cards[0]].name}. Commit offensive.`)
+        button("next")
+    },
+    next() {
+        end()
+    },
+}
+
 // call("change_intelligence_condition")
 // call("choose_reaction_hq")
 // call("activate_units")
@@ -513,14 +551,16 @@ P.activate_units = {
 // call("post_battle_movement")
 // call("emergency_movement")
 P.offensive_sequence = script(`
-    set G.offensive.logistic cards[G.offensive.active_card].ops
+    set G.offensive.logistic cards[G.offensive.active_cards[0]].ops
     call choose_hq
     call activate_units
-    call move_offensive_units
+    while (G.offensive.active_units.length > G.offensive.paths.filter(a => a != null).length) {
+        call move_offensive_units
+    }
+    call declare_battle_hexes
+    call commit_offensive
+    call define_intelligence_condition
     eval {
-        console.log("end activation")
-        set_add(G.discard[G.offensive.attacker], G.offensive.active_card)
-        array_delete_item(G.hand[G.offensive.attacker], G.offensive.active_card)
         G.active = G.offensive.attacker
         reset_offensive()
     }
@@ -582,282 +622,13 @@ P.end_of_turn_phase = script(`
 
 /* EVENTS */
 
-function can_play_event(c) {
-    let req = cards[c].req
-
-    return !!cards[c].event
-}
-
-P.play_event = function () {
-    var event = cards[L.c].event
-    var text = cards[L.c].text
-    set_add(G.removed, L.c)
-    if (text)
-        log('Q' + L.c)
-    goto(event)
-}
-
-// french permanent with no effect when played
-P.event_la_noria = end
-P.event_mangin = end
-P.event_hospitals = end
-P.event_joffre = end
-P.event_heavy_artillery = end
-P.event_haig = end
-P.event_coordinated_tactics = end
-
-// german permanent with no effect when played
-P.event_chaos_in_the_rear = end
-P.event_flamethrowers = end
-P.event_offensive_stockpile = end
-
-
-P.event_total_submarine_warfare = function () {
-    log("US entry DRM +3")
-    G.us_drm += 3
-    G.active = P_FRENCH
-    goto("total_submarine_warfare")
-}
-
-P.event_they_shall_not_pass = script(`
-	call draw_a_card
-	eval {
-		if (G.morale[P_FRENCH] < 10)
-			log("%F10")
-		G.morale[P_FRENCH] = 10
-		for_each_unit(P_FRENCH, u => {
-			set_unit_fresh(u)
-		})
-	}
-`)
-
-
-P.draw_a_card = {
-    _begin() {
-        clear_undo()
-        L.c = draw_card(G.active)
-        log("Drew a card")
-    },
-    prompt() {
-        prompt(`You drew "${cards[L.c].name}".`)
-        button("next")
-    },
-    next() {
-        end()
-    },
-}
+//todo
 
 /* SUPPLY */
 
-const NORTH_EDGE = [0, 1, 2, 3, 4, 5, 6, 7]
-const SOUTH_EDGE = [65, 66, 68, 70, 72, 73, 74, 75, 76, 78]
-
-function search_supply(side) {
-    if (side === P_GERMAN)
-        return search_supply_german()
-    else
-        return search_supply_french()
-}
-
-function search_supply_german() {
-    return search_supply_imp(is_german_zone, NORTH_EDGE)
-}
-
-function search_supply_french() {
-    return search_supply_imp(is_french_zone, SOUTH_EDGE)
-}
-
-function search_supply_imp(pred, start) {
-    var seen = start.slice()
-    var queue = start.filter(pred)
-    while (queue.length > 0) {
-        var here = queue.shift()
-        for (var next of edges[here]) {
-            if (next > 78)
-                continue
-            if (set_has(seen, next))
-                continue
-            set_add(seen, next)
-            if (pred(next)) {
-                queue.push(next)
-            }
-        }
-    }
-    return seen
-}
-
-P.check_supply = function () {
-    var supply = search_supply(G.active)
-    var supplied = []
-    var unsupplied = []
-    var isolated = []
-    for_each_zone(z => {
-        if (has_friendly_units(z)) {
-            if (set_has(supply, z)) {
-                // back in supply
-                if (map_has(G.oos[G.active], z))
-                    set_add(supplied, z)
-            } else {
-                // out of supply
-                set_add(unsupplied, z)
-            }
-        } else {
-            map_delete(G.oos[G.active], z)
-
-            // empty friendly-controlled zones lose control through lack of supply
-            if (is_controlled_zone(z) && !set_has(supply, z)) {
-                set_add(isolated, z)
-                set_zone_control(z, 1 - G.active)
-            }
-        }
-    })
-    if (supplied.length + unsupplied.length + isolated.length > 0) {
-        log("Supply")
-        for (var z of isolated)
-            log(">Z" + z + " isolated")
-        if (supplied.length + unsupplied.length > 0)
-            goto("apply_supply", {supplied, unsupplied})
-        else
-            end()
-    } else {
-        end()
-    }
-}
-
-P.apply_supply = {
-    prompt() {
-        var z
-        prompt("Supply check.")
-        for (z of L.supplied)
-            action_zone(z)
-        for (z of L.unsupplied)
-            action_zone(z)
-    },
-    zone(z) {
-        if (set_has(L.supplied, z)) {
-            log(">Z" + z + " restored")
-            set_delete(L.supplied, z)
-            map_delete(G.oos[G.active], z)
-            this._resume()
-        } else {
-            set_delete(L.unsupplied, z)
-            var level = map_get(G.oos[G.active], z, 0)
-            if (level === 0) {
-                log(">Z" + z + " to L1")
-                map_set(G.oos[G.active], z, 1)
-                this._resume()
-            } else if (level === 1) {
-                log(">Z" + z + " to L2")
-                map_set(G.oos[G.active], z, 2)
-                if (has_fresh_units(G.active, z)) {
-                    call("supply_exhaust", {z})
-                } else {
-                    this._resume()
-                }
-            } else if (level === 2) {
-                log(">Z" + z + " eliminated")
-                map_delete(G.oos[G.active], z)
-                call("supply_eliminate", {z})
-            }
-        }
-    },
-    _resume() {
-        if (L.supplied.length + L.unsupplied.length === 0)
-            end()
-    },
-}
-
-P.supply_exhaust = {
-    prompt() {
-        prompt("Exhaust unsupplied units.")
-        for_each_unit_in_zone(G.active, L.z, u => {
-            if (is_unit_fresh(u))
-                action_unit(u)
-        })
-    },
-    unit(u) {
-        set_unit_exhausted(u)
-        if (!has_fresh_units(G.active, L.z))
-            end()
-    },
-}
-
-P.supply_eliminate = {
-    prompt() {
-        prompt("Eliminate unsupplied units.")
-        for_each_unit_in_zone(G.active, L.z, u => {
-            action_unit(u)
-        })
-    },
-    unit(u) {
-        eliminate_unit(u)
-        log_morale(G.active)
-        if (!has_units(G.active, L.z)) {
-            set_zone_control(L.z, 1 - G.active)
-            end()
-        }
-    },
-}
+//todo
 
 /* SETUP */
-
-P.setup_units = {
-    prompt() {
-        prompt("Deploy " + L.n + " units.")
-        for_each_zone(z => {
-            if ((is_controlled_zone(z) || z === L.zz) && count_units(G.active, z) < 3)
-                action_zone(z)
-        })
-    },
-    zone(z) {
-        push_undo()
-        setup_unit(G.active, z)
-        if (--L.n === 0)
-            end()
-    },
-}
-
-P.setup_exhaust = {
-    prompt() {
-        prompt("Exhaust " + L.n + " units.")
-        for_each_unit(G.active, u => {
-            if (is_unit_fresh(u) && get_unit_zone(u) <= last_zone)
-                action_unit(u)
-        })
-    },
-    unit(u) {
-        push_undo()
-        set_unit_exhausted(u)
-        if (--L.n === 0)
-            end()
-    },
-}
-
-P.setup_trenches = {
-    prompt() {
-        prompt(`Deploy ${L.n} trenches.`)
-        for (var z = 0; z <= last_zone; ++z)
-            if (is_controlled_zone(z) && !has_trench(G.active, z))
-                action_zone(z)
-    },
-    zone(z) {
-        push_undo()
-        place_trench(G.active, z)
-        if (--L.n === 0)
-            end()
-    },
-}
-
-P.setup_done = {
-    prompt() {
-        prompt("Setup done.")
-        button("done")
-    },
-    done() {
-        clear_undo()
-        end()
-    },
-}
 
 function construct_decks() {
     G.draw = [[], []]
@@ -886,26 +657,12 @@ function draw_card(side) {
     return c
 }
 
-function setup_unit(side, z) {
-    set_unit_zone(find_free_unit(side), z)
-}
-
-function setup_units(side, trenches, n, zones) {
-    for (var z of zones) {
-        set_zone_control(z, side)
-        if (trenches)
-            place_trench(side, z)
-        for (var i = 0; i < n; ++i)
-            setup_unit(side, z)
-    }
-}
-
 function setup_scenario_1942() {
     log("#Japan Offensive")
     log("The Japan assault on Asia (December 1941) caught allies off guard")
 
     G.location = []
-    for (let i = 1; i < pieces; i++) {
+    for (let i = 1; i < pieces.length; i++) {
         G.location[i] = hex_to_int(pieces[i].start)
     }
 
@@ -969,21 +726,19 @@ function on_view() {
     V.oos = G.oos
     V.hand = []
     V.future_offensive = []
-    V.offensive = []
+    V.offensive = G.offensive
 
 
     if (R !== JP) {
-        V.hand[JP] = G.hand[JP].map(a => a === G.offensive.active_card ? a : 0)
-        let jfo = G.future_offensive[JP][1]
-        V.future_offensive.push([G.future_offensive[JP][0], jfo === G.offensive.active_card ? jfo : 0])
+        V.hand[JP] = G.hand[JP].map(() => 0)
+        V.future_offensive.push([G.future_offensive[JP][0], 0])
     } else {
         V.hand[JP] = G.hand[JP]
         V.future_offensive.push(G.future_offensive[JP])
     }
     if (R !== AP) {
-        V.hand[AP] = G.hand[AP].map(a => a === G.offensive.active_card ? a : 0)
-        let jfo = G.future_offensive[AP][1]
-        V.future_offensive.push([G.future_offensive[AP][0], jfo === G.offensive.active_card ? jfo : 0])
+        V.hand[AP] = G.hand[AP].map(() => 0)
+        V.future_offensive.push([G.future_offensive[AP][0], 0])
     } else {
         V.hand[AP] = G.hand[AP]
         V.future_offensive.push(G.future_offensive[AP])
@@ -994,37 +749,33 @@ function action_card(c) {
     action("card", c)
 }
 
-function action_zone(s) {
-    action("zone", s)
-}
-
 function action_unit(p) {
     action("unit", p)
 }
 
-function action_number(x) {
-    action("number", x)
-}
-
-function action_number_range(a, b) {
-    for (var x = a; x <= b; ++x)
-        action("number", x)
+function action_hex(p) {
+    action("board_hex", p)
 }
 
 function hex_to_int(i) {
     return (Math.floor(i / 100) - 10) * 29 + i % 100
 }
 
+function int_to_hex(i) {
+    return (Math.floor(i / 29) * 100) + 1000 + i % 29
+}
+
 function reset_offensive() {
     G.offensive = {
         attacker: JP,
-        active_card: 0,
+        active_cards: [],
         logistic: 0,
         active_hq: [],
         active_units: [],
         strat_moved_units: [],
         paths: [],
-        active_stack: []
+        active_stack: [],
+        battle_hexes: []
     }
 }
 

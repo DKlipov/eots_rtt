@@ -247,6 +247,8 @@ body.volko .layout.unit-pool { gap: 0px; }
 
 .piece.action {
 	pointer-events: auto;
+	border-color: yellow;
+	box-shadow: 0 0 3px black, inset 0 0 3px black;
 }
 
 .cylinder {width: 55px; height: 55px; margin: -23px -4px -4px -23px; }

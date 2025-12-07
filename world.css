@@ -21,6 +21,7 @@
 body.hide-markers .decor { display: none }
 body.hide-markers .marker { display: none }
 body.hide-pieces .piece { display: none }
+.hide { display: none }
 
 .board { position: relative; }
 .board > svg { position: absolute; }
@@ -28,12 +29,36 @@ body.hide-pieces .piece { display: none }
 .space { position: absolute; }
 .layout { position: absolute; }
 .card { position: relative }
-.piece { position: relative; }
+.piece {
+	position: relative;
+	border-width: 4px;
+	border-style: solid;
+	border-color: transparent;
+	box-shadow: none;
+	border-radius: 16px;
+}
+
+.piece.activated {
+	transform: rotate(22.5deg);
+	z-index: 100;
+}
+
 .marker { position: relative; }
 
 .layout {
 	box-sizing: border-box;
 	pointer-events: none;
+	border-width: 4px;
+	border-style: solid;
+	border-color: transparent;
+	box-shadow: none;
+	border-radius: 16px;
+}
+
+.layout.action {
+	pointer-events: auto;
+	border-color: yellow;
+	box-shadow: 0 0 3px black, inset 0 0 3px black;
 }
 
 .layout > * {

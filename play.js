@@ -14,18 +14,6 @@ function on_blur_card_tip(c) {
     document.getElementById("tooltip").classList = "hide"
 }
 
-function on_click_zone_tip(z) {
-    scroll_into_view(lookup_thing("zone", z))
-}
-
-function on_focus_zone_tip(z) {
-    lookup_thing("zone", z).classList.toggle("tip", true)
-}
-
-function on_blur_zone_tip(z) {
-    lookup_thing("zone", z).classList.toggle("tip", false)
-}
-
 function on_init() {
     let map = document.getElementById("map")
     map.onclick = (a) => {
@@ -49,6 +37,7 @@ function on_init() {
     }
     define_panel("hand", JP, "jp_hand")
     define_panel("hand", AP, "ap_hand")
+    define_panel("hand", 2, "active_cards")
 }
 
 function push_stack(stk, elt) {
@@ -75,8 +64,39 @@ function update_hand(side) {
     }
 }
 
+function get_near_hexes(hex) {
+    let x = Math.floor(hex / 29)
+    let y = hex % 29
+    let y_diff = x % 2 ? 1 : -1
+    let result = []
+    if (y > 0) {
+        result.push(hex - 1)
+    }
+    if (y < 28) {
+        result.push(hex + 1)
+    }
+    if (x > 0) {
+        result.push(hex - 29)
+        result.push(hex - 29 + y_diff)
+    }
+    if (x < 50) {
+        result.push(hex + 29)
+        result.push(hex + 29 + y_diff)
+    }
+    return result
+}
+
+function test(hex) {
+    return get_near_hexes(hex_to_int(hex)).map(h => int_to_hex(h))
+}
+
 function hex_to_int(i) {
     return (Math.floor(i / 100) - 10) * 29 + i % 100
+}
+
+
+function int_to_hex(i) {
+    return (Math.floor(i / 29) * 100) + 1000 + i % 29
 }
 
 function hex_center(i) {
@@ -112,12 +132,23 @@ function on_update() {
         let piece = data.pieces[i]
         // push_stack(HEXES[i].stack, piece.element)
         // piece.element.classList.remove('hide')
-        populate("board_hex", hex_to_int(piece.start), "unit", i)
+        populate("board_hex", G.location[i], "unit", i).classList.toggle("activated",
+            G.offensive.active_units.includes(i)
+        )
+        console.log(`${i} activates ${G.offensive.active_units.includes(i)}`)
 
     }
 
     update_hand(AP)
     update_hand(JP)
+    if (G.offensive.active_cards.length > 0) {
+        document.getElementById("active_cards").classList.remove("hide")
+        for (let i = 0; i < G.offensive.active_cards.length; i++) {
+            populate("hand", 2, "card", G.offensive.active_cards[i])
+        }
+    } else {
+        document.getElementById("active_cards").classList.add("hide")
+    }
 
     action_button("roll", "Roll")
     action_button("ops", "Operations")
@@ -125,6 +156,12 @@ function on_update() {
     action_button("inter_service", "Strategic Agreement")
     action_button("infrastructure", "Build infrastructure")
     action_button("china_offensive", "China offensive")
+
+    action_button("move", "Move")
+    action_button("stop", "Stop")
+    action_button("displace", "Displace")
+    action_button("strat_move", "Strategic move")
+    action_button("amphibious", "Amphibious")
 
 
     action_button("pass", "Pass")
@@ -159,18 +196,6 @@ const ICONS = {
     R6: '<span class="die red d6"></span>',
 }
 
-function sub_card(match, p1) {
-    var c = p1 | 0
-    var cn = (c <= 51) ? "card-tip french" : "card-tip german"
-    return `<span class="${cn}" onmouseenter="on_focus_card_tip(${c})" onmouseleave="on_blur_card_tip()">${data.cards[c].name}</span>`
-}
-
-function sub_zone(match, p1) {
-    var z = p1 | 0
-    var name = data.zone_name[z]
-    return `<span class="zone-tip" onclick="on_click_zone_tip(${z})" onmouseenter="on_focus_zone_tip(${z})" onmouseleave="on_blur_zone_tip(${z})">${name}</span>`
-}
-
 function escape_text(text) {
     text = String(text)
     text = text.replace(/---/g, "\u2014")
@@ -187,8 +212,6 @@ function escape_text(text) {
     text = text.replace(/([ +-]1) units/g, "$1 unit")
     text = text.replace(/([ +-]1) hits/g, "$1 hit")
     text = text.replace(/[BRW]\d/g, (m) => ICONS[m] ?? m)
-    text = text.replace(/C(\d+)/g, sub_card)
-    text = text.replace(/Z(\d+)/g, sub_zone)
     return text
 }
 

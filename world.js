@@ -446,6 +446,7 @@ function populate(parent_action, parent_id, child_action, child_id) {
     var child = lookup_thing(child_action, child_id)
     child.parent = parent
     parent.appendChild(child)
+    return child
 }
 
 function populate_generic(parent_action, parent_id, keywords, n = 1) {
