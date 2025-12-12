@@ -13,7 +13,6 @@ const FE_SOMME_OFFENSIVE_1 = 27
 const FE_SOMME_OFFENSIVE_2 = 28
 
 data.cards = [
-	{},
 	{
 		"num": 1,
 		"faction": "ap",
@@ -21,6 +20,7 @@ data.cards = [
 		"oc": 2,
 		"ec": 4,
 		"remove": false,
+		"intelligence": "surprise",
 		"name": "Tarzan",
 	},
 	{
@@ -143,7 +143,6 @@ data.cards = [
 ]
 
 data.pieces = [
-	{},
 	{
 		"faction": "jp",
 		"name": "Army 1",

@@ -25,15 +25,18 @@ function on_init() {
     }
     for (let i = 1; i < 1476; ++i) {
         let center = hex_center(i)
-        define_layout("board_hex", i, [center[0] - 15, center[1] - 17, 45, 45], "stack")
+        define_layout("board_hex", i, [center[0] - 4, center[1] - 12, 45, 45], "stack")
+        define_space("action_hex", i, [center[0] - 15, center[1] - 17, 45, 45])
     }
-    for (let i = 1; i < data.pieces.length; ++i) {
+    for (let i = 0; i < data.pieces.length; ++i) {
         let piece = data.pieces[i]
         piece.element = define_piece("unit", i, piece.counter)
     }
-    for (let i = 1; i < data.cards.length; ++i) {
+    for (let i = 0; i < data.cards.length; ++i) {
         let card = data.cards[i]
-        card.element = define_card("card", i, "card_" + card.faction + "_" + card.num)
+        card.element = define_card("card", i, "action card_" + card.faction + "_" + card.num)
+        card.element.onclick = on_click_card
+        card.element.card = i
     }
     define_panel("hand", JP, "jp_hand")
     define_panel("hand", AP, "ap_hand")
@@ -46,19 +49,23 @@ function push_stack(stk, elt) {
 }
 
 function update_hand(side) {
-    if (G.future_offensive[side][0] < 100) {
+    console.log(`foo ${G.future_offensive[side]}`)
+    if (G.future_offensive[side][0] > 0) {
         let card = G.future_offensive[side][1]
+        console.log(`foo ${card}`)
         if (card <= 0) {
             populate_generic("hand", side, side === JP ? "card card_jp_0" : "card card_ap_0")
         } else {
             populate("hand", side, "card", card)
         }
     }
-    for (let i = 0; i < G.hand[side].length; i++) {
-        let card = G.hand[side][i]
-        if (card <= 0) {
+    if (!Array.isArray(G.hand[side])) {
+        for (let i = 0; i < G.hand[side]; i++) {
             populate_generic("hand", side, side === JP ? "card card_jp_0" : "card card_ap_0")
-        } else {
+        }
+    } else {
+        for (let i = 0; i < G.hand[side].length; i++) {
+            let card = G.hand[side][i]
             populate("hand", side, "card", card)
         }
     }
@@ -101,7 +108,7 @@ function int_to_hex(i) {
 
 function hex_center(i) {
     let column = (Math.floor(i / 29))
-    return [67 + column * 42.2, 46 + (i % 29) * 48.5 + (column % 2) * 25]
+    return [57 + column * 43.0, 41 + (i % 29) * 50 + (column % 2) * 25]
 }
 
 // for (let i = 1; i < 1476; ++i) {
@@ -128,15 +135,11 @@ function on_update() {
     // G.actions.board_hex = []
     // G.actions.board_hex.push(hex_to_int(piece.start))
 
-    for (let i = 1; i < data.pieces.length; ++i) {
+    for (let i = 0; i < data.pieces.length; ++i) {
         let piece = data.pieces[i]
-        // push_stack(HEXES[i].stack, piece.element)
-        // piece.element.classList.remove('hide')
-        populate("board_hex", G.location[i], "unit", i).classList.toggle("activated",
-            G.offensive.active_units.includes(i)
-        )
-        console.log(`${i} activates ${G.offensive.active_units.includes(i)}`)
-
+        let unit = populate("board_hex", G.location[i], "unit", i)
+        unit.classList.toggle("activated", G.offensive.active_units.includes(i))
+        unit.classList.toggle("selected", G.offensive.active_stack.includes(i))
     }
 
     update_hand(AP)
@@ -150,14 +153,12 @@ function on_update() {
         document.getElementById("active_cards").classList.add("hide")
     }
 
+    G.offensive.battle_hexes.forEach(h=>populate_generic("board_hex", h, "marker attack"))
+
     action_button("roll", "Roll")
-    action_button("ops", "Operations")
-    action_button("event", "Event")
-    action_button("inter_service", "Strategic Agreement")
-    action_button("infrastructure", "Build infrastructure")
-    action_button("china_offensive", "China offensive")
 
     action_button("move", "Move")
+    action_button("done", "Done")
     action_button("stop", "Stop")
     action_button("displace", "Displace")
     action_button("strat_move", "Strategic move")
@@ -170,6 +171,79 @@ function on_update() {
     action_button("undo", "Undo")
 
     end_update()
+}
+
+function on_click_card(evt) {
+    console.log(evt)
+    let card = evt.target.card
+    if (is_action('card', card)) {
+        send_action('card', card)
+    } else {
+        show_popup_menu(evt, "card_popup", card, data.cards[card].name)
+    }
+}
+
+function show_popup_menu(evt, menu_id, target_id, title, hide = '') {
+    let menu = document.getElementById(menu_id)
+
+    let show = false
+    for (let item of menu.querySelectorAll("li")) {
+        let action = item.dataset.action
+        if (action) {
+            if (action === hide) {
+                item.classList.remove("action")
+                item.classList.add("hide")
+                item.onclick = null
+            } else {
+                if (is_action(action, target_id)) {
+                    show = true
+                    item.classList.add("action")
+                    item.classList.remove("disabled")
+                    item.classList.remove("hide")
+                    item.onclick = function () {
+                        send_action(action, target_id)
+                        hide_popup_menu()
+                        evt.stopPropagation()
+                    }
+                } else {
+                    item.classList.remove("action")
+                    item.classList.remove("hide")
+                    item.classList.add("disabled")
+                    item.onclick = null
+                }
+            }
+        }
+    }
+    console.log(show)
+    console.log(view.actions)
+    console.log(target_id)
+    console.log(is_action("play_ops", target_id))
+    if (show) {
+        menu.onmouseleave = hide_popup_menu
+        menu.style.display = "block"
+        if (title) {
+            let item = menu.querySelector("li.title")
+            if (item) {
+                item.onclick = hide_popup_menu
+                item.textContent = title
+            }
+        }
+
+        let w = menu.clientWidth
+        let h = menu.clientHeight
+        let x = Math.max(5, Math.min(evt.clientX - w / 2, window.innerWidth - w - 5))
+        let y = Math.max(5, Math.min(evt.clientY - 12, window.innerHeight - h - 40))
+        menu.style.left = x + "px"
+        menu.style.top = y + "px"
+
+        evt.stopPropagation()
+    } else {
+        menu.style.display = "none"
+    }
+}
+
+function hide_popup_menu() {
+    document.getElementById("card_popup").style.display = "none"
 }
 
 const ICONS = {

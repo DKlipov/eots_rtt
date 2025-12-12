@@ -22,6 +22,12 @@ const AIR_STRAT_MOVE = 8
 const AIR_MOVE = 16
 const AIR_CLOSE_MOVE = 32
 const GROUND_MOVE = 64
+const POST_BATTLE_MOVE = 128
+
+//Intelligence
+const SURPRISE = 0
+const INTERCEPT = 1
+const AMBUSH = 2
 
 const LAST_BOARD_HEX = 1476
 
@@ -108,13 +114,18 @@ P.deal_cards = function () {
 
 P.offensive_phase = script(`
     log ("Offensives phase")
-    eval {console.log("Offensives phase")}
     call initiative_segment
     while (G.hand[AP].length > 0 || G.hand[JP].length > 0) {
         if (G.hand[G.active].length > 0){
             call offensive_segment
+            eval {
+                G.active = 1 - G.offensive.attacker
+                reset_offensive()
+                G.offensive.attacker = G.active
+            }
+        } else {
+            set G.active (1 - G.active)
         }
-        set G.active (1 - G.active)
     }
     goto political_phase
 `)
@@ -151,13 +162,41 @@ P.future_offensive = {
     card() {
         push_undo()
         let card = G.future_offensive[R][1]
-        G.future_offensive[R] = [0, 0]
+        G.future_offensive[R] = [-1, 0]
         goto("play_event", {card: card})
     },
     pass() {
         G.active = 1 - G.active
         end()
     }
+}
+
+function get_allowed_actions(num) {
+    let card = cards[num]
+    let result = ["ops", "discard", "event"]
+    if (card.ops >= 3) {
+        result.push("inter_service")
+        result.push("infrastructure")
+        if (R === JP) {
+            result.push("china_offensive")
+        }
+    }
+    if (G.future_offensive[R][0] <= 0) {
+        result.push("future_offensive")
+    }
+    return result
+}
+
+function activate_card(c) {
+    push_undo()
+    G.offensive.active_cards.push(c)
+    if (G.future_offensive[R][1] === c) {
+        G.future_offensive[R] = [-1, 0]
+    } else {
+        array_delete_item(G.hand[R], c)
+    }
+    G.discard[R].push(c)
+    G.offensive.attacker = R
 }
 
 P.offensive_segment = {
@@ -170,54 +209,28 @@ P.offensive_segment = {
             button("pass")
         }
         for (let i = 0; i < G.hand[R].length; i++) {
-            action_card(G.hand[R][i])
+            let card = G.hand[R][i]
+            get_allowed_actions(card).forEach(a => action(a, card))
         }
-        if (G.future_offensive[R][0] < G.turn) {
-            action_card(G.future_offensive[R][1])
-        }
-    },
-    card(c) {
-        push_undo()
-        G.offensive.active_cards.push(c)
-        if (G.future_offensive[R][1] === c) {
-            G.future_offensive[R] = [100, 0]
-        } else {
-            array_delete_item(G.hand[R], c)
-        }
-        G.discard[R].push(c)
-        G.offensive.attacker = R
-        goto("choose_action", {c})
-    },
-    pass() {
-        G.passes[R] -= 1
-        end()
-    }
-}
-
-P.choose_action = {
-    _begin() {
-
-    },
-    prompt() {
-        let card = cards[L.c]
-        prompt(card.name + ". Choose action.")
-        button("event")
-        button("ops")
-        if (card.ops >= 3) {
-            button("inter_service")
-            button("infrastructure")
-            if (R === JP) {
-                button("china_offensive")
-            }
+        if (G.future_offensive[R][0] > 0 && G.future_offensive[R][0] < G.turn) {
+            let card = G.future_offensive[R][1]
+            get_allowed_actions(card).forEach(a => action(a, card))
         }
     },
-    ops() {
-        push_undo()
-        log(`${R} played ${cards[L.c].name} as operation card`)
+    ops(c) {
+        activate_card(c)
+        log(`${R} played ${cards[c].name} as operation card`)
         goto("offensive_sequence")
     },
-    event() {
-        push_undo()
+    event(c) {
+        activate_card(c)
+        log(`${R} played ${cards[c].name} as event card(not implemented so just operations)`)
+        goto("offensive_sequence")
+    },
+    discard(c) {
+        activate_card(c)
+        log(`${R} discards ${cards[c].name}`)
+        goto("end_action")
     },
     inter_service() {
     },
@@ -225,16 +238,22 @@ P.choose_action = {
     },
     china_offensive() {
     },
+    future_offensive(c) {
+        push_undo()
+        log(`${R} played future offensive`)
+        G.future_offensive[R] = [G.turn, c]
+        goto("end_action")
+    },
     pass() {
         G.passes[R] -= 1
-        end()
+        goto("end_action")
     }
 }
 
 P.choose_hq = {
     prompt() {
         prompt(cards[G.offensive.active_cards[0]].name + ". Choose HQ.")
-        for (let i = 1; i < pieces.length; i++) {
+        for (let i = 0; i < pieces.length; i++) {
             let piece = pieces[i]
             let faction = R === AP ? "ap" : "jp"
             if (piece.faction === faction && piece.class === "hq") {
@@ -244,7 +263,7 @@ P.choose_hq = {
     },
     unit(u) {
         push_undo()
-        G.offensive.active_hq.push(u)
+        G.offensive.active_hq[R] = u
         log(`${pieces[u].name} activated`)
         end()
     },
@@ -256,32 +275,32 @@ function get_distance(first_hex, second_hex) {
 
 P.activate_units = {
     _begin() {
-        L.hq_bonus = pieces[G.offensive.active_hq[0]].cm
+        L.hq_bonus = pieces[G.offensive.active_hq[G.active]].cm
     },
     prompt() {
-        prompt(`${cards[G.offensive.active_cards[0]].name}. Activate units ${G.offensive.logistic} + ${L.hq_bonus} / ${G.offensive.active_units.length}.`)
-        for (let i = 1; i < pieces.length; i++) {
+        prompt(`${cards[G.offensive.active_cards[0]].name}. Activate units ${G.offensive.logistic} + ${L.hq_bonus} / ${G.offensive.active_units[R].length}.`)
+        for (let i = 0; i < pieces.length; i++) {
             let piece = pieces[i]
             let faction = R === AP ? "ap" : "jp"
-            let hq = G.offensive.active_hq[0]
+            let hq = G.offensive.active_hq[G.active]
             if (piece.faction === faction && get_distance(G.location[hq], G.location[i]) <= pieces[hq].cr && piece.class !== "hq" &&
-                !set_has(G.offensive.active_units, i)) {
+                !set_has(G.offensive.active_units[R], i)) {
                 action_unit(i)
             }
         }
-        button("pass")
+        button("done")
     },
     unit(u) {
         push_undo()
-        set_add(G.offensive.active_units, u)
-        if (G.offensive.active_units.length >= (G.offensive.logistic + L.hq_bonus)) {
+        set_add(G.offensive.active_units[R], u)
+        if (G.offensive.active_units[R].length >= (G.offensive.logistic + L.hq_bonus)) {
             end()
         }
     },
-    pass() {
+    done() {
         push_undo()
         end()
-    }
+    },
 }
 
 function is_active_air() {
@@ -296,62 +315,71 @@ function is_active_air() {
 
 P.move_offensive_units = {
     _begin() {
+        if (!L.type) {
+            L.type = 0
+        }
     },
     prompt() {
         prompt(`${cards[G.offensive.active_cards[0]].name}. Move activated units.`)
-        button("pass")
+        button("done")
         if (G.offensive.active_stack.length === 0) {
-            for (let i = 0; i < G.offensive.active_units.length; i++) {
-                if (!G.offensive.paths[i]) {
-                    action_unit(G.offensive.active_units[i])
+            for (let i = 0; i < G.offensive.active_units[R].length; i++) {
+                if (!G.offensive.paths[R][i] || L.type & POST_BATTLE_MOVE) {
+                    action_unit(G.offensive.active_units[R][i])
                 }
             }
         } else {
             let loc = G.location[G.offensive.active_stack[0]]
             let active_air = is_active_air()
-            for (let i = 0; i < G.offensive.active_units.length; i++) {
-                let unit = G.offensive.active_units[i]
-                if (!G.offensive.paths[i] && loc === G.location[unit] &&
+            for (let i = 0; i < G.offensive.active_units[R].length; i++) {
+                let unit = G.offensive.active_units[R][i]
+                if ((!G.offensive.paths[R][i] || L.type & POST_BATTLE_MOVE) && loc === G.location[unit] &&
                     (active_air === (pieces[unit].class === "air")) && !set_has(G.offensive.active_stack, unit)) {
                     action_unit(unit)
                 }
             }
-            button("move")
-            button("strat_move")
-            if (active_air) {
-                button("displace")
-            } else {
-                button("amphibious")
+            for (let i = 0; i < L.allowed_hexes.length - 1; i++) {
+                action_hex(L.allowed_hexes[i])
             }
         }
     },
     unit(u) {
         push_undo()
-        set_add(G.offensive.active_stack, u)
+        G.offensive.active_stack.push(u)
+        if (G.offensive.active_stack.length === 1) {
+            L.leader = G.offensive.active_units[R].indexOf(u)
+            let distance = cards[G.offensive.active_cards[0]].ops * 5
+            L.allowed_hexes = get_allowed_hexes(G.location[u], distance)
+            G.offensive.paths[G.active][L.leader] = [ANY_MOVE, L.location]
+        } else {
+            G.offensive.paths[G.active][G.offensive.active_units[R].indexOf(u)] = 1
+        }
     },
-    move() {
+    action_hex(hex) {
         push_undo()
-        goto("move_stack", {type: is_active_air() ? AIR_MOVE : ANY_MOVE})
+        log(`Units ${G.offensive.active_stack} moved to ${int_to_hex(hex)}`)
+        let leader = G.offensive.active_units[R][0]
+        for (let i = 0; i < G.offensive.active_stack.length; i++) {
+            G.location[G.offensive.active_stack[i]] = hex
+        }
+        L.allowed_hexes = []
+        G.offensive.paths[R][L.leader].push(hex)
+        if (L.type & POST_BATTLE_MOVE) {
+            G.offensive.active_stack.forEach(u => array_delete_item(G.offensive.active_units[R], u))
+        }
+        G.offensive.active_stack = []
+        end()
     },
-    displace() {
+    done() {
         push_undo()
-        // end()
-    },
-    strat_move() {
-        push_undo()
-        goto("move_stack", {type: is_active_air() ? AIR_STRAT_MOVE : NAVAL_STRAT_MOVE})
-    },
-    amphibious() {
-        push_undo()
-        // end()
-    },
-    pass() {
-        push_undo()
-        let path = G.offensive.paths
-        for (let i = 0; i < G.offensive.active_units.length; i++) {
+        let path = G.offensive.paths[R]
+        for (let i = 0; i < G.offensive.active_units[R].length; i++) {
             if (!path[i]) {
-                path[i] = [ANY_MOVE]
+                path[i] = 1
             }
+        }
+        if (L.type & POST_BATTLE_MOVE) {
+            G.offensive.active_units[R] = []
         }
         end()
     },
@@ -412,11 +440,12 @@ function get_near_hexes(hex) {
     return result
 }
 
-function get_allowed_hexes(distance_max) {
+function get_allowed_hexes(location, distance_max, move_type) {
+    let type = get_allowed_move_type() + move_type
     let queue = []
     let distance_map = []
-    queue.push(L.location)
-    map_set(distance_map, L.location, 0)
+    queue.push(location)
+    map_set(distance_map, location, 0)
     let i = 0
     while (true) {
         let item = queue[i]
@@ -436,9 +465,10 @@ function get_allowed_hexes(distance_max) {
         }
     }
     let result = []
-    for (let i = 1; i < queue.length; i++) {
+    for (let i = 0; i < queue.length; i++) {
         set_add(result, queue[i])
     }
+    array_delete_item(result, location)
     return result
 }
 
@@ -450,12 +480,12 @@ P.move_stack = {
         L.location = G.location[G.offensive.active_stack[0]]
         L.distance = cards[G.offensive.active_cards[0]].ops * 5
         L.allowed_hexes = get_allowed_hexes(L.distance)
-        let last_from_stack = G.offensive.active_units.indexOf(G.offensive.active_stack[G.offensive.active_stack.length - 1])
+        let last_from_stack = G.offensive.active_units[R].indexOf(G.offensive.active_stack[G.offensive.active_stack.length - 1])
         L.last_from_stack = last_from_stack
         for (let i = 0; i < G.offensive.active_stack.length; i++) {
-            G.offensive.paths[i] = last_from_stack
+            G.offensive.paths[G.active][i] = last_from_stack
         }
-        G.offensive.paths[last_from_stack] = [ANY_MOVE, L.location]
+        G.offensive.paths[G.active][last_from_stack] = [ANY_MOVE, L.location]
     },
     prompt() {
         prompt(`${cards[G.offensive.active_cards[0]].name}. Move activated units.`)
@@ -465,7 +495,7 @@ P.move_stack = {
         }
         button("stop")
     },
-    board_hex(hex) {
+    action_hex(hex) {
         push_undo()
         for (let i = 0; i < G.offensive.active_stack.length; i++) {
             G.location[G.offensive.active_stack[i]] = hex
@@ -473,15 +503,18 @@ P.move_stack = {
         L.distance -= get_distance(L.location, hex)
         L.location = hex
         L.allowed_hexes = get_allowed_hexes(L.distance)
-        G.offensive.paths[L.last_from_stack].push(hex)
+        G.offensive.paths[R][L.last_from_stack].push(hex)
         if (L.distance <= 0) {
             this.stop()
         }
     },
     stop() {
         push_undo()
+        if (L.type & POST_BATTLE_MOVE) {
+            G.offensive.active_stack.forEach(u => array_delete_item(G.offensive.active_units[R], u))
+        }
         G.offensive.active_stack = []
-        let path = G.offensive.paths[L.last_from_stack]
+        let path = G.offensive.paths[R][L.last_from_stack]
         log(`Units moved to ${int_to_hex(path[path.length - 1])}`)
         end()
     },
@@ -491,36 +524,29 @@ P.declare_battle_hexes = {
     _begin() {
         L.possible_hexes = []
         let jp_hexes = []
-        console.log(pieces.length)
-        for (let i = 1; i < pieces.length; i++) {
+        for (let i = 0; i < pieces.length; i++) {
             let location = G.location[i]
             if (location > 0 && location < LAST_BOARD_HEX && pieces[i].faction === "jp") {
                 set_add(jp_hexes, location)
             }
         }
-        console.log(pieces.length)
-        for (let i = 1; i < pieces.length; i++) {
+        for (let i = 0; i < pieces.length; i++) {
             let location = G.location[i]
             if (pieces[i].faction === "ap" && set_has(jp_hexes, location) && !set_has(G.offensive.battle_hexes, location)) {
                 set_add(L.possible_hexes, location)
             }
         }
-        console.log(pieces.length)
     },
     prompt() {
         prompt(`${cards[G.offensive.active_cards[0]].name}. Declare battle hexes.`)
-        console.log(L)
-        console.log(L.possible_hexes.length)
         for (let i = 0; i < L.possible_hexes.length; i++) {
             let location = L.possible_hexes[i]
             if (!set_has(G.offensive.battle_hexes, location)) {
                 action_hex(location)
             }
         }
-
-        button("stop")
     },
-    board_hex(hex) {
+    action_hex(hex) {
         push_undo()
         set_add(G.offensive.battle_hexes, hex)
         if (G.offensive.battle_hexes.length >= L.possible_hexes.length) {
@@ -543,26 +569,105 @@ P.commit_offensive = {
     },
 }
 
-// call("change_intelligence_condition")
-// call("choose_reaction_hq")
-// call("activate_units")
-// call("move_reaction_units")
-// call("resolve_battles")
-// call("post_battle_movement")
-// call("emergency_movement")
+P.end_action = {
+    prompt() {
+        prompt(`End action.`)
+        button("done")
+    },
+    done() {
+        end()
+    },
+}
+
+P.define_intelligence_condition = {
+    _begin() {
+        if (G.offensive.battle_hexes.length <= 0) {
+            end()
+        }
+        let card = cards[G.offensive.active_cards[0]]
+        L.card = card
+        if (card.intelligence !== "surprise") {
+            L.roll_allowed = true
+        }
+        if (G.hand[G.active].filter(c => c.intelligence && (c.type === "intercept" || c.type === "conteroffensive")).length > 0) {
+            L.card_allowed = true
+        }
+        if (!L.roll_allowed && !L.card_allowed) {
+            end()
+        }
+    },
+    prompt() {
+        prompt(`${L.card.name}. Change intelligence condition.`)
+        button("roll")
+        G.hand[G.active].filter(c => c.intelligence && (c.type === "intercept" || c.type === "conteroffensive"))
+            .forEach(c => action_card(c))
+    },
+    card(c) {
+        G.offensive.intelligence = INTERCEPT
+        end()
+    },
+    roll() {
+        let result = random(10)
+        clear_undo()
+
+        let treshhold = L.card.oc + 3
+        log(`Intercept roll to ${result} vs ${treshhold}, offensive condition is ${result <= treshhold ? "intercept" : "surprise"}`)
+        if (result <= treshhold) {
+            G.offensive.intelligence = INTERCEPT
+        }
+        end()
+    }
+}
+
+P.naval_air_battle = {
+    prompt() {
+        prompt(`Choose battle hex.`)
+        G.offensive.battle_hexes.forEach(b => action_hex(b))
+    },
+    action_hex(c) {
+        clear_undo()
+        let result_a = random(10)
+        let result_d = random(10)
+        let winner = result_a > result_d ? G.offensive.attacker : 1 - G.offensive.attacker
+        log(`Battle at ${c}, attacker rolled ${result_a}, defender rolled ${result_d}, ${winner} wins`)
+        set_delete(G.offensive.battle_hexes, c)
+        end()
+    },
+}
+
 P.offensive_sequence = script(`
     set G.offensive.logistic cards[G.offensive.active_cards[0]].ops
     call choose_hq
     call activate_units
-    while (G.offensive.active_units.length > G.offensive.paths.filter(a => a != null).length) {
+    eval {
+        G.offensive.paths[G.active] = G.offensive.active_units[G.active].map(u=>null)
+    }
+    while (G.offensive.active_units[G.active].length > G.offensive.paths[G.active].filter(a => a != null).length) {
         call move_offensive_units
     }
     call declare_battle_hexes
     call commit_offensive
+    set G.active 1-G.offensive.attacker
     call define_intelligence_condition
-    eval {
-        G.active = G.offensive.attacker
-        reset_offensive()
+    if (G.offensive.intelligence != SURPRISE) {
+        call choose_hq
+        call activate_units
+        while (G.offensive.active_units[G.active].length > G.offensive.paths[G.active].filter(a => a != null).length) {
+            call move_offensive_units
+        }
+        call commit_offensive
+    }
+    set G.active G.offensive.attacker
+    while (G.offensive.battle_hexes.length > 0) {
+        call naval_air_battle
+    }
+    set G.active 1-G.offensive.attacker
+    while (G.offensive.active_units[G.active].length > 0) {
+       call move_offensive_units { type: POST_BATTLE_MOVE }
+    }
+    set G.active G.offensive.attacker
+    while (G.offensive.active_units[G.active].length > 0) {
+       call move_offensive_units { type: POST_BATTLE_MOVE }
     }
     
 `)
@@ -596,7 +701,7 @@ P.attrition_phase = script(`
     log ("Attrition phase")
     
     eval {
-    for (let i = 1; i < pieces.length; i++) {
+    for (let i = 0; i < pieces.length; i++) {
         if (random(10) % 5 === 0) {
             set_add(G.reduced, i)
             log(pieces[i].name + " reduced as attrition")
@@ -633,7 +738,7 @@ P.end_of_turn_phase = script(`
 function construct_decks() {
     G.draw = [[], []]
 
-    for (let c = 1; c < cards.length; ++c) {
+    for (let c = 0; c < cards.length; ++c) {
         if (cards[c].faction === "ap") {
             G.draw[AP].push(c)
         } else {
@@ -662,7 +767,7 @@ function setup_scenario_1942() {
     log("The Japan assault on Asia (December 1941) caught allies off guard")
 
     G.location = []
-    for (let i = 1; i < pieces.length; i++) {
+    for (let i = 0; i < pieces.length; i++) {
         G.location[i] = hex_to_int(pieces[i].start)
     }
 
@@ -695,13 +800,14 @@ function on_setup(scenario, options) {
     G.passes = [0, 0]
     G.removed = [] // removed one-time events (both sides)
     G.hand = [[], []]
-    G.future_offensive = [[100, 0], [100, 0]]
+    G.future_offensive = [[-1, 0], [-1, 0]]
     G.discard = [[], []]
     G.amph_points = [0, 0]
 
     G.location = []
     G.reduced = []
     G.oos = []
+    G.control = []
     reset_offensive()
 
     switch (scenario) {
@@ -726,19 +832,26 @@ function on_view() {
     V.oos = G.oos
     V.hand = []
     V.future_offensive = []
-    V.offensive = G.offensive
+    V.offensive = {
+        active_units: G.offensive.active_units[0].concat(G.offensive.active_units[1]),
+        paths: G.offensive.paths[0].concat(G.offensive.paths[1]),
+        active_cards: G.offensive.active_cards,
+        active_hq: G.offensive.active_hq,
+        active_stack: G.offensive.active_stack,
+        battle_hexes: G.offensive.battle_hexes
+    }
 
 
     if (R !== JP) {
-        V.hand[JP] = G.hand[JP].map(() => 0)
-        V.future_offensive.push([G.future_offensive[JP][0], 0])
+        V.hand[JP] = G.hand[JP].length
+        V.future_offensive.push([G.future_offensive[JP][0], -1])
     } else {
         V.hand[JP] = G.hand[JP]
         V.future_offensive.push(G.future_offensive[JP])
     }
     if (R !== AP) {
-        V.hand[AP] = G.hand[AP].map(() => 0)
-        V.future_offensive.push([G.future_offensive[AP][0], 0])
+        V.hand[AP] = G.hand[AP].length
+        V.future_offensive.push([G.future_offensive[AP][0], -1])
     } else {
         V.hand[AP] = G.hand[AP]
         V.future_offensive.push(G.future_offensive[AP])
@@ -754,7 +867,7 @@ function action_unit(p) {
 }
 
 function action_hex(p) {
-    action("board_hex", p)
+    action("action_hex", p)
 }
 
 function hex_to_int(i) {
@@ -769,13 +882,14 @@ function reset_offensive() {
     G.offensive = {
         attacker: JP,
         active_cards: [],
+        intelligence: SURPRISE,
         logistic: 0,
         active_hq: [],
-        active_units: [],
+        active_units: [[], []],
         strat_moved_units: [],
-        paths: [],
+        paths: [[], []],
         active_stack: [],
-        battle_hexes: []
+        battle_hexes: [],
     }
 }
 

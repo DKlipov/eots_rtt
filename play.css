@@ -135,15 +135,15 @@ body.Alies #ap_hand { grid-row: 2; }
 body.Alies #jp_hand { grid-row: 4; }
 
 #mapwrap {
-	width: 2244px;
-	height: 1452px;
+	width: 2290px;
+	height: 1490px;
 }
 
 #map {
-	width: 2244px;
-	height: 1452px;
+	width: 2290px;
+	height: 1490px;
 	background-image: url(map75.jpg);
-	background-size: 2244px 1452px;
+	background-size: 2290px 1490px;
 }
 
 /* SPACES */
@@ -212,7 +212,7 @@ path.zone.tip {
 }
 
 .card.action {
-	box-shadow: 0 0 0 3px white;
+	box-shadow: 0 0 0 3px yellow;
 }
 
 /* LAYOUT */
@@ -245,10 +245,13 @@ body.volko .layout.unit-pool { gap: 0px; }
 	/*pointer-events: none;*/
 }
 
+
 .piece.action {
 	pointer-events: auto;
-	border-color: yellow;
-	box-shadow: 0 0 3px black, inset 0 0 3px black;
+	border-color: yellow;!important;
+	box-shadow: 0 0 2px black, inset 0 0 2px black;
+	border-width: 4px;
+	/*box-shadow: 0 0 0 3px lime; border-color: #000;*/
 }
 
 .cylinder {width: 55px; height: 55px; margin: -23px -4px -4px -23px; }
@@ -260,17 +263,7 @@ body.volko .layout.unit-pool { gap: 0px; }
 .unit.volko { border-radius: 0 15px }
 .unit.exhausted { border-radius: 0 10px }
 
-.cylinder { background-image: url(pieces/cylinder.svg); }
-.cylinder.german { background-image: url(pieces/cylinder_german.svg); }
-.cylinder.french { background-image: url(pieces/cylinder_french.svg); }
-.cylinder.action { background-image: url(pieces/cylinder.svg), url(pieces/cylinder_action.svg); }
-.cylinder.german.action { background-image: url(pieces/cylinder_german.svg), url(pieces/cylinder_action.svg); }
-.cylinder.french.action { background-image: url(pieces/cylinder_french.svg), url(pieces/cylinder_action.svg); }
-
-.trench.german { background-image: url(pieces/trench_german.svg); }
-.trench.french { background-image: url(pieces/trench_french.svg); }
-
-.unit{
+.unit, .marker{
 	transition: left 200ms, top 200ms;
 	position: absolute;
 	background-size: auto 100%;

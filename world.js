@@ -165,13 +165,15 @@ function register_action(action, id, e) {
 function register_focusable(e) {
     e.onmousedown = (evt) => {
         if (world.focus !== e.parent) {
-            evt.stopPropagation()
             if (world.focus != null) {
                 world.focus.classList.remove("focus")
             }
             world.focus = e.parent
             e.parent.classList.add("focus")
             on_update()
+            if (e.parent.childNodes.length > 1) {
+                evt.stopPropagation()
+            }
         }
     }
 }
