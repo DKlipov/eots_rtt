@@ -1,5 +1,6 @@
 const data = {}
 
+const OCEAN = 0
 const OPEN = 1
 const JUNGLE = 2
 const MIXED = 3
@@ -322,7 +323,7 @@ data.pieces = [
 //Hex sides
 //N,NE,SE,S,SW,NW
 //WATER_: 1, GROUND: 2, ROAD: 4, UNPASSABLE: 8
-data.hex = [
+data.map = [
     {id: 1005, name: "Maldive Is.", airfield: true, port: true, terrain: OPEN, island: true},
     {id: 1307, name: "Colombo", airfield: true, port: true, terrain: MIXED, edges: [1, 1, 1, 3, 3, 1]},
     {id: 1308, name: "Trincomalee", airfield: true, port: true, terrain: MIXED, edges: [3, 1, 1, 1, 1, 3]},

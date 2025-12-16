@@ -29,9 +29,63 @@ const SURPRISE = 0
 const INTERCEPT = 1
 const AMBUSH = 2
 
+//Terrain
+const OCEAN = 0
+const OPEN = 1
+const JUNGLE = 2
+const MIXED = 3
+const MOUNTAIN = 4
+const ATOLL = 5
+
+// Hex sides
+const WATER = 1
+const GROUND = 2
+const ROAD = 4
+const UNPLAYABLE = 8
+const MAP_BORDER = 16
+
 const LAST_BOARD_HEX = 1476
 
-const {pieces, cards, edges} = require("./data.js")
+const {pieces, cards, map} = require("./data.js")
+
+/* INIT */
+
+const map_data = []
+map.forEach(h => map_data[hex_to_int(h.id)] = h)
+
+for (let i = 1; i < LAST_BOARD_HEX; ++i) {
+    let hex = map_data[i]
+    if (!hex) {
+        hex = {id: int_to_hex(i), terrain: OCEAN, region: "Ocean"}
+        map_data[i] = hex
+    }
+
+    hex.edges_int = 0
+    let nh = get_near_hexes(i)
+    for (let j = 0; j < nh.length; j++) {
+        if (nh[j] < 0) {
+            hex.edges[j] = MAP_BORDER
+            continue
+        }
+        let near_hex = map_data[nh[j]]
+        let nh_index = (j + 3) % 6
+
+        let border = GROUND
+        if (hex.edges) {
+            border = hex.edges[j] | (hex.edges[j] & ROAD ? GROUND : 0)
+        } else if (near_hex && near_hex.edges) {
+            border = near_hex.edges[nh_index]
+        } else if (hex.island || hex.terrain === ATOLL || hex.terrain === OCEAN) {
+            border = 1
+        }
+        hex.edges_int = (hex.edges_int << 5) | border
+
+    }
+    if (hex.airfield || hex.port || hex.port) {
+        hex.named = true
+    }
+}
+
 
 /* DATA */
 
@@ -419,24 +473,18 @@ function get_allowed_move_type() {
 }
 
 function get_near_hexes(hex) {
-    let x = Math.floor(hex / 29)
     let y = hex % 29
-    let y_diff = x % 2 ? 1 : -1
+    let x = (hex - y) / 29
+
+    let y_diff = 1 - (x % 2)
+    let y1_diff = 1 - y_diff
     let result = []
-    if (y > 0) {
-        result.push(hex - 1)
-    }
-    if (y < 28) {
-        result.push(hex + 1)
-    }
-    if (x > 0) {
-        result.push(hex - 29)
-        result.push(hex - 29 + y_diff)
-    }
-    if (x < 50) {
-        result.push(hex + 29)
-        result.push(hex + 29 + y_diff)
-    }
+    result.push((-y >> 31) * hex * -1 - 1)                                                                          //N or -1
+    result.push((-((x - 50 >> 31) & (-y1_diff | -hex % 29 >> 31)) - 1) * (hex + 30 - y_diff) + hex + 29 - y_diff)   //NE or -1
+    result.push((-((x - 50 >> 31) & ((-hex - 1) % 29 >> 31)) - 1) * (hex + 30 + y1_diff) + hex + 29 + y1_diff)      //SE or -1
+    result.push((-((-hex - 1 - y1_diff) % 29 >> 31) - 1) * (hex + 2) + hex + 1)                                     //S or -1
+    result.push((-((-x >> 31) & ((-hex - 1) % 29 >> 31)) - 1) * (hex - 28 + y1_diff) + hex - 29 + y1_diff)      //SW or -1
+    result.push((-((-x >> 31) & (-y1_diff | -hex % 29 >> 31)) - 1) * (hex - 28 - y_diff) + hex - 29 - y_diff)   //NW or -1
     return result
 }
 
