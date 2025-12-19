@@ -15,14 +15,15 @@ const AP = 1
 
 //Move types
 const ANY_MOVE = 0
-const AMPH_MOVE = 1
-const NAVAL_MOVE = 2
-const NAVAL_STRAT_MOVE = 4
-const AIR_STRAT_MOVE = 8
-const AIR_MOVE = 16
-const AIR_CLOSE_MOVE = 32
-const GROUND_MOVE = 64
-const POST_BATTLE_MOVE = 128
+const NAVAL_STRAT_MOVE = 1 << 0
+const NAVAL_MOVE = 1 << 1
+const GROUND_MOVE = 1 << 2
+const AMPH_MOVE = 1 << 3
+const AIR_STRAT_MOVE = 1 << 4
+const AIR_MOVE = 1 << 5
+const AIR_CLOSE_MOVE = 1 << 6
+const POST_BATTLE_MOVE = 1 << 7
+const REACTION_MOVE = 1 << 8
 
 //Intelligence
 const SURPRISE = 0
@@ -44,6 +45,22 @@ const ROAD = 4
 const UNPLAYABLE = 8
 const MAP_BORDER = 16
 
+// Hex status
+const JP_ZOI = 1 << 0
+const AP_ZOI = 1 << 1
+const JP_ZOI_NTRL = 1 << 2
+const AP_ZOI_NTRL = 1 << 3
+const JP_SUPPLY = 1 << 4
+const US_SUPPLY = 1 << 5
+const BR_SUPPLY = 1 << 6
+const JOINT_SUPPLY = 1 << 7
+const JP_UNITS = 1 << 8
+const AP_UNITS = 1 << 9
+const JP_GAH_UNITS = 1 << 10
+const AP_GAH_LOCK = 1 << 11
+const JP_STRAT_MOVE_LOCK = 1 << 12
+const AP_STRAT_MOVE_LOCK = 1 << 13
+
 const LAST_BOARD_HEX = 1476
 
 const {pieces, cards, map} = require("./data.js")
@@ -61,24 +78,26 @@ for (let i = 1; i < LAST_BOARD_HEX; ++i) {
     }
 
     hex.edges_int = 0
+    hex.coastal = false
     let nh = get_near_hexes(i)
     for (let j = 0; j < nh.length; j++) {
-        if (nh[j] < 0) {
-            hex.edges[j] = MAP_BORDER
-            continue
-        }
+
         let near_hex = map_data[nh[j]]
         let nh_index = (j + 3) % 6
 
         let border = GROUND
-        if (hex.edges) {
+
+        if (nh[j] < 0) {
+            border = MAP_BORDER
+        } else if (hex.edges) {
             border = hex.edges[j] | (hex.edges[j] & ROAD ? GROUND : 0)
         } else if (near_hex && near_hex.edges) {
             border = near_hex.edges[nh_index]
         } else if (hex.island || hex.terrain === ATOLL || hex.terrain === OCEAN) {
             border = 1
         }
-        hex.edges_int = (hex.edges_int << 5) | border
+        hex.coastal = hex.coastal || (border & WATER)
+        hex.edges_int = hex.edges_int | (border << 5 * j)
 
     }
     if (hex.airfield || hex.port || hex.port) {
@@ -372,6 +391,7 @@ P.move_offensive_units = {
         if (!L.type) {
             L.type = 0
         }
+        check_supply()
     },
     prompt() {
         prompt(`${cards[G.offensive.active_cards[0]].name}. Move activated units.`)
@@ -402,11 +422,13 @@ P.move_offensive_units = {
         G.offensive.active_stack.push(u)
         if (G.offensive.active_stack.length === 1) {
             L.leader = G.offensive.active_units[R].indexOf(u)
-            let distance = cards[G.offensive.active_cards[0]].ops * 5
-            L.allowed_hexes = get_allowed_hexes(G.location[u], distance)
+            L.distance = cards[G.offensive.active_cards[0]].ops * 5
+            L.location = G.location[u]
+            ground_naval_move_hexes(L.distance, L.type ? L.type : 0)
             G.offensive.paths[G.active][L.leader] = [ANY_MOVE, L.location]
         } else {
             G.offensive.paths[G.active][G.offensive.active_units[R].indexOf(u)] = 1
+            ground_naval_move_hexes(L.distance, L.type ? L.type : 0)
         }
     },
     action_hex(hex) {
@@ -439,39 +461,6 @@ P.move_offensive_units = {
     },
 }
 
-function get_allowed_move_type() {
-    let active_air = false
-    let active_ground = false
-    let active_naval = false
-    let result = 0
-    for (let i = 0; i < G.offensive.active_stack.length; i++) {
-        switch (pieces[G.offensive.active_stack[i]].class) {
-            case "air":
-                active_air = true;
-                break;
-            case "ground":
-                active_ground = true;
-                break;
-            case "naval":
-                active_naval = true;
-                break;
-        }
-    }
-    if (active_air) {
-        return AIR_MOVE
-    }
-    if (active_ground && !active_naval) {
-        result += GROUND_MOVE
-    }
-    if (active_ground) {//todo hex==port
-        result += AMPH_MOVE
-    }
-    if (active_naval && !active_ground) {
-        result += NAVAL_MOVE
-    }
-    return result
-}
-
 function get_near_hexes(hex) {
     let y = hex % 29
     let x = (hex - y) / 29
@@ -488,8 +477,150 @@ function get_near_hexes(hex) {
     return result
 }
 
-function get_allowed_hexes(location, distance_max, move_type) {
-    let type = get_allowed_move_type() + move_type
+function check_supply() {
+    L.supply_cache = []
+    for (let i = 0; i < pieces.length; i++) {
+        let piece = pieces[i]
+        let location = G.location[i]
+        if (location > LAST_BOARD_HEX) {
+            continue
+        }
+        let faction = piece.faction === "ap"
+        if (piece.class === "air") {
+            let mask = 0 | (JP_ZOI << faction) | (JP_ZOI_NTRL << 1 - faction)
+            L.supply_cache[location] = L.supply_cache[location] | (JP_GAH_UNITS << faction) | (JP_UNITS << faction)
+            get_near_hexes(location).flatMap(h => get_near_hexes(h)).forEach(h => {
+                L.supply_cache[h] = L.supply_cache[h] | mask
+                console.log(`Hex zoi ${int_to_hex(h)} - ${piece.faction}`)
+            })
+        } else if (piece.class === "hq" || piece.class === "ground") {
+            L.supply_cache[location] = L.supply_cache[location] | (JP_GAH_UNITS << faction) | (JP_UNITS << faction)
+        }
+    }
+    console.log(L.supply_cache.filter(h => h))
+}
+
+function get_move_data() {
+    let result = {
+        ground_present: false,
+        naval_present: false,
+        battle_range: 0,
+        is_cv_escort: false,
+        naval_move_distance: 0,
+        strat_move_distance: 0,
+        ground_move_distance: 0,
+    }
+    G.offensive.active_stack.forEach(u => {
+        let piece = pieces[u]
+        if (piece.class === "ground") {
+            result.ground_present = true
+        } else if (piece.class === "naval") {
+            result.naval_present = true
+        }
+        if (piece.br && (result.battle_range === 0 || piece.br < result.battle_range)) {
+            result.battle_range = piece.br
+        }
+    })
+    result.naval_move_distance = (cards[G.offensive.active_cards[0]].ops * 5)
+    result.strat_move_distance = cards[G.offensive.active_cards[0]].ops * 5 * 2
+    result.ground_move_distance = (cards[G.offensive.active_cards[0]].ops * 2)
+    result.is_cv_escort = result.battle_range > 0
+    return result
+}
+
+function get_move_cost(terrain) {
+    return terrain - (terrain > 2) ? 1 : 0
+}
+
+function ground_naval_move_hexes(distance_max, move_type) {
+    let location = L.location
+    let result = []
+    let participate_battle = []
+    let move_data = get_move_data()
+    console.log(L)
+    console.log(map_data[location])
+    console.log(move_data)
+    if (!(move_type & POST_BATTLE_MOVE) && !(move_type & REACTION_MOVE) && map_data[location].port) {
+        move_type = move_type | NAVAL_STRAT_MOVE
+    }
+    if (move_data.ground_present && !move_data.naval_present) {
+        move_type = move_type | GROUND_MOVE
+    }
+
+    if (map_data[location].coastal) {
+        move_type = move_type | NAVAL_MOVE
+        if (move_data.ground_present) {
+            move_type = move_type | AMPH_MOVE
+        }
+    }
+    if (map_data[location].coastal) {
+        console.log(`Check navy ${move_data}`)
+        for (let i = 0; i < L.supply_cache.length; i++) {
+            if (L.supply_cache[i] & (JP_UNITS << R)) {
+                console.log(int_to_hex(i))
+            }
+        }
+        check_hexes_in_distance(location,
+            (h, nh, j) => {
+                return (map_data[h].edges_int & WATER << 5 * j) && true
+            },
+            move_data.naval_move_distance,
+            h => {
+                // console.log(`Try ${int_to_hex(h)}`)
+                if ((map_data[h].port && G.control[h] === R) //to friendly port
+                    || L.supply_cache[h] & (JP_UNITS << R) //directly attack to hex
+                    || set_has(participate_battle, h) //cv ranged attack is possible
+                    || move_data.is_cv_escort && move_data.ground_present && map_data[h].terrain > OCEAN //amphibious landing with cv cover
+                ) {
+                    console.log(`success ${h}`)
+                    set_add(result, h)
+                }
+            })
+        console.log(`Check navy no zoi`)
+        console.log(`${L.supply_cache[hex_to_int(2910)] & JP_ZOI << 1 - R} - ${L.supply_cache[hex_to_int(2910)] & JP_ZOI_NTRL << 1 - R}`)
+        console.log(`${L.supply_cache[hex_to_int(3009)] & JP_ZOI << 1 - R} - ${L.supply_cache[hex_to_int(3009)] & JP_ZOI_NTRL << 1 - R}`)
+        console.log(`${L.supply_cache[hex_to_int(3108)] & JP_ZOI << 1 - R} - ${L.supply_cache[hex_to_int(3108)] & JP_ZOI_NTRL << 1 - R}`)
+        check_hexes_in_distance(location, (h, nh, j) => (map_data[h].edges_int & WATER << 5 * j && (!(L.supply_cache[nh] & JP_ZOI << 1 - R) || (L.supply_cache[nh] & JP_ZOI_NTRL << 1 - R))) && true,
+            move_data.naval_move_distance * ((move_type & NAVAL_STRAT_MOVE) << 1),
+            (h, distance) => {
+                console.log(h)
+                console.log(map_data[h])
+                if ((map_data[h].port && G.control[h] === R) //to friendly port
+                    || move_data.ground_present && distance <= move_data.naval_move_distance && map_data[h].terrain > OCEAN //amphibious landing avoiding ezoi
+                ) {
+                    // console.log(`Hex accepted ${int_to_hex(h)}, distance ${distance}, port ${(map_data[h].port && G.control[h] === R)}, `)
+                    set_add(result, h)
+                }
+            }
+        )
+    }
+    if (move_data.ground_present && !move_data.naval_present) {
+        console.log(`Check ground`)
+        check_hexes_in_distance(location,
+            (h, nh, j) => {
+                if (!(map_data[h].edges_int & GROUND << 5) || L.supply_cache[h] & JP_GAH_UNITS << R) {
+                    return 0;
+                }
+                if (map_data[h].edges_int & ROAD << 5 * j && !(L.supply_cache[nh] & JP_STRAT_MOVE_LOCK << R)) {
+                    return 1;
+                } else {
+                    return get_move_cost(map_data[nh].terrain) * 2
+                }
+            },
+            move_data.ground_move_distance,
+            h => {
+                if (map_data[h].terrain > OCEAN) {
+                    set_add(result, h)
+                }
+            }
+        )
+    }
+    set_delete(result, location)
+    L.allowed_hexes = result
+
+}
+
+function check_hexes_in_distance(location, connection_check, limit, process_hex) {
     let queue = []
     let distance_map = []
     queue.push(location)
@@ -497,75 +628,37 @@ function get_allowed_hexes(location, distance_max, move_type) {
     let i = 0
     while (true) {
         let item = queue[i]
-        let distance = map_get(distance_map, item) + 1
-        if (distance <= distance_max) {
-            get_near_hexes(item).forEach(nh => {
-                let d = map_get(distance_map, nh, null)
-                if (d == null || distance < d) {
-                    map_set(distance_map, nh, distance)
-                    queue.push(nh)
-                }
-            })
+        console.log(`Check item ${item}`)
+        let base_distance = map_get(distance_map, item)
+        let nh_list = get_near_hexes(item)
+        for (let j = 0; j < 6; j++) {
+            let nh = nh_list[j]
+            if (nh < 0 || map_get(distance_map, nh)) {
+                continue
+            }
+            let distance = base_distance
+            let con_check_result = connection_check(item, nh, j, distance)
+            if (con_check_result <= 0) {
+                continue
+            }
+            distance += con_check_result
+            // console.log(`distance ${int_to_hex(item)} -> ${int_to_hex(nh)} ${distance}`)
+            if (distance > limit) {
+                continue
+            }
+            if (map_get(distance_map, nh) < distance) {
+                //do nothing
+            } else {
+                process_hex(nh, distance)
+                map_set(distance_map, nh, distance)
+                queue.push(nh)
+            }
         }
         i++
         if (i >= queue.length) {
             break
         }
     }
-    let result = []
-    for (let i = 0; i < queue.length; i++) {
-        set_add(result, queue[i])
-    }
-    array_delete_item(result, location)
-    return result
-}
-
-P.move_stack = {
-    _begin() {
-        if (!L.type) {
-            L.type = get_allowed_move_type()
-        }
-        L.location = G.location[G.offensive.active_stack[0]]
-        L.distance = cards[G.offensive.active_cards[0]].ops * 5
-        L.allowed_hexes = get_allowed_hexes(L.distance)
-        let last_from_stack = G.offensive.active_units[R].indexOf(G.offensive.active_stack[G.offensive.active_stack.length - 1])
-        L.last_from_stack = last_from_stack
-        for (let i = 0; i < G.offensive.active_stack.length; i++) {
-            G.offensive.paths[G.active][i] = last_from_stack
-        }
-        G.offensive.paths[G.active][last_from_stack] = [ANY_MOVE, L.location]
-    },
-    prompt() {
-        prompt(`${cards[G.offensive.active_cards[0]].name}. Move activated units.`)
-
-        for (let i = 0; i < L.allowed_hexes.length - 1; i++) {
-            action_hex(L.allowed_hexes[i])
-        }
-        button("stop")
-    },
-    action_hex(hex) {
-        push_undo()
-        for (let i = 0; i < G.offensive.active_stack.length; i++) {
-            G.location[G.offensive.active_stack[i]] = hex
-        }
-        L.distance -= get_distance(L.location, hex)
-        L.location = hex
-        L.allowed_hexes = get_allowed_hexes(L.distance)
-        G.offensive.paths[R][L.last_from_stack].push(hex)
-        if (L.distance <= 0) {
-            this.stop()
-        }
-    },
-    stop() {
-        push_undo()
-        if (L.type & POST_BATTLE_MOVE) {
-            G.offensive.active_stack.forEach(u => array_delete_item(G.offensive.active_units[R], u))
-        }
-        G.offensive.active_stack = []
-        let path = G.offensive.paths[R][L.last_from_stack]
-        log(`Units moved to ${int_to_hex(path[path.length - 1])}`)
-        end()
-    },
 }
 
 P.declare_battle_hexes = {
