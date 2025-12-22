@@ -62,8 +62,41 @@ const JP_STRAT_MOVE_LOCK = 1 << 12
 const AP_STRAT_MOVE_LOCK = 1 << 13
 
 const LAST_BOARD_HEX = 1476
+const ELIMINATED_BOX = 1478
+const DELAYED_BOX = 1479
+const TURN_BOX = 1480
 
 const {pieces, cards, map} = require("./data.js")
+
+// PIECES
+const SEAC_HQ = find_piece("hq_ap_seac")
+const M_CORPS = find_piece("army_ap_m")
+const NL_CORPS = find_piece("army_ap_nl")
+const SL_CORPS = find_piece("army_ap_sl")
+const HK_DIVISION = find_piece("army_ap_hk")
+const US_FEAF = find_piece("air_ap_feaf")
+const LRB_19 = find_piece("air_ap_19")
+const AF7 = find_piece("air_ap_7")
+const AF7_LRB = find_piece("air_ap_7_lrb")
+const US_ASIA_CA = find_piece("casia")
+const US_ASIA_DD = find_piece("dasia")
+const N_ORLEANS = find_piece("orleans")
+
+const JP_SOUTH_HQ = find_piece("hq_jp_s")
+const JP_SOUTH_SEAS_HQ = find_piece("hq_jp_ss")
+const YAMAMOTO_HQ = find_piece("hq_jp_cy")
+const KOREAN_ARMY = find_piece("army_jp_kor")
+const ED_ARMY = find_piece("army_jp_ed")
+
+
+function find_piece(id) {
+    for (let i = 0; i < pieces.length; i++) {
+        if (pieces[i].id === id) {
+            return i
+        }
+    }
+    throw new Error("Missed unit " + id);
+}
 
 /* INIT */
 
@@ -100,7 +133,7 @@ for (let i = 1; i < LAST_BOARD_HEX; ++i) {
         hex.edges_int = hex.edges_int | (border << 5 * j)
 
     }
-    if (hex.airfield || hex.port || hex.port) {
+    if (hex.airfield || hex.port || hex.port || hex.city) {
         hex.named = true
     }
 }
@@ -903,14 +936,100 @@ function draw_card(side) {
     return c
 }
 
+function eliminate(unit) {
+    G.location[unit] = ELIMINATED_BOX
+    set_delete(G.reduced, unit)
+}
+
 function setup_scenario_1942() {
     log("#Japan Offensive")
     log("The Japan assault on Asia (December 1941) caught allies off guard")
 
-    G.location = []
     for (let i = 0; i < pieces.length; i++) {
-        G.location[i] = hex_to_int(pieces[i].start)
+        var piece = pieces[i]
+        if (piece.reinforcement !== 2) {
+            continue
+        }
+        if (piece.faction === "ap") {
+            G.location[i] = DELAYED_BOX
+        }
+        if (piece.start_reduced) {
+            set_add(G.reduced, i)
+        }
     }
+    //ap setup
+    eliminate(find_piece("mdca"))
+    eliminate(M_CORPS)
+    eliminate(HK_DIVISION)
+    eliminate(find_piece("forcez"))
+    eliminate(NL_CORPS)
+    G.location[SEAC_HQ] = hex_to_int(1805)
+    G.location[US_FEAF] = hex_to_int(2813)
+    set_add(G.reduced, US_FEAF)
+    G.location[SL_CORPS] = hex_to_int(2912)
+    set_add(G.reduced, SL_CORPS)
+    G.location[LRB_19] = hex_to_int(2917)
+    set_add(G.reduced, LRB_19)
+    G.location[US_ASIA_CA] = hex_to_int(3014)
+    set_add(G.reduced, US_ASIA_CA)
+    G.location[AF7] = hex_to_int(5108)
+    G.location[AF7_LRB] = hex_to_int(5808)
+    G.location[find_piece("lexington")] = hex_to_int(5808)
+    set_delete(G.reduced, find_piece("lexington"))
+    G.location[find_piece("enterprise")] = hex_to_int(5808)
+    set_delete(G.reduced, find_piece("enterprise"))
+    G.location[N_ORLEANS] = hex_to_int(5808)
+    set_add(G.reduced, N_ORLEANS)
+
+    //jp setup
+    set_add(G.control, hex_to_int(1912))
+    set_add(G.control, hex_to_int(2012))
+    setup_jp_unit(jp_army(38), 1913)
+    setup_jp_unit(jp_army(15), 2109)
+    setup_jp_unit(jp_army(28), 2110, true)
+    setup_jp_unit(jp_army(25), 2112, true)
+    setup_jp_unit(jp_air(22), 2212)
+    setup_jp_unit(JP_SOUTH_HQ, 2212)
+    setup_jp_unit(find_piece("mogami"), 2311)
+    setup_jp_unit(find_piece("kongo"), 2311)
+    setup_jp_unit(jp_army("2sn"), 2415)
+    setup_jp_unit(jp_army(17), 2709, true)
+    setup_jp_unit(jp_army(14), 2812)
+    setup_jp_unit(jp_air(5), 2812)
+    setup_jp_unit(jp_air(21), 2909)
+    setup_jp_unit(find_piece("takao"), 2909)
+    setup_jp_unit(jp_army("1sn"), 2911)
+    setup_jp_unit(jp_army(19), 2913, true)
+    setup_jp_unit(jp_army(16), 2915, true)
+    setup_jp_unit(find_piece("ryujo"), 2915)
+    setup_jp_unit(find_piece("zuiho"), 2915)
+    setup_jp_unit(find_piece("nachi"), 2915)
+    setup_jp_unit(jp_air(2), 3004)
+    setup_jp_unit(jp_army(35), 3007, true)
+    setup_jp_unit(jp_air(23), 3009)
+    setup_jp_unit(KOREAN_ARMY, 3005)
+    setup_jp_unit(YAMAMOTO_HQ, 3407)
+    setup_jp_unit(find_piece("nagato"), 3407)
+    setup_jp_unit(find_piece("yamato"), 3407, true)
+    setup_jp_unit(jp_air(25), 3407)
+    setup_jp_unit(jp_air(3), 3607)
+    setup_jp_unit(jp_air(4), 3607)
+    setup_jp_unit(jp_army(27), 3704, true)
+    setup_jp_unit(ED_ARMY, 3706)
+    setup_jp_unit(jp_air(1), 3706)
+    setup_jp_unit(jp_army(18), 3706, true)
+    setup_jp_unit(find_piece("akagi"), 3706)
+    setup_jp_unit(find_piece("soryu"), 3706)
+    setup_jp_unit(find_piece("shokaku"), 3706)
+    setup_jp_unit(find_piece("hiei"), 3706)
+    setup_jp_unit(jp_army("3sn"), 3814)
+    setup_jp_unit(JP_SOUTH_SEAS_HQ, 4017)
+    setup_jp_unit(find_piece("kamikaze"), 4017)
+    setup_jp_unit(find_piece("aoba"), 4021)
+    setup_jp_unit(jp_army("ss"), 4021)
+    setup_jp_unit(jp_army("4sn"), 4715, true)
+    setup_jp_unit(jp_air(24), 4715)
+    setup_jp_unit(find_piece("tenyru"), 4715)
 
     construct_decks()
 
@@ -926,6 +1045,27 @@ function setup_scenario_1942() {
 
     console.log("setup 1942")
     call("offensive_phase")
+}
+
+function jp_air(id) {
+    return find_piece("air_jp_" + id)
+}
+
+function jp_army(id) {
+    return find_piece("army_jp_" + id)
+}
+
+function setup_jp_unit(piece, hex_id, reduced = false) {
+    let hex = hex_to_int(hex_id)
+    if (map_data[hex].named) {
+        set_add(G.control, hex)
+    }
+    G.location[piece] = hex
+    if (reduced) {
+        set_add(G.reduced, piece)
+    } else {
+        set_delete(G.reduced, piece)
+    }
 }
 
 
@@ -949,7 +1089,29 @@ function on_setup(scenario, options) {
     G.reduced = []
     G.oos = []
     G.control = []
+    console.log(map_data.length)
+    console.log(map.length)
+    console.log(LAST_BOARD_HEX)
+    console.log(hex_to_int(6025))
+    console.log(map_data[1474])
+    console.log(map_data[1475])
+    console.log(map_data[1476])
+    for (let i = 1; i < LAST_BOARD_HEX; i++) {
+        if (map_data[i].named && ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Siam", "Caroline", "Marshall", "Japan"].includes(map_data[i].region)) {
+            set_add(G.control, i)
+        }
+    }
     reset_offensive()
+    G.location = []
+    for (let i = 0; i < pieces.length; i++) {
+        var piece = pieces[i]
+        if (piece.start) {
+            G.location[i] = hex_to_int(piece.start)
+            if (piece.start_reduced) {
+                set_add(G.reduced, i)
+            }
+        }
+    }
 
     switch (scenario) {
         case "1942":
