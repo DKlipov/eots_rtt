@@ -3,6 +3,11 @@
 const JP = 0
 const AP = 1
 
+const LAST_BOARD_HEX = 1476
+const ELIMINATED_BOX = 1478
+const DELAYED_BOX = 1479
+const TURN_BOX = 1480
+
 function on_focus_card_tip(c) {
     if (data.cards[c].type === "Barrage")
         document.getElementById("tooltip").classList = "card barrage c" + c
@@ -23,11 +28,16 @@ function on_init() {
             on_update()
         }
     }
-    for (let i = 1; i < 1476; ++i) {
+    for (let i = 1; i < LAST_BOARD_HEX; ++i) {
         let center = hex_center(i)
         define_layout("board_hex", i, [center[0] - 4, center[1] - 12, 45, 45], "stack")
         define_space("action_hex", i, [center[0] - 15, center[1] - 17, 45, 45])
     }
+    for (let i = 1; i <= 12; ++i) {
+        define_layout("board_hex", TURN_BOX + i, [80, 1050 - (i - 1) * 40, 45, 45], "stack")
+    }
+    define_layout("board_hex", ELIMINATED_BOX, [50, 50, 45, 45], "stack")
+    define_layout("board_hex", DELAYED_BOX, [2100, 1350, 45, 45], "stack")
     for (let i = 0; i < data.pieces.length; ++i) {
         let piece = data.pieces[i]
         piece.element = define_piece("unit", i, piece.counter)
@@ -111,7 +121,7 @@ function hex_center(i) {
     return [57 + column * 43.0, 41 + (i % 29) * 50 + (column % 2) * 25]
 }
 
-// for (let i = 1; i < 1476; ++i) {
+// for (let i = 1; i < LAST_BOARD_HEX; ++i) {
 //     let elt = document.createElement("div")
 //     elt.style.borderColor = "red"
 //     elt.style.backgroundColor = "red"
@@ -137,9 +147,12 @@ function on_update() {
 
     for (let i = 0; i < data.pieces.length; ++i) {
         let piece = data.pieces[i]
-        let unit = populate("board_hex", G.location[i], "unit", i)
-        unit.classList.toggle("activated", G.offensive.active_units.includes(i))
-        unit.classList.toggle("selected", G.offensive.active_stack.includes(i))
+        if (G.location[i] > 0) {
+            let unit = populate("board_hex", G.location[i], "unit", i)
+            unit.classList.toggle("activated", G.offensive.active_units.includes(i))
+            unit.classList.toggle("selected", G.offensive.active_stack.includes(i))
+            unit.classList.toggle("reduced", set_has(G.reduced, i))
+        }
     }
 
     update_hand(AP)
@@ -153,7 +166,7 @@ function on_update() {
         document.getElementById("active_cards").classList.add("hide")
     }
 
-    G.offensive.battle_hexes.forEach(h=>populate_generic("board_hex", h, "marker attack"))
+    G.offensive.battle_hexes.forEach(h => populate_generic("board_hex", h, "marker attack"))
 
     action_button("roll", "Roll")
 

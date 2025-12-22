@@ -1007,7 +1007,7 @@ function setup_scenario_1942() {
     setup_jp_unit(jp_air(2), 3004)
     setup_jp_unit(jp_army(35), 3007, true)
     setup_jp_unit(jp_air(23), 3009)
-    setup_jp_unit(KOREAN_ARMY, 3005)
+    setup_jp_unit(KOREAN_ARMY, 3305)
     setup_jp_unit(YAMAMOTO_HQ, 3407)
     setup_jp_unit(find_piece("nagato"), 3407)
     setup_jp_unit(find_piece("yamato"), 3407, true)
@@ -1089,13 +1089,6 @@ function on_setup(scenario, options) {
     G.reduced = []
     G.oos = []
     G.control = []
-    console.log(map_data.length)
-    console.log(map.length)
-    console.log(LAST_BOARD_HEX)
-    console.log(hex_to_int(6025))
-    console.log(map_data[1474])
-    console.log(map_data[1475])
-    console.log(map_data[1476])
     for (let i = 1; i < LAST_BOARD_HEX; i++) {
         if (map_data[i].named && ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Siam", "Caroline", "Marshall", "Japan"].includes(map_data[i].region)) {
             set_add(G.control, i)

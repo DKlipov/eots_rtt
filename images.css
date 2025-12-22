@@ -3,14 +3,30 @@
 
 
 /* ARMIES (45x45) */
-.army_jp { background-image: url(pieces/army_jp.png); background-size: 35px 70px; }
-.air_jp { background-image: url(pieces/air_jp.png); background-size: 35px 70px; }
-.navy_jp { background-image: url(pieces/navy_jp.png); background-size: 35px 70px; }
-.hq_jp { background-image: url(pieces/hq_jp.png); background-size: 35px 70px; }
-.army_us { background-image: url(pieces/army_us.png); background-size: 35px 70px; }
-.air_us { background-image: url(pieces/air_us.png); background-size: 35px 70px; }
-.navy_us { background-image: url(pieces/navy_us.png); background-size: 35px 70px; }
-.hq_us { background-image: url(pieces/hq_us.png); background-size: 35px 70px; }
+.air_br { background-image: url(pieces/air_br.png); background-size: 136px 70px; }
+.air_jp { background-image: url(pieces/air_jp.png); background-size: 441px 70px; }
+.air_jp_navy { background-image: url(pieces/air_jp_navy.png); background-size: 407px 70px; }
+.air_us { background-image: url(pieces/air_us.png); background-size: 548px 70px; }
+.air_us_marine { background-image: url(pieces/air_us_marine.png); background-size: 135px 70px; }
+.army_aus { background-image: url(pieces/army_aus.png); background-size: 204px 70px; }
+.army_br { background-image: url(pieces/army_br.png); background-size: 407px 70px; }
+.army_cn { background-image: url(pieces/army_cn.png); background-size: 103px 70px; }
+.army_jp_1 { background-image: url(pieces/army_jp_1.png); background-size: 409px 70px; }
+.army_jp_2 { background-image: url(pieces/army_jp_2.png); background-size: 306px 70px; }
+.army_us { background-image: url(pieces/army_us.png); background-size: 408px 70px; }
+.cv_jp { background-image: url(pieces/cv_jp.png); background-size: 306px 70px; }
+.cv_us { background-image: url(pieces/cv_us.png); background-size: 647px 70px; }
+.force_aus { background-image: url(pieces/force_aus.png); background-size: 68px 70px; }
+.force_dutch { background-image: url(pieces/force_dutch.png); background-size: 375px 70px; }
+.hq_br { background-image: url(pieces/hq_br.png); background-size: 70px 70px; }
+.hq_joint { background-image: url(pieces/hq_joint.png); background-size: 70px 70px; }
+.hq_jp { background-image: url(pieces/hq_jp.png); background-size: 135px 70px; }
+.hq_us { background-image: url(pieces/hq_us.png); background-size: 135px 70px; }
+.marine_jp { background-image: url(pieces/marine_jp.png); background-size: 170px 70px; }
+.marine_us { background-image: url(pieces/marine_us.png); background-size: 303px 70px; }
+.navy_br { background-image: url(pieces/navy_br.png); background-size: 272px 70px; }
+.navy_jp { background-image: url(pieces/navy_jp.png); background-size: 340px 70px; }
+.navy_us { background-image: url(pieces/navy_us.png); background-size: 478px 70px; }
 
 
 /* CARDS */
