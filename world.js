@@ -98,7 +98,8 @@ function _update_preference_radio(name) {
 }
 
 function toggle_pieces() {
-    document.body.classList.toggle("hide-pieces")
+    // document.body.classList.toggle("hide-pieces")
+    toggle_markers_and_pieces()
 }
 
 function toggle_markers_and_pieces() {
@@ -706,6 +707,50 @@ function set_has(set, item) {
             return true
     }
     return false
+}
+
+function set_add(set, item) {
+    var a = 0
+    var b = set.length - 1
+    // optimize fast case of appending items in order
+    if (item > set[b]) {
+        set[b + 1] = item
+        return
+    }
+    while (a <= b) {
+        var m = (a + b) >> 1
+        var x = set[m]
+        if (item < x)
+            b = m - 1
+        else if (item > x)
+            a = m + 1
+        else
+            return
+    }
+    array_insert(set, a, item)
+}
+
+function array_insert(array, index, item) {
+    for (var i = array.length; i > index; --i)
+        array[i] = array[i - 1]
+    array[index] = item
+}
+
+function set_delete(set, item) {
+    var a = 0
+    var b = set.length - 1
+    while (a <= b) {
+        var m = (a + b) >> 1
+        var x = set[m]
+        if (item < x)
+            b = m - 1
+        else if (item > x)
+            a = m + 1
+        else {
+            array_delete(set, m)
+            return
+        }
+    }
 }
 
 function map_get(map, key, missing) {

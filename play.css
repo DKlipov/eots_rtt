@@ -139,6 +139,14 @@ body.Alies #jp_hand { grid-row: 4; }
 	height: 1490px;
 }
 
+#canvas {
+	width: 2290px;
+	height: 1490px;
+	position: absolute;
+	z-index: 1;
+	pointer-events: none;
+}
+
 #map {
 	width: 2290px;
 	height: 1490px;

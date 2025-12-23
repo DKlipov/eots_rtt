@@ -8,6 +8,9 @@ const ELIMINATED_BOX = 1478
 const DELAYED_BOX = 1479
 const TURN_BOX = 1480
 
+const CANVAS = document.getElementById("canvas")
+const CANVAS_CTX = document.getElementById("canvas").getContext("2d")
+
 function on_focus_card_tip(c) {
     if (data.cards[c].type === "Barrage")
         document.getElementById("tooltip").classList = "card barrage c" + c
@@ -19,7 +22,12 @@ function on_blur_card_tip(c) {
     document.getElementById("tooltip").classList = "hide"
 }
 
+function clear_paths() {
+    CANVAS_CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
+}
+
 function on_init() {
+    init_canvas()
     let map = document.getElementById("map")
     map.onclick = (a) => {
         if (a.target === map && world.focus !== null) {
@@ -30,8 +38,8 @@ function on_init() {
     }
     for (let i = 1; i < LAST_BOARD_HEX; ++i) {
         let center = hex_center(i)
-        define_layout("board_hex", i, [center[0] - 4, center[1] - 12, 45, 45], "stack")
-        define_space("action_hex", i, [center[0] - 15, center[1] - 17, 45, 45])
+        define_layout("board_hex", i, [center[0] - 18, center[1] - 14, 45, 45], "stack")
+        define_space("action_hex", i, [center[0] - 29, center[1] - 19, 45, 45])
     }
     for (let i = 1; i <= 12; ++i) {
         define_layout("board_hex", TURN_BOX + i, [80, 1050 - (i - 1) * 40, 45, 45], "stack")
@@ -118,7 +126,7 @@ function int_to_hex(i) {
 
 function hex_center(i) {
     let column = (Math.floor(i / 29))
-    return [57 + column * 43.0, 41 + (i % 29) * 50 + (column % 2) * 25]
+    return [71 + column * 43.0, 43 + (i % 29) * 50 + (column % 2) * 25]
 }
 
 // for (let i = 1; i < LAST_BOARD_HEX; ++i) {
@@ -133,10 +141,56 @@ function hex_center(i) {
 //     document.getElementById("map").appendChild(elt)
 // }
 
+function init_canvas() {
+    var sizeX = 2290
+    var sizeY = 1490
+    CANVAS.style.width = sizeX + "px"
+    CANVAS.style.height = sizeY + "px"
+
+    var scale = window.devicePixelRatio
+    CANVAS.width = sizeX * scale
+    CANVAS.height = sizeY * scale
+
+    CANVAS_CTX.scale(scale, scale)
+}
+
+function draw_paths() {
+    for (var i = 0; i < G.offensive.paths.length; i++) {
+        if (Array.isArray(G.offensive.paths[i])) {
+            console.log(Array.isArray(G.offensive.paths[i]))
+            console.log(G.offensive.paths[i])
+            var start = hex_center(G.offensive.paths[i][1])
+            var finish
+            CANVAS_CTX.strokeStyle = "red"
+            CANVAS_CTX.fillStyle = "red"
+            CANVAS_CTX.lineWidth = 2;
+            CANVAS_CTX.beginPath();
+            CANVAS_CTX.arc(start[0] , start[1] , 4, 0, 2 * Math.PI);
+            CANVAS_CTX.fill();
+            CANVAS_CTX.stroke();
+            for (var j = 2; j < G.offensive.paths[i].length; j++) {
+                start = hex_center(G.offensive.paths[i][j - 1])
+                finish = hex_center(G.offensive.paths[i][j])
+                CANVAS_CTX.beginPath();
+                CANVAS_CTX.moveTo(start[0], start[1]);
+                CANVAS_CTX.lineTo(finish[0], finish[1]);
+                CANVAS_CTX.stroke();
+            }
+            if (finish) {
+                CANVAS_CTX.beginPath();
+                CANVAS_CTX.fillRect(finish[0] - 4, finish[1] - 4, 8, 8)
+                CANVAS_CTX.stroke();
+            }
+        }
+    }
+}
+
 function on_update() {
     var z, u
 
     begin_update()
+    clear_paths()
+    draw_paths()
 
     console.log(G)
     // console.log(V)
@@ -144,16 +198,19 @@ function on_update() {
     // G.actions={}
     // G.actions.board_hex = []
     // G.actions.board_hex.push(hex_to_int(piece.start))
+    let unit_present_hex = []
 
     for (let i = 0; i < data.pieces.length; ++i) {
         let piece = data.pieces[i]
         if (G.location[i] > 0) {
+            set_add(unit_present_hex, G.location[i])
             let unit = populate("board_hex", G.location[i], "unit", i)
             unit.classList.toggle("activated", G.offensive.active_units.includes(i))
             unit.classList.toggle("selected", G.offensive.active_stack.includes(i))
             unit.classList.toggle("reduced", set_has(G.reduced, i))
         }
     }
+    G.control.filter(h => !set_has(unit_present_hex, h)).forEach(h => populate_generic("board_hex", h, "marker control_jp"))
 
     update_hand(AP)
     update_hand(JP)
