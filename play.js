@@ -43,6 +43,7 @@ function on_init() {
     }
     for (let i = 1; i <= 12; ++i) {
         define_layout("board_hex", TURN_BOX + i, [80, 1050 - (i - 1) * 40, 45, 45], "stack")
+        define_space("action_hex", TURN_BOX + i, [80, 1050 - (i - 1) * 40, 45, 45], "stack")
     }
     define_layout("board_hex", ELIMINATED_BOX, [50, 50, 45, 45], "stack")
     define_layout("board_hex", DELAYED_BOX, [2100, 1350, 45, 45], "stack")

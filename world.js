@@ -768,3 +768,30 @@ function map_get(map, key, missing) {
     }
     return missing
 }
+
+function map_set(map, key, value) {
+    var a = 0
+    var b = (map.length >> 1) - 1
+    while (a <= b) {
+        var m = (a + b) >> 1
+        var x = map[m << 1]
+        if (key < x)
+            b = m - 1
+        else if (key > x)
+            a = m + 1
+        else {
+            map[(m << 1) + 1] = value
+            return
+        }
+    }
+    array_insert_pair(map, a << 1, key, value)
+}
+
+function array_insert_pair(array, index, key, value) {
+    for (var i = array.length; i > index; i -= 2) {
+        array[i] = array[i - 2]
+        array[i + 1] = array[i - 1]
+    }
+    array[index] = key
+    array[index + 1] = value
+}
