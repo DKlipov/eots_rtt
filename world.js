@@ -787,6 +787,11 @@ function map_set(map, key, value) {
     array_insert_pair(map, a << 1, key, value)
 }
 
+function map_for_each(map, f) {
+    for (var i = 0; i < map.length; i += 2)
+        f(map[i], map[i + 1])
+}
+
 function array_insert_pair(array, index, key, value) {
     for (var i = array.length; i > index; i -= 2) {
         array[i] = array[i - 2]

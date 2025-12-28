@@ -156,44 +156,46 @@ function init_canvas() {
 }
 
 function draw_paths() {
-    for (var i = 0; i < G.offensive.paths.length; i++) {
-        if (Array.isArray(G.offensive.paths[i])) {
-            console.log(Array.isArray(G.offensive.paths[i]))
-            console.log(G.offensive.paths[i])
-            var start = hex_center(G.offensive.paths[i][1])
-            var finish
-            CANVAS_CTX.strokeStyle = "red"
-            CANVAS_CTX.fillStyle = "red"
-            CANVAS_CTX.lineWidth = 2;
+    map_for_each(G.offensive.paths, (k, v) => {
+        var start = hex_center(v[1])
+        var finish
+        CANVAS_CTX.strokeStyle = "red"
+        CANVAS_CTX.fillStyle = "red"
+        CANVAS_CTX.lineWidth = 2;
+        for (var j = 2; j < v.length; j++) {
+            start = hex_center(v[j - 1])
+            finish = hex_center(v[j])
             CANVAS_CTX.beginPath();
-            CANVAS_CTX.arc(start[0] , start[1] , 4, 0, 2 * Math.PI);
+            CANVAS_CTX.arc(start[0], start[1], 4, 0, 2 * Math.PI);
             CANVAS_CTX.fill();
             CANVAS_CTX.stroke();
-            for (var j = 2; j < G.offensive.paths[i].length; j++) {
-                start = hex_center(G.offensive.paths[i][j - 1])
-                finish = hex_center(G.offensive.paths[i][j])
-                CANVAS_CTX.beginPath();
-                CANVAS_CTX.moveTo(start[0], start[1]);
-                CANVAS_CTX.lineTo(finish[0], finish[1]);
-                CANVAS_CTX.stroke();
+            CANVAS_CTX.beginPath();
+            if (G.location[k] === v[j - 1]) {
+                CANVAS_CTX.setLineDash([5, 3]);
             }
-            if (finish) {
-                CANVAS_CTX.beginPath();
-                CANVAS_CTX.fillRect(finish[0] - 4, finish[1] - 4, 8, 8)
-                CANVAS_CTX.stroke();
-            }
+            CANVAS_CTX.moveTo(start[0], start[1]);
+            CANVAS_CTX.lineTo(finish[0], finish[1]);
+            CANVAS_CTX.stroke();
+            CANVAS_CTX.setLineDash([])
         }
-    }
+        if (finish) {
+            CANVAS_CTX.beginPath();
+            CANVAS_CTX.fillRect(finish[0] - 4, finish[1] - 4, 8, 8)
+            CANVAS_CTX.stroke();
+        }
+    })
 }
 
 function on_update() {
     var z, u
 
     begin_update()
+
+    console.log(G)
     clear_paths()
     draw_paths()
 
-    console.log(G)
+
     // console.log(V)
     // console.log(R)
     // G.actions={}
@@ -207,7 +209,7 @@ function on_update() {
             set_add(unit_present_hex, G.location[i])
             let unit = populate("board_hex", G.location[i], "unit", i)
             unit.classList.toggle("activated", G.offensive.active_units.includes(i))
-            unit.classList.toggle("selected", G.offensive.active_stack.includes(i))
+            unit.classList.toggle("selected", G.active_stack.includes(i))
             unit.classList.toggle("reduced", set_has(G.reduced, i))
         }
     }
@@ -237,6 +239,7 @@ function on_update() {
 
 
     action_button("pass", "Pass")
+    action_button("no_move", "No move")
     action_button("next", "Next")
     action_button("done", "Done")
     action_button("undo", "Undo")
