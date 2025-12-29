@@ -1,5 +1,7 @@
 Todo list:
-* Declare battle hex step WIP
+* Ground movement WIP
+* Supply check
+* Navy & Amph movement
 * Special reaction and intelligence state step
 * Amphibious shiping point calculation
 * Reaction movement
@@ -10,7 +12,6 @@ Todo list:
 * Post battle movement
 * Air strategic movement & displacement
 * Parentheless air restrictions (move, reaction and commit battle steps)
-* Supply check
 * Progress of war
 * Interservice rivalry
 * National status segment
