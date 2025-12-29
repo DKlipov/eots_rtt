@@ -12,6 +12,7 @@ Todo list:
 * Parentheless air restrictions (move, reaction and commit battle steps)
 * Supply check
 * Progress of war
+* Interservice rivalry
 * National status segment
 * Political will segment
 * Attrition phase

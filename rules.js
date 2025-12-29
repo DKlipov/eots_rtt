@@ -29,6 +29,7 @@ const AIR_CLOSE_MOVE = 1 << 6
 const POST_BATTLE_MOVE = 1 << 7
 const REACTION_MOVE = 1 << 8
 const AIR_EXTENDED_MOVE = 1 << 9
+const ATTACK_MOVE = 1 << 10
 
 //Intelligence
 const SURPRISE = 0
@@ -389,7 +390,7 @@ P.offensive_segment = {
 
 P.choose_hq = {
     prompt() {
-        prompt(cards[G.offensive.active_cards[0]].name + ". Choose HQ.")
+        prompt(`${offensive_card_header()} Choose HQ.`)
         for (let i = 0; i < pieces.length; i++) {
             let piece = pieces[i]
             let faction = R === AP ? "ap" : "jp"
@@ -476,22 +477,23 @@ P.move_offensive_units = {
         L.move_data = get_move_data()
         L.movable_units = []
         L.allowed_hexes = []
+        L.state = "move"
         G.offensive.active_units[R].forEach(u => set_add(L.movable_units, u))
     },
     prompt() {
-        if (L.move_data.moved) {
+        if (L.state === "attack") {
             prompt(`${offensive_card_header()} Commit units to battle.`)
             button("pass")
         } else {
-            prompt(`${offensive_card_header()}. Move activated units.`)
+            prompt(`${offensive_card_header()} Move activated units.`)
             button("done")
         }
         if (G.active_stack.length === 0) {
             L.movable_units.forEach(u => action_unit(u))
-        } else if (!L.move_data.moved) {
+        } else if (L.state === "move") {
             let loc = G.location[G.active_stack[0]]
             L.movable_units.filter(u => loc === G.location[u]
-                && (L.move_data.is_air_present === (pieces[u].class === "air"))
+                && !L.move_data.is_air_present
                 && !set_has(G.active_stack, u))
                 .forEach(u => action_unit(u))
             button("no_move")
@@ -525,6 +527,7 @@ P.move_offensive_units = {
         map_set(G.offensive.paths, u, [ANY_MOVE, L.location])
     },
     pass() {
+        L.state = "move"
         L.allowed_hexes = []
         if (L.type & POST_BATTLE_MOVE) {
             G.active_stack.forEach(u => array_delete_item(G.offensive.active_units[R], u))
@@ -538,19 +541,23 @@ P.move_offensive_units = {
         push_undo()
         log(`Units ${G.active_stack} moved to ${int_to_hex(hex)}`)
         G.active_stack.forEach(u => {
-            map_get(G.offensive.paths, u).push(hex)
-            if (!L.move_data.is_air_present || !L.move_data.moved) {
+            const path = map_get(G.offensive.paths, u)
+            path.push(hex)
+            if (L.state === "move") {
                 G.location[u] = hex
-
+            } else {
+                path[0] = path[0] | ATTACK_MOVE
             }
         })
-        if (L.move_data.is_air_present && !L.move_data.moved) {
-            L.move_data.moved = true
+        console.log(L)
+        console.log(G.active_stack.length)
+        if (L.state === "move" && L.move_data.battle_range && G.active_stack.length === 1) {
             compute_air_commit_hexes()
+            L.state = "attack"
             if (L.allowed_hexes.length === 0) {
                 this.pass()
             }
-        } else if (L.move_data.is_air_present && L.move_data.moved) {
+        } else if (L.state === "attack") {
             set_add(G.offensive.battle_hexes, hex)
             this.pass()
         } else {
@@ -558,9 +565,12 @@ P.move_offensive_units = {
         }
     },
     no_move() {
-        if (L.move_data.is_air_present && !L.move_data.moved) {
-            L.move_data.moved = true
+        if (L.move_data.battle_range && G.active_stack.length === 1) {
             compute_air_commit_hexes()
+            L.state = "attack"
+            if (L.allowed_hexes.length === 0) {
+                this.pass()
+            }
         } else {
             this.pass()
         }
@@ -568,10 +578,11 @@ P.move_offensive_units = {
     done() {
         push_undo()
         G.offensive.active_units[R].filter(u => !map_has(G.offensive.paths, u))
-            .forEach(u => map_set(G.offensive.paths, u, [ANY_MOVE, L.location]))
+            .forEach(u => map_set(G.offensive.paths, u, [ANY_MOVE, G.location[u]]))
         if (L.type & POST_BATTLE_MOVE) {
             G.offensive.active_units[R] = []
         }
+        G.active_stack = []
         end()
     },
 }
@@ -616,7 +627,6 @@ function check_supply() {
             L.supply_cache[location] = L.supply_cache[location] | (JP_GAH_UNITS << faction) | (JP_UNITS << faction)
         }
     }
-    console.log(L.supply_cache.filter(h => h))
 }
 
 function get_move_data() {
@@ -674,30 +684,29 @@ function get_move_cost(terrain) {
 }
 
 function compute_possible_battle_hexes() {
+    if (G.offensive.battle_hexes.length > 0 && G.offensive.type === OC) {
+        return G.offensive.battle_hexes.slice()
+    }
     var result = []
     const units = []
-    G.offensive.active_units[R].filter(u => pieces[u].type === "air").forEach(u => {
+    G.offensive.active_units[R].filter(u => pieces[u].br).forEach(u => {
         const location = G.location[u]
         var path = map_get(G.offensive.paths, u)
         var range = pieces[u].ebr
         if (u.parenthetical) {
             range = pieces[u].br
         }
-        if (u.parenthetical && path && path[0] & AIR_EXTENDED_MOVE) {
+        if (path[0] & ATTACK_MOVE || u.parenthetical && path && path[0] & AIR_EXTENDED_MOVE) {
             range = 0
         }
-
         var saved_range = map_get(units, location)
-        if (range > 0
-            && (!path || path[path.length - 1] === location)
-            && (!saved_range || saved_range < range)) {
+        if (range > 0 && (!saved_range || saved_range < range)) {
             map_set(units, location, range)
         }
     })
 
     for (i = 0; i < L.supply_cache.length; i++) {
-        if (!(L.supply_cache[i] & JP_UNITS << (1 - R))
-            || set_has(G.battle_hexes, i)
+        if (!(L.supply_cache[i] & JP_UNITS << (1 - R)) || set_has(G.offensive.battle_hexes, i)
         ) {
             continue
         }
@@ -708,6 +717,7 @@ function compute_possible_battle_hexes() {
             }
         }
     }
+    G.offensive.battle_hexes.forEach(h => set_add(result, h))
     return result
 }
 
@@ -917,12 +927,41 @@ function check_hexes_in_distance(location, connection_check, limit, process_hex)
     }
 }
 
+function unit_in_battle_range(u) {
+    const range = pieces[u].parenthetical ? pieces[u].br : pieces[u].ebr
+    const location = G.location[u]
+    for (var i = 0; i < L.possible_hexes.length; i++) {
+        console.log(`Unit ${u}, ${get_distance(location, L.possible_hexes[i])}`)
+        if (get_distance(location, L.possible_hexes[i]) <= range) {
+            return true
+        }
+    }
+    return false
+}
+
+function commit_to_attack(unit, hex) {
+    var path = map_get(G.offensive.paths, unit)
+    if (!path) {
+        console.log("set new")
+        path = [ANY_MOVE, G.location[unit]]
+        map_set(G.offensive.paths, unit, path)
+    }
+    path.push(hex)
+    path[0] = path[0] | ATTACK_MOVE
+    console.log(path)
+    console.log(G.location[unit])
+}
+
 P.declare_battle_hexes = {
     _begin() {
+        check_supply()
+        G.offensive.battle_hexes.forEach(h => log(`Battle declared in hex ${int_to_hex(h)}`))
+        L.possible_hexes = compute_possible_battle_hexes()
         L.possible_units = []
-        G.offensive.active_units[G.offensive.attacker].filter(u => pieces[u].type === "air").forEach(u => {
+        G.offensive.active_units[G.offensive.attacker].filter(u => pieces[u].br).forEach(u => {
             const path = map_get(G.offensive.paths, u)
-            if (!path || path[path.length - 1] === G.location[u]) {
+            const unit_not_commited = !path || (!(path[0] & ATTACK_MOVE) && !(path[0] & AIR_EXTENDED_MOVE))
+            if (unit_not_commited && unit_in_battle_range(u)) {
                 set_add(L.possible_units, u)
             }
         })
@@ -930,33 +969,40 @@ P.declare_battle_hexes = {
             log("Additional battle hexes could not be declared")
             end()
         }
-        L.possible_hexes = []
-        G.offensive.battle_hexes.forEach(h => log(`Battle declared in hex ${int_to_hex(h)}`))
-        check_supply()
-        if (G.offensive.battle_hexes.length <= 0 || G.offensive.type === EC) {
-            L.possible_hexes = compute_possible_battle_hexes()
-        }
-        L.move_data = get_move_data()
     },
     prompt() {
-        prompt(`${offensive_card_header()} Declare battle hexes and commit air units.`)
-        for (let i = 0; i < L.possible_hexes.length; i++) {
-            let location = L.possible_hexes[i]
-            if (G.active_stack.length <= 0 || get_distance(location, L.move_data.location) <= L.move_data.extended_battle_range) {
-                action_hex(location)
-            }
+        prompt(`${offensive_card_header()} Declare battle hexes and commit units.`)
+        console.log(L)
+        if (G.active_stack.length === 0) {
+            L.possible_units.forEach(u => action_unit(u))
+            button("done")
+        } else {
+            const location = G.location[G.active_stack[0]]
+            const range = pieces[G.active_stack[0]].ebr
+            L.possible_hexes.filter(loc => get_distance(loc, location) <= range).forEach(loc => action_hex(loc))
         }
-        L.possible_units.filter(u => G.active_stack.length <= 0 || G.location[u] === L.move_data.location)
-            .forEach(u => action_unit(u))
     },
     action_hex(hex) {
         push_undo()
-        set_add(G.offensive.battle_hexes, hex)
-        if (G.offensive.battle_hexes.length >= L.possible_hexes.length) {
+        commit_to_attack(G.active_stack[0], hex)
+        if (!set_has(G.offensive.battle_hexes, hex)) {
+            set_add(G.offensive.battle_hexes, hex)
+            if (G.offensive.type === OC) {
+                L.possible_hexes = G.offensive.battle_hexes.slice()
+                L.possible_units = L.possible_units.filter(u => unit_in_battle_range(u))
+            }
+        }
+        G.active_stack = []
+        if (L.possible_units.length <= 0) {
             end()
         }
     },
-    stop() {
+    unit(u) {
+        push_undo()
+        G.active_stack = [u]
+        set_delete(L.possible_units, u)
+    },
+    done() {
         push_undo()
         end()
     },
@@ -964,7 +1010,7 @@ P.declare_battle_hexes = {
 
 P.commit_offensive = {
     prompt() {
-        prompt(`${offensive_card_header()}. Commit offensive.`)
+        prompt(`${offensive_card_header()} Commit offensive.`)
         button("next")
     },
     next() {
