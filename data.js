@@ -3363,7 +3363,7 @@ data.map = [
     {id: 2408, region: "IChina", terrain: MIXED},
     {id: 2307, region: "IChina", terrain: MIXED},
     {id: 2109, region: "Siam", terrain: JUNGLE, edges: [5, 2, 2, 2, 5, 1]},
-    {id: 2110, name: "Udorn", region: "Siam", terrain: OPEN, edges: [2, 2, 2, 2, 4, 2]},
+    {id: 2210, name: "Udorn", region: "Siam", terrain: OPEN, edges: [2, 2, 2, 2, 4, 2]},
     {id: 2209, region: "Siam", terrain: MIXED},
     {id: 2010, region: "Siam", terrain: MIXED, edges: [1, 5, 4, 2, 1, 1]},
     {
