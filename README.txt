@@ -1,7 +1,7 @@
 Todo list:
-* Ground movement WIP
 * Supply check
 * Navy & Amph movement
+* Activation line check (hq - unit)
 * Special reaction and intelligence state step
 * Amphibious shiping point calculation
 * Reaction movement

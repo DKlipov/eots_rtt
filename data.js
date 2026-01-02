@@ -2367,7 +2367,7 @@ data.pieces = [
     {
         id: "cbay",
         "faction": "ap",
-        "name": "C. Bay",
+        "name": "Commencement Bay",
         "counter": "cv_us unit_ix_18",
         "class": "naval",
         "type": "cve",

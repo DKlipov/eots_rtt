@@ -68,7 +68,6 @@ function push_stack(stk, elt) {
 }
 
 function update_hand(side) {
-    console.log(`foo ${G.future_offensive[side]}`)
     if (G.future_offensive[side][0] > 0) {
         let card = G.future_offensive[side][1]
         console.log(`foo ${card}`)
@@ -157,12 +156,12 @@ function init_canvas() {
 
 function draw_paths() {
     map_for_each(G.offensive.paths, (k, v) => {
-        var start = hex_center(v[1])
+        var start = hex_center(v[2])
         var finish
         CANVAS_CTX.strokeStyle = "red"
         CANVAS_CTX.fillStyle = "red"
         CANVAS_CTX.lineWidth = 2;
-        for (var j = 2; j < v.length; j++) {
+        for (var j = 3; j < v.length; j++) {
             start = hex_center(v[j - 1])
             finish = hex_center(v[j])
             CANVAS_CTX.beginPath();
