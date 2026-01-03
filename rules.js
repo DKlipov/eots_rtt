@@ -37,6 +37,11 @@ const SURPRISE = 0
 const INTERCEPT = 1
 const AMBUSH = 2
 
+//hex data
+const CITY = 1
+const JAPANESE_CITY = 2
+const CHINESE_CITY = 3
+
 //Terrain
 const OCEAN = 0
 const OPEN = 1
@@ -52,30 +57,34 @@ const ROAD = 4
 const UNPLAYABLE = 8
 const MAP_BORDER = 16
 
-// Hex status
+// Hex supply status flags
 const JP_ZOI = 1 << 0
 const AP_ZOI = 1 << 1
 const JP_ZOI_NTRL = 1 << 2
 const AP_ZOI_NTRL = 1 << 3
-const JP_SUPPLY = 1 << 4
-const US_SUPPLY = 1 << 5
-const BR_SUPPLY = 1 << 6
-const JOINT_SUPPLY = 1 << 7
-const JP_AIR_UNITS = 1 << 8
-const AP_AIR_UNITS = 1 << 9
-const JP_GROUND_UNITS = 1 << 10
-const AP_GROUND_UNITS = 1 << 11
-const JP_NAVAL_UNITS = 1 << 12
-const AP_NAVAL_UNITS = 1 << 13
-const JP_HQ_UNITS = 1 << 14
-const AP_HQ_UNITS = 1 << 15
-const TRANSPORT_ROUTE_DISABLED = 1 << 16
+const JP_AIR_UNITS = 1 << 4
+const AP_AIR_UNITS = 1 << 5
+const JP_GROUND_UNITS = 1 << 6
+const AP_GROUND_UNITS = 1 << 7
+const JP_NAVAL_UNITS = 1 << 8
+const AP_NAVAL_UNITS = 1 << 9
+const JP_HQ_UNITS = 1 << 10
+const AP_HQ_UNITS = 1 << 11
+const TRANSPORT_ROUTE_DISABLED = 1 << 12
+const JP_SUPPLY_PORT = 1 << 13
+const AP_SUPPLY_PORT = 1 << 14
+const JP_SUPPLIED_HEX = 1 << 15
+const BR_SUPPLIED_HEX = 1 << 16
+const JOINT_SUPPLIED_HEX = 1 << 17
+const US_SUPPLIED_HEX = 1 << 18
 
 const JP_UNITS = JP_AIR_UNITS | JP_GROUND_UNITS | JP_NAVAL_UNITS | JP_HQ_UNITS
 const JP_GA_UNITS = JP_AIR_UNITS | JP_GROUND_UNITS
 const JP_GAH_UNITS = JP_AIR_UNITS | JP_GROUND_UNITS | JP_HQ_UNITS
+const SUPPLY_ITERATION_MASK = [...Array(13).keys()].reduce((a, b) => a + Math.pow(2, b))
 
 const LAST_BOARD_HEX = 1476
+const NON_PLACED_BOX = 1477
 const ELIMINATED_BOX = 1478
 const DELAYED_BOX = 1479
 const TURN_BOX = 1480
@@ -148,12 +157,21 @@ for (let i = 1; i < LAST_BOARD_HEX; ++i) {
         } else if (hex.island || hex.terrain === ATOLL || hex.terrain === OCEAN) {
             border = 1
         }
+
+        if (j === 3 && border & MAP_BORDER) {
+            hex.supply_source = AP //south side of the map
+        }
         hex.coastal = hex.coastal || (border & WATER)
         hex.edges_int = hex.edges_int | (border << 5 * j)
 
     }
     if (hex.airfield || hex.port || hex.port || hex.city) {
         hex.named = true
+    }
+    if (hex.city === JAPANESE_CITY) {
+        hex.supply_source = JP
+    } else if (i < 29 || i > (LAST_BOARD_HEX - 29)) {
+        hex.supply_source = AP ////left or right side of the map
     }
 }
 
@@ -407,8 +425,7 @@ P.choose_hq = {
         prompt(`${offensive_card_header()} Choose HQ.`)
         for (let i = 0; i < pieces.length; i++) {
             let piece = pieces[i]
-            let faction = R === AP ? "ap" : "jp"
-            if (piece.faction === faction && piece.class === "hq") {
+            if (piece.faction === R && piece.class === "hq") {
                 action_unit(i)
             }
         }
@@ -446,9 +463,8 @@ P.activate_units = {
         prompt(`${offensive_card_header()}. Activate units ${G.offensive.logistic} + ${L.hq_bonus} / ${G.offensive.active_units[R].length}.`)
         for (let i = 0; i < pieces.length; i++) {
             let piece = pieces[i]
-            let faction = R === AP ? "ap" : "jp"
             let hq = G.offensive.active_hq[G.active]
-            if (piece.faction === faction && get_distance(G.location[hq], G.location[i]) <= pieces[hq].cr && piece.class !== "hq" &&
+            if (piece.faction === R && get_distance(G.location[hq], G.location[i]) <= pieces[hq].cr && piece.class !== "hq" &&
                 !set_has(G.offensive.active_units[R], i)) {
                 action_unit(i)
             }
@@ -628,33 +644,142 @@ function get_near_hexes(hex) {
     return result
 }
 
-function set_zoi(excluded_units) {
+function for_each_unit(apply) {
+    for (let i = 0; i < pieces.length; i++) {
+        var piece = pieces[i]
+        if (G.location[i] > LAST_BOARD_HEX) {
+            continue
+        }
+        apply(i, piece)
+    }
+}
+
+function set_zoi(i, piece) {
+    let location = G.location[i]
+    if (piece.br && !set_has(G.oos, i)) {
+        let mask = 0 | (JP_ZOI << piece.faction) | (JP_ZOI_NTRL << 1 - piece.faction)
+        G.supply_cache[location] = G.supply_cache[location] | mask
+        get_near_hexes(location).flatMap(h => get_near_hexes(h)).forEach(h => {
+            G.supply_cache[h] = G.supply_cache[h] | mask
+        })
+    }
+}
+
+function mark_unit(i, piece) {
+    const location = G.location[i]
+    if (piece.class === "air") {
+        G.supply_cache[location] = G.supply_cache[location] | (JP_AIR_UNITS << piece.faction)
+    } else if (piece.class === "hq") {
+        G.supply_cache[location] = G.supply_cache[location] | (JP_HQ_UNITS << piece.faction)
+    } else if (piece.class === "ground") {
+        G.supply_cache[location] = G.supply_cache[location] | (JP_GROUND_UNITS << piece.faction)
+    } else if (piece.class === "naval") {
+        G.supply_cache[location] = G.supply_cache[location] | (JP_NAVAL_UNITS << piece.faction)
+    }
+}
+
+function check_hq_in_supply(hq, piece) {
+    const faction = piece.faction
+    const location = G.location[hq]
+    let queue = []
+    const overland_set = [location]
+    const oversea_set = [location]
+    queue.push(location)
+    for (var i = 0; i < queue.length; i++) {
+        let item = queue[i]
+        let nh_list = get_near_hexes(item)
+        const MD = MAP_DATA[item]
+        const overland = set_has(overland_set, item)
+        const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))
+        const enemy_port_s = (MD.port && set_has(G.control, item) == (1 - faction))
+        const occupied_land_s = G.supply_cache[item] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[item] & JP_GAH_UNITS << faction)
+        const oversea = set_has(oversea_set, item)
+        for (let j = 0; j < 6; j++) {
+            let nh = nh_list[j]
+            if (!nh) {
+                continue
+            }
+            var reachable = false
+            const enemy_port = enemy_port_s || (MD.port && set_has(G.control, nh) == (1 - faction))
+            const occupied_land = occupied_land_s || G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
+            if (!set_has(overland_set, nh) && (overland || (MD.port && !enemy_port)) && MD.edges_int & GROUND << 5 * j && !occupied_land) {
+                reachable = true
+                set_add(overland_set, nh)
+            }
+            const non_neutral_zoi = non_neutral_zoi_s || G.supply_cache[nh] & JP_ZOI << (1 - faction) && !(G.supply_cache[nh] & JP_ZOI_NTRL << (1 - faction))
+            if (!set_has(oversea_set, nh) && (oversea || (MD.port && !enemy_port)) && MD.edges_int & WATER << 5 * j && !non_neutral_zoi) {
+                reachable = true
+                set_add(oversea_set, nh)
+            }
+            if (reachable) {
+                if (MAP_DATA[nh].supply_source === piece.faction) {
+                    return true
+                }
+                queue.push(nh)
+            }
+        }
+    }
+    console.log(`OOS hq ${hq}`)
+    set_add(G.oos, hq)
+    return false
+}
+
+function mark_supply_ports(hq) {
 
 }
 
+function mark_hexes_supplied_from(hq) {
+
+}
+
+function check_unit_supply(i, piece) {
+    return true
+}
+
 function check_supply() {
+    for (let o = 0; o < pieces.length; o++) {
+        if (G.location[o] <= 0) {
+            G.location[o] = NON_PLACED_BOX
+        }
+    }
     G.supply_cache = []
-    for (let i = 0; i < pieces.length; i++) {
-        let piece = pieces[i]
-        let location = G.location[i]
-        if (location > LAST_BOARD_HEX) {
-            continue
+    for_each_unit(mark_unit)
+    for_each_unit((i, p) => p.faction ? set_zoi(i, p) : null)
+    for_each_unit((i, p) => set_zoi(i, p))
+    var oos_counter_prev = [0, 0]//counts supplied for JP and oos for AP
+    var oos_counter_cur = [0, 0]//same but for current iteration
+    for (var i = 0; i < 10; i++) {//limit supply check counts
+        G.oos = []
+        for_each_unit((i, p) => {
+            if (p.class === "hq") {
+                mark_supply_ports(i)
+            }
+        })
+        for_each_unit((i, p) => {
+            if (p.class === "hq") {
+                check_hq_in_supply(i, p)
+                if (!set_has(G.oos, i)) {
+                    mark_hexes_supplied_from(i)
+                }
+            }
+        })
+        for_each_unit((i, p) => {
+            const supply = check_unit_supply(i, p)
+            oos_counter_cur[p.faction] += (supply == (1 - p.faction))
+            if (!supply) {
+                set_add(G.oos, i)
+            }
+        })
+        if (oos_counter_cur[0] > oos_counter_prev[0] || oos_counter_cur[1] > oos_counter_prev[1]) {
+            oos_counter_prev = oos_counter_cur
+            oos_counter_cur = [0, 0]
+        } else {
+            break
         }
-        let faction = piece.faction === "ap"
-        if (piece.class === "air") {
-            let mask = 0 | (JP_ZOI << faction) | (JP_ZOI_NTRL << 1 - faction)
-            G.supply_cache[location] = G.supply_cache[location] | (JP_AIR_UNITS << faction) | mask
-            get_near_hexes(location).flatMap(h => get_near_hexes(h)).forEach(h => {
-                G.supply_cache[h] = G.supply_cache[h] | mask
-                console.log(`Hex zoi ${int_to_hex(h)} - ${piece.faction}`)
-            })
-        } else if (piece.class === "hq") {
-            G.supply_cache[location] = G.supply_cache[location] | (JP_HQ_UNITS << faction)
-        } else if (piece.class === "ground") {
-            G.supply_cache[location] = G.supply_cache[location] | (JP_GROUND_UNITS << faction)
-        } else if (piece.class === "naval") {
-            G.supply_cache[location] = G.supply_cache[location] | (JP_NAVAL_UNITS << faction)
+        for (i = 1; i < LAST_BOARD_HEX; i++) {
+            G.supply_cache[i] = G.supply_cache[i] & SUPPLY_ITERATION_MASK
         }
+        for_each_unit((i, p) => set_zoi(i, p))
     }
 }
 
@@ -1249,7 +1374,7 @@ function construct_decks() {
     G.draw = [[], []]
 
     for (let c = 0; c < cards.length; ++c) {
-        if (cards[c].faction === "ap") {
+        if (cards[c].faction) {
             G.draw[AP].push(c)
         } else {
             G.draw[JP].push(c)
@@ -1263,8 +1388,6 @@ function draw_card(side) {
         G.draw[side] = G.discard[side]
         G.discard[side] = []
     }
-    console.log(side == 0 ? "JP" : "AP")
-    console.log(G.draw[side].length)
     var i = random(G.draw[side].length)
     var c = G.draw[side][i]
     array_delete(G.draw[side], i)
@@ -1286,7 +1409,7 @@ function setup_scenario_1942() {
         if (piece.reinforcement !== 2) {
             continue
         }
-        if (piece.faction === "ap") {
+        if (piece.faction) {
             G.location[i] = DELAYED_BOX
         }
         if (piece.start_reduced) {
@@ -1436,6 +1559,7 @@ function on_setup(scenario, options) {
     G.location = []
     for (let i = 0; i < pieces.length; i++) {
         var piece = pieces[i]
+        G.location[i] = NON_PLACED_BOX
         if (piece.start) {
             G.location[i] = hex_to_int(piece.start)
             if (piece.start_reduced) {

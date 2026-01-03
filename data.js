@@ -1,5 +1,8 @@
 const data = {}
 
+const JP = 0
+const AP = 1
+
 const OCEAN = 0
 const OPEN = 1
 const JUNGLE = 2
@@ -14,7 +17,7 @@ const CHINESE_CITY = 3
 data.cards = [
     {
         "num": 1,
-        "faction": "ap",
+        "faction": AP,
         "ops": 2,
         "oc": 2,
         "ec": 4,
@@ -24,7 +27,7 @@ data.cards = [
     },
     {
         "num": 2,
-        "faction": "ap",
+        "faction": AP,
         "ops": 2,
         "oc": 2,
         "ec": 0,
@@ -33,7 +36,7 @@ data.cards = [
     },
     {
         "num": 3,
-        "faction": "ap",
+        "faction": AP,
         "ops": 3,
         "oc": 3,
         "ec": 5,
@@ -42,7 +45,7 @@ data.cards = [
     },
     {
         "num": 4,
-        "faction": "ap",
+        "faction": AP,
         "ops": 2,
         "oc": 2,
         "ec": 0,
@@ -51,7 +54,7 @@ data.cards = [
     },
     {
         "num": 5,
-        "faction": "ap",
+        "faction": AP,
         "ops": 2,
         "oc": 2,
         "ec": 0,
@@ -60,7 +63,7 @@ data.cards = [
     },
     {
         "num": 6,
-        "faction": "ap",
+        "faction": AP,
         "ops": 1,
         "oc": 1,
         "ec": 0,
@@ -69,7 +72,7 @@ data.cards = [
     },
     {
         "num": 7,
-        "faction": "ap",
+        "faction": AP,
         "ops": 2,
         "oc": 2,
         "ec": 0,
@@ -78,7 +81,7 @@ data.cards = [
     },
     {
         "num": 1,
-        "faction": "jp",
+        "faction": JP,
         "ops": 2,
         "oc": 4,
         "ec": 0,
@@ -87,7 +90,7 @@ data.cards = [
     },
     {
         "num": 2,
-        "faction": "jp",
+        "faction": JP,
         "ops": 2,
         "oc": 4,
         "ec": 6,
@@ -96,7 +99,7 @@ data.cards = [
     },
     {
         "num": 3,
-        "faction": "jp",
+        "faction": JP,
         "ops": 1,
         "oc": 3,
         "ec": 0,
@@ -105,7 +108,7 @@ data.cards = [
     },
     {
         "num": 4,
-        "faction": "jp",
+        "faction": JP,
         "ops": 3,
         "oc": 5,
         "ec": 7,
@@ -114,7 +117,7 @@ data.cards = [
     },
     {
         "num": 5,
-        "faction": "jp",
+        "faction": JP,
         "ops": 2,
         "oc": 4,
         "ec": 0,
@@ -123,7 +126,7 @@ data.cards = [
     },
     {
         "num": 6,
-        "faction": "jp",
+        "faction": JP,
         "ops": 1,
         "oc": 3,
         "ec": 0,
@@ -132,7 +135,7 @@ data.cards = [
     },
     {
         "num": 7,
-        "faction": "jp",
+        "faction": JP,
         "ops": 3,
         "oc": 5,
         "ec": 7,
@@ -144,7 +147,7 @@ data.cards = [
 data.pieces = [
     {
         id: "hq_jp_cy",
-        "faction": "jp",
+        "faction": JP,
         "name": "Combined Fleet HQ (Yamamoto)",
         "counter": "hq_jp unit_ix_1",
         "class": "hq",
@@ -154,7 +157,7 @@ data.pieces = [
     },
     {
         id: "hq_jp_ss",
-        "faction": "jp",
+        "faction": JP,
         "name": "South Seas HQ",
         "counter": "hq_jp unit_ix_2",
         "class": "hq",
@@ -164,7 +167,7 @@ data.pieces = [
     },
     {
         id: "hq_jp_s",
-        "faction": "jp",
+        "faction": JP,
         "name": "South HQ",
         "counter": "hq_jp unit_ix_3",
         "class": "hq",
@@ -174,7 +177,7 @@ data.pieces = [
     },
     {
         id: "hq_jp_co",
-        "faction": "jp",
+        "faction": JP,
         "name": "Combined Fleet HQ (Ozawa)",
         "counter": "hq_jp unit_ix_4",
         "class": "hq",
@@ -183,7 +186,7 @@ data.pieces = [
     },
     {
         id: "akagi",
-        "faction": "jp",
+        "faction": JP,
         "name": "Akagi",
         "class": "naval",
         "type": "cv",
@@ -198,7 +201,7 @@ data.pieces = [
     },
     {
         id: "soryu",
-        "faction": "jp",
+        "faction": JP,
         "name": "Soryu",
         "class": "naval",
         "counter": "cv_jp unit_ix_2",
@@ -213,7 +216,7 @@ data.pieces = [
     },
     {
         id: "shokaku",
-        "faction": "jp",
+        "faction": JP,
         "name": "Shokaku",
         "class": "naval",
         "counter": "cv_jp unit_ix_3",
@@ -228,7 +231,7 @@ data.pieces = [
     },
     {
         id: "zuiho",
-        "faction": "jp",
+        "faction": JP,
         "name": "Zuiho",
         "class": "naval",
         "counter": "cv_jp unit_ix_4",
@@ -243,7 +246,7 @@ data.pieces = [
     },
     {
         id: "ryujo",
-        "faction": "jp",
+        "faction": JP,
         "name": "Ryujo",
         "class": "naval",
         "counter": "cv_jp unit_ix_5",
@@ -257,7 +260,7 @@ data.pieces = [
         "start": 3416
     }, {
         id: "nagato",
-        "faction": "jp",
+        "faction": JP,
         "name": "Nagato",
         "class": "naval",
         "counter": "navy_jp unit_ix_1",
@@ -270,7 +273,7 @@ data.pieces = [
         "start": 3407
     }, {
         id: "hiei",
-        "faction": "jp",
+        "faction": JP,
         "name": "Hiei",
         "class": "naval",
         "counter": "navy_jp unit_ix_2",
@@ -283,7 +286,7 @@ data.pieces = [
         "start": 3705
     }, {
         id: "kongo",
-        "faction": "jp",
+        "faction": JP,
         "name": "Kongo",
         "class": "naval",
         "counter": "navy_jp unit_ix_3",
@@ -296,7 +299,7 @@ data.pieces = [
         "start": 2909
     }, {
         id: "aoba",
-        "faction": "jp",
+        "faction": JP,
         "name": "Aoba",
         "class": "naval",
         "counter": "navy_jp unit_ix_4",
@@ -309,7 +312,7 @@ data.pieces = [
         "start": 4017
     }, {
         id: "mogami",
-        "faction": "jp",
+        "faction": JP,
         "name": "Mogami",
         "class": "naval",
         "counter": "navy_jp unit_ix_5",
@@ -323,7 +326,7 @@ data.pieces = [
     },
     {
         id: "takao",
-        "faction": "jp",
+        "faction": JP,
         "class": "naval",
         "notreplaceable": true,
         "counter": "navy_jp unit_ix_6",
@@ -337,7 +340,7 @@ data.pieces = [
     },
     {
         id: "nachi",
-        "faction": "jp",
+        "faction": JP,
         "class": "naval",
         "notreplaceable": true,
         "counter": "navy_jp unit_ix_7",
@@ -351,7 +354,7 @@ data.pieces = [
     },
     {
         id: "kamikaze",
-        "faction": "jp",
+        "faction": JP,
         "class": "naval",
         "notreplaceable": true,
         "counter": "navy_jp unit_ix_8",
@@ -365,7 +368,7 @@ data.pieces = [
     },
     {
         id: "tenyru",
-        "faction": "jp",
+        "faction": JP,
         "class": "naval",
         "notreplaceable": true,
         "counter": "navy_jp unit_ix_9",
@@ -379,7 +382,7 @@ data.pieces = [
     },
     {
         id: "air_jp_21",
-        "faction": "jp",
+        "faction": JP,
         "name": "21st Air Flotilla",
         "counter": "air_jp_navy unit_ix_1",
         "class": "air",
@@ -395,7 +398,7 @@ data.pieces = [
     },
     {
         id: "air_jp_22",
-        "faction": "jp",
+        "faction": JP,
         "name": "22nd Air Flotilla",
         "counter": "air_jp_navy unit_ix_2",
         "class": "air",
@@ -411,7 +414,7 @@ data.pieces = [
     },
     {
         id: "air_jp_23",
-        "faction": "jp",
+        "faction": JP,
         "name": "23rd Air Flotilla",
         "counter": "air_jp_navy unit_ix_3",
         "class": "air",
@@ -427,7 +430,7 @@ data.pieces = [
     },
     {
         id: "air_jp_24",
-        "faction": "jp",
+        "faction": JP,
         "name": "24th Air Flotilla",
         "counter": "air_jp_navy unit_ix_4",
         "class": "air",
@@ -443,7 +446,7 @@ data.pieces = [
     },
     {
         id: "army_jp_1sn",
-        "faction": "jp",
+        "faction": JP,
         "name": "1st SN Brigade",
         "counter": "marine_jp unit_ix_1",
         "class": "ground",
@@ -458,7 +461,7 @@ data.pieces = [
     },
     {
         id: "army_jp_2sn",
-        "faction": "jp",
+        "faction": JP,
         "name": "2nd SN Brigade",
         "counter": "marine_jp unit_ix_2",
         "class": "ground",
@@ -473,7 +476,7 @@ data.pieces = [
     },
     {
         id: "army_jp_3sn",
-        "faction": "jp",
+        "faction": JP,
         "name": "3rd SN Brigade",
         "counter": "marine_jp unit_ix_3",
         "class": "ground",
@@ -488,7 +491,7 @@ data.pieces = [
     },
     {
         id: "army_jp_4sn",
-        "faction": "jp",
+        "faction": JP,
         "name": "4th SN Brigade",
         "counter": "marine_jp unit_ix_4",
         "class": "ground",
@@ -503,7 +506,7 @@ data.pieces = [
     },
     {
         id: "army_jp_ss",
-        "faction": "jp",
+        "faction": JP,
         "name": "South Seas Brigade",
         "counter": "marine_jp unit_ix_5",
         "class": "ground",
@@ -518,7 +521,7 @@ data.pieces = [
     },
     {
         id: "army_jp_kor",
-        "faction": "jp",
+        "faction": JP,
         "name": "Korean Army",
         "counter": "army_jp_1 unit_ix_1",
         "class": "ground",
@@ -533,7 +536,7 @@ data.pieces = [
     },
     {
         id: "army_jp_ed",
-        "faction": "jp",
+        "faction": JP,
         "name": "Eastern District Army",
         "counter": "army_jp_1 unit_ix_2",
         "class": "ground",
@@ -548,7 +551,7 @@ data.pieces = [
     },
     {
         id: "army_jp_14",
-        "faction": "jp",
+        "faction": JP,
         "name": "14th Army",
         "counter": "army_jp_1 unit_ix_3",
         "class": "ground",
@@ -563,7 +566,7 @@ data.pieces = [
     },
     {
         id: "army_jp_15",
-        "faction": "jp",
+        "faction": JP,
         "name": "15th Army",
         "class": "ground",
         "service": "army",
@@ -578,7 +581,7 @@ data.pieces = [
     },
     {
         id: "army_jp_16",
-        "faction": "jp",
+        "faction": JP,
         "name": "16th Army",
         "class": "ground",
         "service": "army",
@@ -594,7 +597,7 @@ data.pieces = [
     },
     {
         id: "army_jp_17",
-        "faction": "jp",
+        "faction": JP,
         "name": "17th Army",
         "class": "ground",
         "service": "army",
@@ -610,7 +613,7 @@ data.pieces = [
     },
     {
         id: "army_jp_18",
-        "faction": "jp",
+        "faction": JP,
         "name": "18th Army",
         "class": "ground",
         "service": "army",
@@ -626,7 +629,7 @@ data.pieces = [
     },
     {
         id: "army_jp_19",
-        "faction": "jp",
+        "faction": JP,
         "name": "19th Army",
         "class": "ground",
         "service": "army",
@@ -642,7 +645,7 @@ data.pieces = [
     },
     {
         id: "army_jp_25",
-        "faction": "jp",
+        "faction": JP,
         "name": "25th Army",
         "class": "ground",
         "service": "army",
@@ -658,7 +661,7 @@ data.pieces = [
     },
     {
         id: "army_jp_27",
-        "faction": "jp",
+        "faction": JP,
         "name": "27th Army",
         "class": "ground",
         "service": "army",
@@ -674,7 +677,7 @@ data.pieces = [
     },
     {
         id: "army_jp_35",
-        "faction": "jp",
+        "faction": JP,
         "name": "35th Army",
         "class": "ground",
         "service": "army",
@@ -690,7 +693,7 @@ data.pieces = [
     },
     {
         id: "army_jp_38",
-        "faction": "jp",
+        "faction": JP,
         "name": "38th Army",
         "class": "ground",
         "service": "army",
@@ -705,7 +708,7 @@ data.pieces = [
     },
     {
         id: "air_jp_1",
-        "faction": "jp",
+        "faction": JP,
         "name": "1st Air Division",
         "class": "air",
         "service": "army",
@@ -721,7 +724,7 @@ data.pieces = [
     },
     {
         id: "air_jp_2",
-        "faction": "jp",
+        "faction": JP,
         "name": "2nd Air Division",
         "counter": "air_jp unit_ix_2",
         "class": "air",
@@ -737,7 +740,7 @@ data.pieces = [
     },
     {
         id: "air_jp_3",
-        "faction": "jp",
+        "faction": JP,
         "name": "3rd Air Division",
         "counter": "air_jp unit_ix_3",
         "class": "air",
@@ -753,7 +756,7 @@ data.pieces = [
     },
     {
         id: "air_jp_4",
-        "faction": "jp",
+        "faction": JP,
         "name": "4th Air Division",
         "counter": "air_jp unit_ix_4",
         "class": "air",
@@ -769,7 +772,7 @@ data.pieces = [
     },
     {
         id: "air_jp_5",
-        "faction": "jp",
+        "faction": JP,
         "name": "5th Air Division",
         "counter": "air_jp unit_ix_5",
         "class": "air",
@@ -785,7 +788,7 @@ data.pieces = [
     },
     {
         id: "air_jp_25",
-        "faction": "jp",
+        "faction": JP,
         "name": "25th Air Flotilla",
         "counter": "air_jp_navy unit_ix_5",
         "class": "air",
@@ -801,7 +804,7 @@ data.pieces = [
     },
     {
         id: "air_jp_26",
-        "faction": "jp",
+        "faction": JP,
         "name": "26th Air Flotilla",
         "counter": "air_jp_navy unit_ix_6",
         "class": "air",
@@ -817,7 +820,7 @@ data.pieces = [
     },
     {
         id: "air_jp_27",
-        "faction": "jp",
+        "faction": JP,
         "name": "27th Air Flotilla",
         "counter": "air_jp_navy unit_ix_7",
         "class": "air",
@@ -833,7 +836,7 @@ data.pieces = [
     },
     {
         id: "air_jp_28",
-        "faction": "jp",
+        "faction": JP,
         "name": "28th Air Flotilla",
         "counter": "air_jp_navy unit_ix_8",
         "class": "air",
@@ -849,7 +852,7 @@ data.pieces = [
     },
     {
         id: "air_jp_50",
-        "faction": "jp",
+        "faction": JP,
         "name": "50th Air Flotilla",
         "counter": "air_jp_navy unit_ix_9",
         "class": "air",
@@ -865,7 +868,7 @@ data.pieces = [
     },
     {
         id: "air_jp_51",
-        "faction": "jp",
+        "faction": JP,
         "name": "51st Air Flotilla",
         "counter": "air_jp_navy unit_ix_10",
         "class": "air",
@@ -881,7 +884,7 @@ data.pieces = [
     },
     {
         id: "air_jp_61",
-        "faction": "jp",
+        "faction": JP,
         "name": "61st Air Flotilla",
         "counter": "air_jp_navy unit_ix_11",
         "class": "air",
@@ -897,7 +900,7 @@ data.pieces = [
     },
     {
         id: "air_jp_62",
-        "faction": "jp",
+        "faction": JP,
         "name": "62nd Air Flotilla",
         "counter": "air_jp_navy unit_ix_12",
         "class": "air",
@@ -913,7 +916,7 @@ data.pieces = [
     },
     {
         id: "air_jp_t",
-        "faction": "jp",
+        "faction": JP,
         "name": "Tainan Air Unit",
         "counter": "air_jp unit_ix_8",
         "class": "air",
@@ -929,7 +932,7 @@ data.pieces = [
     },
     {
         id: "air_jp_6",
-        "faction": "jp",
+        "faction": JP,
         "name": "6th Air Division",
         "counter": "air_jp unit_ix_7",
         "class": "air",
@@ -945,7 +948,7 @@ data.pieces = [
     },
     {
         id: "air_jp_7",
-        "faction": "jp",
+        "faction": JP,
         "name": "7th Air Division",
         "counter": "air_jp unit_ix_6",
         "class": "air",
@@ -961,7 +964,7 @@ data.pieces = [
     },
     {
         id: "air_jp_8",
-        "faction": "jp",
+        "faction": JP,
         "name": "8th Air Division",
         "counter": "air_jp unit_ix_9",
         "class": "air",
@@ -977,7 +980,7 @@ data.pieces = [
     },
     {
         id: "air_jp_9",
-        "faction": "jp",
+        "faction": JP,
         "name": "9th Air Division",
         "counter": "air_jp unit_ix_10",
         "class": "air",
@@ -993,7 +996,7 @@ data.pieces = [
     },
     {
         id: "air_jp_10",
-        "faction": "jp",
+        "faction": JP,
         "name": "10th Air Division",
         "counter": "air_jp unit_ix_12",
         "class": "air",
@@ -1009,7 +1012,7 @@ data.pieces = [
     },
     {
         id: "air_jp_11",
-        "faction": "jp",
+        "faction": JP,
         "name": "11th Air Division",
         "counter": "air_jp unit_ix_11",
         "class": "air",
@@ -1025,7 +1028,7 @@ data.pieces = [
     },
     {
         id: "air_jp_12",
-        "faction": "jp",
+        "faction": JP,
         "name": "12th Air Division",
         "counter": "air_jp unit_ix_13",
         "class": "air",
@@ -1041,7 +1044,7 @@ data.pieces = [
     },
     {
         id: "army_jp_28",
-        "faction": "jp",
+        "faction": JP,
         "name": "28th Army",
         "counter": "army_jp_2 unit_ix_1",
         "class": "ground",
@@ -1057,7 +1060,7 @@ data.pieces = [
     },
     {
         id: "army_jp_31",
-        "faction": "jp",
+        "faction": JP,
         "name": "31st Army",
         "counter": "army_jp_2 unit_ix_2",
         "class": "ground",
@@ -1073,7 +1076,7 @@ data.pieces = [
     },
     {
         id: "army_jp_37",
-        "faction": "jp",
+        "faction": JP,
         "name": "37th Army",
         "counter": "army_jp_2 unit_ix_3",
         "class": "ground",
@@ -1089,7 +1092,7 @@ data.pieces = [
     },
     {
         id: "army_jp_33",
-        "faction": "jp",
+        "faction": JP,
         "name": "33rd Army",
         "counter": "army_jp_2 unit_ix_4",
         "class": "ground",
@@ -1105,7 +1108,7 @@ data.pieces = [
     },
     {
         id: "army_jp_2",
-        "faction": "jp",
+        "faction": JP,
         "name": "2nd Army",
         "counter": "army_jp_2 unit_ix_6",
         "class": "ground",
@@ -1121,7 +1124,7 @@ data.pieces = [
     },
     {
         id: "army_jp_29",
-        "faction": "jp",
+        "faction": JP,
         "name": "29th Army",
         "counter": "army_jp_2 unit_ix_5",
         "class": "ground",
@@ -1137,7 +1140,7 @@ data.pieces = [
     },
     {
         id: "army_jp_32",
-        "faction": "jp",
+        "faction": JP,
         "name": "32nd Army",
         "counter": "army_jp_2 unit_ix_7",
         "class": "ground",
@@ -1153,7 +1156,7 @@ data.pieces = [
     },
     {
         id: "army_jp_36",
-        "faction": "jp",
+        "faction": JP,
         "name": "36th Army",
         "counter": "army_jp_2 unit_ix_8",
         "class": "ground",
@@ -1168,7 +1171,7 @@ data.pieces = [
     },
     {
         id: "army_jp_39",
-        "faction": "jp",
+        "faction": JP,
         "name": "39th Army",
         "counter": "army_jp_2 unit_ix_9",
         "class": "ground",
@@ -1184,7 +1187,7 @@ data.pieces = [
     },
     {
         id: "yamato",
-        "faction": "jp",
+        "faction": JP,
         "name": "Yamato",
         "class": "naval",
         "counter": "navy_jp unit_ix_10",
@@ -1199,7 +1202,7 @@ data.pieces = [
     },
     {
         id: "junyo",
-        "faction": "jp",
+        "faction": JP,
         "name": "Junyo",
         "class": "naval",
         "counter": "cv_jp unit_ix_6",
@@ -1214,7 +1217,7 @@ data.pieces = [
     },
     {
         id: "kaiyo",
-        "faction": "jp",
+        "faction": JP,
         "name": "Kaiyo",
         "class": "naval",
         "counter": "cv_jp unit_ix_7",
@@ -1230,7 +1233,7 @@ data.pieces = [
     },
     {
         id: "taiho",
-        "faction": "jp",
+        "faction": JP,
         "name": "Taiho",
         "class": "naval",
         "counter": "cv_jp unit_ix_8",
@@ -1245,7 +1248,7 @@ data.pieces = [
     },
     {
         id: "amagi",
-        "faction": "jp",
+        "faction": JP,
         "name": "Amagi",
         "class": "naval",
         "counter": "cv_jp unit_ix_9",
@@ -1260,7 +1263,7 @@ data.pieces = [
     },
     {
         id: "hq_ap_c",
-        "faction": "ap",
+        "faction": AP,
         "name": "Central Pacific HQ",
         "counter": "hq_us unit_ix_1",
         "class": "hq",
@@ -1271,7 +1274,7 @@ data.pieces = [
     },
     {
         id: "hq_ap_sw",
-        "faction": "ap",
+        "faction": AP,
         "name": "South West Pacific HQ",
         "counter": "hq_us unit_ix_2",
         "class": "hq",
@@ -1282,7 +1285,7 @@ data.pieces = [
     },
     {
         id: "hq_ap_sg",
-        "faction": "ap",
+        "faction": AP,
         "name": "South Pacific HQ (Ghormley)",
         "counter": "hq_us unit_ix_3",
         "class": "hq",
@@ -1293,7 +1296,7 @@ data.pieces = [
     },
     {
         id: "hq_ap_sh",
-        "faction": "ap",
+        "faction": AP,
         "name": "South Pacific HQ (Halsey)",
         "counter": "hq_us unit_ix_4",
         "class": "hq",
@@ -1303,7 +1306,7 @@ data.pieces = [
     },
     {
         id: "hq_ap_m",
-        "faction": "ap",
+        "faction": AP,
         "name": "Malaya HQ",
         "counter": "hq_br unit_ix_1",
         "class": "hq",
@@ -1315,7 +1318,7 @@ data.pieces = [
     },
     {
         id: "hq_ap_seac",
-        "faction": "ap",
+        "faction": AP,
         "name": "SEAC HQ",
         "counter": "hq_br unit_ix_2",
         "class": "hq",
@@ -1326,7 +1329,7 @@ data.pieces = [
     },
     {
         id: "hq_ap_ab",
-        "faction": "ap",
+        "faction": AP,
         "name": "ABDA HQ",
         "counter": "hq_joint unit_ix_2",
         "class": "hq",
@@ -1338,7 +1341,7 @@ data.pieces = [
     },
     {
         id: "hq_ap_an",
-        "faction": "ap",
+        "faction": AP,
         "name": "ANZAC HQ",
         "counter": "hq_joint unit_ix_1",
         "class": "hq",
@@ -1349,7 +1352,7 @@ data.pieces = [
     },
     {
         id: "lexington",
-        "faction": "ap",
+        "faction": AP,
         "name": "Lexington",
         "class": "naval",
         "type": "cv",
@@ -1365,7 +1368,7 @@ data.pieces = [
     },
     {
         id: "enterprise",
-        "faction": "ap",
+        "faction": AP,
         "name": "Enterprise",
         "counter": "cv_us unit_ix_2",
         "class": "naval",
@@ -1381,7 +1384,7 @@ data.pieces = [
     },
     {
         id: "mdca",
-        "faction": "ap",
+        "faction": AP,
         "name": "MD/CA",
         "class": "naval",
         "counter": "navy_us unit_ix_1",
@@ -1396,7 +1399,7 @@ data.pieces = [
     },
     {
         id: "orleans",
-        "faction": "ap",
+        "faction": AP,
         "name": "New Orleans",
         "class": "naval",
         "counter": "navy_us unit_ix_2",
@@ -1411,7 +1414,7 @@ data.pieces = [
     },
     {
         id: "casia",
-        "faction": "ap",
+        "faction": AP,
         "name": "US Asia (Cruiser)",
         "counter": "navy_us unit_ix_3",
         "class": "naval",
@@ -1426,7 +1429,7 @@ data.pieces = [
     },
     {
         id: "dasia",
-        "faction": "ap",
+        "faction": AP,
         "name": "Us Asia (Destroyer)",
         "counter": "navy_us unit_ix_4",
         "class": "naval",
@@ -1441,7 +1444,7 @@ data.pieces = [
     },
     {
         id: "forcez",
-        "faction": "ap",
+        "faction": AP,
         "name": "Force Z",
         "counter": "navy_br unit_ix_1",
         "class": "naval",
@@ -1456,7 +1459,7 @@ data.pieces = [
     },
     {
         id: "exeter",
-        "faction": "ap",
+        "faction": AP,
         "name": "Exeter",
         "counter": "navy_br unit_ix_2",
         "class": "naval",
@@ -1471,7 +1474,7 @@ data.pieces = [
     },
     {
         id: "Kent",
-        "faction": "ap",
+        "faction": AP,
         "name": "Kent",
         "class": "naval",
         "counter": "force_aus unit_ix_1",
@@ -1486,7 +1489,7 @@ data.pieces = [
     },
     {
         id: "dutch",
-        "faction": "ap",
+        "faction": AP,
         "name": "Dutch",
         "class": "naval",
         "counter": "force_dutch unit_ix_1",
@@ -1501,7 +1504,7 @@ data.pieces = [
     },
     {
         id: "air_ap_211",
-        "faction": "ap",
+        "faction": AP,
         "name": "Marine Fighter Attack Squadron 211",
         "counter": "air_us_marine unit_ix_1",
         "class": "air",
@@ -1519,7 +1522,7 @@ data.pieces = [
     },
     {
         id: "air_ap_feaf",
-        "faction": "ap",
+        "faction": AP,
         "name": "Far East Air Force (US)",
         "counter": "air_us unit_ix_1",
         "class": "air",
@@ -1536,7 +1539,7 @@ data.pieces = [
     },
     {
         id: "air_ap_19",
-        "faction": "ap",
+        "faction": AP,
         "name": "19th LRB air unit",
         "counter": "air_us unit_ix_2",
         "class": "air",
@@ -1552,7 +1555,7 @@ data.pieces = [
     },
     {
         id: "air_ap_7",
-        "faction": "ap",
+        "faction": AP,
         "name": "7th Air Force",
         "class": "air",
         "service": "army",
@@ -1568,7 +1571,7 @@ data.pieces = [
     },
     {
         id: "air_ap_7_lrb",
-        "faction": "ap",
+        "faction": AP,
         "name": "7th Air Force (LRB)",
         "counter": "air_us unit_ix_4",
         "class": "air",
@@ -1585,7 +1588,7 @@ data.pieces = [
     },
     {
         id: "air_ap_avg",
-        "faction": "ap",
+        "faction": AP,
         "name": "The American Volunteer Groups",
         "counter": "air_us unit_ix_5",
         "class": "air",
@@ -1602,7 +1605,7 @@ data.pieces = [
     },
     {
         id: "air_ap_du",
-        "faction": "ap",
+        "faction": AP,
         "name": "Royal Netherlands Air Force",
         "counter": "force_dutch unit_ix_11",
         "class": "air",
@@ -1619,7 +1622,7 @@ data.pieces = [
     },
     {
         id: "air_ap_fe",
-        "faction": "ap",
+        "faction": AP,
         "name": "Far East Air Force (RAF)",
         "counter": "air_br unit_ix_1",
         "class": "air",
@@ -1636,7 +1639,7 @@ data.pieces = [
     },
     {
         id: "air_ap_ma",
-        "faction": "ap",
+        "faction": AP,
         "name": "Malayan Air Force (RAF)",
         "counter": "air_br unit_ix_2",
         "class": "air",
@@ -1653,7 +1656,7 @@ data.pieces = [
     },
     {
         id: "air_ap_au",
-        "faction": "ap",
+        "faction": AP,
         "name": "Australian Air Force",
         "counter": "force_aus unit_ix_2",
         "class": "air",
@@ -1670,7 +1673,7 @@ data.pieces = [
     },
     {
         id: "air_ap_14",
-        "faction": "ap",
+        "faction": AP,
         "name": "14th Air Force",
         "counter": "air_us unit_ix_14",
         "class": "air",
@@ -1685,7 +1688,7 @@ data.pieces = [
     },
     {
         id: "air_ap_10_lrb",
-        "faction": "ap",
+        "faction": AP,
         "name": "10th Air Force (LRB)",
         "counter": "air_us unit_ix_6",
         "class": "air",
@@ -1701,7 +1704,7 @@ data.pieces = [
     },
     {
         id: "air_ap_5_lrb",
-        "faction": "ap",
+        "faction": AP,
         "name": "5th Air Force (LRB)",
         "counter": "air_us unit_ix_8",
         "class": "air",
@@ -1717,7 +1720,7 @@ data.pieces = [
     },
     {
         id: "air_ap_5",
-        "faction": "ap",
+        "faction": AP,
         "name": "5th Air Force",
         "counter": "air_us unit_ix_7",
         "class": "air",
@@ -1733,7 +1736,7 @@ data.pieces = [
     },
     {
         id: "air_ap_1_maw",
-        "faction": "ap",
+        "faction": AP,
         "name": "1st Marine Aircraft Wing",
         "counter": "air_us_marine unit_ix_3",
         "class": "air",
@@ -1750,7 +1753,7 @@ data.pieces = [
     },
     {
         id: "air_ap_seac",
-        "faction": "ap",
+        "faction": AP,
         "name": "SEAC Air Force",
         "counter": "air_br unit_ix_3",
         "class": "air",
@@ -1766,7 +1769,7 @@ data.pieces = [
     },
     {
         id: "air_ap_seac_lrb",
-        "faction": "ap",
+        "faction": AP,
         "name": "SEAC Air Force (LRB)",
         "counter": "air_br unit_ix_4",
         "class": "air",
@@ -1782,7 +1785,7 @@ data.pieces = [
     },
     {
         id: "air_ap_13_lrb",
-        "faction": "ap",
+        "faction": AP,
         "name": "13th Air Force (LRB)",
         "counter": "air_us unit_ix_10",
         "class": "air",
@@ -1798,7 +1801,7 @@ data.pieces = [
     },
     {
         id: "air_ap_13",
-        "faction": "ap",
+        "faction": AP,
         "name": "13th Air Force",
         "counter": "air_us unit_ix_9",
         "class": "air",
@@ -1814,7 +1817,7 @@ data.pieces = [
     },
     {
         id: "air_ap_11_lrb",
-        "faction": "ap",
+        "faction": AP,
         "name": "11th Air Force (LRB)",
         "counter": "air_us unit_ix_12",
         "class": "air",
@@ -1830,7 +1833,7 @@ data.pieces = [
     },
     {
         id: "air_ap_11",
-        "faction": "ap",
+        "faction": AP,
         "name": "11th Air Force",
         "counter": "air_us unit_ix_11",
         "class": "air",
@@ -1846,7 +1849,7 @@ data.pieces = [
     },
     {
         id: "air_ap_14_lrb",
-        "faction": "ap",
+        "faction": AP,
         "name": "14th Air Force (LRB)",
         "counter": "air_us unit_ix_13",
         "class": "air",
@@ -1862,7 +1865,7 @@ data.pieces = [
     },
     {
         id: "air_ap_2_maw",
-        "faction": "ap",
+        "faction": AP,
         "name": "2nd Marine Aircraft Wing",
         "counter": "air_us_marine unit_ix_2",
         "class": "air",
@@ -1879,7 +1882,7 @@ data.pieces = [
     },
     {
         id: "air_ap_3_maw",
-        "faction": "ap",
+        "faction": AP,
         "name": "3rd Marine Aircraft Wing",
         "counter": "air_us_marine unit_ix_4",
         "class": "air",
@@ -1896,7 +1899,7 @@ data.pieces = [
     },
     {
         id: "air_ap_20_bc",
-        "faction": "ap",
+        "faction": AP,
         "name": "XX Bomber Command (B-29)",
         "counter": "air_us unit_ix_15",
         "class": "air",
@@ -1912,7 +1915,7 @@ data.pieces = [
     },
     {
         id: "air_ap_21_bc",
-        "faction": "ap",
+        "faction": AP,
         "name": "XXI Bomber Command (B-29)",
         "counter": "air_us unit_ix_16",
         "class": "air",
@@ -1928,7 +1931,7 @@ data.pieces = [
     },
     {
         id: "missouri",
-        "faction": "ap",
+        "faction": AP,
         "name": "Missouri",
         "counter": "navy_us unit_ix_5",
         "class": "naval",
@@ -1943,7 +1946,7 @@ data.pieces = [
     },
     {
         id: "northampton",
-        "faction": "ap",
+        "faction": AP,
         "name": "Northampton",
         "counter": "navy_us unit_ix_6",
         "class": "naval",
@@ -1958,7 +1961,7 @@ data.pieces = [
     },
     {
         id: "warspite",
-        "faction": "ap",
+        "faction": AP,
         "name": "Warspite",
         "counter": "navy_br unit_ix_3",
         "class": "naval",
@@ -1973,7 +1976,7 @@ data.pieces = [
     },
     {
         id: "indomitable",
-        "faction": "ap",
+        "faction": AP,
         "name": "Indomitable",
         "counter": "navy_br unit_ix_4",
         "class": "naval",
@@ -1989,7 +1992,7 @@ data.pieces = [
     },
     {
         id: "hermes",
-        "faction": "ap",
+        "faction": AP,
         "name": "Hermes",
         "class": "naval",
         "counter": "navy_br unit_ix_5",
@@ -2006,7 +2009,7 @@ data.pieces = [
     },
     {
         id: "carolina",
-        "faction": "ap",
+        "faction": AP,
         "name": "North Carolina",
         "counter": "navy_us unit_ix_7",
         "class": "naval",
@@ -2021,7 +2024,7 @@ data.pieces = [
     },
     {
         id: "wasp",
-        "faction": "ap",
+        "faction": AP,
         "name": "Wasp",
         "class": "naval",
         "counter": "cv_us unit_ix_3",
@@ -2037,7 +2040,7 @@ data.pieces = [
     },
     {
         id: "washington",
-        "faction": "ap",
+        "faction": AP,
         "name": "Washington",
         "counter": "navy_us unit_ix_8",
         "class": "naval",
@@ -2052,7 +2055,7 @@ data.pieces = [
     },
     {
         id: "london",
-        "faction": "ap",
+        "faction": AP,
         "name": "London",
         "class": "naval",
         "counter": "navy_br unit_ix_6",
@@ -2067,7 +2070,7 @@ data.pieces = [
     },
     {
         id: "mass",
-        "faction": "ap",
+        "faction": AP,
         "name": "Massachusetts",
         "counter": "navy_us unit_ix_9",
         "class": "naval",
@@ -2082,7 +2085,7 @@ data.pieces = [
     },
     {
         id: "jacinto",
-        "faction": "ap",
+        "faction": AP,
         "name": "San Jacinto",
         "counter": "cv_us unit_ix_4",
         "class": "naval",
@@ -2098,7 +2101,7 @@ data.pieces = [
     },
     {
         id: "essex",
-        "faction": "ap",
+        "faction": AP,
         "name": "Essex",
         "class": "naval",
         "counter": "cv_us unit_ix_5",
@@ -2114,7 +2117,7 @@ data.pieces = [
     },
     {
         id: "bunker",
-        "faction": "ap",
+        "faction": AP,
         "name": "Bunker Hill",
         "counter": "cv_us unit_ix_6",
         "class": "naval",
@@ -2130,7 +2133,7 @@ data.pieces = [
     },
     {
         id: "cowpens",
-        "faction": "ap",
+        "faction": AP,
         "name": "Cowpens",
         "counter": "cv_us unit_ix_7",
         "class": "naval",
@@ -2146,7 +2149,7 @@ data.pieces = [
     },
     {
         id: "belleau",
-        "faction": "ap",
+        "faction": AP,
         "name": "Belleau Wool",
         "counter": "cv_us unit_ix_8",
         "class": "naval",
@@ -2162,7 +2165,7 @@ data.pieces = [
     },
     {
         id: "sangamon",
-        "faction": "ap",
+        "faction": AP,
         "name": "Sangamon",
         "counter": "cv_us unit_ix_9",
         "class": "naval",
@@ -2178,7 +2181,7 @@ data.pieces = [
     },
     {
         id: "jersey",
-        "faction": "ap",
+        "faction": AP,
         "name": "New Jersey",
         "counter": "navy_us unit_ix_10",
         "class": "naval",
@@ -2193,7 +2196,7 @@ data.pieces = [
     },
     {
         id: "franklin",
-        "faction": "ap",
+        "faction": AP,
         "name": "Franklin",
         "counter": "cv_us unit_ix_10",
         "class": "naval",
@@ -2209,7 +2212,7 @@ data.pieces = [
     },
     {
         id: "intrepid",
-        "faction": "ap",
+        "faction": AP,
         "name": "Intrepid",
         "counter": "cv_us unit_ix_11",
         "class": "naval",
@@ -2225,7 +2228,7 @@ data.pieces = [
     },
     {
         id: "bataan",
-        "faction": "ap",
+        "faction": AP,
         "name": "Bataan",
         "class": "naval",
         "counter": "cv_us unit_ix_12",
@@ -2241,7 +2244,7 @@ data.pieces = [
     },
     {
         id: "hancock",
-        "faction": "ap",
+        "faction": AP,
         "counter": "cv_us unit_ix_14",
         "name": "Hancock",
         "class": "naval",
@@ -2257,7 +2260,7 @@ data.pieces = [
     },
     {
         id: "casablanca",
-        "faction": "ap",
+        "faction": AP,
         "name": "Casablanca",
         "counter": "cv_us unit_ix_15",
         "class": "naval",
@@ -2273,7 +2276,7 @@ data.pieces = [
     },
     {
         id: "shangri",
-        "faction": "ap",
+        "faction": AP,
         "name": "Shangri-La",
         "counter": "cv_us unit_ix_13",
         "class": "naval",
@@ -2289,7 +2292,7 @@ data.pieces = [
     },
     {
         id: "missouri",
-        "faction": "ap",
+        "faction": AP,
         "name": "Missouri",
         "counter": "navy_us unit_ix_11",
         "class": "naval",
@@ -2304,7 +2307,7 @@ data.pieces = [
     },
     {
         id: "newyork",
-        "faction": "ap",
+        "faction": AP,
         "name": "New York",
         "counter": "navy_us unit_ix_12",
         "class": "naval",
@@ -2319,7 +2322,7 @@ data.pieces = [
     },
     {
         id: "richard",
-        "faction": "ap",
+        "faction": AP,
         "name": "B.H. Richard",
         "counter": "cv_us unit_ix_16",
         "class": "naval",
@@ -2335,7 +2338,7 @@ data.pieces = [
     },
     {
         id: "alaska",
-        "faction": "ap",
+        "faction": AP,
         "name": "Alaska",
         "class": "naval",
         "counter": "navy_us unit_ix_13",
@@ -2350,7 +2353,7 @@ data.pieces = [
     },
     {
         id: "stlo",
-        "faction": "ap",
+        "faction": AP,
         "name": "St. Lo",
         "counter": "cv_us unit_ix_17",
         "class": "naval",
@@ -2366,7 +2369,7 @@ data.pieces = [
     },
     {
         id: "cbay",
-        "faction": "ap",
+        "faction": AP,
         "name": "Commencement Bay",
         "counter": "cv_us unit_ix_18",
         "class": "naval",
@@ -2382,7 +2385,7 @@ data.pieces = [
     },
     {
         id: "baltimore",
-        "faction": "ap",
+        "faction": AP,
         "name": "Baltimore",
         "counter": "cv_us unit_ix_14",
         "class": "naval",
@@ -2397,7 +2400,7 @@ data.pieces = [
     },
     {
         id: "duke",
-        "faction": "ap",
+        "faction": AP,
         "name": "Duke of York",
         "counter": "navy_br unit_ix_7",
         "class": "naval",
@@ -2412,7 +2415,7 @@ data.pieces = [
     },
     {
         id: "victorious",
-        "faction": "ap",
+        "faction": AP,
         "name": "Victorious",
         "counter": "navy_br unit_ix_8",
         "class": "naval",
@@ -2428,7 +2431,7 @@ data.pieces = [
     },
     {
         id: "army_ap_5_cn",
-        "faction": "ap",
+        "faction": AP,
         "name": "Chinese 5th Army",
         "counter": "army_cn unit_ix_1",
         "class": "ground",
@@ -2444,7 +2447,7 @@ data.pieces = [
     },
     {
         id: "army_ap_6_cn",
-        "faction": "ap",
+        "faction": AP,
         "name": "Chinese 6th Army",
         "counter": "army_cn unit_ix_2",
         "class": "ground",
@@ -2460,7 +2463,7 @@ data.pieces = [
     },
     {
         id: "army_ap_6_cn",
-        "faction": "ap",
+        "faction": AP,
         "name": "Chinese 66th Army",
         "counter": "army_cn unit_ix_3",
         "class": "ground",
@@ -2476,7 +2479,7 @@ data.pieces = [
     },
     {
         id: "army_ap_w",
-        "faction": "ap",
+        "faction": AP,
         "name": "Wake Island Brigade",
         "class": "ground",
         "counter": "marine_us unit_ix_1",
@@ -2493,7 +2496,7 @@ data.pieces = [
     },
     {
         id: "army_ap_nl",
-        "faction": "ap",
+        "faction": AP,
         "name": "NL Corps",
         "counter": "army_us unit_ix_4",
         "class": "ground",
@@ -2508,7 +2511,7 @@ data.pieces = [
     },
     {
         id: "army_ap_r",
-        "faction": "ap",
+        "faction": AP,
         "name": "R Corps",
         "counter": "army_us unit_ix_5",
         "class": "ground",
@@ -2523,7 +2526,7 @@ data.pieces = [
     },
     {
         id: "army_ap_sl",
-        "faction": "ap",
+        "faction": AP,
         "name": "SL Corps",
         "counter": "army_us unit_ix_6",
         "class": "ground",
@@ -2538,7 +2541,7 @@ data.pieces = [
     },
     {
         id: "army_ap_m",
-        "faction": "ap",
+        "faction": AP,
         "name": "M Corps",
         "class": "ground",
         "counter": "army_us unit_ix_1",
@@ -2553,7 +2556,7 @@ data.pieces = [
     },
     {
         id: "army_ap_p",
-        "faction": "ap",
+        "faction": AP,
         "name": "P Brigade",
         "counter": "army_us unit_ix_2",
         "class": "ground",
@@ -2569,7 +2572,7 @@ data.pieces = [
     },
     {
         id: "army_ap_10",
-        "faction": "ap",
+        "faction": AP,
         "name": "X Corps",
         "counter": "army_us unit_ix_3",
         "class": "ground",
@@ -2584,7 +2587,7 @@ data.pieces = [
     },
     {
         id: "army_ap_1_au",
-        "faction": "ap",
+        "faction": AP,
         "name": "1st Australian Corps",
         "counter": "army_aus unit_ix_2",
         "class": "ground",
@@ -2599,7 +2602,7 @@ data.pieces = [
     },
     {
         id: "army_ap_2_au",
-        "faction": "ap",
+        "faction": AP,
         "name": "2nd Australian Corps",
         "counter": "army_aus unit_ix_3",
         "class": "ground",
@@ -2614,7 +2617,7 @@ data.pieces = [
     },
     {
         id: "army_ap_8_au",
-        "faction": "ap",
+        "faction": AP,
         "name": "8th Australian Division",
         "counter": "army_aus unit_ix_1",
         "class": "ground",
@@ -2629,7 +2632,7 @@ data.pieces = [
     },
     {
         id: "army_ap_pm",
-        "faction": "ap",
+        "faction": AP,
         "name": "PM Brigade",
         "counter": "army_aus unit_ix_4",
         "class": "ground",
@@ -2644,7 +2647,7 @@ data.pieces = [
     },
     {
         id: "army_ap_hk",
-        "faction": "ap",
+        "faction": AP,
         "name": "Hong Kong Division",
         "counter": "army_br unit_ix_6",
         "class": "ground",
@@ -2659,7 +2662,7 @@ data.pieces = [
     },
     {
         id: "army_ap_3_ind",
-        "faction": "ap",
+        "faction": AP,
         "name": "3rd Indian Corps",
         "counter": "army_br unit_ix_4",
         "class": "ground",
@@ -2674,7 +2677,7 @@ data.pieces = [
     },
     {
         id: "army_ap_b_ind",
-        "faction": "ap",
+        "faction": AP,
         "name": "Burma Indian Division",
         "counter": "army_br unit_ix_5",
         "class": "ground",
@@ -2689,7 +2692,7 @@ data.pieces = [
     },
     {
         id: "army_ap_1_bu",
-        "faction": "ap",
+        "faction": AP,
         "name": "1st Burma Division",
         "counter": "army_br unit_ix_1",
         "class": "ground",
@@ -2704,7 +2707,7 @@ data.pieces = [
     },
     {
         id: "army_ap_1_ind",
-        "faction": "ap",
+        "faction": AP,
         "name": "1st Indian Corps",
         "counter": "army_br unit_ix_2",
         "class": "ground",
@@ -2719,7 +2722,7 @@ data.pieces = [
     },
     {
         id: "army_ap_2_ind",
-        "faction": "ap",
+        "faction": AP,
         "name": "2nd Indian Corps",
         "counter": "army_br unit_ix_3",
         "class": "ground",
@@ -2734,7 +2737,7 @@ data.pieces = [
     },
     {
         id: "army_ap_1_du",
-        "faction": "ap",
+        "faction": AP,
         "name": "1st Regiment",
         "counter": "force_dutch unit_ix_6",
         "class": "ground",
@@ -2750,7 +2753,7 @@ data.pieces = [
     },
     {
         id: "army_ap_2_du",
-        "faction": "ap",
+        "faction": AP,
         "name": "2nd Regiment",
         "counter": "force_dutch unit_ix_2",
         "class": "ground",
@@ -2766,7 +2769,7 @@ data.pieces = [
     },
     {
         id: "army_ap_3_du",
-        "faction": "ap",
+        "faction": AP,
         "name": "3rd Regiment",
         "counter": "force_dutch unit_ix_3",
         "class": "ground",
@@ -2782,7 +2785,7 @@ data.pieces = [
     },
     {
         id: "army_ap_4_du",
-        "faction": "ap",
+        "faction": AP,
         "name": "4th Regiment",
         "counter": "force_dutch unit_ix_4",
         "class": "ground",
@@ -2798,7 +2801,7 @@ data.pieces = [
     },
     {
         id: "army_ap_5_du",
-        "faction": "ap",
+        "faction": AP,
         "name": "5th Regiment",
         "counter": "force_dutch unit_ix_7",
         "class": "ground",
@@ -2814,7 +2817,7 @@ data.pieces = [
     },
     {
         id: "army_ap_6_du",
-        "faction": "ap",
+        "faction": AP,
         "name": "6th Regiment",
         "counter": "force_dutch unit_ix_8",
         "class": "ground",
@@ -2830,7 +2833,7 @@ data.pieces = [
     },
     {
         id: "army_ap_7_du",
-        "faction": "ap",
+        "faction": AP,
         "name": "7th Regiment",
         "class": "ground",
         "counter": "force_dutch unit_ix_9",
@@ -2846,7 +2849,7 @@ data.pieces = [
     },
     {
         id: "army_ap_8_du",
-        "faction": "ap",
+        "faction": AP,
         "name": "8th Regiment",
         "counter": "force_dutch unit_ix_10",
         "class": "ground",
@@ -2862,7 +2865,7 @@ data.pieces = [
     },
     {
         id: "army_ap_j",
-        "faction": "ap",
+        "faction": AP,
         "name": "Java Division",
         "counter": "force_dutch unit_ix_5",
         "class": "ground",
@@ -2877,7 +2880,7 @@ data.pieces = [
     },
     {
         id: "army_ap_7",
-        "faction": "ap",
+        "faction": AP,
         "name": "7th Armored Brigade",
         "class": "ground",
         "counter": "army_br unit_ix_11",
@@ -2891,7 +2894,7 @@ data.pieces = [
     },
     {
         id: "army_ap_77",
-        "faction": "ap",
+        "faction": AP,
         "name": "77th Brigade",
         "counter": "army_br unit_ix_12",
         "class": "ground",
@@ -2905,7 +2908,7 @@ data.pieces = [
     },
     {
         id: "army_ap_4_m",
-        "faction": "ap",
+        "faction": AP,
         "name": "4th Marine Division",
         "counter": "marine_us unit_ix_4",
         "class": "ground",
@@ -2920,7 +2923,7 @@ data.pieces = [
     },
     {
         id: "army_ap_11",
-        "faction": "ap",
+        "faction": AP,
         "name": "XI Corps",
         "class": "ground",
         "counter": "army_us unit_ix_7",
@@ -2935,7 +2938,7 @@ data.pieces = [
     },
     {
         id: "army_ap_14",
-        "faction": "ap",
+        "faction": AP,
         "name": "XIV Corps",
         "counter": "army_us unit_ix_8",
         "class": "ground",
@@ -2951,7 +2954,7 @@ data.pieces = [
     },
     {
         id: "army_ap_1",
-        "faction": "ap",
+        "faction": AP,
         "name": "I Corps",
         "class": "ground",
         "service": "army",
@@ -2967,7 +2970,7 @@ data.pieces = [
     },
     {
         id: "army_ap_24",
-        "faction": "ap",
+        "faction": AP,
         "name": "XXIV Corps",
         "counter": "army_us unit_ix_10",
         "class": "ground",
@@ -2982,7 +2985,7 @@ data.pieces = [
     },
     {
         id: "army_ap_9",
-        "faction": "ap",
+        "faction": AP,
         "name": "IX Corps",
         "counter": "army_us unit_ix_11",
         "class": "ground",
@@ -2997,7 +3000,7 @@ data.pieces = [
     },
     {
         id: "army_ap_11_d",
-        "faction": "ap",
+        "faction": AP,
         "name": "11th Division",
         "counter": "army_us unit_ix_12",
         "class": "ground",
@@ -3012,7 +3015,7 @@ data.pieces = [
     },
     {
         id: "army_ap_mb",
-        "faction": "ap",
+        "faction": AP,
         "name": "Marine Brigade",
         "counter": "marine_us unit_ix_2",
         "class": "ground",
@@ -3028,7 +3031,7 @@ data.pieces = [
     },
     {
         id: "army_ap_sf",
-        "faction": "ap",
+        "faction": AP,
         "name": "SF Brigade",
         "counter": "marine_us unit_ix_3",
         "class": "ground",
@@ -3043,7 +3046,7 @@ data.pieces = [
     },
     {
         id: "army_ap_1_m",
-        "faction": "ap",
+        "faction": AP,
         "name": "1st Marine Division",
         "counter": "marine_us unit_ix_5",
         "class": "ground",
@@ -3059,7 +3062,7 @@ data.pieces = [
     },
     {
         id: "army_ap_2_m",
-        "faction": "ap",
+        "faction": AP,
         "name": "2nd Marine Division",
         "counter": "marine_us unit_ix_7",
         "class": "ground",
@@ -3075,7 +3078,7 @@ data.pieces = [
     },
     {
         id: "army_ap_3_m",
-        "faction": "ap",
+        "faction": AP,
         "name": "3rd Marine Division",
         "counter": "marine_us unit_ix_8",
         "class": "ground",
@@ -3091,7 +3094,7 @@ data.pieces = [
     },
     {
         id: "army_ap_6_m",
-        "faction": "ap",
+        "faction": AP,
         "name": "6th Marine Division",
         "counter": "marine_us unit_ix_6",
         "class": "ground",
@@ -3107,7 +3110,7 @@ data.pieces = [
     },
     {
         id: "army_ap_5_m",
-        "faction": "ap",
+        "faction": AP,
         "name": "5th Marine Division",
         "counter": "marine_us unit_ix_9",
         "class": "ground",
@@ -3123,7 +3126,7 @@ data.pieces = [
     },
     {
         id: "army_ap_15",
-        "faction": "ap",
+        "faction": AP,
         "name": "15th Corps",
         "class": "ground",
         "counter": "army_br unit_ix_7",
@@ -3138,7 +3141,7 @@ data.pieces = [
     },
     {
         id: "army_ap_3",
-        "faction": "ap",
+        "faction": AP,
         "name": "33rd Corps",
         "counter": "army_br unit_ix_8",
         "class": "ground",
@@ -3153,7 +3156,7 @@ data.pieces = [
     },
     {
         id: "army_ap_3_au",
-        "faction": "ap",
+        "faction": AP,
         "name": "3rd Australian Corps",
         "class": "ground",
         "counter": "army_aus unit_ix_5",
@@ -3168,7 +3171,7 @@ data.pieces = [
     },
     {
         id: "army_ap_3_nz",
-        "faction": "ap",
+        "faction": AP,
         "name": "3rd New Zeeland Division",
         "counter": "army_br unit_ix_9",
         "class": "ground",
@@ -3183,7 +3186,7 @@ data.pieces = [
     },
     {
         id: "army_ap_4_ind",
-        "faction": "ap",
+        "faction": AP,
         "name": "4th Indian Corps",
         "counter": "army_br unit_ix_10",
         "class": "ground",
@@ -3198,7 +3201,7 @@ data.pieces = [
     },
     {
         id: "army_ap_4_au",
-        "faction": "ap",
+        "faction": AP,
         "name": "4th Australian Corps",
         "counter": "army_aus unit_ix_6",
         "class": "ground",

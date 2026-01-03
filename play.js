@@ -1,9 +1,9 @@
 "use strict"
 
-const JP = 0
-const AP = 1
+
 
 const LAST_BOARD_HEX = 1476
+const NON_PLACED_BOX = 1477
 const ELIMINATED_BOX = 1478
 const DELAYED_BOX = 1479
 const TURN_BOX = 1480
@@ -47,6 +47,7 @@ function on_init() {
         define_layout("board_hex", TURN_BOX + i, [80, 1050 - (i - 1) * 40, 45, 45], "stack")
         define_space("action_hex", TURN_BOX + i, [80, 1050 - (i - 1) * 40, 45, 45], "hex stack")
     }
+    define_layout("board_hex", NON_PLACED_BOX, [10, 10, 45, 45], "stack")
     define_layout("board_hex", ELIMINATED_BOX, [50, 50, 45, 45], "stack")
     define_layout("board_hex", DELAYED_BOX, [2100, 1350, 45, 45], "stack")
     for (let i = 0; i < data.pieces.length; ++i) {
@@ -226,9 +227,6 @@ function on_update() {
 
     for (i = 1; i < LAST_BOARD_HEX; i++) {
         const zoi_state = G.supply_cache[i] & 3
-        if(zoi_state){
-            console.log(zoi_state)
-        }
         if (zoi_state === 0) {
             ZOI_HEX[i].classList.add("hide")
         } else if (zoi_state === 1) {
