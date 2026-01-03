@@ -719,13 +719,70 @@ function check_hq_in_supply(hq, piece) {
             }
         }
     }
-    console.log(`OOS hq ${hq}`)
-    set_add(G.oos, hq)
     return false
 }
 
-function mark_supply_ports(hq) {
+function mark_supply_ports_overland(hq, piece) {
+    const move_distance_from_hq = 4
+    const faction = piece.faction
+    const location = G.location[hq]
+    var queue = [location]
+    var distance_map = [location, 0]
+    for (var i = 0; i < queue.length; i++) {
+        let item = queue[i]
+        let base_distance = map_get(distance_map, item)
+        let nh_list = get_near_hexes(item)
+        for (let j = 0; j < 6; j++) {
+            let nh = nh_list[j]
+            if (nh < 0) {
+                continue
+            }
+            const occupied_land = G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
+            var distance = base_distance[0] + get_ground_move_cost(item, nh, j)
+            if (distance > move_distance_from_hq || distance > map_get(distance_map, nh, [100])[0] || occupied_land) {
+                continue
+            }
+            map_set(distance_map, nh, distance)
 
+            if (distance < move_distance_from_hq) {
+                queue.push(nh)
+            }
+            if (MAP_DATA[nh].port && set_has(G.control, nh) != faction) {
+                G.supply_cache[nh] = G.supply_cache[nh] | JP_SUPPLY_PORT << faction
+                console.log(`Supply eligable ground ${int_to_hex(nh)} ${faction ? "Alied" : "Japan"}`)
+            }
+        }
+    }
+}
+
+function mark_supply_ports_oversea(hq, piece) {
+    const faction = piece.faction
+    const location = G.location[hq]
+    var queue = [location]
+    var distance_map = [location]
+    for (var i = 0; i < queue.length; i++) {
+        let item = queue[i]
+        let nh_list = get_near_hexes(item)
+        const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))
+        for (let j = 0; j < 6; j++) {
+            let nh = nh_list[j]
+            if (!nh) {
+                continue
+            }
+            const non_neutral_zoi = non_neutral_zoi_s || G.supply_cache[nh] & JP_ZOI << (1 - faction) && !(G.supply_cache[nh] & JP_ZOI_NTRL << (1 - faction))
+            if (!set_has(distance_map, nh) && MAP_DATA[item].edges_int & WATER << 5 * j && !non_neutral_zoi) {
+                set_add(distance_map, nh)
+                queue.push(nh)
+                if (G.supply_cache[nh] & JP_SUPPLY_PORT << faction) {
+                    return
+                }
+                if (MAP_DATA[nh].port && set_has(G.control, nh) != faction) {
+                    G.supply_cache[nh] = G.supply_cache[nh] | JP_SUPPLY_PORT << faction
+                    console.log(`Supply eligable ${int_to_hex(nh)} ${faction ? "Alied" : "Japan"}`)
+                }
+            }
+        }
+    }
 }
 
 function mark_hexes_supplied_from(hq) {
@@ -736,6 +793,41 @@ function check_unit_supply(i, piece) {
     return true
 }
 
+function check_faction_supply_not_changed(faction, both_sides_zoi) {
+    for (i = 1; i < LAST_BOARD_HEX; i++) {
+        G.supply_cache[i] = G.supply_cache[i] & SUPPLY_ITERATION_MASK
+    }
+    for_each_unit((i, p) => both_sides_zoi || p.faction === faction ? set_zoi(i, p) : null)
+    for_each_unit((i, p) => {
+        if (p.class === "hq" && p.faction === faction) {
+            console.log(pieces[i].name)
+            mark_supply_ports_oversea(i, p)
+        }
+    })
+    for_each_unit((i, p) => {
+        if (p.class === "hq" && p.faction === faction) {
+            console.log(pieces[i].name)
+            mark_supply_ports_overland(i, p)
+        }
+    })
+    var size = L.oos_units[faction].length
+    L.oos_units[faction] = []
+    for_each_unit((i, p) => {
+        if (p.class === "hq" && p.faction === faction && check_hq_in_supply(i, p)) {
+            mark_hexes_supplied_from(i)
+        } else if (p.class === "hq" && p.faction === faction) {
+            set_add(L.oos_units[faction], i)
+        }
+    })
+
+    for_each_unit((i, p) => {
+        if (p.class !== "hq" && p.faction === faction && !check_unit_supply(i, p)) {
+            set_add(L.oos_units[faction], i)
+        }
+    })
+    return L.oos_units[faction].length === size
+}
+
 function check_supply() {
     for (let o = 0; o < pieces.length; o++) {
         if (G.location[o] <= 0) {
@@ -744,43 +836,22 @@ function check_supply() {
     }
     G.supply_cache = []
     for_each_unit(mark_unit)
-    for_each_unit((i, p) => p.faction ? set_zoi(i, p) : null)
-    for_each_unit((i, p) => set_zoi(i, p))
-    var oos_counter_prev = [0, 0]//counts supplied for JP and oos for AP
-    var oos_counter_cur = [0, 0]//same but for current iteration
+
+    L.oos_units = [[], []]
+    G.oos = []
+    check_faction_supply_not_changed(AP, false)
+    check_faction_supply_not_changed(JP, true)
     for (var i = 0; i < 10; i++) {//limit supply check counts
-        G.oos = []
-        for_each_unit((i, p) => {
-            if (p.class === "hq") {
-                mark_supply_ports(i)
-            }
-        })
-        for_each_unit((i, p) => {
-            if (p.class === "hq") {
-                check_hq_in_supply(i, p)
-                if (!set_has(G.oos, i)) {
-                    mark_hexes_supplied_from(i)
-                }
-            }
-        })
-        for_each_unit((i, p) => {
-            const supply = check_unit_supply(i, p)
-            oos_counter_cur[p.faction] += (supply == (1 - p.faction))
-            if (!supply) {
-                set_add(G.oos, i)
-            }
-        })
-        if (oos_counter_cur[0] > oos_counter_prev[0] || oos_counter_cur[1] > oos_counter_prev[1]) {
-            oos_counter_prev = oos_counter_cur
-            oos_counter_cur = [0, 0]
-        } else {
+        const ap = check_faction_supply_not_changed(AP, true)
+        const jp = check_faction_supply_not_changed(JP, true)
+        if (ap && jp) {
             break
         }
-        for (i = 1; i < LAST_BOARD_HEX; i++) {
-            G.supply_cache[i] = G.supply_cache[i] & SUPPLY_ITERATION_MASK
-        }
-        for_each_unit((i, p) => set_zoi(i, p))
+        break
     }
+    G.oos = L.oos_units[0]
+    L.oos_units[1].forEach(h => set_add(G.oos, h))
+    L.oos_units = null
 }
 
 function get_move_data() {
@@ -1077,9 +1148,6 @@ function get_ground_move(avoid_zoi) {
         if (i >= queue.length) {
             break
         }
-    }
-    for (let i = 0; i < distance_map.length; i += 2) {
-
     }
     return distance_map
 }
