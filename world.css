@@ -92,8 +92,21 @@ body.hide-pieces .piece {
     position: relative;
 }
 
+.zoi {
+    pointer-events: none;
+    background: rgba(255, 0, 255, 0.4);
+    z-index: -1;
+}
 
-.space {
+.jp_zoi {
+    background: rgba(255, 0, 0, 0.4);
+}
+
+.ap_zoi {
+    background: rgba(0, 0, 255, 0.4);
+}
+
+.hex {
     height: 50px;
     aspect-ratio: 1/cos(30deg);
     clip-path: polygon(50% -50%, 100% 50%, 50% 150%, 0 50%);

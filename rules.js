@@ -374,6 +374,12 @@ P.offensive_segment = {
         goto("offensive_sequence")
     },
     discard(c) {
+        check_supply()
+        for (let i = 1; i < MAP_DATA.length; i++) {
+            if (["Sumatra", "Borneo", "Java"].includes(MAP_DATA[i].region) && !(G.supply_cache[i] & JP_UNITS << 1) && MAP_DATA[i].named) {
+                set_add(G.control, i)
+            }
+        }
         activate_card(c)
         log(`${R} discards ${cards[c].name}`)
         goto("end_action")
@@ -546,7 +552,7 @@ P.move_offensive_units = {
     action_hex(hex) {
         push_undo()
         log(`Units ${G.active_stack} moved to ${int_to_hex(hex)}`)
-        if (L.supply_cache[hex] & JP_UNITS << (1 - R)) {
+        if (G.supply_cache[hex] & JP_UNITS << (1 - R)) {
             set_add(G.offensive.battle_hexes, hex)
         }
         var curr_path = map_get(L.allowed_hexes, hex)
@@ -560,11 +566,12 @@ P.move_offensive_units = {
                 G.location[u] = hex
             }
         })
+        check_supply()
         L.allowed_hexes = []
         if (curr_path[0] & GROUND_MOVE) {
             for (var i = 2; i < curr_path.length; i++) {
                 const hex = curr_path[i]
-                if (L.supply_cache[hex]) {
+                if (G.supply_cache[hex]) {
                     capture_hex(hex)
                 }
             }
@@ -626,7 +633,7 @@ function set_zoi(excluded_units) {
 }
 
 function check_supply() {
-    L.supply_cache = []
+    G.supply_cache = []
     for (let i = 0; i < pieces.length; i++) {
         let piece = pieces[i]
         let location = G.location[i]
@@ -636,17 +643,17 @@ function check_supply() {
         let faction = piece.faction === "ap"
         if (piece.class === "air") {
             let mask = 0 | (JP_ZOI << faction) | (JP_ZOI_NTRL << 1 - faction)
-            L.supply_cache[location] = L.supply_cache[location] | (JP_AIR_UNITS << faction) | mask
+            G.supply_cache[location] = G.supply_cache[location] | (JP_AIR_UNITS << faction) | mask
             get_near_hexes(location).flatMap(h => get_near_hexes(h)).forEach(h => {
-                L.supply_cache[h] = L.supply_cache[h] | mask
+                G.supply_cache[h] = G.supply_cache[h] | mask
                 console.log(`Hex zoi ${int_to_hex(h)} - ${piece.faction}`)
             })
         } else if (piece.class === "hq") {
-            L.supply_cache[location] = L.supply_cache[location] | (JP_HQ_UNITS << faction)
+            G.supply_cache[location] = G.supply_cache[location] | (JP_HQ_UNITS << faction)
         } else if (piece.class === "ground") {
-            L.supply_cache[location] = L.supply_cache[location] | (JP_GROUND_UNITS << faction)
+            G.supply_cache[location] = G.supply_cache[location] | (JP_GROUND_UNITS << faction)
         } else if (piece.class === "naval") {
-            L.supply_cache[location] = L.supply_cache[location] | (JP_NAVAL_UNITS << faction)
+            G.supply_cache[location] = G.supply_cache[location] | (JP_NAVAL_UNITS << faction)
         }
     }
 }
@@ -706,7 +713,7 @@ function get_ground_move_cost(from, to, direction) {
         return 100;
     }
     if ((MAP_DATA[from].edges_int & ROAD << (5 * direction))
-        && !(L.supply_cache[to] & (TRANSPORT_ROUTE_DISABLED | (JP_GA_UNITS << 1 - R)))
+        && !(G.supply_cache[to] & (TRANSPORT_ROUTE_DISABLED | (JP_GA_UNITS << 1 - R)))
     ) {
         return 1;
     } else {
@@ -736,8 +743,8 @@ function compute_possible_battle_hexes() {
         }
     })
 
-    for (i = 0; i < L.supply_cache.length; i++) {
-        if (!(L.supply_cache[i] & JP_UNITS << (1 - R)) || set_has(G.offensive.battle_hexes, i)
+    for (i = 0; i < G.supply_cache.length; i++) {
+        if (!(G.supply_cache[i] & JP_UNITS << (1 - R)) || set_has(G.offensive.battle_hexes, i)
         ) {
             continue
         }
@@ -778,8 +785,8 @@ function compute_air_commit_hexes() {
             map_set(result, h, path_u)
         })
     if (move_data.is_new_battle_allowed) {
-        for (i = 0; i < L.supply_cache.length; i++) {
-            if ((L.supply_cache[i] & JP_UNITS << (1 - R)) && get_distance(i, location) <= range) {
+        for (i = 0; i < G.supply_cache.length; i++) {
+            if ((G.supply_cache[i] & JP_UNITS << (1 - R)) && get_distance(i, location) <= range) {
                 const path_u = path.slice()
                 path_u.push(i)
                 map_set(result, i, path_u)
@@ -814,7 +821,7 @@ function compute_air_move_hexes() {
                 continue
             }
             set_add(selected, nh)
-            if (nh !== AIR_FERRY && !(L.supply_cache[nh] & JP_UNITS << 1 - R) && !set_has(G.offensive.battle_hexes, nh)) {
+            if (nh !== AIR_FERRY && !(G.supply_cache[nh] & JP_UNITS << 1 - R) && !set_has(G.offensive.battle_hexes, nh)) {
                 var path_array = map_get(result, item)
                 if (!path_array) {
                     path_array = [ANY_MOVE, leg_distance, item]
@@ -851,8 +858,8 @@ function compute_ground_naval_move_hexes() {
 
     if (MAP_DATA[location].coastal) {
         // console.log(`Check navy ${move_data}`)
-        // for (let i = 0; i < L.supply_cache.length; i++) {
-        //     if (L.supply_cache[i] & (JP_UNITS << R)) {
+        // for (let i = 0; i < G.supply_cache.length; i++) {
+        //     if (G.supply_cache[i] & (JP_UNITS << R)) {
         //         console.log(int_to_hex(i))
         //     }
         // }
@@ -864,7 +871,7 @@ function compute_ground_naval_move_hexes() {
             h => {
                 // console.log(`Try ${int_to_hex(h)}`)
                 if ((MAP_DATA[h].port && G.control[h] === R) //to friendly port
-                    || L.supply_cache[h] & (JP_UNITS << R) //directly attack to hex
+                    || G.supply_cache[h] & (JP_UNITS << R) //directly attack to hex
                     || set_has(participate_battle, h) //cv ranged attack is possible
                     || move_data.is_cv_escort && move_data.is_ground_present && MAP_DATA[h].terrain > OCEAN //amphibious landing with cv cover
                 ) {
@@ -873,10 +880,10 @@ function compute_ground_naval_move_hexes() {
                 }
             })
         // console.log(`Check navy no zoi`)
-        // console.log(`${L.supply_cache[hex_to_int(2910)] & JP_ZOI << 1 - R} - ${L.supply_cache[hex_to_int(2910)] & JP_ZOI_NTRL << 1 - R}`)
-        // console.log(`${L.supply_cache[hex_to_int(3009)] & JP_ZOI << 1 - R} - ${L.supply_cache[hex_to_int(3009)] & JP_ZOI_NTRL << 1 - R}`)
-        // console.log(`${L.supply_cache[hex_to_int(3108)] & JP_ZOI << 1 - R} - ${L.supply_cache[hex_to_int(3108)] & JP_ZOI_NTRL << 1 - R}`)
-        check_hexes_in_distance(location, (h, nh, j) => (MAP_DATA[h].edges_int & WATER << 5 * j && (!(L.supply_cache[nh] & JP_ZOI << 1 - R) || (L.supply_cache[nh] & JP_ZOI_NTRL << 1 - R))) && true,
+        // console.log(`${G.supply_cache[hex_to_int(2910)] & JP_ZOI << 1 - R} - ${G.supply_cache[hex_to_int(2910)] & JP_ZOI_NTRL << 1 - R}`)
+        // console.log(`${G.supply_cache[hex_to_int(3009)] & JP_ZOI << 1 - R} - ${G.supply_cache[hex_to_int(3009)] & JP_ZOI_NTRL << 1 - R}`)
+        // console.log(`${G.supply_cache[hex_to_int(3108)] & JP_ZOI << 1 - R} - ${G.supply_cache[hex_to_int(3108)] & JP_ZOI_NTRL << 1 - R}`)
+        check_hexes_in_distance(location, (h, nh, j) => (MAP_DATA[h].edges_int & WATER << 5 * j && (!(G.supply_cache[nh] & JP_ZOI << 1 - R) || (G.supply_cache[nh] & JP_ZOI_NTRL << 1 - R))) && true,
             move_data.naval_move_distance * ((move_data.move_type & STRAT_MOVE) << 1),
             (h, distance) => {
                 if ((MAP_DATA[h].port && G.control[h] === R) //to friendly port
@@ -906,7 +913,7 @@ function get_ground_move(avoid_zoi) {
     const move_data = L.move_data
     const queue = []
     const distance_map = []
-    if (avoid_zoi && L.supply_cache[location] & JP_ZOI << (1 - R)) {
+    if (avoid_zoi && G.supply_cache[location] & JP_ZOI << (1 - R)) {
         return []
     }
     queue.push(location)
@@ -924,10 +931,10 @@ function get_ground_move(avoid_zoi) {
 
             var distance = base_distance[0] + get_ground_move_cost(item, nh, j)
 
-            if ((avoid_zoi && L.supply_cache[nh] & JP_ZOI << (1 - R)) || distance > move_data.ground_move_distance || distance > map_get(distance_map, nh, [100])[0]) {
+            if ((avoid_zoi && G.supply_cache[nh] & JP_ZOI << (1 - R)) || distance > move_data.ground_move_distance || distance > map_get(distance_map, nh, [100])[0]) {
                 continue
             }
-            const stop_move = L.supply_cache[nh] & JP_GAH_UNITS << (1 - R) || set_has(G.offensive.battle_hexes, nh)
+            const stop_move = G.supply_cache[nh] & JP_GAH_UNITS << (1 - R) || set_has(G.offensive.battle_hexes, nh)
             if (stop_move) {
                 distance = move_data.ground_move_distance
             }
@@ -1373,6 +1380,7 @@ function setup_scenario_1942() {
     G.political_will = 8
 
     console.log("setup 1942")
+    check_supply()
     call("offensive_phase")
 }
 
@@ -1456,6 +1464,7 @@ function on_view() {
     V.vps = G.vps
     V.exhausted = G.exhausted
     V.oos = G.oos
+    V.supply_cache = G.supply_cache
     V.hand = []
     V.future_offensive = []
     V.active_stack = G.active_stack

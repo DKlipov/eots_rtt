@@ -10,6 +10,7 @@ const TURN_BOX = 1480
 
 const CANVAS = document.getElementById("canvas")
 const CANVAS_CTX = document.getElementById("canvas").getContext("2d")
+const ZOI_HEX = [0]
 
 function on_focus_card_tip(c) {
     if (data.cards[c].type === "Barrage")
@@ -39,11 +40,12 @@ function on_init() {
     for (let i = 1; i < LAST_BOARD_HEX; ++i) {
         let center = hex_center(i)
         define_layout("board_hex", i, [center[0] - 18, center[1] - 14, 45, 45], "stack")
-        define_space("action_hex", i, [center[0] - 29, center[1] - 19, 45, 45])
+        define_space("action_hex", i, [center[0] - 29, center[1] - 19, 45, 45], "hex")
+        ZOI_HEX.push(define_space("zoi", i, [center[0] - 29, center[1] - 19, 45, 45], "hex hide"))
     }
     for (let i = 1; i <= 12; ++i) {
         define_layout("board_hex", TURN_BOX + i, [80, 1050 - (i - 1) * 40, 45, 45], "stack")
-        define_space("action_hex", TURN_BOX + i, [80, 1050 - (i - 1) * 40, 45, 45], "stack")
+        define_space("action_hex", TURN_BOX + i, [80, 1050 - (i - 1) * 40, 45, 45], "hex stack")
     }
     define_layout("board_hex", ELIMINATED_BOX, [50, 50, 45, 45], "stack")
     define_layout("board_hex", DELAYED_BOX, [2100, 1350, 45, 45], "stack")
@@ -202,7 +204,7 @@ function on_update() {
     // G.actions.board_hex.push(hex_to_int(piece.start))
     let unit_present_hex = []
 
-    for (let i = 0; i < data.pieces.length; ++i) {
+    for (var i = 0; i < data.pieces.length; ++i) {
         let piece = data.pieces[i]
         if (G.location[i] > 0) {
             set_add(unit_present_hex, G.location[i])
@@ -210,8 +212,40 @@ function on_update() {
             unit.classList.toggle("activated", G.offensive.active_units.includes(i))
             unit.classList.toggle("selected", G.active_stack.includes(i))
             unit.classList.toggle("reduced", set_has(G.reduced, i))
+            unit.classList.toggle("oos", set_has(G.oos, i))
         }
     }
+    var oos_hex_set = []
+    for (i = 0; i < G.oos.length; i++) {
+        let hex = G.location[G.oos[i]]
+        if (!set_has(oos_hex_set, hex)) {
+            populate_generic("board_hex", hex, "marker oos")
+            set_add(oos_hex_set, hex)
+        }
+    }
+
+    for (i = 1; i < LAST_BOARD_HEX; i++) {
+        const zoi_state = G.supply_cache[i] & 3
+        if(zoi_state){
+            console.log(zoi_state)
+        }
+        if (zoi_state === 0) {
+            ZOI_HEX[i].classList.add("hide")
+        } else if (zoi_state === 1) {
+            ZOI_HEX[i].classList.remove("hide")
+            ZOI_HEX[i].classList.remove("ap_zoi")
+            ZOI_HEX[i].classList.add("jp_zoi")
+        } else if (zoi_state === 2) {
+            ZOI_HEX[i].classList.remove("hide")
+            ZOI_HEX[i].classList.remove("jp_zoi")
+            ZOI_HEX[i].classList.add("ap_zoi")
+        } else {
+            ZOI_HEX[i].classList.remove("hide")
+            ZOI_HEX[i].classList.remove("jp_zoi")
+            ZOI_HEX[i].classList.remove("ap_zoi")
+        }
+    }
+
     G.control.filter(h => !set_has(unit_present_hex, h)).forEach(h => populate_generic("board_hex", h, "marker control_jp"))
 
     update_hand(AP)
