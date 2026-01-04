@@ -81,7 +81,9 @@ const US_SUPPLIED_HEX = 1 << 18
 const JP_UNITS = JP_AIR_UNITS | JP_GROUND_UNITS | JP_NAVAL_UNITS | JP_HQ_UNITS
 const JP_GA_UNITS = JP_AIR_UNITS | JP_GROUND_UNITS
 const JP_GAH_UNITS = JP_AIR_UNITS | JP_GROUND_UNITS | JP_HQ_UNITS
-const SUPPLY_ITERATION_MASK = [...Array(13).keys()].reduce((a, b) => a + Math.pow(2, b))
+const NON_SUPPLY_MASK = [...Array(13).keys()].reduce((a, b) => a + Math.pow(2, b))
+const CLEAN_SUPPLY_MASK = [(NON_SUPPLY_MASK | JP_SUPPLY_PORT | JP_SUPPLIED_HEX), (NON_SUPPLY_MASK | AP_SUPPLY_PORT | BR_SUPPLIED_HEX | JOINT_SUPPLIED_HEX | US_SUPPLIED_HEX)]
+const AP_SUPPLIED_HEX = (BR_SUPPLIED_HEX | JOINT_SUPPLIED_HEX | US_SUPPLIED_HEX)
 
 const LAST_BOARD_HEX = 1476
 const NON_PLACED_BOX = 1477
@@ -192,6 +194,39 @@ for (var i = 0; i < map.length; i++) {
         }
     }
     map_set(AIRFIELD_LINKS, hex_i, links.sort((a, b) => a[1] - b[1]).flatMap(a => a))
+}
+
+function get_hq_supply_type(piece) {
+    if (!piece.faction) {
+        return JP_SUPPLIED_HEX
+    } else if (piece.service === "us") {
+        return US_SUPPLIED_HEX
+    } else if (piece.service === "br") {
+        return BR_SUPPLIED_HEX
+    } else {
+        return JOINT_SUPPLIED_HEX
+    }
+}
+
+function get_unit_supply_type(piece) {
+    if (!piece.faction) {
+        return JP_SUPPLIED_HEX
+    } else if (piece.service === "ch" || piece.class === "air" && (piece.service === "navy" || piece.service === "army")) {
+        return AP_SUPPLIED_HEX
+    } else if (piece.service === "br" || piece.service === "au" || piece.service === "bu" || piece.service === "ind") {
+        return BR_SUPPLIED_HEX | JOINT_SUPPLIED_HEX
+    } else if (piece.service === "navy" || piece.service === "army") {
+        return US_SUPPLIED_HEX | JOINT_SUPPLIED_HEX
+    } else if (piece.service === "du") {
+        return JOINT_SUPPLIED_HEX
+    }
+    throw new Error("Invalid piece supply: " + piece.name)
+}
+
+for (var i = 0; i < pieces.length; i++) {
+    const piece = pieces[i]
+    const supply = piece.class === "hq" ? get_hq_supply_type(piece) : get_unit_supply_type(piece)
+    piece.supply = supply
 }
 
 
@@ -696,7 +731,7 @@ function check_hq_in_supply(hq, piece) {
         const oversea = set_has(oversea_set, item)
         for (let j = 0; j < 6; j++) {
             let nh = nh_list[j]
-            if (!nh) {
+            if (nh <= 0) {
                 continue
             }
             var reachable = false
@@ -734,7 +769,7 @@ function mark_supply_ports_overland(hq, piece) {
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < 6; j++) {
             let nh = nh_list[j]
-            if (nh < 0) {
+            if (nh <= 0) {
                 continue
             }
             const occupied_land = G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
@@ -749,7 +784,7 @@ function mark_supply_ports_overland(hq, piece) {
             }
             if (MAP_DATA[nh].port && set_has(G.control, nh) != faction) {
                 G.supply_cache[nh] = G.supply_cache[nh] | JP_SUPPLY_PORT << faction
-                console.log(`Supply eligable ground ${int_to_hex(nh)} ${faction ? "Alied" : "Japan"}`)
+                // console.log(`Supply eligable ground ${int_to_hex(nh)} ${faction ? "Alied" : "Japan"}`)
             }
         }
     }
@@ -766,7 +801,7 @@ function mark_supply_ports_oversea(hq, piece) {
         const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))
         for (let j = 0; j < 6; j++) {
             let nh = nh_list[j]
-            if (!nh) {
+            if (nh <= 0) {
                 continue
             }
             const non_neutral_zoi = non_neutral_zoi_s || G.supply_cache[nh] & JP_ZOI << (1 - faction) && !(G.supply_cache[nh] & JP_ZOI_NTRL << (1 - faction))
@@ -778,54 +813,99 @@ function mark_supply_ports_oversea(hq, piece) {
                 }
                 if (MAP_DATA[nh].port && set_has(G.control, nh) != faction) {
                     G.supply_cache[nh] = G.supply_cache[nh] | JP_SUPPLY_PORT << faction
-                    console.log(`Supply eligable ${int_to_hex(nh)} ${faction ? "Alied" : "Japan"}`)
+                    // console.log(`Supply eligable ${int_to_hex(nh)} ${faction ? "Alied" : "Japan"}`)
                 }
             }
         }
     }
 }
 
-function mark_hexes_supplied_from(hq) {
-
+function mark_hexes_supplied_from(hq, piece) {
+    if (hq !== 79) {
+        // return
+    }
+    console.log(piece.name)
+    const faction = piece.faction
+    const location = G.location[hq]
+    const queue = [location]
+    const oversea_set = [location, 0]
+    const overland_set = [location, 0]
+    const supply_type = piece.supply
+    G.supply_cache[location] = G.supply_cache[location] | supply_type
+    for (var i = 0; i < queue.length; i++) {
+        let item = queue[i]
+        let nh_list = get_near_hexes(item)
+        const MD = MAP_DATA[item]
+        const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))
+        const distance = map_get(oversea_set, item) + 1
+        for (let j = 0; j < 6; j++) {
+            let nh = nh_list[j]
+            if (nh <= 0) {
+                continue
+            }
+            const non_neutral_zoi = non_neutral_zoi_s || G.supply_cache[nh] & JP_ZOI << (1 - faction) && !(G.supply_cache[nh] & JP_ZOI_NTRL << (1 - faction))
+            if (!(MD.edges_int & WATER << 5 * j) || non_neutral_zoi || map_get(oversea_set, nh, 100) <= distance) {
+                continue
+            }
+            if (distance < piece.cr) {
+                queue.push(nh)
+            }
+            map_set(oversea_set, nh, distance)
+            const friendly_port = (MAP_DATA[nh].port && set_has(G.control, nh) !== faction)
+            if (MAP_DATA[nh].port && friendly_port && !MAP_DATA[nh].island && MAP_DATA[nh].terrain !== ATOLL) {
+                map_set(overland_set, nh, distance)
+            }
+            if (MAP_DATA[nh].terrain > 0) {
+                G.supply_cache[nh] = G.supply_cache[nh] | supply_type
+            }
+        }
+    }
+    // if (hq === 74) {
+    console.log(`${piece.name} ${queue.length} ${oversea_set.length} ${overland_set.length}`)
+    // }
 }
 
 function check_unit_supply(i, piece) {
-    return true
+    const location = G.location[i]
+    if (piece.class === "hq") {
+        return false
+    }
+    return G.supply_cache[location] & piece.supply
 }
 
-function check_faction_supply_not_changed(faction, both_sides_zoi) {
+function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
     for (i = 1; i < LAST_BOARD_HEX; i++) {
-        G.supply_cache[i] = G.supply_cache[i] & SUPPLY_ITERATION_MASK
+        G.supply_cache[i] = G.supply_cache[i] & CLEAN_SUPPLY_MASK[1 - faction]
     }
     for_each_unit((i, p) => both_sides_zoi || p.faction === faction ? set_zoi(i, p) : null)
     for_each_unit((i, p) => {
         if (p.class === "hq" && p.faction === faction) {
-            console.log(pieces[i].name)
+            // console.log(pieces[i].name)
             mark_supply_ports_oversea(i, p)
         }
     })
     for_each_unit((i, p) => {
         if (p.class === "hq" && p.faction === faction) {
-            console.log(pieces[i].name)
+            // console.log(pieces[i].name)
             mark_supply_ports_overland(i, p)
         }
     })
-    var size = L.oos_units[faction].length
-    L.oos_units[faction] = []
+    var size = oos_units[faction].length
+    oos_units[faction] = []
     for_each_unit((i, p) => {
         if (p.class === "hq" && p.faction === faction && check_hq_in_supply(i, p)) {
-            mark_hexes_supplied_from(i)
+            mark_hexes_supplied_from(i, p)
         } else if (p.class === "hq" && p.faction === faction) {
-            set_add(L.oos_units[faction], i)
+            set_add(oos_units[faction], i)
         }
     })
 
     for_each_unit((i, p) => {
         if (p.class !== "hq" && p.faction === faction && !check_unit_supply(i, p)) {
-            set_add(L.oos_units[faction], i)
+            set_add(oos_units[faction], i)
         }
     })
-    return L.oos_units[faction].length === size
+    return oos_units[faction].length === size
 }
 
 function check_supply() {
@@ -837,21 +917,20 @@ function check_supply() {
     G.supply_cache = []
     for_each_unit(mark_unit)
 
-    L.oos_units = [[], []]
+    var oos_units = [[], []]
     G.oos = []
-    check_faction_supply_not_changed(AP, false)
-    check_faction_supply_not_changed(JP, true)
+    check_faction_supply_not_changed(AP, false, oos_units)
+    check_faction_supply_not_changed(JP, true, oos_units)
     for (var i = 0; i < 10; i++) {//limit supply check counts
-        const ap = check_faction_supply_not_changed(AP, true)
-        const jp = check_faction_supply_not_changed(JP, true)
+        const ap = check_faction_supply_not_changed(AP, true, oos_units)
+        const jp = check_faction_supply_not_changed(JP, true, oos_units)
         if (ap && jp) {
             break
         }
         break
     }
-    G.oos = L.oos_units[0]
-    L.oos_units[1].forEach(h => set_add(G.oos, h))
-    L.oos_units = null
+    G.oos = oos_units[0]
+    oos_units[1].forEach(h => set_add(G.oos, h))
 }
 
 function get_move_data() {
@@ -1121,7 +1200,7 @@ function get_ground_move(avoid_zoi) {
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < 6; j++) {
             let nh = nh_list[j]
-            if (nh < 0) {
+            if (nh <= 0) {
                 continue
             }
 
@@ -1165,7 +1244,7 @@ function check_hexes_in_distance(location, connection_check, limit, process_hex)
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < 6; j++) {
             let nh = nh_list[j]
-            if (nh < 0 || map_get(distance_map, nh)) {
+            if (nh <= 0 || map_get(distance_map, nh)) {
                 continue
             }
             let distance = base_distance
