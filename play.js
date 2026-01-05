@@ -55,7 +55,7 @@ function on_init() {
     }
     for (let i = 0; i < data.cards.length; ++i) {
         let card = data.cards[i]
-        card.element = define_card("card", i, "action card_" + card.faction + "_" + card.num)
+        card.element = define_card("card", i, `action card_${card.faction ? "ap" : "jp"}_${card.num}`)
         card.element.onclick = on_click_card
         card.element.card = i
     }
@@ -225,10 +225,10 @@ function on_update() {
     }
 
     for (i = 1; i < LAST_BOARD_HEX; i++) {
-        if((G.supply_cache[i] & (1 << 15))&&G.supply_cache[i] & ((1 << 16) | (1 << 17) | (1 << 18))){
-                    ZOI_HEX[i].classList.remove("hide")
-                    ZOI_HEX[i].classList.remove("jp_zoi")
-                    ZOI_HEX[i].classList.remove("ap_zoi")
+        if ((G.supply_cache[i] & (1 << 15)) && G.supply_cache[i] & ((1 << 16) | (1 << 17) | (1 << 18))) {
+            ZOI_HEX[i].classList.remove("hide")
+            ZOI_HEX[i].classList.remove("jp_zoi")
+            ZOI_HEX[i].classList.remove("ap_zoi")
         } else if (G.supply_cache[i] & (1 << 15)) {
             ZOI_HEX[i].classList.remove("hide")
             ZOI_HEX[i].classList.remove("ap_zoi")
