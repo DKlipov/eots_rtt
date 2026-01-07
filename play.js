@@ -224,43 +224,44 @@ function on_update() {
         }
     }
 
-    for (i = 1; i < LAST_BOARD_HEX; i++) {
-        if ((G.supply_cache[i] & (1 << 15)) && G.supply_cache[i] & ((1 << 16) | (1 << 17) | (1 << 18))) {
-            ZOI_HEX[i].classList.remove("hide")
-            ZOI_HEX[i].classList.remove("jp_zoi")
-            ZOI_HEX[i].classList.remove("ap_zoi")
-        } else if (G.supply_cache[i] & (1 << 15)) {
-            ZOI_HEX[i].classList.remove("hide")
-            ZOI_HEX[i].classList.remove("ap_zoi")
-            ZOI_HEX[i].classList.add("jp_zoi")
-        } else if (G.supply_cache[i] & ((1 << 16) | (1 << 17) | (1 << 18))) {
-            ZOI_HEX[i].classList.remove("hide")
-            ZOI_HEX[i].classList.remove("jp_zoi")
-            ZOI_HEX[i].classList.add("ap_zoi")
-        } else {
-            ZOI_HEX[i].classList.add("hide")
-        }
-    }
-
-
+    //show supply
     // for (i = 1; i < LAST_BOARD_HEX; i++) {
-    //     const zoi_state = G.supply_cache[i] & 3
-    //     if (zoi_state === 0) {
-    //         ZOI_HEX[i].classList.add("hide")
-    //     } else if (zoi_state === 1) {
+    //     if ((G.supply_cache[i] & (1 << 15)) && G.supply_cache[i] & ((1 << 16) | (1 << 17) | (1 << 18))) {
+    //         ZOI_HEX[i].classList.remove("hide")
+    //         ZOI_HEX[i].classList.remove("jp_zoi")
+    //         ZOI_HEX[i].classList.remove("ap_zoi")
+    //     } else if (G.supply_cache[i] & (1 << 15)) {
     //         ZOI_HEX[i].classList.remove("hide")
     //         ZOI_HEX[i].classList.remove("ap_zoi")
     //         ZOI_HEX[i].classList.add("jp_zoi")
-    //     } else if (zoi_state === 2) {
+    //     } else if (G.supply_cache[i] & ((1 << 16) | (1 << 17) | (1 << 18))) {
     //         ZOI_HEX[i].classList.remove("hide")
     //         ZOI_HEX[i].classList.remove("jp_zoi")
     //         ZOI_HEX[i].classList.add("ap_zoi")
     //     } else {
-    //         ZOI_HEX[i].classList.remove("hide")
-    //         ZOI_HEX[i].classList.remove("jp_zoi")
-    //         ZOI_HEX[i].classList.remove("ap_zoi")
+    //         ZOI_HEX[i].classList.add("hide")
     //     }
     // }
+
+    //show zoi
+    for (i = 1; i < LAST_BOARD_HEX; i++) {
+        const zoi_state = G.supply_cache[i] & 3
+        if (zoi_state === 0) {
+            ZOI_HEX[i].classList.add("hide")
+        } else if (zoi_state === 1) {
+            ZOI_HEX[i].classList.remove("hide")
+            ZOI_HEX[i].classList.remove("ap_zoi")
+            ZOI_HEX[i].classList.add("jp_zoi")
+        } else if (zoi_state === 2) {
+            ZOI_HEX[i].classList.remove("hide")
+            ZOI_HEX[i].classList.remove("jp_zoi")
+            ZOI_HEX[i].classList.add("ap_zoi")
+        } else {
+            ZOI_HEX[i].classList.remove("hide")
+            ZOI_HEX[i].classList.remove("jp_zoi")
+            ZOI_HEX[i].classList.remove("ap_zoi")
+        }
+    }
 
     G.control.filter(h => !set_has(unit_present_hex, h)).forEach(h => populate_generic("board_hex", h, "marker control_jp"))
 

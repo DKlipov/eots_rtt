@@ -57,6 +57,9 @@ const ROAD = 4
 const UNPLAYABLE = 8
 const MAP_BORDER = 16
 
+
+const SUPPLY_PORT_RANGE = 4 * 2 //ground movement points count with multiplier
+
 // Hex supply status flags
 const JP_ZOI = 1 << 0
 const AP_ZOI = 1 << 1
@@ -519,16 +522,6 @@ P.activate_units = {
     },
 }
 
-function is_active_air() {
-    let active_air = false
-    for (let i = 0; i < G.active_stack.length; i++) {
-        if (pieces[G.active_stack[i]].class === "air") {
-            active_air = true
-        }
-    }
-    return active_air
-}
-
 function offensive_card_header() {
     return `${G.offensive.type === EC ? "EC" : "OC"}: ${cards[G.offensive.active_cards[0]].name}.`
 }
@@ -630,7 +623,7 @@ P.move_offensive_units = {
         }
         check_supply()
         L.allowed_hexes = []
-        if (curr_path[0] & GROUND_MOVE && curr_path[1] < L.move_data.ground_move_distance) {
+        if (curr_path[0] & GROUND_MOVE && curr_path[1] < L.move_data.ground_move_distance && !should_ground_move_stop(hex, R)) {
             L.move_data.ground_move_distance -= curr_path[1]
             L.move_data.location = hex
             compute_ground_naval_move_hexes()
@@ -696,7 +689,10 @@ function for_each_unit(apply) {
 function set_zoi(i, piece, oos_units) {
     let location = G.location[i]
     if (piece.br && !set_has(oos_units[piece.faction], i)) {
-        let mask = 0 | (JP_ZOI << piece.faction) | (JP_ZOI_NTRL << 1 - piece.faction)
+        var mask = 0 | (JP_ZOI << piece.faction)
+        if (piece.br < 6) {
+            mask = mask | JP_ZOI_NTRL << 1 - piece.faction
+        }
         G.supply_cache[location] = G.supply_cache[location] | mask
         get_near_hexes(location).flatMap(h => get_near_hexes(h)).forEach(h => {
             G.supply_cache[h] = G.supply_cache[h] | mask
@@ -762,7 +758,6 @@ function check_hq_in_supply(hq, piece) {
 }
 
 function mark_supply_ports_overland(hq, piece) {
-    const move_distance_from_hq = 4
     const faction = piece.faction
     const location = G.location[hq]
     var queue = [location]
@@ -777,18 +772,17 @@ function mark_supply_ports_overland(hq, piece) {
                 continue
             }
             const occupied_land = G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
-            var distance = base_distance[0] + get_ground_move_cost(item, nh, j)
-            if (distance > move_distance_from_hq || distance > map_get(distance_map, nh, [100])[0] || occupied_land) {
+            var distance = base_distance + get_ground_move_cost(item, nh, j, faction)
+            if (distance > SUPPLY_PORT_RANGE || distance >= map_get(distance_map, nh, [100])[0] || occupied_land) {
                 continue
             }
             map_set(distance_map, nh, distance)
 
-            if (distance < move_distance_from_hq) {
+            if (distance < SUPPLY_PORT_RANGE) {
                 queue.push(nh)
             }
             if (MAP_DATA[nh].port && set_has(G.control, nh) != faction) {
                 G.supply_cache[nh] = G.supply_cache[nh] | JP_SUPPLY_PORT << faction
-                // console.log(`Supply eligable ground ${int_to_hex(nh)} ${faction ? "Alied" : "Japan"}`)
             }
         }
     }
@@ -824,18 +818,52 @@ function mark_supply_ports_oversea(hq, piece) {
     }
 }
 
-function mark_hexes_supplied_from(hq, piece) {
-    if (hq !== 2 && hq < 10) {
-        // console.log(`${piece.name} ${hq}`)
-        // return
+function supply_source_in_range(location, faction) {
+    if (!(G.supply_cache[location] & JP_UNITS << faction)) {
+        return false
+    } else if (G.supply_cache[location] & JP_SUPPLY_PORT << faction) {
+        return true
     }
-    console.log(piece.name)
+    const queue = [location]
+    const distance_map = []
+    map_set(distance_map, location, 0)
+
+    for (var i = 0; i < queue.length; i++) {
+        const item = queue[i]
+        const base_distance = map_get(distance_map, item)
+        const nh_list = get_near_hexes(item)
+        for (var j = 0; j < 6; j++) {
+            const nh = nh_list[j]
+            if (nh <= 0) {
+                continue
+            }
+
+            var distance = base_distance + get_ground_move_cost(item, nh, j, faction)
+            const occupied_land = G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
+            if (distance > SUPPLY_PORT_RANGE || occupied_land || distance >= map_get(distance_map, nh, [100])[0]) {
+                continue
+            }
+            if (G.supply_cache[nh] & JP_SUPPLY_PORT << faction) {
+                return true
+            }
+            map_set(distance_map, nh, distance)
+
+            if (distance < SUPPLY_PORT_RANGE) {
+                queue.push(nh)
+            }
+        }
+    }
+    return false
+}
+
+function mark_hexes_supplied_from(hq, piece) {
     const faction = piece.faction
     const location = G.location[hq]
     var queue = [location]
     const oversea_set = [location, 0]
     const overland_set = [location, 0]
     const supply_type = piece.supply
+    const extended_supply_type = supply_type | (faction ? JOINT_SUPPLIED_HEX : 0)
     G.supply_cache[location] = G.supply_cache[location] | supply_type
     for (var i = 0; i < queue.length; i++) {
         let item = queue[i]
@@ -882,25 +910,20 @@ function mark_hexes_supplied_from(hq, piece) {
             if (!(MD.edges_int & GROUND << 5 * j) || occupied_land || map_get(overland_set, nh, 100) <= distance) {
                 continue
             }
-            if (int_to_hex(nh) === 2008) {
-                console.log("nh log")
-                console.log(MAP_DATA[nh].port && set_has(G.control, nh) != faction)
-                console.log(distance < piece.cr)
-            }
             if (distance < piece.cr) {
                 queue.push(nh)
                 const friendly_port = MAP_DATA[nh].port && set_has(G.control, nh) != faction
                 if (friendly_port && map_get(oversea_set, nh, 100) > distance) {
                     map_set(oversea_set, nh, distance)
                     second_ports.push(nh)
-                    console.log(`second port ${int_to_hex(nh)}`)
                 }
             }
             map_set(overland_set, nh, distance)
-            G.supply_cache[nh] = G.supply_cache[nh] | supply_type
+            if (!(G.supply_cache[nh] & extended_supply_type) && supply_source_in_range(nh, faction)) {
+                G.supply_cache[nh] = G.supply_cache[nh] | supply_type
+            }
         }
     }
-    console.log(`second ports ${second_ports}`)
     second_ports.forEach(h => queue.push(h))
     for (; i < queue.length; i++) {
         let item = queue[i]
@@ -932,6 +955,8 @@ function check_unit_supply(i, piece) {
     const location = G.location[i]
     if (piece.class === "hq") {
         return false
+    } else if (set_has(G.offensive.active_units[piece.faction], i)) {
+        return true
     }
     return G.supply_cache[location] & piece.supply
 }
@@ -943,13 +968,11 @@ function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
     for_each_unit((i, p) => both_sides_zoi || p.faction === faction ? set_zoi(i, p, oos_units) : null)
     for_each_unit((i, p) => {
         if (p.class === "hq" && p.faction === faction) {
-            // console.log(pieces[i].name)
             mark_supply_ports_oversea(i, p)
         }
     })
     for_each_unit((i, p) => {
         if (p.class === "hq" && p.faction === faction) {
-            // console.log(pieces[i].name)
             mark_supply_ports_overland(i, p)
         }
     })
@@ -986,7 +1009,6 @@ function check_supply() {
     check_faction_supply_not_changed(JP, true, oos_units)
     for (var i = 0; i < 10; i++) {//limit supply check counts
         const ap = check_faction_supply_not_changed(AP, true, oos_units)
-        console.log(oos_units)
         const jp = check_faction_supply_not_changed(JP, true, oos_units)
         if (ap && jp) {
             break
@@ -1047,12 +1069,12 @@ function get_move_data() {
     return result
 }
 
-function get_ground_move_cost(from, to, direction) {
+function get_ground_move_cost(from, to, direction, faction) {
     if (!(MAP_DATA[from].edges_int & GROUND << 5 * direction)) {
         return 100;
     }
     if ((MAP_DATA[from].edges_int & ROAD << (5 * direction))
-        && !(G.supply_cache[to] & (TRANSPORT_ROUTE_DISABLED | (JP_GA_UNITS << 1 - R)))
+        && !(G.supply_cache[to] & (TRANSPORT_ROUTE_DISABLED | (JP_GA_UNITS << 1 - faction)))
     ) {
         return 1;
     } else {
@@ -1241,10 +1263,16 @@ function compute_ground_naval_move_hexes() {
         })
         map_for_each(get_ground_move(true), (k, v) => {
             v.unshift(GROUND_MOVE | AVOID_ZOI)
-            map_set(L.allowed_hexes, k, v)
+            if (map_get(L.allowed_hexes, k, [100])[1] >= v[1]) {
+                map_set(L.allowed_hexes, k, v)
+            }
         })
     }
     map_delete(L.allowed_hexes, location)
+}
+
+function should_ground_move_stop(hex, faction) {
+    return G.supply_cache[hex] & JP_GAH_UNITS << (1 - faction) || set_has(G.offensive.battle_hexes, hex)
 }
 
 function get_ground_move(avoid_zoi) {
@@ -1268,20 +1296,21 @@ function get_ground_move(avoid_zoi) {
                 continue
             }
 
-            var distance = base_distance[0] + get_ground_move_cost(item, nh, j)
-
-            if ((avoid_zoi && G.supply_cache[nh] & JP_ZOI << (1 - R)) || distance > move_data.ground_move_distance || distance > map_get(distance_map, nh, [100])[0]) {
+            var distance = base_distance[0] + get_ground_move_cost(item, nh, j, R)
+            console.log(`${int_to_hex(item)} - ${int_to_hex(nh)} ${distance}`)
+            console.log(`${(avoid_zoi && G.supply_cache[nh] & JP_ZOI << (1 - R))} - ${distance > move_data.ground_move_distance} - ${distance > map_get(distance_map, nh, [100])[0]} - ${map_get(distance_map, nh, [100])[0]}`)
+            console.log(`${(avoid_zoi && G.supply_cache[nh] & JP_ZOI << (1 - R)) || distance > move_data.ground_move_distance || distance >= map_get(distance_map, nh, [100])[0]}`)
+            if ((avoid_zoi && G.supply_cache[nh] & JP_ZOI << (1 - R)) || distance > move_data.ground_move_distance || distance >= map_get(distance_map, nh, [100])[0]) {
                 continue
             }
-            const stop_move = G.supply_cache[nh] & JP_GAH_UNITS << (1 - R) || set_has(G.offensive.battle_hexes, nh)
-            if (stop_move) {
-                distance = move_data.ground_move_distance
-            }
+            const stop_move = should_ground_move_stop(nh, R)
 
             let path_array = base_distance.slice()
             path_array.push(nh)
             path_array[0] = distance
             map_set(distance_map, nh, path_array)
+
+            console.log(`${int_to_hex(nh)} - ${path_array.map(a => a < 100 ? a : int_to_hex(a))}`)
 
             if (distance < move_data.ground_move_distance && !stop_move) {
                 queue.push(nh)

@@ -1,16 +1,15 @@
 Todo list:
-* Supply check
+* Amphibious shiping point calculation
 * Navy & Amph movement
 * Activation line check (hq - unit)
+* Air strategic movement & displacement
 * Special reaction and intelligence state step
-* Amphibious shiping point calculation
 * Reaction movement
 * Battle calculation
 * Ground retreat step
 * Battle loss step
 * Emergency move
 * Post battle movement
-* Air strategic movement & displacement
 * Parentheless air restrictions (move, reaction and commit battle steps)
 * Progress of war
 * Interservice rivalry
