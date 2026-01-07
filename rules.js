@@ -1739,7 +1739,7 @@ function setup_scenario_1942() {
     G.passes[AP] = 2
     G.passes[JP] = 0
     G.turn = 2
-    G.amph_points = [7, 1]
+    G.amph_points[1] = [1, 0]
     G.political_will = 8
 
     console.log("setup 1942")
@@ -1783,8 +1783,10 @@ function on_setup(scenario, options) {
     G.hand = [[], []]
     G.future_offensive = [[-1, 0], [-1, 0]]
     G.discard = [[], []]
-    G.amph_points = [0, 0]
+    G.amph_points = [[7, 0], [0, 0]]
     G.active_stack = []
+    G.agreement = [1, 1]
+    G.wie = 3
 
     G.location = []
     G.reduced = []
@@ -1819,14 +1821,10 @@ function on_view() {
     V.location = G.location
     V.reduced = G.reduced
     V.political_will = G.political_will
-
-    V.permanent = G.permanent
+    V.agreement = G.agreement
+    V.wie = G.wie
 
     V.control = G.control
-    V.units = G.units
-    V.trenches = G.trenches
-    V.vps = G.vps
-    V.exhausted = G.exhausted
     V.oos = G.oos
     V.supply_cache = G.supply_cache
     V.hand = []

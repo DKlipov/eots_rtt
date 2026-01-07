@@ -7,6 +7,11 @@ const ELIMINATED_BOX = 1478
 const DELAYED_BOX = 1479
 const TURN_BOX = 1480
 
+//status markers
+const JP_AGREEMENT = 0
+const AP_AGREEMENT = 1
+
+
 const CANVAS = document.getElementById("canvas")
 const CANVAS_CTX = document.getElementById("canvas").getContext("2d")
 const ZOI_HEX = [0]
@@ -36,19 +41,30 @@ function on_init() {
             on_update()
         }
     }
-    for (let i = 1; i < LAST_BOARD_HEX; ++i) {
+    for (var i = 1; i < LAST_BOARD_HEX; ++i) {
         let center = hex_center(i)
         define_layout("board_hex", i, [center[0] - 18, center[1] - 14, 45, 45], "stack")
         define_space("action_hex", i, [center[0] - 29, center[1] - 19, 45, 45], "hex")
         ZOI_HEX.push(define_space("zoi", i, [center[0] - 29, center[1] - 19, 45, 45], "hex hide"))
     }
-    for (let i = 1; i <= 12; ++i) {
+    for (i = 1; i <= 12; ++i) {
         define_layout("board_hex", TURN_BOX + i, [80, 1050 - (i - 1) * 40, 45, 45], "stack")
         define_space("action_hex", TURN_BOX + i, [80, 1050 - (i - 1) * 40, 45, 45], "hex stack")
     }
     define_layout("board_hex", NON_PLACED_BOX, [10, 10, 45, 45], "stack")
     define_layout("board_hex", ELIMINATED_BOX, [50, 50, 45, 45], "stack")
     define_layout("board_hex", DELAYED_BOX, [2100, 1350, 45, 45], "stack")
+    define_layout("status", JP_AGREEMENT, [890, 130, 35, 35])
+    define_layout("status", AP_AGREEMENT, [945, 130, 35, 35])
+    for (i = 0; i < 11; i++) {
+        define_layout("pw", i, [147, 1068 - Math.floor((i * 42.3)), 35, 35])
+    }
+    for (i = 0; i < 11; i++) {
+        define_layout("wie", i, [243, 645 + Math.floor((i * 42.3)), 35, 35])
+    }
+    for (i = 1; i < 13; i++) {
+        define_layout("turn", i, [63, 1110 - Math.floor((i * 42.3)), 35, 35])
+    }
     for (let i = 0; i < data.pieces.length; ++i) {
         let piece = data.pieces[i]
         piece.element = define_piece("unit", i, piece.counter)
@@ -277,6 +293,12 @@ function on_update() {
     }
 
     G.offensive.battle_hexes.forEach(h => populate_generic("board_hex", h, "marker attack"))
+
+    G.agreement.forEach((v, i) => populate_generic("status", i, `marker ${v ? "agreement" : "rivalry"}_${i ? "ap" : "jp"}`))
+    populate_generic("pw", G.political_will, "marker pw")
+    populate_generic("wie", G.wie, "marker wie")
+
+    populate_generic("turn", G.turn, "marker turn_pmt")
 
     action_button("roll", "Roll")
 

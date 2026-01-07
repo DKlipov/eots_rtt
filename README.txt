@@ -1,4 +1,5 @@
 Todo list:
+* Interservice rivalry
 * Amphibious shiping point calculation
 * Navy & Amph movement
 * Activation line check (hq - unit)
@@ -12,7 +13,6 @@ Todo list:
 * Post battle movement
 * Parentheless air restrictions (move, reaction and commit battle steps)
 * Progress of war
-* Interservice rivalry
 * National status segment
 * Political will segment
 * Attrition phase
