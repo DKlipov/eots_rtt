@@ -1,28 +1,5 @@
-Todo list:
-* Interservice rivalry
-* Amphibious shiping point calculation
-* Navy & Amph movement
-* Activation line check (hq - unit)
-* Air strategic movement & displacement
-* Special reaction and intelligence state step
-* Reaction movement
-* Battle calculation
-* Ground retreat step
-* Battle loss step
-* Emergency move
-* Post battle movement
-* Parentheless air restrictions (move, reaction and commit battle steps)
-* Progress of war
-* National status segment
-* Political will segment
-* Attrition phase
-* Full card deck
-* End of turn phase & Tojo & Machuria offensive
-* Replacement & reinforcement segment
-* Strategic warfare segment & B29
-* Future offensive
-* Reduced hq (Ghormley & Yamamoto)/ Hq displace and return
-* China offensive & stuff & China air box
-* Build infrastructure
-* China armies restrictions
-* Instrinct city defence
+Empire of the sun (https://www.gmtgames.com/p-1114-empire-of-the-sun-5th-printing.aspx) module for Rally-the-Troops.
+How to run: https://rally-the-troops.com/docs/server/install.md
+How it works: https://rally-the-troops.com/docs/index.md
+
+Contact me with mail danklipov97@gmail.com, tg @dklipov or discord fomelg#4134
