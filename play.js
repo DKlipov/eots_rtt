@@ -32,23 +32,23 @@ const TRACK_MARKERS = [
     },
     {
         counter: "asp_jp",
-        value: G => G.amph_points[0][0]
+        value: G => G.asp[0][0]
     },
     {
         counter: "aspu_jp",
         always_show: true,
-        value: G => G.amph_points[0][1]
+        value: G => G.asp[0][1]
     },
     {
         counter: "asp_ap",
         alt_counter: "asp_ap_1",
-        value: G => G.amph_points[1][0]
+        value: G => G.asp[1][0]
     },
     {
         counter: "aspu_ap",
         alt_counter: "aspu_ap_1",
         always_show: true,
-        value: G => G.amph_points[1][1]
+        value: G => G.asp[1][1]
     },
     {
         counter: "pass_jp",
@@ -340,7 +340,7 @@ function on_update() {
 
     G.offensive.battle_hexes.forEach(h => populate_generic("board_hex", h, "marker attack"))
 
-    G.agreement.forEach((v, i) => populate_generic("status", i, `marker ${v ? "agreement" : "rivalry"}_${i ? "ap" : "jp"}`))
+    G.inter_service.forEach((v, i) => populate_generic("status", i, `marker ${v ? "rivalry" : "agreement"}_${i ? "ap" : "jp"}`))
     populate_generic("pw", G.political_will, "marker pw")
     populate_generic("wie", G.wie, "marker wie")
 
@@ -374,6 +374,9 @@ function on_update() {
     action_button("next", "Next")
     action_button("done", "Done")
     action_button("undo", "Undo")
+
+    //debug
+    action_button("isr", "isr")
 
     end_update()
 }

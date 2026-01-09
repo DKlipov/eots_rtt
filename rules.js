@@ -230,6 +230,9 @@ for (var i = 0; i < pieces.length; i++) {
     const piece = pieces[i]
     const supply = piece.class === "hq" ? get_hq_supply_type(piece) : get_unit_supply_type(piece)
     piece.supply = supply
+    if (piece.class === "naval" && !piece.faction) {
+        piece.service = "navy"
+    }
 }
 
 
@@ -260,10 +263,10 @@ P.replacement_segment = function () {
 function submarine_success() {
     log("Successful submarine attack")
     G.strategic_warfare[0] = 1
-    if (G.amph_points[JP] > 1) {
-        G.amph_points[JP] -= 1
-        log("Japan amphibious shipping points reduced to: " + G.amph_points[JP])
-    }
+    // if (G.amph_points[JP] > 1) {
+    //     G.amph_points[JP] -= 1
+    //     log("Japan amphibious shipping points reduced to: " + G.amph_points[JP])
+    // }
 }
 
 P.strategic_warfare = {
@@ -416,6 +419,8 @@ P.offensive_segment = {
             let card = G.future_offensive[R][1]
             get_allowed_actions(card).forEach(a => action(a, card))
         }
+        //debug
+        button("isr")
     },
     ops(c) {
         activate_card(c)
@@ -456,6 +461,10 @@ P.offensive_segment = {
         push_undo()
         G.passes[R] -= 1
         goto("end_action")
+    },
+    //debug
+    isr() {
+        G.inter_service[R] = 1 - G.inter_service[R]
     }
 }
 
@@ -494,25 +503,38 @@ function get_distance(first_hex, second_hex) {
     return rx + ry - (rx >> 1)
 }
 
+function apply_inter_service(u) {
+    const piece = pieces[u]
+    if (!G.inter_service[R] || (piece.service !== "army" && piece.service !== "navy")) {
+        return
+    }
+    const rival_service = piece.service === "army" ? "navy" : "army"
+    L.possible_units.filter(i => pieces[i].service === rival_service).forEach(i => set_delete(L.possible_units, i))
+}
+
 P.activate_units = {
     _begin() {
         L.hq_bonus = pieces[G.offensive.active_hq[G.active]].cm
-    },
-    prompt() {
-        prompt(`${offensive_card_header()}. Activate units ${G.offensive.logistic} + ${L.hq_bonus} / ${G.offensive.active_units[R].length}.`)
+        L.possible_units = []
         for (let i = 0; i < pieces.length; i++) {
             let piece = pieces[i]
             let hq = G.offensive.active_hq[G.active]
             if (piece.faction === R && get_distance(G.location[hq], G.location[i]) <= pieces[hq].cr && piece.class !== "hq" &&
                 !set_has(G.offensive.active_units[R], i)) {
-                action_unit(i)
+                set_add(L.possible_units, i)
             }
         }
+    },
+    prompt() {
+        prompt(`${offensive_card_header()}. Activate units ${G.offensive.logistic} + ${L.hq_bonus} / ${G.offensive.active_units[R].length}.`)
+        L.possible_units.forEach(u => action_unit(u))
         button("done")
     },
     unit(u) {
         push_undo()
         set_add(G.offensive.active_units[R], u)
+        set_delete(L.possible_units, u)
+        apply_inter_service(u)
         if (G.offensive.active_units[R].length >= (G.offensive.logistic + L.hq_bonus)) {
             end()
         }
@@ -1035,7 +1057,9 @@ function get_move_data() {
         air_move_legs: 0,
         move_type: 0,
         location: 0,
-        moved: false
+        moved: false,
+        asp_total: 0,
+        asp_used: 0,
     }
     G.active_stack.forEach(u => {
         let piece = pieces[u]
@@ -1067,6 +1091,10 @@ function get_move_data() {
     result.is_new_battle_allowed = R === G.offensive.attacker
         && (G.offensive.type === EC || G.offensive.battle_hexes.length === 0)
         && !(result.move_type & POST_BATTLE_MOVE)
+    result.asp_total = Math.max(G.asp[R][0] - G.asp[R][0], 0)
+    if (!R && G.inter_service[0]) {
+        result.asp_total = Math.ceil(result.asp_total / 2)
+    }
     return result
 }
 
@@ -1740,7 +1768,7 @@ function setup_scenario_1942() {
     G.passes[AP] = 2
     G.passes[JP] = 0
     G.turn = 2
-    G.amph_points[1] = [1, 0]
+    G.asp[1] = [1, 0]
     G.political_will = 8
 
     console.log("setup 1942")
@@ -1784,9 +1812,9 @@ function on_setup(scenario, options) {
     G.hand = [[], []]
     G.future_offensive = [[-1, 0], [-1, 0]]
     G.discard = [[], []]
-    G.amph_points = [[7, 0], [0, 0]]
+    G.asp = [[7, 0], [0, 0]]
     G.active_stack = []
-    G.agreement = [1, 1]
+    G.inter_service = [0, 0]
     G.wie = 3
 
     G.location = []
@@ -1822,10 +1850,10 @@ function on_view() {
     V.location = G.location
     V.reduced = G.reduced
     V.political_will = G.political_will
-    V.agreement = G.agreement
+    V.inter_service = G.inter_service
     V.wie = G.wie
     V.passes = G.passes
-    V.amph_points = G.amph_points
+    V.asp = G.asp
 
     V.control = G.control
     V.oos = G.oos

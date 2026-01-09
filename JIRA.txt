@@ -1,7 +1,5 @@
 Todo list:
-* [WIP] Interservice rivalry
-* Amphibious shiping point calculation
-* Navy & Amph movement
+* [WIP] Navy & Amph movement
 * Activation line check (hq - unit)
 * Air strategic movement & displacement
 * Special reaction and intelligence state step
@@ -12,6 +10,7 @@ Todo list:
 * Emergency move
 * Post battle movement
 * Parentheless air restrictions (move, reaction and commit battle steps)
+* Check supply durning movement
 * Progress of war
 * National status segment
 * Political will segment
