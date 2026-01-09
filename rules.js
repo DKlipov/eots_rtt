@@ -453,6 +453,7 @@ P.offensive_segment = {
         goto("end_action")
     },
     pass() {
+        push_undo()
         G.passes[R] -= 1
         goto("end_action")
     }
@@ -1823,6 +1824,8 @@ function on_view() {
     V.political_will = G.political_will
     V.agreement = G.agreement
     V.wie = G.wie
+    V.passes = G.passes
+    V.amph_points = G.amph_points
 
     V.control = G.control
     V.oos = G.oos

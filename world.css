@@ -26,6 +26,10 @@ body.hide-markers .marker {
     display: none
 }
 
+body.hide-markers .hex {
+    display: none
+}
+
 body.hide-pieces .piece {
     display: none
 }

@@ -1,11 +1,6 @@
 main { background-color: dimgray; }
 
 header { background-color: tan }
-body.German header.your_turn { background-color: whitesmoke }
-body.French header.your_turn { background-color: skyblue }
-
-#role_German { background-color: silver }
-#role_French { background-color: skyblue }
 
 /* LOG */
 
@@ -18,8 +13,6 @@ body.French header.your_turn { background-color: skyblue }
 	margin: 8px 0;
 	text-align: center;
 }
-#log .h2.german { background-color: gainsboro; }
-#log .h2.french { background-color: lightblue; }
 
 #log > .q { padding-left: 20px; font-style: italic; opacity: 75%; }
 #log > .i { padding-left: 20px; }
@@ -111,17 +104,6 @@ body.French header.your_turn { background-color: skyblue }
 	}
 }
 
-#played_row { display: flex; flex-wrap: wrap; }
-#french_permanent { flex-grow: 1; }
-#german_permanent { flex-grow: 1; }
-
-#played .panel-body {
-	min-height: 380px;
-	min-width: 380px;
-	flex-direction: column-reverse;
-	justify-content: start;
-}
-
 #played .panel-body .card.barrage {
 	margin-bottom: -194px;
 }
@@ -154,45 +136,6 @@ body.Alies #jp_hand { grid-row: 4; }
 	background-size: 2290px 1490px;
 }
 
-/* SPACES */
-
-.space.zone {
-	box-sizing: border-box;
-}
-
-.space.zone.action {
-	background-color: #0803;
-	border: 4px solid #ff0;
-}
-
-.space.zone.select {
-	border: 4px dashed aqua;
-}
-
-.space.zone.tip {
-	border: 4px dashed lime;
-}
-
-path.zone {
-	fill: transparent;
-}
-
-path.zone.action {
-	fill: yellow;
-	fill-opacity: 0.1;
-	stroke: yellow;
-}
-
-path.zone.select {
-	stroke: cyan;
-	stroke-dasharray: 6 6;
-}
-
-path.zone.tip {
-	stroke: lime;
-	stroke-dasharray: 6 6;
-}
-
 /* CARDS */
 
 #tooltip {
@@ -214,38 +157,9 @@ path.zone.tip {
 	border: 1px solid black;
 }
 
-.card.barrage {
-	width: 378px;
-	height: 246px;
-}
-
 .card.action {
 	box-shadow: 0 0 0 3px yellow;
 }
-
-/* LAYOUT */
-
-.layout.zone-units-g, .layout.zone-units-f {
-	gap: 8px;
-}
-
-
-.layout.unit-pool {
-	gap: 0px;
-}
-
-.layout.trench-pool {
-	flex-direction: column;
-	gap: 0px;
-}
-
-.layout.trench-pool .piece.trench:nth-child(even) {
-	margin-left: 8px;
-}
-
-body.volko .layout.zone-units-g,
-body.volko .layout.zone-units-f { gap: 4px; margin-left: -24px; }
-body.volko .layout.unit-pool { gap: 0px; }
 
 /* PIECES */
 
@@ -262,15 +176,6 @@ body.volko .layout.unit-pool { gap: 0px; }
 	/*box-shadow: 0 0 0 3px lime; border-color: #000;*/
 }
 
-.cylinder {width: 55px; height: 55px; margin: -23px -4px -4px -23px; }
-.trench { width: 88px; height: 22px; margin: -8px -4px -4px -8px; }
-
-
-.trench { border-radius: 0 10px }
-.unit { border-radius: 0 25px }
-.unit.volko { border-radius: 0 15px }
-.unit.exhausted { border-radius: 0 10px }
-
 .unit, .marker{
 	transition: left 200ms, top 200ms;
 	position: absolute;
@@ -282,44 +187,6 @@ body.volko .layout.unit-pool { gap: 0px; }
 }
 
 /* MARKER IMAGES */
-
-.zone-marker {
-	pointer-events: none;
-	width: 46px;
-	height: 46px;
-	border-radius: 50%;
-	border: 1px solid black;
-}
-
-.zone-marker.control.german { background-image: url(markers75/control_german.png) }
-.zone-marker.control.french { background-image: url(markers75/control_french.png) }
-.zone-marker.vp.german { background-image: url(markers75/vp_german.png) }
-.zone-marker.vp.french { background-image: url(markers75/vp_french.png) }
-.zone-marker.supply1 { background-image: url(markers75/l1.png) }
-.zone-marker.supply2 { background-image: url(markers75/l2.png) }
-
-.marker.barrage {
-	width: 48px;
-	height: 48px;
-	background-image: url(bang.svg);
-	background-size: 100%;
-	filter: drop-shadow(0 0 4px #000c);
-}
-
-.marker.turn {
-	width: 60px;
-	height: 60px;
-	border: 1px solid black;
-	border-radius: 50%;
-}
-
-.marker.us {
-	background-size: 75px 75px;
-	background-position: center;
-	width: 66px;
-	height: 66px;
-	border: 1px solid black;
-}
 
 .unit_ix_1 { background-position: 0px 0px; }
 .unit_ix_2 { background-position: -34px 0px; }

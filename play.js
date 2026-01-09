@@ -15,6 +15,50 @@ const AP_AGREEMENT = 1
 const CANVAS = document.getElementById("canvas")
 const CANVAS_CTX = document.getElementById("canvas").getContext("2d")
 const ZOI_HEX = [0]
+const RESOURCE_HEX = [...Array(data.map.length).keys()].filter(h => data.map[h].resource).map(h => hex_to_int(data.map[h].id))
+
+const JP_REGIONS = ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Siam", "Caroline", "Marshall", "Japan"]
+const JP_BOUNDARIES = [];
+
+[...Array(data.map.length).keys()].map(h => data.map[h]).filter(hex => (hex.airfield || hex.port || hex.port || hex.city) && JP_REGIONS.includes(hex.region))
+    .forEach(h => set_add(JP_BOUNDARIES, hex_to_int(h.id)))
+
+
+const TRACK_MARKERS = [
+    {
+        counter: "resource_jp",
+        alt_counter: "resource_jp_1",
+        value: G => RESOURCE_HEX.filter(h => set_has(G.control, h)).length
+    },
+    {
+        counter: "asp_jp",
+        value: G => G.amph_points[0][0]
+    },
+    {
+        counter: "aspu_jp",
+        always_show: true,
+        value: G => G.amph_points[0][1]
+    },
+    {
+        counter: "asp_ap",
+        alt_counter: "asp_ap_1",
+        value: G => G.amph_points[1][0]
+    },
+    {
+        counter: "aspu_ap",
+        alt_counter: "aspu_ap_1",
+        always_show: true,
+        value: G => G.amph_points[1][1]
+    },
+    {
+        counter: "pass_jp",
+        value: G => G.passes[0]
+    },
+    {
+        counter: "pass_ap",
+        value: G => G.passes[1]
+    },
+]
 
 function on_focus_card_tip(c) {
     if (data.cards[c].type === "Barrage")
@@ -47,10 +91,6 @@ function on_init() {
         define_space("action_hex", i, [center[0] - 29, center[1] - 19, 45, 45], "hex")
         ZOI_HEX.push(define_space("zoi", i, [center[0] - 29, center[1] - 19, 45, 45], "hex hide"))
     }
-    for (i = 1; i <= 12; ++i) {
-        define_layout("board_hex", TURN_BOX + i, [80, 1050 - (i - 1) * 40, 45, 45], "stack")
-        define_space("action_hex", TURN_BOX + i, [80, 1050 - (i - 1) * 40, 45, 45], "hex stack")
-    }
     define_layout("board_hex", NON_PLACED_BOX, [10, 10, 45, 45], "stack")
     define_layout("board_hex", ELIMINATED_BOX, [50, 50, 45, 45], "stack")
     define_layout("board_hex", DELAYED_BOX, [2100, 1350, 45, 45], "stack")
@@ -63,7 +103,10 @@ function on_init() {
         define_layout("wie", i, [243, 645 + Math.floor((i * 42.3)), 35, 35])
     }
     for (i = 1; i < 13; i++) {
-        define_layout("turn", i, [63, 1110 - Math.floor((i * 42.3)), 35, 35])
+        define_layout("turn", i, [63, 1110 - Math.floor((i * 42.3)), 35, 35], "stack")
+    }
+    for (i = 0; i < 10; i++) {
+        define_layout("track", i, [343, 1430 - Math.floor((i * 42.3)), 35, 35], "stack")
     }
     for (let i = 0; i < data.pieces.length; ++i) {
         let piece = data.pieces[i]
@@ -279,7 +322,10 @@ function on_update() {
         }
     }
 
-    G.control.filter(h => !set_has(unit_present_hex, h)).forEach(h => populate_generic("board_hex", h, "marker control_jp"))
+    G.control.filter(h => !set_has(unit_present_hex, h) && !set_has(JP_BOUNDARIES, h))
+        .forEach(h => populate_generic("board_hex", h, "marker control_jp"))
+    JP_BOUNDARIES.filter(h => !set_has(unit_present_hex, h) && !set_has(G.control, h))
+        .forEach(h => populate_generic("board_hex", h, "marker control_ap"))
 
     update_hand(AP)
     update_hand(JP)
@@ -299,6 +345,19 @@ function on_update() {
     populate_generic("wie", G.wie, "marker wie")
 
     populate_generic("turn", G.turn, "marker turn_pmt")
+
+
+    for (i = 0; i < TRACK_MARKERS.length; i++) {
+        const marker = TRACK_MARKERS[i]
+        var value = marker.value(G)
+        var counter = marker.counter
+        if (value > 9 && marker.alt_counter) {
+            counter = marker.alt_counter
+        }
+        if (value > 0 || marker.always_show) {
+            populate_generic("track", value % 10, "marker " + counter)
+        }
+    }
 
     action_button("roll", "Roll")
 

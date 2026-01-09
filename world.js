@@ -458,7 +458,11 @@ function populate_generic(parent_action, parent_id, keywords, n = 1) {
         // TODO: use generic marker cache ?
         var child = document.createElement("div")
         child.className = keywords
+        child.parent = parent
         parent.appendChild(child)
+        if (keywords.includes("marker")) {
+            register_focusable(child)
+        }
     }
 }
 
