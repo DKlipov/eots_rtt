@@ -350,6 +350,7 @@ function on_update() {
     }
 
     G.offensive.battle_hexes.forEach(h => populate_generic("board_hex", h, "marker attack"))
+    G.offensive.landind_hexes.forEach(h => populate_generic("board_hex", h, "marker landing"))
 
     G.inter_service.forEach((v, i) => populate_generic("status", i, `marker ${v ? "rivalry" : "agreement"}_${i ? "ap" : "jp"}`))
     populate_generic("pw", G.political_will, "marker pw")

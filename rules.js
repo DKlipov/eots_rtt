@@ -585,6 +585,14 @@ function capture_hex(hex, side = G.active) {
     }
 }
 
+function is_valid_cv_stop() {
+    if (!L.move_data.is_naval_present || !L.move_data.battle_range || G.active_stack.length <= 0) {
+        return true
+    }
+    var location = G.location[G.active_stack[0]]
+    return set_has(G.offensive.battle_hexes, location) || set_has(G.offensive.landind_hexes, location) || is_space_controlled(location, R) && MAP_DATA[location].port
+}
+
 P.move_offensive_units = {
     _begin() {
         if (!L.type) {
@@ -601,7 +609,10 @@ P.move_offensive_units = {
     prompt() {
         if (L.state === "attack") {
             prompt(`${offensive_card_header()} Commit units to battle.`)
-            button("pass")
+            console.log(`is_valid_cv_stop`)
+            if (is_valid_cv_stop()) {
+                button("pass")
+            }
         } else if (L.state === "move") {
             prompt(`${offensive_card_header()} Continue move ground units.`)
             button("pass")
@@ -647,10 +658,16 @@ P.move_offensive_units = {
     action_hex(hex) {
         push_undo()
         log(`Units ${G.active_stack} moved to ${int_to_hex(hex)}`)
-        if (G.supply_cache[hex] & JP_UNITS << (1 - R)) {
-            set_add(G.offensive.battle_hexes, hex)
-        }
         var curr_path = map_get(L.allowed_hexes, hex)
+        if (is_faction_units(hex, 1 - R)) {
+            set_add(G.offensive.battle_hexes, hex)
+        } else if (is_space_controlled(hex, 1 - R) && curr_path[0] & AMPH_MOVE) {
+            set_add(G.offensive.landind_hexes, hex)
+        }
+
+        if (curr_path[0] & AMPH_MOVE && !MAP_DATA[hex].port && !is_space_controlled(hex, R)) {
+            G.asp[R][1] += L.move_data.asp_points
+        }
         if (L.state === "move") {
             const prev_path = map_get(G.offensive.paths, G.active_stack[0])
             curr_path = [curr_path[0], curr_path[1], ...prev_path.slice(2), ...curr_path.slice(3)]
@@ -669,6 +686,10 @@ P.move_offensive_units = {
                 }
             }
         }
+        if (!G.offensive.zoi_intelligence_modifier && !curr_path[0] & AVOID_ZOI) {
+            log("Reaction zoi violated!")
+            G.offensive.zoi_intelligence_modifier = true
+        }
         check_supply()
         L.allowed_hexes = []
         if (curr_path[0] & GROUND_MOVE && curr_path[1] < L.move_data.ground_move_distance && !should_ground_move_stop(hex, R)) {
@@ -677,7 +698,7 @@ P.move_offensive_units = {
             compute_ground_naval_move_hexes()
             L.state = "move"
 
-        } else if (L.state === "choose" && L.move_data.battle_range && G.active_stack.length === 1) {
+        } else if (L.state === "choose" && L.move_data.battle_range && G.active_stack.length === 1 && !is_faction_units(hex, 1 - R)) {
             compute_air_commit_hexes()
             L.state = "attack"
         }
@@ -1106,7 +1127,6 @@ function get_move_data() {
         is_air_present: false,
         is_naval_present: false,
         battle_range: 0,
-        is_cv_escort: false,
         naval_move_distance: 0,
         ground_move_distance: 0,
         extended_battle_range: 0,
@@ -1136,11 +1156,7 @@ function get_move_data() {
         if (piece.class === "ground" && !piece.strat_move) {
             strat_move = false
             asp_move = false
-            console.log(`no strat move `)
-            console.log(piece)
         } else if (piece.class === "ground" && !piece.asp) {
-            console.log(`no amph move ${piece}`)
-            console.log(piece)
             asp_move = false
         } else if (piece.class === "ground") {
             result.asp_points += set_has(G.reduced) ? piece.aspr : piece.asp
@@ -1149,7 +1165,6 @@ function get_move_data() {
     result.naval_move_distance = (cards[G.offensive.active_cards[0]].ops * 5)
     result.strat_move_distance = cards[G.offensive.active_cards[0]].ops * 5 * 2
     result.ground_move_distance = (cards[G.offensive.active_cards[0]].ops * 2)
-    result.is_cv_escort = result.battle_range > 0
     result.air_move_legs = cards[G.offensive.active_cards[0]].ops
     if (result.extended_battle_range < result.battle_range) {
         result.extended_battle_range = result.battle_range
@@ -2012,7 +2027,8 @@ function on_view() {
         paths: G.offensive.paths,
         active_cards: G.offensive.active_cards,
         active_hq: G.offensive.active_hq,
-        battle_hexes: G.offensive.battle_hexes
+        battle_hexes: G.offensive.battle_hexes,
+        landind_hexes: G.offensive.landind_hexes,
     }
 
 
