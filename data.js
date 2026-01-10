@@ -3891,7 +3891,7 @@ data.map = [
         resource: true,
         region: "Borneo",
         terrain: MIXED,
-        edges: [1, 1, 3, 2, 2, 3]
+        edges: [1, 1, 3, 2, 3, 1]
     },
     {
         id: 2616,

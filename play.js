@@ -322,6 +322,17 @@ function on_update() {
         }
     }
 
+    // // show supply
+    // for (i = 1; i < LAST_BOARD_HEX; i++) {
+    //     if ((G.supply_cache[i] & (1 << 20))) {
+    //         ZOI_HEX[i].classList.remove("hide")
+    //         ZOI_HEX[i].classList.remove("jp_zoi")
+    //         ZOI_HEX[i].classList.remove("ap_zoi")
+    //     } else {
+    //         ZOI_HEX[i].classList.add("hide")
+    //     }
+    // }
+
     G.control.filter(h => !set_has(unit_present_hex, h) && !set_has(JP_BOUNDARIES, h))
         .forEach(h => populate_generic("board_hex", h, "marker control_jp"))
     JP_BOUNDARIES.filter(h => !set_has(unit_present_hex, h) && !set_has(G.control, h))

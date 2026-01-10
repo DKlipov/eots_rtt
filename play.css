@@ -113,8 +113,8 @@ header { background-color: tan }
 body.Japan #jp_hand { grid-row: 2; }
 body.Japan #ap_hand { grid-row: 4; }
 
-body.Alies #ap_hand { grid-row: 2; }
-body.Alies #jp_hand { grid-row: 4; }
+body.Allies #ap_hand { grid-row: 2; }
+body.Allies #jp_hand { grid-row: 4; }
 
 #mapwrap {
 	width: 2290px;
