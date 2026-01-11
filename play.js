@@ -283,7 +283,7 @@ function on_update() {
         }
     }
 
-    //show supply
+    // show supply
     // for (i = 1; i < LAST_BOARD_HEX; i++) {
     //     if ((G.supply_cache[i] & (1 << 15)) && G.supply_cache[i] & ((1 << 16) | (1 << 17) | (1 << 18))) {
     //         ZOI_HEX[i].classList.remove("hide")
@@ -322,7 +322,7 @@ function on_update() {
         }
     }
 
-    // // show supply
+    // // show attack range
     // for (i = 1; i < LAST_BOARD_HEX; i++) {
     //     if ((G.supply_cache[i] & (1 << 20))) {
     //         ZOI_HEX[i].classList.remove("hide")
