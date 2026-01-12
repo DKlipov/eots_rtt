@@ -1,8 +1,5 @@
 Todo list:
-* [WIP] Navy & Amph movement
-* Activation line check (hq - unit)
-* Air strategic movement & displacement
-* Special reaction and intelligence state step
+* [WIP] Special reaction and intelligence state step
 * Reaction movement
 * Battle calculation
 * Ground retreat step
@@ -10,6 +7,7 @@ Todo list:
 * Emergency move
 * Post battle movement
 * Parentheless air restrictions (move, reaction and commit battle steps)
+* Strategic movement & air displacement
 * Check supply durning movement
 * Progress of war
 * National status segment
@@ -25,3 +23,4 @@ Todo list:
 * Build infrastructure
 * China armies restrictions
 * Instrinct city defence
+* Add partially impassable hexsides to data.js

@@ -506,7 +506,7 @@ P.choose_hq = {
         prompt(`${offensive_card_header()} Choose HQ.`)
         for (let i = 0; i < pieces.length; i++) {
             let piece = pieces[i]
-            if (piece.faction === R && piece.class === "hq") {
+            if (piece.faction === R && piece.class === "hq" && !set_has(G.oos, i)) {
                 action_unit(i)
             }
         }
@@ -548,18 +548,67 @@ function apply_inter_service(u) {
     L.possible_units.filter(i => pieces[i].service === rival_service).forEach(i => set_delete(L.possible_units, i))
 }
 
+function is_active_zoi(hex, faction) {
+    return (G.supply_cache[hex] & JP_ZOI << (faction) && !(G.supply_cache[hex] & JP_ZOI_NTRL << (faction)))
+}
+
+function solely_occupied_land(hex, faction) {
+    return G.supply_cache[hex] & JP_GAH_UNITS << (faction) && !(G.supply_cache[hex] & JP_GAH_UNITS << (1 - faction))
+}
+
+function get_activatable_units(hq) {
+    const result = []
+    clear_temp_hex_flags()
+    const location = G.location[hq]
+    G.supply_cache[location] |= ATTACK_ZONE
+    const range = pieces[hq].cr
+    const faction = pieces[hq].faction
+    let queue = [location]
+    const distance_map = [location, 0]
+    for (var i = 0; i < queue.length; i++) {
+        let item = queue[i]
+        let nh_list = get_near_hexes(item)
+        const MD = MAP_DATA[item]
+        const distance = map_get(distance_map, item) + 1
+        const non_neutral_zoi = is_active_zoi(item, 1 - faction)
+        const occupied_land = solely_occupied_land(item, 1 - faction)
+        for (let j = 0; j < 6; j++) {
+            let nh = nh_list[j]
+            if (nh <= 0) {
+                continue
+            }
+            if (map_get(distance_map, nh, 100) > distance
+                && (
+                    (MD.edges_int & GROUND << 5 * j && !occupied_land && !solely_occupied_land(nh, 1 - faction)) ||
+                    (MD.edges_int & WATER << 5 * j && !non_neutral_zoi && !is_active_zoi(nh, 1 - faction)) ||
+                    MD.edges_int & UNPLAYABLE << 5 * j
+                )) {
+                map_set(distance_map, nh, distance)
+                G.supply_cache[nh] |= ATTACK_ZONE
+                if (distance < range) {
+                    queue.push(nh)
+                }
+            }
+        }
+    }
+    const hq_supply_type = pieces[hq].supply
+    for (let i = 0; i < pieces.length; i++) {
+        let piece = pieces[i]
+        if (piece.supply & hq_supply_type
+            && G.supply_cache[G.location[i]] & ATTACK_ZONE
+            && piece.class !== "hq"
+            && !set_has(G.offensive.active_units[R], i)
+            && !set_has(G.oos, i)) {
+            set_add(result, i)
+        }
+    }
+    return result
+}
+
 P.activate_units = {
     _begin() {
         L.hq_bonus = pieces[G.offensive.active_hq[G.active]].cm
-        L.possible_units = []
-        for (let i = 0; i < pieces.length; i++) {
-            let piece = pieces[i]
-            let hq = G.offensive.active_hq[G.active]
-            if (piece.faction === R && get_distance(G.location[hq], G.location[i]) <= pieces[hq].cr && piece.class !== "hq" &&
-                !set_has(G.offensive.active_units[R], i)) {
-                set_add(L.possible_units, i)
-            }
-        }
+        L.possible_units = get_activatable_units(G.offensive.active_hq[G.active])
     },
     prompt() {
         prompt(`${offensive_card_header()}. Activate units ${G.offensive.logistic} + ${L.hq_bonus} / ${G.offensive.active_units[R].length}.`)
@@ -828,10 +877,9 @@ function mark_unit(i, piece) {
 function check_hq_in_supply(hq, piece) {
     const faction = piece.faction
     const location = G.location[hq]
-    let queue = []
+    let queue = [location]
     const overland_set = [location]
     const oversea_set = [location]
-    queue.push(location)
     for (var i = 0; i < queue.length; i++) {
         let item = queue[i]
         let nh_list = get_near_hexes(item)
@@ -1450,10 +1498,14 @@ function mark_attack_zone(location) {
     }
 }
 
-function mark_participate_battle_hex() {
+function clear_temp_hex_flags() {
     for (var i = 1; i < LAST_BOARD_HEX; i++) {
         G.supply_cache[i] = G.supply_cache[i] & CLEAN_ATTACK_ZONE_MASK
     }
+}
+
+function mark_participate_battle_hex() {
+    clear_temp_hex_flags()
     var base_location = L.move_data.location
     var base_distance = L.move_data.naval_move_distance + L.move_data.battle_range
     G.offensive.battle_hexes.forEach(h => mark_attack_zone(h))
@@ -1479,8 +1531,7 @@ function get_naval_move(zoi_mask) {
     const location = L.move_data.location
     const move_data = L.move_data
     const non_cv_ground_unit = move_data.is_ground_present && !move_data.battle_range
-    const queue = []
-    const distance_map = [location, 0]
+
     if (G.supply_cache[location] & zoi_mask || non_cv_ground_unit && has_non_n_zoi(location, 1 - R)) {
         return []
     }
@@ -1495,9 +1546,8 @@ function get_naval_move(zoi_mask) {
         })
         us_army_unit_active = G.active_stack.map(u => pieces[u]).filter(p => p.class === "ground" && p.service === "army").length
     }
-
-    queue.push(location)
-    map_set(distance_map, location, [0, location])
+    const queue = [location]
+    const distance_map = [location, [0, location]]
     for (var i = 0; i < queue.length; i++) {
         let item = queue[i]
         let base_path = map_get(distance_map, item)
