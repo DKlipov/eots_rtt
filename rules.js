@@ -1478,6 +1478,18 @@ function get_naval_move(zoi_mask) {
     if (G.supply_cache[location] & zoi_mask || non_cv_ground_unit && has_non_n_zoi(location, 1 - R)) {
         return []
     }
+    const marine_landed_islands = []
+    var us_army_unit_active = false
+    if (R) {
+        G.offensive.active_units[R].forEach(u => {
+            const p = pieces[u]
+            if (p.class === "ground" && p.type === "marine") {
+                set_add(marine_landed_islands, G.location[u])
+            }
+        })
+        us_army_unit_active = G.active_stack.map(u => pieces[u]).filter(p => p.class === "ground" && p.service === "army").length
+    }
+
     queue.push(location)
     map_set(distance_map, location, [0, location])
     for (var i = 0; i < queue.length; i++) {
@@ -1509,7 +1521,7 @@ function get_naval_move(zoi_mask) {
     }
     let result = []
     map_for_each(distance_map, (nh, v) => {
-        if (G.supply_cache[nh] & ATTACK_ZONE
+        if (is_amph_attack_possible(nh) && (!us_army_unit_active || set_has(marine_landed_islands, nh))
             || !is_faction_units(nh, 1 - R) &&
             ((MAP_DATA[nh].port && is_space_controlled(nh, R)) || (move_data.move_type & AMPH_MOVE && is_hex_asp_capable(nh)
                 && (!move_data.is_naval_present || move_data.move_type & ORGANIC_ONLY)))
@@ -1519,6 +1531,10 @@ function get_naval_move(zoi_mask) {
     })
 
     return result
+}
+
+function is_amph_attack_possible(hex) {
+    return (G.supply_cache[hex] & ATTACK_ZONE && (L.move_data.move_type & AMPH_MOVE || !L.move_data.is_ground_present))
 }
 
 function is_hex_asp_capable(hex) {
@@ -1894,6 +1910,8 @@ function setup_scenario_1942() {
     setup_jp_unit(jp_army("4sn"), 4715, true)
     setup_jp_unit(jp_air(24), 4715)
     setup_jp_unit(find_piece("tenyru"), 4715)
+
+    for_each_unit(u => capture_hex(G.location[u], pieces[u].faction))
 
     construct_decks()
 
