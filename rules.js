@@ -176,6 +176,9 @@ for (let i = 1; i < LAST_BOARD_HEX; ++i) {
         hex.edges_int = hex.edges_int | (border << 5 * j)
 
     }
+    if (hex.terrain === ATOLL) {
+        hex.island = true
+    }
     if (hex.airfield || hex.port || hex.port || hex.city || hex.resource) {
         hex.named = true
     }
@@ -427,6 +430,9 @@ function activate_card(c) {
     }
     G.discard[R].push(c)
     G.offensive.attacker = R
+    if (!cards[c].faction && cards[c].ops >= 3) {
+        G.offensive.barges = true
+    }
 }
 
 P.offensive_segment = {
@@ -1521,7 +1527,7 @@ function get_naval_move(zoi_mask) {
     }
     let result = []
     map_for_each(distance_map, (nh, v) => {
-        if (is_amph_attack_possible(nh) && (!us_army_unit_active || set_has(marine_landed_islands, nh))
+        if (is_amph_attack_possible(nh) && (!us_army_unit_active || set_has(marine_landed_islands, nh) || !MAP_DATA[nh].island)
             || !is_faction_units(nh, 1 - R) &&
             ((MAP_DATA[nh].port && is_space_controlled(nh, R)) || (move_data.move_type & AMPH_MOVE && is_hex_asp_capable(nh)
                 && (!move_data.is_naval_present || move_data.move_type & ORGANIC_ONLY)))
@@ -2073,6 +2079,7 @@ function reset_offensive() {
         paths: [],
         battle_hexes: [],
         landind_hexes: [],
+        barges: false,
         zoi_intelligence_modifier: false,
     }
 }
