@@ -31,6 +31,7 @@ const REACTION_MOVE = 1 << 8
 const AIR_EXTENDED_MOVE = 1 << 9
 const ATTACK_MOVE = 1 << 10
 const AVOID_ZOI = 1 << 11
+const ORGANIC_ONLY = 1 << 12
 
 //Intelligence
 const SURPRISE = 0
@@ -237,7 +238,11 @@ for (var i = 0; i < pieces.length; i++) {
     piece.supply = supply
     if (piece.class === "naval" && !piece.faction) {
         piece.service = "navy"
+        if (["ca", "cl", "apd"].includes(piece.type)) {
+            piece.organic = true
+        }
     }
+
     if (i === jp_army("kor")) {
         piece.asp = 4
         piece.aspr = 2
@@ -599,7 +604,7 @@ P.move_offensive_units = {
             L.type = 0
         }
         check_supply()
-        L.move_data = get_move_data()
+        L.move_data = {}
         L.movable_units = []
         L.allowed_hexes = []
         L.state = "choose"
@@ -1138,6 +1143,9 @@ function get_move_data() {
     }
     var strat_move = true
     var asp_move = true
+    var organic_naval_counter = 0
+    var organic_ground_counter = 0
+    var organic_only_ships = true
     G.active_stack.forEach(u => {
         let piece = pieces[u]
         if (piece.class === "ground") {
@@ -1152,6 +1160,13 @@ function get_move_data() {
         }
         if (piece.ebr && (result.extended_battle_range === 0 || piece.ebr < result.extended_battle_range)) {
             result.extended_battle_range = piece.ebr
+        }
+        if (piece.organic && piece.class === "ground") {
+            organic_ground_counter++
+        } else if (piece.organic && piece.class === "naval") {
+            organic_naval_counter++
+        } else if (piece.class === "naval") {
+            organic_only_ships = false
         }
         if (piece.class === "ground" && !piece.strat_move) {
             strat_move = false
@@ -1184,8 +1199,12 @@ function get_move_data() {
     if (strat_move) {
         result.move_type |= STRAT_MOVE
     }
+    result.asp_points -= Math.min(organic_naval_counter, organic_ground_counter)
     if (result.is_ground_present && asp_move && result.asp_points <= asp_total) {
         result.move_type |= AMPH_MOVE
+        if (organic_only_ships && organic_naval_counter <= organic_ground_counter) {
+            result.move_type |= ORGANIC_ONLY
+        }
     }
     return result
 }
@@ -1492,7 +1511,8 @@ function get_naval_move(zoi_mask) {
     map_for_each(distance_map, (nh, v) => {
         if (G.supply_cache[nh] & ATTACK_ZONE
             || !is_faction_units(nh, 1 - R) &&
-            ((MAP_DATA[nh].port && is_space_controlled(nh, R)) || (move_data.move_type & AMPH_MOVE && is_hex_asp_capable(nh) && !move_data.is_naval_present))
+            ((MAP_DATA[nh].port && is_space_controlled(nh, R)) || (move_data.move_type & AMPH_MOVE && is_hex_asp_capable(nh)
+                && (!move_data.is_naval_present || move_data.move_type & ORGANIC_ONLY)))
         ) {
             map_set(result, nh, v)
         }

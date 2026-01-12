@@ -458,6 +458,7 @@ data.pieces = [
         "lf": 6,
         "rcf": 2,
         "rlf": 6,
+        "organic" : true,
     },
     {
         id: "army_jp_2sn",
@@ -473,6 +474,7 @@ data.pieces = [
         "lf": 6,
         "rcf": 2,
         "rlf": 6,
+        "organic" : true,
     },
     {
         id: "army_jp_3sn",
@@ -488,6 +490,7 @@ data.pieces = [
         "lf": 6,
         "rcf": 2,
         "rlf": 6,
+        "organic" : true,
     },
     {
         id: "army_jp_4sn",
@@ -503,6 +506,7 @@ data.pieces = [
         "lf": 6,
         "rcf": 2,
         "rlf": 6,
+        "organic" : true,
     },
     {
         id: "army_jp_ss",
@@ -518,6 +522,7 @@ data.pieces = [
         "lf": 6,
         "rcf": 3,
         "rlf": 6,
+        "organic" : true,
     },
     {
         id: "army_jp_kor",
