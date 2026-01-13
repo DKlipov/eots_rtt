@@ -1,6 +1,5 @@
 Todo list:
-* [WIP] Special reaction and intelligence state step
-* Reaction movement
+* [WIP] Reaction movement
 * Battle calculation
 * Ground retreat step
 * Battle loss step
@@ -24,3 +23,4 @@ Todo list:
 * China armies restrictions
 * Instrinct city defence
 * Add partially impassable hexsides to data.js
+* Japanese barges movement (with special button)

@@ -324,7 +324,7 @@ function on_update() {
 
     // // show attack range
     // for (i = 1; i < LAST_BOARD_HEX; i++) {
-    //     if ((G.supply_cache[i] & (1 << 20))) {
+    //     if ((G.supply_cache[i] & (1 << 20)) || (G.supply_cache[i] & (1 << 19))) {
     //         ZOI_HEX[i].classList.remove("hide")
     //         ZOI_HEX[i].classList.remove("jp_zoi")
     //         ZOI_HEX[i].classList.remove("ap_zoi")
