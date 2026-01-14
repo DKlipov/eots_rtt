@@ -1,0 +1,13 @@
+//MOVEMENT
+1. On click to unit game propose you valid destination points, but if needed you could move them step-by-step
+2. Offensive units by default try to avoid enemy zoi, to reduce enemy intercept ability, but check only ZOI that exists
+at start of the move.
+3. Supply and zoi checks after every movement step of every unit stack.
+4. Game offer you to commit ranged-attack-able units to battle just after move, but you free skip it (if it is not a CV
+in open sea). All ranged-attack-able could be assigned to the battle at "declare battle hex" step (if not assigned before).
+5. By default game offer you move type that allows post-battle movement and be committed to battle. If you want use
+"strategic redeploy" ability or move with extended range by short-range air use special button.
+//REACTION
+1. Game offer you activate units that hypotetically could move to any battle hex (counts with ranged attack ability),
+but not counts amphibious assault movement restrictions. So it is possible that not every activated unit could join to
+battle, you need to undo to activation and choose other set of reaction units.

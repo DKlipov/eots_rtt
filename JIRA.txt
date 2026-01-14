@@ -1,10 +1,10 @@
 Todo list:
 * [WIP] Reaction movement
 * Battle calculation
-* Ground retreat step
 * Battle loss step
-* Emergency move
+* Ground retreat step
 * Post battle movement
+* Emergency move
 * Parentheless air restrictions (move, reaction and commit battle steps)
 * Strategic movement & air displacement
 * Check supply durning movement
