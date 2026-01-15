@@ -1596,32 +1596,24 @@ function compute_air_commit_hexes() {
 
 function compute_air_move_hexes() {
     var move_data = L.move_data
-    const result = []
-    var selected = [move_data.location]
-    let queue = [move_data.location]
     let leg_distance = 1
     let distance_incr_i = 0
+    const selected = [move_data.location, [ANY_MOVE, leg_distance, move_data.location]]
+    let queue = [move_data.location]
     for (var i = 0; i < queue.length; i++) {
         let item = queue[i]
         let nh_list = map_get(AIRFIELD_LINKS, item)
         let j = 1;
         while (j < nh_list.length && nh_list[j] <= move_data.extended_battle_range) {
             let nh = nh_list[j - 1]
-            if (set_has(selected, nh) || !is_space_controlled(nh, R)) {
+            if (map_has(selected, nh) || !is_space_controlled(nh, R)) {
                 j += 2
                 continue
             }
-            set_add(selected, nh)
-            if (nh !== AIR_FERRY && !is_faction_units(nh, 1 - R) && !set_has(G.offensive.battle_hexes, nh)
-                && (target_in_battle_range(move_data.extended_battle_range, nh, G.offensive.battle_hexes) || !(move_data.move_type & REACTION_MOVE))) {
-                var path_array = map_get(result, item)
-                if (!path_array) {
-                    path_array = [ANY_MOVE, leg_distance, item]
-                }
-                path_array = path_array.slice()
-                path_array.push(nh)
-                map_set(result, nh, path_array)
-            }
+            var path_array = map_get(selected, item)
+            path_array = path_array.slice()
+            path_array.push(nh)
+            map_set(selected, nh, path_array)
             if (leg_distance < move_data.air_move_legs) {
                 queue.push(nh)
             }
@@ -1631,8 +1623,13 @@ function compute_air_move_hexes() {
             distance_incr_i = queue.length - 1
         }
     }
-    L.allowed_hexes = result
-    return result
+    L.allowed_hexes = []
+    map_for_each(selected, (nh, v) => {
+        if (nh !== AIR_FERRY && !is_faction_units(nh, 1 - R) && !set_has(G.offensive.battle_hexes, nh)
+            && (target_in_battle_range(move_data.extended_battle_range, nh, G.offensive.battle_hexes) || !(move_data.move_type & REACTION_MOVE))) {
+            map_set(L.allowed_hexes, nh, v)
+        }
+    })
 }
 
 function compute_ground_naval_move_hexes() {
