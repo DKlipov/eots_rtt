@@ -2017,20 +2017,99 @@ P.define_intelligence_condition = {
     }
 }
 
+function sum_combat_factor(units) {
+    return units.map(u => set_has(G.reduced, u) ? pieces[u].rcf : pieces[u].cf).reduce((a, b) => a + b)
+}
+
+function naval_battle_table(roll) {
+    if (roll < 3) {
+        return 1 / 4
+    } else if (roll < 6) {
+        return 1 / 2
+    } else {
+        return 1
+    }
+}
+
+function ground_battle_table(roll) {
+    if (roll < 3) {
+        return 1 / 2
+    } else if (roll < 7) {
+        return 1
+    } else if (roll < 9) {
+        return 3 / 2
+    } else {
+        return 2
+    }
+}
+
 P.naval_air_battle = {
+    _begin() {
+
+    },
     prompt() {
-        prompt(`Choose battle hex.`)
-        G.offensive.battle_hexes.forEach(b => action_hex(b))
+        if (!G.offensive.battle) {
+            prompt(`Choose battle hex.`)
+            G.offensive.battle_hexes.forEach(b => action_hex(b))
+        } else {
+            prompt(`Apply hits.`)
+            G.offensive.battle_hexes.forEach(b => action_hex(b))
+        }
     },
-    action_hex(c) {
-        clear_undo()
-        let result_a = random(10)
-        let result_d = random(10)
-        let winner = result_a > result_d ? G.offensive.attacker : 1 - G.offensive.attacker
-        log(`Battle at ${c}, attacker rolled ${result_a}, defender rolled ${result_d}, ${winner} wins`)
-        set_delete(G.offensive.battle_hexes, c)
-        end()
+    action_hex(hex) {
+        push_undo()
+        G.offensive.battle = {
+            battle_hex: hex,
+            air_naval: [[], []],
+            ground: [[], []],
+            strength: [0, 0],
+            loss: [0, 0]
+        }
+        var battle = G.offensive.battle
+        map_for_each(G.offensive.paths, (u, v) => {
+            const piece = pieces[u]
+            if (v[v.length - 1] === hex && (piece.class === "air" || piece.class === "naval")) {
+                set_add(battle.air_naval[piece.faction], u)
+            }
+        })
+        for_each_unit((u, piece) => {
+            var location = G.location[u]
+            if (location === hex && (piece.class === "air" || piece.class === "naval")
+                && !set_has(G.offensive.active_units[piece.faction], u)) {
+                set_add(battle.air_naval[piece.faction], u)
+            } else if (location === hex && piece.class === "ground") {
+                set_add(battle.ground[piece.faction], u)
+            }
+        })
+        if (battle.air_naval[JP].length || battle.air_naval[AP].length) {
+            log(`Battle at ${int_to_hex(hex)}, 
+            ${sum_combat_factor(battle.air_naval[G.offensive.attacker])} vs ${sum_combat_factor(battle.air_naval[1 - G.offensive.attacker])}`)
+        } else {
+            goto("ground_battle")
+            return
+        }
+        if (G.offensive.intelligence === INTERCEPT) {
+            execute_attack(G.offensive.attacker)
+            execute_attack(1 - G.offensive.attacker)
+            G.active = [JP, AP]
+        } else if (G.offensive.intelligence === AMBUSH) {
+            execute_attack(1 - G.offensive.attacker)
+            G.active = G.offensive.attacker
+        } else {
+            execute_attack(G.offensive.attacker)
+            G.active = 1 - G.offensive.attacker
+        }
+
     },
+}
+
+function execute_attack(faction) {
+    var battle = G.offensive.battle
+    battle.strength[faction] = sum_combat_factor(battle.air_naval[faction])
+    let result_a = random(10)
+    battle.loss[1 - faction] = Math.ceil(battle.strength[faction] * naval_battle_table(result_a))
+    log(`${G.offensive.attacker === faction ? "Attacker" : "Defender"} roll ${result_a} (${naval_battle_table(result_a)}), 
+    ${G.offensive.attacker === faction ? "defender" : "attacker"} loss ${battle.loss[1 - faction]} (${battle.strength[faction]})`)
 }
 
 P.offensive_sequence = script(`

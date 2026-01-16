@@ -4,23 +4,24 @@ Todo list:
 * Ground retreat step
 * Post battle movement
 * Emergency move
+* Full card deck
+* Progress of war
+* National status segment
+* Political will segment
+* Attrition phase
+* Future offensive
+* End of turn phase & Tojo & Machuria offensive
+* Replacement & reinforcement segment
+* Strategic warfare segment & B29
+* China offensive & stuff & China air box
+* Build infrastructure
+* Event cards
+* Battle roll modifiers
 * Ground disengadgement
 * Air and cv disengadgement
 * Parentheless air restrictions (move, reaction and commit battle steps)
 * Strategic movement & air displacement
 * Check supply durning movement
-* Progress of war
-* National status segment
-* Political will segment
-* Attrition phase
-* Full card deck
-* End of turn phase & Tojo & Machuria offensive
-* Replacement & reinforcement segment
-* Strategic warfare segment & B29
-* Future offensive
-* Reduced hq (Ghormley & Yamamoto)/ Hq displace and return
-* China offensive & stuff & China air box
-* Build infrastructure
 * China armies restrictions
 * Instrinct city defence
 * Add partially impassable hexsides to data.js

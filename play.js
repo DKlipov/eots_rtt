@@ -219,28 +219,30 @@ function draw_paths() {
     map_for_each(G.offensive.paths, (k, v) => {
         var start = hex_center(v[2])
         var finish
-        CANVAS_CTX.strokeStyle = "red"
-        CANVAS_CTX.fillStyle = "red"
+        var color = data.pieces[k].faction ? "blue" : "red"
+        var d = data.pieces[k].faction ? -2 : 2
+        CANVAS_CTX.strokeStyle = color
+        CANVAS_CTX.fillStyle = color
         CANVAS_CTX.lineWidth = 2;
         for (var j = 3; j < v.length; j++) {
             start = hex_center(v[j - 1])
             finish = hex_center(v[j])
             CANVAS_CTX.beginPath();
-            CANVAS_CTX.arc(start[0], start[1], 4, 0, 2 * Math.PI);
+            CANVAS_CTX.arc(start[0], start[1] + d, 4, 0, 2 * Math.PI);
             CANVAS_CTX.fill();
             CANVAS_CTX.stroke();
             CANVAS_CTX.beginPath();
             if (G.location[k] === v[j - 1]) {
                 CANVAS_CTX.setLineDash([5, 3]);
             }
-            CANVAS_CTX.moveTo(start[0], start[1]);
-            CANVAS_CTX.lineTo(finish[0], finish[1]);
+            CANVAS_CTX.moveTo(start[0], start[1] + d);
+            CANVAS_CTX.lineTo(finish[0], finish[1] + d);
             CANVAS_CTX.stroke();
             CANVAS_CTX.setLineDash([])
         }
         if (finish) {
             CANVAS_CTX.beginPath();
-            CANVAS_CTX.fillRect(finish[0] - 4, finish[1] - 4, 8, 8)
+            CANVAS_CTX.fillRect(finish[0] - 4, finish[1] - 4 + d, 8, 8)
             CANVAS_CTX.stroke();
         }
     })
