@@ -2043,6 +2043,61 @@ function ground_battle_table(roll) {
     }
 }
 
+function fill_hit_able_units(faction) {
+    var battle = G.offensive.battle
+    var enemy_faction = 1 - faction
+    var pool = ((battle.ground_stage || battle.air_naval[enemy_faction].length === 0) ? battle.ground[enemy_faction] : battle.air_naval[enemy_faction])
+        .filter(u => unit_on_board(u))
+    var result = []
+    var reduced = []
+    var critical = battle.critical[faction]
+    var lower_lf_unit = [-1, 100]
+    var lf = battle.hits[faction]
+    var distant_hits = battle.distant_hits_provided[faction] > 0
+    for (var i = 0; i < pool.length; i++) {
+        var unit = pool[i]
+        var piece = pieces[unit]
+        var could_be_damaged = piece.lf <= lf && (distant_hits || !piece.br || G.location[unit] === battle.battle_hex)
+        if (could_be_damaged && (critical || !set_has(G.reduced))) {
+            result.push(unit)
+        } else if (could_be_damaged) {
+            reduced.push(unit)
+        } else if (critical && lower_lf_unit[1] > piece.lf) {
+            lower_lf_unit = [unit, piece.lf]
+        }
+    }
+    if (!result.length && reduced.length) {
+        result = reduced
+    } else if (result.length <= 0 && critical && lower_lf_unit[0] >= 0 && !battle.damaged[faction].length) {
+        result.push(lower_lf_unit[0])
+    }
+    battle.hit_able_units[faction] = result
+}
+
+function unit_on_board(unit) {
+    return G.location[unit] < LAST_BOARD_HEX
+}
+
+function execute_attack(faction) {
+    var battle = G.offensive.battle
+    var pool = battle.air_naval[faction]
+    if (pool.filter(u => unit_on_board(u)).length <= 0) {
+        log(`${G.offensive.attacker === faction ? "Attacker" : "Defender"} has no air/naval units`)
+        return
+    }
+    battle.strength[faction] = sum_combat_factor(pool)
+    battle.roll[faction] = random(10)
+    let roll = battle.roll[faction]
+    battle.hits[faction] = Math.ceil(battle.strength[faction] * naval_battle_table(roll))
+    battle.distant_hits_provided[faction] = pool.filter(u => unit_on_board(u) && pieces[u].br).length
+    if (roll === 9) {
+        battle.critical[faction] = true
+    }
+    log(`${G.offensive.attacker === faction ? "Attacker" : "Defender"} roll ${roll} ${battle.critical[faction] ? " - critical !" : ""} (${naval_battle_table(roll)}), 
+    ${G.offensive.attacker === faction ? "defender" : "attacker"} loss ${battle.hits[faction]} (${battle.strength[faction]})`)
+    fill_hit_able_units(faction)
+}
+
 P.naval_air_battle = {
     _begin() {
 
@@ -2052,64 +2107,195 @@ P.naval_air_battle = {
             prompt(`Choose battle hex.`)
             G.offensive.battle_hexes.forEach(b => action_hex(b))
         } else {
-            prompt(`Apply hits.`)
-            G.offensive.battle_hexes.forEach(b => action_hex(b))
+            prompt(`Apply hits. ${G.offensive.battle.hits[R]}`)
+            G.offensive.battle.hit_able_units[R].forEach(u => action_unit(u))
         }
     },
     action_hex(hex) {
         push_undo()
         G.offensive.battle = {
             battle_hex: hex,
+            ground_stage: false,
             air_naval: [[], []],
             ground: [[], []],
+            amph_ground: [],
             strength: [0, 0],
-            loss: [0, 0]
+            hits: [0, 0],
+            roll: [-1, -1],
+            hit_able_units: [[], []],
+            distant_hits_provided: [0, 0],
+            critical: [false, false],
+            damaged: [[], []],
         }
+        naval_battle()
+    },
+    unit(unit) {
+        var piece = pieces[unit]
         var battle = G.offensive.battle
-        map_for_each(G.offensive.paths, (u, v) => {
-            const piece = pieces[u]
-            if (v[v.length - 1] === hex && (piece.class === "air" || piece.class === "naval")) {
-                set_add(battle.air_naval[piece.faction], u)
-            }
-        })
-        for_each_unit((u, piece) => {
-            var location = G.location[u]
-            if (location === hex && (piece.class === "air" || piece.class === "naval")
-                && !set_has(G.offensive.active_units[piece.faction], u)) {
-                set_add(battle.air_naval[piece.faction], u)
-            } else if (location === hex && piece.class === "ground") {
-                set_add(battle.ground[piece.faction], u)
-            }
-        })
-        if (battle.air_naval[JP].length || battle.air_naval[AP].length) {
-            log(`Battle at ${int_to_hex(hex)}, 
-            ${sum_combat_factor(battle.air_naval[G.offensive.attacker])} vs ${sum_combat_factor(battle.air_naval[1 - G.offensive.attacker])}`)
-        } else {
-            goto("ground_battle")
-            return
+        battle.damaged[R].push(unit)
+        battle.hits[R] -= piece.lf
+        if (G.location[unit] !== battle.battle_hex && piece.br) {
+            battle.distant_hits_provided[R] -= 1
         }
-        if (G.offensive.intelligence === INTERCEPT) {
-            execute_attack(G.offensive.attacker)
-            execute_attack(1 - G.offensive.attacker)
-            G.active = [JP, AP]
-        } else if (G.offensive.intelligence === AMBUSH) {
-            execute_attack(1 - G.offensive.attacker)
-            G.active = G.offensive.attacker
-        } else {
-            execute_attack(G.offensive.attacker)
-            G.active = 1 - G.offensive.attacker
+        fill_hit_able_units(R)
+        if (!battle.hit_able_units[R].length) {
+            G.active = 1 - R
         }
-
+        if (!battle.hit_able_units[0].length && !battle.hit_able_units[1].length) {
+            commit_loss()
+        }
     },
 }
 
-function execute_attack(faction) {
+function commit_loss() {
     var battle = G.offensive.battle
-    battle.strength[faction] = sum_combat_factor(battle.air_naval[faction])
-    let result_a = random(10)
-    battle.loss[1 - faction] = Math.ceil(battle.strength[faction] * naval_battle_table(result_a))
-    log(`${G.offensive.attacker === faction ? "Attacker" : "Defender"} roll ${result_a} (${naval_battle_table(result_a)}), 
-    ${G.offensive.attacker === faction ? "defender" : "attacker"} loss ${battle.loss[1 - faction]} (${battle.strength[faction]})`)
+    battle.damaged[0].concat(battle.damaged[1]).forEach(u => {
+        if (set_has(G.reduced, u)) {
+            eliminate(u)
+        } else {
+            set_add(G.reduced, u)
+        }
+    })
+    if (battle.roll[JP] < 0) {
+        execute_attack(JP)
+    } else if (battle.roll[AP] < 0) {
+        execute_attack(AP)
+    }
+    if (battle.hit_able_units[0].length && !battle.hit_able_units[1].length) {
+        G.active = 0
+    } else if (battle.hit_able_units[1].length && !battle.hit_able_units[0].length) {
+        G.active = 1
+    } else {
+        apply_battle_winner()
+        ground_battle()
+    }
+}
+
+function apply_battle_winner() {
+    var battle = G.offensive.battle
+    var attacker_units = battle.air_naval[G.offensive.attacker].filter(u => unit_on_board(u))
+    var defender_units = battle.air_naval[1 - G.offensive.attacker].filter(u => unit_on_board(u))
+    var attacker_power = sum_combat_factor(attacker_units)
+    var defender_power = sum_combat_factor(defender_units)
+
+    var air_cover = attacker_units.filter(u => pieces[u].br).length || !defender_units.filter(u => pieces[u].br).length
+    var attacker_win = attacker_power > defender_power && air_cover || defender_power === 0
+    log(`${attacker_win ? "Attacker" : "Defender"} win battle (${attacker_power} - ${defender_power}) ${!air_cover ? "no attacker CV or " : ""}`)
+    if (!attacker_win) {
+        battle.amph_ground.forEach(u => set_delete(battle.ground[G.offensive.attacker], u))
+    }
+}
+
+function naval_battle() {
+    var battle = G.offensive.battle
+    var hex = battle.battle_hex
+    map_for_each(G.offensive.paths, (u, v) => {
+        const piece = pieces[u]
+        if (v[v.length - 1] === hex && (piece.class === "air" || piece.class === "naval")) {
+            set_add(battle.air_naval[piece.faction], u)
+        }
+    })
+    var attacker = G.offensive.attacker
+    for_each_unit((u, piece) => {
+        var location = G.location[u]
+        if (location === hex && (piece.class === "air" || piece.class === "naval")
+            && !set_has(G.offensive.active_units[piece.faction], u)) {
+            set_add(battle.air_naval[piece.faction], u)
+        } else if (location === hex && piece.class === "ground") {
+            set_add(battle.ground[piece.faction], u)
+            if (attacker === piece.faction && map_get(G.offensive.paths, u)[0] & AMPH_MOVE) {
+                set_add(battle.amph_ground, u)
+            }
+        }
+    })
+    if (battle.air_naval[JP].length || battle.air_naval[AP].length) {
+        log(`Battle at ${int_to_hex(hex)}, 
+            ${sum_combat_factor(battle.air_naval[G.offensive.attacker])} vs ${sum_combat_factor(battle.air_naval[1 - G.offensive.attacker])}`)
+    }
+    if (G.offensive.intelligence === INTERCEPT) {
+        execute_attack(G.offensive.attacker)
+        execute_attack(1 - G.offensive.attacker)
+    } else if (G.offensive.intelligence === AMBUSH) {
+        execute_attack(1 - G.offensive.attacker)
+    } else {
+        execute_attack(G.offensive.attacker)
+    }
+    if (G.offensive.intelligence === AMBUSH && battle.hit_able_units[1 - G.offensive.attacker].length < 1) {
+        execute_attack(G.offensive.attacker)
+    } else if (G.offensive.intelligence === SURPRISE && battle.hit_able_units[G.offensive.attacker].length < 1) {
+        execute_attack(1 - G.offensive.attacker)
+    }
+    if (battle.hit_able_units[0].length && !battle.hit_able_units[1].length) {
+        G.active = 0
+    } else if (battle.hit_able_units[1].length && !battle.hit_able_units[0].length) {
+        G.active = 1
+    } else if (battle.hit_able_units[0].length && battle.hit_able_units[1].length) {
+        G.active = [0, 1]
+    } else {
+        ground_battle()
+    }
+}
+
+function ground_battle() {
+    var battle = G.offensive.battle
+    G.offensive.battle = {
+        battle_hex: battle.battle_hex,
+        ground_stage: true,
+        air_naval: [[], []],
+        ground: battle.ground,
+        amph_ground: battle.amph_ground,
+        strength: [0, 0],
+        hits: [0, 0],
+        roll: [-1, -1],
+        hit_able_units: [[], []],
+        distant_hits_provided: [0, 0],
+        critical: [false, false],
+        damaged: [[], []],
+    }
+    battle = G.offensive.battle
+    var hex = battle.battle_hex
+    map_for_each(G.offensive.paths, (u, v) => {
+        const piece = pieces[u]
+        if (v[v.length - 1] === hex && (piece.class === "air" || piece.class === "naval")) {
+            set_add(battle.air_naval[piece.faction], u)
+        }
+    })
+    for_each_unit((u, piece) => {
+        var location = G.location[u]
+        if (location === hex && (piece.class === "air" || piece.class === "naval")
+            && !set_has(G.offensive.active_units[piece.faction], u)) {
+            set_add(battle.air_naval[piece.faction], u)
+        } else if (location === hex && piece.class === "ground") {
+            set_add(battle.ground[piece.faction], u)
+        }
+    })
+    if (battle.air_naval[JP].length || battle.air_naval[AP].length) {
+        log(`Battle at ${int_to_hex(hex)}, 
+            ${sum_combat_factor(battle.air_naval[G.offensive.attacker])} vs ${sum_combat_factor(battle.air_naval[1 - G.offensive.attacker])}`)
+    }
+    if (G.offensive.intelligence === INTERCEPT) {
+        execute_attack(G.offensive.attacker)
+        execute_attack(1 - G.offensive.attacker)
+    } else if (G.offensive.intelligence === AMBUSH) {
+        execute_attack(1 - G.offensive.attacker)
+    } else {
+        execute_attack(G.offensive.attacker)
+    }
+    if (G.offensive.intelligence === AMBUSH && battle.hit_able_units[1 - G.offensive.attacker].length < 1) {
+        execute_attack(G.offensive.attacker)
+    } else if (G.offensive.intelligence === SURPRISE && battle.hit_able_units[G.offensive.attacker].length < 1) {
+        execute_attack(1 - G.offensive.attacker)
+    }
+    if (battle.hit_able_units[0].length && !battle.hit_able_units[1].length) {
+        G.active = 0
+    } else if (battle.hit_able_units[1].length && !battle.hit_able_units[0].length) {
+        G.active = 1
+    } else if (battle.hit_able_units[0].length && battle.hit_able_units[1].length) {
+        G.active = [0, 1]
+    } else {
+        ground_battle()
+    }
+    end()
 }
 
 P.offensive_sequence = script(`

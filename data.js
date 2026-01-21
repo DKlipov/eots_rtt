@@ -195,7 +195,6 @@ data.pieces = [
         "lf": 12,
         "br": 3,
         "rcf": 8,
-        "rlf": 12,
         "notreplaceable": true,
         "start": 3705
     },
@@ -210,7 +209,6 @@ data.pieces = [
         "lf": 12,
         "br": 3,
         "rcf": 7,
-        "rlf": 12,
         "notreplaceable": true,
         "start": 3705
     },
@@ -225,7 +223,6 @@ data.pieces = [
         "lf": 12,
         "br": 3,
         "rcf": 9,
-        "rlf": 12,
         "notreplaceable": true,
         "start": 3705
     },
@@ -240,7 +237,6 @@ data.pieces = [
         "lf": 8,
         "br": 3,
         "rcf": 6,
-        "rlf": 8,
         "notreplaceable": true,
         "start": 3407
     },
@@ -255,7 +251,6 @@ data.pieces = [
         "lf": 8,
         "br": 3,
         "rcf": 3,
-        "rlf": 8,
         "notreplaceable": true,
         "start": 3416
     }, {
@@ -268,7 +263,6 @@ data.pieces = [
         "cf": 20,
         "lf": 14,
         "rcf": 10,
-        "rlf": 14,
         "notreplaceable": true,
         "start": 3407
     }, {
@@ -281,7 +275,6 @@ data.pieces = [
         "cf": 17,
         "lf": 14,
         "rcf": 9,
-        "rlf": 14,
         "notreplaceable": true,
         "start": 3705
     }, {
@@ -294,7 +287,6 @@ data.pieces = [
         "cf": 13,
         "lf": 14,
         "rcf": 7,
-        "rlf": 14,
         "notreplaceable": true,
         "start": 2909
     }, {
@@ -307,7 +299,6 @@ data.pieces = [
         "cf": 12,
         "lf": 10,
         "rcf": 7,
-        "rlf": 10,
         "notreplaceable": true,
         "start": 4017
     }, {
@@ -320,7 +311,6 @@ data.pieces = [
         "cf": 12,
         "lf": 10,
         "rcf": 7,
-        "rlf": 10,
         "notreplaceable": true,
         "start": 2311
     },
@@ -336,7 +326,6 @@ data.pieces = [
         "cf": 12,
         "lf": 10,
         "rcf": 7,
-        "rlf": 10,
     },
     {
         id: "nachi",
@@ -350,7 +339,6 @@ data.pieces = [
         "cf": 10,
         "lf": 10,
         "rcf": 6,
-        "rlf": 10,
     },
     {
         id: "kamikaze",
@@ -364,7 +352,6 @@ data.pieces = [
         "cf": 8,
         "lf": 8,
         "rcf": 4,
-        "rlf": 8,
     },
     {
         id: "tenyru",
@@ -378,7 +365,6 @@ data.pieces = [
         "cf": 4,
         "lf": 8,
         "rcf": 3,
-        "rlf": 8,
     },
     {
         id: "air_jp_21",
@@ -394,7 +380,6 @@ data.pieces = [
         "br": 3,
         "ebr": 5,
         "rcf": 8,
-        "rlf": 10,
     },
     {
         id: "air_jp_22",
@@ -410,7 +395,6 @@ data.pieces = [
         "br": 3,
         "ebr": 5,
         "rcf": 10,
-        "rlf": 10,
     },
     {
         id: "air_jp_23",
@@ -426,7 +410,6 @@ data.pieces = [
         "br": 3,
         "ebr": 5,
         "rcf": 8,
-        "rlf": 10,
     },
     {
         id: "air_jp_24",
@@ -442,7 +425,6 @@ data.pieces = [
         "br": 3,
         "ebr": 5,
         "rcf": 10,
-        "rlf": 10,
     },
     {
         id: "army_jp_1sn",
@@ -457,8 +439,7 @@ data.pieces = [
         "cf": 4,
         "lf": 6,
         "rcf": 2,
-        "rlf": 6,
-        "organic" : true,
+        "organic": true,
     },
     {
         id: "army_jp_2sn",
@@ -473,8 +454,7 @@ data.pieces = [
         "cf": 4,
         "lf": 6,
         "rcf": 2,
-        "rlf": 6,
-        "organic" : true,
+        "organic": true,
     },
     {
         id: "army_jp_3sn",
@@ -489,8 +469,7 @@ data.pieces = [
         "cf": 4,
         "lf": 6,
         "rcf": 2,
-        "rlf": 6,
-        "organic" : true,
+        "organic": true,
     },
     {
         id: "army_jp_4sn",
@@ -505,8 +484,7 @@ data.pieces = [
         "cf": 4,
         "lf": 6,
         "rcf": 2,
-        "rlf": 6,
-        "organic" : true,
+        "organic": true,
     },
     {
         id: "army_jp_ss",
@@ -521,8 +499,7 @@ data.pieces = [
         "cf": 6,
         "lf": 6,
         "rcf": 3,
-        "rlf": 6,
-        "organic" : true,
+        "organic": true,
     },
     {
         id: "army_jp_kor",
@@ -537,7 +514,6 @@ data.pieces = [
         "cf": 18,
         "lf": 18,
         "rcf": 9,
-        "rlf": 18,
     },
     {
         id: "army_jp_ed",
@@ -552,7 +528,6 @@ data.pieces = [
         "cf": 18,
         "lf": 12,
         "rcf": 9,
-        "rlf": 12,
     },
     {
         id: "army_jp_14",
@@ -567,7 +542,6 @@ data.pieces = [
         "cf": 18,
         "lf": 12,
         "rcf": 9,
-        "rlf": 12,
     },
     {
         id: "army_jp_15",
@@ -582,7 +556,6 @@ data.pieces = [
         "cf": 20,
         "lf": 12,
         "rcf": 10,
-        "rlf": 12,
     },
     {
         id: "army_jp_16",
@@ -598,7 +571,6 @@ data.pieces = [
         "cf": 18,
         "lf": 12,
         "rcf": 9,
-        "rlf": 12,
     },
     {
         id: "army_jp_17",
@@ -614,7 +586,6 @@ data.pieces = [
         "cf": 18,
         "lf": 12,
         "rcf": 9,
-        "rlf": 12,
     },
     {
         id: "army_jp_18",
@@ -630,7 +601,6 @@ data.pieces = [
         "cf": 18,
         "lf": 12,
         "rcf": 9,
-        "rlf": 12,
     },
     {
         id: "army_jp_19",
@@ -646,7 +616,6 @@ data.pieces = [
         "cf": 18,
         "lf": 12,
         "rcf": 9,
-        "rlf": 12,
     },
     {
         id: "army_jp_25",
@@ -662,7 +631,6 @@ data.pieces = [
         "cf": 18,
         "lf": 12,
         "rcf": 9,
-        "rlf": 12,
     },
     {
         id: "army_jp_27",
@@ -678,7 +646,6 @@ data.pieces = [
         "cf": 18,
         "lf": 12,
         "rcf": 9,
-        "rlf": 12,
     },
     {
         id: "army_jp_35",
@@ -694,7 +661,6 @@ data.pieces = [
         "cf": 18,
         "lf": 12,
         "rcf": 9,
-        "rlf": 12,
     },
     {
         id: "army_jp_38",
@@ -709,7 +675,6 @@ data.pieces = [
         "cf": 18,
         "lf": 12,
         "rcf": 9,
-        "rlf": 12,
     },
     {
         id: "air_jp_1",
@@ -725,7 +690,6 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 10,
-        "rlf": 10,
     },
     {
         id: "air_jp_2",
@@ -741,7 +705,6 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 10,
-        "rlf": 10,
     },
     {
         id: "air_jp_3",
@@ -757,7 +720,6 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 10,
-        "rlf": 10,
     },
     {
         id: "air_jp_4",
@@ -773,7 +735,6 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 10,
-        "rlf": 10,
     },
     {
         id: "air_jp_5",
@@ -789,7 +750,6 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 11,
-        "rlf": 10,
     },
     {
         id: "air_jp_25",
@@ -805,7 +765,6 @@ data.pieces = [
         "br": 3,
         "ebr": 5,
         "rcf": 5,
-        "rlf": 10,
     },
     {
         id: "air_jp_26",
@@ -821,7 +780,6 @@ data.pieces = [
         "br": 3,
         "ebr": 5,
         "rcf": 5,
-        "rlf": 10,
     },
     {
         id: "air_jp_27",
@@ -837,7 +795,6 @@ data.pieces = [
         "br": 3,
         "ebr": 5,
         "rcf": 5,
-        "rlf": 10,
     },
     {
         id: "air_jp_28",
@@ -853,7 +810,6 @@ data.pieces = [
         "br": 3,
         "ebr": 5,
         "rcf": 5,
-        "rlf": 10,
     },
     {
         id: "air_jp_50",
@@ -869,7 +825,6 @@ data.pieces = [
         "br": 3,
         "ebr": 5,
         "rcf": 4,
-        "rlf": 10,
     },
     {
         id: "air_jp_51",
@@ -885,7 +840,6 @@ data.pieces = [
         "br": 3,
         "ebr": 5,
         "rcf": 4,
-        "rlf": 10,
     },
     {
         id: "air_jp_61",
@@ -901,7 +855,6 @@ data.pieces = [
         "br": 3,
         "ebr": 5,
         "rcf": 4,
-        "rlf": 10,
     },
     {
         id: "air_jp_62",
@@ -917,7 +870,6 @@ data.pieces = [
         "br": 3,
         "ebr": 5,
         "rcf": 4,
-        "rlf": 10,
     },
     {
         id: "air_jp_t",
@@ -933,7 +885,6 @@ data.pieces = [
         "br": 4,
         "ebr": 5,
         "rcf": 6,
-        "rlf": 10,
     },
     {
         id: "air_jp_6",
@@ -949,7 +900,6 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 4,
-        "rlf": 10,
     },
     {
         id: "air_jp_7",
@@ -965,7 +915,6 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 4,
-        "rlf": 10,
     },
     {
         id: "air_jp_8",
@@ -981,7 +930,6 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 4,
-        "rlf": 10,
     },
     {
         id: "air_jp_9",
@@ -997,7 +945,6 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 4,
-        "rlf": 10,
     },
     {
         id: "air_jp_10",
@@ -1013,7 +960,6 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 4,
-        "rlf": 10,
     },
     {
         id: "air_jp_11",
@@ -1029,7 +975,6 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 3,
-        "rlf": 10,
     },
     {
         id: "air_jp_12",
@@ -1045,7 +990,6 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 3,
-        "rlf": 10,
     },
     {
         id: "army_jp_28",
@@ -1061,7 +1005,6 @@ data.pieces = [
         "cf": 18,
         "lf": 12,
         "rcf": 9,
-        "rlf": 12,
     },
     {
         id: "army_jp_31",
@@ -1077,7 +1020,6 @@ data.pieces = [
         "cf": 18,
         "lf": 12,
         "rcf": 9,
-        "rlf": 12,
     },
     {
         id: "army_jp_37",
@@ -1093,7 +1035,6 @@ data.pieces = [
         "cf": 18,
         "lf": 12,
         "rcf": 9,
-        "rlf": 12,
     },
     {
         id: "army_jp_33",
@@ -1109,7 +1050,6 @@ data.pieces = [
         "cf": 18,
         "lf": 12,
         "rcf": 9,
-        "rlf": 12,
     },
     {
         id: "army_jp_2",
@@ -1125,7 +1065,6 @@ data.pieces = [
         "cf": 18,
         "lf": 12,
         "rcf": 9,
-        "rlf": 12,
     },
     {
         id: "army_jp_29",
@@ -1141,7 +1080,6 @@ data.pieces = [
         "cf": 18,
         "lf": 12,
         "rcf": 9,
-        "rlf": 12,
     },
     {
         id: "army_jp_32",
@@ -1157,7 +1095,6 @@ data.pieces = [
         "cf": 18,
         "lf": 12,
         "rcf": 9,
-        "rlf": 12,
     },
     {
         id: "army_jp_36",
@@ -1172,7 +1109,6 @@ data.pieces = [
         "cf": 18,
         "lf": 12,
         "rcf": 9,
-        "rlf": 12,
     },
     {
         id: "army_jp_39",
@@ -1188,7 +1124,6 @@ data.pieces = [
         "cf": 18,
         "lf": 12,
         "rcf": 9,
-        "rlf": 12,
     },
     {
         id: "yamato",
@@ -1200,7 +1135,6 @@ data.pieces = [
         "cf": 18,
         "lf": 18,
         "rcf": 9,
-        "rlf": 18,
         "reinforcement": 2,
         "rptype": "jp_navy",
         "start_reduced": true,
@@ -1216,7 +1150,6 @@ data.pieces = [
         "lf": 8,
         "br": 3,
         "rcf": 6,
-        "rlf": 8,
         "reinforcement": 2,
         "rptype": "jp_navy",
     },
@@ -1231,7 +1164,6 @@ data.pieces = [
         "lf": 8,
         "br": 3,
         "rcf": 6,
-        "rlf": 8,
         "reinforcement": 7,
         "start_reduced": true,
         "rptype": "jp_navy",
@@ -1247,7 +1179,6 @@ data.pieces = [
         "lf": 12,
         "br": 3,
         "rcf": 7,
-        "rlf": 12,
         "reinforcement": 8,
         "rptype": "jp_navy",
     },
@@ -1262,7 +1193,6 @@ data.pieces = [
         "lf": 8,
         "br": 3,
         "rcf": 6,
-        "rlf": 8,
         "reinforcement": 9,
         "rptype": "jp_navy",
     },
@@ -1367,7 +1297,6 @@ data.pieces = [
         "lf": 12,
         "br": 2,
         "rcf": 8,
-        "rlf": 12,
         "rptype": "us_navy",
         "start": 5410
     },
@@ -1383,7 +1312,6 @@ data.pieces = [
         "lf": 12,
         "br": 2,
         "rcf": 8,
-        "rlf": 12,
         "rptype": "us_navy",
         "start": 5809
     },
@@ -1399,7 +1327,6 @@ data.pieces = [
         "cf": 15,
         "lf": 10,
         "rcf": 9,
-        "rlf": 12,
         "notreplaceable": true,
     },
     {
@@ -1414,7 +1341,6 @@ data.pieces = [
         "cf": 9,
         "lf": 8,
         "rcf": 6,
-        "rlf": 8,
         "notreplaceable": true,
     },
     {
@@ -1429,7 +1355,6 @@ data.pieces = [
         "cf": 4,
         "lf": 6,
         "rcf": 2,
-        "rlf": 6,
         "notreplaceable": true,
     },
     {
@@ -1444,7 +1369,6 @@ data.pieces = [
         "cf": 2,
         "lf": 4,
         "rcf": 1,
-        "rlf": 4,
         "notreplaceable": true,
     },
     {
@@ -1459,7 +1383,6 @@ data.pieces = [
         "cf": 8,
         "lf": 10,
         "rcf": 4,
-        "rlf": 10,
         "notreplaceable": true,
     },
     {
@@ -1474,7 +1397,6 @@ data.pieces = [
         "cf": 5,
         "lf": 8,
         "rcf": 3,
-        "rlf": 8,
         "notreplaceable": true,
     },
     {
@@ -1489,7 +1411,6 @@ data.pieces = [
         "cf": 3,
         "lf": 8,
         "rcf": 2,
-        "rlf": 8,
         "notreplaceable": true,
     },
     {
@@ -1504,7 +1425,6 @@ data.pieces = [
         "cf": 3,
         "lf": 8,
         "rcf": 2,
-        "rlf": 8,
         "notreplaceable": true,
     },
     {
@@ -1521,7 +1441,6 @@ data.pieces = [
         "cf": 1,
         "lf": 8,
         "rcf": 1,
-        "rlf": 8,
         "br": 2,
         "ebr": 4,
     },
@@ -1540,7 +1459,6 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 4,
-        "rlf": 10,
     },
     {
         id: "air_ap_19",
@@ -1556,7 +1474,6 @@ data.pieces = [
         "lf": 9,
         "br": 6,
         "rcf": 1,
-        "rlf": 9,
     },
     {
         id: "air_ap_7",
@@ -1572,7 +1489,6 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 5,
-        "rlf": 10,
     },
     {
         id: "air_ap_7_lrb",
@@ -1589,7 +1505,6 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 2,
-        "rlf": 10,
     },
     {
         id: "air_ap_avg",
@@ -1606,7 +1521,6 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 5,
-        "rlf": 10,
     },
     {
         id: "air_ap_du",
@@ -1623,7 +1537,6 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 4,
-        "rlf": 9,
     },
     {
         id: "air_ap_fe",
@@ -1640,7 +1553,6 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 4,
-        "rlf": 9,
     },
     {
         id: "air_ap_ma",
@@ -1657,7 +1569,6 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 3,
-        "rlf": 9,
     },
     {
         id: "air_ap_au",
@@ -1674,7 +1585,6 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 5,
-        "rlf": 10,
     },
     {
         id: "air_ap_14",
@@ -1689,7 +1599,6 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 6,
-        "rlf": 10,
     },
     {
         id: "air_ap_10_lrb",
@@ -1705,7 +1614,6 @@ data.pieces = [
         "lf": 10,
         "br": 6,
         "rcf": 2,
-        "rlf": 10,
     },
     {
         id: "air_ap_5_lrb",
@@ -1721,7 +1629,6 @@ data.pieces = [
         "lf": 10,
         "br": 6,
         "rcf": 2,
-        "rlf": 10,
     },
     {
         id: "air_ap_5",
@@ -1736,7 +1643,6 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 5,
-        "rlf": 10,
         "reinforcement": 2,
     },
     {
@@ -1753,7 +1659,6 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 3,
-        "rlf": 10,
         "reinforcement": 2,
     },
     {
@@ -1769,7 +1674,6 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 5,
-        "rlf": 10,
         "reinforcement": 2,
     },
     {
@@ -1785,7 +1689,6 @@ data.pieces = [
         "lf": 10,
         "br": 6,
         "rcf": 2,
-        "rlf": 10,
         "reinforcement": 5,
     },
     {
@@ -1802,7 +1705,6 @@ data.pieces = [
         "lf": 10,
         "br": 6,
         "rcf": 2,
-        "rlf": 10,
     },
     {
         id: "air_ap_13",
@@ -1817,7 +1719,6 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 5,
-        "rlf": 10,
         "reinforcement": 5,
     },
     {
@@ -1834,7 +1735,6 @@ data.pieces = [
         "lf": 10,
         "br": 6,
         "rcf": 2,
-        "rlf": 10,
     },
     {
         id: "air_ap_11",
@@ -1849,7 +1749,6 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 5,
-        "rlf": 10,
         "reinforcement": 5,
     },
     {
@@ -1866,7 +1765,6 @@ data.pieces = [
         "lf": 10,
         "br": 6,
         "rcf": 2,
-        "rlf": 10,
     },
     {
         id: "air_ap_2_maw",
@@ -1882,7 +1780,6 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 6,
-        "rlf": 10,
         "reinforcement": 4,
     },
     {
@@ -1899,7 +1796,6 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 8,
-        "rlf": 10,
         "reinforcement": 9,
     },
     {
@@ -1915,7 +1811,6 @@ data.pieces = [
         "lf": 10,
         "br": 8,
         "rcf": 3,
-        "rlf": 10,
         "reinforcement": 9,
     },
     {
@@ -1931,7 +1826,6 @@ data.pieces = [
         "lf": 10,
         "br": 8,
         "rcf": 3,
-        "rlf": 10,
         "reinforcement": 10,
     },
     {
@@ -1946,7 +1840,6 @@ data.pieces = [
         "cf": 15,
         "lf": 12,
         "rcf": 7,
-        "rlf": 12,
         "rptype": "us_navy",
     },
     {
@@ -1961,7 +1854,6 @@ data.pieces = [
         "cf": 9,
         "lf": 8,
         "rcf": 6,
-        "rlf": 8,
         "rptype": "us_navy",
     },
     {
@@ -1976,7 +1868,6 @@ data.pieces = [
         "cf": 14,
         "lf": 14,
         "rcf": 7,
-        "rlf": 14,
         "rptype": "com_navy",
     },
     {
@@ -1992,7 +1883,6 @@ data.pieces = [
         "lf": 12,
         "br": 2,
         "rcf": 5,
-        "rlf": 12,
         "rptype": "com_navy",
     },
     {
@@ -2008,7 +1898,6 @@ data.pieces = [
         "lf": 8,
         "br": 2,
         "rcf": 2,
-        "rlf": 8,
         "notreplaceable": true,
         "start_reduced": true,
     },
@@ -2024,7 +1913,6 @@ data.pieces = [
         "cf": 16,
         "lf": 16,
         "rcf": 8,
-        "rlf": 16,
         "rptype": "us_navy",
     },
     {
@@ -2039,7 +1927,6 @@ data.pieces = [
         "lf": 12,
         "br": 2,
         "rcf": 8,
-        "rlf": 12,
         "rptype": "us_navy",
         "reinforcement": 3,
     },
@@ -2055,7 +1942,6 @@ data.pieces = [
         "cf": 16,
         "lf": 16,
         "rcf": 8,
-        "rlf": 16,
         "rptype": "us_navy",
     },
     {
@@ -2070,7 +1956,6 @@ data.pieces = [
         "cf": 6,
         "lf": 8,
         "rcf": 3,
-        "rlf": 8,
         "rptype": "com_navy",
     },
     {
@@ -2085,7 +1970,6 @@ data.pieces = [
         "cf": 16,
         "lf": 16,
         "rcf": 8,
-        "rlf": 16,
         "rptype": "us_navy",
     },
     {
@@ -2100,7 +1984,6 @@ data.pieces = [
         "lf": 10,
         "br": 2,
         "rcf": 7,
-        "rlf": 10,
         "rptype": "us_navy",
         "reinforcement": 5,
     },
@@ -2116,7 +1999,6 @@ data.pieces = [
         "lf": 14,
         "br": 2,
         "rcf": 10,
-        "rlf": 14,
         "rptype": "us_navy",
         "reinforcement": 6,
     },
@@ -2132,7 +2014,6 @@ data.pieces = [
         "lf": 14,
         "br": 2,
         "rcf": 10,
-        "rlf": 14,
         "rptype": "us_navy",
         "reinforcement": 6,
     },
@@ -2148,7 +2029,6 @@ data.pieces = [
         "lf": 10,
         "br": 2,
         "rcf": 7,
-        "rlf": 10,
         "rptype": "us_navy",
         "reinforcement": 6,
     },
@@ -2164,7 +2044,6 @@ data.pieces = [
         "lf": 10,
         "br": 2,
         "rcf": 7,
-        "rlf": 10,
         "rptype": "us_navy",
         "reinforcement": 6,
     },
@@ -2180,7 +2059,6 @@ data.pieces = [
         "lf": 8,
         "br": 2,
         "rcf": 3,
-        "rlf": 8,
         "rptype": "us_navy",
         "reinforcement": 6,
     },
@@ -2196,7 +2074,6 @@ data.pieces = [
         "cf": 16,
         "lf": 16,
         "rcf": 8,
-        "rlf": 16,
         "rptype": "us_navy",
     },
     {
@@ -2211,7 +2088,6 @@ data.pieces = [
         "lf": 14,
         "br": 2,
         "rcf": 10,
-        "rlf": 14,
         "rptype": "us_navy",
         "reinforcement": 7,
     },
@@ -2227,7 +2103,6 @@ data.pieces = [
         "lf": 14,
         "br": 2,
         "rcf": 10,
-        "rlf": 14,
         "rptype": "us_navy",
         "reinforcement": 7,
     },
@@ -2243,7 +2118,6 @@ data.pieces = [
         "lf": 10,
         "br": 2,
         "rcf": 7,
-        "rlf": 10,
         "rptype": "us_navy",
         "reinforcement": 7,
     },
@@ -2259,7 +2133,6 @@ data.pieces = [
         "lf": 14,
         "br": 2,
         "rcf": 10,
-        "rlf": 14,
         "rptype": "us_navy",
         "reinforcement": 8,
     },
@@ -2275,7 +2148,6 @@ data.pieces = [
         "lf": 8,
         "br": 2,
         "rcf": 3,
-        "rlf": 8,
         "rptype": "us_navy",
         "reinforcement": 8,
     },
@@ -2291,7 +2163,6 @@ data.pieces = [
         "lf": 14,
         "br": 2,
         "rcf": 10,
-        "rlf": 14,
         "rptype": "us_navy",
         "reinforcement": 9,
     },
@@ -2307,7 +2178,6 @@ data.pieces = [
         "cf": 16,
         "lf": 16,
         "rcf": 8,
-        "rlf": 16,
         "rptype": "us_navy",
     },
     {
@@ -2322,7 +2192,6 @@ data.pieces = [
         "cf": 16,
         "lf": 16,
         "rcf": 8,
-        "rlf": 16,
         "rptype": "us_navy",
     },
     {
@@ -2337,7 +2206,6 @@ data.pieces = [
         "lf": 14,
         "br": 2,
         "rcf": 10,
-        "rlf": 14,
         "rptype": "us_navy",
         "reinforcement": 10,
     },
@@ -2353,7 +2221,6 @@ data.pieces = [
         "cf": 10,
         "lf": 12,
         "rcf": 5,
-        "rlf": 12,
         "rptype": "us_navy",
     },
     {
@@ -2368,7 +2235,6 @@ data.pieces = [
         "lf": 8,
         "br": 2,
         "rcf": 3,
-        "rlf": 8,
         "rptype": "us_navy",
         "reinforcement": 10,
     },
@@ -2384,7 +2250,6 @@ data.pieces = [
         "lf": 8,
         "br": 2,
         "rcf": 3,
-        "rlf": 8,
         "rptype": "us_navy",
         "reinforcement": 10,
     },
@@ -2399,7 +2264,6 @@ data.pieces = [
         "cf": 8,
         "lf": 10,
         "rcf": 4,
-        "rlf": 10,
         "rptype": "us_navy",
         "reinforcement": 11,
     },
@@ -2414,7 +2278,6 @@ data.pieces = [
         "cf": 20,
         "lf": 16,
         "rcf": 10,
-        "rlf": 16,
         "rptype": "com_navy",
         "reinforcement": 10,
     },
@@ -2430,7 +2293,6 @@ data.pieces = [
         "lf": 14,
         "br": 2,
         "rcf": 6,
-        "rlf": 14,
         "rptype": "com_navy",
         "reinforcement": 10,
     },
@@ -2447,7 +2309,6 @@ data.pieces = [
         "cf": 5,
         "lf": 12,
         "rcf": 3,
-        "rlf": 12,
         "start_reduced": true,
     },
     {
@@ -2463,7 +2324,6 @@ data.pieces = [
         "cf": 5,
         "lf": 12,
         "rcf": 3,
-        "rlf": 12,
         "start_reduced": true,
     },
     {
@@ -2479,7 +2339,6 @@ data.pieces = [
         "cf": 6,
         "lf": 12,
         "rcf": 4,
-        "rlf": 12,
         "start_reduced": true,
     },
     {
@@ -2495,7 +2354,6 @@ data.pieces = [
         "cf": 2,
         "lf": 6,
         "rcf": 2,
-        "rlf": 6,
         "start_reduced": true,
         "notreplaceable": true,
     },
@@ -2511,7 +2369,6 @@ data.pieces = [
         "cf": 6,
         "lf": 10,
         "rcf": 3,
-        "rlf": 10,
         "notreplaceable": true,
     },
     {
@@ -2526,7 +2383,6 @@ data.pieces = [
         "cf": 10,
         "lf": 10,
         "rcf": 5,
-        "rlf": 10,
         "notreplaceable": true,
     },
     {
@@ -2541,7 +2397,6 @@ data.pieces = [
         "cf": 4,
         "lf": 10,
         "rcf": 2,
-        "rlf": 10,
         "notreplaceable": true,
     },
     {
@@ -2556,7 +2411,6 @@ data.pieces = [
         "cf": 3,
         "lf": 10,
         "rcf": 1,
-        "rlf": 10,
         "notreplaceable": true,
     },
     {
@@ -2571,7 +2425,6 @@ data.pieces = [
         "cf": 1,
         "lf": 6,
         "rcf": 1,
-        "rlf": 6,
         "start_reduced": true,
         "notreplaceable": true,
     },
@@ -2587,7 +2440,6 @@ data.pieces = [
         "cf": 18,
         "lf": 12,
         "rcf": 9,
-        "rlf": 12,
         "rptype": "ap_ground",
     },
     {
@@ -2602,7 +2454,6 @@ data.pieces = [
         "cf": 12,
         "lf": 12,
         "rcf": 6,
-        "rlf": 12,
         "rptype": "ap_ground",
     },
     {
@@ -2617,7 +2468,6 @@ data.pieces = [
         "cf": 12,
         "lf": 12,
         "rcf": 6,
-        "rlf": 12,
         "rptype": "ap_ground",
     },
     {
@@ -2632,7 +2482,6 @@ data.pieces = [
         "cf": 6,
         "lf": 12,
         "rcf": 3,
-        "rlf": 12,
         "notreplaceable": true,
     },
     {
@@ -2647,7 +2496,6 @@ data.pieces = [
         "cf": 5,
         "lf": 5,
         "rcf": 3,
-        "rlf": 5,
         "notreplaceable": true,
     },
     {
@@ -2662,7 +2510,6 @@ data.pieces = [
         "cf": 3,
         "lf": 4,
         "rcf": 1,
-        "rlf": 4,
         "notreplaceable": true,
     },
     {
@@ -2677,7 +2524,6 @@ data.pieces = [
         "cf": 9,
         "lf": 9,
         "rcf": 5,
-        "rlf": 9,
         "notreplaceable": true,
     },
     {
@@ -2692,7 +2538,6 @@ data.pieces = [
         "cf": 3,
         "lf": 5,
         "rcf": 1,
-        "rlf": 5,
         "notreplaceable": true,
     },
     {
@@ -2707,7 +2552,6 @@ data.pieces = [
         "cf": 6,
         "lf": 4,
         "rcf": 3,
-        "rlf": 4,
         "notreplaceable": true,
     },
     {
@@ -2722,7 +2566,6 @@ data.pieces = [
         "cf": 12,
         "lf": 12,
         "rcf": 8,
-        "rlf": 12,
         "notreplaceable": true,
     },
     {
@@ -2737,7 +2580,6 @@ data.pieces = [
         "cf": 12,
         "lf": 12,
         "rcf": 8,
-        "rlf": 12,
         "notreplaceable": true,
     },
     {
@@ -2752,7 +2594,6 @@ data.pieces = [
         "cf": 1,
         "lf": 6,
         "rcf": 1,
-        "rlf": 6,
         "start_reduced": true,
         "notreplaceable": true,
     },
@@ -2768,7 +2609,6 @@ data.pieces = [
         "cf": 1,
         "lf": 6,
         "rcf": 1,
-        "rlf": 6,
         "start_reduced": true,
         "notreplaceable": true,
     },
@@ -2784,7 +2624,6 @@ data.pieces = [
         "cf": 1,
         "lf": 6,
         "rcf": 1,
-        "rlf": 6,
         "start_reduced": true,
         "notreplaceable": true,
     },
@@ -2800,7 +2639,6 @@ data.pieces = [
         "cf": 1,
         "lf": 6,
         "rcf": 1,
-        "rlf": 6,
         "start_reduced": true,
         "notreplaceable": true,
     },
@@ -2816,7 +2654,6 @@ data.pieces = [
         "cf": 1,
         "lf": 6,
         "rcf": 1,
-        "rlf": 6,
         "start_reduced": true,
         "notreplaceable": true,
     },
@@ -2832,7 +2669,6 @@ data.pieces = [
         "cf": 1,
         "lf": 6,
         "rcf": 1,
-        "rlf": 6,
         "start_reduced": true,
         "notreplaceable": true,
     },
@@ -2848,7 +2684,6 @@ data.pieces = [
         "cf": 1,
         "lf": 6,
         "rcf": 1,
-        "rlf": 6,
         "start_reduced": true,
         "notreplaceable": true,
     },
@@ -2864,7 +2699,6 @@ data.pieces = [
         "cf": 1,
         "lf": 6,
         "rcf": 1,
-        "rlf": 6,
         "start_reduced": true,
         "notreplaceable": true,
     },
@@ -2880,7 +2714,6 @@ data.pieces = [
         "cf": 6,
         "lf": 12,
         "rcf": 3,
-        "rlf": 12,
         "notreplaceable": true,
     },
     {
@@ -2894,7 +2727,6 @@ data.pieces = [
         "cf": 4,
         "lf": 10,
         "rcf": 2,
-        "rlf": 10,
         "rptype": "ap_ground"
     },
     {
@@ -2908,7 +2740,6 @@ data.pieces = [
         "cf": 6,
         "lf": 6,
         "rcf": 4,
-        "rlf": 6,
         "rptype": "ap_ground"
     },
     {
@@ -2923,7 +2754,6 @@ data.pieces = [
         "cf": 12,
         "lf": 12,
         "rcf": 8,
-        "rlf": 12,
         "rptype": "ap_ground"
     },
     {
@@ -2937,7 +2767,6 @@ data.pieces = [
         "cf": 22,
         "lf": 12,
         "rcf": 11,
-        "rlf": 12,
         "rptype": "ap_ground",
         "reinforcement": 2,
     },
@@ -2952,7 +2781,6 @@ data.pieces = [
         "cf": 22,
         "lf": 12,
         "rcf": 11,
-        "rlf": 12,
         "rptype": "ap_ground",
         "reinforcement": 3,
         "start_reduced": true,
@@ -2968,7 +2796,6 @@ data.pieces = [
         "cf": 22,
         "lf": 12,
         "rcf": 11,
-        "rlf": 12,
         "rptype": "ap_ground",
         "reinforcement": 3,
         "start_reduced": true,
@@ -2984,7 +2811,6 @@ data.pieces = [
         "cf": 22,
         "lf": 12,
         "rcf": 11,
-        "rlf": 12,
         "rptype": "ap_ground",
         "reinforcement": 5,
     },
@@ -2999,7 +2825,6 @@ data.pieces = [
         "cf": 22,
         "lf": 12,
         "rcf": 11,
-        "rlf": 12,
         "rptype": "ap_ground",
         "reinforcement": 8,
     },
@@ -3014,7 +2839,6 @@ data.pieces = [
         "cf": 9,
         "lf": 12,
         "rcf": 6,
-        "rlf": 12,
         "rptype": "ap_ground",
         "reinforcement": 8,
     },
@@ -3030,7 +2854,6 @@ data.pieces = [
         "cf": 8,
         "lf": 8,
         "rcf": 4,
-        "rlf": 8,
         "rptype": "ap_ground",
         "reinforcement": 2,
     },
@@ -3045,7 +2868,6 @@ data.pieces = [
         "cf": 4,
         "lf": 6,
         "rcf": 2,
-        "rlf": 6,
         "rptype": "ap_ground",
         "reinforcement": 2,
     },
@@ -3061,7 +2883,6 @@ data.pieces = [
         "cf": 12,
         "lf": 12,
         "rcf": 8,
-        "rlf": 12,
         "rptype": "ap_ground",
         "reinforcement": 3,
     },
@@ -3077,7 +2898,6 @@ data.pieces = [
         "cf": 12,
         "lf": 12,
         "rcf": 8,
-        "rlf": 12,
         "rptype": "ap_ground",
         "reinforcement": 4,
     },
@@ -3093,7 +2913,6 @@ data.pieces = [
         "cf": 12,
         "lf": 12,
         "rcf": 8,
-        "rlf": 12,
         "rptype": "ap_ground",
         "reinforcement": 6,
     },
@@ -3109,7 +2928,6 @@ data.pieces = [
         "cf": 12,
         "lf": 12,
         "rcf": 8,
-        "rlf": 12,
         "rptype": "ap_ground",
         "reinforcement": 8,
     },
@@ -3125,7 +2943,6 @@ data.pieces = [
         "cf": 12,
         "lf": 12,
         "rcf": 8,
-        "rlf": 12,
         "rptype": "ap_ground",
         "reinforcement": 10,
     },
@@ -3140,7 +2957,6 @@ data.pieces = [
         "cf": 16,
         "lf": 12,
         "rcf": 8,
-        "rlf": 12,
         "rptype": "ap_ground",
         "reinforcement": 3,
     },
@@ -3155,7 +2971,6 @@ data.pieces = [
         "cf": 20,
         "lf": 12,
         "rcf": 10,
-        "rlf": 12,
         "rptype": "ap_ground",
         "reinforcement": 3,
     },
@@ -3170,7 +2985,6 @@ data.pieces = [
         "cf": 22,
         "lf": 12,
         "rcf": 11,
-        "rlf": 12,
         "rptype": "ap_ground",
         "reinforcement": 3,
     },
@@ -3185,7 +2999,6 @@ data.pieces = [
         "cf": 9,
         "lf": 12,
         "rcf": 6,
-        "rlf": 12,
         "rptype": "ap_ground",
         "reinforcement": 3,
     },
@@ -3200,7 +3013,6 @@ data.pieces = [
         "cf": 16,
         "lf": 12,
         "rcf": 8,
-        "rlf": 12,
         "rptype": "ap_ground",
         "reinforcement": 4,
     },
@@ -3215,7 +3027,6 @@ data.pieces = [
         "cf": 20,
         "lf": 12,
         "rcf": 10,
-        "rlf": 12,
         "rptype": "ap_ground",
         "reinforcement": 8,
     },

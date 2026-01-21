@@ -26,3 +26,5 @@ Todo list:
 * Instrinct city defence
 * Add partially impassable hexsides to data.js
 * Japanese barges movement (with special button)
+* Reaction player choose (critical hit and last ground unit step)
+* Ground loss for JP organic transpot destroyed
