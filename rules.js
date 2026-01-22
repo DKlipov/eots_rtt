@@ -33,6 +33,12 @@ const ATTACK_MOVE = 1 << 10
 const AVOID_ZOI = 1 << 11
 const ORGANIC_ONLY = 1 << 12
 
+//Offensive stages
+const ATTACKER = 0
+const REACTION = 1
+const BATTLE = 2
+//POST_BATTLE_MOVE
+
 //Intelligence
 const SURPRISE = 0
 const INTERCEPT = 1
@@ -986,6 +992,7 @@ P.move_offensive_units = {
         }
         check_supply()
         L.allowed_hexes = []
+        //move ground units step by step
         // if (curr_path[0] & GROUND_MOVE && curr_path[1] < L.move_data.ground_move_distance && !should_ground_move_stop(hex, R)) {
         //     L.move_data.ground_move_distance -= curr_path[1]
         //     L.move_data.location = hex
@@ -2170,6 +2177,7 @@ P.assign_hits = {
 
     },
     done() {
+        push_undo()
         L.done[R] = true
         if (!L.done[1 - R]) {
             G.active = 1 - R
@@ -2322,19 +2330,53 @@ function ground_battle() {
 
 P.retreat = {
     _begin() {
-        log(`${G.offensive.battle.winner ? "JP" : "AP"}  retreats but not implemented yet`)
-        end()
+        G.active = 1 - G.offensive.battle.winner
+        L.unit_to_retreat = []
+        L.hex_to_retreat = []
+        var battle_hex = G.offensive.battle.battle_hex
+        var near = get_near_hexes(battle_hex)
+        for (var j = 0; j < near.length; j++) {
+            if (MAP_DATA[battle_hex].edges_int & GROUND << 5 * j && !is_faction_units(near[j], 1 - G.active)) {
+                L.hex_to_retreat.push(near[j])
+            }
+        }
+        for_each_unit((u, piece) => {
+            if (piece.faction === G.active && piece.class === "ground" && G.location[u] === battle_hex) {
+                set_add(L.unit_to_retreat, u)
+            }
+        })
+        if (!L.unit_to_retreat.length) {
+            end()
+        }
     },
     prompt() {
-        if (!G.offensive.battle) {
-            prompt(`Choose battle hex.`)
-            G.offensive.battle_hexes.forEach(b => action_hex(b))
+        if (G.active_stack.length) {
+            prompt(`Choose space to retreat.`)
+            L.hex_to_retreat.forEach(u => action_hex(u))
+            if (!L.hex_to_retreat.length) {
+                button("eliminate")
+            }
+        } else if (L.unit_to_retreat.length) {
+            prompt(`Choose unit to retreat.`)
+            L.unit_to_retreat.forEach(u => action_unit(u))
         } else {
-            prompt(`Apply hits. ${G.offensive.battle.hits[R]}`)
-            G.offensive.battle.hit_able_units[R].forEach(u => action_unit(u))
+            prompt(`Commit retreat.`)
+            button("done")
         }
     },
     action_hex(hex) {
+        push_undo()
+        G.location[G.active_stack[0]] = hex
+        G.active_stack = []
+    },
+    unit(u) {
+        push_undo()
+        G.active_stack = [u]
+        set_delete(L.unit_to_retreat, u)
+    },
+    done() {
+        push_undo()
+        end()
     }
 }
 
@@ -2349,22 +2391,25 @@ P.offensive_sequence = script(`
     call special_reaction
     call define_intelligence_condition
     if (G.offensive.intelligence != SURPRISE) {
+        set G.offensive.stage REACTION
         call choose_hq
         call activate_units
         call move_offensive_units
         call commit_offensive
     }
+    set G.offensive.stage BATTLE
     set G.active G.offensive.attacker
     while (G.offensive.battle_hexes.length > 0) {
         call choose_battle
     }
+    set G.offensive.stage POST_BATTLE_MOVE
     set G.active 1-G.offensive.attacker
     while (G.offensive.active_units[G.active].length > 0) {
-       call move_offensive_units { type: POST_BATTLE_MOVE }
+       call move_offensive_units
     }
     set G.active G.offensive.attacker
     while (G.offensive.active_units[G.active].length > 0) {
-       call move_offensive_units { type: POST_BATTLE_MOVE }
+       call move_offensive_units
     }
     
 `)
@@ -2709,6 +2754,7 @@ function reset_offensive() {
         attacker: JP,
         active_cards: [],
         intelligence: SURPRISE,
+        stage: ATTACKER,
         logistic: 0,
         naval_move_distance: 0,
         ground_move_distance: 0,

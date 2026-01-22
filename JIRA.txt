@@ -1,6 +1,5 @@
 Todo list:
-* [WIP] Ground retreat step
-* Post battle movement
+* [WIP] Post battle movement
 * Emergency move
 * Full card deck
 * Progress of war
@@ -20,6 +19,7 @@ Todo list:
 * Parentheless air restrictions (move, reaction and commit battle steps)
 * Strategic movement & air displacement
 * Check supply durning movement
+* Ground retreat step
 * China armies restrictions
 * Instrinct city defence
 * Add partially impassable hexsides to data.js

@@ -384,6 +384,7 @@ function on_update() {
 
     action_button("move", "Move")
     action_button("done", "Done")
+    action_button("eliminate", "Eliminate")
     action_button("stop", "Stop")
     action_button("displace", "Displace")
     action_button("strat_move", "Strategic move")
