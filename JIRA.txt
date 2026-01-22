@@ -1,7 +1,5 @@
 Todo list:
-* [WIP] Battle calculation
-* Battle loss step
-* Ground retreat step
+* [WIP] Ground retreat step
 * Post battle movement
 * Emergency move
 * Full card deck
@@ -28,3 +26,4 @@ Todo list:
 * Japanese barges movement (with special button)
 * Reaction player choose (critical hit and last ground unit step)
 * Ground loss for JP organic transpot destroyed
+* Skipped amph battle if attacker has no navy

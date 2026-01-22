@@ -254,6 +254,13 @@ function on_update() {
     begin_update()
 
     console.log(G)
+    map_for_each(G.offensive.damaged, (u, s) => {
+        if (s >= 2) {
+            G.location[u] = ELIMINATED_BOX
+        } else {
+            set_add(G.reduced, u)
+        }
+    })
     clear_paths()
     draw_paths()
 
