@@ -1,5 +1,4 @@
 Todo list:
-* [WIP] Post battle movement
 * Emergency move
 * Full card deck
 * Progress of war
@@ -27,3 +26,4 @@ Todo list:
 * Reaction player choose (critical hit and last ground unit step)
 * Ground loss for JP organic transpot destroyed
 * Skipped amph battle if attacker has no navy
+* Ground post battle movement
