@@ -644,8 +644,6 @@ function get_reaction_able_units() {
         mark_asp_reaction_hexes(hex)
         mark_ground_reaction_hexes(hex)
     })
-    L.reaction_able_units = []
-    L.asp_ground_units = []
     const has_asp = Math.max(G.asp[R][0] - G.asp[R][1], 0)
     for_each_unit((u, piece) => {
         if (piece.faction === R && piece.class === "ground" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG3) {
@@ -659,13 +657,9 @@ function get_reaction_able_units() {
 }
 
 function get_activatable_units(hq) {
-    //todo debug only, remove later
-    G.offensive.naval_move_distance = (cards[G.offensive.active_cards[0]].ops * 5)
-    G.offensive.ground_move_distance = (cards[G.offensive.active_cards[0]].ops * 2)
-    G.offensive.air_move_distance = (cards[G.offensive.active_cards[0]].ops)
-    G.location[find_piece("lexington")] = hex_to_int(2721)
-    //todo end
     const result = []
+    L.reaction_able_units = []
+    L.asp_ground_units = []
     const reaction_movement = G.offensive.attacker !== G.active
     if (reaction_movement) {
         get_reaction_able_units()
@@ -883,8 +877,6 @@ P.move_offensive_units = {
         if (!L.type) {
             L.type = 0
         }
-//todo delete debug only
-        G.offensive.ground_pbm = G.offensive.ground_pbm ? G.offensive.ground_pbm : []
         check_supply()
         L.move_data = {}
         L.movable_units = []
@@ -892,12 +884,10 @@ P.move_offensive_units = {
         L.state = "choose"
         L.move_cache = []
         G.offensive.active_units[G.active].filter(u => {
-            if (!unit_on_board(u)) {
+            if (!unit_on_board(u) || G.offensive.stage === POST_BATTLE_STAGE && pieces[u].class === "ground" && !set_has(G.offensive.ground_pbm, u)) {
                 return false
-            } else if (pieces[u].class !== "ground" || set_has(G.offensive.ground_pbm, u)) {
-                return true
             }
-            return false
+            return true
         }).forEach(u => set_add(L.movable_units, u))
         console.log(`${G.active} ${L.movable_units.length}`)
         if (L.movable_units.length <= 0) {
@@ -2041,6 +2031,7 @@ P.define_intelligence_condition = {
         let result = random(10)
         const success = result <= L.intelligence_dice
         log(`Intelligence roll ${result} ${success ? "<" : ">"} ${L.intelligence_dice} (${success ? "SUCCESS" : "FAILED"})`)
+        //todo debug only
         // if (success) {
         G.offensive.intelligence = INTERCEPT
         // }
@@ -2198,7 +2189,6 @@ P.assign_hits = {
             battle.distant_hits_provided[R] -= 1
         }
         fill_hit_able_units(R)
-
     },
     done() {
         push_undo()
@@ -2217,11 +2207,9 @@ function apply_loss() {
     for (var i = 1; i < d.length; i += 2) {
         var unit = d[i - 1]
         if (d[i] === 2) {
-            log(`${pieces[unit].name} eliminated`)
             eliminate(unit)
         } else {
-            log(`${pieces[unit].name} reduced`)
-            set_add(G.reduced, unit)
+            reduce_unit(unit)
         }
     }
 
@@ -2392,6 +2380,10 @@ P.retreat = {
             button("done")
         }
     },
+    eliminate() {
+        push_undo()
+        G.location[G.active_stack[0]] = ELIMINATED_BOX
+    },
     action_hex(hex) {
         push_undo()
         G.location[G.active_stack[0]] = hex
@@ -2401,6 +2393,76 @@ P.retreat = {
         push_undo()
         G.active_stack = [u]
         set_delete(L.unit_to_retreat, u)
+    },
+    done() {
+        push_undo()
+        end()
+    }
+}
+
+function get_emergency_retreat_hexes(unit) {
+    var piece = pieces[unit]
+    var range = piece.class === "air" ? piece.ebr : 10
+    var result = []
+    for_each_hex_in_range(G.location[unit], range, h => {
+        if (is_space_controlled(h, piece.faction) && (MAP_DATA[h].port && piece.class === "naval"
+            || MAP_DATA[h].airfield && piece.class === "air")) {
+            set_add(result, h)
+        }
+    })
+    return result
+}
+
+P.emergency_move = {
+    _begin() {
+        L.hex_to_retreat = []
+        L.unit_to_retreat = []
+        for_each_unit((u, piece) => {
+            var location = G.location[u]
+            if (piece.faction !== G.active || is_space_controlled(location, G.active) || !is_faction_units(location, 1 - G.active)) {
+                return
+            }
+            if (piece.class === "hq") {
+                eliminate(u)
+            } else {
+                set_add(L.unit_to_retreat, u)
+            }
+        })
+        if (!L.unit_to_retreat) {
+            end()
+        }
+    },
+    prompt() {
+        if (G.active_stack.length) {
+            prompt(`Choose space to move.`)
+            L.hex_to_retreat.forEach(u => action_hex(u))
+            if (!L.hex_to_retreat.length) {
+                button("eliminate")
+            }
+        } else if (L.unit_to_retreat.length) {
+            prompt(`Choose unit to emergency move.`)
+            L.unit_to_retreat.forEach(u => action_unit(u))
+        } else {
+            prompt(`Commit move.`)
+            button("done")
+        }
+    },
+    eliminate() {
+        push_undo()
+        G.location[G.active_stack[0]] = ELIMINATED_BOX
+    },
+    unit(u) {
+        push_undo()
+        G.active_stack = [u]
+        set_delete(L.unit_to_retreat, u)
+        L.hex_to_retreat = get_emergency_retreat_hexes(u)
+    },
+    action_hex(hex) {
+        push_undo()
+        log(`${pieces[G.active_stack[0]].name} emergency moved to ${int_to_hex(hex)}`)
+        G.location[G.active_stack[0]] = hex
+        G.active_stack = []
+        check_supply()
     },
     done() {
         push_undo()
@@ -2440,12 +2502,16 @@ P.offensive_sequence = script(`
     }
     set G.offensive.stage POST_BATTLE_STAGE
     set G.active 1-G.offensive.attacker
-    call move_offensive_units
-    call commit_offensive
+    if (G.offensive.active_units[G.active].length) {
+        call move_offensive_units
+        call commit_offensive
+    }
     set G.active G.offensive.attacker
     call move_offensive_units
     set G.offensive.active_units [[], []]
     call commit_offensive
+    set G.active 1-G.offensive.attacker
+    call emergency_move
 `)
 
 P.political_phase = script(`
@@ -2537,8 +2603,14 @@ function draw_card(side) {
 }
 
 function eliminate(unit) {
+    log(`${pieces[unit].name} eliminated`)
     G.location[unit] = ELIMINATED_BOX
     set_delete(G.reduced, unit)
+}
+
+function reduce_unit(unit) {
+    log(`${pieces[unit].name} reduced`)
+    set_add(G.reduced, unit)
 }
 
 function setup_scenario_1942() {

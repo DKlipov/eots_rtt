@@ -1,6 +1,5 @@
 Todo list:
-* Emergency move
-* Full card deck
+* [WIP] Full card deck
 * Progress of war
 * National status segment
 * Political will segment
@@ -27,3 +26,4 @@ Todo list:
 * Ground loss for JP organic transpot destroyed
 * Skipped amph battle if attacker has no navy
 * Ground post battle movement
+* hq displace and return
