@@ -17,6 +17,14 @@ const AP = 1
 const EC = 0 //Event card
 const OC = 1 //Offensive card
 
+//card types
+const POLITICAL = 1
+const RESOURCE = 2
+const COUNTER_OFFENSIVE = 3
+const MILITARY = 4
+const INTELLIGENCE = 5
+const REACTION = 6
+
 //Move types
 const ANY_MOVE = 0
 const STRAT_MOVE = 1 << 0
@@ -140,6 +148,15 @@ function find_piece(id) {
         }
     }
     throw new Error("Missed unit " + id);
+}
+
+function find_card(faction, num) {
+    for (let i = 0; i < cards.length; i++) {
+        if (cards[i].faction === faction && cards[i].num === num) {
+            return i
+        }
+    }
+    throw new Error(`Missed card ${faction} ${num}`);
 }
 
 /* INIT */
@@ -415,9 +432,24 @@ P.future_offensive = {
     }
 }
 
+function event_hq_check(card) {
+    if (!card.hq) {
+        return true
+    }
+    for (var hq of card.hq) {
+        if (unit_on_board(hq) && !set_has(G.oos, hq)) {
+            return true
+        }
+    }
+    return false
+}
+
 function get_allowed_actions(num) {
     let card = cards[num]
-    let result = ["ops", "discard", "event"]
+    let result = ["ops", "discard"]
+    if (card.type === MILITARY && event_hq_check(card)) {
+        result.push("event")
+    }
     if (card.ops >= 3) {
         result.push("inter_service")
         result.push("infrastructure")
@@ -431,9 +463,18 @@ function get_allowed_actions(num) {
     return result
 }
 
+function military_card(c) {
+    activate_card(c)
+    G.offensive.type = EC
+    var card = cards[c]
+    if (card.logistic) {
+        G.offensive.logistic = cards[c].logistic
+    }
+}
+
 function activate_card(c) {
-    push_undo()
     G.offensive.active_cards.push(c)
+    G.offensive.offensive_card = c
     if (G.future_offensive[R][1] === c) {
         G.future_offensive[R] = [-1, 0]
     } else {
@@ -447,6 +488,7 @@ function activate_card(c) {
     G.offensive.naval_move_distance = (cards[c].ops * 5)
     G.offensive.ground_move_distance = (cards[c].ops * 2)
     G.offensive.air_move_distance = (cards[c].ops)
+    G.offensive.logistic = cards[c].ops
 }
 
 P.offensive_segment = {
@@ -470,16 +512,19 @@ P.offensive_segment = {
         button("isr")
     },
     ops(c) {
+        push_undo()
         activate_card(c)
         G.offensive.type = OC
         log(`${R} played ${cards[c].name} as operation card`)
         goto("offensive_sequence")
     },
     event(c) {
-        activate_card(c)
-        G.offensive.type = EC
-        log(`${R} played ${cards[c].name} as event card(not implemented so just operations)`)
-        goto("offensive_sequence")
+        push_undo()
+        if (cards[c].type === MILITARY) {
+            military_card(c)
+            log(`${R} played ${cards[c].name} as event card(not implemented so just operations)`)
+            goto("offensive_sequence")
+        }
     },
     discard(c) {
         check_supply()
@@ -520,12 +565,17 @@ P.choose_hq = {
         L.possible_units = []
         for_each_unit((u, piece) => {
             if (piece.faction === R && piece.class === "hq" && !set_has(G.oos, i) && (
-                R === G.offensive.attacker
-                || G.offensive.battle_hexes.filter(bh => get_distance(bh, G.location[u]) <= piece.cr).length
-            )) {
+                    R === G.offensive.attacker
+                    || G.offensive.battle_hexes.filter(bh => get_distance(bh, G.location[u]) <= piece.cr).length
+                )
+                && (G.offensive.type === OC || !cards[G.offensive.offensive_card].hq || cards[G.offensive.offensive_card].hq.includes(u))
+            ) {
                 L.possible_units.push(u)
             }
         })
+        if (L.possible_units.length === 1) {
+            this.unit(L.possible_units[0])
+        }
     },
     prompt() {
         prompt(`${offensive_card_header()} Choose HQ.`)
@@ -534,6 +584,10 @@ P.choose_hq = {
     unit(u) {
         push_undo()
         G.offensive.active_hq[R] = u
+        var card = cards[G.offensive.offensive_card]
+        if (G.offensive.type === EC && card.logistic_alt && card.logistic_alt[0].includes(u)) {
+            G.offensive.logistic = card.logistic_alt[1]
+        }
         log(`${pieces[u].name} activated for ${R === G.offensive.attacker ? "offensive" : "reaction"}`)
         end()
     },
@@ -578,7 +632,6 @@ function mark_ground_reaction_hexes(location) {
     }
     const queue = [location]
     const distance_map = [location, 0]
-    console.log(int_to_hex(location))
     for (var i = 0; i < queue.length; i++) {
         let item = queue[i]
         let base_distance = map_get(distance_map, item)
@@ -889,7 +942,6 @@ P.move_offensive_units = {
             }
             return true
         }).forEach(u => set_add(L.movable_units, u))
-        console.log(`${G.active} ${L.movable_units.length}`)
         if (L.movable_units.length <= 0) {
             log(`No movable units ${G.active ? "AP" : "JP"}`)
             end()
@@ -1464,7 +1516,7 @@ function get_move_data() {
             result.battle_range = piece.br
             result.extended_battle_range = piece.br
         }
-        if (piece.ebr && (!piece.parenthetical || G.offensive.stage === POST_BATTLE_SATGE)) {
+        if (piece.ebr && (!piece.parenthetical || G.offensive.stage === POST_BATTLE_STAGE)) {
             result.extended_battle_range = piece.ebr
         }
         if (piece.organic && piece.class === "ground") {
@@ -1541,7 +1593,7 @@ function compute_possible_battle_hexes() {
         if (u.parenthetical) {
             range = pieces[u].br
         }
-        if (path[0] & ATTACK_MOVE || path[0] & AIR_EXTENDED_MOVE) {
+        if (path[0] & ATTACK_MOVE || path[0] & AIR_EXTENDED_MOVE || is_faction_units(location, 1 - pieces[u].faction)) {
             return
         }
         var saved_value = map_get(unit_ranges, location, [range])
@@ -1636,7 +1688,7 @@ function compute_air_move_hexes() {
     L.allowed_hexes = []
     map_for_each(selected, (nh, v) => {
         if (nh !== AIR_FERRY && !is_faction_units(nh, 1 - R) && !set_has(G.offensive.battle_hexes, nh)
-            && (target_in_battle_range(move_data.extended_battle_range, nh, G.offensive.battle_hexes) || !(move_data.move_type & REACTION_MOVE))) {
+            && (target_in_battle_range(move_data.extended_battle_range, nh, G.offensive.battle_hexes) || G.offensive.stage !== REACTION_STAGE)) {
             map_set(L.allowed_hexes, nh, v)
         }
     })
@@ -2428,7 +2480,7 @@ P.emergency_move = {
                 set_add(L.unit_to_retreat, u)
             }
         })
-        if (!L.unit_to_retreat) {
+        if (!L.unit_to_retreat.length) {
             end()
         }
     },
@@ -2443,7 +2495,7 @@ P.emergency_move = {
             prompt(`Choose unit to emergency move.`)
             L.unit_to_retreat.forEach(u => action_unit(u))
         } else {
-            prompt(`Commit move.`)
+            prompt(`Commit emergency move.`)
             button("done")
         }
     },
@@ -2476,7 +2528,6 @@ function capture_landing_hexes() {
 }
 
 P.offensive_sequence = script(`
-    set G.offensive.logistic cards[G.offensive.active_cards[0]].ops
     call choose_hq
     call activate_units
     call move_offensive_units
@@ -2705,7 +2756,10 @@ function setup_scenario_1942() {
 
     for_each_unit(u => capture_hex(G.location[u], pieces[u].faction))
 
-    construct_decks()
+    array_delete(G.draw[JP], find_card(JP, 1))
+    array_delete(G.draw[JP], find_card(JP, 2))
+    G.removed.push(find_card(JP, 1))
+    G.removed.push(find_card(JP, 2))
 
     while (G.hand[JP].length < 7)
         draw_card(JP)
@@ -2717,7 +2771,6 @@ function setup_scenario_1942() {
     G.asp[1] = [1, 0]
     G.political_will = 8
 
-    console.log("setup 1942")
     check_supply()
     call("offensive_phase")
 }
@@ -2773,6 +2826,7 @@ function on_setup(scenario, options) {
         }
     }
     reset_offensive()
+    construct_decks()
     G.location = []
     for (let i = 0; i < pieces.length; i++) {
         var piece = pieces[i]
@@ -2859,6 +2913,7 @@ function reset_offensive() {
         type: OC,
         attacker: JP,
         active_cards: [],
+        offensive_card: -1,
         intelligence: SURPRISE,
         stage: ATTACK_STAGE,
         logistic: 0,

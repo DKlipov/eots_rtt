@@ -1,6 +1,5 @@
 Todo list:
-* [WIP] Full card deck
-* Progress of war
+* [WIP] Progress of war
 * National status segment
 * Political will segment
 * Attrition phase
