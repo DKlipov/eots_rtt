@@ -6,6 +6,7 @@ const NON_PLACED_BOX = 1477
 const ELIMINATED_BOX = 1478
 const DELAYED_BOX = 1479
 const TURN_BOX = 1480
+const CHINA_BOX = 1500
 
 //status markers
 const JP_AGREEMENT = 0
@@ -58,7 +59,19 @@ const TRACK_MARKERS = [
         counter: "pass_ap",
         value: G => G.passes[1]
     },
+    {
+        counter: "pow",
+        always_show: G => G.turn > 3,
+        value: G => current_pow(G)
+    },
 ]
+
+function current_pow(G) {
+    if (G.turn < 4) {
+        return 0
+    }
+    return G.capture.filter(h => !set_has(G.control, h)).length
+}
 
 function on_focus_card_tip(c) {
     if (data.cards[c].type === "Barrage")
@@ -94,6 +107,7 @@ function on_init() {
     define_layout("board_hex", NON_PLACED_BOX, [10, 10, 45, 45], "stack")
     define_layout("board_hex", ELIMINATED_BOX, [50, 50, 45, 45], "stack")
     define_layout("board_hex", DELAYED_BOX, [2100, 1350, 45, 45], "stack")
+    define_layout("board_hex", CHINA_BOX, [790, 380, 45, 45], "stack")
     define_layout("status", JP_AGREEMENT, [890, 130, 35, 35])
     define_layout("status", AP_AGREEMENT, [945, 130, 35, 35])
     for (i = 0; i < 11; i++) {
@@ -272,6 +286,12 @@ function on_update() {
     // G.actions.board_hex.push(hex_to_int(piece.start))
     let unit_present_hex = []
 
+
+    G.control.filter(h => !set_has(G.capture, h) && !set_has(JP_BOUNDARIES, h))
+        .forEach(h => populate_generic("board_hex", h, "marker control_jp"))
+    JP_BOUNDARIES.filter(h => !set_has(G.capture, h) && !set_has(G.control, h))
+        .forEach(h => populate_generic("board_hex", h, "marker control_ap"))
+    G.capture.forEach(h => populate_generic("board_hex", h, set_has(G.control, h) ? "marker capture_jp" : "marker capture_ap"))
     for (var i = 0; i < data.pieces.length; ++i) {
         let piece = data.pieces[i]
         if (G.location[i] > 0) {
@@ -282,6 +302,10 @@ function on_update() {
             unit.classList.toggle("reduced", set_has(G.reduced, i))
             unit.classList.toggle("oos", set_has(G.oos, i))
         }
+    }
+    if (G.turn > 3) {
+        G.capture.filter(h => !set_has(G.control, h))
+            .forEach(h => populate_generic("board_hex", h, "marker pow"))
     }
     var oos_hex_set = []
     for (i = 0; i < G.oos.length; i++) {
@@ -342,10 +366,6 @@ function on_update() {
     //     }
     // }
 
-    G.control.filter(h => !set_has(unit_present_hex, h) && !set_has(JP_BOUNDARIES, h))
-        .forEach(h => populate_generic("board_hex", h, "marker control_jp"))
-    JP_BOUNDARIES.filter(h => !set_has(unit_present_hex, h) && !set_has(G.control, h))
-        .forEach(h => populate_generic("board_hex", h, "marker control_ap"))
 
     update_hand(AP)
     update_hand(JP)
@@ -372,11 +392,13 @@ function on_update() {
         const marker = TRACK_MARKERS[i]
         var value = marker.value(G)
         var counter = marker.counter
+        var track = Math.min(9, value)
         if (value > 9 && marker.alt_counter) {
             counter = marker.alt_counter
+            track = Math.min(9, value - 10)
         }
-        if (value > 0 || marker.always_show) {
-            populate_generic("track", value % 10, "marker " + counter)
+        if (value > 0 || marker.always_show === true || (typeof marker.always_show === 'function' && marker.always_show(G))) {
+            populate_generic("track", track, "marker " + counter)
         }
     }
 

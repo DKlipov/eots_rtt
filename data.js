@@ -1284,7 +1284,7 @@ data.pieces = [
         "notreplaceable": true,
     },
     {
-        id: "Kent",
+        id: "kent",
         "faction": AP,
         "name": "Kent",
         "class": "naval",
@@ -1345,7 +1345,7 @@ data.pieces = [
         "rcf": 4,
     },
     {
-        id: "air_ap_19",
+        id: "air_ap_19_lrb",
         "faction": AP,
         "name": "19th LRB air unit",
         "counter": "air_us unit_ix_2",
@@ -2211,7 +2211,7 @@ data.pieces = [
         "start_reduced": true,
     },
     {
-        id: "army_ap_6_cn",
+        id: "army_ap_66_cn",
         "faction": AP,
         "name": "Chinese 66th Army",
         "counter": "army_cn unit_ix_3",
@@ -2845,7 +2845,7 @@ data.pieces = [
         "reinforcement": 3,
     },
     {
-        id: "army_ap_3",
+        id: "army_ap_33",
         "faction": AP,
         "name": "33rd Corps",
         "counter": "army_br unit_ix_8",
@@ -3171,7 +3171,7 @@ data.cards = [
         "oc": 2,
         "ec": 4,
         "logistic": 3,
-        "hq": ["hq_ap_sw"],
+        "hq": [HQ_SOUTH_WEST],
         "name": "Operation Lilliput",
     },
     {
@@ -3241,7 +3241,7 @@ data.cards = [
         "oc": 3,
         "ec": 5,
         "logistic": 4,
-        "logistic_alt": [["hq_ap_sw"], 7],
+        "logistic_alt": [[HQ_SOUTH_WEST], 7],
         "name": "Operation Reno II",
     },
     {
@@ -3323,7 +3323,7 @@ data.cards = [
         "oc": 3,
         "ec": 5,
         "logistic": 3,
-        "logistic_alt": [["hq_ap_sw"], 5],
+        "logistic_alt": [[HQ_SOUTH_WEST], 5],
         "name": "Operation Dexterity",
     },
     {
@@ -3372,7 +3372,7 @@ data.cards = [
         "oc": 3,
         "ec": 5,
         "logistic": 4,
-        "logistic_alt": [["hq_ap_c"], 8],
+        "logistic_alt": [[HQ_CENTRAL_PACIFIC], 8],
         "name": "Operation Flintlock",
     },
     {
@@ -3383,7 +3383,7 @@ data.cards = [
         "oc": 2,
         "intelligence": SURPRISE,
         "logistic": 1,
-        "hq": ["hq_ap_sw"],
+        "hq": [HQ_SOUTH_WEST],
         "name": "Operation Brewer",
     },
     {
@@ -3423,7 +3423,7 @@ data.cards = [
         "oc": 2,
         "ec": 4,
         "logistic": 3,
-        "logistic_alt": [["hq_ap_sw"], 4],
+        "logistic_alt": [[HQ_SOUTH_WEST], 4],
         "name": "Tornado Taskforce",
     },
     {
@@ -3453,7 +3453,7 @@ data.cards = [
         "oc": 3,
         "ec": 5,
         "logistic": 4,
-        "logistic_alt": [["hq_ap_c"], 6],
+        "logistic_alt": [[HQ_CENTRAL_PACIFIC], 6],
         "name": "Operation Forager II",
     },
     {
@@ -3464,7 +3464,7 @@ data.cards = [
         "oc": 2,
         "ec": 4,
         "logistic": 3,
-        "logistic_alt": [["hq_ap_sw"], 4],
+        "logistic_alt": [[HQ_SOUTH_WEST], 4],
         "name": "Hurricane Taskforce",
     },
     {
@@ -3475,7 +3475,7 @@ data.cards = [
         "oc": 3,
         "ec": 5,
         "logistic": 4,
-        "logistic_alt": [["hq_ap_c"], 6],
+        "logistic_alt": [[HQ_CENTRAL_PACIFIC], 6],
         "name": "Operation Forager",
     },
     {
@@ -3486,7 +3486,7 @@ data.cards = [
         "oc": 2,
         "ec": 4,
         "logistic": 3,
-        "logistic_alt": [["hq_ap_sw"], 4],
+        "logistic_alt": [[HQ_SOUTH_WEST], 4],
         "name": "Typhoon Taskforce",
     },
     {
@@ -3548,7 +3548,7 @@ data.cards = [
         "oc": 3,
         "ec": 5,
         "logistic": 6,
-        "logistic_alt": [["hq_ap_sw"], 8],
+        "logistic_alt": [[HQ_SOUTH_WEST], 8],
         "remove": true,
         "name": "Operation King II",
     },
@@ -3560,7 +3560,7 @@ data.cards = [
         "oc": 3,
         "ec": 5,
         "logistic": 4,
-        "logistic_alt": [["hq_ap_c"], 6],
+        "logistic_alt": [[HQ_CENTRAL_PACIFIC], 6],
         "name": "Operation Stalemate",
     },
     {
@@ -3571,7 +3571,7 @@ data.cards = [
         "oc": 2,
         "ec": 4,
         "logistic": 3,
-        "logistic_alt": [["hq_ap_sw"], 4],
+        "logistic_alt": [[HQ_SOUTH_WEST], 4],
         "name": "Tradewind Taskforce",
     },
     {
@@ -3582,7 +3582,7 @@ data.cards = [
         "oc": 3,
         "ec": 5,
         "logistic": 6,
-        "logistic_alt": [["hq_ap_sw"], 8],
+        "logistic_alt": [[HQ_SOUTH_WEST], 8],
         "remove": true,
         "name": "MacArthur `moral obligation`",
     },
@@ -3622,7 +3622,7 @@ data.cards = [
         "oc": 3,
         "ec": 5,
         "logistic": 6,
-        "logistic_alt": [["hq_ap_sw"], 8],
+        "logistic_alt": [[HQ_SOUTH_WEST], 8],
         "name": "S-Day",
     },
     {
@@ -3645,7 +3645,7 @@ data.cards = [
         "oc": 2,
         "ec": 4,
         "logistic": 4,
-        "logistic_alt": [["hq_ap_sw"], 6],
+        "logistic_alt": [[HQ_SOUTH_WEST], 6],
         "name": "Victor Plans",
     },
     {
@@ -3656,7 +3656,7 @@ data.cards = [
         "oc": 2,
         "ec": 4,
         "logistic": 4,
-        "logistic_alt": [["hq_ap_c"], 8],
+        "logistic_alt": [[HQ_CENTRAL_PACIFIC], 8],
         "name": "Halsey",
     },
     {
@@ -3676,7 +3676,7 @@ data.cards = [
         "oc": 3,
         "ec": 5,
         "logistic": 4,
-        "logistic_alt": [["hq_ap_c"], 8],
+        "logistic_alt": [[HQ_CENTRAL_PACIFIC], 8],
         "name": "Operation Iceberg",
     },
     {
@@ -3687,7 +3687,7 @@ data.cards = [
         "oc": 3,
         "ec": 5,
         "logistic": 4,
-        "logistic_alt": [["hq_ap_c"], 8],
+        "logistic_alt": [[HQ_CENTRAL_PACIFIC], 8],
         "name": "Operation Detachment",
     },
     {
@@ -3771,7 +3771,7 @@ data.cards = [
         "remove": true,
         "logistic": 0,
         "intelligence": SURPRISE,
-        "hq": ["hq_ap_c"],
+        "hq": [HQ_CENTRAL_PACIFIC],
         "name": "U.S. Carrier Raids",
     },
     {

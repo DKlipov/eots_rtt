@@ -1,6 +1,5 @@
 Todo list:
-* [WIP] Progress of war
-* National status segment
+* [WIP] National status segment
 * Political will segment
 * Attrition phase
 * Future offensive

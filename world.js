@@ -796,6 +796,24 @@ function map_for_each(map, f) {
         f(map[i], map[i + 1])
 }
 
+function set_toggle(set, item) {
+    var a = 0
+    var b = set.length - 1
+    while (a <= b) {
+        var m = (a + b) >> 1
+        var x = set[m]
+        if (item < x)
+            b = m - 1
+        else if (item > x)
+            a = m + 1
+        else {
+            array_delete(set, m)
+            return
+        }
+    }
+    array_insert(set, a, item)
+}
+
 function array_insert_pair(array, index, key, value) {
     for (var i = array.length; i > index; i -= 2) {
         array[i] = array[i - 2]
