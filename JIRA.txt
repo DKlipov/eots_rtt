@@ -25,3 +25,4 @@ Todo list:
 * Skipped amph battle if attacker has no navy
 * Ground post battle movement
 * hq displace and return
+* japan lack of resources win condition

@@ -5732,56 +5732,86 @@ data.map = [
 ]
 
 data.nations = {
-    PHILIPPINES:
-        {
-            name: "Philippines",
-            regions: ["Philippines"],
-            keys: [2813, 2915],
-        },
+    PHILIPPINES: {
+        id: 0,
+        name: "Philippines",
+        pw: 1,
+        regions: ["Philippines"],
+        keys: [2813, 2915],
+    },
     MALAYA: {
+        id: 1,
         name: "Malaya",
+        pw: 1,
         regions: ["Malaya"],
         keys: [2014, 2015]
     },
     DEI: {
+        id: 2,
         name: "Dutch East India",
+        pw: 1,
         regions: ["DEI", "Java", "Sumatra", "Borneo", "Celebes"],
         keys: [2019, 1813, 1916, 2017, 2415, 2616, 2517, 2220]
     },
     BURMA: {
+        id: 3,
         name: "Burma",
+        pw: 1,
         regions: ["Burma"],
         keys: [2008, 2106, 2206, 2305]
     },
     INDIA: {
+        id: 4,
         name: "India",
-        regions: ["NIndia"],
+        regions: ["India"],
+        pw: 2,
+        retreat_hexes: [1005, 1307, 1308, 1208],
         keys: [1905, 2005, 2104, 2105, 2205]
     },
     AUSTRALIA: {
+        id: 5,
         name: "Australia",
+        pw: 2,
         regions: ["Australia"],
         keys: [3727, 3626, 3624, 3226, 3023, 2825, 2525, 2426]
     },
     AUSTRALIAN_MANDATES: {
+        id: 6,
         name: "Australia Mandates",
         regions: ["AMandates"],
         keys: [4021, 4423]
     },
     NEW_GUINEA: {
+        id: 7,
         name: "New Guinea",
         regions: ["Guinea"],
         keys: [3219, 3319, 3520, 3720, 3822, 3823, 4024]
     },
     MARSHALL: {
+        id: 8,
         name: "Marshall islands",
         regions: ["Marshall"],
         keys: [4415, 4715]
     },
+    HAWAII: {
+        id: 9,
+        name: "Hawaii",
+        keys: [5708, 5808, 5908]
+    },
+    ALASKA: {
+        id: 10,
+        name: "Alaska",
+        keys: [4600, 4700, 4800, 5000, 5100]
+    },
     JAPAN: {
-        name: "Japanese Empire",
-        regions: ["Japan"],
-        keys: [3407, 3506, 3507, 3607, 3706, 3705]
+        id: 11,
+        name: "Japanese Empire surrenders by Allied invasion",
+        keys: [3407, 3506, 3507, 3607, 3706, 3705],
+    },
+    JAPAN_BY_RESOURCE: {
+        id: 12,
+        name: "Japanese Empire surrenders by lack of resources",
+        keys: [3307, 3704, 3407, 3506, 3507, 3607, 3706, 3705]
     },
 }
 
