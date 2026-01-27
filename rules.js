@@ -462,14 +462,14 @@ function get_allowed_actions(num) {
         result.push("event")
     }
     if (card.ops >= 3) {
-        result.push("inter_service")
-        result.push("infrastructure")
+        // result.push("inter_service")
+        // result.push("infrastructure")
         if (R === JP) {
-            result.push("china_offensive")
+            // result.push("china_offensive")
         }
     }
     if (G.future_offensive[R][0] <= 0) {
-        result.push("future_offensive")
+        // result.push("future_offensive")
     }
     return result
 }
@@ -538,12 +538,7 @@ P.offensive_segment = {
         }
     },
     discard(c) {
-        check_supply()
-        for (let i = 1; i < MAP_DATA.length; i++) {
-            if (["Sumatra", "Borneo", "Java"].includes(MAP_DATA[i].region) && !(G.supply_cache[i] & JP_UNITS << 1) && MAP_DATA[i].named) {
-                set_add(G.control, i)
-            }
-        }
+        push_undo()
         activate_card(c)
         log(`${R} discards ${cards[c].name}`)
         goto("end_action")
@@ -2629,6 +2624,9 @@ P.end_of_turn_phase = script(`
     }
     }
     incr G.turn
+    set G.asp[JP][1] 0
+    set G.asp[AP][1] 0
+    set G.capture []
     goto strategic_phase
 `)
 

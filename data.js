@@ -5731,6 +5731,60 @@ data.map = [
 
 ]
 
+data.nations = {
+    PHILIPPINES:
+        {
+            name: "Philippines",
+            regions: ["Philippines"],
+            keys: [2813, 2915],
+        },
+    MALAYA: {
+        name: "Malaya",
+        regions: ["Malaya"],
+        keys: [2014, 2015]
+    },
+    DEI: {
+        name: "Dutch East India",
+        regions: ["DEI", "Java", "Sumatra", "Borneo", "Celebes"],
+        keys: [2019, 1813, 1916, 2017, 2415, 2616, 2517, 2220]
+    },
+    BURMA: {
+        name: "Burma",
+        regions: ["Burma"],
+        keys: [2008, 2106, 2206, 2305]
+    },
+    INDIA: {
+        name: "India",
+        regions: ["NIndia"],
+        keys: [1905, 2005, 2104, 2105, 2205]
+    },
+    AUSTRALIA: {
+        name: "Australia",
+        regions: ["Australia"],
+        keys: [3727, 3626, 3624, 3226, 3023, 2825, 2525, 2426]
+    },
+    AUSTRALIAN_MANDATES: {
+        name: "Australia Mandates",
+        regions: ["AMandates"],
+        keys: [4021, 4423]
+    },
+    NEW_GUINEA: {
+        name: "New Guinea",
+        regions: ["Guinea"],
+        keys: [3219, 3319, 3520, 3720, 3822, 3823, 4024]
+    },
+    MARSHALL: {
+        name: "Marshall islands",
+        regions: ["Marshall"],
+        keys: [4415, 4715]
+    },
+    JAPAN: {
+        name: "Japanese Empire",
+        regions: ["Japan"],
+        keys: [3407, 3506, 3507, 3607, 3706, 3705]
+    },
+}
+
 function find_piece(id) {
     for (let i = 0; i < data.pieces.length; i++) {
         if (data.pieces[i].id === id) {
