@@ -5764,6 +5764,7 @@ data.nations = {
         id: 4,
         name: "India",
         regions: ["India"],
+        statuses: ["Stable", "Unrest", "Strikes", "Unstable", "Revolts"],
         pw: 2,
         retreat_hexes: [1005, 1307, 1308, 1208],
         keys: [1905, 2005, 2104, 2105, 2205]

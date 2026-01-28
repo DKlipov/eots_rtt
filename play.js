@@ -23,6 +23,8 @@ const JP_BOUNDARIES = [];
 
 [...Array(data.map.length).keys()].map(h => data.map[h]).filter(hex => (hex.airfield || hex.port || hex.port || hex.city) && JP_REGIONS.includes(hex.region))
     .forEach(h => set_add(JP_BOUNDARIES, hex_to_int(h.id)))
+set_add(JP_BOUNDARIES, hex_to_int(3606))
+set_add(JP_BOUNDARIES, hex_to_int(2109))
 
 
 const TRACK_MARKERS = [
@@ -121,6 +123,9 @@ function on_init() {
     }
     for (i = 0; i < 10; i++) {
         define_layout("track", i, [343, 1430 - Math.floor((i * 42.3)), 35, 35], "stack")
+    }
+    for (i = 0; i < 5; i++) {
+        define_layout("india", i, [540 - Math.floor((i * 45)), 50, 35, 35])
     }
     for (let i = 0; i < data.pieces.length; ++i) {
         let piece = data.pieces[i]
@@ -387,6 +392,8 @@ function on_update() {
 
     populate_generic("turn", G.turn, "marker turn_pmt")
 
+    populate_generic("india", Math.min(4, G.surrender[data.nations.INDIA.id]), "marker india")
+
 
     for (i = 0; i < TRACK_MARKERS.length; i++) {
         const marker = TRACK_MARKERS[i]
@@ -421,6 +428,8 @@ function on_update() {
 
     //debug
     action_button("isr", "isr")
+    action_button("ns", "to political phase")
+    action_button("control", "debug_mode")
 
     end_update()
 }

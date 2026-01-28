@@ -1,6 +1,5 @@
 Todo list:
-* [WIP] National status segment
-* Political will segment
+* [WIP] Political will segment
 * Attrition phase
 * Future offensive
 * End of turn phase & Tojo & Machuria offensive
@@ -26,3 +25,4 @@ Todo list:
 * Ground post battle movement
 * hq displace and return
 * japan lack of resources win condition
+* check overstack for india surrender
