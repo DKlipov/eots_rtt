@@ -1,6 +1,5 @@
 Todo list:
-* [WIP] Strategic warfare segment & B29
-* Attrition phase
+* [WIP] Attrition phase
 * Future offensive
 * End of turn phase & Tojo & Machuria offensive
 * Replacement & reinforcement segment

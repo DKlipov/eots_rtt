@@ -343,32 +343,39 @@ P.replacement_segment = function () {
     end()
 }
 
-function submarine_success() {
-    log("Successful submarine attack")
-    G.strategic_warfare[0] = 1
-    // if (G.amph_points[JP] > 1) {
-    //     G.amph_points[JP] -= 1
-    //     log("Japan amphibious shipping points reduced to: " + G.amph_points[JP])
-    // }
+function change_asp(faction, count) {
+    var size = G.asp[faction][0]
+    if (size + count <= 0) {
+        G.asp[faction][0] = 1
+    } else {
+        G.asp[faction][0] += count
+    }
+    if (size !== G.asp[faction][0]) {
+        log(`${faction === AP ? "Allied" : "Japanese"} amphibious shipping points changed to ${G.asp[faction][0]} (${count})`)
+    }
 }
 
 P.submarine_warfare = {
     _begin() {
-        G.strategic_warfare = [0, 0]
         G.active = AP
-        end()
     },
     prompt() {
         prompt("Roll for a submarine warfare.")
         button("roll")
     },
     roll() {
-        let result = random(10)
+        var result = random(10)
+        var modifiers = 0
         if (G.turn <= 4) {
-            result += 2
+            modifiers += 2
         }
-        if (result - G.turn <= 0) {
-            submarine_success()
+        log(`Submarine warfare roll : ${result} ${modifiers ? "+" + modifiers : ""} `)
+        if (result + modifiers - G.turn <= 0) {
+            log(`(Success) ${result + modifiers} <= ${G.turn}`)
+            G.strategic_warfare++
+            change_asp(JP, -1)
+        } else {
+            log(`(Failed) ${result + modifiers} > ${G.turn}`)
         }
         end()
     },
@@ -427,7 +434,7 @@ P.strategic_bombing = {
 }
 
 function bombing(u, close_air_base) {
-    let result = random(10)
+    var result = random(10)
     var success_rate = 9 - (set_has(G.reduced, u) ? 4 : 0)
     var success = result < success_rate
     var damaged = result >= 9 && !close_air_base
@@ -448,26 +455,67 @@ function bombing(u, close_air_base) {
 }
 
 P.deal_cards = function () {
-    let ap_cards = 4
-    G.passes[AP] = 0
-    if (G.turn === 2) {
-        ap_cards = 2
-        G.passes[AP] = 2
-    } else if (G.turn === 3) {
-        ap_cards = 3
-        G.passes[AP] = 1
+    var jp_cards = 7
+    if (G.turn > 4) {
+        var jp_resources = get_jp_resources()
+        jp_cards = Math.max(Math.ceil(jp_resources / 2), 4)
+        log(`Japan resources - ${jp_resources} (${jp_cards} cards)`)
+    } else {
+        log(`Japan use strategic reserves (${jp_cards} cards)`)
     }
-    log("Allied draw " + ap_cards + ", " + G.passes[AP] + " passes")
-    for (let i = 0; i < ap_cards; i++) {
-        draw_card(AP)
+    if (G.strategic_warfare) {
+        jp_cards = Math.max(jp_cards - G.strategic_warfare, 4)
+        log(`Strategic warfare reduces draw to ${jp_cards} (-${G.strategic_warfare})`)
     }
-    let jp_cards = 4
-    G.passes[JP] = 1
-    jp_cards -= G.strategic_warfare[0]
-    jp_cards -= G.strategic_warfare[1]
-    log("Japan draw " + jp_cards + ", " + G.passes[JP] + " passes")
+    G.passes[JP] = 0
+    if (jp_cards === 6) {
+        G.passes[JP] = 1
+    } else if (jp_cards <= 5) {
+        G.passes[JP] = 2
+    }
+    if (G.passes[JP]) {
+        log(`Japan receives ${G.passes[JP]} passes`)
+    }
     for (let i = 0; i < jp_cards; i++) {
         draw_card(JP)
+    }
+
+    let ap_cards = 7
+    G.passes[AP] = 0
+    if (G.turn === 1) {
+        ap_cards = 0
+    } else if (G.turn === 2) {
+        ap_cards = 5
+        G.passes[AP] = 2
+    } else if (G.turn === 3) {
+        ap_cards = 6
+        G.passes[AP] = 1
+    }
+    if (G.surrender[nations.CHINA.id]) {
+        ap_cards -= 1
+        G.passes[AP]++
+        log(`Allied draw reduced by China`)
+    }
+    if (G.surrender[nations.INDIA.id] >= 4) {
+        ap_cards -= 1
+        G.passes[AP]++
+        log(`Allied draw reduced by India`)
+    }
+    if (G.surrender[nations.AUSTRALIA.id]) {
+        ap_cards -= 1
+        G.passes[AP]++
+        log(`Allied draw reduced by Australia`)
+    }
+    if (G.wie >= 10) {
+        ap_cards -= 1
+        G.passes[AP]++
+        log(`Allied draw reduced by War in Europe`)
+    }
+    ap_cards = Math.max(ap_cards, 4)
+    G.passes[AP] = Math.min(G.passes[AP], 2)
+    log(`Allied draw ${ap_cards} cards, receive ${G.passes[AP]} passes`)
+    for (let i = 0; i < ap_cards; i++) {
+        draw_card(AP)
     }
     end()
 }
@@ -669,13 +717,12 @@ P.offensive_segment = {
     },
     ns() {
         G.hand[AP].forEach(c => {
-            array_delete_item(G.hand[AP], c)
             G.discard[AP].push(c)
         })
         G.hand[JP].forEach(c => {
-            array_delete_item(G.hand[JP], c)
             G.discard[JP].push(c)
         })
+        G.hand = [[], []]
         goto("political_phase")
     },
     control() {
@@ -3099,6 +3146,8 @@ P.end_of_turn_phase = script(`
     set G.asp[AP][1] 0
     set G.capture []
     set G.committed []
+    set G.strategic_warfare 0
+    set G.passes [0,0]
     goto strategic_phase
 `)
 
@@ -3519,6 +3568,7 @@ function on_setup(scenario, options) {
     G.location = []
     G.reduced = []
     G.oos = []
+    G.strategic_warfare = 0
     G.control = []
     G.capture = []
     G.events = []

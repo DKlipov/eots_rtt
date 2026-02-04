@@ -5809,6 +5809,10 @@ data.nations = {
         name: "Japanese Empire surrenders by Allied invasion",
         keys: [3407, 3506, 3507, 3607, 3706, 3705, 3606],
     },
+    CHINA: {
+        id: 12,
+        name: "China",
+    },
     JAPAN_BY_RESOURCE: {
         id: 12,
         name: "Japanese Empire surrenders by lack of resources",
