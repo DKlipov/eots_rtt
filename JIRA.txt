@@ -1,19 +1,19 @@
 Todo list:
-* [WIP] Political will segment
+* [WIP] Strategic warfare segment & B29
 * Attrition phase
 * Future offensive
 * End of turn phase & Tojo & Machuria offensive
 * Replacement & reinforcement segment
-* Strategic warfare segment & B29
 * China offensive & stuff & China air box
 * Build infrastructure
+* War in Europe
 * Event cards
+* Check overstacking
 * Battle roll modifiers
 * Ground disengadgement
 * Air and cv disengadgement
 * Parentheless air restrictions (move, reaction and commit battle steps)
 * Strategic movement & air displacement
-* Check supply durning movement
 * Ground retreat step
 * China armies restrictions
 * Instrinct city defence
@@ -23,6 +23,8 @@ Todo list:
 * Ground loss for JP organic transpot destroyed
 * Skipped amph battle if attacker has no navy
 * Ground post battle movement
-* hq displace and return
-* japan lack of resources win condition
-* check overstack for india surrender
+* Hq displace and return
+* Japan lack of resources win condition
+* Check overstack for india surrender
+* B29 attack restrictions
+* Check supply durning movement

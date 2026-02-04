@@ -62,9 +62,33 @@ const TRACK_MARKERS = [
         value: G => G.passes[1]
     },
     {
+        counter: "pow_target",
+        always_show: G => G.turn > 3,
+        value: G => (G.turn > 3) ? G.pow : 0
+    },
+    {
         counter: "pow",
         always_show: G => G.turn > 3,
         value: G => current_pow(G)
+    },
+]
+
+const TURN_MARKERS = [
+    {
+        counter: "alaska",
+        value: G => G.events[data.events.ALASKA_OCCUPATION.id]
+    },
+    {
+        counter: "hawaii",
+        value: G => G.events[data.events.HAWAII_OCCUPATION.id]
+    },
+    {
+        counter: "strat_bombing",
+        value: G => G.events[data.events.STRAT_BOMBING_CAMPAIGN.id]
+    },
+    {
+        counter: G => "turn_pmt",
+        value: G => G.turn
     },
 ]
 
@@ -390,10 +414,16 @@ function on_update() {
     populate_generic("pw", G.political_will, "marker pw")
     populate_generic("wie", G.wie, "marker wie")
 
-    populate_generic("turn", G.turn, "marker turn_pmt")
-
     populate_generic("india", Math.min(4, G.surrender[data.nations.INDIA.id]), "marker india")
 
+    for (i = 0; i < TURN_MARKERS.length; i++) {
+        const marker = TURN_MARKERS[i]
+        var value = marker.value(G)
+        var counter = (typeof marker.counter === 'function') ? marker.counter(G) : marker.counter
+        if (value > 0) {
+            populate_generic("turn", value, "marker " + counter)
+        }
+    }
 
     for (i = 0; i < TRACK_MARKERS.length; i++) {
         const marker = TRACK_MARKERS[i]
@@ -421,13 +451,16 @@ function on_update() {
 
 
     action_button("pass", "Pass")
+    action_button("skip", "Skip")
     action_button("no_move", "No move")
     action_button("next", "Next")
     action_button("done", "Done")
     action_button("undo", "Undo")
+    action_button("all", "Choose all")
 
     //debug
     action_button("isr", "isr")
+    action_button("deploy_b29", "deploy_b29")
     action_button("ns", "to political phase")
     action_button("control", "debug_mode")
 

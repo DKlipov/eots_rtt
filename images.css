@@ -7,6 +7,8 @@
 .marker.control_ap { background-image: url(markers75/control_ap.png); background-size: 35px 35px; }
 .marker.capture_ap { background-image: url(markers75/capture_ap.png); background-size: 35px 35px; }
 .marker.pow { background-image: url(markers75/pow_square.png); background-size: 35px 35px; }
+.marker.pow_target { background-image: url(markers75/pow_target.png); background-size: 35px 35px; }
+.marker.strat_bombing { background-image: url(markers75/strat_bombing.png); background-size: 35px 35px; }
 .marker.agreement_jp { background-image: url(markers75/jp_ageement.jpg); background-size: 35px 35px; }
 .marker.agreement_ap { background-image: url(markers75/ap_ageement.jpg); background-size: 35px 35px; }
 .marker.rivalry_ap { background-image: url(markers75/ap_rivalry.jpg); background-size: 35px 35px; }
@@ -28,6 +30,8 @@
 .marker.pass_jp { background-image: url(markers75/jp_pass.jpg); background-size: 35px 35px; }
 .marker.pass_ap { background-image: url(markers75/ap_pass.jpg); background-size: 35px 35px; }
 .marker.india { background-image: url(markers75/india.png); background-size: 35px 35px; }
+.marker.alaska { background-image: url(markers75/alaska_occupied.png); background-size: 35px 35px; }
+.marker.hawaii { background-image: url(markers75/hawaii_occupied.png); background-size: 35px 35px; }
 
 
 /* ARMIES (45x45) */

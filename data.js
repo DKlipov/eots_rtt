@@ -1688,7 +1688,7 @@ data.pieces = [
         "name": "XX Bomber Command (B-29)",
         "counter": "air_us unit_ix_15",
         "class": "air",
-        "type": "b29",
+        "type": "lrb",
         "service": "army",
         "rptype": "ap_air",
         "cf": 6,
@@ -1703,7 +1703,7 @@ data.pieces = [
         "name": "XXI Bomber Command (B-29)",
         "counter": "air_us unit_ix_16",
         "class": "air",
-        "type": "b29",
+        "type": "lrb",
         "service": "army",
         "rptype": "ap_air",
         "cf": 6,
@@ -5807,12 +5807,57 @@ data.nations = {
     JAPAN: {
         id: 11,
         name: "Japanese Empire surrenders by Allied invasion",
-        keys: [3407, 3506, 3507, 3607, 3706, 3705],
+        keys: [3407, 3506, 3507, 3607, 3706, 3705, 3606],
     },
     JAPAN_BY_RESOURCE: {
         id: 12,
         name: "Japanese Empire surrenders by lack of resources",
         keys: [3307, 3704, 3407, 3506, 3507, 3607, 3706, 3705]
+    },
+}
+
+data.events = {
+    ALLIED_NATIONS_SURRENDERS: {
+        id: 1,
+        cause: "allied nations surrendered [16.41]",
+        pw: -2,
+        nations: [data.nations.AUSTRALIA, data.nations.BURMA, data.nations.AUSTRALIA, data.nations.DEI, data.nations.MALAYA, data.nations.PHILIPPINES]
+            .map(n => n.id)
+    },
+    ALASKA_OCCUPATION: {
+        id: 2,
+        pw: -1,
+        cause: "alaska occupation",
+        turns_to_control: 3,
+        keys: [4600, 4700, 4800, 5000, 5100]
+    },
+    HAWAII_OCCUPATION: {
+        id: 3,
+        pw: -1,
+        cause: "hawaii occupation",
+        turns_to_control: 2,
+        keys: [5708, 5808, 5908, 5108]
+    },
+    JAPAN_LACK_OF_RESOURCES: {
+        id: 4,
+        cause: "Japan control less than 3 resource",
+        pw: 3,
+    },
+    STRAT_BOMBING: {
+        id: 5,
+        pw: 1,
+        cause: "successful strategic bombing",
+        once_per_turn: true,
+    },
+    STRAT_BOMBING_CAMPAIGN: {
+        id: 6,
+        cause: "strategic bombing campaign started",
+    },
+    US_CASUALTIES: {
+        id: 7,
+        cause: "US Casualties [16.45]",
+        pw: -1,
+        once_per_turn: true,
     },
 }
 
