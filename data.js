@@ -3726,6 +3726,7 @@ data.cards = [
         "type": POLITICAL,
         "oc": 3,
         "remove": true,
+        "reshuffle": true,
         "name": "Soviet Invade Manchuria",
     },
     {
@@ -4183,6 +4184,7 @@ data.cards = [
         "type": POLITICAL,
         "oc": 3,
         "remove": true,
+        "reshuffle": true,
         "name": "Tojo Resigns",
     },
     {
@@ -5862,6 +5864,12 @@ data.events = {
         cause: "US Casualties [16.45]",
         pw: -1,
         once_per_turn: true,
+    },
+    FUTURE_OFFENSIVE_JP: {
+        id: 8,
+    },
+    FUTURE_OFFENSIVE_AP: {
+        id: 9,
     },
 }
 

@@ -523,6 +523,11 @@ P.deal_cards = function () {
 P.offensive_phase = script(`
     log ("Offensives phase")
     call initiative_segment
+    eval {
+        G.active = G.first_active 
+        reset_offensive()
+        G.offensive.attacker = G.active
+    }
     while (G.hand[AP].length > 0 || G.hand[JP].length > 0) {
         if (G.hand[G.active].length > 0){
             call offensive_segment
@@ -538,43 +543,54 @@ P.offensive_phase = script(`
     goto political_phase
 `)
 
-P.initiative_segment = function () {
-    if (G.hand[AP].length > G.hand[JP].length) {
-        G.active = AP
+P.initiative_segment = script(`
+    eval {
+        if (G.hand[AP].length > G.hand[JP].length) {
+            G.active = AP
+        } else if (G.hand[JP].length > G.hand[AP].length) {
+            G.active = JP
+        } else {
+            G.active = G.turn <= 4 ? 0 : 1
+        }
+        G.first_active = G.active
     }
-    if (G.hand[JP].length > G.hand[AP].length) {
-        G.active = JP
-    } else {
-        G.active = G.turn <= 4 ? 0 : 1
-    }
-
     if (G.hand[JP].length !== G.hand[AP].length) {
-        G.active = 1 - G.active
-        call('future_offensive')
+        set G.active 1-G.active
+        goto future_offensive
     }
-    end()
-}
+`)
 
 P.future_offensive = {
     _begin() {
-        if (G.future_offensive[(1 - G.active)][1] <= 0) {
+        L.pass = false
+        if (G.future_offensive[G.active] <= 0) {
             end()
         }
-        G.active = 1 - G.active
+        var card = cards[G.future_offensive[G.active] > 0 ? G.future_offensive[G.active] : 0]
+        if (card.type !== MILITARY || !event_hq_check(card)) {
+            L.pass = true
+        }
     },
     prompt() {
         prompt("Play future offensive card or pass.")
-        button("pass")
-        action_card(G.future_offensive[R][1])
+        if (L.pass) {
+            button("done")
+        } else {
+            button("pass")
+            action("event", G.future_offensive[G.active])
+        }
     },
-    card() {
+    event(c) {
         push_undo()
-        let card = G.future_offensive[R][1]
-        G.future_offensive[R] = [-1, 0]
-        goto("play_event", {card: card})
+        military_card(c)
+        log(`${R} played ${cards[c].name} as event card`)
+        goto("offensive_sequence")
     },
     pass() {
-        G.active = 1 - G.active
+        push_undo()
+        L.pass = true
+    },
+    done() {
         end()
     }
 }
@@ -604,8 +620,8 @@ function get_allowed_actions(num) {
             // result.push("china_offensive")
         }
     }
-    if (G.future_offensive[R][0] <= 0) {
-        // result.push("future_offensive")
+    if (G.future_offensive[R] <= 0 && !card.reshuffle) {
+        result.push("future_offensive")
     }
     return result
 }
@@ -622,8 +638,9 @@ function military_card(c) {
 function activate_card(c) {
     G.offensive.active_cards.push(c)
     G.offensive.offensive_card = c
-    if (G.future_offensive[R][1] === c) {
-        G.future_offensive[R] = [-1, 0]
+    if (G.future_offensive[R] === c) {
+        G.future_offensive[R] = -1
+        G.events[events.FUTURE_OFFENSIVE_JP.id + R] = 0
     } else {
         array_delete_item(G.hand[R], c)
     }
@@ -638,6 +655,16 @@ function activate_card(c) {
     G.offensive.logistic = cards[c].ops
 }
 
+function get_hand(side) {
+    if (G.events[events.FUTURE_OFFENSIVE_JP.id + R] < G.turn && G.future_offensive[R] >= 0) {
+        var result = G.hand[side].slice()
+        result.push(G.future_offensive[R])
+        return result
+    } else {
+        return G.hand[side]
+    }
+}
+
 P.offensive_segment = {
     _begin() {
         L.debug = false
@@ -648,12 +675,9 @@ P.offensive_segment = {
         if (G.passes[R] > 0) {
             button("pass")
         }
-        for (let i = 0; i < G.hand[R].length; i++) {
-            let card = G.hand[R][i]
-            get_allowed_actions(card).forEach(a => action(a, card))
-        }
-        if (G.future_offensive[R][0] > 0 && G.future_offensive[R][0] < G.turn) {
-            let card = G.future_offensive[R][1]
+        var hand = get_hand(R)
+        for (let i = 0; i < hand.length; i++) {
+            let card = hand[i]
             get_allowed_actions(card).forEach(a => action(a, card))
         }
         //debug
@@ -684,7 +708,7 @@ P.offensive_segment = {
         push_undo()
         if (cards[c].type === MILITARY) {
             military_card(c)
-            log(`${R} played ${cards[c].name} as event card(not implemented so just operations)`)
+            log(`${R} played ${cards[c].name} as event card`)
             goto("offensive_sequence")
         }
     },
@@ -703,7 +727,9 @@ P.offensive_segment = {
     future_offensive(c) {
         push_undo()
         log(`${R} played future offensive`)
-        G.future_offensive[R] = [G.turn, c]
+        G.events[events.FUTURE_OFFENSIVE_JP.id + R] = G.turn
+        G.future_offensive[R] = c
+        array_delete_item(G.hand[R], c)
         goto("end_action")
     },
     pass() {
@@ -2286,7 +2312,7 @@ P.define_intelligence_condition = {
         if (card.intelligence !== "surprise") {
             L.roll_allowed = true
         }
-        if (G.hand[G.active].filter(c => c.intelligence && (c.type === "intercept" || c.type === "conteroffensive")).length > 0) {
+        if (get_hand(G.active).filter(c => c.intelligence && (c.type === "intercept" || c.type === "conteroffensive")).length > 0) {
             L.card_allowed = true
         }
         if (!L.roll_allowed && !L.card_allowed) {
@@ -2298,7 +2324,7 @@ P.define_intelligence_condition = {
         if (L.roll_allowed) {
             button("roll")
         }
-        G.hand[G.active].filter(c => c.intelligence && (c.type === "intercept" || c.type === "conteroffensive")).forEach(c => action_card(c))
+        get_hand(G.active).filter(c => c.intelligence && (c.type === "intercept" || c.type === "conteroffensive")).forEach(c => action_card(c))
     },
     card(c) {
         G.offensive.intelligence = INTERCEPT
@@ -3603,7 +3629,7 @@ function on_setup(scenario, options) {
     G.passes = [0, 0]
     G.removed = [] // removed one-time events (both sides)
     G.hand = [[], []]
-    G.future_offensive = [[-1, 0], [-1, 0]]
+    G.future_offensive = [-1, -1]
     G.discard = [[], []]
     G.asp = [[7, 0], [0, 0]]
     G.active_stack = []
@@ -3665,7 +3691,7 @@ function on_view() {
     V.supply_cache = G.supply_cache
     V.hand = []
     V.pow = G.pow
-    V.future_offensive = []
+    V.future_offensive = [-1, -1]
     V.active_stack = G.active_stack
     V.surrender = G.surrender
     V.events = G.events
@@ -3682,17 +3708,15 @@ function on_view() {
 
     if (R !== JP) {
         V.hand[JP] = G.hand[JP].length
-        V.future_offensive.push([G.future_offensive[JP][0], -1])
     } else {
         V.hand[JP] = G.hand[JP]
-        V.future_offensive.push(G.future_offensive[JP])
+        V.future_offensive[JP] = G.future_offensive[JP]
     }
     if (R !== AP) {
         V.hand[AP] = G.hand[AP].length
-        V.future_offensive.push([G.future_offensive[AP][0], -1])
     } else {
         V.hand[AP] = G.hand[AP]
-        V.future_offensive.push(G.future_offensive[AP])
+        V.future_offensive[AP] = G.future_offensive[AP]
     }
 }
 

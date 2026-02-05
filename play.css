@@ -179,11 +179,20 @@ body.Allies #jp_hand { grid-row: 4; }
 .unit, .marker{
 	transition: left 200ms, top 200ms;
 	position: absolute;
-	background-size: auto 100%;
+	/*background-size: auto 100%;*/
 	background-repeat: no-repeat;
 	border-radius: 5px;
 	width:35px;
 	height:35px;
+    background-size: 35px 35px;
+}
+
+.card > .marker {
+    width: 70px;
+    height: 70px;
+    background-size: 70px 70px;
+    right: 10px;
+    top: 10px;
 }
 
 /* MARKER IMAGES */

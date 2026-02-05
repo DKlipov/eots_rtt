@@ -75,6 +75,14 @@ const TRACK_MARKERS = [
 
 const TURN_MARKERS = [
     {
+        counter: "future_offensive_jp",
+        value: G => G.events[data.events.FUTURE_OFFENSIVE_JP.id]
+    },
+    {
+        counter: "future_offensive_ap",
+        value: G => G.events[data.events.FUTURE_OFFENSIVE_AP.id]
+    },
+    {
         counter: "alaska",
         value: G => G.events[data.events.ALASKA_OCCUPATION.id]
     },
@@ -172,15 +180,18 @@ function push_stack(stk, elt) {
 }
 
 function update_hand(side) {
-    if (G.future_offensive[side][0] > 0) {
-        let card = G.future_offensive[side][1]
-        console.log(`foo ${card}`)
-        if (card <= 0) {
-            populate_generic("hand", side, side === JP ? "card card_jp_0" : "card card_ap_0")
-        } else {
-            populate("hand", side, "card", card)
-        }
+    var fo_card;
+    if (G.future_offensive[side] >= 0) {
+        fo_card = populate("hand", side, "card", G.future_offensive[side])
+    } else if (G.events[data.events.FUTURE_OFFENSIVE_JP.id + side] > 0) {
+        fo_card = populate_generic("hand", side, side === JP ? "card card_jp_0" : "card card_ap_0")
     }
+    if (G.events[data.events.FUTURE_OFFENSIVE_JP.id + side] === G.turn) {
+        populate_generic_to_parent(fo_card, "marker future_offensive_inactive")
+    } else if (G.events[data.events.FUTURE_OFFENSIVE_JP.id + side] > 0) {
+        populate_generic_to_parent(fo_card, `marker future_offensive_${side === AP ? "ap" : "jp"}`)
+    }
+
     if (!Array.isArray(G.hand[side])) {
         for (let i = 0; i < G.hand[side]; i++) {
             populate_generic("hand", side, side === JP ? "card card_jp_0" : "card card_ap_0")

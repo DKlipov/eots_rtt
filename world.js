@@ -452,18 +452,20 @@ function populate(parent_action, parent_id, child_action, child_id) {
     return child
 }
 
-function populate_generic(parent_action, parent_id, keywords, n = 1) {
+function populate_generic(parent_action, parent_id, keywords) {
     var parent = lookup_thing(parent_action, parent_id)
-    while (n-- > 0) {
-        // TODO: use generic marker cache ?
-        var child = document.createElement("div")
-        child.className = keywords
-        child.parent = parent
-        parent.appendChild(child)
-        if (keywords.includes("marker")) {
-            register_focusable(child)
-        }
+    return populate_generic_to_parent(parent, keywords)
+}
+
+function populate_generic_to_parent(parent, keywords) {
+    var child = document.createElement("div")
+    child.className = keywords
+    child.parent = parent
+    parent.appendChild(child)
+    if (keywords.includes("marker")) {
+        register_focusable(child)
     }
+    return child
 }
 
 function update_position(action, id, x, y) {

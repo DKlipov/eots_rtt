@@ -1,6 +1,5 @@
 Todo list:
-* [WIP] Future offensive
-* Build infrastructure
+* [WIP] Build infrastructure
 * China offensive & stuff & China air box
 * End of turn phase & Tojo & Machuria offensive
 * Replacement & reinforcement segment
