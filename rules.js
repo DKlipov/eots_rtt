@@ -101,6 +101,7 @@ const HEX_TEMP_FLAG2 = 1 << 20
 const HEX_TEMP_FLAG3 = 1 << 21
 
 const JP_UNITS = JP_AIR_UNITS | JP_GROUND_UNITS | JP_NAVAL_UNITS | JP_HQ_UNITS
+const AP_UNITS = JP_UNITS << 1
 const JP_GA_UNITS = JP_AIR_UNITS | JP_GROUND_UNITS
 const JP_GAH_UNITS = JP_AIR_UNITS | JP_GROUND_UNITS | JP_HQ_UNITS
 const NON_SUPPLY_MASK = [...Array(9).keys()].reduce((a, b) => a + Math.pow(2, b + 4), 0)
@@ -117,6 +118,12 @@ const CHINA_BOX = 1500
 const TURN_BOX = 1480
 
 const {pieces, cards, map, nations, events} = require("./data.js")
+
+const ROAD_EVENTS = Object.keys(events).filter(k => events[k].road).map(k => {
+    var event = events[k]
+    event.keys = event.keys.map(h => hex_to_int(h))
+    return event
+})
 
 // PIECES
 const HQ_CENTRAL_PACIFIC = find_piece("hq_ap_c")
@@ -155,6 +162,10 @@ const AIR_FERRY = hex_to_int(5408)
 const MORESBY = hex_to_int(3823)
 const WEST_HONSHU = hex_to_int(3606)
 const KWAI_BRIDGE = hex_to_int(2109)
+const AKYAB = hex_to_int(2006)
+const MANDALAY = hex_to_int(2106)
+const IMPHAL = hex_to_int(2105)
+const RANGOON = hex_to_int(2008)
 const TOKYO = hex_to_int(3706)
 const TOKYO_AIR_BASES = [3307, 3704, 3407, 3506, 3507, 3607, 3706, 3705, 3305, 3306, 3303, 3209, 3709].map(h => hex_to_int(h))
 
@@ -607,6 +618,36 @@ function event_hq_check(card) {
     return false
 }
 
+function is_imphal_build_enabled() {
+    var mandalay = G.supply_cache[MANDALAY]
+    var rangoon = G.supply_cache[RANGOON]
+    var imphal = G.supply_cache[IMPHAL]
+    return is_space_controlled(RANGOON, JP) && is_space_controlled(MANDALAY, JP)
+        && (rangoon & JP_SUPPLY_PORT) && !(mandalay & AP_UNITS) && !(rangoon & AP_UNITS)
+        && !(imphal & AP_UNITS) && is_space_controlled(IMPHAL, JP)
+        && !((hex_to_int(2007) & AP_UNITS) && (hex_to_int(2107) & AP_UNITS))
+}
+
+function get_infrastructure_actions() {
+    if (R === AP && check_nation_controlled(nations.INDIA, AP) && is_space_controlled(AKYAB, AP)) {
+        if (!is_event_active(events.JARHAT_ROAD)) {
+            return ["jarhat"]
+        }
+        var result = []
+        if (!is_event_active(events.LEDO_ROAD)) {
+            result.push("ledo")
+        }
+        if (!is_event_active(events.IMPHAL_ROAD)) {
+            result.push("imphal")
+        }
+        return result
+    }
+    if (R === JP && !is_event_active(events.IMPHAL_ROAD) && is_imphal_build_enabled()) {
+        return ["imphal"]
+    }
+    return []
+}
+
 function get_allowed_actions(num) {
     let card = cards[num]
     let result = ["ops", "discard"]
@@ -615,7 +656,7 @@ function get_allowed_actions(num) {
     }
     if (card.ops >= 3) {
         // result.push("inter_service")
-        // result.push("infrastructure")
+        get_infrastructure_actions().forEach(a => result.push(a))
         if (R === JP) {
             // result.push("china_offensive")
         }
@@ -663,6 +704,15 @@ function get_hand(side) {
     } else {
         return G.hand[side]
     }
+}
+
+function build_road(card, event) {
+    push_undo()
+    activate_card(card)
+    check_event(event)
+    log(`${R === AP ? "Allies" : "Japan"} build infrastructure ${event.name}`)
+    check_supply()
+    goto("end_action")
 }
 
 P.offensive_segment = {
@@ -720,7 +770,14 @@ P.offensive_segment = {
     },
     inter_service() {
     },
-    infrastructure() {
+    jarhat(c) {
+        build_road(c, events.JARHAT_ROAD)
+    },
+    imphal(c) {
+        build_road(c, events.IMPHAL_ROAD)
+    },
+    ledo(c) {
+        build_road(c, events.LEDO_ROAD)
     },
     china_offensive() {
     },
@@ -1700,6 +1757,10 @@ function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
     return oos_units[faction].length === size
 }
 
+function check_infrastructure() {
+    ROAD_EVENTS.filter(e => !is_event_active(e)).forEach(e => e.keys.forEach(h => G.supply_cache[h] |= TRANSPORT_ROUTE_DISABLED))
+}
+
 function check_supply() {
     for (let o = 0; o < pieces.length; o++) {
         if (G.location[o] <= 0) {
@@ -1708,6 +1769,7 @@ function check_supply() {
     }
     G.supply_cache = []
     for_each_unit(mark_unit)
+    check_infrastructure()
 
     var oos_units = [[], []]
     G.oos = []
@@ -1818,6 +1880,7 @@ function get_ground_move_cost(from, to, direction, faction) {
     }
     if ((MAP_DATA[from].edges_int & ROAD << (5 * direction))
         && !(G.supply_cache[to] & (TRANSPORT_ROUTE_DISABLED | (JP_GA_UNITS << 1 - faction)))
+        && !(G.supply_cache[from] & TRANSPORT_ROUTE_DISABLED)
     ) {
         return 1;
     } else {
@@ -3108,8 +3171,12 @@ function check_jp_resources_event() {
     }
 }
 
+function is_event_active(event) {
+    return G.events[event.id] > 0
+}
+
 function check_event(event) {
-    if (G.events[event.id] > 0) {
+    if (is_event_active(event)) {
         return
     }
     G.events[event.id] = G.turn

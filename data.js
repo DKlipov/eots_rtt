@@ -5871,6 +5871,30 @@ data.events = {
     FUTURE_OFFENSIVE_AP: {
         id: 9,
     },
+    KWAI_RIVER_BRIDGE: {
+        id: 10,
+        road: true,
+        name: "Kwai river",
+        keys: [2108, 2109]
+    },
+    JARHAT_ROAD: {
+        id: 11,
+        road: true,
+        name: "Jarhat",
+        keys: [2104]
+    },
+    IMPHAL_ROAD: {
+        id: 12,
+        road: true,
+        name: "Imphal",
+        keys: [2105]
+    },
+    LEDO_ROAD: {
+        id: 13,
+        road: true,
+        name: "Ledo",
+        keys: [2205]
+    },
 }
 
 function find_piece(id) {

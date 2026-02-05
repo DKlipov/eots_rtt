@@ -26,6 +26,12 @@ const JP_BOUNDARIES = [];
 set_add(JP_BOUNDARIES, hex_to_int(3606))
 set_add(JP_BOUNDARIES, hex_to_int(2109))
 
+const ROAD_EVENTS = Object.keys(data.events).filter(k => data.events[k].road).map(k => {
+    var event = data.events[k]
+    event.keys = event.keys.map(h => hex_to_int(h))
+    return event
+})
+
 
 const TRACK_MARKERS = [
     {
@@ -326,6 +332,11 @@ function on_update() {
     // G.actions.board_hex.push(hex_to_int(piece.start))
     let unit_present_hex = []
 
+    ROAD_EVENTS.forEach(event => {
+        if (!G.events[event.id]) {
+            event.keys.forEach(hex => populate_generic("board_hex", hex, "marker road"))
+        }
+    })
 
     G.control.filter(h => !set_has(G.capture, h) && !set_has(JP_BOUNDARIES, h))
         .forEach(h => populate_generic("board_hex", h, "marker control_jp"))
@@ -512,8 +523,8 @@ function show_popup_menu(evt, menu_id, target_id, title, hide = '') {
                     }
                 } else {
                     item.classList.remove("action")
-                    item.classList.remove("hide")
-                    item.classList.add("disabled")
+                    item.classList.add("hide")
+                    item.classList.remove("disabled")
                     item.onclick = null
                 }
             }
