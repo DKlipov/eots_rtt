@@ -752,7 +752,7 @@ P.choose_hq = {
     _begin() {
         L.possible_units = []
         for_each_unit((u, piece) => {
-            if (piece.faction === R && piece.class === "hq" && !set_has(G.oos, i) && (
+            if (piece.faction === R && piece.class === "hq" && !set_has(G.oos, u) && (
                     R === G.offensive.attacker
                     || G.offensive.battle_hexes.filter(bh => get_distance(bh, G.location[u]) <= piece.cr).length
                 )
@@ -763,6 +763,9 @@ P.choose_hq = {
         })
         if (L.possible_units.length === 1) {
             this.unit(L.possible_units[0])
+        } else if (!L.possible_units.length) {
+            log(`No hq could be selected`)
+            end()
         }
     },
     prompt() {
@@ -773,7 +776,6 @@ P.choose_hq = {
         push_undo()
         G.offensive.active_hq[R] = u
         var card = cards[G.offensive.offensive_card]
-        console.log()
         if (G.offensive.type === EC && card.logistic_alt && card.logistic_alt[0].includes(u)) {
             G.offensive.logistic = card.logistic_alt[1]
         }
@@ -2306,10 +2308,9 @@ P.define_intelligence_condition = {
         let result = random(10)
         const success = result <= L.intelligence_dice
         log(`Intelligence roll ${result} ${success ? "<" : ">"} ${L.intelligence_dice} (${success ? "SUCCESS" : "FAILED"})`)
-        //todo debug only
-        // if (success) {
-        G.offensive.intelligence = INTERCEPT
-        // }
+        if (success) {
+            G.offensive.intelligence = INTERCEPT
+        }
         end()
     }
 }
@@ -2793,9 +2794,11 @@ P.offensive_sequence = script(`
     if (G.offensive.intelligence != SURPRISE) {
         set G.offensive.stage REACTION_STAGE
         call choose_hq
-        call activate_units
-        call move_offensive_units
-        call commit_offensive
+        if (G.offensive.active_hq[G.active]) {
+            call activate_units
+            call move_offensive_units
+            call commit_offensive
+        }
     }
     set G.offensive.stage BATTLE_STAGE
     set G.active G.offensive.attacker
@@ -2987,15 +2990,9 @@ function is_overstack(hex, unit) {
 
 function check_nation_controlled(nation, faction) {
     for (var i = 0; i < nation.keys.length; i++) {
-        console.log(`hex ${nation.keys[i]} controlled by ${faction ? "AP" : "JP"}?`)
-        console.log(set_has(G.control, hex_to_int(nation.keys[i])))
-        console.log(faction)
-        console.log(set_has(G.control, hex_to_int(nation.keys[i])) == faction)
         if (set_has(G.control, hex_to_int(nation.keys[i])) == faction) {
-            console.log("no")
             return false
         }
-        console.log("yes")
     }
     return true
 }
@@ -3021,22 +3018,12 @@ function set_control_over_nation(nation, only_ground = true) {
         if (!nation.regions.includes(hex_data.region)) {
             continue
         }
-        console.log(`Check hex ${nation.name} ${int_to_hex(i)}`)
         var no_enemy_units = (only_ground && !is_faction_ground_units(i, 1 - faction)) || !is_faction_units(i, 1 - faction)
         var control_changed = hex_data.named && no_enemy_units
         if (control_changed && faction === JP) {
             set_add(G.control, i)
-            console.log(`SUCCESS Check hex ${nation.name} ${int_to_hex(i)}`)
         } else if (control_changed && faction === AP) {
             set_delete(G.control, i)
-            console.log(`SUCCESS Check hex ${nation.name} ${int_to_hex(i)}`)
-        } else {
-            console.log(no_enemy_units)
-            console.log(control_changed)
-            console.log(faction)
-            console.log(only_ground)
-            console.log(!is_faction_ground_units(i, 1 - faction))
-            console.log(!is_faction_units(i, 1 - faction))
         }
     }
 }
@@ -3124,10 +3111,68 @@ function get_jp_resources() {
     return G.control.filter(h => MAP_DATA[h].resource).length
 }
 
+P.attrition = {
+    _begin() {
+        L.unit_to_attrition = []
+        var hq_list = []
+        for_each_unit((u, piece) => {
+            if (piece.faction === G.active && piece.class === "hq") {
+                set_add(hq_list, u)
+            }
+        })
+        for_each_unit((u, piece, location) => {
+            if (piece.faction !== G.active || pieces[u].class === "naval" || pieces[u].class === "hq") {
+                return;
+            }
+            if (set_has(G.oos, u)) {
+                if (!set_has(G.reduced, u)) {
+                    set_add(L.unit_to_attrition, u)
+                } else {
+                    for (var i = 0; i < hq_list.length; i++) {
+                        var hq = hq_list[i]
+                        if (get_distance(location, G.location[hq]) <= pieces[hq].cr) {
+                            return
+                        }
+                    }
+                    set_add(L.unit_to_attrition, u)
+                }
+            }
+        })
+        if (!L.unit_to_attrition.length) {
+            end()
+        }
+    },
+    prompt() {
+        prompt(`Apply attrition for not-supplied units`)
+        if (!L.unit_to_attrition.length) {
+            button("done")
+        }
+        L.unit_to_attrition.forEach(u => action_unit(u))
+    },
+    unit(u) {
+        if (set_has(G.reduced, u)) {
+            eliminate(u)
+        } else {
+            reduce_unit(u)
+        }
+        set_delete(L.unit_to_attrition, u)
+        clear_undo()
+    },
+    done() {
+        clear_undo()
+        end()
+    }
+}
+
 P.attrition_phase = script(`
     log ("Attrition phase")
-    
-
+    set G.active JP
+    call attrition
+    set G.active AP
+    call attrition
+    eval {
+        check_supply()
+    }
     goto end_of_turn_phase
 `)
 

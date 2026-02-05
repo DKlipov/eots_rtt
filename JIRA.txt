@@ -1,10 +1,9 @@
 Todo list:
-* [WIP] Attrition phase
-* Future offensive
+* [WIP] Future offensive
+* Build infrastructure
+* China offensive & stuff & China air box
 * End of turn phase & Tojo & Machuria offensive
 * Replacement & reinforcement segment
-* China offensive & stuff & China air box
-* Build infrastructure
 * War in Europe
 * Event cards
 * Check overstacking
