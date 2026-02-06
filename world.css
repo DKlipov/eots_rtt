@@ -98,16 +98,16 @@ body.hide-pieces .piece {
 
 .zoi {
     pointer-events: none;
-    background: rgba(255, 0, 255, 0.4);
+    background: rgba(255, 130, 255, 0.2);
     z-index: -1;
 }
 
 .jp_zoi {
-    background: rgba(255, 0, 0, 0.4);
+    background: rgba(255, 0, 0, 0.2);
 }
 
 .ap_zoi {
-    background: rgba(0, 0, 255, 0.4);
+    background: rgba(0, 130, 255, 0.2);
 }
 
 .hex {

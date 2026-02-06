@@ -3442,6 +3442,7 @@ function setup_scenario_1942() {
     G.turn = 2
     G.asp[1] = [1, 0]
     G.political_will = 8
+    G.china_divisions = 11
 
     check_supply()
     call("offensive_phase")
@@ -3622,7 +3623,13 @@ function setup_scenario_1943() {
     G.asp[AP] = [4, 0]
     G.pow = 4
     G.political_will = 6
+    G.china_divisions = 7
+    G.surrender[nations.CHINA.id] = 2
+    G.burma_road = 1
+    G.wie = 4
     G.inter_service = [1, 1]
+    G.events[events.HUMP.id] = 1
+    G.events[events.JARHAT_ROAD.id] = 1
 
 
     var jr = [1, 2, 5, 6, 13, 15, 18, 39, 55, 73, 78]
@@ -3702,6 +3709,8 @@ function on_setup(scenario, options) {
     G.active_stack = []
     G.inter_service = [0, 0]
     G.wie = 3
+    G.china_divisions = 12
+    G.burma_road = 0
 
     G.location = []
     G.reduced = []
@@ -3745,6 +3754,7 @@ function on_setup(scenario, options) {
 function on_view() {
     V.turn = G.turn
     V.location = G.location
+    V.removed = G.removed
     V.reduced = G.reduced
     V.political_will = G.political_will
     V.inter_service = G.inter_service
@@ -3762,6 +3772,8 @@ function on_view() {
     V.active_stack = G.active_stack
     V.surrender = G.surrender
     V.events = G.events
+    V.burma_road = G.burma_road
+    V.china_divisions = G.china_divisions
     V.offensive = {
         active_units: G.offensive.active_units[0].concat(G.offensive.active_units[1]),
         paths: G.offensive.paths,

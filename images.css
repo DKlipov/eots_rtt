@@ -29,7 +29,8 @@
 .marker.resource_jp_1 { background-image: url(markers75/jp_resources_1.jpg);  }
 .marker.pass_jp { background-image: url(markers75/jp_pass.jpg);  }
 .marker.pass_ap { background-image: url(markers75/ap_pass.jpg);  }
-.marker.india { background-image: url(markers75/india.png);  }
+.marker.india_status { background-image: url(markers75/india.png);  }
+.marker.india_status_surrender { background-image: url(markers75/india_status_surrender.png);  }
 .marker.alaska { background-image: url(markers75/alaska_occupied.png);  }
 .marker.hawaii { background-image: url(markers75/hawaii_occupied.png);  }
 .marker.future_offensive_ap { background-image: url(markers75/fo_ap.png);  }
@@ -37,6 +38,11 @@
 .marker.future_offensive_inactive { background-image: url(markers75/fo_inactive.png);  }
 .marker.kwai_river { background-image: url(markers75/kwai.png);  }
 .marker.road { background-image: url(markers75/route.png);  }
+.marker.china { background-image: url(markers75/china.png);  }
+.marker.burma_road { background-image: url(markers75/burma_road_no_hump.png);  }
+.marker.burma_road_hump { background-image: url(markers75/burma_road_hump.png);  }
+.marker.china_offensive { background-image: url(markers75/china_offensive.png);  }
+.marker.divisions_china { background-image: url(markers75/divisions_china.png);  }
 
 
 /* ARMIES (45x45) */

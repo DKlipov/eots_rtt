@@ -5895,6 +5895,12 @@ data.events = {
         name: "Ledo",
         keys: [2205]
     },
+    CHINA_OFFENSIVE: {
+        id: 14,
+    },
+    HUMP: {
+        id: 15,
+    },
 }
 
 function find_piece(id) {

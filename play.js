@@ -165,6 +165,15 @@ function on_init() {
     for (i = 0; i < 5; i++) {
         define_layout("india", i, [540 - Math.floor((i * 45)), 50, 35, 35])
     }
+    for (i = 0; i < 3; i++) {
+        define_layout("burma", i, [475 - Math.floor((i * 55)), 120, 35, 35])
+    }
+    for (i = 0; i < 6; i++) {
+        define_layout("china", i, [755 - Math.floor((i * 42.3)), 138, 35, 35])
+    }
+    for (i = 0; i < 13; i++) {
+        define_layout("divisions", i, [606 + Math.floor((i * 42.1)), 42, 35, 35])
+    }
     for (let i = 0; i < data.pieces.length; ++i) {
         let piece = data.pieces[i]
         piece.element = define_piece("unit", i, piece.counter)
@@ -436,7 +445,13 @@ function on_update() {
     populate_generic("pw", G.political_will, "marker pw")
     populate_generic("wie", G.wie, "marker wie")
 
-    populate_generic("india", Math.min(4, G.surrender[data.nations.INDIA.id]), "marker india")
+    populate_generic("india", Math.min(4, G.surrender[data.nations.INDIA.id]),
+        `marker ${G.surrender[data.nations.INDIA.id] >= 5 ? "india_status_surrender" : "india_status"}`)
+
+    populate_generic("burma", G.burma_road, `marker burma_road${G.events[data.events.HUMP.id] ? "_hump" : ""}`)
+    populate_generic("china", Math.min(5, G.surrender[data.nations.CHINA.id]), `marker china`)
+    populate_generic("divisions", G.china_divisions, `marker divisions_china`)
+
 
     for (i = 0; i < TURN_MARKERS.length; i++) {
         const marker = TURN_MARKERS[i]
