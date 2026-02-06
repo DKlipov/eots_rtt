@@ -23,4 +23,5 @@ Todo list:
 * Japan lack of resources win condition
 * Check overstack for india surrender
 * B29 attack restrictions
+* Burma road and SE airfield
 * Check supply durning movement

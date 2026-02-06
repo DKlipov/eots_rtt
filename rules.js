@@ -96,18 +96,20 @@ const JP_SUPPLIED_HEX = 1 << 15
 const BR_SUPPLIED_HEX = 1 << 16
 const JOINT_SUPPLIED_HEX = 1 << 17
 const US_SUPPLIED_HEX = 1 << 18
-const HEX_TEMP_FLAG1 = 1 << 19
-const HEX_TEMP_FLAG2 = 1 << 20
-const HEX_TEMP_FLAG3 = 1 << 21
+const JP_SUPPLY_AIRFIELD = 1 << 19
+const AP_SUPPLY_AIRFIELD = 1 << 20
+const HEX_TEMP_FLAG1 = 1 << 21
+const HEX_TEMP_FLAG2 = 1 << 22
+const HEX_TEMP_FLAG3 = 1 << 23
 
 const JP_UNITS = JP_AIR_UNITS | JP_GROUND_UNITS | JP_NAVAL_UNITS | JP_HQ_UNITS
 const AP_UNITS = JP_UNITS << 1
 const JP_GA_UNITS = JP_AIR_UNITS | JP_GROUND_UNITS
 const JP_GAH_UNITS = JP_AIR_UNITS | JP_GROUND_UNITS | JP_HQ_UNITS
 const NON_SUPPLY_MASK = [...Array(9).keys()].reduce((a, b) => a + Math.pow(2, b + 4), 0)
-const CLEAN_UNITS_MASK = [...Array(22).keys()].filter(a => a < 4 || a > 11).reduce((a, b) => a + Math.pow(2, b), 0)
-const CLEAN_SUPPLY_MASK = [(NON_SUPPLY_MASK | JP_SUPPLY_PORT | JP_SUPPLIED_HEX), (NON_SUPPLY_MASK | AP_SUPPLY_PORT | BR_SUPPLIED_HEX | JOINT_SUPPLIED_HEX | US_SUPPLIED_HEX)]
-const CLEAN_ATTACK_ZONE_MASK = [...Array(20).keys()].reduce((a, b) => a + Math.pow(2, b - 1), 0)
+const CLEAN_UNITS_MASK = [...Array(24).keys()].filter(a => a < 4 || a > 11).reduce((a, b) => a + Math.pow(2, b), 0)
+const CLEAN_SUPPLY_MASK = [(NON_SUPPLY_MASK | JP_SUPPLY_PORT | JP_SUPPLY_AIRFIELD | JP_SUPPLIED_HEX), (NON_SUPPLY_MASK | AP_SUPPLY_PORT | AP_SUPPLY_AIRFIELD | BR_SUPPLIED_HEX | JOINT_SUPPLIED_HEX | US_SUPPLIED_HEX)]
+const CLEAN_ATTACK_ZONE_MASK = [...Array(22).keys()].reduce((a, b) => a + Math.pow(2, b - 1), 0)
 const AP_SUPPLIED_HEX = (BR_SUPPLIED_HEX | JOINT_SUPPLIED_HEX | US_SUPPLIED_HEX)
 
 const LAST_BOARD_HEX = 1476
@@ -166,6 +168,10 @@ const AKYAB = hex_to_int(2006)
 const MANDALAY = hex_to_int(2106)
 const IMPHAL = hex_to_int(2105)
 const RANGOON = hex_to_int(2008)
+const JARHAT = hex_to_int(2104)
+const DACCA = hex_to_int(1905)
+const MADRAS = hex_to_int(1406)
+const KUNMING = hex_to_int(2407)
 const TOKYO = hex_to_int(3706)
 const TOKYO_AIR_BASES = [3307, 3704, 3407, 3506, 3507, 3607, 3706, 3705, 3305, 3306, 3303, 3209, 3709].map(h => hex_to_int(h))
 
@@ -816,6 +822,7 @@ P.offensive_segment = {
     },
     action_hex(hex) {
         capture_hex(hex, set_has(G.control, hex) ? AP : JP)
+        check_supply()
     },
     unit(u) {
         if (set_has(G.reduced, u)) {
@@ -1545,8 +1552,11 @@ function mark_supply_ports_overland(hq, piece) {
             if (distance < SUPPLY_PORT_RANGE) {
                 queue.push(nh)
             }
-            if (MAP_DATA[nh].port && set_has(G.control, nh) != faction) {
+            if (MAP_DATA[nh].port && is_space_controlled(nh, faction)) {
                 G.supply_cache[nh] = G.supply_cache[nh] | JP_SUPPLY_PORT << faction
+            }
+            if (MAP_DATA[nh].airfield && is_space_controlled(nh, faction)) {
+                G.supply_cache[nh] = G.supply_cache[nh] | JP_SUPPLY_AIRFIELD << faction
             }
         }
     }
@@ -1574,8 +1584,11 @@ function mark_supply_ports_oversea(hq, piece) {
                 if (G.supply_cache[nh] & JP_SUPPLY_PORT << faction) {
                     return
                 }
-                if (MAP_DATA[nh].port && set_has(G.control, nh) != faction) {
+                if (MAP_DATA[nh].port && is_space_controlled(nh, faction)) {
                     G.supply_cache[nh] = G.supply_cache[nh] | JP_SUPPLY_PORT << faction
+                }
+                if (MAP_DATA[nh].airfield && is_space_controlled(nh, faction)) {
+                    G.supply_cache[nh] = G.supply_cache[nh] | JP_SUPPLY_AIRFIELD << faction
                 }
             }
         }
@@ -1728,6 +1741,9 @@ function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
     for (i = 1; i < LAST_BOARD_HEX; i++) {
         G.supply_cache[i] = G.supply_cache[i] & CLEAN_SUPPLY_MASK[1 - faction]
     }
+    if (G.burma_road < 2) {
+        G.supply_cache[KUNMING] |= AP_SUPPLY_PORT
+    }
     for_each_unit((i, p) => both_sides_zoi || p.faction === faction ? set_zoi(i, p, oos_units) : null)
     for_each_unit((i, p) => {
         if (p.class === "hq" && p.faction === faction) {
@@ -1761,12 +1777,77 @@ function check_infrastructure() {
     ROAD_EVENTS.filter(e => !is_event_active(e)).forEach(e => e.keys.forEach(h => G.supply_cache[h] |= TRANSPORT_ROUTE_DISABLED))
 }
 
-function check_supply() {
-    for (let o = 0; o < pieces.length; o++) {
-        if (G.location[o] <= 0) {
-            G.location[o] = NON_PLACED_BOX
+function check_hump() {
+    if (is_event_active(events.HUMP)
+        && ((G.supply_cache[JARHAT] & AP_SUPPLY_AIRFIELD) || (G.supply_cache[DACCA] & AP_SUPPLY_AIRFIELD))) {
+        G.burma_road = 1
+    }
+}
+
+function check_burma_road() {
+    G.burma_road = 2
+    const faction = AP
+    const location = KUNMING
+    var queue = [location]
+    var distance_map = [location, 0]
+    var rangoon_achived = false
+    for (var i = 0; i < queue.length; i++) {
+        let item = queue[i]
+        let nh_list = get_near_hexes(item)
+        for (let j = 0; j < 6; j++) {
+            let nh = nh_list[j]
+            if (nh <= 0) {
+                continue
+            }
+            const occupied_land = G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
+            var distance = get_ground_move_cost(item, nh, j, faction)
+            if (distance > 1 || map_has(distance_map, nh) || occupied_land || is_space_controlled(nh, JP)) {
+                continue
+            }
+            console.log(int_to_hex(nh))
+            map_set(distance_map, nh, distance)
+
+            if (nh === MADRAS) {
+                G.burma_road = 0
+                return
+            } else if (nh === RANGOON) {
+                rangoon_achived = true
+            } else {
+                queue.push(nh)
+            }
         }
     }
+    if (!rangoon_achived || has_non_n_zoi(RANGOON, JP) || is_space_controlled(RANGOON, JP)) {
+        check_hump()
+        return;
+    }
+    queue = [RANGOON]
+    distance_map = [RANGOON, 0]
+    for (i = 0; i < queue.length; i++) {
+        let item = queue[i]
+        let nh_list = get_near_hexes(item)
+        for (let j = 0; j < 6; j++) {
+            let nh = nh_list[j]
+            if (nh <= 0) {
+                continue
+            }
+            if (map_has(distance_map, nh) || has_non_n_zoi(nh, JP)) {
+                continue
+            }
+            map_set(distance_map, nh, 1)
+            if (nh === MADRAS || MAP_DATA[nh].supply_source === AP) {
+                G.burma_road = 0
+                return
+            } else {
+                queue.push(nh)
+            }
+        }
+    }
+    check_hump()
+}
+
+function check_supply() {
+    check_burma_road()
     G.supply_cache = []
     for_each_unit(mark_unit)
     check_infrastructure()
@@ -1785,6 +1866,7 @@ function check_supply() {
     }
     G.oos = oos_units[0]
     oos_units[1].forEach(h => set_add(G.oos, h))
+    check_burma_road()
 }
 
 function get_move_data() {
@@ -3625,7 +3707,6 @@ function setup_scenario_1943() {
     G.political_will = 6
     G.china_divisions = 7
     G.surrender[nations.CHINA.id] = 2
-    G.burma_road = 1
     G.wie = 4
     G.inter_service = [1, 1]
     G.events[events.HUMP.id] = 1
@@ -3723,6 +3804,7 @@ function on_setup(scenario, options) {
     G.surrender = [...Array(nations.length).keys()].map(i => 0)
     G.surrender[nations.MARSHALL.id] = true //only nation under JP control
     G.committed = []
+    G.supply_cache = []
     G.pow = 0
     for (let i = 1; i < LAST_BOARD_HEX; i++) {
         if (is_controllable_hex(i) && ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Siam", "Caroline", "Marshall", "Japan"].includes(MAP_DATA[i].region)) {
