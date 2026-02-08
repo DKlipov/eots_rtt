@@ -1,6 +1,5 @@
 Todo list:
-* [WIP] China offensive & stuff & China air box
-* End of turn phase & Tojo & Machuria offensive
+* [WIP] End of turn phase & Tojo & Machuria offensive
 * Replacement & reinforcement segment
 * War in Europe
 * Event cards
@@ -24,4 +23,7 @@ Todo list:
 * Check overstack for india surrender
 * B29 attack restrictions
 * Burma road and SE airfield
+* Kwai and jp shq
+* China air box
+* Kunming supply
 * Check supply durning movement

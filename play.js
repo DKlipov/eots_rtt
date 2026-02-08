@@ -101,6 +101,10 @@ const TURN_MARKERS = [
         value: G => G.events[data.events.STRAT_BOMBING_CAMPAIGN.id]
     },
     {
+        counter: "china_offensive",
+        value: G => G.events[data.events.CHINA_OFFENSIVE.id]
+    },
+    {
         counter: G => "turn_pmt",
         value: G => G.turn
     },
@@ -317,6 +321,20 @@ function draw_paths() {
     })
 }
 
+function place_unit(u, location) {
+    var unit
+    if (location > TURN_BOX && location <= (TURN_BOX + 12)) {
+        unit = populate("turn", location - TURN_BOX, "unit", u)
+        unit.classList.toggle("activated", G.offensive.active_units.includes(u))
+        unit.classList.toggle("selected", G.active_stack.includes(u))
+        unit.classList.toggle("reduced", set_has(G.reduced, u))
+        unit.classList.toggle("oos", set_has(G.oos, u))
+    } else {
+        unit = populate("board_hex", location, "unit", u)
+        unit.classList.toggle("reduced", set_has(G.reduced, u))
+    }
+}
+
 function on_update() {
     var z, u
 
@@ -339,7 +357,6 @@ function on_update() {
     // G.actions={}
     // G.actions.board_hex = []
     // G.actions.board_hex.push(hex_to_int(piece.start))
-    let unit_present_hex = []
 
     ROAD_EVENTS.forEach(event => {
         if (!G.events[event.id]) {
@@ -355,12 +372,7 @@ function on_update() {
     for (var i = 0; i < data.pieces.length; ++i) {
         let piece = data.pieces[i]
         if (G.location[i] > 0) {
-            set_add(unit_present_hex, G.location[i])
-            let unit = populate("board_hex", G.location[i], "unit", i)
-            unit.classList.toggle("activated", G.offensive.active_units.includes(i))
-            unit.classList.toggle("selected", G.active_stack.includes(i))
-            unit.classList.toggle("reduced", set_has(G.reduced, i))
-            unit.classList.toggle("oos", set_has(G.oos, i))
+            let unit = place_unit(i, G.location[i])
         }
     }
     if (G.turn > 3) {
@@ -370,7 +382,7 @@ function on_update() {
     var oos_hex_set = []
     for (i = 0; i < G.oos.length; i++) {
         let hex = G.location[G.oos[i]]
-        if (!set_has(oos_hex_set, hex)) {
+        if (!set_has(oos_hex_set, hex) && hex <= LAST_BOARD_HEX) {
             populate_generic("board_hex", hex, "marker oos")
             set_add(oos_hex_set, hex)
         }

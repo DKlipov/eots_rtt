@@ -5813,10 +5813,12 @@ data.nations = {
     },
     CHINA: {
         id: 12,
+        pw: 2,
+        statuses: ["Stable Front", "Unstable Front", "Major Breakthrough", "Threat to Chunking", "Government Collapsed"],
         name: "China",
     },
     JAPAN_BY_RESOURCE: {
-        id: 12,
+        id: 13,
         name: "Japanese Empire surrenders by lack of resources",
         keys: [3307, 3704, 3407, 3506, 3507, 3607, 3706, 3705]
     },
