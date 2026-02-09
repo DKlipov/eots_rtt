@@ -1,6 +1,5 @@
 Todo list:
-* [WIP] End of turn phase & Tojo & Machuria offensive
-* Replacement & reinforcement segment
+* [WIP] Replacement & reinforcement segment
 * War in Europe
 * Event cards
 * Check overstacking

@@ -127,6 +127,10 @@ const ROAD_EVENTS = Object.keys(events).filter(k => events[k].road).map(k => {
     return event
 })
 
+//cards
+const TOJO_RESIGNS = find_card(JP, 43)
+const SOVIET_INVADE = find_card(AP, 79)
+
 // PIECES
 const HQ_CENTRAL_PACIFIC = find_piece("hq_ap_c")
 const HQ_SOUTH_WEST = find_piece("hq_ap_sw")
@@ -657,6 +661,13 @@ function get_infrastructure_actions() {
 
 function get_allowed_actions(num) {
     let card = cards[num]
+    if (num === TOJO_RESIGNS && G.turn >= 8 || num === SOVIET_INVADE && set_has(G.removed, TOJO_RESIGNS)) {
+        return ["event"]
+    } else if (num === TOJO_RESIGNS) {
+        return ["event", "ops", "discard"]
+    } else if (num === SOVIET_INVADE) {
+        return ["ops"]
+    }
     let result = ["ops", "discard"]
     if (card.type === MILITARY && event_hq_check(card)) {
         result.push("event")
@@ -1481,11 +1492,19 @@ function get_near_hexes(hex) {
     return result
 }
 
+function for_each_unit(apply) {
+    for (let i = 0; i < pieces.length; i++) {
+        var piece = pieces[i]
+        var location = G.location[i]
+        apply(i, piece, location)
+    }
+}
+
 function for_each_unit_on_map(apply) {
     for (let i = 0; i < pieces.length; i++) {
         var piece = pieces[i]
         var location = G.location[i]
-        if (location > LAST_BOARD_HEX && location !== CHINA_BOX) {
+        if (location > LAST_BOARD_HEX) {
             continue
         }
         apply(i, piece, location)
@@ -3140,7 +3159,7 @@ function china_surrender() {
         G.location[u] = NON_PLACED_BOX
         set_delete(G.reduced, u)
     })
-    for_each_unit_on_map((u, piece, location) => {
+    for_each_unit((u, piece, location) => {
         if (location === CHINA_BOX) {
             displace_to_turn(u, 1, true)
         }
@@ -3426,6 +3445,19 @@ P.attrition_phase = script(`
     goto end_of_turn_phase
 `)
 
+function reshuffle() {
+    if (G.discard[AP].includes(SOVIET_INVADE)) {
+        log(`Allied deck reshuffled due to Soviet invasion discarded`)
+        G.draw[AP].push(...G.discard[AP])
+        G.discard[AP] = []
+    }
+    if (G.discard[JP].includes(TOJO_RESIGNS)) {
+        log(`Japan deck reshuffled due to Tojo resign discarded`)
+        G.draw[JP].push(...G.discard[JP])
+        G.discard[JP] = []
+    }
+}
+
 P.end_of_turn_phase = script(`
     log ("Turn " + G.turn + ", End of turn phase")
     eval {
@@ -3443,6 +3475,9 @@ P.end_of_turn_phase = script(`
     set G.committed []
     set G.strategic_warfare 0
     set G.passes [0,0]
+    eval {
+        reshuffle()
+    }
     goto strategic_phase
 `)
 
@@ -3608,13 +3643,18 @@ function setup_scenario_1942() {
 function setup_scenario_1943() {
     log("#1943 War never changes")
 
+    var surrender = [nations.MALAYA, nations.PHILIPPINES, nations.DEI, nations.BURMA, nations.AUSTRALIAN_MANDATES]
+    surrender.forEach(n => {
+        G.surrender[n.id] = 1
+        set_control_over_nation(n)
+    })
+    // for (let i = 1; i < LAST_BOARD_HEX; i++) {
+    //     if (is_controllable_hex(i) && ["Malaya", "Philippines", "DEI", "Java", "Borneo", "Sumatra", "Celebes", "Burma", "AMandates"]
+    //         .includes(MAP_DATA[i].region)) {
+    //         set_add(G.control, i)
+    //     }
+    // }
 
-    for (let i = 1; i < LAST_BOARD_HEX; i++) {
-        if (is_controllable_hex(i) && ["Malaya", "Philippines", "DEI", "Java", "Borneo", "Sumatra", "Celebes", "Burma", "AMandates"]
-            .includes(MAP_DATA[i].region)) {
-            set_add(G.control, i)
-        }
-    }
 
     G.reduced = []
     //ap setup
