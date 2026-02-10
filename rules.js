@@ -178,8 +178,10 @@ const DACCA = hex_to_int(1905)
 const MADRAS = hex_to_int(1406)
 const KUNMING = hex_to_int(2407)
 const TOKYO = hex_to_int(3706)
+const OAHU = hex_to_int(5808)
 const TOKYO_AIR_BASES = [3307, 3704, 3407, 3506, 3507, 3607, 3706, 3705, 3305, 3306, 3303, 3209, 3709].map(h => hex_to_int(h))
 
+const COM_REPLACEMENT_POINTS = [1307, 1308, 2114, 2709, 3727].map(h => hex_to_int())
 
 function find_piece(id) {
     for (let i = 0; i < pieces.length; i++) {
@@ -206,7 +208,7 @@ const AIRFIELD_LINKS = []
 
 map.forEach(h => MAP_DATA[hex_to_int(h.id)] = h)
 
-for (let i = 0; i < LAST_BOARD_HEX; ++i) {
+for (let i = 0; i <= LAST_BOARD_HEX; ++i) {
     let hex = MAP_DATA[i]
     if (!hex) {
         hex = {id: int_to_hex(i), terrain: OCEAN, region: "Ocean"}
@@ -284,6 +286,22 @@ function get_hq_supply_type(piece) {
     }
 }
 
+function get_unit_replacement_type(piece) {
+    if (piece.notreplaceable || piece.class === "hq") {
+        return null
+    }
+    if (piece.service === "ch") {
+        return "CHINESE"
+    } else if (piece.class === "naval" && (piece.service === "au" || piece.service === "br")) {
+        return "COMMONWEALTH"
+    } else if (piece.class === "air") {
+        return "AIR"
+    } else if (piece.class === "ground") {
+        return "GROUND"
+    }
+    return "NAVAL"
+}
+
 function get_unit_supply_type(piece) {
     if (!piece.faction) {
         return JP_SUPPLIED_HEX
@@ -303,6 +321,7 @@ for (var i = 0; i < pieces.length; i++) {
     const piece = pieces[i]
     const supply = piece.class === "hq" ? get_hq_supply_type(piece) : get_unit_supply_type(piece)
     piece.supply = supply
+    piece.replacement = get_unit_replacement_type(piece)
     if (piece.class === "naval" && !piece.faction) {
         piece.service = "navy"
         if (["ca", "cl", "apd"].includes(piece.type)) {
@@ -344,7 +363,13 @@ P.strategic_phase = script(`
     eval {
         check_jp_resources_event()
     }
+    set G.active AP 
     call reinforcement_segment
+    set G.active JP 
+    call reinforcement_segment
+    set G.active AP 
+    call replacement_segment
+    set G.active JP
     call replacement_segment
     call submarine_warfare
     call strategic_bombing
@@ -355,14 +380,345 @@ P.strategic_phase = script(`
     goto offensive_phase
 `)
 
-P.reinforcement_segment = function () {
-    log("Reinforcements skipped")
-    end()
+function wie_roll_result() {
+    if (G.wie >= 10) {
+        return 7
+    } else if (G.wie >= 8) {
+        return 5
+    } else if (G.wie >= 6) {
+        return 3
+    } else if (G.wie >= 3) {
+        return 1
+    }
+    return 0
 }
 
-P.replacement_segment = function () {
-    log("Replacements skipped")
-    end()
+function try_delay_reinforcement(u, piece, location) {
+    if (G.active === JP || location === DELAYED_BOX || set_has(G.not_delayed, u) || piece.class === "hq" || u === B_29_1 || u === B_29_2) {
+        set_delete(G.not_delayed, u)
+        return false
+    }
+    var result = G.wie > 2 || piece.service === "army" && G.inter_service[AP]
+    if (result) {
+        set_location(u, DELAYED_BOX)
+        sent_to_europe(u)
+    }
+    return result
+}
+
+function sent_to_europe(u) {
+    var piece = pieces[u]
+    var result = false
+    if (piece.faction === AP && G.wie >= 3 && (piece.service === "army" || piece.type === "cve")) {
+        var modifier = wie_roll_result() + G.inter_service[AP]
+        var roll = random(10)
+        result = roll <= modifier
+        log(`${piece.name} sent to Europe roll ${roll} ${result ? "<=" : ">"} ${modifier} ${G.inter_service[AP] ? "(ISR active)" : ""}`)
+        if (result) {
+            log(`${piece.name} sent to Europe`)
+            displace_to_turn(u, 3)
+        }
+    }
+    return result
+}
+
+function get_unit_reinforcement_hexes(u) {
+    var piece = pieces[u]
+    var faction = piece.faction
+    var result = []
+    if (piece.service === "ch") {
+        return [KUNMING]
+    }
+    for (var i = 0; i < LAST_BOARD_HEX; i++) {
+        var map_data = MAP_DATA[i]
+        if ((piece.class === "air" && map_data.airfield || piece.class !== "air" && map_data.port)
+            && is_space_controlled(i, faction)
+            && check_unit_supply(i, u, piece)
+            && !is_overstack(i, u)) {
+            set_add(result, i)
+        }
+
+    }
+    return result
+}
+
+function get_hq_reinforcement_hexes() {
+    let result = []
+    const faction = G.active
+    let queue = []
+    const overland_set = []
+    const oversea_set = []
+    for (var i = 0; i < LAST_BOARD_HEX; i++) {
+        if (MAP_DATA[i].supply_source === faction) {
+            queue.push(i)
+            set_add(overland_set, i)
+            set_add(oversea_set, i)
+            if (MAP_DATA[i].port && is_space_controlled(i, faction) && !(G.overstack[i] & 1)) {
+                set_add(result, i)
+            }
+        }
+    }
+    for (var i = 0; i < queue.length; i++) {
+        let item = queue[i]
+        let nh_list = get_near_hexes(item)
+        const MD = MAP_DATA[item]
+        const overland = set_has(overland_set, item)
+        const non_neutral_zoi_s = has_non_n_zoi(item, 1 - faction)
+        const enemy_port_s = (MD.port && is_space_controlled(item, 1 - faction))
+        const occupied_land_s = G.supply_cache[item] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[item] & JP_GAH_UNITS << faction)
+        const oversea = set_has(oversea_set, item)
+        for (let j = 0; j < 6; j++) {
+            let nh = nh_list[j]
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
+                continue
+            }
+            var reachable = false
+            const enemy_port = enemy_port_s || (MD.port && is_space_controlled(nh, 1 - faction))
+            const occupied_land = occupied_land_s || G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
+            if (!set_has(overland_set, nh) && (overland || (MD.port && !enemy_port)) && MD.edges_int & GROUND << 5 * j && !occupied_land) {
+                reachable = true
+                set_add(overland_set, nh)
+            }
+            const non_neutral_zoi = non_neutral_zoi_s || has_non_n_zoi(nh, 1 - faction)
+            if (!set_has(oversea_set, nh) && (oversea || (MD.port && !enemy_port)) && MD.edges_int & WATER << 5 * j && !non_neutral_zoi) {
+                reachable = true
+                set_add(oversea_set, nh)
+            }
+            if (reachable) {
+                queue.push(nh)
+            }
+            if (reachable && MAP_DATA[nh].port && is_space_controlled(nh, faction) && !(G.overstack[nh] & 1)) {
+                set_add(result, nh)
+            }
+        }
+    }
+    return result
+}
+
+function is_reinforcement_denied(u) {
+    var piece = pieces[u]
+    return (piece.service === "au" && is_event_active(events.AUSTRALIA_SURRENDER))
+        || (piece.service === "ind" && G.surrender[nations.INDIA.id] >= 4);
+}
+
+P.reinforcement_segment = {
+    _begin() {
+        log(`${G.active === AP ? "Allied" : "Japan"} reinforcement segment`)
+        if (G.wie <= 7 && G.active === AP) {
+            change_asp(AP, 1)
+        } else if (G.active === AP) {
+            log(`War in europe prevent from AP amphibious shipping reinforcement`)
+        }
+        L.hq_reinforcement = []
+        L.unit_reinforcement = []
+        var reinforcement_hex = G.active === AP ? hex_to_int(5709) : hex_to_int(3808)
+        var delayed_units = false
+        for_each_unit((u, piece, location) => {
+            if (piece.faction !== G.active || !(
+                piece.reinforcement === G.turn
+                || location === DELAYED_BOX
+                || location === TURN_BOX + G.turn
+            )) {
+                return
+            }
+            if (piece.reinforcement === G.turn && piece.start_reduced) {
+                set_add(G.reduced, u)
+            }
+            if (is_reinforcement_denied(u)) {
+                eliminate_permanently(u)
+                return;
+            }
+            if (try_delay_reinforcement(u, piece, location)) {
+                delayed_units = true
+                return;
+            }
+            set_location(u, reinforcement_hex)
+            if (piece.class === "hq") {
+                set_add(L.hq_reinforcement, u)
+            }
+            set_add(L.unit_reinforcement, u)
+        })
+        if (L.hq_reinforcement.length) {
+            L.allowed_hexes = get_hq_reinforcement_hexes()
+        }
+        if (delayed_units) {
+            log(`US reinforcements delayed`)
+        }
+    },
+    prompt() {
+        if (G.active_stack.length) {
+
+            L.allowed_hexes.forEach(hex => action_hex(hex))
+            if (L.allowed_hexes.length === 0) {
+                prompt(`Choose hex to place ${pieces[G.active_stack[0]].name} as reinforcement. (Not possible hexes).`)
+                button("delay")
+            } else {
+                prompt(`Choose hex to place ${pieces[G.active_stack[0]].name} as reinforcement.`)
+                button("delay")
+            }
+            return
+        }
+        var hq_in_list = false
+        L.hq_reinforcement.filter(hq => L.unit_reinforcement.includes(hq)).forEach(hq => {
+            hq_in_list = true
+            action_unit(hq)
+        })
+        if (hq_in_list) {
+            prompt(`Choose hq to place as reinforcement.`)
+            return
+        }
+        L.unit_reinforcement.forEach(u => action_unit(u))
+        if (!L.unit_reinforcement.length) {
+            button("done")
+        }
+        prompt(`Choose unit to place as reinforcement.`)
+    },
+    unit(u) {
+        push_undo()
+        G.active_stack = [u]
+        set_delete(L.unit_reinforcement, u)
+        if (pieces[u].class !== "hq") {
+            L.allowed_hexes = get_unit_reinforcement_hexes(u)
+        }
+    },
+    action_hex(hex) {
+        push_undo()
+        log(`${pieces[G.active_stack[0]].name} placed to ${int_to_hex(hex)}`)
+        set_location(G.active_stack[0], hex)
+        if (pieces[G.active_stack[0]].class === "hq") {
+            set_delete(L.allowed_hexes, hex)
+            G.supply_cache[hex] |= pieces[G.active_stack[0]].supply
+        }
+        G.active_stack = []
+    },
+    delay() {
+        push_undo()
+        set_location(G.active_stack[0], DELAYED_BOX)
+        if (!sent_to_europe(G.active_stack[0])) {
+            log(`${pieces[G.active_stack[0]].name} delayed to next turn`)
+        }
+        G.active_stack = []
+    },
+    done() {
+        push_undo()
+        check_supply()
+        end()
+    }
+}
+
+
+function get_replacement_points() {
+    var result = {
+        GROUND: 0,
+        AIR: 0,
+        NAVAL: 0,
+        CHINESE: 0,
+        COMMONWEALTH: 0,
+    }
+    if (G.active === JP) {
+        result.NAVAL = ([3, 4, 11].includes(G.turn) ? 1 : 0) + G.reinforcements.NAVAL
+        result.AIR = G.reinforcements.AIR
+        return result
+    }
+    if (is_space_controlled(OAHU, AP)) {
+        result.NAVAL = 2
+    } else {
+        result.NAVAL = 1
+    }
+    if ([6, 9, 12].includes(G.turn) && COM_REPLACEMENT_POINTS.filter(h => is_space_controlled(h, AP)).length) {
+        result.COMMONWEALTH = 1
+    }
+    result.GROUND = 2
+    result.AIR = 5
+    if (G.turn >= 3 && G.turn % 2 === 1) {
+        result.CHINESE = 1
+    }
+    return result
+}
+
+function print_reinforcements() {
+    var reinf = L.replacement_points
+    return `${G.active === AP ? "US Naval" : "Naval"}: ${reinf.NAVAL}${G.active === AP ? (", Commonwealth: " + reinf.COMMONWEALTH + "") : ""}, 
+    Air: ${reinf.AIR}, Ground: ${reinf.GROUND}${G.active === AP ? (", China: " + reinf.CHINESE) : ""}
+    ${G.active === JP ? (", Divisions from China: " + L.divisions) : ""}
+    `
+}
+
+P.replacement_segment = {
+    _begin() {
+        log(`${G.active === AP ? "Allied" : "Japan"} replacement segment.`)
+        L.replacement_points = get_replacement_points()
+        if (G.active === JP) {
+            G.reinforcements = L.replacement_points
+        }
+        L.divisions = G.active === JP ? Math.min(2, G.china_divisions) : 0
+        L.replacable_units = []
+        L.allowed_hexes = []
+        for_each_unit((u, piece, location) => {
+            if (piece.faction === G.active
+                && !piece.notreplaceable
+                && !is_reinforcement_denied(u)
+                && location === ELIMINATED_BOX) {
+                set_add(L.replacable_units, u)
+            }
+        })
+    },
+    prompt() {
+        if (G.active_stack.length > 0) {
+            prompt(`Choose hex to place ${pieces[G.active_stack[0]].name}.`)
+            L.allowed_hexes.forEach(h => action_hex(h))
+            return
+        }
+        if (G.active !== JP || L.replacement_points.GROUND <= 0) {
+            button("done")
+        }
+        if (L.divisions) {
+            action("divisions", 0)
+        }
+
+        prompt(`Choose unit to reinforce.` + print_reinforcements())
+        L.replacable_units.filter(u => {
+            var piece = pieces[u]
+            return piece.faction === G.active && !piece.notreplaceable && L.replacement_points[piece.replacement] > 0
+        }).forEach(u => action_unit(u))
+        G.reduced.filter(u => {
+            var piece = pieces[u]
+            return piece.faction === G.active && !piece.notreplaceable && L.replacement_points[piece.replacement] > 0 && G.location[u] <= LAST_BOARD_HEX
+        }).forEach(u => action_unit(u))
+    },
+    divisions() {
+        push_undo()
+        L.divisions -= 1
+        G.china_divisions -= 1
+        log(`Japanese divisions in China reduced to ${G.china_divisions}`)
+        L.replacement_points.GROUND++
+    },
+    action_hex(hex) {
+        push_undo()
+        log(`${pieces[G.active_stack[0]].name} placed to ${int_to_hex(hex)}`)
+        set_location(G.active_stack[0], hex)
+        G.active_stack = []
+    },
+    unit(u) {
+        push_undo()
+        if (set_has(G.reduced, u)) {
+            set_delete(G.reduced, u)
+        } else {
+            set_add(G.reduced, u)
+            G.active_stack = [u]
+            set_delete(L.replacable_units, u)
+            L.allowed_hexes = get_unit_reinforcement_hexes(u)
+        }
+        L.replacement_points[pieces[u].replacement] -= 1
+        if (G.active === JP) {
+            G.reinforcements = L.replacement_points
+        }
+    },
+    done() {
+        push_undo()
+        check_supply()
+        end()
+    }
 }
 
 function change_asp(faction, count) {
@@ -848,8 +1204,8 @@ P.offensive_segment = {
     },
     deploy_b29() {
         capture_hex(hex_to_int(3709), AP)
-        G.location[ap_air("20_bc")] = hex_to_int(3709)
-        G.location[ap_air("21_bc")] = hex_to_int(3709)
+        set_location(ap_air("20_bc"), hex_to_int(3709))
+        set_location(ap_air("21_bc"), hex_to_int(3709))
     },
 }
 
@@ -1384,7 +1740,7 @@ P.move_offensive_units = {
         G.active_stack.forEach(u => {
             map_set(G.offensive.paths, u, curr_path.slice())
             if (L.state !== "attack") {
-                G.location[u] = hex
+                set_location(u, hex)
             }
         })
         if (curr_path[0] & GROUND_MOVE) {
@@ -1649,7 +2005,7 @@ function mark_supply_ports_oversea(hq, piece) {
 }
 
 function supply_source_in_range(location, faction) {
-    if (!is_faction_units(location, faction)) {
+    if (!is_faction_units(location, faction) && !MAP_DATA[location].airfield) {
         return false
     } else if (G.supply_cache[location] & JP_SUPPLY_PORT << faction) {
         return true
@@ -1857,7 +2213,6 @@ function check_burma_road() {
             if (distance > 1 || map_has(distance_map, nh) || occupied_land || is_space_controlled(nh, JP)) {
                 continue
             }
-            console.log(int_to_hex(nh))
             map_set(distance_map, nh, distance)
 
             if (nh === MADRAS) {
@@ -1897,6 +2252,59 @@ function check_burma_road() {
         }
     }
     check_hump()
+}
+
+function is_overstack(hex, unit) {
+    var overstack = G.overstack[hex]
+    var piece = pieces[unit]
+    if (piece.class === "hq") {
+        return overstack & 1
+    } else if (piece.class !== "naval") {
+        return ((overstack + 2) % (1 << 7)) >= 8
+    } else {
+        return ((overstack + 128) >> 7) > 5
+    }
+}
+
+function get_overstack_size(unit) {
+    var piece = pieces[unit]
+    if (piece.class === "hq") {
+        return 1
+    } else if (piece.class !== "naval") {
+        return 2
+    } else {
+        return 1 << 7
+    }
+}
+
+function set_location(unit, location) {
+    var prev_location = G.location[unit]
+    var size = get_overstack_size(unit)
+    if (prev_location <= LAST_BOARD_HEX || prev_location === CHINA_BOX) {
+        G.overstack[prev_location] -= size
+    }
+    if (location <= LAST_BOARD_HEX || location === CHINA_BOX) {
+        G.overstack[location] += size
+    }
+    G.location[unit] = location
+}
+
+function fill_overstack() {
+    for (var i = 0; i <= LAST_BOARD_HEX; i++) {
+        G.overstack[i] = 0
+    }
+    G.overstack[CHINA_BOX] = 0
+    for_each_unit((u, piece, location) => {
+        if (location <= LAST_BOARD_HEX && piece.class === "hq") {
+            G.overstack[location] |= 1
+        } else if (location <= LAST_BOARD_HEX && piece.class !== "naval") {
+            G.overstack[location] += (1 << 1)
+        } else if (location <= LAST_BOARD_HEX) {
+            G.overstack[location] += (1 << 7)
+        } else if (location === CHINA_BOX) {
+            G.overstack[location] += 2
+        }
+    })
 }
 
 function check_supply() {
@@ -2907,11 +3315,11 @@ P.retreat = {
     },
     eliminate() {
         push_undo()
-        G.location[G.active_stack[0]] = ELIMINATED_BOX
+        eliminate(G.active_stack[0])
     },
     action_hex(hex) {
         push_undo()
-        G.location[G.active_stack[0]] = hex
+        set_location(G.active_stack[0], hex)
         G.active_stack = []
     },
     unit(u) {
@@ -2943,12 +3351,6 @@ P.emergency_move = {
         L.hex_to_retreat = []
         L.unit_to_retreat = []
         for_each_unit_on_map((u, piece, location) => {
-            if (u === find_piece("aoba")) {
-                console.log(G.active)
-                console.log(piece.faction !== G.active)
-                console.log(is_space_controlled(location, G.active))
-                console.log(!is_faction_units(location, 1 - G.active))
-            }
             if (piece.faction !== G.active || is_space_controlled(location, G.active) || piece.class === "ground") {
                 return
             }
@@ -2979,7 +3381,7 @@ P.emergency_move = {
     },
     eliminate() {
         push_undo()
-        G.location[G.active_stack[0]] = ELIMINATED_BOX
+        eliminate(G.active_stack[0])
         G.active_stack = []
     },
     unit(u) {
@@ -2991,7 +3393,7 @@ P.emergency_move = {
     action_hex(hex) {
         push_undo()
         log(`${pieces[G.active_stack[0]].name} emergency moved to ${int_to_hex(hex)}`)
-        G.location[G.active_stack[0]] = hex
+        set_location(G.active_stack[0], hex)
         G.active_stack = []
         check_supply()
     },
@@ -3086,9 +3488,9 @@ P.national_status_segment = function () {
         set_control_over_nation(nations.DEI)
     }
     if (check_nation_surrender(nations.BURMA) && G.surrender[nations.BURMA.id]) {
-        for_each_unit_on_map((u, piece) => {
+        for_each_unit((u, piece) => {
             if (piece.service === "bu") {
-                eliminate(u)
+                eliminate_permanently(u)
             }
         })
     }
@@ -3098,8 +3500,12 @@ P.national_status_segment = function () {
     } else if (G.surrender[nations.INDIA.id]) {
         india_stable()
     }
-    if (!G.surrender[nations.AUSTRALIA.id]) {
-        check_nation_surrender(nations.AUSTRALIA)
+    if (check_nation_surrender(nations.AUSTRALIA) && check_event(events.AUSTRALIA_SURRENDER)) {
+        for_each_unit((u, piece, location) => {
+            if (piece.service === "au" && location >= LAST_BOARD_HEX) {
+                eliminate_permanently(u)
+            }
+        })
     }
     if (check_nation_surrender(nations.AUSTRALIAN_MANDATES)) {
         set_control_over_nation(nations.AUSTRALIAN_MANDATES)
@@ -3144,8 +3550,8 @@ function update_china_status(diff, to_stable = false) {
 }
 
 function displace_to_turn(unit, turns, not_delayed) {
-    log(`${pieces[unit].name} moved to turn ${G.turn + turns}`)
-    G.location[unit] = TURN_BOX + G.turn + turns
+    log(`${pieces[unit].name} displaced to turn box ${G.turn + turns}`)
+    set_location(unit, TURN_BOX + G.turn + turns)
     if (not_delayed) {
         set_add(G.not_delayed, unit)
     }
@@ -3155,9 +3561,7 @@ function china_surrender() {
     log(`China surrenders!`)
     var units = [ap_army("5_cn"), ap_army("6_cn"), ap_army("66_cn")]
     units.forEach(u => {
-        log(`${pieces[u].name} permanently eliminated`)
-        G.location[u] = NON_PLACED_BOX
-        set_delete(G.reduced, u)
+        eliminate_permanently(u)
     })
     for_each_unit((u, piece, location) => {
         if (location === CHINA_BOX) {
@@ -3182,12 +3586,14 @@ P.india_surrender = {
         G.active = AP
         L.hex_to_retreat = []
         L.unit_to_retreat = []
-        for_each_unit_on_map((u, piece, location) => {
+        for_each_unit((u, piece, location) => {
             var in_india = nations.INDIA.regions.includes(MAP_DATA[location].region)
             if (in_india && piece.class === "hq" && piece.service === "br") {
                 eliminate(u)
-            } else if (piece.service === "ind" || in_india) {
+            } else if (piece.service === "ind" && location <= LAST_BOARD_HEX || in_india) {
                 set_add(L.unit_to_retreat, u)
+            } else if (piece.service === "ind") {
+                eliminate_permanently(u)
             }
         })
         change_political_will(-nations.INDIA.pw, nations.INDIA.name)
@@ -3222,8 +3628,7 @@ P.india_surrender = {
     },
     eliminate() {
         push_undo()
-        log(`Unit ${pieces[G.active_stack[0]].name} PERMANENTLY eliminated`)
-        G.location[G.active_stack[0]] = NON_PLACED_BOX
+        eliminate_permanently(pieces[G.active_stack[0]])
         G.active_stack = []
     },
     unit(u) {
@@ -3239,7 +3644,7 @@ P.india_surrender = {
     action_hex(hex) {
         push_undo()
         log(`${pieces[G.active_stack[0]].name} emergency moved to ${int_to_hex(hex)}`)
-        G.location[G.active_stack[0]] = hex
+        set_location(G.active_stack[0], hex)
         G.active_stack = []
         check_supply()
     },
@@ -3247,10 +3652,6 @@ P.india_surrender = {
         push_undo()
         end()
     }
-}
-
-function is_overstack(hex, unit) {
-    return false
 }
 
 function check_nation_controlled(nation, faction) {
@@ -3353,12 +3754,13 @@ function is_event_active(event) {
 
 function check_event(event) {
     if (is_event_active(event)) {
-        return
+        return false
     }
     G.events[event.id] = G.turn
     if (event.pw) {
         change_political_will(event.pw, event.cause)
     }
+    return true
 }
 
 function check_occupation(event) {
@@ -3516,7 +3918,25 @@ function draw_card(side) {
     return c
 }
 
+function eliminate_permanently(unit) {
+    if (G.location[unit] !== NON_PLACED_BOX) {
+        log(`${pieces[unit].name} removed from game`)
+    }
+    set_location(unit, NON_PLACED_BOX)
+    set_delete(G.reduced, unit)
+}
+
 function eliminate(unit) {
+    var piece = pieces[unit]
+    var size = get_overstack_size(unit)
+    var location = G.location[unit]
+    if (location <= LAST_BOARD_HEX || location === CHINA_BOX) {
+        G.overstack[i] -= size
+    }
+    if (piece.class === "hq" && !piece.notreplaceable) {
+        displace_to_turn(unit, 1)
+        return
+    }
     log(`${pieces[unit].name} eliminated`)
     G.location[unit] = ELIMINATED_BOX
     set_delete(G.reduced, unit)
@@ -3633,9 +4053,8 @@ function setup_scenario_1942() {
     G.political_will = 8
     G.china_divisions = 11
 
-    var surrended = [nations.PHILIPPINES, nations.MALAYA, nations.DEI, nations.AUSTRALIAN_MANDATES]
-    surrended.forEach(n => G.surrender[n.id] = G.turn - 1)
     check_supply()
+    fill_overstack()
     call("offensive_phase")
 }
 
@@ -3648,13 +4067,6 @@ function setup_scenario_1943() {
         G.surrender[n.id] = 1
         set_control_over_nation(n)
     })
-    // for (let i = 1; i < LAST_BOARD_HEX; i++) {
-    //     if (is_controllable_hex(i) && ["Malaya", "Philippines", "DEI", "Java", "Borneo", "Sumatra", "Celebes", "Burma", "AMandates"]
-    //         .includes(MAP_DATA[i].region)) {
-    //         set_add(G.control, i)
-    //     }
-    // }
-
 
     G.reduced = []
     //ap setup
@@ -3843,6 +4255,7 @@ function setup_scenario_1943() {
         draw_card(AP)
     }
     check_supply()
+    fill_overstack()
     call("offensive_phase")
 }
 
@@ -3910,6 +4323,7 @@ function on_setup(scenario, options) {
     G.location = []
     G.reduced = []
     G.oos = []
+    G.reinforcements = {NAVAL: 0, AIR: 0}
     G.strategic_warfare = 0
     G.control = []
     G.capture = []
@@ -3920,6 +4334,7 @@ function on_setup(scenario, options) {
     G.surrender[nations.MARSHALL.id] = true //only nation under JP control
     G.committed = []
     G.supply_cache = []
+    G.overstack = []
     G.pow = 0
     for (let i = 1; i < LAST_BOARD_HEX; i++) {
         if (is_controllable_hex(i) && ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Siam", "Caroline", "Marshall", "Japan"].includes(MAP_DATA[i].region)) {
@@ -3928,7 +4343,6 @@ function on_setup(scenario, options) {
     }
     reset_offensive()
     construct_decks()
-    G.location = []
     for (let i = 0; i < pieces.length; i++) {
         var piece = pieces[i]
         G.location[i] = NON_PLACED_BOX
@@ -3969,6 +4383,7 @@ function on_view() {
     V.active_stack = G.active_stack
     V.surrender = G.surrender
     V.events = G.events
+    V.reinforcements = G.reinforcements
     V.burma_road = G.burma_road
     V.china_divisions = G.china_divisions
     V.offensive = {

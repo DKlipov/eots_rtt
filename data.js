@@ -1603,7 +1603,7 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 5,
-        "reinforcement": 5,
+        "reinforcement": 3,
     },
     {
         id: "air_ap_11_lrb",
@@ -1633,7 +1633,7 @@ data.pieces = [
         "br": 2,
         "ebr": 4,
         "rcf": 5,
-        "reinforcement": 5,
+        "reinforcement": 3,
     },
     {
         id: "air_ap_14_lrb",
@@ -5902,6 +5902,9 @@ data.events = {
     },
     HUMP: {
         id: 15,
+    },
+    AUSTRALIA_SURRENDER: {
+        id: 16,
     },
 }
 

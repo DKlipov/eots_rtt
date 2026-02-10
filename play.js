@@ -40,6 +40,14 @@ const TRACK_MARKERS = [
         value: G => RESOURCE_HEX.filter(h => set_has(G.control, h)).length
     },
     {
+        counter: "naval_repl",
+        value: G => G.reinforcements.NAVAL
+    },
+    {
+        counter: "air_repl",
+        value: G => G.reinforcements.AIR
+    },
+    {
         counter: "asp_jp",
         value: G => G.asp[0][0]
     },
@@ -149,8 +157,8 @@ function on_init() {
         ZOI_HEX.push(define_space("zoi", i, [center[0] - 29, center[1] - 19, 45, 45], "hex hide"))
     }
     define_layout("board_hex", NON_PLACED_BOX, [10, 10, 45, 45], "stack")
-    define_layout("board_hex", ELIMINATED_BOX, [50, 50, 45, 45], "stack")
-    define_layout("board_hex", DELAYED_BOX, [2100, 1350, 45, 45], "stack")
+    define_layout("board_hex", ELIMINATED_BOX, [100, 1180, 45, 45], "stack")
+    define_layout("board_hex", DELAYED_BOX, [2170, 1380, 45, 45], "stack")
     define_layout("board_hex", CHINA_BOX, [790, 380, 45, 45], "stack")
     define_layout("status", JP_AGREEMENT, [890, 130, 35, 35])
     define_layout("status", AP_AGREEMENT, [945, 130, 35, 35])
@@ -178,6 +186,7 @@ function on_init() {
     for (i = 0; i < 13; i++) {
         define_layout("divisions", i, [606 + Math.floor((i * 42.1)), 42, 35, 35])
     }
+    define_marker("divisions", 0, "divisions_china")
     for (let i = 0; i < data.pieces.length; ++i) {
         let piece = data.pieces[i]
         piece.element = define_piece("unit", i, piece.counter)
@@ -329,9 +338,9 @@ function place_unit(u, location) {
         unit.classList.toggle("selected", G.active_stack.includes(u))
         unit.classList.toggle("reduced", set_has(G.reduced, u))
         unit.classList.toggle("oos", set_has(G.oos, u))
-    } else {
+    } else if (location === ELIMINATED_BOX && !data.pieces[u].notreplaceable || location !== ELIMINATED_BOX) {
         unit = populate("board_hex", location, "unit", u)
-        unit.classList.toggle("reduced", set_has(G.reduced, u))
+        unit.classList.toggle("reduced", set_has(G.reduced, u) || location === ELIMINATED_BOX)
     }
 }
 
@@ -462,7 +471,7 @@ function on_update() {
 
     populate_generic("burma", G.burma_road, `marker burma_road${G.events[data.events.HUMP.id] ? "_hump" : ""}`)
     populate_generic("china", Math.min(5, G.surrender[data.nations.CHINA.id]), `marker china`)
-    populate_generic("divisions", G.china_divisions, `marker divisions_china`)
+    populate("divisions", G.china_divisions, `divisions`, 0)
 
 
     for (i = 0; i < TURN_MARKERS.length; i++) {
@@ -504,8 +513,9 @@ function on_update() {
     action_button("no_move", "No move")
     action_button("next", "Next")
     action_button("done", "Done")
-    action_button("undo", "Undo")
+    action_button("delay", "Delay")
     action_button("all", "Choose all")
+    action_button("undo", "Undo")
 
     //debug
     action_button("isr", "isr")

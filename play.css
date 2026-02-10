@@ -168,12 +168,15 @@ body.Allies #jp_hand { grid-row: 4; }
 }
 
 
-.piece.action {
-	pointer-events: auto;
-	border-color: yellow;!important;
-	box-shadow: 0 0 2px black, inset 0 0 2px black;
-	border-width: 4px;
-	/*box-shadow: 0 0 0 3px lime; border-color: #000;*/
+.piece.action, .marker.action {
+    pointer-events: auto;
+    border-color: yellow;!important;
+    box-shadow: 0 0 2px black, inset 0 0 2px black;
+    border-width: 4px;
+    /*box-shadow: 0 0 0 3px lime; border-color: #000;*/
+    /*border-color: transparent;*/
+    /*box-shadow: none;*/
+    border-style: solid;
 }
 
 .unit, .marker{

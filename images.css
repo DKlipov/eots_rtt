@@ -43,6 +43,8 @@
 .marker.burma_road_hump { background-image: url(markers75/burma_road_hump.png);  }
 .marker.china_offensive { background-image: url(markers75/china_offensive.png);  }
 .marker.divisions_china { background-image: url(markers75/divisions_china.png);  }
+.marker.air_repl { background-image: url(markers75/air_rep.png);  }
+.marker.naval_repl { background-image: url(markers75/naval_rep.png);  }
 
 
 /* ARMIES (45x45) */

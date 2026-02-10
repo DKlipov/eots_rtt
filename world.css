@@ -67,12 +67,6 @@ body.hide-pieces .piece {
     position: relative;
 }
 
-.piece.action {
-    border-color: transparent;
-    box-shadow: none;
-    border-style: solid;
-}
-
 .piece.selected {
     transform: rotate(22.5deg);
 }

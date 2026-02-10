@@ -1,7 +1,6 @@
 Todo list:
-* [WIP] Replacement & reinforcement segment
-* War in Europe
-* Event cards
+* [WIP] War in Europe
+* [WIP] Event cards
 * Check overstacking
 * Battle roll modifiers
 * Ground disengadgement
