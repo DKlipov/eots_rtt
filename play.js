@@ -334,13 +334,14 @@ function place_unit(u, location) {
     var unit
     if (location > TURN_BOX && location <= (TURN_BOX + 12)) {
         unit = populate("turn", location - TURN_BOX, "unit", u)
-        unit.classList.toggle("activated", G.offensive.active_units.includes(u))
-        unit.classList.toggle("selected", G.active_stack.includes(u))
         unit.classList.toggle("reduced", set_has(G.reduced, u))
-        unit.classList.toggle("oos", set_has(G.oos, u))
     } else if (location === ELIMINATED_BOX && !data.pieces[u].notreplaceable || location !== ELIMINATED_BOX) {
         unit = populate("board_hex", location, "unit", u)
-        unit.classList.toggle("reduced", set_has(G.reduced, u) || location === ELIMINATED_BOX)
+        unit.classList.toggle("reduced", set_has(G.reduced, u) || location === ELIMINATED_BOX
+            || data.pieces[u].class === "hq" && G.inter_service[data.pieces[u].faction])
+        unit.classList.toggle("oos", set_has(G.oos, u))
+        unit.classList.toggle("activated", G.offensive.active_units.includes(u))
+        unit.classList.toggle("selected", G.active_stack.includes(u))
     }
 }
 
