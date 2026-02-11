@@ -58,11 +58,20 @@ header { background-color: tan }
 	text-indent: 0;
 }
 
-#log .fm { background-color: lightblue; }
-#log .gm { background-color: gainsboro; }
-#log .fm.dark { background-color: steelblue; }
-#log .gm.dark { background-color: dimgray; }
-#log .dark { color: white; font-weight: bold; }
+#chat_text .Allied_Powers { background-color: lightpink }
+#chat_text .Central_Powers { background-color: lightblue }
+body.Japan header.your_turn { background-color: lightcoral; }
+body.Allies header.your_turn { background-color: lightsteelblue; }
+#role_Allied_Powers { background-color: lightcoral; }
+#role_Central_Powers { background-color: lightsteelblue; }
+#log .jp { background-color: lightpink; }
+#log .ap { background-color: lightblue; }
+
+/*#log .fm { background-color: lightblue; }*/
+/*#log .gm { background-color: gainsboro; }*/
+/*#log .fm.dark { background-color: steelblue; }*/
+/*#log .gm.dark { background-color: dimgray; }*/
+/*#log .dark { color: white; font-weight: bold; }*/
 
 .d0 { background-position: -100% 0 }
 .d1 { background-position: 0% 0; }
