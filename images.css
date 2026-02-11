@@ -60,7 +60,8 @@
 .army_jp_2 { background-image: url(pieces/army_jp_2.png); background-size: 306px 70px; }
 .army_us { background-image: url(pieces/army_us.png); background-size: 408px 70px; }
 .cv_jp { background-image: url(pieces/cv_jp.png); background-size: 306px 70px; }
-.cv_us { background-image: url(pieces/cv_us.png); background-size: 647px 70px; }
+.cv_us { background-image: url(pieces/cv_us.png); background-size: 385px 70px; }
+.cvl_us { background-image: url(pieces/cve_us.png); background-size: 245px 70px; }
 .force_aus { background-image: url(pieces/force_aus.png); background-size: 68px 70px; }
 .force_dutch { background-image: url(pieces/force_dutch.png); background-size: 375px 70px; }
 .hq_br { background-image: url(pieces/hq_br.png); background-size: 70px 70px; }
