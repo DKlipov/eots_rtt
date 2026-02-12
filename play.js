@@ -133,7 +133,7 @@ function on_focus_card_tip(c) {
 }
 
 function on_blur_card_tip(c) {
-    document.getElementById("tooltip").classList = "hide"
+    document.getElementById("tooltip").hidden = true
 }
 
 function clear_paths() {
@@ -546,14 +546,14 @@ function show_popup_menu(evt, menu_id, target_id, title, hide = '') {
         if (action) {
             if (action === hide) {
                 item.classList.remove("action")
-                item.classList.add("hide")
+                item.hidden = true
                 item.onclick = null
             } else {
                 if (is_action(action, target_id)) {
                     show = true
                     item.classList.add("action")
                     item.classList.remove("disabled")
-                    item.classList.remove("hide")
+                    item.hidden = false
                     item.onclick = function () {
                         send_action(action, target_id)
                         hide_popup_menu()
@@ -561,7 +561,7 @@ function show_popup_menu(evt, menu_id, target_id, title, hide = '') {
                     }
                 } else {
                     item.classList.remove("action")
-                    item.classList.add("hide")
+                    item.hidden = true
                     item.classList.remove("disabled")
                     item.onclick = null
                 }
