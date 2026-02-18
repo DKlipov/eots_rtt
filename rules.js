@@ -370,6 +370,7 @@ P.strategic_phase = script(`
     call reinforcement_segment
     set G.active JP 
     call reinforcement_segment
+    log ("Replacement segment")
     set G.active AP 
     call replacement_segment
     set G.active JP
@@ -649,12 +650,11 @@ function print_reinforcements() {
 
 P.replacement_segment = {
     _begin() {
-        log(`${G.active === AP ? "Allied" : "Japan"} replacement segment.`)
         L.replacement_points = get_replacement_points()
         if (G.active === JP) {
             G.reinforcements = L.replacement_points
         }
-        L.divisions = G.active === JP ? Math.min(2, G.china_divisions) : 0
+        L.divisions = (G.active === JP && !L.restricted) ? Math.min(2, G.china_divisions) : 0
         L.replacable_units = []
         L.allowed_hexes = []
         for_each_unit((u, piece, location) => {
@@ -680,13 +680,15 @@ P.replacement_segment = {
         }
 
         prompt(`Choose unit to reinforce.` + print_reinforcements())
+        var filter = (piece => piece.faction === G.active && !piece.notreplaceable && L.replacement_points[piece.replacement] > 0
+            && (!L.restricted || L.restricted[piece.replacement] > 0))
         L.replacable_units.filter(u => {
             var piece = pieces[u]
-            return piece.faction === G.active && !piece.notreplaceable && L.replacement_points[piece.replacement] > 0
+            return filter(piece)
         }).forEach(u => action_unit(u))
         G.reduced.filter(u => {
             var piece = pieces[u]
-            return piece.faction === G.active && !piece.notreplaceable && L.replacement_points[piece.replacement] > 0 && G.location[u] <= LAST_BOARD_HEX
+            return filter(piece) && G.location[u] <= LAST_BOARD_HEX
         }).forEach(u => action_unit(u))
     },
     divisions() {
@@ -1029,7 +1031,8 @@ function get_allowed_actions(num) {
         return ["ops"]
     }
     let result = ["ops", "discard"]
-    if (card.type === MILITARY && event_hq_check(card)) {
+    if (card.type === MILITARY && event_hq_check(card) ||
+        (card.type === POLITICAL || card.type === RESOURCE) && card.can_play()) {
         result.push("event")
     }
     if (card.ops >= 3) {
@@ -1085,7 +1088,7 @@ function play_reaction(c) {
     if (cards[c].draw) {
         into_turn_draw(faction)
     }
-    if (cards[c].intelligence) {
+    if (cards[c].intelligence && G.offensive.intelligence !== AMBUSH) {
         G.offensive.intelligence = cards[c].intelligence
         log(`Intelligence condition changed to ${get_named_intelligence(G.offensive.intelligence)}`)
     }
@@ -1182,10 +1185,13 @@ P.offensive_segment = {
     },
     event(c) {
         push_undo()
+        log(`${R} played ${cards[c].name} as event card`)
         if (cards[c].type === MILITARY) {
             military_card(c)
-            log(`${R} played ${cards[c].name} as event card`)
             goto("offensive_sequence")
+        } else {
+            activate_card(c)
+            goto("default_event")
         }
     },
     discard(c) {
@@ -2985,13 +2991,16 @@ P.define_intelligence_condition = {
         L.rolled = false
         L.card = false
         L.intelligence_dice = get_intelligence_dice()
+        G.offensive.logistic = cards[G.offensive.offensive_card].ops
     },
     prompt() {
         prompt(`${offensive_card_header()} Change intelligence condition.`)
         if (G.offensive.type === EC && cards[G.offensive.offensive_card].intelligence) {
-            button("skip")
-        } else if (!L.card && !L.rolled) {
-            button("roll")
+            if (!L.card) {
+                button("skip")
+            } else if (!L.card && !L.rolled) {
+                button("roll")
+            }
         }
         if (!L.rolled) {
             get_hand(G.active).filter(c => {
@@ -3007,9 +3016,11 @@ P.define_intelligence_condition = {
         }
     },
     done() {
+        push_undo()
         end()
     },
     skip() {
+        push_undo()
         end()
     },
     card(c) {
@@ -4072,9 +4083,13 @@ cards[COL_TSUJI].before_unit_activation = function () {
 }
 
 cards[JN_25_SPECIAL].can_play = function () {
-    console.log("check!")
     G.offensive.active_cards.forEach(c => console.log(`${cards[c].type} ${cards[c].faction}`))
     return G.offensive.active_cards.filter(c => cards[c].type === INTELLIGENCE && cards[c].faction === JP).length <= 0
+}
+
+cards[find_card(JP, 5)].event = function () {
+    G.reinforcements.AIR += 2
+    call("replacement_segment", {restricted: {AIR: 2}})
 }
 
 for (var i = 0; i < cards.length; i++) {
@@ -4084,6 +4099,13 @@ for (var i = 0; i < cards.length; i++) {
     }
 
 }
+
+P.default_event = script(`
+    eval {
+        cards[G.offensive.offensive_card].event()
+    }
+    goto end_action
+`)
 
 /* SETUP */
 
@@ -4588,7 +4610,7 @@ function on_view() {
     V.active_stack = G.active_stack
     V.surrender = G.surrender
     V.events = G.events
-    V.draw = G.draw
+    V.draw_counter = G.draw_counter
     V.reinforcements = G.reinforcements
     V.burma_road = G.burma_road
     V.china_divisions = G.china_divisions

@@ -68,6 +68,14 @@ const TRACK_MARKERS = [
         value: G => G.asp[1][1]
     },
     {
+        counter: "drawn_jp",
+        value: G => G.draw_counter[0]
+    },
+    {
+        counter: "drawn_ap",
+        value: G => G.draw_counter[1]
+    },
+    {
         counter: "pass_jp",
         value: G => G.passes[0]
     },
@@ -566,13 +574,9 @@ function show_popup_menu(evt, menu_id, target_id, title, hide = '') {
             }
         }
     }
-    console.log(show)
-    console.log(view.actions)
-    console.log(target_id)
-    console.log(is_action("play_ops", target_id))
     if (show) {
         menu.onmouseleave = hide_popup_menu
-        menu.style.display = "block"
+        menu.hidden = false
         if (title) {
             let item = menu.querySelector("li.title")
             if (item) {
@@ -595,7 +599,7 @@ function show_popup_menu(evt, menu_id, target_id, title, hide = '') {
 }
 
 function hide_popup_menu() {
-    document.getElementById("card_popup").style.display = "none"
+    document.getElementById("card_popup").hidden = true
 }
 
 const ICONS = {
