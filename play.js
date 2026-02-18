@@ -346,7 +346,6 @@ function place_unit(u, location) {
 }
 
 function on_update() {
-    var z, u
 
     begin_update()
 
@@ -380,9 +379,8 @@ function on_update() {
         .forEach(h => populate_generic("board_hex", h, "marker control_ap"))
     G.capture.forEach(h => populate_generic("board_hex", h, set_has(G.control, h) ? "marker capture_jp" : "marker capture_ap"))
     for (var i = 0; i < data.pieces.length; ++i) {
-        let piece = data.pieces[i]
         if (G.location[i] > 0) {
-            let unit = place_unit(i, G.location[i])
+            place_unit(i, G.location[i])
         }
     }
     if (G.turn > 3) {

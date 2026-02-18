@@ -23,9 +23,9 @@ const INTELLIGENCE = 5
 const REACTION = 6
 
 //Intelligence types
-const SURPRISE = 0
-const INTERCEPT = 1
-const AMBUSH = 2
+const SURPRISE = 1
+const INTERCEPT = 2
+const AMBUSH = 3
 
 
 data.pieces = [

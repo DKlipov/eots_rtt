@@ -49,9 +49,9 @@ const BATTLE_STAGE = 2
 const POST_BATTLE_STAGE = POST_BATTLE_MOVE
 
 //Intelligence
-const SURPRISE = 0
-const INTERCEPT = 1
-const AMBUSH = 2
+const SURPRISE = 1
+const INTERCEPT = 2
+const AMBUSH = 3
 
 //hex data
 const CITY = 1
@@ -128,6 +128,8 @@ const ROAD_EVENTS = Object.keys(events).filter(k => events[k].road).map(k => {
 })
 
 //cards
+const COL_TSUJI = find_card(JP, 3)
+const JN_25_SPECIAL = find_card(JP, 13)
 const TOJO_RESIGNS = find_card(JP, 43)
 const SOVIET_INVADE = find_card(AP, 79)
 
@@ -155,6 +157,7 @@ const US_ASIA_CA = find_piece("casia")
 const N_ORLEANS = find_piece("orleans")
 const B_29_1 = ap_air("20_bc")
 const B_29_2 = ap_air("21_bc")
+const ARMOR_BRIGADE = ap_army("7")
 
 
 const HQ_YAMAMOTO = find_piece("hq_jp_cy")
@@ -895,6 +898,7 @@ P.deal_cards = function () {
     for (let i = 0; i < ap_cards; i++) {
         draw_card(AP)
     }
+    draw_all_cards()
     end()
 }
 
@@ -1048,19 +1052,67 @@ function military_card(c) {
     if (card.logistic) {
         G.offensive.logistic = cards[c].logistic
     }
+    if (card.intelligence) {
+        G.offensive.intelligence = card.intelligence
+    }
+    if (cards[c].draw) {
+        into_turn_draw(cards[c].faction)
+    }
+}
+
+function play_counter_offensive(c) {
+    play_reaction(c)
+    G.offensive.counter_offensive_card = c
+    if (cards[c].logistic) {
+        G.offensive.logistic = cards[c].logistic
+    }
+}
+
+function play_reaction(c) {
+    var faction = cards[c].faction
+    G.offensive.active_cards.push(c)
+    if (G.future_offensive[faction] === c) {
+        G.future_offensive[faction] = -1
+        G.events[events.FUTURE_OFFENSIVE_JP.id + faction] = 0
+    } else {
+        array_delete_item(G.hand[faction], c)
+    }
+    if (cards[c].remove) {
+        set_add(G.removed, c)
+    } else {
+        set_add(G.discard[faction], c)
+    }
+    if (cards[c].draw) {
+        into_turn_draw(faction)
+    }
+    if (cards[c].intelligence) {
+        G.offensive.intelligence = cards[c].intelligence
+        log(`Intelligence condition changed to ${get_named_intelligence(G.offensive.intelligence)}`)
+    }
+}
+
+function get_named_intelligence(int) {
+    if (int === SURPRISE) {
+        return "surprise"
+    } else if (int === AMBUSH) {
+        return "ambush"
+    } else {
+        return "intercept"
+    }
 }
 
 function activate_card(c) {
+    var faction = cards[c].faction
     G.offensive.active_cards.push(c)
     G.offensive.offensive_card = c
-    if (G.future_offensive[R] === c) {
-        G.future_offensive[R] = -1
-        G.events[events.FUTURE_OFFENSIVE_JP.id + R] = 0
+    if (G.future_offensive[faction] === c) {
+        G.future_offensive[faction] = -1
+        G.events[events.FUTURE_OFFENSIVE_JP.id + faction] = 0
     } else {
-        array_delete_item(G.hand[R], c)
+        array_delete_item(G.hand[faction], c)
     }
-    G.discard[R].push(c)
-    G.offensive.attacker = R
+    set_add(G.discard[faction], c)
+    G.offensive.attacker = faction
     if (!cards[c].faction && cards[c].ops >= 3) {
         G.offensive.barges = true
     }
@@ -1554,6 +1606,7 @@ P.activate_units = {
     _begin() {
         L.hq_bonus = pieces[G.offensive.active_hq[G.active]].cm
         L.possible_units = get_activatable_units(G.offensive.active_hq[G.active])
+        trigger_event("before_unit_activation")
     },
     prompt() {
         prompt(`${offensive_card_header()} Activate units ${G.offensive.logistic} + ${L.hq_bonus} / ${G.offensive.active_units[R].length}.`)
@@ -1852,7 +1905,11 @@ function for_each_unit(apply) {
     for (let i = 0; i < pieces.length; i++) {
         var piece = pieces[i]
         var location = G.location[i]
-        apply(i, piece, location)
+        var returned = apply(i, piece, location)
+        if (returned) {
+            return returned
+        }
+
     }
 }
 
@@ -1863,7 +1920,10 @@ function for_each_unit_on_map(apply) {
         if (location > LAST_BOARD_HEX) {
             continue
         }
-        apply(i, piece, location)
+        var returned = apply(i, piece, location)
+        if (returned) {
+            return returned
+        }
     }
 }
 
@@ -2907,34 +2967,59 @@ P.special_reaction = {
     },
 }
 
+function into_turn_draw(faction) {
+    if (G.draw_counter[faction] >= 3) {
+        log(`${faction === AP ? "AP" : "JP"} already drown 3 cards, draw skipped`)
+        return
+    }
+    G.draw_counter[faction]++
+    set_add(G.offensive.draw, draw_card(faction, false))
+    clear_undo()
+}
+
 P.define_intelligence_condition = {
     _begin() {
         if (G.offensive.battle_hexes.length <= 0) {
             end()
         }
+        L.rolled = false
+        L.card = false
         L.intelligence_dice = get_intelligence_dice()
-        let card = cards[G.offensive.active_cards[0]]
-        L.card = card
-        if (card.intelligence !== "surprise") {
-            L.roll_allowed = true
-        }
-        if (get_hand(G.active).filter(c => c.intelligence && (c.type === "intercept" || c.type === "conteroffensive")).length > 0) {
-            L.card_allowed = true
-        }
-        if (!L.roll_allowed && !L.card_allowed) {
-            end()
-        }
     },
     prompt() {
-        prompt(`${L.card.name}. Change intelligence condition.`)
-        if (L.roll_allowed) {
+        prompt(`${offensive_card_header()} Change intelligence condition.`)
+        if (G.offensive.type === EC && cards[G.offensive.offensive_card].intelligence) {
+            button("skip")
+        } else if (!L.card && !L.rolled) {
             button("roll")
         }
-        get_hand(G.active).filter(c => c.intelligence && (c.type === "intercept" || c.type === "conteroffensive")).forEach(c => action_card(c))
+        if (!L.rolled) {
+            get_hand(G.active).filter(c => {
+                var card = cards[c]
+                return (card.type === INTELLIGENCE || card.type === COUNTER_OFFENSIVE && G.offensive.counter_offensive_card <= 0)
+                    && card.can_play()
+            }).forEach(c => action_card(c))
+        } else if (G.hand[R].includes(JN_25_SPECIAL)) {
+            action_card(JN_25_SPECIAL)
+        }
+        if (L.rolled || L.card) {
+            button("done")
+        }
+    },
+    done() {
+        end()
+    },
+    skip() {
+        end()
     },
     card(c) {
-        G.offensive.intelligence = INTERCEPT
-        end()
+        push_undo()
+        L.card = true
+        if (cards[c].type === COUNTER_OFFENSIVE) {
+            play_counter_offensive(c)
+        } else {
+            play_reaction(c)
+        }
     },
     roll() {
         let result = random(10)
@@ -2943,7 +3028,11 @@ P.define_intelligence_condition = {
         if (success) {
             G.offensive.intelligence = INTERCEPT
         }
-        end()
+        L.rolled = true
+        clear_undo()
+        if (!G.hand[R].includes(JN_25_SPECIAL)) {
+            end()
+        }
     }
 }
 
@@ -3024,6 +3113,63 @@ function unit_on_board(unit) {
     return G.location[unit] < LAST_BOARD_HEX
 }
 
+function get_ground_roll_modifiers(faction) {
+    var battle = G.offensive.battle
+    var result = 0
+    if (faction === G.offensive.attacker) {
+        var air = [false, false]
+        var naval = [false, false]
+        battle.air_naval[faction].concat(battle.air_naval[1 - faction]).filter(u => unit_on_board(u)).forEach(u => {
+            if (pieces[u].class === "naval" && G.location[u] === battle.battle_hex) {
+                naval[pieces[u].faction] = true
+            }
+            if (pieces[u].br) {
+                air[pieces[u].faction] = true
+            }
+        })
+        if (air[faction] && !air[faction]) {
+            result += 2
+            log(`+2 ${faction ? "Ap" : "Jp"} air support`)
+        }
+        if (naval[faction] && !naval[faction]) {
+            result += 2
+            log(`+2 ${faction ? "Ap" : "Jp"} naval support`)
+        }
+    } else {
+        var terrain = MAP_DATA[battle.battle_hex].terrain
+        if (terrain === JUNGLE) {
+            result += 1
+            log(`+1 Jungle`)
+        } else if (terrain === MIXED) {
+            result += 2
+            log(`+2 Mixed terrain`)
+        }
+        if (terrain === MOUNTAIN) {
+            result += 3
+            log(`+3 Mountains`)
+        }
+
+        if (battle.amph_ground.filter(u => unit_on_board(u)).length && !set_has(G.offensive.landind_hexes, battle.battle_hex)) {
+            result += 3
+            log(`+3 Amphibious assault`)
+        }
+    }
+    if (faction === AP && G.location[ARMOR_BRIGADE] === battle.battle_hex) {
+        result += 1
+        log(`+1 Armor brigade`)
+    }
+    return result
+}
+
+function is_col_tsuji_applied(faction) {
+    if (!(faction === JP && G.offensive.offensive_card === COL_TSUJI && G.offensive.type === EC
+        && G.offensive.battle.ground_stage)) {
+        return false
+    }
+    var map_data = MAP_DATA[G.offensive.battle.battle_hex]
+    return map_data.terrain === JUNGLE || map_data.terrain === MIXED || map_data.region === "Malaya"
+}
+
 function execute_attack(faction) {
     var battle = G.offensive.battle
     var pool = (battle.ground_stage ? battle.ground : battle.air_naval)[faction].filter(u => unit_on_board(u))
@@ -3032,15 +3178,26 @@ function execute_attack(faction) {
         return
     }
     battle.strength[faction] = sum_combat_factor(pool)
+    log(`${G.offensive.attacker === faction ? "Attacker" : "Defender"} fire (${battle.strength[faction]})`)
     battle.roll[faction] = random(10)
+    battle.roll_modifiers = 0
+    if (battle.ground_stage && is_col_tsuji_applied(faction)) {
+        battle.roll_modifiers = 4
+        log(`+4 Col.Tsuji`)
+    } else if (battle.ground_stage) {
+        battle.roll_modifiers = get_ground_roll_modifiers(faction)
+    } else {
+        battle.roll_modifiers = 0
+    }
+    trigger_event("after_battle_roll")
     let roll = battle.roll[faction]
-    battle.hits[faction] = Math.ceil(battle.strength[faction] * (battle.ground_stage ? ground_battle_table(roll) : naval_battle_table(roll)))
+    var modififed_roll = roll + battle.roll_modifiers
+    battle.hits[faction] = Math.ceil(battle.strength[faction] * (battle.ground_stage ? ground_battle_table(modififed_roll) : naval_battle_table(modififed_roll)))
     battle.distant_hits_provided[faction] = pool.filter(u => unit_on_board(u) && pieces[u].br).length
     if (roll === 9 && !battle.ground_stage) {
         battle.critical[faction] = true
     }
-    log(`${G.offensive.attacker === faction ? "Attacker" : "Defender"} roll ${roll} ${battle.critical[faction] ? " - critical !" : ""}, 
-    ${G.offensive.attacker === faction ? "defender" : "attacker"} loss ${battle.hits[faction]} (${battle.strength[faction]})`)
+    log(`${roll}${battle.roll_modifiers ? " +" + battle.roll_modifiers : ""} (${ground_battle_table(modififed_roll)}) ${battle.critical[faction] ? " - critical !" : ""} x ${battle.strength[faction]} = ${battle.hits[faction]}`)
     fill_hit_able_units(faction)
 }
 
@@ -3254,8 +3411,7 @@ function ground_battle() {
     battle = G.offensive.battle
     var hex = battle.battle_hex
     if (battle.ground[JP].length || battle.ground[AP].length) {
-        log(`Ground battle at ${int_to_hex(hex)}, 
-            ${sum_combat_factor(battle.ground[G.offensive.attacker])} vs ${sum_combat_factor(battle.ground[1 - G.offensive.attacker])}`)
+        log(`Ground battle at ${int_to_hex(hex)}`)
     }
     execute_attack(G.offensive.attacker)
     execute_attack(1 - G.offensive.attacker)
@@ -3875,6 +4031,7 @@ P.end_of_turn_phase = script(`
     set G.asp[AP][1] 0
     set G.capture []
     set G.committed []
+    set G.draw_counter [0,0]
     set G.strategic_warfare 0
     set G.passes [0,0]
     eval {
@@ -3885,11 +4042,48 @@ P.end_of_turn_phase = script(`
 
 /* EVENTS */
 
-//todo
+function filter_activation_units(condition) {
+    L.possible_units = L.possible_units.filter(u => condition(u, pieces[u]))
+}
 
-/* SUPPLY */
+function could_play(c) {
+    var faction = cards[c].faction
+    return G.hand[faction].length && !set_has(G.discard[faction], c) && !G.removed.includes(c)
+}
 
-//todo
+function trigger_event(stage) {
+    var card = -1
+    if (G.active === G.offensive.attacker && G.offensive.type === EC) {
+        card = G.offensive.offensive_card
+    } else if (G.active !== G.offensive.attacker) {
+        card = G.offensive.counter_offensive_card
+    }
+    if (!(card >= 0)) {
+        return
+    }
+    var card_data = cards[card]
+    if (card_data[stage]) {
+        card_data[stage]()
+    }
+}
+
+cards[COL_TSUJI].before_unit_activation = function () {
+    filter_activation_units((u, piece) => piece.class === "ground")
+}
+
+cards[JN_25_SPECIAL].can_play = function () {
+    console.log("check!")
+    G.offensive.active_cards.forEach(c => console.log(`${cards[c].type} ${cards[c].faction}`))
+    return G.offensive.active_cards.filter(c => cards[c].type === INTELLIGENCE && cards[c].faction === JP).length <= 0
+}
+
+for (var i = 0; i < cards.length; i++) {
+    var always_true = () => true
+    if (!cards[i].can_play) {
+        cards[i].can_play = always_true
+    }
+
+}
 
 /* SETUP */
 
@@ -3906,7 +4100,7 @@ function construct_decks() {
     }
 }
 
-function draw_card(side) {
+function draw_card(side, to_hand = true) {
     if (G.draw[side].length <= 0) {
         G.draw[side] = G.discard[side]
         G.discard[side] = []
@@ -3914,7 +4108,9 @@ function draw_card(side) {
     var i = random(G.draw[side].length)
     var c = G.draw[side][i]
     array_delete(G.draw[side], i)
-    G.hand[side].push(c)
+    if (to_hand) {
+        G.hand[side].push(c)
+    }
     return c
 }
 
@@ -3945,6 +4141,13 @@ function eliminate(unit) {
 function reduce_unit(unit) {
     log(`${pieces[unit].name} reduced`)
     set_add(G.reduced, unit)
+}
+
+function draw_all_cards() {
+    G.hand = [[], []]
+    for (let i = 0; i < cards.length; i++) {
+        G.hand[cards[i].faction].push(i)
+    }
 }
 
 function setup_scenario_1942() {
@@ -4052,7 +4255,7 @@ function setup_scenario_1942() {
     G.asp[1] = [1, 0]
     G.political_will = 8
     G.china_divisions = 11
-
+    draw_all_cards()
     check_supply()
     fill_overstack()
     call("offensive_phase")
@@ -4254,6 +4457,7 @@ function setup_scenario_1943() {
     while (G.hand[AP].length < 7) {
         draw_card(AP)
     }
+    draw_all_cards()
     check_supply()
     fill_overstack()
     call("offensive_phase")
@@ -4327,6 +4531,7 @@ function on_setup(scenario, options) {
     G.strategic_warfare = 0
     G.control = []
     G.capture = []
+    G.draw_counter = [0, 0]
     G.events = []
     G.not_delayed = []
     Object.keys(events).forEach(k => G.events[events[k].id] = 0)
@@ -4383,6 +4588,7 @@ function on_view() {
     V.active_stack = G.active_stack
     V.surrender = G.surrender
     V.events = G.events
+    V.draw = G.draw
     V.reinforcements = G.reinforcements
     V.burma_road = G.burma_road
     V.china_divisions = G.china_divisions
@@ -4398,15 +4604,17 @@ function on_view() {
 
 
     if (R !== JP) {
-        V.hand[JP] = G.hand[JP].length
+        V.hand[JP] = G.hand[JP].length + G.offensive.draw.filter(c => cards[c].faction === JP).length
     } else {
-        V.hand[JP] = G.hand[JP]
+        V.hand[JP] = G.hand[JP].slice()
+        G.offensive.draw.filter(c => cards[c].faction === JP).forEach(c => V.hand[JP].push(c))
         V.future_offensive[JP] = G.future_offensive[JP]
     }
     if (R !== AP) {
-        V.hand[AP] = G.hand[AP].length
+        V.hand[AP] = G.hand[AP].length + G.offensive.draw.filter(c => cards[c].faction === AP).length
     } else {
-        V.hand[AP] = G.hand[AP]
+        V.hand[AP] = G.hand[AP].slice()
+        G.offensive.draw.filter(c => cards[c].faction === AP).forEach(c => V.hand[AP].push(c))
         V.future_offensive[AP] = G.future_offensive[AP]
     }
 }
@@ -4437,6 +4645,7 @@ function reset_offensive() {
         attacker: JP,
         active_cards: [],
         offensive_card: -1,
+        counter_offensive_card: -1,
         intelligence: SURPRISE,
         stage: ATTACK_STAGE,
         logistic: 0,
@@ -4444,6 +4653,7 @@ function reset_offensive() {
         ground_move_distance: 0,
         ground_pbm: [],
         active_hq: [],
+        draw: [],
         active_units: [[], []],
         paths: [],
         battle_hexes: [],

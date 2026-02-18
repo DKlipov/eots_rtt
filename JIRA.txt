@@ -24,4 +24,5 @@ Todo list:
 * Kwai and jp shq
 * China air box
 * Kunming supply
+* Amph assault battle roll modifier (if only air was present it should apply)
 * Check supply durning movement

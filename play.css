@@ -58,12 +58,12 @@ header { background-color: tan }
 	text-indent: 0;
 }
 
-#chat_text .Allied_Powers { background-color: lightpink }
-#chat_text .Central_Powers { background-color: lightblue }
+#chat_text .Japan { background-color: lightpink }
+#chat_text .Allies { background-color: lightblue }
 body.Japan header.your_turn { background-color: lightcoral; }
 body.Allies header.your_turn { background-color: lightsteelblue; }
-#role_Allied_Powers { background-color: lightcoral; }
-#role_Central_Powers { background-color: lightsteelblue; }
+#role_Japan { background-color: lightcoral; }
+#role_Allies { background-color: lightsteelblue; }
 #log .jp { background-color: lightpink; }
 #log .ap { background-color: lightblue; }
 
