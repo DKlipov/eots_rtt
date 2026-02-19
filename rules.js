@@ -131,6 +131,7 @@ const ROAD_EVENTS = Object.keys(events).filter(k => events[k].road).map(k => {
 const COL_TSUJI = find_card(JP, 3)
 const JN_25_SPECIAL = find_card(JP, 13)
 const TOJO_RESIGNS = find_card(JP, 43)
+const DOOLITLE_RAID = find_card(AP, 8)
 const SOVIET_INVADE = find_card(AP, 79)
 
 // PIECES
@@ -169,6 +170,7 @@ const ED_ARMY = find_piece("army_jp_ed")
 
 //hexes
 const AIR_FERRY = hex_to_int(5408)
+const FRENCH_FRIGATE_SHOALS = hex_to_int(5508)
 const MORESBY = hex_to_int(3823)
 const WEST_HONSHU = hex_to_int(3606)
 const KWAI_BRIDGE = hex_to_int(2109)
@@ -1031,8 +1033,7 @@ function get_allowed_actions(num) {
         return ["ops"]
     }
     let result = ["ops", "discard"]
-    if (card.type === MILITARY && event_hq_check(card) ||
-        (card.type === POLITICAL || card.type === RESOURCE) && card.can_play()) {
+    if ((card.type === MILITARY && event_hq_check(card) || card.type === POLITICAL || card.type === RESOURCE) && card.can_play()) {
         result.push("event")
     }
     if (card.ops >= 3) {
@@ -1072,22 +1073,8 @@ function play_counter_offensive(c) {
 }
 
 function play_reaction(c) {
-    var faction = cards[c].faction
+    play_event(c)
     G.offensive.active_cards.push(c)
-    if (G.future_offensive[faction] === c) {
-        G.future_offensive[faction] = -1
-        G.events[events.FUTURE_OFFENSIVE_JP.id + faction] = 0
-    } else {
-        array_delete_item(G.hand[faction], c)
-    }
-    if (cards[c].remove) {
-        set_add(G.removed, c)
-    } else {
-        set_add(G.discard[faction], c)
-    }
-    if (cards[c].draw) {
-        into_turn_draw(faction)
-    }
     if (cards[c].intelligence && G.offensive.intelligence !== AMBUSH) {
         G.offensive.intelligence = cards[c].intelligence
         log(`Intelligence condition changed to ${get_named_intelligence(G.offensive.intelligence)}`)
@@ -1101,6 +1088,25 @@ function get_named_intelligence(int) {
         return "ambush"
     } else {
         return "intercept"
+    }
+}
+
+function play_event(c) {
+    var faction = cards[c].faction
+    G.offensive.offensive_card = c
+    if (G.future_offensive[faction] === c) {
+        G.future_offensive[faction] = -1
+        G.events[events.FUTURE_OFFENSIVE_JP.id + faction] = 0
+    } else {
+        array_delete_item(G.hand[faction], c)
+    }
+    if (cards[c].remove) {
+        set_add(G.removed, c)
+    } else {
+        set_add(G.discard[faction], c)
+    }
+    if (cards[c].draw) {
+        into_turn_draw(faction)
     }
 }
 
@@ -1190,7 +1196,7 @@ P.offensive_segment = {
             military_card(c)
             goto("offensive_sequence")
         } else {
-            activate_card(c)
+            play_event(c)
             goto("default_event")
         }
     },
@@ -1628,6 +1634,7 @@ P.activate_units = {
             L.asp_ground_units.forEach(gu => set_delete(L.possible_units, gu))
             L.asp_ground_units = []
         }
+        trigger_event("after_unit_activation", u)
         if (G.offensive.active_units[R].length >= (G.offensive.logistic + L.hq_bonus) || L.possible_units.length <= 0) {
             end()
         }
@@ -2900,8 +2907,13 @@ P.commit_offensive = {
         } else if (G.offensive.stage === POST_BATTLE_STAGE) {
             action = "post battle move"
         }
-        prompt(`${offensive_card_header()} Commit ${action}.`)
-        button("next")
+        var verify_error = trigger_event("before_commit_offensive")
+        if (!verify_error) {
+            prompt(`${offensive_card_header()} Commit ${action}.`)
+            button("next")
+        } else {
+            prompt(`${offensive_card_header()} Commit ${action}. ` + verify_error)
+        }
     },
     next() {
         end()
@@ -2918,16 +2930,29 @@ P.end_action = {
     },
 }
 
-function get_intelligence_dice() {
+function roll_intelligence_dice() {
     const card = cards[G.offensive.active_cards[0]]
     const card_value = (G.offensive.type === EC && card.ec) ? card.ec : card.oc
-    return Math.min(8, card_value + (G.offensive.zoi_intelligence_modifier ? 2 : 0))
+    var modifier = 0
+    if (G.offensive.zoi_intelligence_modifier) {
+        modifier -= 2
+        log(`-2 ZOI modifier`)
+    }
+    var event_modifier = trigger_event("before_intelligence_roll")
+    if (event_modifier) {
+        modifier += event_modifier
+    }
+    let result = random(10)
+    const success = result !== 9 && result + modifier <= card_value
+    if (modifier > 0) {
+        modifier = "+" + modifier
+    }
+    log(`Intelligence roll ${result}${modifier ? modifier : ""}, card value ${card_value} (${success ? "SUCCESS" : "FAILED"})`)
+    return success
 }
-
 
 P.special_reaction = {
     _begin() {
-        L.intelligence_dice = get_intelligence_dice()
         const hq_list = []
         for_each_unit_on_map((u, piece) => {
             if (piece.faction === R && piece.class === "hq") {
@@ -2958,9 +2983,8 @@ P.special_reaction = {
         this._begin()
     },
     action_hex(hex) {
-        let result = random(10)
-        const success = result <= L.intelligence_dice
-        log(`Special reaction in ${int_to_hex(hex)} ${result} ${success ? "<" : ">"} ${L.intelligence_dice} (${success ? "SUCCESS" : "FAILED"})`)
+        log(`Special reaction in ${int_to_hex(hex)}`)
+        const success = roll_intelligence_dice()
         set_delete(L.possible_hexes, hex)
         if (success) {
             set_add(G.offensive.battle_hexes, hex)
@@ -2990,18 +3014,17 @@ P.define_intelligence_condition = {
         }
         L.rolled = false
         L.card = false
-        L.intelligence_dice = get_intelligence_dice()
         G.offensive.logistic = cards[G.offensive.offensive_card].ops
     },
     prompt() {
         prompt(`${offensive_card_header()} Change intelligence condition.`)
-        if (G.offensive.type === EC && cards[G.offensive.offensive_card].intelligence) {
-            if (!L.card) {
-                button("skip")
-            } else if (!L.card && !L.rolled) {
-                button("roll")
-            }
+        if (G.offensive.type === EC && cards[G.offensive.offensive_card].intelligence && !L.card && !L.rolled) {
+            button("skip")
+        } else if ((G.offensive.type === OC || !cards[G.offensive.offensive_card].intelligence)
+            && G.offensive.intelligence === SURPRISE && !L.rolled) {
+            button("roll")
         }
+
         if (!L.rolled) {
             get_hand(G.active).filter(c => {
                 var card = cards[c]
@@ -3033,9 +3056,8 @@ P.define_intelligence_condition = {
         }
     },
     roll() {
-        let result = random(10)
-        const success = result <= L.intelligence_dice
-        log(`Intelligence roll ${result} ${success ? "<" : ">"} ${L.intelligence_dice} (${success ? "SUCCESS" : "FAILED"})`)
+        log('Change intelligence condition')
+        var success = roll_intelligence_dice()
         if (success) {
             G.offensive.intelligence = INTERCEPT
         }
@@ -3200,7 +3222,7 @@ function execute_attack(faction) {
     } else {
         battle.roll_modifiers = 0
     }
-    trigger_event("after_battle_roll")
+    trigger_event("before_battle_roll", faction)
     let roll = battle.roll[faction]
     var modififed_roll = roll + battle.roll_modifiers
     battle.hits[faction] = Math.ceil(battle.strength[faction] * (battle.ground_stage ? ground_battle_table(modififed_roll) : naval_battle_table(modififed_roll)))
@@ -4051,6 +4073,16 @@ P.end_of_turn_phase = script(`
     goto strategic_phase
 `)
 
+function set_inter_service(faction, rivalry) {
+    if (G.inter_service[faction] && !rivalry) {
+        log(`${faction === AP ? "Allied" : "Japan"} service agreement`)
+        G.inter_service[faction] = 0
+    } else if (!G.inter_service[faction] && rivalry) {
+        log(`${faction === AP ? "Allied" : "Japan"} inter-service rivalry`)
+        G.inter_service[faction] = 1
+    }
+}
+
 /* EVENTS */
 
 function filter_activation_units(condition) {
@@ -4059,23 +4091,18 @@ function filter_activation_units(condition) {
 
 function could_play(c) {
     var faction = cards[c].faction
-    return G.hand[faction].length && !set_has(G.discard[faction], c) && !G.removed.includes(c)
+    return G.hand[faction].length && !set_has(G.discard[faction], c) && !set_has(G.removed, c)
 }
 
-function trigger_event(stage) {
-    var card = -1
-    if (G.active === G.offensive.attacker && G.offensive.type === EC) {
-        card = G.offensive.offensive_card
-    } else if (G.active !== G.offensive.attacker) {
-        card = G.offensive.counter_offensive_card
+function trigger_event(stage, arg) {
+    var result = null
+    if (G.offensive.type === EC && G.offensive.offensive_card >= 0 && cards[G.offensive.offensive_card][stage]) {
+        result = cards[G.offensive.offensive_card][stage](arg)
     }
-    if (!(card >= 0)) {
-        return
+    if (G.offensive.counter_offensive_card >= 0 && cards[G.offensive.counter_offensive_card][stage]) {
+        result += cards[G.offensive.counter_offensive_card][stage](arg)
     }
-    var card_data = cards[card]
-    if (card_data[stage]) {
-        card_data[stage]()
-    }
+    return result
 }
 
 cards[COL_TSUJI].before_unit_activation = function () {
@@ -4092,16 +4119,81 @@ cards[find_card(JP, 5)].event = function () {
     call("replacement_segment", {restricted: {AIR: 2}})
 }
 
+cards[find_card(JP, 6)].can_play = function () {
+    return set_has(G.removed, DOOLITLE_RAID)
+}
+
+cards[find_card(JP, 8)].before_unit_activation = function () {
+    filter_activation_units((u, piece) => piece.class === "naval")
+}
+
+cards[find_card(JP, 8)].before_battle_roll = function (faction) {
+    if (faction !== JP || G.offensive.battle.ground) {
+        return
+    }
+    var any_com_unit = false
+    G.offensive.battle.air_naval[AP].map(u => pieces[u]).forEach(piece => {
+        if (piece.service === "br" && piece.class === "air" || piece.id === "kent") {
+            any_com_unit = true
+        }
+    })
+    if (any_com_unit) {
+        G.offensive.battle.roll_modifiers += 1
+        log(`+1 Operation C`)
+    }
+}
+
+cards[find_card(JP, 9)].before_unit_activation = function () {
+    G.offensive.naval_move_distance = 21
+}
+
+cards[find_card(JP, 9)].after_unit_activation = function (u) {
+    if (pieces[u].class === "ground") {
+        filter_activation_units((u, piece) => piece.class !== "ground")
+    }
+}
+
+cards[find_card(JP, 10)].can_play = function () {
+    return !G.inter_service[JP]
+}
+
+cards[find_card(JP, 12)].before_commit_offensive = function () {
+    if (G.offensive.stage !== ATTACK_STAGE) {
+        return
+    }
+    if (G.offensive.battle_hexes.filter(h => !MAP_DATA[h].island)) {
+        return "All battles must be fought in one hex island."
+    }
+}
+
+cards[find_card(JP, 12)].before_intelligence_roll = function () {
+    var ca_in_shoals = false
+    for_each_unit((u, piece, location) => {
+        if (piece.type === "ca" && piece.faction === AP && piece.service === "navy" && get_distance(FRENCH_FRIGATE_SHOALS, location) <= 3) {
+            ca_in_shoals = true
+        }
+    })
+    if ((G.supply_cache[FRENCH_FRIGATE_SHOALS] & AP_ZOI) === 0 && !ca_in_shoals) {
+        log(`+4 Japanese superior information security`)
+        return 4
+    }
+}
+
 for (var i = 0; i < cards.length; i++) {
     var always_true = () => true
     if (!cards[i].can_play) {
         cards[i].can_play = always_true
     }
-
+    if (!cards[i].event) {
+        cards[i].event = always_true
+    }
 }
 
 P.default_event = script(`
     eval {
+        if (cards[G.offensive.offensive_card].isr_rivalry) {
+            set_inter_service(1-cards[G.offensive.offensive_card].faction,1)
+        }
         cards[G.offensive.offensive_card].event()
     }
     goto end_action
@@ -4487,7 +4579,7 @@ function setup_scenario_1943() {
 
 function remove_card(faction, card) {
     array_delete(G.draw[JP], find_card(faction, card))
-    G.removed.push(find_card(faction, card))
+    set_add(G.removed, find_card(faction, card))
 }
 
 function discard_card(faction, card) {

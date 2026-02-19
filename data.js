@@ -3839,6 +3839,7 @@ data.cards = [
         "type": POLITICAL,
         "oc": 4,
         "draw": true,
+        "isr_rivalry": true,
         "name": "US Joint Staff Debate",
     },
     {
@@ -3878,6 +3879,7 @@ data.cards = [
         "type": POLITICAL,
         "oc": 4,
         "draw": true,
+        "isr_rivalry": true,
         "name": "US/British Second Front Conference",
     },
     {
