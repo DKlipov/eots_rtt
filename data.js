@@ -3830,6 +3830,7 @@ data.cards = [
         "type": POLITICAL,
         "oc": 4,
         "remove": true,
+        "china": 1,
         "name": "Doolottle Raid Reprisal",
     },
     {
@@ -5907,6 +5908,9 @@ data.events = {
     },
     AUSTRALIA_SURRENDER: {
         id: 16,
+    },
+    INDEPENDENCE_CAMPAIGN: {
+        id: 17,
     },
 }
 

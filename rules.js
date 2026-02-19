@@ -173,7 +173,8 @@ const AIR_FERRY = hex_to_int(5408)
 const FRENCH_FRIGATE_SHOALS = hex_to_int(5508)
 const MORESBY = hex_to_int(3823)
 const WEST_HONSHU = hex_to_int(3606)
-const KWAI_BRIDGE = hex_to_int(2109)
+const KWAI_BRIDGE = hex_to_int(2108)
+const KWAI_BRIDGE_1 = hex_to_int(2109)
 const AKYAB = hex_to_int(2006)
 const MANDALAY = hex_to_int(2106)
 const IMPHAL = hex_to_int(2105)
@@ -186,7 +187,7 @@ const TOKYO = hex_to_int(3706)
 const OAHU = hex_to_int(5808)
 const TOKYO_AIR_BASES = [3307, 3704, 3407, 3506, 3507, 3607, 3706, 3705, 3305, 3306, 3303, 3209, 3709].map(h => hex_to_int(h))
 
-const COM_REPLACEMENT_POINTS = [1307, 1308, 2114, 2709, 3727].map(h => hex_to_int())
+const COM_REPLACEMENT_POINTS = [1307, 1308, 2114, 2709, 3727].map(h => hex_to_int(h))
 
 function find_piece(id) {
     for (let i = 0; i < pieces.length; i++) {
@@ -324,6 +325,7 @@ function get_unit_supply_type(piece) {
 
 for (var i = 0; i < pieces.length; i++) {
     const piece = pieces[i]
+    piece.u = i
     const supply = piece.class === "hq" ? get_hq_supply_type(piece) : get_unit_supply_type(piece)
     piece.supply = supply
     piece.replacement = get_unit_replacement_type(piece)
@@ -501,10 +503,11 @@ function get_hq_reinforcement_hexes() {
     return result
 }
 
-function is_reinforcement_denied(u) {
-    var piece = pieces[u]
-    return (piece.service === "au" && is_event_active(events.AUSTRALIA_SURRENDER))
-        || (piece.service === "ind" && G.surrender[nations.INDIA.id] >= 4);
+function is_reinforcement_denied(piece) {
+    return (piece.service === "au" && is_event_active(events.AUSTRALIA_SURRENDER) && !set_has(G.reduced, piece.u))
+        || (piece.service === "ind" && G.surrender[nations.INDIA.id] >= 4)
+        || (is_event_active(events.INDEPENDENCE_CAMPAIGN) && piece.class === "ground" &&
+            (piece.service === "ind" || piece.service === "au" || piece.service === "br"));
 }
 
 P.reinforcement_segment = {
@@ -530,7 +533,7 @@ P.reinforcement_segment = {
             if (piece.reinforcement === G.turn && piece.start_reduced) {
                 set_add(G.reduced, u)
             }
-            if (is_reinforcement_denied(u)) {
+            if (is_reinforcement_denied(piece)) {
                 eliminate_permanently(u)
                 return;
             }
@@ -639,6 +642,10 @@ function get_replacement_points() {
     if (G.turn >= 3 && G.turn % 2 === 1) {
         result.CHINESE = 1
     }
+    if (is_event_active(events.INDEPENDENCE_CAMPAIGN)) {
+        result.GROUND -= 1
+        log(`-1 AP ground replacement, Indian independence campaign (no commonwealth units could be replaced)`)
+    }
     return result
 }
 
@@ -662,7 +669,7 @@ P.replacement_segment = {
         for_each_unit((u, piece, location) => {
             if (piece.faction === G.active
                 && !piece.notreplaceable
-                && !is_reinforcement_denied(u)
+                && !is_reinforcement_denied(piece)
                 && location === ELIMINATED_BOX) {
                 set_add(L.replacable_units, u)
             }
@@ -683,7 +690,7 @@ P.replacement_segment = {
 
         prompt(`Choose unit to reinforce.` + print_reinforcements())
         var filter = (piece => piece.faction === G.active && !piece.notreplaceable && L.replacement_points[piece.replacement] > 0
-            && (!L.restricted || L.restricted[piece.replacement] > 0))
+            && (!L.restricted || L.restricted[piece.replacement] > 0) && !is_reinforcement_denied(piece))
         L.replacable_units.filter(u => {
             var piece = pieces[u]
             return filter(piece)
@@ -1075,7 +1082,7 @@ function play_counter_offensive(c) {
 function play_reaction(c) {
     play_event(c)
     G.offensive.active_cards.push(c)
-    if (cards[c].intelligence && G.offensive.intelligence !== AMBUSH) {
+    if (cards[c].intelligence && G.offensive.intelligence !== AMBUSH && G.offensive.intelligence !== cards[c].intelligence) {
         G.offensive.intelligence = cards[c].intelligence
         log(`Intelligence condition changed to ${get_named_intelligence(G.offensive.intelligence)}`)
     }
@@ -1126,6 +1133,8 @@ function activate_card(c) {
         G.offensive.barges = true
     }
     G.offensive.naval_move_distance = (cards[c].ops * 5)
+    //todo debug
+    G.offensive.naval_move_distance = 30
     G.offensive.ground_move_distance = (cards[c].ops * 2)
     G.offensive.air_move_distance = (cards[c].ops)
     G.offensive.logistic = cards[c].ops
@@ -1650,7 +1659,7 @@ function offensive_card_header() {
 }
 
 function is_controllable_hex(hex) {
-    return MAP_DATA[hex].named || hex === WEST_HONSHU || hex === KWAI_BRIDGE
+    return MAP_DATA[hex].named || hex === WEST_HONSHU || hex === KWAI_BRIDGE || hex === KWAI_BRIDGE_1
 }
 
 function control_hex(hex, side = G.active) {
@@ -3060,6 +3069,7 @@ P.define_intelligence_condition = {
         var success = roll_intelligence_dice()
         if (success) {
             G.offensive.intelligence = INTERCEPT
+            log(`Intelligence condition changed to ${get_named_intelligence(G.offensive.intelligence)}`)
         }
         L.rolled = true
         clear_undo()
@@ -3105,8 +3115,15 @@ function ground_battle_table(roll) {
 function fill_hit_able_units(faction) {
     var battle = G.offensive.battle
     var enemy_faction = 1 - faction
-    var pool = ((battle.ground_stage || battle.air_naval[enemy_faction].length === 0)
-        ? battle.ground[enemy_faction] : battle.air_naval[enemy_faction]).filter(u => unit_on_board(u))
+    L.pool = []
+    var units = ((battle.ground_stage || battle.air_naval[enemy_faction].length === 0)
+        ? battle.ground[enemy_faction] : battle.air_naval[enemy_faction])
+    units.filter(u => unit_on_board(u))
+        .forEach(u => {
+            var piece = pieces[u]
+            map_set(L.pool, u, piece.lf)
+        })
+    trigger_event("before_apply_hits", faction)
     var result = []
     var ground_bombing = battle.air_naval[faction].length && !battle.air_naval[enemy_faction].length
     var reduced = []
@@ -3114,10 +3131,11 @@ function fill_hit_able_units(faction) {
     var lower_lf_unit = [-1, 100]
     var hit_limit = battle.hits[faction]
     var distant_hits = battle.distant_hits_provided[faction] > 0
-    for (var i = 0; i < pool.length; i++) {
-        var unit = pool[i]
+    for (var i = 0; i < L.pool.length; i += 2) {
+        var unit = L.pool[i]
         var piece = pieces[unit]
-        var lf = battle.ground_stage && set_has(battle.amph_ground, unit) ? Math.ceil(piece.lf / 2) : piece.lf
+        var base_lf = L.pool[i + 1]
+        var loss_factor = battle.ground_stage && set_has(battle.amph_ground, unit) ? Math.ceil(base_lf / 2) : base_lf
         var reduced_status = map_get(battle.damaged[faction], unit, 0)
         if (!reduced_status) {
             reduced_status = set_has(G.reduced) ? 1 : 0
@@ -3125,19 +3143,19 @@ function fill_hit_able_units(faction) {
         if (reduced_status >= 2) {
             continue
         }
-        var could_be_damaged = lf <= hit_limit && (distant_hits || !piece.br || G.location[unit] === battle.battle_hex)
+        var could_be_damaged = loss_factor <= hit_limit && (distant_hits || !piece.br || G.location[unit] === battle.battle_hex)
         if (could_be_damaged && (critical || reduced_status || ground_bombing)) {
-            result.push(unit)
+            map_set(result, unit, loss_factor)
         } else if (could_be_damaged) {
-            reduced.push(unit)
-        } else if (critical && lower_lf_unit[1] > piece.lf) {
-            lower_lf_unit = [unit, piece.lf]
+            map_set(result, unit, loss_factor)
+        } else if (critical && lower_lf_unit[1] > loss_factor) {
+            lower_lf_unit = [unit, loss_factor]
         }
     }
     if (!result.length && reduced.length) {
         result = reduced
     } else if (result.length <= 0 && critical && lower_lf_unit[0] >= 0 && !battle.damaged[faction].length) {
-        result.push(lower_lf_unit[0])
+        map_set(result, lower_lf_unit[0], hit_limit)
     }
     battle.hit_able_units[faction] = result
 }
@@ -3272,7 +3290,7 @@ P.assign_hits = {
         }
     },
     prompt() {
-        G.offensive.battle.hit_able_units[R].forEach(u => action_unit(u))
+        map_for_each(G.offensive.battle.hit_able_units[R], u => action_unit(u))
         if (!G.offensive.battle.hit_able_units[R].length) {
             button("done")
             prompt(`Commit hits. Remaining: ${Math.max(G.offensive.battle.hits[R], 0)}.`)
@@ -3289,7 +3307,7 @@ P.assign_hits = {
             status = set_has(G.reduced, unit) ? 1 : 0
         }
         map_set(battle.damaged[R], unit, ++status)
-        battle.hits[R] -= Math.ceil(piece.lf / (battle.ground_stage && set_has(battle.amph_ground, unit) ? 2 : 1))
+        battle.hits[R] -= map_get(G.offensive.battle.hit_able_units[R], unit)
         if (G.location[unit] !== battle.battle_hex && piece.br) {
             battle.distant_hits_provided[R] -= 1
         }
@@ -3683,12 +3701,7 @@ P.national_status_segment = function () {
             }
         })
     }
-    if (G.surrender[nations.INDIA.id] < 4 && check_nation_controlled(nations.INDIA, JP)) {
-        G.surrender[nations.INDIA.id] += 1
-        log(`India status changed to ${nations.INDIA.statuses[G.surrender[nations.INDIA.id]]}`)
-    } else if (G.surrender[nations.INDIA.id]) {
-        india_stable()
-    }
+    degrade_india(true)
     if (check_nation_surrender(nations.AUSTRALIA) && check_event(events.AUSTRALIA_SURRENDER)) {
         for_each_unit((u, piece, location) => {
             if (piece.service === "au" && location >= LAST_BOARD_HEX) {
@@ -3735,6 +3748,16 @@ function update_china_status(diff, to_stable = false) {
         china_surrender()
     } else if (prev !== G.surrender[nations.CHINA.id]) {
         log(`China status changed to ${nations.CHINA.statuses[G.surrender[nations.CHINA.id]]}`)
+    }
+}
+
+function degrade_india(could_revolt = false) {
+    var jp_occupied = check_nation_controlled(nations.INDIA, JP)
+    if (G.surrender[nations.INDIA.id] < (could_revolt ? 4 : 3) && jp_occupied) {
+        G.surrender[nations.INDIA.id] += 1
+        log(`India status changed to ${nations.INDIA.statuses[G.surrender[nations.INDIA.id]]}`)
+    } else if (G.surrender[nations.INDIA.id] < 4 && !jp_occupied) {
+        india_stable()
     }
 }
 
@@ -4085,7 +4108,10 @@ function set_inter_service(faction, rivalry) {
 
 /* EVENTS */
 
-function filter_activation_units(condition) {
+function filter_activation_units(condition, faction) {
+    if (G.active !== faction) {
+        return
+    }
     L.possible_units = L.possible_units.filter(u => condition(u, pieces[u]))
 }
 
@@ -4105,12 +4131,20 @@ function trigger_event(stage, arg) {
     return result
 }
 
+function only_one_ground_unit(card) {
+    var faction = cards[card].faction
+    cards[card].after_unit_activation = function (u) {
+        if (pieces[u].class === "ground") {
+            filter_activation_units((u, piece) => piece.class !== "ground", faction)
+        }
+    }
+}
+
 cards[COL_TSUJI].before_unit_activation = function () {
-    filter_activation_units((u, piece) => piece.class === "ground")
+    filter_activation_units((u, piece) => piece.class === "ground", JP)
 }
 
 cards[JN_25_SPECIAL].can_play = function () {
-    G.offensive.active_cards.forEach(c => console.log(`${cards[c].type} ${cards[c].faction}`))
     return G.offensive.active_cards.filter(c => cards[c].type === INTELLIGENCE && cards[c].faction === JP).length <= 0
 }
 
@@ -4124,11 +4158,11 @@ cards[find_card(JP, 6)].can_play = function () {
 }
 
 cards[find_card(JP, 8)].before_unit_activation = function () {
-    filter_activation_units((u, piece) => piece.class === "naval")
+    filter_activation_units((u, piece) => piece.class === "naval", JP)
 }
 
 cards[find_card(JP, 8)].before_battle_roll = function (faction) {
-    if (faction !== JP || G.offensive.battle.ground) {
+    if (faction !== JP || G.offensive.battle.ground_stage) {
         return
     }
     var any_com_unit = false
@@ -4147,11 +4181,7 @@ cards[find_card(JP, 9)].before_unit_activation = function () {
     G.offensive.naval_move_distance = 21
 }
 
-cards[find_card(JP, 9)].after_unit_activation = function (u) {
-    if (pieces[u].class === "ground") {
-        filter_activation_units((u, piece) => piece.class !== "ground")
-    }
-}
+only_one_ground_unit(find_card(JP, 9))
 
 cards[find_card(JP, 10)].can_play = function () {
     return !G.inter_service[JP]
@@ -4179,6 +4209,63 @@ cards[find_card(JP, 12)].before_intelligence_roll = function () {
     }
 }
 
+only_one_ground_unit(find_card(JP, 14))
+
+cards[find_card(JP, 14)].before_apply_hits = function (faction) {
+    if (faction === JP || G.offensive.battle.ground_stage) {
+        return
+    }
+    for (var i = 0; i < L.pool.length; i++) {
+        var piece = pieces[L.pool[i]]
+        if (piece.type === "cv") {
+            L.pool[i + 1] += 2
+        }
+    }
+}
+
+cards[find_card(JP, 15)].event = function () {
+    degrade_india()
+    check_event(events.INDEPENDENCE_CAMPAIGN)
+}
+
+
+cards[find_card(JP, 16)].before_unit_activation = function () {
+    filter_activation_units((u, piece) => piece.class !== "naval", JP)
+}
+
+cards[find_card(JP, 17)].before_unit_activation = function () {
+    filter_activation_units((u, piece) => piece.class !== "ground", JP)
+}
+
+cards[find_card(JP, 17)].after_unit_activation = function (u) {
+    var p_class = pieces[u].class
+    filter_activation_units((u, piece) => piece.class === p_class, JP)
+}
+
+cards[find_card(JP, 17)].before_battle_roll = function (faction) {
+    if (faction === AP || G.offensive.battle.ground_stage) {
+        return
+    }
+    var modifier = 0
+    G.offensive.battle.air_naval[JP].map(u => pieces[u]).forEach(piece => {
+        if (piece.type === "ca" || piece.type === "cl" || piece.type === "apd") {
+            G.offensive.battle.strength[faction] += 2
+            modifier += 2
+        }
+    })
+    if (modifier) {
+        log(`+${modifier} attack strength (Night fighting advantage)`)
+    }
+}
+
+cards[find_card(JP, 18)].can_play = function () {
+    return events.KWAI_RIVER_BRIDGE.keys.filter(h => is_space_controlled(h, JP)).length >= 2
+}
+
+cards[find_card(JP, 18)].event = function () {
+    check_event(events.KWAI_RIVER_BRIDGE)
+}
+
 for (var i = 0; i < cards.length; i++) {
     var always_true = () => true
     if (!cards[i].can_play) {
@@ -4193,6 +4280,9 @@ P.default_event = script(`
     eval {
         if (cards[G.offensive.offensive_card].isr_rivalry) {
             set_inter_service(1-cards[G.offensive.offensive_card].faction,1)
+        }
+        if (cards[G.offensive.offensive_card].china) {
+            update_china_status(cards[G.offensive.offensive_card].china)
         }
         cards[G.offensive.offensive_card].event()
     }
@@ -4476,6 +4566,7 @@ function setup_scenario_1943() {
     setup_jp_unit(jp_army(25), 1916, true)
     setup_jp_unit(jp_army(28), 2008)
     setup_jp_unit(jp_air(5), 2008)
+    set_add(G.control, hex_to_int(2108))
     set_add(G.control, hex_to_int(2014))
     set_add(G.control, hex_to_int(2015))
     set_add(G.control, hex_to_int(2017))
@@ -4660,6 +4751,8 @@ function on_setup(scenario, options) {
             set_add(G.control, i)
         }
     }
+    set_add(G.control, hex_to_int(2109))
+    set_add(G.control, hex_to_int(3606))
     reset_offensive()
     construct_decks()
     for (let i = 0; i < pieces.length; i++) {
