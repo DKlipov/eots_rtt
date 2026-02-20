@@ -3037,13 +3037,10 @@ function into_turn_draw(faction) {
 
 P.cancel_offensive = {
     _begin() {
-        get_hand(R).forEach(c => {
-            console.log(cards[c].num)
-            console.log(cards[c].cancel)
-            console.log(cards[c].could_play())
-        })
+        if (G.active === AP) {
+            end()
+        }
         L.cancel = for_each_card((c, card) => {
-            console.log(`${card.name} ${card.cancel && card.could_play()}`)
             return card.cancel && card.could_play()
         })
         if (!L.cancel) {
@@ -3052,6 +3049,10 @@ P.cancel_offensive = {
     },
     prompt() {
         prompt(`${offensive_card_header()} Cancel offensive.`)
+        if (L.reactions_card >= 0) {
+            button("done")
+            return
+        }
         G.hand[R].filter(c => cards[c].cancel && cards[c].can_play()).forEach(c => action_card(c))
         button("skip")
     },
@@ -3061,15 +3062,21 @@ P.cancel_offensive = {
     },
     card(c) {
         push_undo()
+        L.reactions_card = c
+        G.offensive.active_cards.push(c)
+    },
+    done() {
         var offensive_card = G.offensive.offensive_card
-        var reactions_card = c
+        var reaction_card = L.reactions_card
         restore_state(G.offensive.weather_rollback)
         discard_card(offensive_card)
-        remove_card(reactions_card)
-        log(`Offensive resets`)
-        play_event(c)
+        remove_card(L.reactions_card)
+        log(`Japan played ${cards[reaction_card].name}`)
+        log(`Offensive resets, ${cards[offensive_card].name} discard`)
+        play_event(reaction_card)
+        end()
         goto("default_event")
-    },
+    }
 }
 
 P.define_intelligence_condition = {
@@ -4371,6 +4378,64 @@ P.naval_battle_guadalcanal = {
         log(`${G.location[u]} airfield bombardment selected`)
         damage_unit(u)
         end()
+    }
+}
+
+cards[find_card(JP, 21)].can_play = function () {
+    return G.offensive.active_hq.includes(HQ_SEAC)
+}
+
+P.worker_strikes_unit = {
+    _begin() {
+        L.allowed_units = []
+        for_each_unit_on_map((u, piece, location) => {
+            if (piece.service !== "ind" || piece.size !== 3 || set_has(G.reduced, u)) {
+                return
+            }
+            set_add(L.allowed_units, u)
+        })
+        if (L.allowed_units.length <= 0) {
+            log(`No full strength Indian corps`)
+            end()
+        }
+    },
+    prompt() {
+        prompt(`Worker strikes. Choose unit.`)
+        L.allowed_units.forEach(u => action_unit(u))
+    },
+    unit(u) {
+        push_undo()
+        log(`Worker strikes: ${pieces[u].name}`)
+        damage_unit(u)
+        end()
+    }
+}
+
+cards[find_card(JP, 21)].event = function () {
+    G.active = AP
+    G.offensive.active_cards = [find_card(JP, 21)]
+    call("worker_strikes_unit")
+}
+
+
+cards[find_card(JP, 23)].before_battle_roll = function (faction) {
+    if (faction === AP || !G.offensive.battle.ground_stage) {
+        return
+    }
+    var any_com_unit = false
+    G.offensive.battle.ground[JP].map(u => pieces[u]).forEach(piece => {
+        if (unit_on_board(piece.u) && piece.class === "ground" && piece.size === 3) {
+            any_com_unit = true
+        }
+    })
+    G.offensive.battle.ground[AP].map(u => pieces[u]).forEach(piece => {
+        if (unit_on_board(piece.u) && piece.class === "ground" && piece.size === 3) {
+            any_com_unit = true
+        }
+    })
+    if (any_com_unit) {
+        G.offensive.battle.roll_modifiers += 1
+        log(`+1 Operation RE`)
     }
 }
 
