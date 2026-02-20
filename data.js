@@ -21,6 +21,11 @@ const COUNTER_OFFENSIVE = 3
 const MILITARY = 4
 const INTELLIGENCE = 5
 const REACTION = 6
+const CANCEL = 7
+
+//reaction types
+const BEFORE_COMBAT = 1
+const AFTER_COMBAT = 2
 
 //Intelligence types
 const SURPRISE = 1
@@ -3956,10 +3961,9 @@ data.cards = [
         "num": 19,
         "faction": JP,
         "ops": 2,
-        "type": REACTION,
+        "type": CANCEL,
         "oc": 4,
         "remove": true,
-        "cancel": true,
         "name": "Weather",
     },
     {
@@ -3976,21 +3980,19 @@ data.cards = [
         "num": 21,
         "faction": JP,
         "ops": 3,
-        "type": REACTION,
+        "type": CANCEL,
         "oc": 5,
         "remove": true,
         "draw": true,
-        "cancel": true,
         "name": "Mahatma Gandhi",
     },
     {
         "num": 22,
         "faction": JP,
         "ops": 2,
-        "type": REACTION,
+        "type": CANCEL,
         "oc": 4,
         "remove": true,
-        "cancel": true,
         "name": "Weather",
     },
     {
@@ -4010,6 +4012,7 @@ data.cards = [
         "type": REACTION,
         "oc": 3,
         "draw": true,
+        "stage": AFTER_COMBAT,
         "name": "Submarine Attack",
     },
     {
@@ -4038,6 +4041,7 @@ data.cards = [
         "type": REACTION,
         "oc": 3,
         "draw": true,
+        "stage": AFTER_COMBAT,
         "name": "Submarine Attack",
     },
     {
@@ -4120,6 +4124,7 @@ data.cards = [
         "type": REACTION,
         "oc": 3,
         "draw": true,
+        "stage": BEFORE_COMBAT,
         "name": "Submarine Attack",
     },
     {
@@ -4373,6 +4378,7 @@ data.cards = [
         "type": REACTION,
         "oc": 4,
         "draw": true,
+        "stage": BEFORE_COMBAT,
         "remove": true,
         "name": "Kamikaze Attack",
     },
@@ -4381,6 +4387,7 @@ data.cards = [
         "faction": JP,
         "ops": 2,
         "type": REACTION,
+        "stage": BEFORE_COMBAT,
         "oc": 4,
         "draw": true,
         "remove": true,
@@ -4391,6 +4398,7 @@ data.cards = [
         "faction": JP,
         "ops": 2,
         "type": REACTION,
+        "stage": BEFORE_COMBAT,
         "oc": 4,
         "draw": true,
         "remove": true,
@@ -4400,11 +4408,10 @@ data.cards = [
         "num": 64,
         "faction": JP,
         "ops": 2,
-        "type": REACTION,
+        "type": CANCEL,
         "oc": 4,
         "draw": true,
         "remove": true,
-        "cancel": true,
         "name": "Weather",
     },
     {
@@ -4422,6 +4429,7 @@ data.cards = [
         "faction": JP,
         "ops": 2,
         "type": REACTION,
+        "stage": BEFORE_COMBAT,
         "oc": 4,
         "draw": true,
         "remove": true,
@@ -4507,6 +4515,7 @@ data.cards = [
         "faction": JP,
         "ops": 1,
         "type": REACTION,
+        "stage": BEFORE_COMBAT,
         "oc": 1,
         "draw": true,
         "name": "Submarine Attack",
@@ -4563,6 +4572,7 @@ data.cards = [
         "faction": JP,
         "ops": 2,
         "type": REACTION,
+        "stage": BEFORE_COMBAT,
         "oc": 4,
         "draw": true,
         "remove": true,
@@ -4612,6 +4622,7 @@ data.cards = [
         "faction": JP,
         "ops": 1,
         "type": REACTION,
+        "stage": AFTER_COMBAT,
         "oc": 3,
         "draw": true,
         "name": "Submarine Attack",

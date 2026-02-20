@@ -25,6 +25,11 @@ const COUNTER_OFFENSIVE = 3
 const MILITARY = 4
 const INTELLIGENCE = 5
 const REACTION = 6
+const CANCEL = 7
+
+//reaction types
+const BEFORE_COMBAT = 1
+const AFTER_COMBAT = 2
 
 //Move types
 const ANY_MOVE = 0
@@ -1100,7 +1105,6 @@ function get_named_intelligence(int) {
 
 function play_event(c) {
     var faction = cards[c].faction
-    G.offensive.offensive_card = c
     if (G.future_offensive[faction] === c) {
         G.future_offensive[faction] = -1
         G.events[events.FUTURE_OFFENSIVE_JP.id + faction] = 0
@@ -1212,6 +1216,7 @@ P.offensive_segment = {
             goto("offensive_sequence")
         } else {
             play_event(c)
+            G.offensive.active_cards.push(c)
             goto("default_event")
         }
     },
@@ -3041,7 +3046,7 @@ P.cancel_offensive = {
             end()
         }
         L.cancel = for_each_card((c, card) => {
-            return card.cancel && card.could_play()
+            return card.type === CANCEL && card.could_play()
         })
         if (!L.cancel) {
             end()
@@ -3053,7 +3058,7 @@ P.cancel_offensive = {
             button("done")
             return
         }
-        G.hand[R].filter(c => cards[c].cancel && cards[c].can_play()).forEach(c => action_card(c))
+        G.hand[R].filter(c => cards[c].type === CANCEL && cards[c].can_play()).forEach(c => action_card(c))
         button("skip")
     },
     skip() {
@@ -3074,6 +3079,8 @@ P.cancel_offensive = {
         log(`Japan played ${cards[reaction_card].name}`)
         log(`Offensive resets, ${cards[offensive_card].name} discard`)
         play_event(reaction_card)
+        G.offensive.offensive_card = reaction_card
+        G.offensive.active_cards = [reaction_card]
         end()
         goto("default_event")
     }
@@ -3140,9 +3147,63 @@ P.define_intelligence_condition = {
         }
         L.rolled = true
         clear_undo()
-        if (!G.hand[R].includes(JN_25_SPECIAL)) {
+        if (success || !get_hand(R).includes(JN_25_SPECIAL)) {
             end()
         }
+    }
+}
+
+P.attack_reaction_cards = {
+    _begin() {
+        if (get_hand(R).filter(c => cards[c].type === REACTION && cards[c].can_play()).length <= 0) {
+            end()
+        }
+    },
+    prompt() {
+        prompt(`${offensive_card_header()} Play reaction cards.`)
+        get_hand(R).filter(c => cards[c].type === REACTION && cards[c].can_play()).forEach(c => action_card(c))
+        button("done")
+    },
+    done() {
+        push_undo()
+        end()
+    },
+    card(c) {
+        push_undo()
+        play_event(c)
+        G.offensive.active_cards.push(c)
+    }
+}
+
+P.apply_attack_reaction = {
+    _begin() {
+        if (G.offensive.battle_hexes.length <= 0 && G.offensive.stage !== BATTLE_STAGE) {
+            end()
+        }
+        var stage = G.offensive.stage === POST_BATTLE_STAGE ? AFTER_COMBAT : BEFORE_COMBAT
+        L.allowed_cards = []
+        G.offensive.active_cards.filter(c => cards[c].type === REACTION &&
+            (cards[c].stage === stage || G.offensive.battle_hexes.length <= 0 && G.offensive.stage === BATTLE_STAGE))
+            .forEach(c => set_add(L.allowed_cards, c))
+        if (L.allowed_cards.length <= 0) {
+            end()
+        }
+    },
+    prompt() {
+        prompt(`${offensive_card_header()} Apply reaction cards.`)
+        L.allowed_cards.forEach(c => action_card(c))
+    },
+    done() {
+        push_undo()
+        end()
+    },
+    card(c) {
+        set_delete(L.allowed_cards, c)
+        clear_undo()
+        if (L.allowed_cards.length <= 0) {
+            end()
+        }
+        cards[c].event()
     }
 }
 
@@ -3698,10 +3759,16 @@ P.offensive_sequence = script(`
         if (G.offensive.active_hq[G.active]) {
             call activate_units
             call move_offensive_units
+            call attack_reaction_cards
             call commit_offensive
         }
     }
+    if (!G.offensive.active_hq[G.active]) {
+        call attack_reaction_cards
+    }
     set G.offensive.stage BATTLE_STAGE
+    set G.active 1-G.offensive.attacker
+    call apply_attack_reaction
     set G.active G.offensive.attacker
     while (G.offensive.battle_hexes.length > 0) {
         call choose_battle
@@ -3711,6 +3778,7 @@ P.offensive_sequence = script(`
     }
     set G.offensive.stage POST_BATTLE_STAGE
     set G.active 1-G.offensive.attacker
+    call apply_attack_reaction
     if (G.offensive.active_units[G.active].length) {
         call move_offensive_units
         call commit_offensive
@@ -4436,6 +4504,69 @@ cards[find_card(JP, 23)].before_battle_roll = function (faction) {
     if (any_com_unit) {
         G.offensive.battle.roll_modifiers += 1
         log(`+1 Operation RE`)
+    }
+}
+
+cards[find_card(JP, 24)].event = function () {
+    call("submarine_attack", {success: 4, card: find_card(JP, 24)})
+}
+
+cards[find_card(JP, 27)].event = function () {
+    call("submarine_attack", {success: 4, critical: 7, card: find_card(JP, 27)})
+}
+
+cards[find_card(JP, 36)].event = function () {
+    call("submarine_attack", {success: 4, card: find_card(JP, 36)})
+}
+
+cards[find_card(JP, 75)].event = function () {
+    call("submarine_attack", {success: 4, card: find_card(JP, 75)})
+}
+
+cards[find_card(JP, 86)].event = function () {
+    call("submarine_attack", {success: 7, card: find_card(JP, 86)})
+}
+
+P.submarine_attack = {
+    _begin() {
+        log(`${cards[L.card].name} played`)
+        var roll = random(10)
+        L.hits = 0
+        if (roll <= L.success) {
+            log(`${roll} - Loss one naval step`)
+            L.hits = 1
+        } else if (L.critical && roll <= L.critical) {
+            log(`${roll} - Loss two naval steps`)
+            L.hits = 2
+        } else {
+            log(`${roll} - No effect`)
+        }
+        L.allowed_units = []
+        G.offensive.active_units[AP].forEach(u => {
+            if (unit_on_board(u) && pieces[u].class === "naval") {
+                set_add(L.allowed_units, u)
+            }
+        })
+        clear_undo()
+        if (L.allowed_units.length <= 0 || L.hits <= 0) {
+            end()
+        }
+    },
+    prompt() {
+        prompt(`Submarine attack. Apply hits: ${L.hits}.`)
+        L.allowed_units.forEach(u => action_unit(u))
+    },
+    unit(u) {
+        push_undo()
+        log(`Submarine attack: ${pieces[u].name}`)
+        damage_unit(u)
+        if (!unit_on_board(u)) {
+            set_delete(L.allowed_units, u)
+        }
+        L.hits -= 1
+        if (L.allowed_units.length <= 0 || L.hits <= 0) {
+            end()
+        }
     }
 }
 
