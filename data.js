@@ -3959,6 +3959,7 @@ data.cards = [
         "type": REACTION,
         "oc": 4,
         "remove": true,
+        "cancel": true,
         "name": "Weather",
     },
     {
@@ -3979,6 +3980,7 @@ data.cards = [
         "oc": 5,
         "remove": true,
         "draw": true,
+        "cancel": true,
         "name": "Mahatma Gandhi",
     },
     {
@@ -3988,6 +3990,7 @@ data.cards = [
         "type": REACTION,
         "oc": 4,
         "remove": true,
+        "cancel": true,
         "name": "Weather",
     },
     {
@@ -4401,6 +4404,7 @@ data.cards = [
         "oc": 4,
         "draw": true,
         "remove": true,
+        "cancel": true,
         "name": "Weather",
     },
     {

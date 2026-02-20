@@ -1163,6 +1163,9 @@ P.offensive_segment = {
     _begin() {
         L.debug = false
         L.eliminate = false
+        if (G.active === AP) {
+            G.offensive.weather_rollback = copy_state()
+        }
     },
     prompt() {
         prompt("Turn " + G.turn + " Take one action.")
@@ -1174,6 +1177,9 @@ P.offensive_segment = {
             let card = hand[i]
             get_allowed_actions(card).forEach(a => action(a, card))
         }
+        console.log(Object.keys(G))
+        // console.log(Object.keys(G.active_stack))
+        console.log(G.undo)
         //debug
         button("isr")
         button("ns")
@@ -1921,6 +1927,17 @@ function get_near_hexes(hex) {
     result.push((-((-x >> 31) & ((-hex - 1) % 29 >> 31)) - 1) * (hex - 28 + y1_diff) + hex - 29 + y1_diff)      //SW or -1
     result.push((-((-x >> 31) & (-y1_diff | -hex % 29 >> 31)) - 1) * (hex - 28 - y_diff) + hex - 29 - y_diff)   //NW or -1
     return result
+}
+
+function for_each_card(apply) {
+    for (let i = 0; i < cards.length; i++) {
+        var card = cards[i]
+        var returned = apply(i, card)
+        if (returned) {
+            return returned
+        }
+
+    }
 }
 
 function for_each_unit(apply) {
@@ -2908,6 +2925,7 @@ P.declare_battle_hexes = {
 P.commit_offensive = {
     _begin() {
         check_supply()
+        L.verify_error = trigger_event("before_commit_offensive")
     },
     prompt() {
         var action = "offensive"
@@ -2916,12 +2934,12 @@ P.commit_offensive = {
         } else if (G.offensive.stage === POST_BATTLE_STAGE) {
             action = "post battle move"
         }
-        var verify_error = trigger_event("before_commit_offensive")
-        if (!verify_error) {
+
+        if (!L.verify_error) {
             prompt(`${offensive_card_header()} Commit ${action}.`)
             button("next")
         } else {
-            prompt(`${offensive_card_header()} Commit ${action}. ` + verify_error)
+            prompt(`${offensive_card_header()} Commit ${action}. ` + L.verify_error)
         }
     },
     next() {
@@ -3011,9 +3029,47 @@ function into_turn_draw(faction) {
         log(`${faction === AP ? "AP" : "JP"} already drown 3 cards, draw skipped`)
         return
     }
+    log(`${faction === AP ? "AP" : "JP"} draw additional card`)
     G.draw_counter[faction]++
     set_add(G.offensive.draw, draw_card(faction, false))
     clear_undo()
+}
+
+P.cancel_offensive = {
+    _begin() {
+        get_hand(R).forEach(c => {
+            console.log(cards[c].num)
+            console.log(cards[c].cancel)
+            console.log(cards[c].could_play())
+        })
+        L.cancel = for_each_card((c, card) => {
+            console.log(`${card.name} ${card.cancel && card.could_play()}`)
+            return card.cancel && card.could_play()
+        })
+        if (!L.cancel) {
+            end()
+        }
+    },
+    prompt() {
+        prompt(`${offensive_card_header()} Cancel offensive.`)
+        G.hand[R].filter(c => cards[c].cancel && cards[c].can_play()).forEach(c => action_card(c))
+        button("skip")
+    },
+    skip() {
+        push_undo()
+        end()
+    },
+    card(c) {
+        push_undo()
+        var offensive_card = G.offensive.offensive_card
+        var reactions_card = c
+        restore_state(G.offensive.weather_rollback)
+        discard_card(offensive_card)
+        remove_card(reactions_card)
+        log(`Offensive resets`)
+        play_event(c)
+        goto("default_event")
+    },
 }
 
 P.define_intelligence_condition = {
@@ -3053,7 +3109,11 @@ P.define_intelligence_condition = {
     },
     skip() {
         push_undo()
-        end()
+        if (L.cancel) {
+            L.cancel = false
+        } else {
+            end()
+        }
     },
     card(c) {
         push_undo()
@@ -3622,6 +3682,7 @@ P.offensive_sequence = script(`
     call declare_battle_hexes
     call commit_offensive
     set G.active 1-G.offensive.attacker
+    call cancel_offensive
     call special_reaction
     call define_intelligence_condition
     if (G.offensive.intelligence != SURPRISE) {
@@ -4115,9 +4176,9 @@ function filter_activation_units(condition, faction) {
     L.possible_units = L.possible_units.filter(u => condition(u, pieces[u]))
 }
 
-function could_play(c) {
-    var faction = cards[c].faction
-    return G.hand[faction].length && !set_has(G.discard[faction], c) && !set_has(G.removed, c)
+function could_play(card) {
+    var faction = card.faction
+    return get_hand(faction).length && !set_has(G.discard[faction], card.c) && !set_has(G.removed, card.c)
 }
 
 function trigger_event(stage, arg) {
@@ -4266,8 +4327,58 @@ cards[find_card(JP, 18)].event = function () {
     check_event(events.KWAI_RIVER_BRIDGE)
 }
 
+cards[find_card(JP, 20)].before_commit_offensive = function () {
+    call("naval_battle_guadalcanal")
+}
+
+P.naval_battle_guadalcanal = {
+    _begin() {
+        L.allowed_units = []
+        var jp_bb_hex = []
+        G.offensive.active_units[JP].forEach(u => {
+            var piece = pieces[u]
+            if (piece.type === "bb" && set_has(G.offensive.battle_hexes, G.location[u])) {
+                set_add(jp_bb_hex, G.location[u])
+            }
+        })
+        var ap_bb_hex = []
+        for_each_unit_on_map((u, piece, location) => {
+            if (piece.faction === JP || !set_has(G.offensive.battle_hexes, location)) {
+                return
+            }
+            if (piece.type === "bb") {
+                set_add(ap_bb_hex, location)
+            } else if (piece.class === "air") {
+                set_add(L.allowed_units, u)
+            }
+        })
+        L.allowed_units = L.allowed_units.filter(u => !set_has(ap_bb_hex, G.location[u]))
+    },
+    prompt() {
+        prompt(`${offensive_card_header()} Choose airfield bombardment target.`)
+        L.allowed_units.forEach(u => action_unit(u))
+        if (L.allowed_units.length <= 0) {
+            button("skip")
+        }
+    },
+    skip() {
+        push_undo()
+        log(`No airfield bombardment`)
+        end()
+    },
+    unit(u) {
+        push_undo()
+        log(`${G.location[u]} airfield bombardment selected`)
+        damage_unit(u)
+        end()
+    }
+}
+
 for (var i = 0; i < cards.length; i++) {
     var always_true = () => true
+    const card = cards[i]
+    card.c = i
+    cards[i].could_play = () => could_play(card)
     if (!cards[i].can_play) {
         cards[i].can_play = always_true
     }
@@ -4340,6 +4451,14 @@ function eliminate(unit) {
     log(`${pieces[unit].name} eliminated`)
     G.location[unit] = ELIMINATED_BOX
     set_delete(G.reduced, unit)
+}
+
+function damage_unit(unit) {
+    if (set_has(G.reduced, unit)) {
+        eliminate(unit)
+    } else {
+        reduce_unit(unit)
+    }
 }
 
 function reduce_unit(unit) {
@@ -4446,8 +4565,8 @@ function setup_scenario_1942() {
 
     for_each_unit_on_map(u => control_hex(G.location[u], pieces[u].faction))
 
-    remove_card(JP, 1)
-    remove_card(JP, 2)
+    remove_card(find_card(JP, 1))
+    remove_card(find_card(JP, 2))
 
     while (G.hand[JP].length < 7)
         draw_card(JP)
@@ -4648,13 +4767,13 @@ function setup_scenario_1943() {
 
 
     var jr = [1, 2, 5, 6, 13, 15, 18, 39, 55, 73, 78]
-    jr.forEach(i => remove_card(JP, i))
+    jr.forEach(i => remove_card(find_card(JP, i)))
     var ar = [1, 3, 4, 6, 7, 8, 10, 11, 12, 14, 16, 17, 20, 51]
-    ar.forEach(i => remove_card(AP, i))
-    discard_card(AP, 13)
-    discard_card(AP, 15)
+    ar.forEach(i => remove_card(find_card(AP, i)))
+    discard_card(find_card(AP, 13))
+    discard_card(find_card(AP, 15))
     var jd = [8, 12, 14, 20, 25, 29, 35]
-    jd.forEach(i => discard_card(JP, i))
+    jd.forEach(i => discard_card(find_card(JP, i)))
 
     while (G.hand[JP].length < 7) {
         draw_card(JP)
@@ -4668,14 +4787,23 @@ function setup_scenario_1943() {
     call("offensive_phase")
 }
 
-function remove_card(faction, card) {
-    array_delete(G.draw[JP], find_card(faction, card))
-    set_add(G.removed, find_card(faction, card))
+function remove_card(card) {
+    var faction = cards[card].faction
+    discard_card(card)
+    array_delete(G.discard[faction], card)
+    set_add(G.removed, card)
 }
 
-function discard_card(faction, card) {
-    array_delete(G.draw[JP], find_card(faction, card))
-    G.discard[faction].push(find_card(faction, card))
+function discard_card(card) {
+    var faction = cards[card].faction
+    array_delete(G.draw[faction], card)
+    set_add(G.discard[faction], card)
+    if (G.future_offensive[faction] === card.c) {
+        G.future_offensive[faction] = -1
+        G.events[events.FUTURE_OFFENSIVE_JP.id + faction] = 0
+    } else {
+        array_delete_item(G.hand[faction], card)
+    }
 }
 
 function ap_air(id) {
@@ -5417,21 +5545,35 @@ function clear_undo() {
 }
 
 function push_undo() {
-    var copy, k, v
     if (G.undo) {
-        copy = {}
-        for (k in G) {
-            v = G[k]
-            if (k === "undo")
-                continue
-            else if (k === "log")
-                v = v.length
-            else if (typeof v === "object" && v !== null)
-                v = object_copy(v)
-            copy[k] = v
-        }
-        G.undo.push(copy)
+        G.undo.push(copy_state())
     }
+}
+
+function restore_state(state) {
+    if (state) {
+        var save_log = G.log
+        var save_undo = G.undo
+        G = state
+        G.log = save_log
+        G.undo = save_undo
+    }
+}
+
+function copy_state() {
+    var copy, k, v
+    copy = {}
+    for (k in G) {
+        v = G[k]
+        if (k === "undo")
+            continue
+        else if (k === "log")
+            v = v.length
+        else if (typeof v === "object" && v !== null)
+            v = object_copy(v)
+        copy[k] = v
+    }
+    return copy
 }
 
 function pop_undo() {
