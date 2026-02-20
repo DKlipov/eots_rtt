@@ -1217,6 +1217,7 @@ P.offensive_segment = {
         } else {
             play_event(c)
             G.offensive.active_cards.push(c)
+            G.offensive.offensive_card = c
             goto("default_event")
         }
     },
@@ -4383,7 +4384,7 @@ cards[find_card(JP, 17)].before_battle_roll = function (faction) {
         return
     }
     var modifier = 0
-    G.offensive.battle.air_naval[JP].map(u => pieces[u]).forEach(piece => {
+    G.offensive.battle.air_naval[JP].filter(u => unit_on_board(u)).map(u => pieces[u]).forEach(piece => {
         if (piece.type === "ca" || piece.type === "cl" || piece.type === "apd") {
             G.offensive.battle.strength[faction] += 2
             modifier += 2
@@ -4511,8 +4512,30 @@ cards[find_card(JP, 24)].event = function () {
     call("submarine_attack", {success: 4, card: find_card(JP, 24)})
 }
 
+cards[find_card(JP, 25)].before_battle_roll = function (faction) {
+    if (faction === JP || G.offensive.battle.ground_stage) {
+        return
+    }
+    var modifier = 0
+    G.offensive.battle.air_naval[AP].filter(u => unit_on_board(u)).map(u => pieces[u]).forEach(piece => {
+        if (piece.type === "cv") {
+            G.offensive.battle.strength[faction] -= 2
+            modifier -= 2
+        }
+    })
+    if (modifier) {
+        log(`${modifier} attack strength (Allied tactical confusion)`)
+    }
+}
+
 cards[find_card(JP, 27)].event = function () {
     call("submarine_attack", {success: 4, critical: 7, card: find_card(JP, 27)})
+}
+
+only_one_ground_unit(find_card(JP, 28))
+
+cards[find_card(JP, 28)].before_commit_offensive = function () {
+    call("tokyo_express")
 }
 
 cards[find_card(JP, 36)].event = function () {

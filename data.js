@@ -4032,6 +4032,7 @@ data.cards = [
         "type": POLITICAL,
         "oc": 4,
         "remove": true,
+        "china": 1,
         "name": "Chiang Kai-shek",
     },
     {
@@ -5926,6 +5927,10 @@ data.events = {
     },
     INDEPENDENCE_CAMPAIGN: {
         id: 17,
+    },
+    TOKYO_EXPRESS: {
+        id: 18,
+        once_per_turn: true,
     },
 }
 
