@@ -1686,6 +1686,10 @@ function control_hex(hex, side = G.active) {
 }
 
 function capture_hex(hex, side = G.active) {
+    if (side === AP && is_event_active(events.TOKYO_EXPRESS) === hex) {
+        log(`Tokyo express marker removed`)
+        G.events[events.TOKYO_EXPRESS.id] = 0
+    }
     if (!is_controllable_hex(hex)) {
         return
     }
@@ -2278,7 +2282,10 @@ function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
             set_add(oos_units[faction], i)
         }
     })
-
+    var tokyo_express = G.events[events.TOKYO_EXPRESS.id]
+    if (tokyo_express > 0) {
+        G.supply_cache[tokyo_express] |= JP_SUPPLIED_HEX
+    }
     for_each_unit_on_map((i, p) => {
         if (p.class !== "hq" && p.faction === faction && !check_unit_supply(G.location[i], i, p)) {
             set_add(oos_units[faction], i)
@@ -2433,6 +2440,7 @@ function check_supply() {
     G.oos = oos_units[0]
     oos_units[1].forEach(h => set_add(G.oos, h))
     check_burma_road()
+    log("Check supply")
 }
 
 function get_move_data() {
@@ -3745,6 +3753,9 @@ function capture_landing_hexes() {
 }
 
 P.offensive_sequence = script(`
+    eval {
+        trigger_event("before_activation")
+    }
     call choose_hq
     call activate_units
     call move_offensive_units
@@ -4059,6 +4070,7 @@ P.political_will_segment = function () {
             G.events[event.id] = 0
         }
     })
+    check_supply()
     end()
 }
 
@@ -4098,7 +4110,7 @@ function check_jp_resources_event() {
 }
 
 function is_event_active(event) {
-    return G.events[event.id] > 0
+    return G.events[event.id]
 }
 
 function check_event(event) {
@@ -4534,8 +4546,32 @@ cards[find_card(JP, 27)].event = function () {
 
 only_one_ground_unit(find_card(JP, 28))
 
-cards[find_card(JP, 28)].before_commit_offensive = function () {
+cards[find_card(JP, 28)].before_activation = function () {
     call("tokyo_express")
+}
+
+P.tokyo_express = {
+    _begin() {
+    },
+    prompt() {
+        prompt(`${offensive_card_header()} Place Tokyo express marker.`)
+        for_each_unit_on_map((u, piece, location) => {
+            if (piece.class === "hq" && piece.faction === JP && !set_has(G.oos, u)) {
+                for_each_hex_in_range(location, piece.cr, h => {
+                    if (MAP_DATA[h].terrain > OCEAN && !is_space_controlled(h, AP) && !is_faction_units(h, AP)) {
+                        action_hex(h)
+                    }
+                })
+            }
+        })
+    },
+    action_hex(h) {
+        push_undo()
+        log(`Tokyo Express placed: ${int_to_hex(h)}`)
+        G.events[events.TOKYO_EXPRESS.id] = h
+        check_supply()
+        end()
+    }
 }
 
 cards[find_card(JP, 36)].event = function () {

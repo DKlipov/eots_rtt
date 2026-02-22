@@ -386,6 +386,9 @@ function on_update() {
     JP_BOUNDARIES.filter(h => !set_has(G.capture, h) && !set_has(G.control, h))
         .forEach(h => populate_generic("board_hex", h, "marker control_ap"))
     G.capture.forEach(h => populate_generic("board_hex", h, set_has(G.control, h) ? "marker capture_jp" : "marker capture_ap"))
+    if (G.events[data.events.TOKYO_EXPRESS.id] > 0) {
+        populate_generic("board_hex", G.events[data.events.TOKYO_EXPRESS.id], "marker tokyo_express")
+    }
     for (var i = 0; i < data.pieces.length; ++i) {
         if (G.location[i] > 0) {
             place_unit(i, G.location[i])
