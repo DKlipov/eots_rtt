@@ -109,6 +109,26 @@ const TURN_MARKERS = [
         value: G => G.events[data.events.NEW_OPERATION_PLAN.id]
     },
     {
+        counter: "barges",
+        value: G => G.events[data.events.BARGES.id]
+    },
+    {
+        counter: "escorts2",
+        value: G => G.events[data.events.JP_ESCORTS.id]
+    },
+    {
+        counter: "escorts4",
+        value: G => G.events[data.events.MIGHTY_JP_ESCORTS.id]
+    },
+    {
+        counter: "interceptors_jp",
+        value: G => G.events[data.events.INTERCEPTORS.id]
+    },
+    {
+        counter: "panama_canal",
+        value: G => G.events[data.events.PANAMA_CANAL.id]
+    },
+    {
         counter: "alaska",
         value: G => G.events[data.events.ALASKA_OCCUPATION.id]
     },

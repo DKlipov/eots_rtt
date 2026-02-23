@@ -49,6 +49,11 @@
 .marker.drawn_jp { background-image: url(markers75/drawn_jp.png);  }
 .marker.tokyo_express { background-image: url(markers75/tokyo_express.png);  }
 .marker.defensive_doctrine { background-image: url(markers75/defensive_doctrine.png);  }
+.marker.escorts2 { background-image: url(markers75/escorts+2.png);  }
+.marker.escorts4 { background-image: url(markers75/escorts+4.png);  }
+.marker.panama_canal { background-image: url(markers75/panama_canal.png);  }
+.marker.interceptors_jp { background-image: url(markers75/interceptors.png);  }
+.marker.barges { background-image: url(markers75/barges.png);  }
 
 
 /* ARMIES (45x45) */

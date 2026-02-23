@@ -5937,6 +5937,24 @@ data.events = {
     NEW_OPERATION_PLAN: {
         id: 19,
     },
+    JP_ESCORTS: {
+        id: 20,
+    },
+    MIGHTY_JP_ESCORTS: {
+        id: 21,
+    },
+    SUBMARINE_DOCTRINE: {
+        id: 22,
+    },
+    BARGES: {
+        id: 23,
+    },
+    PANAMA_CANAL: {
+        id: 24,
+    },
+    INTERCEPTORS: {
+        id: 25,
+    },
 }
 
 function find_piece(id) {
