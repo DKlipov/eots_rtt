@@ -136,6 +136,8 @@ const ROAD_EVENTS = Object.keys(events).filter(k => events[k].road).map(k => {
 const COL_TSUJI = find_card(JP, 3)
 const JN_25_SPECIAL = find_card(JP, 13)
 const TOJO_RESIGNS = find_card(JP, 43)
+const SHO_GO = find_card(JP, 45)
+const GENERAL_ADACHI = find_card(JP, 48)
 const DOOLITLE_RAID = find_card(AP, 8)
 const SOVIET_INVADE = find_card(AP, 79)
 
@@ -776,13 +778,30 @@ P.submarine_warfare = {
     roll() {
         var result = random(10)
         var modifiers = 0
+        log(`US submarine warfare.`)
         if (G.turn <= 4) {
+            modifiers += 1
+            log(`+1 Defective torpedoes (1942)`)
+        }
+        if (is_event_active(events.MIGHTY_JP_ESCORTS)) {
+            modifiers += 4
+            log(`+4 Escort`)
+        } else if (is_event_active(events.JP_ESCORTS)) {
             modifiers += 2
+            log(`+2 Escort`)
         }
         log(`Submarine warfare roll : ${result} ${modifiers ? "+" + modifiers : ""} `)
         if (result + modifiers - G.turn <= 0) {
             log(`(Success) ${result + modifiers} <= ${G.turn}`)
             G.strategic_warfare++
+            if (is_event_active(events.MIGHTY_JP_ESCORTS)) {
+                G.events[events.MIGHTY_JP_ESCORTS.id] = 0
+                G.events[events.JP_ESCORTS.id] = G.turn
+                log(`Escort reduced +2`)
+            } else if (is_event_active(events.JP_ESCORTS)) {
+                G.events[events.JP_ESCORTS.id] = 0
+                log(`Escort modifier removed`)
+            }
             change_asp(JP, -1)
         } else {
             log(`(Failed) ${result + modifiers} > ${G.turn}`)
@@ -1340,12 +1359,22 @@ P.china_offensive = {
 P.choose_hq = {
     _begin() {
         L.possible_units = []
+        var hq_list = []
+        if (R === G.offensive.attacker && G.offensive.type === EC && cards[G.offensive.offensive_card].hq) {
+            L.card = G.offensive.offensive_card
+            hq_list = cards[G.offensive.offensive_card].hq
+        } else if (R !== G.offensive.attacker && G.offensive.counter_offensive_card >= 0 && cards[G.offensive.counter_offensive_card].hq) {
+            L.card = G.offensive.counter_offensive_card
+            hq_list = cards[G.offensive.counter_offensive_card].hq
+        }
         for_each_unit_on_map((u, piece) => {
-            if (piece.faction === R && piece.class === "hq" && !set_has(G.oos, u) && (
+            if (piece.faction === R && piece.class === "hq" &&
+                (!set_has(G.oos, u) || L.card === GENERAL_ADACHI)
+                && (
                     R === G.offensive.attacker
                     || G.offensive.battle_hexes.filter(bh => get_distance(bh, G.location[u]) <= piece.cr).length
                 )
-                && (G.offensive.type === OC || !cards[G.offensive.offensive_card].hq || cards[G.offensive.offensive_card].hq.includes(u))
+                && (hq_list.length <= 0 || hq_list.includes(u))
             ) {
                 L.possible_units.push(u)
             }
@@ -1354,7 +1383,6 @@ P.choose_hq = {
             this.unit(L.possible_units[0])
         } else if (!L.possible_units.length) {
             log(`No hq could be selected`)
-            end()
         }
     },
     prompt() {
@@ -1364,9 +1392,8 @@ P.choose_hq = {
     unit(u) {
         push_undo()
         G.offensive.active_hq[R] = u
-        var card = cards[G.offensive.offensive_card]
-        if (G.offensive.type === EC && card.logistic_alt && card.logistic_alt[0].includes(u)) {
-            G.offensive.logistic = card.logistic_alt[1]
+        if (G.offensive.type === EC && L.card >= 0 && cards[L.card].logistic_alt && cards[L.card].logistic_alt[0].includes(u)) {
+            G.offensive.logistic = cards[L.card].logistic_alt[1]
         }
         log(`${pieces[u].name} activated for ${R === G.offensive.attacker ? "offensive" : "reaction"}`)
         end()
@@ -1541,7 +1568,7 @@ function get_activatable_units(hq) {
             && G.supply_cache[G.location[i]] & HEX_TEMP_FLAG3
             && piece.class !== "hq"
             && !set_has(G.offensive.active_units[R], i)
-            && !set_has(G.oos, i)
+            && (!set_has(G.oos, i) || L.card === GENERAL_ADACHI)
             && (!reaction_movement || is_unit_reaction_able(i))
             && (!G.committed.includes(i) || reaction_movement && is_faction_units(G.location[i], JP))
         ) {
@@ -1650,6 +1677,11 @@ function is_air_reaction_able(u) {
 
 P.activate_units = {
     _begin() {
+        if (R === G.offensive.attacker && G.offensive.type === EC && cards[G.offensive.offensive_card].hq) {
+            L.card = G.offensive.offensive_card
+        } else if (R !== G.offensive.attacker && G.offensive.counter_offensive_card >= 0 && cards[G.offensive.counter_offensive_card].hq) {
+            L.card = G.offensive.counter_offensive_card
+        }
         L.hq_bonus = pieces[G.offensive.active_hq[G.active]].cm
         L.possible_units = get_activatable_units(G.offensive.active_hq[G.active])
         trigger_event("before_unit_activation")
@@ -3297,8 +3329,8 @@ P.apply_attack_reaction = {
         end()
     },
     card(c) {
+        push_undo()
         set_delete(L.allowed_cards, c)
-        clear_undo()
         if (L.allowed_cards.length <= 0) {
             end()
         }
@@ -3887,16 +3919,14 @@ P.offensive_sequence = script(`
         if (G.offensive.active_hq[G.active]) {
             call activate_units
             call move_offensive_units
-            call attack_reaction_cards
-            call commit_offensive
         }
     }
-    if (!G.offensive.active_hq[G.active]) {
-        call attack_reaction_cards
-    }
+    call attack_reaction_cards
     set G.offensive.stage BATTLE_STAGE
-    set G.active 1-G.offensive.attacker
-    call apply_attack_reaction
+     call apply_attack_reaction
+    if (G.offensive.active_hq[G.active]) {
+        call commit_offensive
+    }
     set G.active G.offensive.attacker
     while (G.offensive.battle_hexes.length > 0) {
         call choose_battle
@@ -4489,10 +4519,12 @@ cards[find_card(JP, 14)].before_apply_hits = function (faction) {
     if (faction === JP || G.offensive.battle.ground_stage) {
         return
     }
+    var modifier = 0
     for (var i = 0; i < L.pool.length; i++) {
         var piece = pieces[L.pool[i]]
         if (piece.type === "cv") {
             L.pool[i + 1] += 2
+            modifier++
         }
     }
 }
@@ -4955,6 +4987,157 @@ cards[find_card(JP, 44)].before_commit_offensive = function () {
     delete G['jp_asp']
 }
 
+function check_kamikaze_playable() {
+    if (!G.offensive.kamikaze) {
+        set_kamikaze_able_battles()
+    }
+    return G.offensive.active_cards.filter(c => cards[c].kamikaze).length < G.offensive.kamikaze.length
+}
+
+function set_kamikaze_able_battles() {
+    if (G.offensive.kamikaze) {
+        return
+    }
+    var ap_naval_commited = []
+    map_for_each(G.offensive.paths, (u, path) => {
+        if (pieces[u].faction === AP && pieces[u].class === "naval" && unit_on_board(u)) {
+            set_add(ap_naval_commited, path[path.length - 1])
+        }
+    })
+    var battles = []
+    for_each_unit_on_map((u, piece, location) => {
+        if (piece.faction === JP && piece.class === "air") {
+            G.offensive.battle_hexes
+                .filter(h => get_distance(h, TOKYO) <= 11
+                    && set_has(ap_naval_commited, h)
+                    && get_distance(h, location) <= piece.ebr)
+                .forEach(h => set_add(battles, h))
+        }
+    })
+    G.offensive.kamikaze = battles
+}
+
+P.kamikaze_attack = {
+    _begin() {
+        L.allowed_units = []
+        for_each_unit_on_map((u, piece, location) => {
+            if (piece.faction === JP && piece.class === "air" && G.offensive.kamikaze.filter(bh => get_distance(bh, location) <= piece.ebr).length) {
+                set_add(L.allowed_units, u)
+            }
+        })
+        if (L.allowed_units.length <= 0) {
+            log(`No kamikaze attack possible`)
+            end()
+        }
+        L.stage = 1
+    },
+    prompt() {
+        if (L.stage === 1) {
+            prompt(`Kamikaze attack. Choose air unit.`)
+            L.allowed_units.forEach(u => action_unit(u))
+        } else {
+            prompt(`Kamikaze attack. Choose target. Hits: ${L.hits}.`)
+            var has_non_damaged = L.allowed_units.filter(u => !set_has(G.reduced, u)).length
+            if (L.hits > 0) {
+                L.allowed_units.forEach(u => {
+                    if (!set_has(G.reduced, u) || !has_non_damaged) {
+                        action_unit(u)
+                    }
+                })
+            }
+            if (G.offensive.counter_offensive_card === SHO_GO && !G.offensive.sho_go) {
+                action_card(SHO_GO)
+            }
+        }
+        if (L.allowed_units.length <= 0 || L.hits <= 0) {
+            button("done")
+        }
+    },
+    done() {
+        push_undo()
+        end()
+    },
+    card(c) {
+        push_undo()
+        G.offensive.sho_go = 1
+        L.hits += 1
+        log(`+1 kamikaze hit (Sho-go)`)
+    },
+    unit(u) {
+        push_undo()
+        if (L.stage === 1) {
+            var location = G.location[u]
+            log(`${pieces[u].name} launch kamikaze attack.`)
+            damage_unit(u)
+            L.allowed_units = []
+            map_for_each(G.offensive.paths, (ap, path) => {
+                var bh = path[path.length - 1]
+                console.log(pieces[u].name)
+                console.log(int_to_hex(bh))
+                console.log(G.offensive.kamikaze.map(h => int_to_hex(h)))
+                console.log(int_to_hex(location))
+                console.log(get_distance(bh, location))
+                console.log(pieces[u].ebr)
+                if (pieces[ap].faction === AP && pieces[ap].class === "naval" && unit_on_board(ap) && set_has(G.offensive.kamikaze, bh)
+                    && get_distance(bh, location) <= pieces[u].ebr) {
+                    set_add(L.allowed_units, ap)
+                }
+            })
+            L.stage++
+            L.hits = 2
+        } else {
+            L.hits -= 1
+            var bh = get_unit_battle_hex(u)
+            set_delete(G.offensive.kamikaze, bh)
+            damage_unit(u)
+            L.allowed_units = L.allowed_units.filter(au => unit_on_board(au) && get_unit_battle_hex(au) === bh)
+        }
+    }
+}
+
+function get_unit_battle_hex(unit) {
+    var path = map_get(G.offensive.paths, unit)
+    return path[path.length - 1]
+}
+
+cards[find_card(JP, 46)].before_apply_hits = function (faction) {
+    if (faction === AP || G.offensive.battle.ground_stage) {
+        return
+    }
+    var modifier = 0
+    for (var i = 0; i < L.pool.length; i++) {
+        var piece = pieces[L.pool[i]]
+        if (piece.br && piece.class === "naval") {
+            L.pool[i + 1] += 2
+            modifier++
+        }
+    }
+}
+
+cards[find_card(JP, 47)].before_battle_roll = function (faction) {
+    if (faction === AP || G.offensive.battle.ground_stage) {
+        return
+    }
+    var modifier = 0
+    G.offensive.battle.air_naval[JP].filter(u => unit_on_board(u)).map(u => pieces[u]).forEach(piece => {
+        if (piece.type === "ca") {
+            G.offensive.battle.strength[faction] += 2
+            modifier += 2
+        }
+    })
+    if (modifier) {
+        log(`+${modifier} attack strength (Float plane tactics)`)
+    }
+}
+
+cards[GENERAL_ADACHI].before_unit_activation = function () {
+    filter_activation_units((u, piece) => piece.class !== "naval", JP)
+}
+
+cards[find_card(JP, 50)].before_unit_activation = function () {
+    filter_activation_units((u, piece) => piece.class !== "naval", JP)
+}
+
 cards[find_card(JP, 75)].event = function () {
     call("submarine_attack", {success: 4, card: find_card(JP, 75)})
 }
@@ -5016,6 +5199,10 @@ for (var i = 0; i < cards.length; i++) {
     }
     if (!cards[i].event) {
         cards[i].event = always_true
+    }
+    if (cards[i].kamikaze) {
+        cards[i].event = () => call("kamikaze_attack")
+        cards[i].can_play = () => check_kamikaze_playable()
     }
 }
 
