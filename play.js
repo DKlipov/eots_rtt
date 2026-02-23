@@ -105,6 +105,10 @@ const TURN_MARKERS = [
         value: G => G.events[data.events.FUTURE_OFFENSIVE_AP.id]
     },
     {
+        counter: "defensive_doctrine",
+        value: G => G.events[data.events.NEW_OPERATION_PLAN.id]
+    },
+    {
         counter: "alaska",
         value: G => G.events[data.events.ALASKA_OCCUPATION.id]
     },

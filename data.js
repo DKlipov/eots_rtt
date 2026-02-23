@@ -4099,6 +4099,7 @@ data.cards = [
         "ops": 2,
         "type": POLITICAL,
         "oc": 4,
+        "isr_agreement": true,
         "name": "Imperial Intervention",
     },
     {
@@ -4108,6 +4109,7 @@ data.cards = [
         "type": POLITICAL,
         "oc": 4,
         "draw": true,
+        "isr_rivalry": true,
         "name": "US Army/Navy Dispute",
     },
     {
@@ -5931,6 +5933,9 @@ data.events = {
     TOKYO_EXPRESS: {
         id: 18,
         once_per_turn: true,
+    },
+    NEW_OPERATION_PLAN: {
+        id: 19,
     },
 }
 

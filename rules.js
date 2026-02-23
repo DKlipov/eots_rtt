@@ -3346,6 +3346,32 @@ function get_ground_roll_modifiers(faction) {
         result += 1
         log(`+1 Armor brigade`)
     }
+    if (faction === JP && is_event_active(events.NEW_OPERATION_PLAN) && MAP_DATA[battle.battle_hex].island) {
+        result += 1
+        log(`+1 Defensive doctrine`)
+    }
+    return result
+}
+
+function get_naval_roll_modifiers(faction) {
+    var battle = G.offensive.battle
+    var result = 0
+    if (faction === AP && G.offensive.intelligence === AMBUSH) {
+        result += 4
+        log(`+4 Ambush`)
+    }
+    if (faction === G.offensive.attacker && G.offensive.intelligence === SURPRISE) {
+        result += 3
+        log(`+3 Surprise attack`)
+    }
+    var ap_air_superiority = faction === AP && battle.air_naval[AP].filter(u => unit_on_board(u) && pieces[u].br).length > 0
+    if (ap_air_superiority && G.turn >= 8) {
+        result += 3
+        log(`+3 Allied air superiority (1944-1945)`)
+    } else if (ap_air_superiority && G.turn >= 5) {
+        result += 1
+        log(`+3 Allied air superiority (1943)`)
+    }
     return result
 }
 
@@ -3375,7 +3401,7 @@ function execute_attack(faction) {
     } else if (battle.ground_stage) {
         battle.roll_modifiers = get_ground_roll_modifiers(faction)
     } else {
-        battle.roll_modifiers = 0
+        battle.roll_modifiers = get_naval_roll_modifiers(faction)
     }
     trigger_event("before_battle_roll", faction)
     let roll = battle.roll[faction]
@@ -4574,6 +4600,110 @@ P.tokyo_express = {
     }
 }
 
+cards[find_card(JP, 29)].before_unit_activation = function () {
+    filter_activation_units((u, piece) => piece.class !== "ground", JP)
+}
+
+cards[find_card(JP, 29)].before_battle_roll = function (faction) {
+    if (faction === AP || G.offensive.battle.ground_stage) {
+        return
+    }
+    var modifier = 0
+    G.offensive.battle.air_naval[JP].filter(u => unit_on_board(u)).map(u => pieces[u]).forEach(piece => {
+        if (piece.class === "naval" && piece.br) {
+            G.offensive.battle.strength[faction] += 2
+            modifier += 2
+        }
+    })
+    if (modifier) {
+        log(`+${modifier} attack strength (Effective aerial torpedo tactics)`)
+    }
+}
+
+cards[find_card(JP, 30)].event = function () {
+    G.reinforcements.AIR += 3
+    call("replacement_segment", {restricted: {AIR: 3}})
+}
+
+cards[find_card(JP, 31)].event = function () {
+    check_event(events.NEW_OPERATION_PLAN)
+}
+
+cards[find_card(JP, 32)].before_unit_activation = function () {
+    filter_activation_units((u, piece) => piece.class === "air", JP)
+}
+
+cards[find_card(JP, 32)].before_battle_roll = function (faction) {
+    if (faction === AP || G.offensive.battle.ground_stage) {
+        return
+    }
+    var battle = G.offensive.battle.battle_hex
+    var cv_present = for_each_unit_on_map((u, piece, location) => {
+        if (piece.faction === JP && (piece.type === "cv" || piece.type === "cvl") && get_distance(battle, location) <= 6) {
+            return true
+        }
+    })
+    if (cv_present) {
+        G.offensive.battle.roll_modifiers += 1
+        log(`+1 Air shuttle`)
+    }
+}
+
+cards[find_card(JP, 33)].event = function () {
+    call("draw_from_discard")
+}
+
+P.draw_from_discard = {
+    _begin() {
+        if (G.discard[R].length === 0 || G.discard[R].length === 1 && G.discard[R][0] === G.offensive.offensive_card) {
+            log(`Discard pile is empty, could not replace card`)
+            end()
+        }
+        if (G.future_offensive[R] < 0 && G.hand[R].length === 0) {
+            log(`Have no card to discard, could not replace card`)
+            end()
+        }
+    },
+    prompt() {
+        if (L.card) {
+            prompt(`${offensive_card_header()} Choose card to draw.`)
+            G.discard[R].forEach(c => action_card(c))
+        } else {
+            prompt(`${offensive_card_header()} Choose card to discard.`)
+            if (G.future_offensive[R] >= 0) {
+                action_card(G.future_offensive[R])
+            }
+            G.hand[R].forEach(c => action_card(c))
+            button("skip")
+        }
+    },
+    skip() {
+        log(`${R === AP ? "Ap" : "Jp"} choose to skip replace card`)
+        end()
+    },
+    card(c) {
+        push_undo()
+        if (!L.card) {
+            L.card = c
+            G.offensive.active_cards = []
+            var event = G.offensive.offensive_card
+            G.discard[R].forEach(c => {
+                if (event !== c) {
+                    G.offensive.active_cards.push(c)
+                }
+            })
+            log(`${R === AP ? "Ap" : "Jp"} discard ${cards[c].name}`)
+            discard_card(c)
+            return
+        }
+        set_delete(G.discard, c)
+        G.hand[R].push(c)
+        G.offensive.active_cards = []
+        log(`${R === AP ? "Ap" : "Jp"} draw ${cards[c].name} from discard pile`)
+        end()
+    }
+}
+
 cards[find_card(JP, 36)].event = function () {
     call("submarine_attack", {success: 4, card: find_card(JP, 36)})
 }
@@ -4646,6 +4776,9 @@ P.default_event = script(`
     eval {
         if (cards[G.offensive.offensive_card].isr_rivalry) {
             set_inter_service(1-cards[G.offensive.offensive_card].faction,1)
+        }
+        if (cards[G.offensive.offensive_card].isr_agreement) {
+            set_inter_service(cards[G.offensive.offensive_card].faction,0)
         }
         if (cards[G.offensive.offensive_card].china) {
             update_china_status(cards[G.offensive.offensive_card].china)
