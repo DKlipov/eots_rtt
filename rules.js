@@ -1050,7 +1050,7 @@ function get_infrastructure_actions() {
 
 function get_allowed_actions(num) {
     let card = cards[num]
-    if (num === TOJO_RESIGNS && G.turn >= 8 || num === SOVIET_INVADE && set_has(G.removed, TOJO_RESIGNS)) {
+    if (num === TOJO_RESIGNS && G.turn >= 8 || num === SOVIET_INVADE && is_event_active(events.TOJO)) {
         return ["event"]
     } else if (num === TOJO_RESIGNS) {
         return ["event", "ops", "discard"]
@@ -1744,7 +1744,6 @@ P.move_offensive_units = {
         if (!L.type) {
             L.type = 0
         }
-        check_supply()
         L.move_data = {}
         L.movable_units = []
         L.allowed_hexes = []
@@ -4925,15 +4924,35 @@ cards[find_card(JP, 39)].event = function () {
 }
 
 cards[find_card(JP, 39)].before_replacement = function () {
-    console.log(L.replacable_units.length)
     L.replacable_units = []
-    console.log(L.replacable_units.length)
     for_each_unit_on_map((u, piece, location) => {
         if (piece.class === "ground" && piece.faction === JP && set_has(G.reduced, u) && get_distance(RANGOON, location) <= 3) {
             set_add(L.replacable_units, u)
         }
     })
-    console.log(L.replacable_units.length)
+}
+
+cards[find_card(JP, 40)].before_unit_activation = function () {
+    filter_activation_units((u, piece) => piece.class !== "naval", JP)
+}
+
+cards[TOJO_RESIGNS].event = function () {
+    check_event(events.TOJO)
+}
+
+cards[find_card(JP, 44)].before_activation = function () {
+    G.jp_asp = []
+    G.jp_asp[0] = 2 + Math.max(0, G.asp[JP][1] - G.asp[JP][0])
+    G.jp_asp[1] = G.asp[JP][1]
+    log('Japan gain 2 temporary ASPs')
+    G.asp[JP][0] += G.jp_asp[0]
+    call("tokyo_express")
+}
+
+cards[find_card(JP, 44)].before_commit_offensive = function () {
+    G.asp[JP][0] -= G.jp_asp[0]
+    G.asp[JP][1] -= Math.min(G.asp[JP][1] - G.jp_asp[1], 2)
+    delete G['jp_asp']
 }
 
 cards[find_card(JP, 75)].event = function () {
@@ -5007,6 +5026,9 @@ P.default_event = script(`
         }
         if (cards[G.offensive.offensive_card].isr_agreement) {
             set_inter_service(cards[G.offensive.offensive_card].faction,0)
+        }
+        if (cards[G.offensive.offensive_card].pw) {
+            change_political_will(cards[G.offensive.offensive_card].pw, cards[G.offensive.offensive_card].name)
         }
         if (cards[G.offensive.offensive_card].china) {
             update_china_status(cards[G.offensive.offensive_card].china)

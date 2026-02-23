@@ -145,7 +145,7 @@ const TURN_MARKERS = [
         value: G => G.events[data.events.CHINA_OFFENSIVE.id]
     },
     {
-        counter: G => "turn_pmt",
+        counter: G => G.events[data.events.TOJO.id] ? "turn_tr" : "turn_pmt",
         value: G => G.turn
     },
 ]

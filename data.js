@@ -4180,6 +4180,7 @@ data.cards = [
         "type": POLITICAL,
         "oc": 5,
         "remove": true,
+        "china": 1,
         "name": "Patric Hurley",
     },
     {
@@ -4189,6 +4190,7 @@ data.cards = [
         "type": POLITICAL,
         "oc": 5,
         "remove": true,
+        "china": 1,
         "name": "Ichi-Go",
     },
     {
@@ -4197,6 +4199,7 @@ data.cards = [
         "ops": 1,
         "type": POLITICAL,
         "oc": 3,
+        "pw": -2,
         "remove": true,
         "reshuffle": true,
         "name": "Tojo Resigns",
@@ -5954,6 +5957,9 @@ data.events = {
     },
     INTERCEPTORS: {
         id: 25,
+    },
+    TOJO: {
+        id: 26,
     },
 }
 
