@@ -2369,12 +2369,13 @@ function check_burma_road() {
 function is_overstack(hex, unit) {
     var overstack = G.overstack[hex]
     var piece = pieces[unit]
+    var multiplier = G.location[unit] === hex ? 0 : 1
     if (piece.class === "hq") {
         return overstack & 1
     } else if (piece.class !== "naval") {
-        return ((overstack + 2) % (1 << 7)) >= 8
+        return ((overstack + 2 * multiplier) % (1 << 7)) > 8
     } else {
-        return ((overstack + 128) >> 7) > 5
+        return ((overstack + 128 * multiplier) >> 7) > 5
     }
 }
 
@@ -2386,6 +2387,83 @@ function get_overstack_size(unit) {
         return 2
     } else {
         return 1 << 7
+    }
+}
+
+P.check_overstacking = {
+    _begin() {
+        L.allowed_units = []
+        L.ground_units = []
+        var overstack_naval = []
+        var overstack_land = []
+        for (var i = 0; i < LAST_BOARD_HEX; i++) {
+            if ((G.overstack[i] % (1 << 7)) > 8) {
+                set_add(overstack_land, i)
+            }
+            if ((G.overstack[i] >> 7) > 6) {
+                set_add(overstack_naval, i)
+            }
+        }
+        if (!overstack_naval.length && !overstack_land.length) {
+            end()
+        }
+        var air_hex = []
+        for_each_unit_on_map((u, piece, location) => {
+            if (piece.class === "naval" && set_has(overstack_naval, location)) {
+                set_add(L.allowed_units, u)
+            } else if (piece.class === "ground" && set_has(overstack_land, location)) {
+                set_add(L.ground_units, u)
+            } else if (piece.class === "air" && set_has(overstack_land, location)) {
+                set_add(L.allowed_units, u)
+                set_add(air_hex, location)
+            }
+        })
+        L.ground_units.forEach(u => {
+            if (!set_has(air_hex, G.location[u])) {
+                set_add(L.allowed_units, u)
+            }
+        })
+    },
+    prompt() {
+        prompt(`Remove overstacked units.`)
+        L.allowed_units.forEach(u => action_unit(u))
+        if (L.allowed_units.length === 0) {
+            button("done")
+        }
+    },
+    done() {
+        push_undo()
+        end()
+    },
+    unit(u) {
+        push_undo()
+        var location = G.location[u]
+        log(`${pieces[u].name} removed due to overstacking.`)
+        if (set_has(G.oos, u)) {
+            eliminate(u)
+        } else {
+            displace_to_turn(u, 1, true)
+        }
+        set_delete(L.allowed_units, u)
+        var still_overstack = is_overstack(location, u)
+        if (!still_overstack && pieces[u].class === "naval") {
+            L.allowed_units = L.allowed_units.filter(u => G.location[u] !== location || pieces[u].class !== "naval")
+        } else if (!still_overstack && pieces[u].class === "ground") {
+            L.allowed_units = L.allowed_units.filter(u => G.location[u] !== location || pieces[u].class !== "ground")
+        } else if (!still_overstack && pieces[u].class === "air") {
+            L.allowed_units = L.allowed_units.filter(u => G.location[u] !== location || pieces[u].class !== "air")
+        } else if (still_overstack && pieces[u].class === "air") {
+            console.log("4 condition")
+            var air_present = L.allowed_units.filter(u => G.location[u] === location && pieces[u].class === "air").length
+            console.log(air_present)
+            if (!air_present) {
+                L.ground_units.forEach(u => {
+                    if (G.location[u] === location) {
+                        set_add(L.allowed_units, u)
+                    }
+                })
+            }
+        }
     }
 }
 
@@ -3819,14 +3897,18 @@ P.offensive_sequence = script(`
     call apply_attack_reaction
     if (G.offensive.active_units[G.active].length) {
         call move_offensive_units
+        set G.offensive.active_units[1-G.offensive.attacker] []
+        call check_overstacking
         call commit_offensive
     }
     set G.active G.offensive.attacker
     call move_offensive_units
-    set G.offensive.active_units [[], []]
+    set G.offensive.active_units[G.offensive.attacker] []
+    call check_overstacking
     call commit_offensive
     set G.active 1-G.offensive.attacker
     call emergency_move
+    call check_overstacking
 `)
 
 P.political_phase = script(`
@@ -3936,6 +4018,11 @@ function degrade_india(could_revolt = false) {
 }
 
 function displace_to_turn(unit, turns, not_delayed) {
+    if (pieces[unit].notreplaceable) {
+        log(`${pieces[unit].name} not replacable, could not be displaced to turn box`)
+        eliminate(unit)
+        return
+    }
     log(`${pieces[unit].name} displaced to turn box ${G.turn + turns}`)
     set_location(unit, TURN_BOX + G.turn + turns)
     if (not_delayed) {
@@ -4702,6 +4789,101 @@ P.draw_from_discard = {
         log(`${R === AP ? "Ap" : "Jp"} draw ${cards[c].name} from discard pile`)
         end()
     }
+}
+
+cards[find_card(JP, 35)].event = function () {
+    call("guadalcanal_evacuation")
+}
+
+P.guadalcanal_evacuation = {
+    _begin() {
+        L.allowed_hexes = []
+        for (var i = 0; i < LAST_BOARD_HEX; i++) {
+            if (is_faction_units(i, JP) && MAP_DATA[i].coastal) {
+                set_add(L.allowed_hexes, i)
+            }
+        }
+        L.allowed_units = []
+        L.stage = 1
+    },
+    prompt() {
+        if (L.stage === 1) {
+            prompt(`${offensive_card_header()} Choose coastal hex.`)
+            L.allowed_hexes.forEach(c => action_hex(c))
+        } else if (L.stage === 2) {
+            prompt(`${offensive_card_header()} Choose units to evacuation.${G.offensive.active_units[JP].length === 0 && L.allowed_units.length === 0 ? " (No possible units)." : ""}`)
+            if (G.offensive.active_units[JP].length) {
+                button("done")
+            }
+            L.allowed_units.forEach(u => action_unit(u))
+        } else {
+            prompt(`${offensive_card_header()} Choose destination port hex.${L.allowed_hexes.length === 0 ? " (No possible hex)." : ""}`)
+            L.allowed_hexes.forEach(c => action_hex(c))
+        }
+    },
+    done() {
+        push_undo()
+        L.stage++
+    },
+    action_hex(h) {
+        push_undo()
+        if (L.stage === 1) {
+            L.allowed_hexes = get_guadalcanal_evacuation_destination(h)
+            L.stage++
+            for_each_unit_on_map((u, piece, location) => {
+                if (piece.faction === JP && piece.class === "ground" && get_distance(location, h) <= 1) {
+                    set_add(L.allowed_units, u)
+                }
+            })
+        } else {
+            G.offensive.active_units[JP].forEach(u => set_location(u, h))
+            G.offensive.active_units[JP] = []
+            check_supply()
+            goto("check_overstacking")
+        }
+    },
+    unit(u) {
+        push_undo()
+        set_add(G.offensive.active_units[JP], u)
+        set_delete(L.allowed_units, u)
+        if (L.allowed_units.length <= 0 || G.offensive.active_units[JP].length >= 3) {
+            L.stage++
+        }
+    }
+}
+
+function get_guadalcanal_evacuation_destination(location) {
+    const move_data = {naval_move_distance: 15}
+    if (MAP_DATA[location].port && is_space_controlled(location, JP)) {
+        move_data.naval_move_distance = 30
+    }
+    const queue = [location]
+    const distance_map = [location, 0]
+    const result = []
+    for (var i = 0; i < queue.length; i++) {
+        let item = queue[i]
+        const distance = map_get(distance_map, item) + 1
+        let nh_list = get_near_hexes(item)
+        for (let j = 0; j < 6; j++) {
+            let nh = nh_list[j]
+            if (nh <= 0) {
+                continue
+            }
+            if (distance > move_data.naval_move_distance
+                || !(MAP_DATA[item].edges_int & WATER << 5 * j)
+                || distance >= map_get(distance_map, nh, [100])) {
+                continue
+            }
+            if (distance < move_data.naval_move_distance) {
+                queue.push(nh)
+            }
+            map_set(distance_map, nh, distance)
+            if (MAP_DATA[nh].port && is_space_controlled(nh, JP)) {
+                set_add(result, nh)
+            }
+        }
+    }
+    return result
 }
 
 cards[find_card(JP, 36)].event = function () {
