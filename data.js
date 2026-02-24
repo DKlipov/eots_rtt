@@ -4464,6 +4464,7 @@ data.cards = [
         "ops": 2,
         "type": POLITICAL,
         "oc": 4,
+        "isr_agreement": true,
         "name": "Japanese Army/Navy",
     },
     {
@@ -4472,6 +4473,7 @@ data.cards = [
         "ops": 2,
         "type": POLITICAL,
         "oc": 4,
+        "isr_agreement": true,
         "name": "Japanese Army/Navy",
     },
     {
@@ -4531,6 +4533,7 @@ data.cards = [
         "type": POLITICAL,
         "oc": 3,
         "remove": true,
+        "pw": -1,
         "name": "Tokyo Rose",
     },
     {
@@ -4588,6 +4591,8 @@ data.cards = [
         "ops": 2,
         "type": RESOURCE,
         "oc": 4,
+        "draw": true,
+        "remove": true,
         "name": "Attack on the Panama Canal",
     },
     {
@@ -5961,7 +5966,7 @@ data.events = {
     JP_ESCORTS: {
         id: 20,
     },
-    MIGHTY_JP_ESCORTS: {
+    PT_BOATS: {
         id: 21,
     },
     SUBMARINE_DOCTRINE: {

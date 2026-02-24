@@ -48,7 +48,7 @@ const TRACK_MARKERS = [
         value: G => G.reinforcements.AIR
     },
     {
-        counter: "asp_jp",
+        counter: () => G.events[data.events.BARGES.id] > 0 ? "asp_b_jp" : "asp_jp",
         value: G => G.asp[0][0]
     },
     {
@@ -113,12 +113,8 @@ const TURN_MARKERS = [
         value: G => G.events[data.events.BARGES.id]
     },
     {
-        counter: "escorts2",
-        value: G => G.events[data.events.JP_ESCORTS.id]
-    },
-    {
-        counter: "escorts4",
-        value: G => G.events[data.events.MIGHTY_JP_ESCORTS.id]
+        counter: () => (G.events[data.events.JP_ESCORTS.id] >> 4 === 2) ? "escorts2" : "escorts4",
+        value: G => G.events[data.events.JP_ESCORTS.id] % (1 << 4)
     },
     {
         counter: "interceptors_jp",
@@ -520,7 +516,7 @@ function on_update() {
     for (i = 0; i < TRACK_MARKERS.length; i++) {
         const marker = TRACK_MARKERS[i]
         var value = marker.value(G)
-        var counter = marker.counter
+        var counter = (typeof marker.counter === 'function') ? marker.counter(G) : marker.counter
         var track = Math.min(9, value)
         if (value > 9 && marker.alt_counter) {
             counter = marker.alt_counter
