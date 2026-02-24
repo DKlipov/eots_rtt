@@ -4092,6 +4092,30 @@ function change_political_will(diff, cause) {
     log(`Political will changed to ${G.political_will} (${diff}) ${cause}`)
 }
 
+function get_wie_level() {
+    if (G.wie <= 2) {
+        return "No effect"
+    } else if (G.wie <= 5) {
+        return "Level 1"
+    } else if (G.wie <= 7) {
+        return "Level 2"
+    } else if (G.wie <= 9) {
+        return "Level 3"
+    } else if (G.wie <= 10) {
+        return "Level 4"
+    }
+}
+
+function change_wie(diff, cause) {
+    if (diff === undefined) {
+        log(`No war in europe changed`)
+        return
+    }
+    G.wie = Math.max(G.wie + diff, 0)
+    G.wie = Math.min(G.wie, 10)
+    log(`War in europe changed to ${get_wie_level()} (${3 - G.wie}), ${cause} (${diff})`)
+}
+
 P.india_surrender = {
     _begin() {
         if (G.surrender[nations.INDIA.id] !== 4) {
@@ -5206,6 +5230,11 @@ for (var i = 0; i < cards.length; i++) {
     }
 }
 
+function get_year() {
+    var t = G.turn + 1
+    return (t - (t % 3)) / 3 + 1941
+}
+
 P.default_event = script(`
     eval {
         if (cards[G.offensive.offensive_card].isr_rivalry) {
@@ -5216,6 +5245,9 @@ P.default_event = script(`
         }
         if (cards[G.offensive.offensive_card].pw) {
             change_political_will(cards[G.offensive.offensive_card].pw, cards[G.offensive.offensive_card].name)
+        }
+        if (cards[G.offensive.offensive_card].wie) {
+            change_wie(cards[G.offensive.offensive_card].wie[get_year()-1942], cards[G.offensive.offensive_card].cause)
         }
         if (cards[G.offensive.offensive_card].china) {
             update_china_status(cards[G.offensive.offensive_card].china)

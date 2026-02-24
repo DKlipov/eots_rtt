@@ -4288,6 +4288,8 @@ data.cards = [
         "type": POLITICAL,
         "oc": 5,
         "remove": true,
+        "cause": "Minor axis victory",
+        "wie": [2, 1],
         "name": "War in europe",
     },
     {
@@ -4297,6 +4299,7 @@ data.cards = [
         "type": POLITICAL,
         "oc": 5,
         "remove": true,
+        "wie": [2, 1],
         "name": "War in europe",
     },
     {
@@ -4306,6 +4309,8 @@ data.cards = [
         "type": POLITICAL,
         "oc": 5,
         "remove": true,
+        "cause": "Minor axis victory",
+        "wie": [2, 1],
         "name": "War in europe",
     },
     {
@@ -4315,6 +4320,8 @@ data.cards = [
         "type": POLITICAL,
         "oc": 5,
         "remove": true,
+        "cause": "Minor axis victory",
+        "wie": [2, 1],
         "name": "War in europe",
     },
     {
@@ -4324,6 +4331,8 @@ data.cards = [
         "type": POLITICAL,
         "oc": 5,
         "remove": true,
+        "wie": [3, 2, 1],
+        "cause": "Major axis victory",
         "name": "War in europe",
     },
     {
@@ -4333,6 +4342,8 @@ data.cards = [
         "type": POLITICAL,
         "oc": 5,
         "remove": true,
+        "cause": "Minor axis victory",
+        "wie": [2, 1],
         "name": "War in europe",
     },
     {
@@ -4342,6 +4353,8 @@ data.cards = [
         "type": POLITICAL,
         "oc": 5,
         "remove": true,
+        "cause": "Minor axis victory",
+        "wie": [2, 1],
         "name": "War in europe",
     },
     {
