@@ -138,7 +138,9 @@ const JN_25_SPECIAL = find_card(JP, 13)
 const TOJO_RESIGNS = find_card(JP, 43)
 const SHO_GO = find_card(JP, 45)
 const GENERAL_ADACHI = find_card(JP, 48)
+const MATADOR = find_card(AP, 5)
 const DOOLITLE_RAID = find_card(AP, 8)
+const ROCHEFORT = find_card(AP, 12)
 const SOVIET_INVADE = find_card(AP, 79)
 
 // PIECES
@@ -746,6 +748,7 @@ P.replacement_segment = {
             set_add(G.reduced, u)
             G.active_stack = [u]
             L.allowed_hexes = get_unit_reinforcement_hexes(u)
+            trigger_event("before_place_replacement")
         }
         L.replacement_points[pieces[u].replacement] -= 1
         if (G.active === JP && (pieces[u].replacement === "AIR" || pieces[u].replacement === "NAVAL")) {
@@ -1511,7 +1514,7 @@ function get_reaction_able_units() {
         mark_asp_reaction_hexes(hex)
         mark_ground_reaction_hexes(hex)
     })
-    const has_asp = Math.max(G.asp[R][0] - G.asp[R][1], 0)
+    const has_asp = Math.max(G.asp[R][0] - G.asp[R][1], 0) && G.offensive.counter_offensive_card !== MATADOR
     for_each_unit_on_map((u, piece) => {
         if (piece.faction === R && piece.class === "ground" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG3) {
             set_add(L.reaction_able_units, u)
@@ -2300,7 +2303,7 @@ function mark_hexes_supplied_from(hq, piece) {
 
 function check_unit_supply(location, i, piece) {
     if (piece.class === "hq") {
-        return false
+        return true
     } else if (set_has(G.offensive.active_units[piece.faction], i)) {
         return true
     }
@@ -2651,6 +2654,9 @@ function get_move_data() {
         result.move_type |= STRAT_MOVE
     }
     result.asp_points -= Math.min(organic_naval_counter, organic_ground_counter)
+    if (G.offensive.counter_offensive_card === MATADOR) {
+        result.asp_points = 0
+    }
     if (result.is_ground_present && asp_move && result.asp_points <= asp_total) {
         result.move_type |= AMPH_MOVE
         if (organic_only_ships && organic_naval_counter <= organic_ground_counter) {
@@ -3509,7 +3515,7 @@ function get_naval_roll_modifiers(faction) {
         log(`+3 Allied air superiority (1944-1945)`)
     } else if (ap_air_superiority && G.turn >= 5) {
         result += 1
-        log(`+3 Allied air superiority (1943)`)
+        log(`+1 Allied air superiority (1943)`)
     }
     return result
 }
@@ -3547,7 +3553,7 @@ function execute_attack(faction) {
     var modififed_roll = roll + battle.roll_modifiers
     battle.hits[faction] = Math.ceil(battle.strength[faction] * (battle.ground_stage ? ground_battle_table(modififed_roll) : naval_battle_table(modififed_roll)))
     battle.distant_hits_provided[faction] = pool.filter(u => unit_on_board(u) && pieces[u].br).length
-    if (roll === 9 && !battle.ground_stage) {
+    if ((roll === 9 || battle.roll_modifiers + roll >= 9 && G.offensive.active_cards.includes(ROCHEFORT)) && !battle.ground_stage) {
         battle.critical[faction] = true
     }
     log(`${roll}${battle.roll_modifiers ? " +" + battle.roll_modifiers : ""} (${ground_battle_table(modififed_roll)}) ${battle.critical[faction] ? " - critical !" : ""} x ${battle.strength[faction]} = ${battle.hits[faction]}`)
@@ -4541,7 +4547,7 @@ cards[find_card(JP, 12)].before_commit_offensive = function () {
     if (G.offensive.stage !== ATTACK_STAGE) {
         return
     }
-    if (G.offensive.battle_hexes.filter(h => !MAP_DATA[h].island)) {
+    if (G.offensive.battle_hexes.filter(h => !MAP_DATA[h].island).length) {
         return "All battles must be fought in one hex island."
     }
 }
@@ -5365,6 +5371,47 @@ P.attack_b29_base = {
     }
 }
 
+cards[find_card(JP, 77)].event = function () {
+    call("fuel_shortage")
+}
+
+cards[find_card(JP, 77)].can_play = function () {
+    return unit_on_board(HQ_YAMAMOTO) || unit_on_board(HQ_OZAWA)
+}
+
+//todo when BGG thread resolved
+P.fuel_shortage = {
+    _begin() {
+        L.allowed_units = []
+        for_each_unit_on_map((u, piece) => {
+            if (u === HQ_YAMAMOTO || u === HQ_OZAWA || piece.faction === JP && piece.class === "naval") {
+                set_add(L.allowed_units, u)
+            }
+        })
+        L.moved = []
+        L.limit = 0
+    },
+    prompt() {
+        prompt(`${offensive_card_header()} Move units.`)
+        L.allowed_units.forEach(u => {
+            if (G.active_stack.length === 0 || G.location[G.active_stack[0] === G.location[u]])
+                action_unit(u)
+        })
+        if (G.active_stack.length > 0) {
+            L.allowed_hexes.forEach(h => action_hex(h))
+        }
+        if (L.limit & 8) {
+            button("done")
+        }
+    },
+    unit(u) {
+        push_undo()
+        log(`Japan attacks B29 base: ${pieces[u].name}`)
+        damage_unit(u)
+        end()
+    }
+}
+
 cards[find_card(JP, 78)].event = function () {
     call("event_unit", {unit: jp_air("t")})
 }
@@ -5463,6 +5510,119 @@ P.submarine_attack = {
             end()
         }
     }
+}
+
+
+cards[find_card(AP, 1)].can_play = function () {
+    return is_space_controlled(hex_to_int(2813), JP)
+}
+
+cards[find_card(AP, 3)].event = function () {
+    call("replacement_segment", {replacement_points: {GROUND: 2}})
+}
+
+cards[find_card(AP, 3)].before_replacement = function () {
+    L.replacable_units = L.replacable_units.filter(u => pieces[u].service === "au")
+}
+
+cards[find_card(AP, 3)].before_place_replacement = function () {
+    L.allowed_hexes = L.allowed_hexes.filter(h => MAP_DATA[h].region === "Australia")
+}
+
+cards[find_card(AP, 4)].event = function () {
+    call("place_abda")
+}
+
+P.place_abda = {
+    _begin() {
+        var dei = ["Java", "Borneo", "Sumatra", "Celebes"]
+        L.allowed_hexes = get_unit_reinforcement_hexes(HQ_ABDA).filter(h => dei.includes(MAP_DATA[h].region))
+        if (L.allowed_hexes.length <= 0) {
+            log(`ABDA HQ could not be placed`)
+            eliminate_permanently(HQ_ABDA)
+            end()
+        }
+    },
+    prompt() {
+        prompt(`${offensive_card_header()} Choose hex to place ${pieces[HQ_ABDA].name}.`)
+        L.allowed_hexes.forEach(h => action_hex(h))
+    },
+    action_hex(h) {
+        push_undo()
+        set_location(HQ_ABDA, h)
+        check_supply()
+        end()
+    }
+}
+
+cards[MATADOR].before_apply_hits = function (faction) {
+    if (faction === AP || G.offensive.battle.ground_stage) {
+        return
+    }
+    var modifier = 0
+    for (var i = 0; i < L.pool.length; i++) {
+        var piece = pieces[L.pool[i]]
+        if (piece.br && piece.class === "air") {
+            L.pool[i + 1] += 2
+            modifier++
+        }
+    }
+}
+
+cards[find_card(AP, 6)].event = function () {
+    check_event(events.DOOLITLE)
+}
+
+cards[find_card(AP, 7)].before_unit_activation = function () {
+    filter_activation_units((u, piece) => piece.class !== "naval", AP)
+}
+
+cards[find_card(AP, 7)].before_battle_roll = function (faction) {
+    if (faction === JP || !G.offensive.battle.ground_stage) {
+        return
+    }
+    G.offensive.battle.roll_modifiers += 2
+    log(`+2 Merrill\`s marauders`)
+}
+
+cards[find_card(AP, 8)].can_play = function () {
+    return G.offensive.active_units[JP].filter(u => pieces[u].class !== "ground").length
+}
+
+cards[find_card(AP, 9)].before_activation = function () {
+    G.temp_asp = []
+    G.temp_asp[0] = 2 + Math.max(0, G.asp[AP][1] - G.asp[AP][0])
+    G.temp_asp[1] = G.asp[AP][1]
+    log('Allied gain 4 temporary ASPs')
+    G.asp[AP][0] += G.temp_asp[0]
+}
+
+cards[find_card(AP, 9)].before_commit_offensive = function () {
+    G.asp[AP][0] -= G.temp_asp[0]
+    G.asp[AP][1] -= Math.min(G.asp[AP][1] - G.temp_asp[1], 4)
+    delete G['temp_asp']
+    var jp_battles = G.offensive.battle_hexes.filter(h => MAP_DATA[h].region === "Japan")
+    var required_battles = false
+    G.offensive.active_units[AP].forEach(u => {
+        if (set_has(jp_battles, G.location[u]) && pieces[u].class === "ground") {
+            required_battles = true
+        }
+    })
+    if (!required_battles) {
+        return "At least one ground battle should be initiated at Japanese home island."
+    }
+}
+
+cards[find_card(AP, 10)].event = function () {
+    call("draw_from_discard")
+}
+
+cards[find_card(AP, 13)].after_unit_activation = function (u) {
+    filter_activation_units((u, piece) => piece.class !== "ground", AP)
+}
+
+cards[find_card(AP, 15)].event = function (u) {
+    call("replacement_segment", {replacement_points: {NAVAL: 2}})
 }
 
 for (var i = 0; i < cards.length; i++) {

@@ -2942,6 +2942,7 @@ data.cards = [
         "ops": 1,
         "type": POLITICAL,
         "oc": 1,
+        "pw": 1,
         "remove": true,
         "name": "Battan Death March",
     },
@@ -2952,6 +2953,7 @@ data.cards = [
         "type": POLITICAL,
         "oc": 1,
         "draw": true,
+        "isr_rivalry": true,
         "name": "Imperial HQ Debate",
     },
     {
@@ -2970,6 +2972,7 @@ data.cards = [
         "type": POLITICAL,
         "oc": 1,
         "remove": true,
+        "isr_agreement": true,
         "name": "Arcadia Conference",
     },
     {
@@ -2989,6 +2992,7 @@ data.cards = [
         "type": POLITICAL,
         "oc": 3,
         "remove": true,
+        "pw": 1,
         "name": "Doolittle Raid",
     },
     {
@@ -3032,6 +3036,7 @@ data.cards = [
         "type": POLITICAL,
         "oc": 1,
         "remove": true,
+        "isr_agreement": true,
         "name": "General Douglas MacArthur",
     },
     {
@@ -3041,6 +3046,8 @@ data.cards = [
         "type": POLITICAL,
         "oc": 2,
         "remove": true,
+        "cause": "Minor allied victory",
+        "wie": [-1, -1, -2, -3],
         "name": "War in europe",
     },
     {
@@ -3070,6 +3077,8 @@ data.cards = [
         "type": POLITICAL,
         "oc": 2,
         "remove": true,
+        "cause": "Minor allied victory",
+        "wie": [-1, -1, -2, -3],
         "name": "War in europe",
     },
     {
@@ -5983,6 +5992,9 @@ data.events = {
     },
     TOJO: {
         id: 26,
+    },
+    DOOLITLE: {
+        id: 27,
     },
 }
 
