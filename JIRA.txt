@@ -1,5 +1,4 @@
 Todo list:
-* [WIP] War in Europe
 * [WIP] Event cards
 * Check overstacking
 * Battle roll modifiers
@@ -16,6 +15,8 @@ Todo list:
 * Ground loss for JP organic transpot destroyed
 * Skipped amph battle if attacker has no navy
 * Ground post battle movement
+* skip bombing
+* fuel shortage
 * Hq displace and return
 * Japan lack of resources win condition
 * Check overstack for india surrender

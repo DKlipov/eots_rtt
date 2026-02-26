@@ -5,8 +5,9 @@ const LAST_BOARD_HEX = 1476
 const NON_PLACED_BOX = 1477
 const ELIMINATED_BOX = 1478
 const DELAYED_BOX = 1479
-const TURN_BOX = 1480
-const CHINA_BOX = 1500
+const CHINA_BOX = 1480
+const PERM_ELIMINATED = 1481
+const TURN_BOX = 1490
 
 //status markers
 const JP_AGREEMENT = 0
@@ -198,6 +199,7 @@ function on_init() {
     }
     define_layout("board_hex", NON_PLACED_BOX, [10, 10, 45, 45], "stack")
     define_layout("board_hex", ELIMINATED_BOX, [100, 1180, 45, 45], "stack")
+    define_layout("board_hex", PERM_ELIMINATED, [100, 1180, 45, 45], "stack")
     define_layout("board_hex", DELAYED_BOX, [2170, 1380, 45, 45], "stack")
     define_layout("board_hex", CHINA_BOX, [790, 380, 45, 45], "stack")
     define_layout("status", JP_AGREEMENT, [890, 130, 35, 35])
