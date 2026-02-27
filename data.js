@@ -3350,6 +3350,8 @@ data.cards = [
         "type": POLITICAL,
         "oc": 2,
         "remove": true,
+        "cause": "Minor allied victory",
+        "wie": [-1, -1, -2, -3],
         "name": "War in europe",
     },
     {
@@ -3359,6 +3361,8 @@ data.cards = [
         "type": POLITICAL,
         "oc": 2,
         "remove": true,
+        "cause": "Minor allied victory",
+        "wie": [-1, -1, -2, -3],
         "name": "War in europe",
     },
     {
@@ -3368,6 +3372,7 @@ data.cards = [
         "type": POLITICAL,
         "oc": 1,
         "draw": true,
+        "isr_rivalry": true,
         "name": "Japanese Army/Navy Dispute",
     },
     {
@@ -3410,6 +3415,8 @@ data.cards = [
         "type": POLITICAL,
         "oc": 2,
         "remove": true,
+        "cause": "Major allied victory",
+        "wie": [-1, -2, -3, -3],
         "name": "War in europe",
     },
     {
@@ -3430,6 +3437,7 @@ data.cards = [
         "type": POLITICAL,
         "oc": 1,
         "remove": true,
+        "china": -1,
         "name": "Roosevelt Threatens Chungking",
     },
     {
@@ -3460,6 +3468,7 @@ data.cards = [
         "type": POLITICAL,
         "oc": 1,
         "remove": true,
+        "isr_agreement": true,
         "name": "Roosevelt-Nimitz-MacArthur",
     },
     {
@@ -3555,6 +3564,7 @@ data.cards = [
         "oc": 1,
         "draw": true,
         "remove": true,
+        "stage": BEFORE_COMBAT,
         "name": "Submarine Attack",
     },
     {
@@ -3610,6 +3620,8 @@ data.cards = [
         "type": POLITICAL,
         "oc": 2,
         "remove": true,
+        "cause": "Major allied victory",
+        "wie": [-1, -2, -3, -3],
         "name": "War in europe",
     },
     {
@@ -3629,6 +3641,7 @@ data.cards = [
         "oc": 1,
         "draw": true,
         "remove": true,
+        "stage": AFTER_COMBAT,
         "name": "Submarine Attack",
     },
     {

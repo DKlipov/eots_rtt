@@ -12,11 +12,12 @@ Todo list:
 * Add partially impassable hexsides to data.js
 * Japanese barges movement (with special button)
 * Reaction player choose (critical hit and last ground unit step)
-* Ground loss for JP organic transpot destroyed
+* Ground loss for JP organic transpot destroyed (attacker only!)
 * Skipped amph battle if attacker has no navy
 * Ground post battle movement
 * skip bombing
 * fuel shortage
+* AP55
 * Hq displace and return
 * Japan lack of resources win condition
 * Check overstack for india surrender
