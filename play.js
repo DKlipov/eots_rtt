@@ -9,6 +9,9 @@ const CHINA_BOX = 1480
 const PERM_ELIMINATED = 1481
 const TURN_BOX = 1490
 
+const MANCHURIA_1 = hex_to_int(3302)
+const MANCHURIA_2 = hex_to_int(3303)
+
 //status markers
 const JP_AGREEMENT = 0
 const AP_AGREEMENT = 1
@@ -417,9 +420,19 @@ function on_update() {
 
     G.control.filter(h => !set_has(G.capture, h) && !set_has(JP_BOUNDARIES, h))
         .forEach(h => populate_generic("board_hex", h, "marker control_jp"))
-    JP_BOUNDARIES.filter(h => !set_has(G.capture, h) && !set_has(G.control, h))
+    JP_BOUNDARIES.filter(h => !set_has(G.capture, h) && !set_has(G.control, h) && h !== MANCHURIA_1 && h !== MANCHURIA_2)
         .forEach(h => populate_generic("board_hex", h, "marker control_ap"))
-    G.capture.forEach(h => populate_generic("board_hex", h, set_has(G.control, h) ? "marker capture_jp" : "marker capture_ap"))
+    G.capture.forEach(h => {
+        var marker
+        if (h === MANCHURIA_1 || h === MANCHURIA_2) {
+            marker = "marker capture_sov"
+        } else if (set_has(G.control, h)) {
+            marker = "marker capture_jp"
+        } else {
+            marker = "marker capture_ap"
+        }
+        populate_generic("board_hex", h, marker)
+    })
     if (G.events[data.events.TOKYO_EXPRESS.id] > 0) {
         populate_generic("board_hex", G.events[data.events.TOKYO_EXPRESS.id], "marker tokyo_express")
     }

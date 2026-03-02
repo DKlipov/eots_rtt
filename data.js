@@ -2720,7 +2720,7 @@ data.pieces = [
     {
         id: "army_ap_11_d",
         "faction": AP,
-        "name": "11th Division",
+        "name": "11th Airborne Division",
         "counter": "army_us unit_ix_12",
         "class": "ground",
         "service": "army",
@@ -3696,6 +3696,8 @@ data.cards = [
         "type": POLITICAL,
         "oc": 2,
         "remove": true,
+        "cause": "Major allied victory",
+        "wie": [-1, -2, -3, -3],
         "name": "War in europe",
     },
     {
@@ -3737,6 +3739,7 @@ data.cards = [
         "type": POLITICAL,
         "oc": 2,
         "remove": true,
+        "china": -1,
         "name": "Mao Tse Tung",
     },
     {
@@ -3747,6 +3750,7 @@ data.cards = [
         "oc": 1,
         "draw": true,
         "remove": true,
+        "stage": BEFORE_COMBAT,
         "name": "Submarine Attack",
     },
     {
@@ -3775,6 +3779,7 @@ data.cards = [
         "ops": 2,
         "type": POLITICAL,
         "oc": 2,
+        "china": -1,
         "name": "China Offensive",
     },
     {
@@ -3783,6 +3788,7 @@ data.cards = [
         "ops": 2,
         "type": POLITICAL,
         "oc": 2,
+        "china": -1,
         "name": "China Offensive",
     },
     {
@@ -3791,6 +3797,7 @@ data.cards = [
         "ops": 2,
         "type": POLITICAL,
         "oc": 2,
+        "china": -1,
         "name": "China Offensive",
     },
     {
@@ -4739,9 +4746,27 @@ data.map = [
     {id: 3702, terrain: OCEAN, edges: [1, 1, 1, 1, 1, 16]},
     {id: 3701, terrain: OCEAN, edges: [1, 1, 1, 1, 16, 16]},
     {id: 3700, terrain: OCEAN, edges: [16, 1, 1, 1, 16, 16]},
-    {id: 1005, name: "Maldive Is.", airfield: true, port: true, terrain: OPEN, island: true},
-    {id: 1307, name: "Colombo", airfield: true, port: true, city: CITY, terrain: MIXED, edges: [1, 1, 1, 3, 3, 1]},
-    {id: 1308, name: "Trincomalee", airfield: true, port: true, city: CITY, terrain: MIXED, edges: [3, 1, 1, 1, 1, 3]},
+    {id: 1005, name: "Maldive Is.", region: "Ceylon", airfield: true, port: true, terrain: OPEN, island: true},
+    {
+        id: 1307,
+        name: "Colombo",
+        region: "Ceylon",
+        airfield: true,
+        port: true,
+        city: CITY,
+        terrain: MIXED,
+        edges: [1, 1, 1, 3, 3, 1]
+    },
+    {
+        id: 1308,
+        name: "Trincomalee",
+        region: "Ceylon",
+        airfield: true,
+        port: true,
+        city: CITY,
+        terrain: MIXED,
+        edges: [3, 1, 1, 1, 1, 3]
+    },
     {id: 1208, terrain: MIXED, edges: [1, 3, 3, 1, 1, 1]},
     {id: 1206, region: "India", terrain: OPEN, edges: [1, 16, 3, 1, 1, 1]},
     {id: 1306, region: "India", terrain: OPEN, edges: [16, 3, 1, 1, 1, 3]},
