@@ -1160,7 +1160,6 @@ data.pieces = [
         "service": "joint",
         "cr": 12,
         "cm": 1,
-        "start": 2019,
         "notreplaceable": true,
     },
     {
@@ -5905,7 +5904,6 @@ data.nations = {
     },
     JAPAN: {
         id: 11,
-        name: "Japanese Empire surrenders by Allied invasion",
         keys: [3407, 3506, 3507, 3607, 3706, 3705, 3606],
     },
     CHINA: {
@@ -5913,11 +5911,6 @@ data.nations = {
         pw: 2,
         statuses: ["Stable Front", "Unstable Front", "Major Breakthrough", "Threat to Chunking", "Government Collapsed"],
         name: "China",
-    },
-    JAPAN_BY_RESOURCE: {
-        id: 13,
-        name: "Japanese Empire surrenders by lack of resources",
-        keys: [3307, 3704, 3407, 3506, 3507, 3607, 3706, 3705]
     },
 }
 
@@ -6036,6 +6029,11 @@ data.events = {
     },
     DOOLITLE: {
         id: 27,
+    },
+    JAPAN_TRACE_RESOURCES: {
+        id: 28,
+        name: "Japanese Empire surrenders by lack of resources",
+        keys: [3307, 3704, 3407, 3506, 3507, 3607, 3706, 3705]
     },
 }
 

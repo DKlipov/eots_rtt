@@ -1,0 +1,19 @@
+<div id="year_1942" class="scenario_info">
+    <p>
+        <label><input type="checkbox" value="true" name="historical" id="historical">Use historical japanese
+            hand</label>
+</div>
+
+<script>
+    let scenario = document.querySelector("select[name='scenario']");
+    scenario.onchange = function (evt) {
+        document.querySelectorAll(".scenario_info").forEach(e => e.hidden = true);
+        // document.getElementById(scenario.value).classList.add("show");
+        if (scenario.value.indexOf("1942") >= 0) {
+            document.querySelector("#year_1942").hidden = false;
+        } else {
+            document.querySelector("#historical").checked = false
+        }
+    }
+    scenario.onchange();
+</script>

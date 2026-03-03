@@ -4,12 +4,22 @@ var G, L, R, V, P = {}
 
 const ROLES = ["Japan", "Allies"]
 
-const SCENARIOS = [
-    "1942",
-    "1943",
+const SCENARIO_DATA = [
+    {name: "1941-1945 (The Full Campaign)", setup: setup_scenario_1941, victory: victory_1945},
+    {name: "South Pacific", setup: setup_scenario_south_pacific, victory: victory_south_pacific},
+    {name: "1942", setup: setup_scenario_1942, victory: victory_1942, one_year: true},
+    {name: "1942-1943", setup: setup_scenario_1942, victory: victory_1943},
+    {name: "1942-1944", setup: setup_scenario_1942, victory: victory_1944},
+    {name: "1942-1945 (The Shortened Campaign)", setup: setup_scenario_1942, victory: victory_1945},
+    {name: "1943", setup: setup_scenario_1943, victory: victory_1943, one_year: true},
+    {name: "1943-1944", setup: setup_scenario_1943, victory: victory_1944},
+    {name: "1943-1945 (The Even Shorter Campaign)", setup: setup_scenario_1943, victory: victory_1945},
+    {name: "1944", setup: setup_scenario_1944, victory: victory_1944, one_year: true},
 ]
 
-exports.default_scenario = "1942"
+const SCENARIOS = SCENARIO_DATA.map(s => s.name)
+
+exports.default_scenario = "1943"
 
 const JP = 0
 const AP = 1
@@ -395,9 +405,9 @@ P.strategic_phase = script(`
         check_jp_resources_event()
     }
     set G.active AP 
-    call reinforcement_segment
+    call reinforcement_segment1
     set G.active JP 
-    call reinforcement_segment
+    call reinforcement_segment1
     log ("Replacement segment")
     set G.active AP 
     call replacement_segment {scheduled_points: 1}
@@ -466,6 +476,7 @@ function get_unit_reinforcement_hexes(u) {
         if ((piece.class === "air" && map_data.airfield || piece.class !== "air" && map_data.port)
             && is_space_controlled(i, faction)
             && check_unit_supply(i, u, piece)
+            && !has_non_n_zoi(i, 1 - faction)
             && !is_overstack(i, u)) {
             set_add(result, i)
         }
@@ -534,6 +545,13 @@ function is_reinforcement_denied(piece) {
             (piece.service === "ind" || piece.service === "au" || piece.service === "br"));
 }
 
+P.reinforcement_segment1 = {
+    _begin() {
+        end()
+    },
+    prompt() {
+    }
+}
 P.reinforcement_segment = {
     _begin() {
         log(`${G.active === AP ? "Allied" : "Japan"} reinforcement segment`)
@@ -972,7 +990,6 @@ P.deal_cards = function () {
     for (let i = 0; i < ap_cards; i++) {
         draw_card(AP)
     }
-    draw_all_cards()
     end()
 }
 
@@ -1099,21 +1116,26 @@ function get_allowed_actions(num) {
     if (num === SANDCRAB && events.ALASKA_OCCUPATION.keys.filter(k => is_faction_units(hex_to_int(k), JP)).length) {
         return ["event", "discard"]
     } else if (num === SANDCRAB) {
-        return ["ops"]
+        return ["ops", "discard"]
     }
-    if (num === TOJO_RESIGNS && G.turn >= 8 || num === SOVIET_INVADE && is_event_active(events.TOJO)) {
+
+    let result = ["ops", "discard"]
+
+    if (card.pw && scenario_data().one_year) {
+        //do nothing
+    } else if (num === TOJO_RESIGNS && G.turn >= 8 || num === SOVIET_INVADE && is_event_active(events.TOJO)) {
         return ["event"]
     } else if (num === TOJO_RESIGNS) {
         return ["event", "ops", "discard"]
     } else if (num === SOVIET_INVADE) {
         return ["ops", "discard"]
-    }
-    let result = ["ops", "discard"]
-    if ((card.type === MILITARY || card.type === POLITICAL || card.type === RESOURCE) && card.can_play()) {
+    } else if ((card.type === MILITARY || card.type === POLITICAL || card.type === RESOURCE) && card.can_play()) {
         result.push("event")
     }
     if (card.ops >= 3) {
-        // result.push("inter_service")
+        if (G.inter_service[card.faction] && scenario_data().one_year) {
+            result.push("inter_service")
+        }
         get_infrastructure_actions().forEach(a => result.push(a))
         if (R === JP && G.turn - G.events[events.CHINA_OFFENSIVE.id] > 1 && G.surrender[nations.CHINA.id] < 5) {
             result.push("china_offensive")
@@ -2093,7 +2115,7 @@ function check_hq_in_supply(hq, piece) {
         const MD = MAP_DATA[item]
         const overland = set_has(overland_set, item)
         const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))
-        const enemy_port_s = (MD.port && set_has(G.control, item) == (1 - faction))
+        const enemy_port_s = (MD.port && is_space_controlled(item, 1 - faction))
         const occupied_land_s = G.supply_cache[item] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[item] & JP_GAH_UNITS << faction)
         const oversea = set_has(oversea_set, item)
         for (let j = 0; j < 6; j++) {
@@ -3909,7 +3931,7 @@ function get_emergency_retreat_hexes(unit) {
 P.emergency_move = {
     _begin() {
         L.hex_to_retreat = []
-        L.unit_to_retreat = []
+        L.unit_to_retreat = L.unit_to_retreat ? L.unit_to_retreat : []
         for_each_unit_on_map((u, piece, location) => {
             if (piece.faction !== G.active || is_space_controlled(location, G.active) || piece.class === "ground") {
                 return
@@ -3930,10 +3952,15 @@ P.emergency_move = {
             L.hex_to_retreat.forEach(u => action_hex(u))
             if (!L.hex_to_retreat.length) {
                 button("eliminate")
+            } else if (set_has(L.hex_to_retreat, G.location[u])) {
+                button("no_move")
             }
         } else if (L.unit_to_retreat.length) {
             prompt(`Choose unit to emergency move.`)
             L.unit_to_retreat.forEach(u => action_unit(u))
+            if (L.unit_to_retreat.filter(u => !is_space_controlled(G.location[u], pieces[u].faction)).length <= 0) {
+                button("done")
+            }
         } else {
             prompt(`Commit emergency move.`)
             button("done")
@@ -4096,10 +4123,67 @@ P.national_status_segment = function () {
         set_control_over_nation(nations.MARSHALL)
     }
     if (check_nation_controlled(nations.JAPAN, AP)) {
-        finish("Allies", nations.JAPAN.name)
+        finish("Allies", "Japanese Empire surrenders by Allied invasion")
         return
     }
+    if (check_japan_resource_trace()) {
+        G.events[events.JAPAN_TRACE_RESOURCES.id] = 0
+    } else if (is_event_active(events.JAPAN_TRACE_RESOURCES) && is_event_active(events.JAPAN_TRACE_RESOURCES) <= G.turn - 2) {
+        finish("Allies", "Japanese Empire surrenders by lack of resources")
+        return
+    } else {
+        log(`Japan could not trace path to resource hex`)
+        check_event(events.JAPAN_TRACE_RESOURCES)
+    }
     end()
+}
+
+function check_japan_resource_trace() {
+    const faction = JP
+    let queue = []
+    const overland_set = []
+    const oversea_set = []
+    events.JAPAN_TRACE_RESOURCES.keys.forEach(hh => {
+        var h = hex_to_int(hh)
+        set_add(queue, h)
+        set_add(overland_set, h)
+        set_add(oversea_set, h)
+    })
+    for (var i = 0; i < queue.length; i++) {
+        let item = queue[i]
+        let nh_list = get_near_hexes(item)
+        const MD = MAP_DATA[item]
+        const overland = set_has(overland_set, item)
+        const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))
+        const enemy_port_s = (MD.port && is_space_controlled(item, 1 - faction))
+        const occupied_land_s = G.supply_cache[item] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[item] & JP_GAH_UNITS << faction)
+        const oversea = set_has(oversea_set, item)
+        for (let j = 0; j < 6; j++) {
+            let nh = nh_list[j]
+            if (nh <= 0) {
+                continue
+            }
+            var reachable = false
+            const enemy_port = enemy_port_s || (MD.port && is_space_controlled(nh, 1 - faction))
+            const occupied_land = occupied_land_s || G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
+            if (!set_has(overland_set, nh) && (overland || (MD.port && !enemy_port)) && MD.edges_int & GROUND << 5 * j && !occupied_land) {
+                reachable = true
+                set_add(overland_set, nh)
+            }
+            const non_neutral_zoi = non_neutral_zoi_s || G.supply_cache[nh] & JP_ZOI << (1 - faction) && !(G.supply_cache[nh] & JP_ZOI_NTRL << (1 - faction))
+            if (!set_has(oversea_set, nh) && (oversea || (MD.port && !enemy_port)) && MD.edges_int & WATER << 5 * j && !non_neutral_zoi) {
+                reachable = true
+                set_add(oversea_set, nh)
+            }
+            if (reachable) {
+                if (MAP_DATA[nh].resource) {
+                    return true
+                }
+                queue.push(nh)
+            }
+        }
+    }
+    return false
 }
 
 function india_stable() {
@@ -4479,12 +4563,8 @@ function reshuffle() {
 P.end_of_turn_phase = script(`
     log ("Turn " + G.turn + ", End of turn phase")
     eval {
-    if (G.political_will <= 0) {
-        finish("Japan", "US surrenders")
-    }
-    if (G.turn >= G.finish) {
-        finish("Allies", "Japan surrenders")
-    }
+        default_victory_check()
+        scenario_data().victory()
     }
     incr G.turn
     set G.asp[JP][1] 0
@@ -4499,6 +4579,201 @@ P.end_of_turn_phase = script(`
     }
     goto strategic_phase
 `)
+
+function default_victory_check() {
+    if (G.political_will <= 0) {
+        finish("Japan", "US surrenders")
+    }
+}
+
+function victory_1942() {
+    var hawaii = [hex_to_int(5708), hex_to_int(5808), hex_to_int(5908)]
+    hawaii.forEach(h => {
+        if (is_space_controlled(h, JP)) {
+            set_add(G.captured_once, h)
+        }
+    })
+    if (G.turn < 4) {
+        return
+    }
+    if (get_jp_resources() < 12) {
+        finish("Allies", "Japan captured less than 12 resource hexes")
+        return
+    }
+    var vp = 0
+    if (G.surrender[nations.CHINA.id] > 0) {
+        vp += G.surrender[nations.CHINA.id]
+        log(`+${G.surrender[nations.CHINA.id]} VP - China goverment status`)
+    }
+    if (G.surrender[nations.CHINA.id] > 5) {
+        vp += 3
+        log(`+3 VP - China surrender`)
+    }
+    if (G.burma_road >= 2) {
+        vp += 1
+        log(`+1 VP - Burma road closed`)
+    }
+    if (!check_supply_line(hex_to_int(3727), OAHU, AP)) {
+        vp += 5
+        log(`+5 VP - Townsville isolated from Oahu`)
+    }
+    var india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
+    if (india) {
+        vp += india
+        log(`+${india} VP - Jp controlled hexes of Northern India`)
+    }
+    var india_status = G.surrender[nations.INDIA.id]
+    if (india_status > 0 && india_status <= 2) {
+        vp += 1
+        log(`+1 VP - India ${nations.INDIA.statuses[india_status]}`)
+    } else if (india_status > 0) {
+        vp += 2
+        log(`+2 VP - India ${nations.INDIA.statuses[india_status]}`)
+    }
+    if (G.surrender[nations.AUSTRALIAN_MANDATES.id]) {
+        vp += 1
+        log(`+1 VP - Control of Australian Mandates`)
+    }
+    var new_guinea = 0
+    G.control.forEach(h => {
+        if (MAP_DATA[h].port && MAP_DATA[h].region === "Guinea") {
+            new_guinea++
+        }
+    })
+    if (new_guinea >= 4) {
+        vp += 2
+        log(`+2 VP - Control of ${new_guinea} New Guinea ports`)
+    }
+    if (G.political_will <= 5) {
+        vp += G.political_will - 4
+        log(`+${G.political_will - 4} VP - Political will`)
+    } else if (G.political_will >= 6) {
+        vp -= G.political_will - 5
+        log(`-${G.political_will - 5} VP - Political will`)
+    }
+
+    if (set_has(G.captured_once, OAHU)) {
+        vp += 3
+        log(`+3 VP - Oahu was captured`)
+    }
+    if (set_has(G.captured_once, hex_to_int(5708))) {
+        vp += 1
+        log(`+1 VP - Kauai was captured`)
+    } else if (set_has(G.captured_once, hex_to_int(5908))) {
+        vp += 1
+        log(`+1 VP - Hawaii was captured`)
+    }
+
+    if (is_space_controlled(hex_to_int(5108), JP) && is_faction_units(hex_to_int(5108), JP)) {
+        vp += 1
+        log(`+1 VP - Midway captured`)
+    }
+    if (is_space_controlled(hex_to_int(4612), JP) && is_faction_units(hex_to_int(4612), JP)) {
+        vp += 1
+        log(`+1 VP - Wake island captured`)
+    }
+    if (is_faction_units(hex_to_int(4600), JP)) {
+        vp += 1
+        log(`+1 VP - Attu/Kiska captured`)
+    }
+    if (is_space_controlled(hex_to_int(5100), JP)) {
+        vp += 2
+        log(`+2 VP - Dutch Harbor captured`)
+    }
+    if (get_jp_resources() === 12) {
+        vp -= 3
+        log(`-3 VP - Japan control 12 resource hexes`)
+    }
+    log(`Total VP - ${vp}`)
+    if (vp <= 2) {
+        finish("Allies", "Allied Decisive Victory")
+    } else if (vp <= 5) {
+        finish("Allies", "Allied Tactical Victory")
+    } else if (vp <= 9) {
+        finish("Japan", "Japanese Tactical Victory")
+    } else {
+        finish("Japan", "Japanese Decisive Victory")
+    }
+}
+
+function check_supply_line(hex1, hex2, faction) {
+    let queue = [hex1]
+    const overland_set = []
+    const oversea_set = []
+    if (!is_space_controlled(hex1, faction) || !is_space_controlled(hex2, faction)) {
+        return false
+    }
+    if (MAP_DATA[hex1].terrain > OCEAN) {
+        overland_set.push(hex1)
+    }
+    if (MAP_DATA[hex1].coastal) {
+        oversea_set.push(hex1)
+    }
+    for (var i = 0; i < queue.length; i++) {
+        let item = queue[i]
+        let nh_list = get_near_hexes(item)
+        const MD = MAP_DATA[item]
+        const overland = set_has(overland_set, item)
+        const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))
+        const enemy_port_s = (MD.port && is_space_controlled(item, 1 - faction))
+        const occupied_land_s = G.supply_cache[item] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[item] & JP_GAH_UNITS << faction)
+        const oversea = set_has(oversea_set, item)
+        for (let j = 0; j < 6; j++) {
+            let nh = nh_list[j]
+            if (nh <= 0) {
+                continue
+            }
+            var reachable = false
+            const enemy_port = enemy_port_s || (MD.port && is_space_controlled(nh, 1 - faction))
+            const occupied_land = occupied_land_s || G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
+            if (!set_has(overland_set, nh) && (overland || (MD.port && !enemy_port)) && MD.edges_int & GROUND << 5 * j && !occupied_land) {
+                reachable = true
+                set_add(overland_set, nh)
+            }
+            const non_neutral_zoi = non_neutral_zoi_s || G.supply_cache[nh] & JP_ZOI << (1 - faction) && !(G.supply_cache[nh] & JP_ZOI_NTRL << (1 - faction))
+            if (!set_has(oversea_set, nh) && (oversea || (MD.port && !enemy_port)) && MD.edges_int & WATER << 5 * j && !non_neutral_zoi) {
+                reachable = true
+                set_add(oversea_set, nh)
+            }
+            if (reachable) {
+                if (nh === hex2) {
+                    return true
+                }
+                queue.push(nh)
+            }
+        }
+    }
+    return false
+}
+
+function victory_1943() {
+
+}
+
+function victory_1944() {
+
+}
+
+function victory_1945() {
+    var japan_surrenders = is_event_active(events.STRAT_BOMBING_CAMPAIGN) > 0 && is_event_active(events.STRAT_BOMBING_CAMPAIGN) <= 9
+        && get_jp_resources() <= 1 && (get_distance(G.location[B_29_1], TOKYO) <= 6 || G.location[B_29_1] === CHINA_BOX
+            || get_distance(G.location[B_29_2], TOKYO) <= 6 || G.location[B_29_2] === CHINA_BOX)
+    // if (dry_run) {
+    //     return japan_surrenders ? "Japan surrenders" : "No victory condition achived";
+    // }
+    if (G.turn < 12) {
+        return
+    }
+    if (japan_surrenders) {
+        finish("Allies", "Japan surrenders by strategic bombing campaign")
+    } else {
+        finish("Japan", "Japan not surrounded")
+    }
+}
+
+function victory_south_pacific(dry_run) {
+
+}
 
 function set_inter_service(faction, rivalry) {
     if (G.inter_service[faction] && !rivalry) {
@@ -6513,6 +6788,13 @@ function draw_card(side, to_hand = true) {
     return c
 }
 
+function draw_specific_card(card) {
+    var card_data = cards[card]
+    array_delete_item(G.draw[card_data.faction], card)
+    G.hand[card_data.faction].push(card)
+    return card
+}
+
 function eliminate_permanently(unit) {
     if (G.location[unit] !== NON_PLACED_BOX) {
         log(`${pieces[unit].name} removed from game`)
@@ -6557,9 +6839,16 @@ function draw_all_cards() {
     }
 }
 
-function setup_scenario_1942() {
-    log("#Japan Offensive")
-    log("The Japan assault on Asia (December 1941) caught allies off guard")
+function setup_scenario_1941() {
+    //nothing actually
+}
+
+function setup_scenario_1942(options) {
+    log("#Japanese Offensive")
+
+    if (options.historical) {
+        G.options = {historical: true}
+    }
 
     for (let i = 0; i < pieces.length; i++) {
         var piece = pieces[i]
@@ -6574,11 +6863,11 @@ function setup_scenario_1942() {
         }
     }
     //ap setup
-    eliminate(find_piece("mdca"))
-    eliminate(M_CORPS)
-    eliminate(HK_DIVISION)
-    eliminate(find_piece("forcez"))
-    eliminate(NL_CORPS)
+    G.location[find_piece("mdca")] = ELIMINATED_BOX
+    G.location[M_CORPS] = ELIMINATED_BOX
+    G.location[HK_DIVISION] = ELIMINATED_BOX
+    G.location[find_piece("forcez")] = ELIMINATED_BOX
+    G.location[NL_CORPS] = ELIMINATED_BOX
     G.location[HQ_SEAC] = hex_to_int(1805)
     G.location[US_FEAF] = hex_to_int(2813)
     set_add(G.reduced, US_FEAF)
@@ -6652,22 +6941,123 @@ function setup_scenario_1942() {
     remove_card(find_card(JP, 1))
     remove_card(find_card(JP, 2))
 
-    while (G.hand[JP].length < 7)
-        draw_card(JP)
-    while (G.hand[AP].length < 5)
-        draw_card(AP)
     G.passes[AP] = 2
     G.passes[JP] = 0
     G.turn = 2
     G.asp[1] = [1, 0]
     G.political_will = 8
     G.china_divisions = 11
-    draw_all_cards()
     check_supply()
     fill_overstack()
-    call("offensive_phase")
+    call("scenario_1942")
 }
 
+P.scenario_1942 = script(`
+    set G.active AP
+    eval {
+        emergency_move_1942()
+    }
+    call arcadia
+    set G.active JP
+    call japan_init_1942
+    call offensive_phase
+    `)
+
+P.arcadia = {
+    _begin() {
+        draw_specific_card(find_card(AP, 4))
+    },
+    prompt() {
+        if (G.hand[AP].length === 1) {
+            prompt(`Hold arcadia or discard and replace with random card.`)
+            action("hold", find_card(AP, 4))
+            action("discard", find_card(AP, 4))
+        } else {
+            prompt(`Play Arcadia or pass.`)
+            action("event", find_card(AP, 4))
+            button("done")
+        }
+    },
+    hold() {
+        clear_undo()
+        log(`Ap chooses Arcadia + 4 random cards`)
+        while (G.hand[AP].length < 5) {
+            draw_card(AP)
+        }
+    },
+    discard() {
+        G.hand[AP] = []
+        G.draw[AP].push(find_card(AP, 4))
+        log(`Ap chooses 5 random cards`)
+        clear_undo()
+        while (G.hand[AP].length < 5) {
+            draw_card(AP)
+        }
+        if (G.hand[AP].indexOf(find_card(AP, 4)) < 0) {
+            end()
+        }
+    },
+    event(c) {
+        push_undo()
+        play_event(c)
+        G.offensive.active_cards.push(c)
+        G.offensive.offensive_card = c
+        cards[c].event()
+    },
+    done() {
+        end()
+    }
+}
+
+P.japan_init_1942 = {
+    _begin() {
+        if (G.options && G.options.historical) {
+            var hist = [find_card(JP, 3), find_card(JP, 47), find_card(JP, 59)]
+            log(`Japan draws historical hand ${hist.map(c => cards[c].name).join(", ")}`)
+            hist.forEach(c => draw_specific_card(c))
+            delete G['options']
+        }
+        while (G.hand[JP].length < 7) {
+            draw_card(JP)
+        }
+        if (G.hand[JP].filter(c => cards[c].type === MILITARY).length) {
+            end()
+        }
+    },
+    prompt() {
+        prompt(`Discard one card to draw JP 47: VADM Kondo or pass.`)
+        if (G.hand[JP].includes(find_card(JP, 47))) {
+            button("done")
+        } else {
+            var has_3_ops = G.hand[JP].filter(c => cards[c].ops >= 3).length
+            G.hand[JP].filter(c => cards[c].ops >= 3 || !has_3_ops).forEach(c => action_card(c))
+            button("pass")
+        }
+    },
+    card(c) {
+        push_undo()
+        discard_card(c)
+        draw_specific_card(find_card(JP, 47))
+    },
+    skip() {
+        push_undo()
+        end()
+    },
+    done() {
+        push_undo()
+        end()
+    }
+}
+
+function emergency_move_1942() {
+    var unit_to_retreat = []
+    for_each_unit_on_map((u, piece, location) => {
+        if (piece.faction === AP && piece.class === "naval") {
+            set_add(unit_to_retreat, u)
+        }
+    })
+    call("emergency_move", {unit_to_retreat})
+}
 
 function setup_scenario_1943() {
     log("#1943 War never changes")
@@ -6865,7 +7255,408 @@ function setup_scenario_1943() {
     while (G.hand[AP].length < 7) {
         draw_card(AP)
     }
-    draw_all_cards()
+    check_supply()
+    fill_overstack()
+    call("offensive_phase")
+}
+
+function setup_scenario_1944() {
+    log("#1944 Allied offensive")
+
+    var surrender = [nations.MALAYA, nations.PHILIPPINES, nations.DEI, nations.BURMA, nations.AUSTRALIAN_MANDATES]
+    surrender.forEach(n => {
+        G.surrender[n.id] = 1
+        set_control_over_nation(n)
+    })
+
+    G.reduced = []
+    //ap setup
+    for (var i = 0; i < pieces.length; i++) {
+        var piece = pieces[i]
+        if (piece.faction === AP && piece.start && piece.notreplaceable) {
+            G.location[i] = ELIMINATED_BOX
+        }
+    }
+    for (let i = 0; i < pieces.length; i++) {
+        var piece = pieces[i]
+        if (piece.reinforcement !== 5) {
+            continue
+        }
+        if (piece.faction) {
+            G.location[i] = DELAYED_BOX
+        }
+        if (piece.start_reduced) {
+            set_add(G.reduced, i)
+        }
+    }
+    G.location[find_piece("wasp")] = ELIMINATED_BOX
+    G.location[find_piece("northampton")] = ELIMINATED_BOX
+    G.location[HQ_SOUTH_GHORMLEY] = ELIMINATED_BOX
+    G.location[find_piece("indomitable")] = hex_to_int(1005)
+    G.location[find_piece("warspite")] = hex_to_int(1005)
+    G.location[find_piece("london")] = hex_to_int(1005)
+    G.location[HQ_SEAC] = hex_to_int(1805)
+    G.location[ap_air("seac")] = hex_to_int(1805)
+    G.location[ap_army("15")] = hex_to_int(1905)
+    G.location[ap_air("10_lrb")] = hex_to_int(1905)
+    G.location[ap_air("14_lrb")] = CHINA_BOX
+    G.location[ap_army("4_ind")] = hex_to_int(2006)
+    G.location[ap_air("14")] = hex_to_int(2104)
+    G.location[ap_army("33")] = hex_to_int(2105)
+    G.location[ap_army("1_ind")] = hex_to_int(2205)
+    set_add(G.reduced, ap_army("1_ind"))
+    G.location[ap_army("5_cn")] = hex_to_int(2205)
+    G.location[ap_army("6_cn")] = hex_to_int(2407)
+    G.location[ap_army("66_cn")] = hex_to_int(2407)
+    set_add(G.reduced, ap_army("6_cn"))
+    set_add(G.reduced, ap_army("66_cn"))
+    G.location[ap_army("1_m")] = hex_to_int(3626)
+    G.location[ap_air("5")] = hex_to_int(3626)
+    G.location[ap_air("5_lrb")] = hex_to_int(3626)
+    G.location[HQ_SOUTH_WEST] = hex_to_int(3727)
+    G.location[ap_army("2_au")] = hex_to_int(3727)
+    G.location[find_piece("kent")] = hex_to_int(3727)
+    G.location[HQ_ANZAC] = hex_to_int(3823)
+    G.location[ap_army("pm")] = hex_to_int(3823)
+    set_add(G.reduced, ap_army("pm"))
+    G.location[ap_army("3_au")] = hex_to_int(3823)
+    G.location[ap_air("au")] = hex_to_int(3823)
+    G.location[ap_army("11")] = hex_to_int(3922)
+    G.location[ap_army("1")] = hex_to_int(4024)
+    G.location[ap_army("14")] = hex_to_int(4423)
+    G.location[ap_army("2_m")] = hex_to_int(4423)
+    G.location[ap_air("1_maw")] = hex_to_int(4423)
+    G.location[ap_air("2_maw")] = hex_to_int(4825)
+    G.location[ap_air("13")] = hex_to_int(4825)
+    G.location[ap_air("13_lrb")] = hex_to_int(4825)
+    G.location[ap_army("sf")] = hex_to_int(4825)
+    G.location[HQ_SOUTH_HELSEY] = hex_to_int(4828)
+    G.location[ap_army("3_nz")] = hex_to_int(4828)
+    G.location[find_piece("lexington")] = hex_to_int(4828)
+    G.location[find_piece("enterprise")] = hex_to_int(4828)
+    G.location[find_piece("washington")] = hex_to_int(4828)
+    G.location[find_piece("carolina")] = hex_to_int(4828)
+    set_add(G.reduced, find_piece("lexington"))
+    set_add(G.reduced, find_piece("enterprise"))
+    G.location[ap_air("11")] = hex_to_int(5100)
+    G.location[ap_air("11_lrb")] = hex_to_int(5100)
+    G.location[ap_air("7_lrb")] = hex_to_int(5108)
+    G.location[HQ_CENTRAL_PACIFIC] = hex_to_int(5808)
+    G.location[ap_air("7")] = hex_to_int(5808)
+    G.location[ap_army("10")] = hex_to_int(5808)
+    G.location[ap_army("mb")] = hex_to_int(5808)
+    G.location[find_piece("missouri")] = hex_to_int(5808)
+
+
+    //jp setup
+    G.location[find_piece("kongo")] = ELIMINATED_BOX
+    G.location[find_piece("akagi")] = ELIMINATED_BOX
+    G.location[find_piece("soryu")] = ELIMINATED_BOX
+    G.location[find_piece("ryujo")] = ELIMINATED_BOX
+    G.location[find_piece("tenyru")] = ELIMINATED_BOX
+    G.location[jp_air("t")] = ELIMINATED_BOX
+    set_add(G.control, hex_to_int(1813))
+    setup_jp_unit(jp_air(3), 1916, true)
+    setup_jp_unit(jp_army(25), 1916, true)
+    setup_jp_unit(jp_army(28), 2008)
+    setup_jp_unit(jp_air(5), 2008)
+    set_add(G.control, hex_to_int(2108))
+    set_add(G.control, hex_to_int(2014))
+    set_add(G.control, hex_to_int(2015))
+    set_add(G.control, hex_to_int(2017))
+    set_add(G.control, hex_to_int(2018))
+    setup_jp_unit(jp_army(33), 2106)
+    set_add(G.control, hex_to_int(2019))
+    set_add(G.control, hex_to_int(2110))
+    setup_jp_unit(jp_army(15), 2206)
+    G.location[HQ_JP_SOUTH] = hex_to_int(2212)
+    setup_jp_unit(jp_army(38), 2212)
+    setup_jp_unit(jp_air(27), 2212)
+    setup_jp_unit(jp_air(23), 2220)
+    setup_jp_unit(jp_army(16), 2220, true)
+    set_add(G.control, hex_to_int(2305))
+    set_add(G.control, hex_to_int(2415))
+    set_add(G.control, hex_to_int(2517))
+    setup_jp_unit(jp_army(37), 2616, true)
+    setup_jp_unit(jp_air(28), 2620)
+    set_add(G.control, hex_to_int(2709))
+    setup_jp_unit(jp_army(14), 2813)
+    setup_jp_unit(jp_air(22), 2909, true)
+    setup_jp_unit(jp_air(8), 2915)
+    setup_jp_unit(jp_army(35), 2915)
+    setup_jp_unit(jp_air(2), 3004)
+    setup_jp_unit(jp_air(4), 3004)
+    setup_jp_unit(jp_air(7), 3119)
+    set_add(G.control, hex_to_int(3219))
+    set_add(G.control, hex_to_int(3319))
+    setup_jp_unit(jp_army("kor"), 3305)
+    setup_jp_unit(HQ_YAMAMOTO, 3407)
+    setup_jp_unit(find_piece("junyo"), 3407)
+    setup_jp_unit(find_piece("nagato"), 3407)
+    setup_jp_unit(find_piece("mogami"), 3407, true)
+    set_add(G.control, hex_to_int(3520))
+    set_add(G.control, hex_to_int(3620))
+    setup_jp_unit(jp_army("27"), 3704, true)
+    setup_jp_unit(jp_army("ed"), 3706)
+    setup_jp_unit(jp_air(1), 3706)
+    setup_jp_unit(jp_air(6), 3720)
+    setup_jp_unit(jp_army(19), 3720)
+    set_add(G.control, hex_to_int(3721))
+    set_add(G.control, hex_to_int(3814))
+    setup_jp_unit(jp_army(31), 3813, true)
+    setup_jp_unit(jp_army(18), 3822)
+    setup_jp_unit(HQ_SOUTH_SEAS, 4017)
+    setup_jp_unit(find_piece("yamato"), 4017)
+    setup_jp_unit(find_piece("shokaku"), 4017)
+    setup_jp_unit(find_piece("zuiho"), 4017)
+    setup_jp_unit(find_piece("hiei"), 4017)
+    setup_jp_unit(find_piece("nachi"), 4017)
+    setup_jp_unit(jp_army(17), 4021)
+    setup_jp_unit(jp_air(21), 4021, true)
+    setup_jp_unit(find_piece("aoba"), 4021, true)
+    setup_jp_unit(find_piece("takao"), 4021)
+    setup_jp_unit(find_piece("kamikaze"), 4021)
+    setup_jp_unit(jp_air(25), 4222, true)
+    setup_jp_unit(jp_army("ss"), 4322)
+    setup_jp_unit(jp_air(26), 4415)
+    setup_jp_unit(jp_army("2sn"), 4600, true)
+    setup_jp_unit(jp_army("4sn"), 4612, true)
+    setup_jp_unit(jp_army("3sn"), 4715)
+    setup_jp_unit(jp_air(24), 4715, true)
+    set_add(G.control, hex_to_int(4719))
+    setup_jp_unit(jp_army("1sn"), 5018)
+
+    for_each_unit_on_map(u => control_hex(G.location[u], pieces[u].faction))
+
+    G.turn = 5
+    G.asp[JP] = [7, 0]
+    G.asp[AP] = [4, 0]
+    G.pow = 4
+    G.political_will = 6
+    G.china_divisions = 7
+    G.surrender[nations.CHINA.id] = 2
+    G.wie = 4
+    G.inter_service = [1, 1]
+    G.events[events.HUMP.id] = 1
+    G.events[events.JARHAT_ROAD.id] = 1
+
+
+    var jr = [1, 2, 5, 6, 13, 15, 18, 39, 55, 73, 78]
+    jr.forEach(i => remove_card(find_card(JP, i)))
+    var ar = [1, 3, 4, 6, 7, 8, 10, 11, 12, 14, 16, 17, 20, 51]
+    ar.forEach(i => remove_card(find_card(AP, i)))
+    discard_card(find_card(AP, 13))
+    discard_card(find_card(AP, 15))
+    var jd = [8, 12, 14, 20, 25, 29, 35]
+    jd.forEach(i => discard_card(find_card(JP, i)))
+
+    while (G.hand[JP].length < 7) {
+        draw_card(JP)
+    }
+    while (G.hand[AP].length < 7) {
+        draw_card(AP)
+    }
+    check_supply()
+    fill_overstack()
+    call("offensive_phase")
+}
+
+function setup_scenario_south_pacific() {
+    log("#1944 Allied offensive")
+
+    var surrender = [nations.MALAYA, nations.PHILIPPINES, nations.DEI, nations.BURMA, nations.AUSTRALIAN_MANDATES]
+    surrender.forEach(n => {
+        G.surrender[n.id] = 1
+        set_control_over_nation(n)
+    })
+
+    G.reduced = []
+    //ap setup
+    for (var i = 0; i < pieces.length; i++) {
+        var piece = pieces[i]
+        if (piece.faction === AP && piece.start && piece.notreplaceable) {
+            G.location[i] = ELIMINATED_BOX
+        }
+    }
+    for (let i = 0; i < pieces.length; i++) {
+        var piece = pieces[i]
+        if (piece.reinforcement !== 5) {
+            continue
+        }
+        if (piece.faction) {
+            G.location[i] = DELAYED_BOX
+        }
+        if (piece.start_reduced) {
+            set_add(G.reduced, i)
+        }
+    }
+    G.location[find_piece("wasp")] = ELIMINATED_BOX
+    G.location[find_piece("northampton")] = ELIMINATED_BOX
+    G.location[HQ_SOUTH_GHORMLEY] = ELIMINATED_BOX
+    G.location[find_piece("indomitable")] = hex_to_int(1005)
+    G.location[find_piece("warspite")] = hex_to_int(1005)
+    G.location[find_piece("london")] = hex_to_int(1005)
+    G.location[HQ_SEAC] = hex_to_int(1805)
+    G.location[ap_air("seac")] = hex_to_int(1805)
+    G.location[ap_army("15")] = hex_to_int(1905)
+    G.location[ap_air("10_lrb")] = hex_to_int(1905)
+    G.location[ap_air("14_lrb")] = CHINA_BOX
+    G.location[ap_army("4_ind")] = hex_to_int(2006)
+    G.location[ap_air("14")] = hex_to_int(2104)
+    G.location[ap_army("33")] = hex_to_int(2105)
+    G.location[ap_army("1_ind")] = hex_to_int(2205)
+    set_add(G.reduced, ap_army("1_ind"))
+    G.location[ap_army("5_cn")] = hex_to_int(2205)
+    G.location[ap_army("6_cn")] = hex_to_int(2407)
+    G.location[ap_army("66_cn")] = hex_to_int(2407)
+    set_add(G.reduced, ap_army("6_cn"))
+    set_add(G.reduced, ap_army("66_cn"))
+    G.location[ap_army("1_m")] = hex_to_int(3626)
+    G.location[ap_air("5")] = hex_to_int(3626)
+    G.location[ap_air("5_lrb")] = hex_to_int(3626)
+    G.location[HQ_SOUTH_WEST] = hex_to_int(3727)
+    G.location[ap_army("2_au")] = hex_to_int(3727)
+    G.location[find_piece("kent")] = hex_to_int(3727)
+    G.location[HQ_ANZAC] = hex_to_int(3823)
+    G.location[ap_army("pm")] = hex_to_int(3823)
+    set_add(G.reduced, ap_army("pm"))
+    G.location[ap_army("3_au")] = hex_to_int(3823)
+    G.location[ap_air("au")] = hex_to_int(3823)
+    G.location[ap_army("11")] = hex_to_int(3922)
+    G.location[ap_army("1")] = hex_to_int(4024)
+    G.location[ap_army("14")] = hex_to_int(4423)
+    G.location[ap_army("2_m")] = hex_to_int(4423)
+    G.location[ap_air("1_maw")] = hex_to_int(4423)
+    G.location[ap_air("2_maw")] = hex_to_int(4825)
+    G.location[ap_air("13")] = hex_to_int(4825)
+    G.location[ap_air("13_lrb")] = hex_to_int(4825)
+    G.location[ap_army("sf")] = hex_to_int(4825)
+    G.location[HQ_SOUTH_HELSEY] = hex_to_int(4828)
+    G.location[ap_army("3_nz")] = hex_to_int(4828)
+    G.location[find_piece("lexington")] = hex_to_int(4828)
+    G.location[find_piece("enterprise")] = hex_to_int(4828)
+    G.location[find_piece("washington")] = hex_to_int(4828)
+    G.location[find_piece("carolina")] = hex_to_int(4828)
+    set_add(G.reduced, find_piece("lexington"))
+    set_add(G.reduced, find_piece("enterprise"))
+    G.location[ap_air("11")] = hex_to_int(5100)
+    G.location[ap_air("11_lrb")] = hex_to_int(5100)
+    G.location[ap_air("7_lrb")] = hex_to_int(5108)
+    G.location[HQ_CENTRAL_PACIFIC] = hex_to_int(5808)
+    G.location[ap_air("7")] = hex_to_int(5808)
+    G.location[ap_army("10")] = hex_to_int(5808)
+    G.location[ap_army("mb")] = hex_to_int(5808)
+    G.location[find_piece("missouri")] = hex_to_int(5808)
+
+
+    //jp setup
+    G.location[find_piece("kongo")] = ELIMINATED_BOX
+    G.location[find_piece("akagi")] = ELIMINATED_BOX
+    G.location[find_piece("soryu")] = ELIMINATED_BOX
+    G.location[find_piece("ryujo")] = ELIMINATED_BOX
+    G.location[find_piece("tenyru")] = ELIMINATED_BOX
+    G.location[jp_air("t")] = ELIMINATED_BOX
+    set_add(G.control, hex_to_int(1813))
+    setup_jp_unit(jp_air(3), 1916, true)
+    setup_jp_unit(jp_army(25), 1916, true)
+    setup_jp_unit(jp_army(28), 2008)
+    setup_jp_unit(jp_air(5), 2008)
+    set_add(G.control, hex_to_int(2108))
+    set_add(G.control, hex_to_int(2014))
+    set_add(G.control, hex_to_int(2015))
+    set_add(G.control, hex_to_int(2017))
+    set_add(G.control, hex_to_int(2018))
+    setup_jp_unit(jp_army(33), 2106)
+    set_add(G.control, hex_to_int(2019))
+    set_add(G.control, hex_to_int(2110))
+    setup_jp_unit(jp_army(15), 2206)
+    G.location[HQ_JP_SOUTH] = hex_to_int(2212)
+    setup_jp_unit(jp_army(38), 2212)
+    setup_jp_unit(jp_air(27), 2212)
+    setup_jp_unit(jp_air(23), 2220)
+    setup_jp_unit(jp_army(16), 2220, true)
+    set_add(G.control, hex_to_int(2305))
+    set_add(G.control, hex_to_int(2415))
+    set_add(G.control, hex_to_int(2517))
+    setup_jp_unit(jp_army(37), 2616, true)
+    setup_jp_unit(jp_air(28), 2620)
+    set_add(G.control, hex_to_int(2709))
+    setup_jp_unit(jp_army(14), 2813)
+    setup_jp_unit(jp_air(22), 2909, true)
+    setup_jp_unit(jp_air(8), 2915)
+    setup_jp_unit(jp_army(35), 2915)
+    setup_jp_unit(jp_air(2), 3004)
+    setup_jp_unit(jp_air(4), 3004)
+    setup_jp_unit(jp_air(7), 3119)
+    set_add(G.control, hex_to_int(3219))
+    set_add(G.control, hex_to_int(3319))
+    setup_jp_unit(jp_army("kor"), 3305)
+    setup_jp_unit(HQ_YAMAMOTO, 3407)
+    setup_jp_unit(find_piece("junyo"), 3407)
+    setup_jp_unit(find_piece("nagato"), 3407)
+    setup_jp_unit(find_piece("mogami"), 3407, true)
+    set_add(G.control, hex_to_int(3520))
+    set_add(G.control, hex_to_int(3620))
+    setup_jp_unit(jp_army("27"), 3704, true)
+    setup_jp_unit(jp_army("ed"), 3706)
+    setup_jp_unit(jp_air(1), 3706)
+    setup_jp_unit(jp_air(6), 3720)
+    setup_jp_unit(jp_army(19), 3720)
+    set_add(G.control, hex_to_int(3721))
+    set_add(G.control, hex_to_int(3814))
+    setup_jp_unit(jp_army(31), 3813, true)
+    setup_jp_unit(jp_army(18), 3822)
+    setup_jp_unit(HQ_SOUTH_SEAS, 4017)
+    setup_jp_unit(find_piece("yamato"), 4017)
+    setup_jp_unit(find_piece("shokaku"), 4017)
+    setup_jp_unit(find_piece("zuiho"), 4017)
+    setup_jp_unit(find_piece("hiei"), 4017)
+    setup_jp_unit(find_piece("nachi"), 4017)
+    setup_jp_unit(jp_army(17), 4021)
+    setup_jp_unit(jp_air(21), 4021, true)
+    setup_jp_unit(find_piece("aoba"), 4021, true)
+    setup_jp_unit(find_piece("takao"), 4021)
+    setup_jp_unit(find_piece("kamikaze"), 4021)
+    setup_jp_unit(jp_air(25), 4222, true)
+    setup_jp_unit(jp_army("ss"), 4322)
+    setup_jp_unit(jp_air(26), 4415)
+    setup_jp_unit(jp_army("2sn"), 4600, true)
+    setup_jp_unit(jp_army("4sn"), 4612, true)
+    setup_jp_unit(jp_army("3sn"), 4715)
+    setup_jp_unit(jp_air(24), 4715, true)
+    set_add(G.control, hex_to_int(4719))
+    setup_jp_unit(jp_army("1sn"), 5018)
+
+    for_each_unit_on_map(u => control_hex(G.location[u], pieces[u].faction))
+
+    G.turn = 5
+    G.asp[JP] = [7, 0]
+    G.asp[AP] = [4, 0]
+    G.pow = 4
+    G.political_will = 6
+    G.china_divisions = 7
+    G.surrender[nations.CHINA.id] = 2
+    G.wie = 4
+    G.inter_service = [1, 1]
+    G.events[events.HUMP.id] = 1
+    G.events[events.JARHAT_ROAD.id] = 1
+
+
+    var jr = [1, 2, 5, 6, 13, 15, 18, 39, 55, 73, 78]
+    jr.forEach(i => remove_card(find_card(JP, i)))
+    var ar = [1, 3, 4, 6, 7, 8, 10, 11, 12, 14, 16, 17, 20, 51]
+    ar.forEach(i => remove_card(find_card(AP, i)))
+    discard_card(find_card(AP, 13))
+    discard_card(find_card(AP, 15))
+    var jd = [8, 12, 14, 20, 25, 29, 35]
+    jd.forEach(i => discard_card(find_card(JP, i)))
+
+    while (G.hand[JP].length < 7) {
+        draw_card(JP)
+    }
+    while (G.hand[AP].length < 7) {
+        draw_card(AP)
+    }
     check_supply()
     fill_overstack()
     call("offensive_phase")
@@ -6874,7 +7665,8 @@ function setup_scenario_1943() {
 function remove_card(card) {
     var faction = cards[card].faction
     discard_card(card)
-    array_delete(G.discard[faction], card)
+    array_delete_item(G.discard[faction], card)
+    array_delete_item(G.draw[faction], card)
     set_add(G.removed, card)
 }
 
@@ -6928,7 +7720,6 @@ function on_setup(scenario, options) {
 
     G.active = JP
     G.turn = 1
-    G.finish = 12
     G.passes = [0, 0]
     G.removed = [] // removed one-time events (both sides)
     G.hand = [[], []]
@@ -6940,6 +7731,7 @@ function on_setup(scenario, options) {
     G.wie = 3
     G.china_divisions = 12
     G.burma_road = 0
+    G.political_will = 8
 
     G.location = []
     G.reduced = []
@@ -6958,6 +7750,7 @@ function on_setup(scenario, options) {
     G.supply_cache = []
     G.overstack = []
     G.pow = 0
+    G.captured_once = []
     for (let i = 1; i < LAST_BOARD_HEX; i++) {
         if (is_controllable_hex(i) && ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Siam", "Caroline", "Marshall", "Japan"].includes(MAP_DATA[i].region)) {
             set_add(G.control, i)
@@ -6978,12 +7771,11 @@ function on_setup(scenario, options) {
         }
     }
 
-    switch (scenario) {
-        case "1942":
-            return setup_scenario_1942()
-        case "1943":
-            return setup_scenario_1943()
-    }
+    scenario_data().setup(options)
+}
+
+function scenario_data() {
+    return SCENARIO_DATA.filter(s => s.name === G.scenario)[0]
 }
 
 function on_view() {
