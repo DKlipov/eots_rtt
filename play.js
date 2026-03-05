@@ -412,11 +412,6 @@ function on_update() {
     // G.actions.board_hex = []
     // G.actions.board_hex.push(hex_to_int(piece.start))
 
-    ROAD_EVENTS.forEach(event => {
-        if (!G.events[event.id]) {
-            event.keys.forEach(hex => populate_generic("board_hex", hex, "marker road"))
-        }
-    })
 
     G.control.filter(h => !set_has(G.capture, h) && !set_has(JP_BOUNDARIES, h))
         .forEach(h => populate_generic("board_hex", h, "marker control_jp"))
@@ -432,6 +427,11 @@ function on_update() {
             marker = "marker capture_ap"
         }
         populate_generic("board_hex", h, marker)
+    })
+    ROAD_EVENTS.forEach(event => {
+        if (!G.events[event.id]) {
+            event.keys.forEach(hex => populate_generic("board_hex", hex, "marker road"))
+        }
     })
     if (G.events[data.events.TOKYO_EXPRESS.id] > 0) {
         populate_generic("board_hex", G.events[data.events.TOKYO_EXPRESS.id], "marker tokyo_express")
