@@ -1,7 +1,5 @@
 Todo list:
-* [WIP] Event cards
-* Check overstacking
-* Battle roll modifiers
+* [WIP] 1941 scenario
 * Ground disengadgement
 * Air and cv disengadgement
 * Parentheless air restrictions (move, reaction and commit battle steps)
@@ -28,4 +26,5 @@ Todo list:
 * Kunming supply
 * Amph assault battle roll modifier (if only air was present it should apply)
 * One step ground units at ground battle FULL streight
+* Check overstacking same number AF
 * Check supply durning movement

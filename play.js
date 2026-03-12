@@ -262,7 +262,7 @@ function push_stack(stk, elt) {
 
 function is_active_card(card) {
     for (let a of CARD_ACTIONS) {
-        console.log(G.actions[a])
+        // console.log(G.actions[a])
         if (G.actions && G.actions[a] && set_has(G.actions[a], card)) {
             return true
         }
@@ -274,9 +274,6 @@ function update_hand(side) {
     var fo_card;
     if (G.future_offensive[side] >= 0) {
         fo_card = populate("hand", side, "card", G.future_offensive[side])
-        fo_card.classList.toggle("action", true)
-        fo_card.classList.add("action")
-        // fo_card.classList.toggle("action", is_active_card(G.future_offensive[side]))
     } else if (G.events[data.events.FUTURE_OFFENSIVE_JP.id + side] > 0) {
         fo_card = populate_generic("hand", side, side === JP ? "card card_jp_0" : "card card_ap_0")
     }
@@ -293,7 +290,8 @@ function update_hand(side) {
     } else {
         for (let i = 0; i < G.hand[side].length; i++) {
             let card = G.hand[side][i]
-            populate("hand", side, "card", card).classList.toggle("action", is_active_card(card))
+            populate("hand", side, "card", card)
+                //.classList.toggle("action", is_active_card(card))
             // populate("hand", side, "card", card).classList.add("action")
         }
     }
