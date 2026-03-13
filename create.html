@@ -9,7 +9,7 @@
     scenario.onchange = function (evt) {
         document.querySelectorAll(".scenario_info").forEach(e => e.hidden = true);
         // document.getElementById(scenario.value).classList.add("show");
-        if (scenario.value.indexOf("1942") >= 0) {
+        if (scenario.value.indexOf("1942") >= 0 || scenario.value.indexOf("1941") >= 0) {
             document.querySelector("#year_1942").hidden = false;
         } else {
             document.querySelector("#historical").checked = false

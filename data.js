@@ -1186,7 +1186,8 @@ data.pieces = [
         "br": 2,
         "rcf": 8,
         "rptype": "us_navy",
-        "start": 5410
+        "start": 5410,
+        "start_reduced": true,
     },
     {
         id: "enterprise",
@@ -1201,7 +1202,8 @@ data.pieces = [
         "br": 2,
         "rcf": 8,
         "rptype": "us_navy",
-        "start": 5809
+        "start": 5809,
+        "start_reduced": true,
     },
     {
         id: "mdca",
