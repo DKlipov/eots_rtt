@@ -592,7 +592,8 @@ function on_update() {
     action_button("done", "Done")
     action_button("delay", "Delay")
     action_button("all", "Choose all")
-    action_button("undo", "Undo")
+    action_button("avoid_zoi", "Avoid ZOI")
+    action_button("regular_movement", "Regular movement")
 
     //debug
     action_button("isr", "isr")
@@ -600,6 +601,7 @@ function on_update() {
     action_button("ns", "to political phase")
     action_button("control", "debug_mode")
 
+    action_button("undo", "Undo")
     end_update()
 }
 
