@@ -593,6 +593,7 @@ function on_update() {
     action_button("delay", "Delay")
     action_button("all", "Choose all")
     action_button("avoid_zoi", "Avoid ZOI")
+    action_button("no_disen", "Skip ground disengagement")
     action_button("regular_movement", "Regular movement")
 
     //debug

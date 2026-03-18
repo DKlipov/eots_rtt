@@ -56,6 +56,7 @@ const AIR_EXTENDED_MOVE = 1 << 9
 const ATTACK_MOVE = 1 << 10
 const AVOID_ZOI = 1 << 11
 const ORGANIC_ONLY = 1 << 12
+const GROUND_DISENGAGEMENT = 1 << 13
 
 //Offensive stages
 const ATTACK_STAGE = ATTACK_MOVE
@@ -1642,6 +1643,7 @@ function get_activatable_units(hq, hq_supply_type) {
         if (piece.supply & hq_supply_type
             && G.supply_cache[G.location[i]] & HEX_TEMP_FLAG3
             && piece.class !== "hq"
+            && (piece.class !== "ground" || !set_has(G.offensive.battle_hexes, G.location[i]))
             && !set_has(G.offensive.active_units[R], i)
             && (!set_has(G.oos, i) || L.card === GENERAL_ADACHI)
             && (!reaction_movement || is_unit_reaction_able(i))
@@ -1853,11 +1855,41 @@ function update_move_hex() {
         return
     }
     L.move_data = get_move_data()
-    if (L.move_data.is_air_present) {
+    if (!set_has(G.active, G.active_stack[0])) {
+        compute_ground_disengagement()
+    } else if (L.move_data.is_air_present) {
         compute_air_move_hexes()
     } else {
         compute_ground_naval_move_hexes()
     }
+}
+
+function apply_ground_disengadgement() {
+    if (G.offensive.stage !== REACTION_STAGE) {
+        return
+    }
+    L.disen.forEach(u => set_delete(L.movable_units, u))
+    var battles = []
+    G.offensive.battle_hexes.forEach(b => {
+        map_set(battles, b, [0, 0])
+    })
+    for_each_unit_on_map((u, piece, location) => {
+        var bh = map_get(battles, location)
+        if (piece.class === "ground" && bh) {
+            bh[piece.faction] += set_has(G.reduced, u) ? piece.rcf : piece.cf
+        }
+    })
+    L.disen.forEach(u => {
+        if (map_has(G.offensive.paths, u)) {
+            return
+        }
+        var piece = pieces[u]
+        var bh = map_get(battles, G.location[u])
+        var cf = set_has(G.reduced, u) ? piece.rcf : piece.cf
+        if (bh[G.offensive.attacker] < bh[1 - G.offensive.attacker] - cf) {
+            set_add(L.movable_units, u)
+        }
+    })
 }
 
 P.move_offensive_units = {
@@ -1865,6 +1897,7 @@ P.move_offensive_units = {
         if (!L.type) {
             L.type = 0
         }
+        L.disen = []
         L.move_data = {}
         L.movable_units = []
         L.allowed_hexes = []
@@ -1879,6 +1912,23 @@ P.move_offensive_units = {
             }
             return true
         }).forEach(u => set_add(L.movable_units, u))
+
+        var of_entered_hex = []
+        if (G.offensive.stage === REACTION_STAGE) {
+            map_for_each(G.offensive.paths, (u, path) => {
+                var piece = pieces[u]
+                var location = G.location[u]
+                if (piece.faction === G.offensive.attacker && (path[0] & ATTACK_MOVE) === 0 && set_has(G.offensive.battle_hexes, location)) {
+                    set_add(of_entered_hex, location)
+                }
+            })
+            for_each_unit_on_map((u, piece, location) => {
+                if (piece.faction !== G.offensive.attacker && piece.class === "ground" && set_has(of_entered_hex, location)) {
+                    set_add(L.disen, u)
+                }
+            })
+        }
+        apply_ground_disengadgement()
         if (L.movable_units.length <= 0) {
             log(`No movable units ${G.active ? "AP" : "JP"}`)
             end()
@@ -1897,6 +1947,9 @@ P.move_offensive_units = {
             prompt(`${offensive_card_header()} Move activated units.`)
             if (G.offensive.stage === ATTACK_MOVE) {
                 button("done")
+            }
+            if (L.movable_units.length > 0 && L.movable_units.filter(u => set_has(L.disen, u)).length === L.movable_units.length) {
+                button("no_disen")
             }
             if (G.offensive.stage === ATTACK_STAGE && !G.offensive.zoi_intelligence_modifier && L.move_type !== AVOID_ZOI) {
                 button("avoid_zoi")
@@ -1919,6 +1972,14 @@ P.move_offensive_units = {
         }
         for (let i = 0; i < L.allowed_hexes.length; i += 2) {
             action_hex(L.allowed_hexes[i])
+        }
+    },
+    no_disen() {
+        push_undo()
+        L.disen.forEach(u => set_delete(L.movable_units, u))
+        L.disen = []
+        if (L.movable_units.length <= 0) {
+            end()
         }
     },
     avoid_zoi() {
@@ -2000,6 +2061,7 @@ P.move_offensive_units = {
             compute_air_commit_hexes()
             L.state = "attack"
         }
+        apply_ground_disengadgement()
         if (L.allowed_hexes.length === 0) {
             this.pass()
         }
@@ -2955,6 +3017,59 @@ function compute_ground_naval_move_hexes() {
             }
         })
     }
+    map_delete(L.allowed_hexes, location)
+}
+
+function compute_ground_disengagement() {
+    let location = L.move_data.location
+    L.allowed_hexes = []
+    let move_data = L.move_data
+
+    var just_enetered = []
+    map_for_each(G.offensive.paths, (u, path) => {
+        var piece = pieces[u]
+        var a_location = G.location[u]
+        if (pieces.faction === G.offensive.attacker && a_location === location && piece.class === "ground") {
+            set_add(just_enetered, path[path.length - 2])
+        }
+    })
+
+    map_for_each(get_ground_move(false), (k, v) => {
+        v.unshift(GROUND_DISENGAGEMENT | REACTION_MOVE)
+        map_set(L.allowed_hexes, k, v)
+    })
+    const queue = [location]
+    const distance_map = [location, [0, location]]
+    for (var i = 0; i < queue.length; i++) {
+        let item = queue[i]
+        let base_distance = map_get(distance_map, item)
+        let nh_list = get_near_hexes(item)
+        for (let j = 0; j < 6; j++) {
+            let nh = nh_list[j]
+            if (nh <= 0) {
+                continue
+            }
+            var distance = base_distance[0] + get_ground_move_cost(item, nh, j, R)
+            if ((item === location && (is_faction_units(nh, G.offensive.attacker) || set_has(nh, just_enetered)))
+                || item !== location && (distance > move_data.ground_move_distance || distance >= map_get(distance_map, nh, [100])[0])) {
+                continue
+            }
+            const stop_move = should_ground_move_stop(nh, R)
+
+            let path_array = base_distance.slice()
+            path_array.push(nh)
+            path_array[0] = distance
+            map_set(distance_map, nh, path_array)
+
+            if (distance < move_data.ground_move_distance && !stop_move) {
+                queue.push(nh)
+            }
+        }
+    }
+    map_for_each(distance_map, (k, v) => {
+        v.unshift(GROUND_DISENGAGEMENT | REACTION_MOVE)
+        map_set(L.allowed_hexes, k, v)
+    })
     map_delete(L.allowed_hexes, location)
 }
 
@@ -6611,6 +6726,9 @@ P.skip_bombing = {
 }
 
 cards[find_card(AP, 25)].before_unit_activation = function () {
+    if (G.active === JP) {
+        return
+    }
     var hq = G.offensive.active_hq[G.active]
     var supply = pieces[hq].supply
     supply |= BR_SUPPLIED_HEX
@@ -7148,6 +7266,9 @@ cards[find_card(AP, 75)].before_commit_offensive = cards[find_card(AP, 74)].befo
 
 
 cards[find_card(AP, 76)].before_unit_activation = function () {
+    if (G.active === JP) {
+        return
+    }
     L.possible_units = get_activatable_units(G.offensive.active_hq[G.active], pieces[HQ_ANZAC].supply)
     filter_activation_units((u, piece) => piece.class !== "ground" || piece.service === "au", AP)
 }
