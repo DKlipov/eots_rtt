@@ -3029,17 +3029,13 @@ function compute_ground_disengagement() {
     map_for_each(G.offensive.paths, (u, path) => {
         var piece = pieces[u]
         var a_location = G.location[u]
-        if (pieces.faction === G.offensive.attacker && a_location === location && piece.class === "ground") {
+        if (piece.faction === G.offensive.attacker && a_location === location && piece.class === "ground") {
             set_add(just_enetered, path[path.length - 2])
         }
     })
-
-    map_for_each(get_ground_move(false), (k, v) => {
-        v.unshift(GROUND_DISENGAGEMENT | REACTION_MOVE)
-        map_set(L.allowed_hexes, k, v)
-    })
     const queue = [location]
     const distance_map = [location, [0, location]]
+
     for (var i = 0; i < queue.length; i++) {
         let item = queue[i]
         let base_distance = map_get(distance_map, item)
@@ -3050,7 +3046,7 @@ function compute_ground_disengagement() {
                 continue
             }
             var distance = base_distance[0] + get_ground_move_cost(item, nh, j, R)
-            if ((item === location && (is_faction_units(nh, G.offensive.attacker) || set_has(nh, just_enetered)))
+            if (is_faction_units(nh, G.offensive.attacker) || set_has(nh, just_enetered)
                 || item !== location && (distance > move_data.ground_move_distance || distance >= map_get(distance_map, nh, [100])[0])) {
                 continue
             }
