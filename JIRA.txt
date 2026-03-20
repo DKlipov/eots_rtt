@@ -1,6 +1,5 @@
 Todo list:
-* [WIP] Parentheless air restrictions (move, reaction and commit battle steps)
-* Strategic movement & air displacement
+* [WIP] Strategic movement & air displacement
 * Ground retreat step
 * China armies restrictions
 * Instrinct city defence

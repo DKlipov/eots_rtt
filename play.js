@@ -291,7 +291,7 @@ function update_hand(side) {
         for (let i = 0; i < G.hand[side].length; i++) {
             let card = G.hand[side][i]
             populate("hand", side, "card", card)
-                //.classList.toggle("action", is_active_card(card))
+            //.classList.toggle("action", is_active_card(card))
             // populate("hand", side, "card", card).classList.add("action")
         }
     }
@@ -379,7 +379,7 @@ function draw_paths() {
             CANVAS_CTX.fill();
             CANVAS_CTX.stroke();
             CANVAS_CTX.beginPath();
-            if (G.location[k] === v[j - 1]) {
+            if (G.location[k] === v[j - 1] && j === v.length - 1) {
                 CANVAS_CTX.setLineDash([5, 3]);
             }
             CANVAS_CTX.moveTo(start[0], start[1] + d);
@@ -581,7 +581,7 @@ function on_update() {
     action_button("eliminate", "Eliminate")
     action_button("stop", "Stop")
     action_button("displace", "Displace")
-    action_button("strat_move", "Strategic move")
+
     action_button("amphibious", "Amphibious")
 
 
@@ -593,8 +593,10 @@ function on_update() {
     action_button("delay", "Delay")
     action_button("all", "Choose all")
     action_button("avoid_zoi", "Avoid ZOI")
-    action_button("no_disen", "Skip ground disengagement")
+    action_button("strat_move", "Strategic move")
     action_button("regular_movement", "Regular movement")
+    action_button("extended_air", "Use extended range")
+    action_button("no_disen", "Skip ground disengagement")
 
     //debug
     action_button("isr", "isr")
