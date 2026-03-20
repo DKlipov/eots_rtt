@@ -216,6 +216,8 @@ const SINGAPORE = hex_to_int(2015)
 const MANILA = hex_to_int(2813)
 const PALAU = hex_to_int(3416)
 const OAHU = hex_to_int(5808)
+const HARBIN = hex_to_int(3302)
+const MUKDEN = hex_to_int(3303)
 const TOKYO_AIR_BASES = [3307, 3704, 3407, 3506, 3507, 3607, 3706, 3705, 3305, 3306, 3303, 3209, 3709].map(h => hex_to_int(h))
 
 const COM_REPLACEMENT_POINTS = [1307, 1308, 2114, 2709, 3727].map(h => hex_to_int(h))
@@ -2412,7 +2414,6 @@ function supply_source_in_range(location, faction) {
             if (distance > SUPPLY_PORT_RANGE || occupied_land || distance >= map_get(distance_map, nh, [100])) {
                 continue
             }
-            console.log(`cs ${int_to_hex(nh)} ${distance} `)
             if (G.supply_cache[nh] & JP_SUPPLY_PORT << faction) {
                 return true
             }
@@ -2968,7 +2969,8 @@ function compute_possible_battle_hexes() {
         map_set(unit_ranges, location, saved_value)
     })
     map_for_each(unit_ranges, (attacker_stack_hex, value) => for_each_hex_in_range(attacker_stack_hex, value[0], (h) => {
-        if (new_battle_allowed && is_faction_units(h, 1 - R) || set_has(G.offensive.battle_hexes, h) || set_has(G.offensive.landind_hexes, h)) {
+        if (new_battle_allowed && is_faction_units(h, 1 - R) && get_map_data()[h].region !== "IChina"
+            || set_has(G.offensive.battle_hexes, h) || set_has(G.offensive.landind_hexes, h)) {
             set_add(selected_hexes, h)
             var has_not_selected = false
             const distance = get_distance(attacker_stack_hex, h)
@@ -3022,7 +3024,8 @@ function compute_air_commit_hexes() {
     }
     if (move_data.is_new_battle_allowed) {
         for (i = 0; i < G.supply_cache.length; i++) {
-            if ((G.supply_cache[i] & JP_UNITS << (1 - R)) && get_distance(i, location) <= range) {
+            if ((G.supply_cache[i] & JP_UNITS << (1 - R)) && get_distance(i, location) <= range
+                && get_map_data()[i].region !== "IChina") {
                 const path_u = path.slice()
                 path_u.push(i)
                 map_set(result, i, path_u)
@@ -3100,7 +3103,7 @@ function compute_air_move_hexes() {
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < 6; j++) {
             let nh = nh_list[j]
-            if (nh <= 0 || nh > LAST_BOARD_HEX) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX || nh === HARBIN || nh === MUKDEN) {
                 continue
             }
             var cached = map_get(distance_map, nh, [9])[0]
@@ -3282,6 +3285,24 @@ function should_ground_move_stop(hex, faction) {
     return G.supply_cache[hex] & JP_GAH_UNITS << (1 - faction) || set_has(G.offensive.battle_hexes, hex)
 }
 
+function ground_move_denied(hex) {
+    if (hex === HARBIN || hex === MUKDEN) {
+        return true
+    }
+    var region = get_map_data()[hex].region
+    if (region === "IChina") {
+        return G.active_stack.filter(u => pieces[u].service !== "ch").length
+    }
+    console.log(`${int_to_hex(hex)} ${R === JP} ${region}`)
+    if (R === JP && region === "India") {
+
+        return G.active_stack.filter(u => pieces[u].class === "ground").length
+    }
+    if (G.active_stack.filter(u => pieces[u].service === "ch").length) {
+        return region === "IChina" || region === "NIndia" || region === "Burma"
+    }
+}
+
 function get_ground_move(avoid_zoi) {
     const location = L.move_data.location
     const move_data = L.move_data
@@ -3301,7 +3322,8 @@ function get_ground_move(avoid_zoi) {
                 continue
             }
             var distance = base_distance[0] + get_ground_move_cost(item, nh, j, R)
-            if ((avoid_zoi && G.supply_cache[nh] & JP_ZOI << (1 - R)) || distance > move_data.ground_move_distance || distance >= map_get(distance_map, nh, [100])[0]) {
+            if ((avoid_zoi && G.supply_cache[nh] & JP_ZOI << (1 - R)) || distance > move_data.ground_move_distance || distance >= map_get(distance_map, nh, [100])[0]
+                || ground_move_denied(nh)) {
                 continue
             }
             const stop_move = should_ground_move_stop(nh, R)
@@ -3421,17 +3443,18 @@ function get_naval_move(zoi_mask) {
             path_array.push(nh)
             path_array[0] = distance
             map_set(distance_map, nh, path_array)
-
         }
     }
     let result = []
     map_for_each(distance_map, (nh, v) => {
-        if (is_amph_attack_possible(nh) && (!us_army_unit_active || set_has(marine_landed_islands, nh) || !get_map_data()[nh].island || G.offensive.stage === REACTION_STAGE)
-            || !is_faction_units(nh, 1 - R) &&
-            ((get_map_data()[nh].port && is_space_controlled(nh, R)) || (move_data.move_type & AMPH_MOVE && is_hex_asp_capable(nh)
-                    && (!move_data.is_naval_present || move_data.move_type & ORGANIC_ONLY))
-            ) && (G.offensive.stage !== REACTION_STAGE)
-        ) {
+        var naval_attack = is_amph_attack_possible(nh) && (!us_army_unit_active || set_has(marine_landed_islands, nh) || !get_map_data()[nh].island || G.offensive.stage === REACTION_STAGE)
+        var port_transport = (get_map_data()[nh].port && is_space_controlled(nh, R))
+        var aa_landing = (move_data.move_type & AMPH_MOVE && is_hex_asp_capable(nh)
+            && (!move_data.is_naval_present || move_data.move_type & ORGANIC_ONLY))
+        var landing = !is_faction_units(nh, 1 - R) &&
+            (port_transport || aa_landing) && (G.offensive.stage !== REACTION_STAGE)
+        if ((naval_attack || landing) && (!L.move_data.is_ground_present || !ground_move_denied(nh))) {
+            console.log(` isap ${int_to_hex(nh)} ${is_amph_attack_possible(nh)} `)
             map_set(result, nh, v)
         }
     })
@@ -4292,7 +4315,12 @@ P.retreat = {
     },
     action_hex(hex) {
         push_undo()
-        set_location(G.active_stack[0], hex)
+        if (ground_move_denied(hex)) {
+            log(`${pieces[G.active_stack[0]]} retreat to restricted area`)
+            eliminate(G.active_stack[0])
+        } else {
+            set_location(G.active_stack[0], hex)
+        }
         G.active_stack = []
     },
     unit(u) {

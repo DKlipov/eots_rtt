@@ -5104,7 +5104,7 @@ data.map = [
     {
         id: 3302,
         name: "Harbin",
-        airfield: true,
+        // airfield: true,
         resource: true,
         city: CHINESE_CITY,
         region: "Manchuria",
@@ -5114,7 +5114,7 @@ data.map = [
     {
         id: 3303,
         name: "Mukden",
-        airfield: true,
+        // airfield: true,
         resource: true,
         city: CHINESE_CITY,
         region: "Manchuria",

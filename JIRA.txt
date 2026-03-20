@@ -1,6 +1,5 @@
 Todo list:
-* [WIP] China armies restrictions
-* Instrinct city defence
+* [WIP] Instrinct city defence
 * Add partially impassable hexsides to data.js
 * Japanese barges movement (with special button)
 * Reaction player choose (critical hit and last ground unit step)
