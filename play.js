@@ -364,6 +364,7 @@ function init_canvas() {
 
 function draw_paths() {
     map_for_each(G.offensive.paths, (k, v) => {
+        var clazz = data.pieces[k].class
         var start = hex_center(v[2])
         var finish
         var color = data.pieces[k].faction ? "blue" : "red"
@@ -374,10 +375,13 @@ function draw_paths() {
         for (var j = 3; j < v.length; j++) {
             start = hex_center(v[j - 1])
             finish = hex_center(v[j])
+            console.log(`${v[j]} ${v[j - 1]}`)
             CANVAS_CTX.beginPath();
-            CANVAS_CTX.arc(start[0], start[1] + d, 4, 0, 2 * Math.PI);
-            CANVAS_CTX.fill();
-            CANVAS_CTX.stroke();
+            if (clazz !== "air" || v[j - 1]===v[j]) {
+                CANVAS_CTX.arc(start[0], start[1] + d, 4, 0, 2 * Math.PI);
+                CANVAS_CTX.fill();
+                CANVAS_CTX.stroke();
+            }
             CANVAS_CTX.beginPath();
             if (G.location[k] === v[j - 1] && j === v.length - 1) {
                 CANVAS_CTX.setLineDash([5, 3]);

@@ -19,8 +19,8 @@ Todo list:
 * Burma road and SE airfield
 * Kwai and jp shq
 * China air box
-* Kunming supply
 * Amph assault battle roll modifier (if only air was present it should apply)
 * One step ground units at ground battle FULL streight
 * Check overstacking same number AF
+* Kunming supply
 * Check supply durning movement
