@@ -1954,6 +1954,9 @@ P.move_offensive_units = {
             if (G.offensive.stage === ATTACK_STAGE && L.move_data.sm_possible) {
                 button("strat_move", L.move_type !== STRAT_MOVE)
             }
+            if (G.offensive.stage === ATTACK_STAGE && pieces[G.active_stack[0]].class === "air") {
+                action_box(TURN_BOX + G.turn + 1)
+            }
             button("regular_movement", L.move_type !== ANY_MOVE)
             let loc = G.location[G.active_stack[0]]
             L.movable_units.filter(u => loc === G.location[u]
@@ -1967,6 +1970,15 @@ P.move_offensive_units = {
         }
         for (let i = 0; i < L.allowed_hexes.length; i += 2) {
             action_hex(L.allowed_hexes[i])
+        }
+    },
+    action_box(h) {
+        push_undo()
+        G.active_stack.forEach(u => displace_to_turn(u, 1, true))
+        G.active_stack = []
+        L.allowed_hexes = []
+        if (L.movable_units.length <= 0) {
+            end()
         }
     },
     no_disen() {
@@ -8678,6 +8690,10 @@ function action_unit(p) {
 
 function action_hex(p) {
     action("action_hex", p)
+}
+
+function action_box(p) {
+    action("action_box", p)
 }
 
 function hex_to_int(i) {

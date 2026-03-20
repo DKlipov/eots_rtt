@@ -1,6 +1,5 @@
 Todo list:
-* [WIP] Strategic movement & air displacement
-* Ground retreat step
+* [WIP] Ground retreat step
 * China armies restrictions
 * Instrinct city defence
 * Add partially impassable hexsides to data.js

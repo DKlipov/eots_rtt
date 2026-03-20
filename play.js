@@ -223,6 +223,7 @@ function on_init() {
     }
     for (i = 1; i < 13; i++) {
         define_layout("turn", i, [63, 1110 - Math.floor((i * 42.3)), 35, 35], "stack")
+        define_space("action_box", i + TURN_BOX, [63, 1110 - Math.floor((i * 42.3)), 35, 35])
     }
     for (i = 0; i < 10; i++) {
         define_layout("track", i, [343, 1430 - Math.floor((i * 42.3)), 35, 35], "stack")
@@ -377,7 +378,7 @@ function draw_paths() {
             finish = hex_center(v[j])
             console.log(`${v[j]} ${v[j - 1]}`)
             CANVAS_CTX.beginPath();
-            if (clazz !== "air" || v[j - 1]===v[j]) {
+            if (clazz !== "air" || v[j - 1] === v[j]) {
                 CANVAS_CTX.arc(start[0], start[1] + d, 4, 0, 2 * Math.PI);
                 CANVAS_CTX.fill();
                 CANVAS_CTX.stroke();
@@ -404,6 +405,9 @@ function place_unit(u, location) {
     if (location > TURN_BOX && location <= (TURN_BOX + 12)) {
         unit = populate("turn", location - TURN_BOX, "unit", u)
         unit.classList.toggle("reduced", set_has(G.reduced, u))
+        unit.classList.remove("oos")
+        unit.classList.remove("activated")
+        unit.classList.remove("selected")
     } else if (location === ELIMINATED_BOX && !data.pieces[u].notreplaceable || location !== ELIMINATED_BOX) {
         unit = populate("board_hex", location, "unit", u)
         unit.classList.toggle("reduced", set_has(G.reduced, u) || location === ELIMINATED_BOX
