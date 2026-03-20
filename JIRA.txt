@@ -1,6 +1,5 @@
 Todo list:
-* [WIP] Ground retreat step
-* China armies restrictions
+* [WIP] China armies restrictions
 * Instrinct city defence
 * Add partially impassable hexsides to data.js
 * Japanese barges movement (with special button)

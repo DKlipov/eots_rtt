@@ -1430,7 +1430,7 @@ P.china_offensive = {
 
 P.choose_hq = {
     _begin() {
-        if (G.offensive.active_hq[G.active] >= 0) {
+        if (G.offensive.active_hq[G.active] >= 0 && Number.isInteger(G.offensive.active_hq[G.active])) {
             end()
             return
         }
@@ -1447,10 +1447,8 @@ P.choose_hq = {
         for_each_unit_on_map((u, piece) => {
             if (piece.faction === R && piece.class === "hq" &&
                 (!set_has(G.oos, u) || L.card === GENERAL_ADACHI)
-                && (
-                    R === G.offensive.attacker
-                    || G.offensive.battle_hexes.filter(bh => get_distance(bh, G.location[u]) <= piece.cr).length
-                )
+                && (R === G.offensive.attacker
+                    || G.offensive.battle_hexes.filter(bh => get_distance(bh, G.location[u]) <= piece.cr).length)
                 && (hq_list.length <= 0 || hq_list.includes(u))
             ) {
                 L.possible_units.push(u)
@@ -1468,7 +1466,7 @@ P.choose_hq = {
     },
     unit(u) {
         push_undo()
-        G.offensive.active_hq[R] = u
+        G.offensive.active_hq[G.active] = u
         if (G.offensive.type === EC && L.card >= 0 && cards[L.card].logistic_alt && cards[L.card].logistic_alt[0].includes(u)) {
             G.offensive.logistic = cards[L.card].logistic_alt[1]
         }
@@ -2253,7 +2251,7 @@ function for_each_unit_on_map(apply) {
 
 function set_zoi(i, piece, oos_units) {
     let location = G.location[i]
-    var zoi_disabled = L.move_type === STRAT_MOVE && set_has(G.active_stack, i)
+    var zoi_disabled = L && L.move_type === STRAT_MOVE && set_has(G.active_stack, i)
     if (piece.br && !set_has(oos_units[piece.faction], i) && !zoi_disabled) {
         var mask = 0 | (JP_ZOI << piece.faction)
         if (piece.br < 6) {
@@ -2411,9 +2409,10 @@ function supply_source_in_range(location, faction) {
 
             var distance = base_distance + get_ground_move_cost(item, nh, j, faction)
             const occupied_land = G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
-            if (distance > SUPPLY_PORT_RANGE || occupied_land || distance >= map_get(distance_map, nh, [100])[0]) {
+            if (distance > SUPPLY_PORT_RANGE || occupied_land || distance >= map_get(distance_map, nh, [100])) {
                 continue
             }
+            console.log(`cs ${int_to_hex(nh)} ${distance} `)
             if (G.supply_cache[nh] & JP_SUPPLY_PORT << faction) {
                 return true
             }
@@ -3882,7 +3881,7 @@ function fill_hit_able_units(faction) {
     var ground_bombing = battle.air_naval[faction].length && !battle.air_naval[enemy_faction].length
     var reduced = []
     var critical = battle.critical[faction]
-    var lower_lf_unit = [-1, 100]
+    var lower_lf_unit = [100]
     var hit_limit = battle.hits[faction]
     var distant_hits = battle.distant_hits_provided[faction] > 0
     for (var i = 0; i < L.pool.length; i += 2) {
@@ -3902,14 +3901,18 @@ function fill_hit_able_units(faction) {
             map_set(result, unit, loss_factor)
         } else if (could_be_damaged) {
             map_set(reduced, unit, loss_factor)
-        } else if (critical && lower_lf_unit[1] > loss_factor) {
-            lower_lf_unit = [unit, loss_factor]
+        } else if (critical && lower_lf_unit[0] === loss_factor) {
+            lower_lf_unit.push(unit)
+        } else if (critical && lower_lf_unit[0] > loss_factor) {
+            lower_lf_unit = [loss_factor, unit]
         }
     }
     if (!result.length && reduced.length) {
         result = reduced
     } else if (result.length <= 0 && critical && lower_lf_unit[0] >= 0 && !battle.damaged[faction].length) {
-        map_set(result, lower_lf_unit[0], hit_limit)
+        for (var i = 1; i < lower_lf_unit.length; i++) {
+            map_set(result, lower_lf_unit[i], hit_limit)
+        }
     }
     battle.hit_able_units[faction] = result
 }
@@ -4250,20 +4253,14 @@ P.prepare_ground_battle = function () {
 
 P.retreat = {
     _begin() {
-        console.log("retreat?")
-        G.active = 1 - G.offensive.battle.winner
+        G.active = G.offensive.attacker
+        var looser = 1 - G.offensive.battle.winner
         L.unit_to_retreat = []
         L.hex_to_retreat = []
         var battle_hex = G.offensive.battle.battle_hex
         capture_hex(battle_hex, G.offensive.battle.winner)
-        var near = get_near_hexes(battle_hex)
-        for (var j = 0; j < near.length; j++) {
-            if (get_map_data()[battle_hex].edges_int & GROUND << 5 * j && !is_faction_units(near[j], 1 - G.active)) {
-                L.hex_to_retreat.push(near[j])
-            }
-        }
         for_each_unit_on_map((u, piece) => {
-            var retreat_unit = piece.faction === G.active && piece.class === "ground" && G.location[u] === battle_hex
+            var retreat_unit = piece.faction === looser && piece.class === "ground" && G.location[u] === battle_hex
             if (retreat_unit && set_has(G.offensive.battle.amph_ground, u)) {
                 set_add(G.offensive.ground_pbm, u)
             } else if (retreat_unit) {
@@ -4302,10 +4299,42 @@ P.retreat = {
         push_undo()
         G.active_stack = [u]
         set_delete(L.unit_to_retreat, u)
+        select_retreat_hex()
     },
     done() {
         push_undo()
         end()
+    }
+}
+
+function select_retreat_hex() {
+    L.hex_to_retreat = []
+    var u = G.active_stack[0]
+    if (pieces[u].faction === G.offensive.attacker) {
+        var path = map_get(G.offensive.paths, u)
+        L.hex_to_retreat = [path[path.length - 2]]
+        return
+    }
+    var just_entered = []
+    console.log(G.offensive.battle.ground[G.offensive.attacker])
+    map_for_each(G.offensive.paths, (u, path) => {
+        var piece = pieces[u]
+        if (piece.faction === G.offensive.attacker && piece.class === "ground" && set_has(G.offensive.battle.ground[G.offensive.attacker], u)
+            && path[0] & GROUND_MOVE) {
+            set_add(just_entered, path[path.length - 2])
+        }
+    })
+    var able = []
+    get_near_hexes(G.offensive.battle.battle_hex).forEach(h => {
+        if (h < 0 || h > LAST_BOARD_HEX || set_has(just_entered, h) || is_overstack(h, G.active_stack[0])
+            || is_faction_units(h, G.offensive.attacker)) {
+            return
+        }
+        set_add(able, h)
+    })
+    L.hex_to_retreat = able.filter(h => MAP_DATA[h].named && is_space_controlled(h, 1 - G.offensive.attacker))
+    if (L.hex_to_retreat.length === 0) {
+        L.hex_to_retreat = able
     }
 }
 
