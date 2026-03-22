@@ -144,6 +144,8 @@ const ROAD_EVENTS = Object.keys(events).filter(k => events[k].road).map(k => {
     return event
 })
 
+const GARRISONED_CITY = [...Array(Object.keys(map).length).keys()].map(i => map[i]).filter(h => h.city > CITY).map(h => hex_to_int(h.id))
+
 //cards
 const OPERATION_NO_1 = find_card(JP, 2)
 const COL_TSUJI = find_card(JP, 3)
@@ -1244,7 +1246,7 @@ function activate_card(c) {
     }
     G.offensive.naval_move_distance = (cards[c].ops * 5)
     //todo debug
-    // G.offensive.naval_move_distance = 30
+    G.offensive.naval_move_distance = 30
     G.offensive.ground_move_distance = (cards[c].ops * 2)
     G.offensive.air_move_distance = (cards[c].ops)
     G.offensive.logistic = cards[c].ops
@@ -1817,23 +1819,25 @@ function capture_hex(hex, side = G.active) {
     if (!is_controllable_hex(hex)) {
         return
     }
+    var md = get_map_data()[hex]
     if (side && set_has(G.control, hex)) {
         log(`AP captured ${int_to_hex(hex)}`)
         set_delete(G.control, hex)
-        if (get_map_data()[hex].region === "NIndia") {
+        if (md.region === "NIndia") {
             india_stable()
+        } else if (md.city === JAPANESE_CITY) {
+            set_add(G.garr_elim, hex)
         }
-        if (get_map_data()[hex].resource) {
+        if (md.resource) {
             check_jp_resources_event()
         }
     } else if (!side && !set_has(G.control, hex)) {
         log(`JP captured ${int_to_hex(hex)}`)
         set_add(G.control, hex)
-
     } else {
         return
     }
-    if (get_map_data()[hex].named) {
+    if (md.named) {
         set_toggle(G.capture, hex)
     }
 }
@@ -2799,6 +2803,11 @@ function check_supply() {
     check_burma_road()
     G.supply_cache = []
     for_each_unit_on_map(mark_unit)
+    GARRISONED_CITY.forEach(h => {
+        if (is_space_controlled(h, JP) && (get_map_data()[h].city === CHINESE_CITY || !set_has(G.garr_elim, h))) {
+            G.supply_cache[h] = G.supply_cache[h] | JP_GROUND_UNITS
+        }
+    })
     check_infrastructure()
 
     var oos_units = [[], []]
@@ -2892,6 +2901,8 @@ function get_move_data() {
         result.move_type |= NAVAL_MOVE
     }
     result.naval_move_distance = G.offensive.naval_move_distance
+    result.naval_move_distance = 30
+    //debug
     result.air_move_legs = cards[G.offensive.active_cards[0]].ops
     if (L.move_type & STRAT_MOVE) {
         result.naval_move_distance = G.offensive.naval_move_distance * 2
@@ -8647,6 +8658,7 @@ function on_setup(scenario, options) {
     G.strategic_warfare = 0
     G.control = []
     G.capture = []
+    G.garr_elim = []
     G.draw_counter = [0, 0]
     G.events = []
     G.not_delayed = []
@@ -8706,6 +8718,7 @@ function on_view() {
     V.active_stack = G.active_stack
     V.surrender = G.surrender
     V.events = G.events
+    V.garr_elim = G.garr_elim
     V.draw_counter = G.draw_counter
     V.reinforcements = G.reinforcements
     V.burma_road = G.burma_road
@@ -8716,9 +8729,23 @@ function on_view() {
         active_cards: G.offensive.active_cards,
         active_hq: G.offensive.active_hq,
         battle_hexes: G.offensive.battle_hexes,
+        processed_bh: G.offensive.processed_bh,
         landind_hexes: G.offensive.landind_hexes,
         damaged: G.offensive.battle && G.offensive.battle.damaged ? G.offensive.battle.damaged[R] : [],
     }
+    V.garrision = []
+    var div_count = 1
+    if (G.china_divisions > 8) {
+        div_count = 3
+    } else if (G.china_divisions > 4) {
+        div_count = 2
+    }
+    G.offensive.battle_hexes.forEach(h => {
+        var city = get_map_data()[h].city
+        if (!set_has(G.offensive.processed_bh) && city > CITY) {
+            map_set(V.garrision, h, city === JAPANESE_CITY ? 0 : div_count)
+        }
+    })
 
 
     if (R !== JP) {

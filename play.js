@@ -17,6 +17,9 @@ const JP_AGREEMENT = 0
 const AP_AGREEMENT = 1
 
 
+const JP_GARRISON_JP = find_piece("army_jp_g_mainland")
+const JP_GARRISON_CN = find_piece("army_jp_g_1")
+
 const CANVAS = document.getElementById("canvas")
 const CANVAS_CTX = document.getElementById("canvas").getContext("2d")
 const ZOI_HEX = [0]
@@ -376,7 +379,6 @@ function draw_paths() {
         for (var j = 3; j < v.length; j++) {
             start = hex_center(v[j - 1])
             finish = hex_center(v[j])
-            console.log(`${v[j]} ${v[j - 1]}`)
             CANVAS_CTX.beginPath();
             if (clazz !== "air" || v[j - 1] === v[j]) {
                 CANVAS_CTX.arc(start[0], start[1] + d, 4, 0, 2 * Math.PI);
@@ -443,6 +445,8 @@ function on_update() {
 
     G.control.filter(h => !set_has(G.capture, h) && !set_has(JP_BOUNDARIES, h))
         .forEach(h => populate_generic("board_hex", h, "marker control_jp"))
+    G.control.filter(h => set_has(G.garr_elim, h))
+        .forEach(h => populate_generic("board_hex", h, "marker no_garrison"))
     JP_BOUNDARIES.filter(h => !set_has(G.capture, h) && !set_has(G.control, h) && h !== MANCHURIA_1 && h !== MANCHURIA_2)
         .forEach(h => populate_generic("board_hex", h, "marker control_ap"))
     G.capture.forEach(h => {
@@ -464,6 +468,16 @@ function on_update() {
     if (G.events[data.events.TOKYO_EXPRESS.id] > 0) {
         populate_generic("board_hex", G.events[data.events.TOKYO_EXPRESS.id], "marker tokyo_express")
     }
+    map_for_each(G.garrision, (h, count) => {
+        var marker = JP_GARRISON_CN
+        if (count === 0) {
+            count = 1
+            marker = JP_GARRISON_JP
+        }
+        for (var i = 0; i < count; i++) {
+            populate_generic("board_hex", h, "unit " + data.pieces[marker].counter)
+        }
+    })
     for (var i = 0; i < data.pieces.length; ++i) {
         if (G.location[i] > 0) {
             place_unit(i, G.location[i])
