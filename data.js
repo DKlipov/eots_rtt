@@ -34,6 +34,63 @@ const AMBUSH = 3
 
 
 data.pieces = [
+    {},
+    {
+        id: "army_jp_g_mainland",
+        "faction": JP,
+        "name": "Japanese Home Islands garrison",
+        "counter": "army_jp_2 unit_ix_11",
+        "class": "ground",
+        "service": "army",
+        "notreplaceable": true,
+        "start_reduced": true,
+        "size": 4,
+        "cf": 12,
+        "lf": 12,
+        "rcf": 12,
+    },
+    {
+        id: "army_jp_g_1",
+        "faction": JP,
+        "name": "Japanese garrison",
+        "counter": "army_jp_2 unit_ix_10",
+        "class": "ground",
+        "service": "army",
+        "notreplaceable": true,
+        "start_reduced": true,
+        "size": 4,
+        "cf": 9,
+        "lf": 12,
+        "rcf": 9,
+    },
+    {
+        id: "army_jp_g_2",
+        "faction": JP,
+        "name": "Japanese garrison",
+        "counter": "army_jp_2 unit_ix_10",
+        "class": "ground",
+        "service": "army",
+        "notreplaceable": true,
+        "start_reduced": true,
+        "size": 4,
+        "cf": 9,
+        "lf": 12,
+        "rcf": 9,
+    },
+    {
+        id: "army_jp_g_3",
+        "faction": JP,
+        "name": "Japanese garrison",
+        "counter": "army_jp_2 unit_ix_10",
+        "class": "ground",
+        "service": "army",
+        "notreplaceable": true,
+        "start_reduced": true,
+        "size": 4,
+        "cf": 9,
+        "lf": 12,
+        "rcf": 9,
+    },
     {
         id: "hq_jp_cy",
         "faction": JP,
@@ -2920,62 +2977,6 @@ data.pieces = [
         "rptype": "ap_ground",
         "reinforcement": 8,
     },
-    {
-        id: "army_jp_g_mainland",
-        "faction": JP,
-        "name": "Japanese Home Islands garrison",
-        "counter": "army_jp_2 unit_ix_11",
-        "class": "ground",
-        "service": "army",
-        "notreplaceable": true,
-        "start_reduced": true,
-        "size": 4,
-        "cf": 12,
-        "lf": 12,
-        "rcf": 12,
-    },
-    {
-        id: "army_jp_g_1",
-        "faction": JP,
-        "name": "Japanese garrison",
-        "counter": "army_jp_2 unit_ix_10",
-        "class": "ground",
-        "service": "army",
-        "notreplaceable": true,
-        "start_reduced": true,
-        "size": 4,
-        "cf": 9,
-        "lf": 12,
-        "rcf": 9,
-    },
-    {
-        id: "army_jp_g_2",
-        "faction": JP,
-        "name": "Japanese garrison",
-        "counter": "army_jp_2 unit_ix_10",
-        "class": "ground",
-        "service": "army",
-        "notreplaceable": true,
-        "start_reduced": true,
-        "size": 4,
-        "cf": 9,
-        "lf": 12,
-        "rcf": 9,
-    },
-    {
-        id: "army_jp_g_3",
-        "faction": JP,
-        "name": "Japanese garrison",
-        "counter": "army_jp_2 unit_ix_10",
-        "class": "ground",
-        "service": "army",
-        "notreplaceable": true,
-        "start_reduced": true,
-        "size": 4,
-        "cf": 9,
-        "lf": 12,
-        "rcf": 9,
-    },
 ]
 
 const HQ_CENTRAL_PACIFIC = find_piece("hq_ap_c")
@@ -2993,6 +2994,7 @@ const HQ_JP_SOUTH = find_piece("hq_jp_s")
 const HQ_SOUTH_SEAS = find_piece("hq_jp_ss")
 
 data.cards = [
+    {},
     {
         "num": 1,
         "faction": AP,
@@ -6100,7 +6102,7 @@ data.events = {
 }
 
 function find_piece(id) {
-    for (let i = 0; i < data.pieces.length; i++) {
+    for (let i = 1; i < data.pieces.length; i++) {
         if (data.pieces[i].id === id) {
             return i
         }

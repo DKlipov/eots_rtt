@@ -244,11 +244,11 @@ function on_init() {
         define_layout("divisions", i, [606 + Math.floor((i * 42.1)), 42, 35, 35])
     }
     define_marker("divisions", 0, "divisions_china")
-    for (let i = 0; i < data.pieces.length; ++i) {
+    for (let i = 1; i < data.pieces.length; ++i) {
         let piece = data.pieces[i]
         piece.element = define_piece("unit", i, piece.counter)
     }
-    for (let i = 0; i < data.cards.length; ++i) {
+    for (let i = 1; i < data.cards.length; ++i) {
         let card = data.cards[i]
         card.element = define_card("card", i, `action card_${card.faction ? "ap" : "jp"}_${card.num}`)
         card.element.onclick = on_click_card
@@ -276,7 +276,7 @@ function is_active_card(card) {
 
 function update_hand(side) {
     var fo_card;
-    if (G.future_offensive[side] >= 0) {
+    if (G.future_offensive[side] > 0) {
         fo_card = populate("hand", side, "card", G.future_offensive[side])
     } else if (G.events[data.events.FUTURE_OFFENSIVE_JP.id + side] > 0) {
         fo_card = populate_generic("hand", side, side === JP ? "card card_jp_0" : "card card_ap_0")
@@ -478,7 +478,7 @@ function on_update() {
             populate_generic("board_hex", h, "unit " + data.pieces[marker].counter)
         }
     })
-    for (var i = 0; i < data.pieces.length; ++i) {
+    for (var i = 1; i < data.pieces.length; ++i) {
         if (G.location[i] > 0) {
             place_unit(i, G.location[i])
         }

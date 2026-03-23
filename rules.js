@@ -188,6 +188,8 @@ const N_ORLEANS = find_piece("orleans")
 const B_29_1 = ap_air("20_bc")
 const B_29_2 = ap_air("21_bc")
 const ARMOR_BRIGADE = ap_army("7")
+const JP_GARRISON_JP = jp_army("g_mainland")
+const JP_GARRISON_CN = [jp_army("g_1"), jp_army("g_2"), jp_army("g_3")]
 
 
 const HQ_YAMAMOTO = find_piece("hq_jp_cy")
@@ -225,7 +227,7 @@ const TOKYO_AIR_BASES = [3307, 3704, 3407, 3506, 3507, 3607, 3706, 3705, 3305, 3
 const COM_REPLACEMENT_POINTS = [1307, 1308, 2114, 2709, 3727].map(h => hex_to_int(h))
 
 function find_piece(id) {
-    for (let i = 0; i < pieces.length; i++) {
+    for (let i = 1; i < pieces.length; i++) {
         if (pieces[i].id === id) {
             return i
         }
@@ -234,7 +236,7 @@ function find_piece(id) {
 }
 
 function find_card(faction, num) {
-    for (let i = 0; i < cards.length; i++) {
+    for (let i = 1; i < cards.length; i++) {
         if (cards[i].faction === faction && cards[i].num === num) {
             return i
         }
@@ -361,7 +363,7 @@ function get_unit_supply_type(piece) {
     throw new Error("Invalid piece supply: " + piece.name)
 }
 
-for (var i = 0; i < pieces.length; i++) {
+for (var i = 1; i < pieces.length; i++) {
     const piece = pieces[i]
     piece.u = i
     const supply = piece.class === "hq" ? get_hq_supply_type(piece) : get_unit_supply_type(piece)
@@ -1253,7 +1255,7 @@ function activate_card(c) {
 }
 
 function get_hand(side) {
-    if (G.events[events.FUTURE_OFFENSIVE_JP.id + R] < G.turn && G.future_offensive[R] >= 0) {
+    if (G.events[events.FUTURE_OFFENSIVE_JP.id + R] < G.turn && G.future_offensive[R] > 0) {
         var result = G.hand[side].slice()
         result.push(G.future_offensive[R])
         return result
@@ -1434,7 +1436,7 @@ P.china_offensive = {
 
 P.choose_hq = {
     _begin() {
-        if (G.offensive.active_hq[G.active] >= 0 && Number.isInteger(G.offensive.active_hq[G.active])) {
+        if (G.offensive.active_hq[G.active]) {
             end()
             return
         }
@@ -1442,7 +1444,7 @@ P.choose_hq = {
         var hq_list = []
         if (R === G.offensive.attacker && G.offensive.type === EC) {
             L.card = G.offensive.offensive_card
-        } else if (R !== G.offensive.attacker && G.offensive.counter_offensive_card >= 0) {
+        } else if (R !== G.offensive.attacker && G.offensive.counter_offensive_card > 0) {
             L.card = G.offensive.counter_offensive_card
         }
         if (L.card && cards[L.card].hq) {
@@ -1471,7 +1473,7 @@ P.choose_hq = {
     unit(u) {
         push_undo()
         G.offensive.active_hq[G.active] = u
-        if (G.offensive.type === EC && L.card >= 0 && cards[L.card].logistic_alt && cards[L.card].logistic_alt[0].includes(u)) {
+        if (G.offensive.type === EC && L.card > 0 && cards[L.card].logistic_alt && cards[L.card].logistic_alt[0].includes(u)) {
             G.offensive.logistic = cards[L.card].logistic_alt[1]
         }
         log(`${pieces[u].name} activated for ${R === G.offensive.attacker ? "offensive" : "reaction"}`)
@@ -1640,7 +1642,7 @@ function get_activatable_units(hq, hq_supply_type) {
     L.air_reaction_hex_map = []
     L.move_data = {}
     G.offensive.battle_hexes.forEach(h => mark_attack_zone(h, R === AP ? 2 : 3))
-    for (let i = 0; i < pieces.length; i++) {
+    for (let i = 1; i < pieces.length; i++) {
         let piece = pieces[i]
         if (piece.supply & hq_supply_type
             && G.supply_cache[G.location[i]] & HEX_TEMP_FLAG3
@@ -1758,7 +1760,7 @@ P.activate_units = {
     _begin() {
         if (R === G.offensive.attacker && G.offensive.type === EC && cards[G.offensive.offensive_card].hq) {
             L.card = G.offensive.offensive_card
-        } else if (R !== G.offensive.attacker && G.offensive.counter_offensive_card >= 0 && cards[G.offensive.counter_offensive_card].hq) {
+        } else if (R !== G.offensive.attacker && G.offensive.counter_offensive_card > 0 && cards[G.offensive.counter_offensive_card].hq) {
             L.card = G.offensive.counter_offensive_card
         }
         L.hq_bonus = pieces[G.offensive.active_hq[G.active]].cm
@@ -2226,7 +2228,7 @@ function get_near_hexes(hex) {
 }
 
 function for_each_card(apply) {
-    for (let i = 0; i < cards.length; i++) {
+    for (let i = 1; i < cards.length; i++) {
         var card = cards[i]
         var returned = apply(i, card)
         if (returned) {
@@ -2237,7 +2239,7 @@ function for_each_card(apply) {
 }
 
 function for_each_unit(apply) {
-    for (let i = 0; i < pieces.length; i++) {
+    for (let i = 1; i < pieces.length; i++) {
         var piece = pieces[i]
         var location = G.location[i]
         var returned = apply(i, piece, location)
@@ -2245,7 +2247,7 @@ function for_each_unit(apply) {
 }
 
 function for_each_unit_on_map(apply) {
-    for (let i = 0; i < pieces.length; i++) {
+    for (let i = 1; i < pieces.length; i++) {
         var piece = pieces[i]
         var location = G.location[i]
         if (location > LAST_BOARD_HEX) {
@@ -3388,13 +3390,11 @@ function mark_participate_attack_hex() {
     if (!L.move_data.is_new_battle_allowed) {
         return
     }
-    for (var i = 0; i < pieces.length; i++) {
-        var piece = pieces[i]
-        var location = G.location[i]
-        if (piece.faction !== R && get_distance(location, base_location) <= base_distance && !(G.supply_cache[location] & HEX_TEMP_FLAG2)) {
-            mark_attack_zone(location, L.move_data.battle_range)
+    for_each_hex_in_range(base_location, base_distance, h => {
+        if (is_faction_units(h, 1 - R) && !(G.supply_cache[h] & HEX_TEMP_FLAG2)) {
+            mark_attack_zone(h, L.move_data.battle_range)
         }
-    }
+    })
 }
 
 
@@ -3465,7 +3465,6 @@ function get_naval_move(zoi_mask) {
         var landing = !is_faction_units(nh, 1 - R) &&
             (port_transport || aa_landing) && (G.offensive.stage !== REACTION_STAGE)
         if ((naval_attack || landing) && (!L.move_data.is_ground_present || !ground_move_denied(nh))) {
-            console.log(` isap ${int_to_hex(nh)} ${is_amph_attack_possible(nh)} `)
             map_set(result, nh, v)
         }
     })
@@ -3691,7 +3690,7 @@ P.cancel_offensive = {
     },
     prompt() {
         prompt(`${offensive_card_header()} Cancel offensive.`)
-        if (L.reactions_card >= 0) {
+        if (L.reactions_card > 0) {
             button("done")
             return
         }
@@ -3841,7 +3840,6 @@ P.apply_attack_reaction = {
             .forEach(c => set_add(L.allowed_cards, c))
         console.log(L.allowed_cards)
         if (L.allowed_cards.length <= 0) {
-            console.log("end??")
             end()
         }
     },
@@ -3899,18 +3897,32 @@ function ground_battle_table(roll) {
     }
 }
 
+function get_reduced_status(u, faction) {
+    var on_process = map_get(G.offensive.battle.damaged[faction], u, 0)
+    if (on_process === 0) {
+        return set_has(G.reduced, u) + 0
+    }
+    return on_process
+}
+
 function fill_hit_able_units(faction) {
     var battle = G.offensive.battle
     var enemy_faction = 1 - faction
     L.pool = []
     var units = ((battle.ground_stage || battle.air_naval[enemy_faction].length === 0)
         ? battle.ground[enemy_faction] : battle.air_naval[enemy_faction])
-    units.filter(u => unit_on_board(u))
-        .forEach(u => {
+    units.forEach(u => {
+        if (unit_on_board(u) && get_reduced_status(u, faction) < 2) {
             var piece = pieces[u]
             map_set(L.pool, u, piece.lf)
-        })
+        }
+    })
     trigger_event("before_apply_hits", faction)
+    if (!battle.ground_stage && L.pool.length === 2 && pieces[L.pool[0]].class === "ground" && get_reduced_status(L.pool[0], faction) === 1) {
+        battle.hit_able_units[faction] = []
+        return
+    }
+    console.log(`gc ${battle.ground_stage} pool ${L.pool.length} cl ${pieces[L.pool[0]].class} rd ${set_has(G.reduced, L.pool[0])}`)
     var result = []
     var ground_bombing = battle.air_naval[faction].length && !battle.air_naval[enemy_faction].length
     var reduced = []
@@ -3923,13 +3935,7 @@ function fill_hit_able_units(faction) {
         var piece = pieces[unit]
         var base_lf = L.pool[i + 1]
         var loss_factor = battle.ground_stage && set_has(battle.amph_ground, unit) ? Math.ceil(base_lf / 2) : base_lf
-        var reduced_status = map_get(battle.damaged[faction], unit, 0)
-        if (reduced_status === 0) {
-            reduced_status = set_has(G.reduced, unit) ? 1 : 0
-        }
-        if (reduced_status >= 2) {
-            continue
-        }
+        var reduced_status = get_reduced_status(unit, faction)
         var could_be_damaged = loss_factor <= hit_limit && (distant_hits || !piece.br || G.location[unit] === battle.battle_hex)
         if (could_be_damaged && (critical || reduced_status === 0 || ground_bombing)) {
             map_set(result, unit, loss_factor)
@@ -4089,6 +4095,9 @@ P.choose_battle = {
         })
     },
     action_hex(hex) {
+        random(10)
+        random(10)
+        //debug
         set_add(G.offensive.processed_bh, hex)
         G.offensive.battle = {
             battle_hex: hex,
@@ -4252,6 +4261,19 @@ P.prepare_battle = function () {
             }
         }
     })
+    if (is_space_controlled(hex, JP) && get_map_data()[hex].city === JAPANESE_CITY) {
+        G.location[JP_GARRISON_JP] = hex
+        set_add(G.reduced, JP_GARRISON_JP)
+        set_add(battle.ground[JP], JP_GARRISON_JP)
+    } else if (is_space_controlled(hex, JP) && get_map_data()[hex].city === CHINESE_CITY && !set_has(G.garr_elim, hex)) {
+        var count = get_garrison_count()
+        for (var i = 0; i < count; i++) {
+            var d = JP_GARRISON_CN[i]
+            G.location[d] = hex
+            set_add(G.reduced, d)
+            set_add(battle.ground[JP], d)
+        }
+    }
     G.committed.forEach(u => set_delete(battle.air_naval[AP], u))
     if (battle.air_naval[JP].length || battle.air_naval[AP].length) {
         log(`Air/naval combat:`)
@@ -4285,8 +4307,20 @@ P.prepare_ground_battle = function () {
     end()
 }
 
+function reset_garrison() {
+    set_delete(G.reduced, JP_GARRISON_JP)
+    G.location[JP_GARRISON_JP] = NON_PLACED_BOX
+    JP_GARRISON_CN.forEach(u => {
+        set_delete(G.reduced, u)
+        G.location[u] = NON_PLACED_BOX
+    })
+}
+
 P.retreat = {
     _begin() {
+        if (get_map_data()[G.offensive.battle.battle_hex].city > CITY) {
+            reset_garrison()
+        }
         G.active = G.offensive.attacker
         var looser = 1 - G.offensive.battle.winner
         L.unit_to_retreat = []
@@ -5504,7 +5538,7 @@ function could_play(card) {
 
 function trigger_event(stage, arg) {
     var result = null
-    if (G.offensive.type === EC && G.offensive.offensive_card >= 0 && cards[G.offensive.offensive_card][stage]) {
+    if (G.offensive.type === EC && G.offensive.offensive_card > 0 && cards[G.offensive.offensive_card][stage]) {
         result = cards[G.offensive.offensive_card][stage](arg)
     }
     G.offensive.active_cards.forEach(c => {
@@ -6036,7 +6070,7 @@ P.draw_from_discard = {
             G.discard[R].forEach(c => action_card(c))
         } else {
             prompt(`${offensive_card_header()} Choose card to discard.`)
-            if (G.future_offensive[R] >= 0) {
+            if (G.future_offensive[R] > 0) {
                 action_card(G.future_offensive[R])
             }
             G.hand[R].forEach(c => action_card(c))
@@ -6274,10 +6308,15 @@ P.kamikaze_attack = {
             L.allowed_units.forEach(u => action_unit(u))
         } else {
             prompt(`Kamikaze attack. Choose target. Hits: ${L.hits}.`)
-            var has_non_damaged = L.allowed_units.filter(u => !set_has(G.reduced, u)).length
+            var has_non_damaged = []
+            L.allowed_units.forEach(u => {
+                if (!set_has(G.reduced, u)) {
+                    set_add(has_non_damaged, get_unit_battle_hex(u))
+                }
+            })
             if (L.hits > 0) {
                 L.allowed_units.forEach(u => {
-                    if (!set_has(G.reduced, u) || !has_non_damaged) {
+                    if (!set_has(G.reduced, u) || !set_has(has_non_damaged, get_unit_battle_hex(u))) {
                         action_unit(u)
                     }
                 })
@@ -6292,6 +6331,7 @@ P.kamikaze_attack = {
     },
     done() {
         push_undo()
+        check_supply()
         end()
     },
     card(c) {
@@ -6309,12 +6349,6 @@ P.kamikaze_attack = {
             L.allowed_units = []
             map_for_each(G.offensive.paths, (ap, path) => {
                 var bh = path[path.length - 1]
-                console.log(pieces[u].name)
-                console.log(int_to_hex(bh))
-                console.log(G.offensive.kamikaze.map(h => int_to_hex(h)))
-                console.log(int_to_hex(location))
-                console.log(get_distance(bh, location))
-                console.log(pieces[u].ebr)
                 if (pieces[ap].faction === AP && pieces[ap].class === "naval" && unit_on_board(ap) && set_has(G.offensive.kamikaze, bh)
                     && get_distance(bh, location) <= pieces[u].ebr) {
                     set_add(L.allowed_units, ap)
@@ -7131,7 +7165,7 @@ cards[find_card(AP, 33)].before_unit_activation = function () {
     filter_activation_units((u, piece) => piece.class !== "naval", AP)
 }
 
-for (var i = 0; i < cards.length; i++) {
+for (var i = 1; i < cards.length; i++) {
     var always_true = () => true
     const card = cards[i]
     card.c = i
@@ -7626,7 +7660,7 @@ P.default_event = script(`
 function construct_decks() {
     G.draw = [[], []]
 
-    for (let c = 0; c < cards.length; ++c) {
+    for (let c = 1; c < cards.length; ++c) {
         if (cards[c].faction) {
             G.draw[AP].push(c)
         } else {
@@ -7696,7 +7730,7 @@ function reduce_unit(unit) {
 
 function draw_all_cards() {
     G.hand = [[], []]
-    for (let i = 0; i < cards.length; i++) {
+    for (let i = 1; i < cards.length; i++) {
         G.hand[cards[i].faction].push(i)
     }
 }
@@ -7839,7 +7873,7 @@ function setup_scenario_1942(options) {
         G.options = {historical: true}
     }
 
-    for (let i = 0; i < pieces.length; i++) {
+    for (let i = 1; i < pieces.length; i++) {
         var piece = pieces[i]
         if (piece.reinforcement !== 2) {
             continue
@@ -8058,13 +8092,13 @@ function setup_scenario_1943() {
 
     G.reduced = []
     //ap setup
-    for (var i = 0; i < pieces.length; i++) {
+    for (var i = 1; i < pieces.length; i++) {
         var piece = pieces[i]
         if (piece.faction === AP && piece.start && piece.notreplaceable) {
             G.location[i] = ELIMINATED_BOX
         }
     }
-    for (let i = 0; i < pieces.length; i++) {
+    for (let i = 1; i < pieces.length; i++) {
         var piece = pieces[i]
         if (piece.reinforcement !== 5) {
             continue
@@ -8461,7 +8495,7 @@ function setup_scenario_south_pacific() {
     for_each_unit(u => G.location[u] = PERM_ELIMINATED)
 
     //ap setup
-    for (let i = 0; i < pieces.length; i++) {
+    for (let i = 1; i < pieces.length; i++) {
         var piece = pieces[i]
         if (piece.reinforcement !== 5) {
             continue
@@ -8567,7 +8601,7 @@ function setup_scenario_south_pacific() {
 
 function future_offencive_card(card, turn) {
     var faction = cards[card].faction
-    if (G.future_offensive[faction] >= 0) {
+    if (G.future_offensive[faction] > 0) {
         discard_card(G.future_offensive[faction])
     }
     G.future_offensive[faction] = card
@@ -8679,7 +8713,7 @@ function on_setup(scenario, options) {
     set_add(G.control, hex_to_int(3606))
     reset_offensive()
     construct_decks()
-    for (let i = 0; i < pieces.length; i++) {
+    for (let i = 1; i < pieces.length; i++) {
         var piece = pieces[i]
         G.location[i] = NON_PLACED_BOX
         if (piece.start) {
@@ -8695,6 +8729,15 @@ function on_setup(scenario, options) {
 
 function scenario_data() {
     return SCENARIO_DATA.filter(s => s.name === G.scenario)[0]
+}
+
+function get_garrison_count() {
+    if (G.china_divisions > 8) {
+        return 3
+    } else if (G.china_divisions > 4) {
+        return 2
+    }
+    return 1
 }
 
 function on_view() {
@@ -8734,15 +8777,10 @@ function on_view() {
         damaged: G.offensive.battle && G.offensive.battle.damaged ? G.offensive.battle.damaged[R] : [],
     }
     V.garrision = []
-    var div_count = 1
-    if (G.china_divisions > 8) {
-        div_count = 3
-    } else if (G.china_divisions > 4) {
-        div_count = 2
-    }
+    var div_count = get_garrison_count()
     G.offensive.battle_hexes.forEach(h => {
         var city = get_map_data()[h].city
-        if (!set_has(G.offensive.processed_bh) && city > CITY) {
+        if (!set_has(G.offensive.processed_bh, h) && (city === CHINESE_CITY || city === JAPANESE_CITY && !set_has(G.garr_elim, h))) {
             map_set(V.garrision, h, city === JAPANESE_CITY ? 0 : div_count)
         }
     })
