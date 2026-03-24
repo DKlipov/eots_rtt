@@ -565,13 +565,14 @@ function is_reinforcement_denied(piece) {
             (piece.service === "ind" || piece.service === "au" || piece.service === "br"));
 }
 
-P.reinforcement_segment1 = {
-    _begin() {
-        end()
-    },
-    prompt() {
+function update_reinf_active() {
+    if (L.unit_reinforcement.length) {
+        G.active_stack = [L.unit_reinforcement[0]]
+    } else {
+        G.active_stack = []
     }
 }
+
 P.reinforcement_segment = {
     _begin() {
         log(`${G.active === AP ? "Allied" : "Japan"} reinforcement segment`)
@@ -619,10 +620,10 @@ P.reinforcement_segment = {
         if (delayed_units) {
             log(`US reinforcements delayed`)
         }
+        update_reinf_active()
     },
     prompt() {
         if (G.active_stack.length) {
-
             L.allowed_hexes.forEach(hex => action_hex(hex))
             if (L.allowed_hexes.length === 0) {
                 prompt(`Choose hex to place ${pieces[G.active_stack[0]].name} as reinforcement. (Not possible hexes).`)
@@ -631,40 +632,57 @@ P.reinforcement_segment = {
                 prompt(`Choose hex to place ${pieces[G.active_stack[0]].name} as reinforcement.`)
                 button("delay")
             }
-            return
+            //debug
+            button("auto")
+        } else {
+            prompt(`Place reinforcements. (Done).`)
         }
         var hq_in_list = false
         L.hq_reinforcement.filter(hq => L.unit_reinforcement.includes(hq)).forEach(hq => {
             hq_in_list = true
-            action_unit(hq)
+            if (G.active_stack.length && G.active_stack[0] !== hq) {
+                action_unit(hq)
+            }
         })
         if (hq_in_list) {
-            prompt(`Choose hq to place as reinforcement.`)
+            // prompt(`Choose hq to place as reinforcement.`)
             return
         }
-        L.unit_reinforcement.forEach(u => action_unit(u))
+        L.unit_reinforcement.forEach(u => {
+            if (G.active_stack.length && G.active_stack[0] !== u) {
+                action_unit(u)
+            }
+        })
         if (!L.unit_reinforcement.length) {
             button("done")
         }
-        prompt(`Choose unit to place as reinforcement.`)
+        // prompt(`Choose unit to place as reinforcement.`)
+    },
+    auto() {
+        while (L.unit_reinforcement.length) {
+            if (L.allowed_hexes.length) {
+                this.action_hex(L.allowed_hexes[0])
+            } else {
+                this.delay()
+            }
+        }
     },
     unit(u) {
-        push_undo()
         G.active_stack = [u]
-        set_delete(L.unit_reinforcement, u)
         if (pieces[u].class !== "hq") {
             L.allowed_hexes = get_unit_reinforcement_hexes(u)
         }
     },
     action_hex(hex) {
         push_undo()
+        set_delete(L.unit_reinforcement, G.active_stack[0])
         log(`${pieces[G.active_stack[0]].name} placed to ${int_to_hex(hex)}`)
         set_location(G.active_stack[0], hex)
         if (pieces[G.active_stack[0]].class === "hq") {
             set_delete(L.allowed_hexes, hex)
             G.supply_cache[hex] |= pieces[G.active_stack[0]].supply
         }
-        G.active_stack = []
+        update_reinf_active()
     },
     delay() {
         push_undo()
@@ -672,7 +690,7 @@ P.reinforcement_segment = {
         if (!sent_to_europe(G.active_stack[0])) {
             log(`${pieces[G.active_stack[0]].name} delayed to next turn`)
         }
-        G.active_stack = []
+        update_reinf_active()
     },
     done() {
         push_undo()

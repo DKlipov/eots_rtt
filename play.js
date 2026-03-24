@@ -616,6 +616,7 @@ function on_update() {
     action_button("ns", "end turn(dbg)")
     action_button("control", "change control(dbg)")
     action_button("draw", "draw card(dbg)")
+    action_button("auto", "auto(dbg)")
 
     action_button("undo", "Undo")
     end_update()

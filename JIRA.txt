@@ -9,7 +9,7 @@ Todo list:
 * AP55
 * Hq displace and return
 * Japan lack of resources win condition
-* Check overstack for india surrender
+* Check overstack for india surrender and place reinforcement
 * B29 attack restrictions
 * Burma road and SE airfield
 * Kwai and jp shq
