@@ -3909,6 +3909,8 @@ function fill_hit_able_units(faction) {
     var battle = G.offensive.battle
     var enemy_faction = 1 - faction
     L.pool = []
+    var total_lf = 0
+    var ground_bomb = !battle.ground_stage && battle.air_naval[enemy_faction].length === 0
     var units = ((battle.ground_stage || battle.air_naval[enemy_faction].length === 0)
         ? battle.ground[enemy_faction] : battle.air_naval[enemy_faction])
     units.forEach(u => {
@@ -3918,13 +3920,11 @@ function fill_hit_able_units(faction) {
         }
     })
     trigger_event("before_apply_hits", faction)
-    if (!battle.ground_stage && L.pool.length === 2 && pieces[L.pool[0]].class === "ground" && get_reduced_status(L.pool[0], faction) === 1) {
+    if (ground_bomb && L.pool.length === 2 && get_reduced_status(L.pool[0], faction) === 1) {
         battle.hit_able_units[faction] = []
         return
     }
-    console.log(`gc ${battle.ground_stage} pool ${L.pool.length} cl ${pieces[L.pool[0]].class} rd ${set_has(G.reduced, L.pool[0])}`)
     var result = []
-    var ground_bombing = battle.air_naval[faction].length && !battle.air_naval[enemy_faction].length
     var reduced = []
     var critical = battle.critical[faction]
     var lower_lf_unit = [100]
@@ -3936,8 +3936,12 @@ function fill_hit_able_units(faction) {
         var base_lf = L.pool[i + 1]
         var loss_factor = battle.ground_stage && set_has(battle.amph_ground, unit) ? Math.ceil(base_lf / 2) : base_lf
         var reduced_status = get_reduced_status(unit, faction)
+        total_lf += loss_factor
+        if (reduced_status === 0) {
+            total_lf += loss_factor
+        }
         var could_be_damaged = loss_factor <= hit_limit && (distant_hits || !piece.br || G.location[unit] === battle.battle_hex)
-        if (could_be_damaged && (critical || reduced_status === 0 || ground_bombing)) {
+        if (could_be_damaged && (critical || reduced_status === 0 || ground_bomb)) {
             map_set(result, unit, loss_factor)
         } else if (could_be_damaged) {
             map_set(reduced, unit, loss_factor)
@@ -3953,6 +3957,20 @@ function fill_hit_able_units(faction) {
         for (var i = 1; i < lower_lf_unit.length; i++) {
             map_set(result, lower_lf_unit[i], hit_limit)
         }
+    }
+    if (ground_bomb && get_map_data()[battle.battle_hex].city > CITY) {
+        var garrisons = []
+        map_for_each(result, u => {
+            if (pieces[u].garrison) {
+                garrisons.push(u)
+            }
+        })
+        if (result.length > garrisons.length * 2) {
+            garrisons.forEach(u => map_delete(result, u))
+        }
+    }
+    if (ground_bomb && hit_limit >= total_lf) {
+        battle.ground_disperced = 1
     }
     battle.hit_able_units[faction] = result
 }
@@ -4110,6 +4128,14 @@ P.choose_battle = {
 P.assign_hits = {
     _begin() {
         var battle = G.offensive.battle
+        if (battle.ground_disperced) {
+            G.active = 1 - G.offensive.attacker
+            battle.hit_able_units = [[], []]
+            battle.hits = [0, 0]
+            end()
+            call("ground_dispersed")
+            return;
+        }
         if (battle.hit_able_units[0].length && !battle.hit_able_units[1].length) {
             G.active = 0
         } else if (battle.hit_able_units[1].length && !battle.hit_able_units[0].length) {
@@ -4153,8 +4179,43 @@ P.assign_hits = {
             G.active = 1 - R
         } else {
             apply_loss()
+            check_supply()
             end()
         }
+    }
+}
+
+P.ground_dispersed = {
+    _begin() {
+        var battle = G.offensive.battle
+        L.allowed_units = battle.ground[G.active].filter(u => unit_on_board(u))
+        L.garrison_present = L.allowed_units.filter(u => pieces[u].garrison).length
+        battle.ground_disperced = 0
+        if (L.allowed_units.length === 1 && set_has(G.reduced, pieces[L.allowed_units[0]])) {
+            end()
+        }
+    },
+    prompt() {
+        L.allowed_units.filter(u => !pieces[u].garrison || !L.garrison_present).forEach(u => action_unit(u))
+        prompt(`Choose one survived ground step.`)
+        if (!L.allowed_units.length) {
+            button("done")
+        }
+    },
+    unit(unit) {
+        push_undo()
+        damage_unit(unit)
+        if (!unit_on_board(unit)) {
+            set_delete(L.allowed_units, unit)
+            L.garrison_present = L.allowed_units.filter(u => pieces[u].garrison).length
+        }
+        if (L.allowed_units.length === 1 && set_has(G.reduced, pieces[L.allowed_units[0]])) {
+            L.allowed_units = []
+        }
+    },
+    done() {
+        push_undo()
+        end()
     }
 }
 
@@ -8777,12 +8838,12 @@ function on_view() {
         landind_hexes: G.offensive.landind_hexes,
         damaged: G.offensive.battle && G.offensive.battle.damaged ? G.offensive.battle.damaged[R] : [],
     }
-    V.garrision = []
+    V.garrison = []
     var div_count = get_garrison_count()
     G.offensive.battle_hexes.forEach(h => {
         var city = get_map_data()[h].city
         if (!set_has(G.offensive.processed_bh, h) && (city === CHINESE_CITY || city === JAPANESE_CITY && !set_has(G.garr_elim, h))) {
-            map_set(V.garrision, h, city === JAPANESE_CITY ? 0 : div_count)
+            map_set(V.garrison, h, city === JAPANESE_CITY ? 0 : div_count)
         }
     })
 
@@ -8866,9 +8927,8 @@ function on_view() {}
 function on_assert() {}
 */
 
-function on_query (q, params)
-{
-	// So far it looks like this needs to be here but doesn't have to "do" anything
+function on_query(q, params) {
+    // So far it looks like this needs to be here but doesn't have to "do" anything
 }
 
 

@@ -457,7 +457,7 @@ function on_update() {
     if (G.events[data.events.TOKYO_EXPRESS.id] > 0) {
         populate_generic("board_hex", G.events[data.events.TOKYO_EXPRESS.id], "marker tokyo_express")
     }
-    map_for_each(G.garrision, (h, count) => {
+    map_for_each(G.garrison, (h, count) => {
         var marker = JP_GARRISON_CN
         if (count === 0) {
             count = 1

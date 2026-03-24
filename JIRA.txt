@@ -1,7 +1,5 @@
 Todo list:
-* [WIP] Instrinct city defence
-* Add partially impassable hexsides to data.js
-* Japanese barges movement (with special button)
+* [WIP] Japanese barges movement (with special button)
 * Reaction player choose (critical hit and last ground unit step)
 * Ground loss for JP organic transpot destroyed (attacker only!)
 * Skipped amph battle if attacker has no navy
@@ -19,5 +17,8 @@ Todo list:
 * Amph assault battle roll modifier (if only air was present it should apply)
 * One step ground units at ground battle FULL streight
 * Check overstacking same number AF
+* JP CV ressign hits step
+* Split removed cards
+* Add partially impassable hexsides to data.js
 * Kunming supply
 * Check supply durning movement
