@@ -8744,6 +8744,7 @@ function on_view() {
     V.turn = G.turn
     V.location = G.location
     V.removed = G.removed
+    V.discard = G.discard
     V.reduced = G.reduced
     V.political_will = G.political_will
     V.inter_service = G.inter_service
@@ -8862,9 +8863,14 @@ var G, L, R, V, P = {}
 function on_setup(scenario, options) {}
 function on_static_view() {}
 function on_view() {}
-function on_query(q) {}
 function on_assert() {}
 */
+
+function on_query (q, params)
+{
+	// So far it looks like this needs to be here but doesn't have to "do" anything
+}
+
 
 function log(s) {
     if (s === undefined) {

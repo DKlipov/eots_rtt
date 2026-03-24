@@ -21,6 +21,12 @@
 </head>
 <body>
 
+<div id="event_card_dialog" class="dialog">
+	<div class="dialog_header">Event Cards</div>
+	<div class="dialog_x" onclick="hide_dialog('event_card_dialog')">&#x274c;</div>
+	<div class="dialog_body"></div>
+</div>
+
 <menu id="card_popup" hidden>
     <li class="title">CARD
     <li class="separator">
@@ -36,7 +42,7 @@
     <li data-action="discard"> &#x1f3ed;&#xfe0e; &nbsp; Discard
 </menu>
 
-<div id="tooltip" hidden></div>
+<div id="tooltip" class="hide"></div>
 
 <header>
     <div id="toolbar">
@@ -54,6 +60,14 @@
             </menu>
         </details>
         <button onclick="toggle_pieces()"><img src="/images/earth-africa-europe.svg"></button>
+        <details id="info_menu">
+            <summary><img src="/images/wooden-sign.svg"></summary>
+            <menu>
+                <li onclick="send_query('event_cards')">
+                    <div class="hotkey">E</div>
+                    <div>Inspect Event Cards</div>
+            </menu>
+        </details>
     </div>
 </header>
 
