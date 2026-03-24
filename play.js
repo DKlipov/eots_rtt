@@ -607,13 +607,15 @@ function on_update() {
     action_button("strat_move", "Strategic move")
     action_button("regular_movement", "Regular movement")
     action_button("extended_air", "Use extended range")
+    action_button("barges", "Use barges")
     action_button("no_disen", "Skip ground disengagement")
 
     //debug
-    action_button("isr", "isr")
-    action_button("deploy_b29", "deploy_b29")
-    action_button("ns", "to political phase")
-    action_button("control", "debug_mode")
+    action_button("isr", "isr(dbg)")
+    action_button("deploy_b29", "deploy_b29(dbg)")
+    action_button("ns", "end turn(dbg)")
+    action_button("control", "change control(dbg)")
+    action_button("draw", "draw card(dbg)")
 
     action_button("undo", "Undo")
     end_update()

@@ -1,9 +1,9 @@
 <div id="year_1942" class="scenario_info">
     <p>
-        <label><input type="checkbox" value="true" name="historical" id="historical">Use historical japanese
+        <label><input type="checkbox" value="true" name="historical" id="historical" checked>Use historical japanese
             hand</label>
 </div>
-
+<label><input type="checkbox" value="true" name="debug" id="debug" checked>Debug mode (additional interactions)</label>
 <script>
     let scenario = document.querySelector("select[name='scenario']");
     scenario.onchange = function (evt) {

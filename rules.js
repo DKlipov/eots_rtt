@@ -49,7 +49,7 @@ const GROUND_MOVE = 1 << 2
 const AMPH_MOVE = 1 << 3
 const AIR_STRAT_MOVE = 1 << 4
 const AIR_MOVE = 1 << 5
-const AIR_CLOSE_MOVE = 1 << 6
+const BARGES_MOVE = 1 << 6
 const POST_BATTLE_MOVE = 1 << 7
 const REACTION_MOVE = 1 << 8
 const AIR_EXTENDED_MOVE = 1 << 9
@@ -411,9 +411,9 @@ P.strategic_phase = script(`
         check_jp_resources_event()
     }
     set G.active AP 
-    call reinforcement_segment1
+    call reinforcement_segment
     set G.active JP 
-    call reinforcement_segment1
+    call reinforcement_segment
     log ("Replacement segment")
     set G.active AP 
     call replacement_segment {scheduled_points: 1}
@@ -1243,12 +1243,12 @@ function activate_card(c) {
     }
     set_add(G.discard[faction], c)
     G.offensive.attacker = faction
-    if (!cards[c].faction && cards[c].ops >= 3) {
-        G.offensive.barges = true
+    if (cards[c].faction === JP && cards[c].ops >= 3 && is_event_active(events.BARGES)) {
+        G.offensive.barges = 2
     }
     G.offensive.naval_move_distance = (cards[c].ops * 5)
     //todo debug
-    G.offensive.naval_move_distance = 30
+    // G.offensive.naval_move_distance = 30
     G.offensive.ground_move_distance = (cards[c].ops * 2)
     G.offensive.air_move_distance = (cards[c].ops)
     G.offensive.logistic = cards[c].ops
@@ -1291,15 +1291,14 @@ P.offensive_segment = {
             let card = hand[i]
             get_allowed_actions(card).forEach(a => action(a, card))
         }
-        console.log(Object.keys(G))
-        // console.log(Object.keys(G.active_stack))
-        console.log(G.undo)
-        //debug
-        button("isr")
-        button("ns")
-        button("control")
-        button("eliminate")
-        button("deploy_b29")
+        if (G.debug) {
+            button("isr")
+            button("ns")
+            button("control")
+            button("eliminate")
+            button("deploy_b29")
+            button("draw")
+        }
         if (L.debug) {
             for (var i = 1; i < get_map_data().length; i++) {
                 if (is_controllable_hex(i)) {
@@ -1317,6 +1316,12 @@ P.offensive_segment = {
         G.offensive.type = OC
         log(`${R} played ${cards[c].name} as operation card`)
         goto("offensive_sequence")
+    },
+    draw() {
+        push_undo()
+        G.offensive.active_cards = [TOJO_RESIGNS]
+        G.draw[R].forEach(c => discard_card(c))
+        call("draw_from_discard")
     },
     event(c) {
         push_undo()
@@ -1960,6 +1965,9 @@ P.move_offensive_units = {
             if (G.offensive.stage === ATTACK_STAGE && L.move_data.sm_possible) {
                 button("strat_move", L.move_type !== STRAT_MOVE)
             }
+            if (G.offensive.stage === ATTACK_STAGE && G.offensive.barges) {
+                button("barges", L.move_type !== BARGES_MOVE && G.offensive.barges > 1 && G.active_stack.filter(u => pieces[u].class === "ground").length === 1)
+            }
             if (G.offensive.stage === ATTACK_STAGE && pieces[G.active_stack[0]].class === "air") {
                 action_box(TURN_BOX + G.turn + 1)
             }
@@ -1968,6 +1976,7 @@ P.move_offensive_units = {
             L.movable_units.filter(u => loc === G.location[u]
                 && !L.move_data.is_air_present
                 && pieces[u].type !== "air"
+                && L.move_type !== BARGES_MOVE
                 && !set_has(G.active_stack, u))
                 .forEach(u => action_unit(u))
             if (G.offensive.stage === ATTACK_MOVE || is_valid_cv_stop()) {
@@ -1995,9 +2004,11 @@ P.move_offensive_units = {
             end()
         }
     },
-
     extended_air() {
         set_mt(AIR_EXTENDED_MOVE)
+    },
+    barges() {
+        set_mt(BARGES_MOVE)
     },
     strat_move() {
         set_mt(STRAT_MOVE)
@@ -2030,6 +2041,10 @@ P.move_offensive_units = {
     action_hex(hex) {
         push_undo()
         log(`Units ${G.active_stack} moved to ${int_to_hex(hex)}`)
+        if (L.move_type === BARGES_MOVE) {
+            G.offensive.barges = 1
+            log(`Barges ability used`)
+        }
         var curr_path = map_get(L.allowed_hexes, hex)
         if (is_faction_units(hex, 1 - R) && G.active === G.offensive.attacker && G.offensive.stage === ATTACK_STAGE) {
             set_add(G.offensive.battle_hexes, hex)
@@ -2107,7 +2122,7 @@ function reset_move_type() {
     if (G.offensive.zoi_intelligence_modifier && L.move_type === AVOID_ZOI) {
         set_mt(ANY_MOVE)
     }
-    if (L.move_type === AIR_EXTENDED_MOVE || L.move_type === STRAT_MOVE) {
+    if (L.move_type === AIR_EXTENDED_MOVE || L.move_type === STRAT_MOVE || L.move_type === BARGES_MOVE) {
         set_mt(ANY_MOVE)
     }
 }
@@ -2754,9 +2769,7 @@ P.check_overstacking = {
         } else if (!still_overstack && pieces[u].class === "air") {
             L.allowed_units = L.allowed_units.filter(u => G.location[u] !== location || pieces[u].class !== "air")
         } else if (still_overstack && pieces[u].class === "air") {
-            console.log("4 condition")
             var air_present = L.allowed_units.filter(u => G.location[u] === location && pieces[u].class === "air").length
-            console.log(air_present)
             if (!air_present) {
                 L.ground_units.forEach(u => {
                     if (G.location[u] === location) {
@@ -2903,8 +2916,6 @@ function get_move_data() {
         result.move_type |= NAVAL_MOVE
     }
     result.naval_move_distance = G.offensive.naval_move_distance
-    result.naval_move_distance = 30
-    //debug
     result.air_move_legs = cards[G.offensive.active_cards[0]].ops
     if (L.move_type & STRAT_MOVE) {
         result.naval_move_distance = G.offensive.naval_move_distance * 2
@@ -2914,6 +2925,7 @@ function get_move_data() {
     if (result.extended_battle_range < result.battle_range) {
         result.extended_battle_range = result.battle_range
     }
+
 
     result.is_new_battle_allowed = (R === G.offensive.attacker
         && (G.offensive.type === EC || G.offensive.battle_hexes.length === 0)
@@ -2937,6 +2949,11 @@ function get_move_data() {
         if (organic_only_ships && organic_naval_counter <= organic_ground_counter) {
             result.move_type |= ORGANIC_ONLY
         }
+    }
+    if (L.move_type & BARGES_MOVE) {
+        result.naval_move_distance = 1
+        result.move_type |= AMPH_MOVE
+        result.asp_points = 0
     }
     return result
 }
@@ -3187,7 +3204,7 @@ function compute_ground_naval_move_hexes() {
             map_set(L.allowed_hexes, k, v)
         })
     }
-    if (move_data.is_ground_present && !move_data.is_naval_present) {
+    if (move_data.is_ground_present && !move_data.is_naval_present && !(move_data.move_type & BARGES_MOVE)) {
         mt = GROUND_MOVE
         if (move_data.move_type & AVOID_ZOI) {
             mt |= AVOID_ZOI
@@ -3306,7 +3323,6 @@ function ground_move_denied(hex) {
     if (region === "IChina") {
         return G.active_stack.filter(u => pieces[u].service !== "ch").length
     }
-    console.log(`${int_to_hex(hex)} ${R === JP} ${region}`)
     if (R === JP && region === "India") {
 
         return G.active_stack.filter(u => pieces[u].class === "ground").length
@@ -3821,24 +3837,14 @@ P.apply_attack_reaction = {
     _begin() {
         if (G.offensive.battle_hexes.length <= 0 && G.offensive.stage !== BATTLE_STAGE) {
             end()
-            console.log(G.offensive.battle_hexes)
         }
         var stage = G.offensive.stage === POST_BATTLE_STAGE ? AFTER_COMBAT : BEFORE_COMBAT
         L.allowed_cards = []
-        // console.log(`player ${R} ${G.active}`)
-        // G.offensive.active_cards.forEach(c=>{
-        //     console.log(`${c} ${cards[c].name}`)
-        //     console.log((G.offensive.type === EC || c !== G.offensive.offensive_card))
-        //     console.log(cards[c].faction === R)
-        //     console.log(cards[c].stage === stage)
-        //     console.log(G.offensive.battle_hexes.length <= 0 && G.offensive.stage === BATTLE_STAGE && cards[c].stage)
-        // })
         G.offensive.active_cards.filter(c =>
             (G.offensive.type === EC || c !== G.offensive.offensive_card)
             && cards[c].faction === G.active
             && (cards[c].stage === stage || G.offensive.battle_hexes.length <= 0 && G.offensive.stage === BATTLE_STAGE && cards[c].stage))
             .forEach(c => set_add(L.allowed_cards, c))
-        console.log(L.allowed_cards)
         if (L.allowed_cards.length <= 0) {
             end()
         }
@@ -4113,9 +4119,6 @@ P.choose_battle = {
         })
     },
     action_hex(hex) {
-        random(10)
-        random(10)
-        //debug
         set_add(G.offensive.processed_bh, hex)
         G.offensive.battle = {
             battle_hex: hex,
@@ -4250,12 +4253,10 @@ P.apply_naval_winner = function () {
     if (!attacker_win) {
         battle.amph_ground.forEach(u => set_delete(battle.ground[G.offensive.attacker], u))
     }
-    console.log("apply nav win")
     end()
 }
 
 P.apply_ground_winner = function () {
-    console.log("apply ground winner")
     var battle = G.offensive.battle
     if (battle.ground[G.offensive.attacker].length === 0) {
         end()
@@ -4364,7 +4365,6 @@ P.prepare_ground_battle = function () {
     if (battle.ground[G.offensive.attacker].filter(u => unit_on_board(u)).length) {
         log(`Ground combat at ${int_to_hex(hex)}`)
     }
-    console.log("ground prepared")
     end()
 }
 
@@ -4450,7 +4450,6 @@ function select_retreat_hex() {
         return
     }
     var just_entered = []
-    console.log(G.offensive.battle.ground[G.offensive.attacker])
     map_for_each(G.offensive.paths, (u, path) => {
         var piece = pieces[u]
         if (piece.faction === G.offensive.attacker && piece.class === "ground" && set_has(G.offensive.battle.ground[G.offensive.attacker], u)
@@ -6157,7 +6156,7 @@ P.draw_from_discard = {
             discard_card(c)
             return
         }
-        set_delete(G.discard, c)
+        set_delete(G.discard[R], c)
         G.hand[R].push(c)
         G.offensive.active_cards = []
         log(`${R === AP ? "Ap" : "Jp"} draw ${cards[c].name} from discard pile`)
@@ -6487,7 +6486,6 @@ P.paratroopers = {
                 return
             } else if (piece.service === "du" && !set_has(duth_hexes, location)) {
                 set_add(duth_hexes, location)
-                console.log(`du ${int_to_hex(location)}`)
             } else {
                 set_add(occupied_hexes, location)
             }
@@ -8765,6 +8763,10 @@ function on_setup(scenario, options) {
     G.overstack = []
     G.pow = 0
     G.captured_once = []
+
+    if (options.debug) {
+        G.debug = 1
+    }
     for (let i = 1; i < LAST_BOARD_HEX; i++) {
         if (is_controllable_hex(i) && ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Siam", "Caroline", "Marshall", "Japan"].includes(get_map_data()[i].region)) {
             set_add(G.control, i)
@@ -8908,7 +8910,7 @@ function reset_offensive() {
         battle_hexes: [],
         processed_bh: [],
         landind_hexes: [],
-        barges: false,
+        barges: 0,
         zoi_intelligence_modifier: false,
         battle: {},
     }
