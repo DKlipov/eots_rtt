@@ -180,17 +180,6 @@ function current_pow(G) {
     return G.capture.filter(h => !set_has(G.control, h)).length
 }
 
-function on_focus_card_tip(c) {
-    if (data.cards[c].type === "Barrage")
-        document.getElementById("tooltip").classList = "card barrage c" + c
-    else
-        document.getElementById("tooltip").classList = "card c" + c
-}
-
-function on_blur_card_tip(c) {
-    document.getElementById("tooltip").hidden = true
-}
-
 function clear_paths() {
     CANVAS_CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
 }
@@ -739,6 +728,7 @@ function escape_text(text) {
     text = text.replace(/([ +-]1) units/g, "$1 unit")
     text = text.replace(/([ +-]1) hits/g, "$1 hit")
     text = text.replace(/[BRW]\d/g, (m) => ICONS[m] ?? m)
+    text = text.replace(/C(\d+)/g, sub_card)
     return text
 }
 
@@ -898,7 +888,7 @@ function show_card_list(id, params) {
 		if (id === "event_card_dialog") {
 			append_header(`Japanese Discard Pile (${G.discard[JP].length})`)
 			G.discard[JP].forEach(append_card)
-			append_header(`Allied Powers Discard Pile (${G.discard[AP].length})`)
+			append_header(`Allies Discard Pile (${G.discard[AP].length})`)
 			G.discard[AP].forEach(append_card)
 			append_header(`Removed Cards (${G.removed.length})`)
 			G.removed.forEach(append_card)
@@ -921,3 +911,20 @@ function format_card_info(c) {
 	let text = "C" + c
 	return escape_text(text)
 }
+
+function sub_card(match, p1) {
+	const c = p1 | 0
+	const cn = "card-tip"
+	return `<span class="${cn}" onmouseenter="on_focus_card_tip(${c})" onmouseleave="on_blur_card_tip()">${data.cards[c].name}</span>`
+}
+
+function on_focus_card_tip(c) {
+	let elem = document.getElementById("tooltip")
+    const card = data.cards[c]
+	elem.classList = `card card_${card.faction ? "ap" : "jp"}_${card.num}`
+}
+
+function on_blur_card_tip(c) {
+	document.getElementById("tooltip").classList = "hide"
+}
+

@@ -67,6 +67,8 @@ body.Allies header.your_turn { background-color: lightsteelblue; }
 #log .jp { background-color: lightpink; }
 #log .ap { background-color: lightblue; }
 
+.card-tip { cursor: pointer; font-style: italic }
+
 /*#log .fm { background-color: lightblue; }*/
 /*#log .gm { background-color: gainsboro; }*/
 /*#log .fm.dark { background-color: steelblue; }*/
@@ -309,3 +311,4 @@ body.Allies #jp_hand { grid-row: 4; }
 
 .dialog_body dl { margin: 0; }
 .dialog_body dd { margin-left: 20px; }
+
