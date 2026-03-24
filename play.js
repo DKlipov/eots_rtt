@@ -785,3 +785,139 @@ function on_log(text) {
 
     return p
 }
+
+// Below is code imported from Imperial struggle for dialog windows etc
+// still not completely integrated. commented out code should be looked at
+
+function on_reply(q, params)
+{
+	if (q === "event_cards") {
+		toggle_dialog("event_card_dialog")
+	}
+}
+
+function toggle_dialog(id)
+{
+	if (document.getElementById(id).classList.contains("show")) {
+		hide_dialog(id)
+	} else {
+		show_card_list(id, null)
+	}
+}
+
+function show_dialog(id, dialog_generator) {
+	document.getElementById(id).classList.add("show")
+	let body = document.getElementById(id).querySelector(".dialog_body")
+	body.replaceChildren()
+	if (dialog_generator) {
+		dialog_generator(body)
+	}
+	if (!is_mobile()) dragElement(document.getElementById(id))
+}
+
+function hide_dialog(id) {
+	document.getElementById(id).classList.remove("show")
+	_tip_blur_mobile_tip()
+}
+
+function toggle_dialog_collapse(id) {
+	let dialog_body = document.getElementById(id).querySelector(".dialog_body")
+	let dialog_x = document.getElementById(id).querySelector(".dialog_x")
+	if (dialog_body.className.includes("hide")) {
+		dialog_body.classList.remove("hide")
+		dialog_x.textContent = "A"
+	} else {
+		dialog_body.classList.add("hide")
+		dialog_x.textContent = "V"
+	}
+}
+
+//BR// Makes an element/dialog draggable by the player
+function dragElement(e) {
+	var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0
+	var the_e = e
+	if (document.getElementById(e.id + "header")) {
+		document.getElementById(e.id + "header").onmousedown = dragMouseDown  // Drag by the header if it exists
+	} else {
+		e.onmousedown = dragMouseDown                                                  // Otherwise drag by the whole element
+	}
+
+	function dragMouseDown(e) {
+		e.preventDefault()
+		pos3 = e.clientX
+		pos4 = e.clientY
+		document.onmouseup = closeDragElement
+		document.onmousemove = elementDrag
+	}
+
+	function elementDrag(e) {
+		e.preventDefault()
+
+		pos1 = pos3 - e.clientX
+		pos2 = pos4 - e.clientY
+		pos3 = e.clientX
+		pos4 = e.clientY
+
+		// set the element's new position
+
+		the_e.style.position = "absolute";
+		the_e.style.top = (the_e.offsetTop - pos2) + "px"
+		the_e.style.left = (the_e.offsetLeft - pos1) + "px"
+	}
+
+	function closeDragElement() {
+		// stop moving when mouse button is released
+		document.onmouseup = null
+		document.onmousemove = null
+	}
+}
+
+// Returns true if we're playing this on a mobile platform e.g. phone
+function is_mobile() {
+	return ("ontouchstart" in window)
+}
+
+function show_card_list(id, params) {
+	show_dialog(id, (body) => {
+		let dl = document.createElement("dl")
+		let append_header = (text) => {
+			let header = document.createElement("dt")
+			header.textContent = text
+			dl.appendChild(header)
+		}
+		let append_card = (c) => {
+			let p = document.createElement("dd")
+			p.className = "cardtip"
+			p.onmouseenter = () => on_focus_card_tip(c)
+			p.onmouseleave = () => on_blur_card_tip()
+			//p.onmousedown = () => _tip_focus_event_mobile(NONE, c, "card event_card c" + c)
+			p.innerHTML = format_card_info(c)
+			dl.appendChild(p)
+		}
+
+		if (id === "event_card_dialog") {
+			append_header(`Japanese Discard Pile (${G.discard[JP].length})`)
+			G.discard[JP].forEach(append_card)
+			append_header(`Allied Powers Discard Pile (${G.discard[AP].length})`)
+			G.discard[AP].forEach(append_card)
+			append_header(`Removed Cards (${G.removed.length})`)
+			G.removed.forEach(append_card)
+			//if (!is_observing()) {
+			//	append_header(`Your Hand (${V.hand[R].length})`)
+			//	V.hand[R].forEach(append_card)
+			//}
+		}
+
+		body.appendChild(dl)
+	})
+}
+
+function is_observing()
+{
+	return (R !== JP) && (R !== AP)
+}
+
+function format_card_info(c) {
+	let text = "C" + c
+	return escape_text(text)
+}
