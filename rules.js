@@ -3315,7 +3315,7 @@ function compute_ground_disengagement() {
                 continue
             }
             var distance = base_distance[0] + get_ground_move_cost(item, nh, j, R)
-            if (is_faction_units(nh, G.offensive.attacker) || set_has(nh, just_enetered)
+            if (is_faction_units(nh, G.offensive.attacker) || set_has(nh, just_enetered) || distance >= 100
                 || item !== location && (distance > move_data.ground_move_distance || distance >= map_get(distance_map, nh, [100])[0])) {
                 continue
             }
@@ -3662,14 +3662,15 @@ function roll_intelligence_dice() {
 
 P.special_reaction = {
     _begin() {
+        G.active = 1 - G.offensive.attacker
         const hq_list = []
         for_each_unit_on_map((u, piece) => {
-            if (piece.faction === R && piece.class === "hq") {
+            if (piece.faction === G.active && piece.class === "hq") {
                 hq_list.push(G.location[u], piece.cr)
             }
         })
         L.possible_hexes = G.offensive.landind_hexes.filter(h => {
-            if (!get_map_data()[h].named || !has_zoi(h, R)) {
+            if (!get_map_data()[h].named || !has_zoi(h, G.active)) {
                 return false
             }
             for (var i = 1; i < hq_list.length; i += 2) {
@@ -3680,6 +3681,8 @@ P.special_reaction = {
             return false
         })
         if (L.possible_hexes.length <= 0) {
+            log("no possible hexes")
+            log(hq_list)
             end()
         }
     },
@@ -3781,6 +3784,7 @@ P.define_intelligence_condition = {
         G.offensive.logistic = cards[G.offensive.offensive_card].ops
     },
     prompt() {
+        button("stop")
         prompt(`${offensive_card_header()} Change intelligence condition.`)
         if (G.offensive.type === EC && cards[G.offensive.offensive_card].intelligence && !L.card && !L.rolled) {
             button("skip")
@@ -3801,6 +3805,9 @@ P.define_intelligence_condition = {
         if (L.rolled || L.card) {
             button("done")
         }
+    },
+    stop() {
+        call("special_reaction")
     },
     done() {
         push_undo()
@@ -3974,7 +3981,7 @@ function fill_hit_able_units(faction) {
             total_lf += loss_factor
         }
         var could_be_damaged = loss_factor <= hit_limit && (distant_hits || !piece.br || G.location[unit] === battle.battle_hex)
-        if (could_be_damaged && (critical || reduced_status === 0 || ground_bomb)) {
+        if (could_be_damaged && (critical || reduced_status === 0)) {
             map_set(result, unit, loss_factor)
         } else if (could_be_damaged) {
             map_set(reduced, unit, loss_factor)
@@ -3986,10 +3993,6 @@ function fill_hit_able_units(faction) {
     }
     if (!result.length && reduced.length) {
         result = reduced
-    } else if (result.length <= 0 && critical && lower_lf_unit[0] >= 0 && !battle.damaged[faction].length) {
-        for (var i = 1; i < lower_lf_unit.length; i++) {
-            map_set(result, lower_lf_unit[i], hit_limit)
-        }
     }
     if (ground_bomb && get_map_data()[battle.battle_hex].city > CITY) {
         var garrisons = []
@@ -4004,7 +4007,15 @@ function fill_hit_able_units(faction) {
     }
     if (ground_bomb && hit_limit >= total_lf) {
         battle.ground_disperced = 1
+    } else if (result.length <= 0 && critical && lower_lf_unit[0] >= 0 && !battle.damaged[faction].length) {
+        for (var i = 1; i < lower_lf_unit.length; i++) {
+            map_set(result, lower_lf_unit[i], hit_limit)
+        }
+        if (faction === G.offensive.attacker) {
+            battle.at_crit_only = 1
+        }
     }
+
     battle.hit_able_units[faction] = result
 }
 
@@ -4035,24 +4046,25 @@ function get_ground_roll_modifiers(faction) {
             result += 2
             log(`+2 ${faction ? "Ap" : "Jp"} naval support`)
         }
-    } else {
+    }
+    if (faction === G.offensive.attacker) {
         var terrain = get_map_data()[battle.battle_hex].terrain
         if (terrain === JUNGLE) {
-            result += 1
-            log(`+1 Jungle`)
+            result -= 1
+            log(`-1 Jungle`)
         } else if (terrain === MIXED) {
-            result += 2
-            log(`+2 Mixed terrain`)
+            result -= 2
+            log(`-2 Mixed terrain`)
         }
         if (terrain === MOUNTAIN) {
-            result += 3
-            log(`+3 Mountains`)
+            result -= 3
+            log(`-3 Mountains`)
         }
-
-        if (battle.amph_ground.filter(u => unit_on_board(u)).length && !set_has(G.offensive.landind_hexes, battle.battle_hex)) {
-            result += 3
-            log(`+3 Amphibious assault`)
-        }
+    }
+    if (faction !== G.offensive.attacker && battle.amph_ground.filter(u => unit_on_board(u)).length && !set_has(G.offensive.landind_hexes, battle.battle_hex)) {
+        result += 3
+        //todo
+        log(`+3 Amphibious assault (do not check that reaction unit present)`)
     }
     if (faction === AP && G.location[ARMOR_BRIGADE] === battle.battle_hex) {
         result += 1
@@ -4098,9 +4110,10 @@ function is_col_tsuji_applied(faction) {
 
 P.execute_attack = function () {
     var faction = L.active
+    var enemy_faction = 1 - faction
     var battle = G.offensive.battle
     var pool = (battle.ground_stage ? battle.ground : battle.air_naval)[faction].filter(u => unit_on_board(u))
-    if (pool.length <= 0) {
+    if (pool.length <= 0 || (battle.ground[enemy_faction].length + battle.air_naval[enemy_faction].length) === 0) {
         // log(`${G.offensive.attacker === faction ? "Attacker" : "Defender"} has no ${battle.ground_stage ? "ground" : "air/naval"} units`)
         end()
         return
@@ -4155,17 +4168,19 @@ P.choose_battle = {
     },
 }
 
-P.assign_hits = {
+P.assign_hits = script(`
+      if (G.offensive.battle.ground_disperced) {
+        call ground_bombardment
+      }
+      if (G.offensive.battle.at_crit_only) {
+        call assign_crit
+      }
+      call apply_hits
+      `)
+
+P.apply_hits = {
     _begin() {
         var battle = G.offensive.battle
-        if (battle.ground_disperced) {
-            G.active = 1 - G.offensive.attacker
-            battle.hit_able_units = [[], []]
-            battle.hits = [0, 0]
-            end()
-            call("ground_dispersed")
-            return;
-        }
         if (battle.hit_able_units[0].length && !battle.hit_able_units[1].length) {
             G.active = 0
         } else if (battle.hit_able_units[1].length && !battle.hit_able_units[0].length) {
@@ -4215,12 +4230,13 @@ P.assign_hits = {
     }
 }
 
-P.ground_dispersed = {
+P.ground_bombardment = {
     _begin() {
+        G.active = (1 - G.offensive.attacker)
+        battle.hit_able_units = [[], []]
         var battle = G.offensive.battle
         L.allowed_units = battle.ground[G.active].filter(u => unit_on_board(u))
         L.garrison_present = L.allowed_units.filter(u => pieces[u].garrison).length
-        battle.ground_disperced = 0
         if (L.allowed_units.length === 1 && set_has(G.reduced, pieces[L.allowed_units[0]])) {
             end()
         }
@@ -4249,6 +4265,30 @@ P.ground_dispersed = {
     }
 }
 
+P.assign_crit = {
+    _begin() {
+        G.active = (1 - G.offensive.attacker)
+        console.log(G.active)
+        console.log(G.offensive.battle.hit_able_units)
+    },
+    prompt() {
+        G.offensive.battle.hit_able_units[1 - G.active].forEach(u => action_unit(u))
+        prompt(`Choose one step applied by critical hit.`)
+        if (!G.offensive.battle.hit_able_units[1 - G.active].length) {
+            button("done")
+        }
+    },
+    unit(unit) {
+        push_undo()
+        damage_unit(unit)
+        G.offensive.battle.hit_able_units[1 - G.active] = []
+    },
+    done() {
+        push_undo()
+        end()
+    }
+}
+
 function apply_loss() {
     var battle = G.offensive.battle
     var d = battle.damaged[0].concat(battle.damaged[1])
@@ -4265,7 +4305,8 @@ function apply_loss() {
 
 P.apply_naval_winner = function () {
     var battle = G.offensive.battle
-    if (battle.air_naval[JP].length === 0 || battle.air_naval[AP].length === 0) {
+    if (battle.air_naval[JP].length === 0 && battle.air_naval[AP].length === 0
+        || battle.air_naval[1 - G.offensive.attacker].length === 0) {
         end()
         return
     }
@@ -4276,11 +4317,42 @@ P.apply_naval_winner = function () {
 
     var air_cover = attacker_units.filter(u => pieces[u].br).length || !defender_units.filter(u => pieces[u].br).length
     var attacker_win = attacker_power > defender_power && air_cover || defender_power === 0
-    log(`${attacker_win ? "Attacker" : "Defender"} win battle (${attacker_power} - ${defender_power}) ${!air_cover ? "no attacker CV or " : ""}`)
+    log(`${attacker_win ? "Attacker" : "Defender"} win battle (${attacker_power} - ${defender_power}) ${!air_cover ? "no attacker CV or air" : ""}`)
     if (!attacker_win) {
         battle.amph_ground.forEach(u => set_delete(battle.ground[G.offensive.attacker], u))
     }
     end()
+}
+
+P.broken_aa = {
+    _begin() {
+        var battle = G.offensive.battle
+        L.allowed_units = battle.amph_ground.filter(u => unit_on_board(u))
+        var attacker_navy = battle.air_naval[G.offensive.attacker].filter(u => pieces[u].class === "naval" && unit_on_board(u)).length
+        var defender_navy = battle.air_naval[1 - G.offensive.attacker].filter(u => pieces[u].class === "naval" && unit_on_board(u)).length
+        if (defender_navy <= 0 || attacker_navy >= 0 || L.allowed_units.length === 0) {
+            end()
+            return
+        }
+        battle.amph_ground.forEach(u => set_delete(battle.ground[G.offensive.attacker], u))
+        log("Amphibious Assault failed due to lack of cover.")
+    },
+    prompt() {
+        L.allowed_units.forEach(u => action_unit(u))
+        prompt(`Amphibious Assault failed. Apply losses.`)
+        if (!L.allowed_units.length) {
+            button("done")
+        }
+    },
+    unit(unit) {
+        push_undo()
+        damage_unit(unit)
+        set_delete(L.allowed_units, unit)
+    },
+    done() {
+        push_undo()
+        end()
+    }
 }
 
 P.apply_ground_winner = function () {
@@ -4646,6 +4718,7 @@ P.battle_sequence = script(`
       call choose_battle
       call prepare_battle
       set G.offensive.battle.ground_stage 0
+      call broken_aa
       if (G.offensive.intelligence === INTERCEPT) {
         log ("Intelligence condition INTERCEPT")
         call execute_attack {active: G.offensive.attacker}
