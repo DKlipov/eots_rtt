@@ -1106,7 +1106,7 @@ P.future_offensive = {
     event(c) {
         push_undo()
         military_card(c)
-        log(`${R} played ${cards[c].name} as event card`)
+        log(`${R} played ${card_get_log_str(c)} as event card`)
         goto("offensive_sequence")
     },
     pass() {
@@ -1240,7 +1240,7 @@ function get_named_intelligence(int) {
 }
 
 function play_event(c) {
-    log(`${cards[c].name} played`)
+    log(`${card_get_log_str(c)} played`)
     var faction = cards[c].faction
     if (G.future_offensive[faction] === c) {
         G.future_offensive[faction] = -1
@@ -1341,7 +1341,7 @@ P.offensive_segment = {
         push_undo()
         activate_card(c)
         G.offensive.type = OC
-        log(`${R} played ${cards[c].name} as operation card`)
+        log(`${R} played ${card_get_log_str(c)} as operation card`)
         goto("offensive_sequence")
     },
     draw() {
@@ -1352,7 +1352,7 @@ P.offensive_segment = {
     },
     event(c) {
         push_undo()
-        log(`${R} played ${cards[c].name} as event card`)
+        log(`${R} played ${card_get_log_str(c)} as event card`)
         if (cards[c].type === MILITARY) {
             military_card(c)
             goto("offensive_sequence")
@@ -1366,7 +1366,7 @@ P.offensive_segment = {
     discard(c) {
         push_undo()
         activate_card(c)
-        log(`${R} discards ${cards[c].name}`)
+        log(`${R} discards ${card_get_log_str(c)}`)
         goto("end_action")
     },
     inter_service() {
@@ -1826,7 +1826,7 @@ P.activate_units = {
 }
 
 function offensive_card_header() {
-    return `${G.offensive.type === EC ? "EC" : "OC"}: ${cards[G.offensive.active_cards[0]].name}.`
+    return `${G.offensive.type === EC ? "EC" : "OC"}: ${card_get_log_str(G.offensive.active_cards[0])}.`
 }
 
 function is_controllable_hex(hex) {
@@ -8193,7 +8193,7 @@ P.arcadia = {
 
 function draw_hist_cards() {
     var hist = [find_card(JP, 3), find_card(JP, 47), find_card(JP, 59)]
-    log(`Japan draws historical hand ${hist.map(c => cards[c].name).join(", ")}`)
+    log(`Japan draws historical hand ${hist.map(c => card_get_log_str(c)).join(", ")}`)
     hist.forEach(c => draw_specific_card(c))
 }
 
@@ -9014,6 +9014,13 @@ function reset_offensive() {
         zoi_intelligence_modifier: false,
         battle: {},
     }
+}
+
+/* log formatting helper functions*/
+// below are all functions for pretty formatting (tooltips, hover to piece on click etc) in the log
+
+function card_get_log_str(c){
+    return `C${cards[c].num}`
 }
 
 /* FRAMEWORK */
