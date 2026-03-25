@@ -179,6 +179,7 @@ const SL_CORPS = find_piece("army_ap_sl")
 const HK_DIVISION = find_piece("army_ap_hk")
 const US_FEAF = find_piece("air_ap_feaf")
 const LRB_19 = find_piece("air_ap_19_lrb")
+const LRB_10 = find_piece("air_ap_10_lrb")
 const AP_AIR_14 = find_piece("air_ap_14")
 const LRB_14 = find_piece("air_ap_14_lrb")
 const AF7 = find_piece("air_ap_7")
@@ -380,6 +381,12 @@ for (var i = 1; i < pieces.length; i++) {
         piece.ebr = piece.br
     }
 
+    if (piece.type === "lrb" && i !== LRB_19 && i !== LRB_10) {
+        var pair = find_piece(piece.id.replace("_lrb", ""))
+        pieces[pair].pair = i
+        piece.pair = pair
+    }
+
     if (i === jp_army("kor")) {
         piece.asp = 4
         piece.aspr = 2
@@ -491,6 +498,7 @@ function get_unit_reinforcement_hexes(u) {
     if (piece.service === "ch") {
         return [KUNMING]
     }
+    var i = hex_to_int(1308)
     for (var i = 0; i < LAST_BOARD_HEX; i++) {
         var map_data = get_map_data()[i]
         if ((piece.class === "air" && map_data.airfield || piece.class !== "air" && map_data.port)
@@ -498,6 +506,7 @@ function get_unit_reinforcement_hexes(u) {
             && check_unit_supply(i, u, piece)
             && !has_non_n_zoi(i, 1 - faction)
             && !is_overstack(i, u)) {
+
             set_add(result, i)
         }
 
@@ -567,7 +576,7 @@ function is_reinforcement_denied(piece) {
 
 function update_reinf_active() {
     if (L.unit_reinforcement.length) {
-        G.active_stack = [L.unit_reinforcement[0]]
+        P.reinforcement_segment.unit(L.unit_reinforcement[0])
     } else {
         G.active_stack = []
     }
@@ -2692,13 +2701,13 @@ function check_burma_road() {
 function is_overstack(hex, unit) {
     var overstack = G.overstack[hex]
     var piece = pieces[unit]
-    var multiplier = G.location[unit] === hex ? 0 : 1
+    var multiplier = (G.location[unit] === hex || G.location[piece.pair] === hex) ? 0 : 1
     if (piece.class === "hq") {
         return overstack & 1
     } else if (piece.class !== "naval") {
-        return ((overstack + 2 * multiplier) % (1 << 7)) > 8
+        return ((overstack + 2 * multiplier) % (1 << 7)) > 7
     } else {
-        return ((overstack + 128 * multiplier) >> 7) > 5
+        return ((overstack + 128 * multiplier) >> 7) > 6
     }
 }
 
@@ -2720,7 +2729,7 @@ P.check_overstacking = {
         var overstack_naval = []
         var overstack_land = []
         for (var i = 0; i < LAST_BOARD_HEX; i++) {
-            if ((G.overstack[i] % (1 << 7)) > 8) {
+            if ((G.overstack[i] % (1 << 7)) > 7) {
                 set_add(overstack_land, i)
             }
             if ((G.overstack[i] >> 7) > 6) {
@@ -2804,11 +2813,12 @@ function set_location(unit, location) {
         log(`${pieces[unit].name} moved to ${int_to_hex(location)}`)
     }
     var prev_location = G.location[unit]
+    var pair_location = G.location[pieces[unit].pair]
     var size = get_overstack_size(unit)
-    if (prev_location <= LAST_BOARD_HEX || prev_location === CHINA_BOX) {
+    if ((prev_location <= LAST_BOARD_HEX || prev_location === CHINA_BOX) && pair_location !== prev_location) {
         G.overstack[prev_location] -= size
     }
-    if (location <= LAST_BOARD_HEX || location === CHINA_BOX) {
+    if ((location <= LAST_BOARD_HEX || location === CHINA_BOX) && pair_location !== location) {
         G.overstack[location] += size
     }
     G.location[unit] = location
@@ -2820,14 +2830,13 @@ function fill_overstack() {
     }
     G.overstack[CHINA_BOX] = 0
     for_each_unit((u, piece, location) => {
+        var pair_location = G.location[pieces[u].pair]
         if (location <= LAST_BOARD_HEX && piece.class === "hq") {
             G.overstack[location] |= 1
-        } else if (location <= LAST_BOARD_HEX && piece.class !== "naval") {
-            G.overstack[location] += (1 << 1)
-        } else if (location <= LAST_BOARD_HEX) {
+        } else if (location <= LAST_BOARD_HEX && piece.class === "naval") {
             G.overstack[location] += (1 << 7)
-        } else if (location === CHINA_BOX) {
-            G.overstack[location] += 2
+        } else if ((location <= LAST_BOARD_HEX && location === CHINA_BOX) && (piece.type !== "lrb" || pair_location !== location)) {
+            G.overstack[location] += (1 << 1)
         }
     })
 }

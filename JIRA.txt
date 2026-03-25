@@ -16,8 +16,8 @@ Todo list:
 * China air box
 * Amph assault battle roll modifier (if only air was present it should apply)
 * One step ground units at ground battle FULL streight
-* Check overstacking same number AF
 * JP CV ressign hits step
+* Distant hits by units, no steps
 * Split removed cards
 * Add partially impassable hexsides to data.js
 * Kunming supply
