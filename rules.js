@@ -478,9 +478,9 @@ function sent_to_europe(u) {
         var roll = random(10)
         clear_undo()
         result = roll <= modifier
-        log(`${piece.name} sent to Europe roll ${roll} ${result ? "<=" : ">"} ${modifier} ${G.inter_service[AP] ? "(ISR active)" : ""}`)
+        log(`${piece_get_log_str(u)} sent to Europe roll ${roll} ${result ? "<=" : ">"} ${modifier} ${G.inter_service[AP] ? "(ISR active)" : ""}`)
         if (result) {
-            log(`${piece.name} sent to Europe`)
+            log(`${piece_get_log_str(u)} sent to Europe`)
             displace_to_turn(u, 3)
         }
     }
@@ -635,10 +635,10 @@ P.reinforcement_segment = {
         if (G.active_stack.length) {
             L.allowed_hexes.forEach(hex => action_hex(hex))
             if (L.allowed_hexes.length === 0) {
-                prompt(`Choose hex to place ${pieces[G.active_stack[0]].name} as reinforcement. (Not possible hexes).`)
+                prompt(`Choose hex to place ${piece_get_log_str(G.active_stack[0])} as reinforcement. (Not possible hexes).`)
                 button("delay")
             } else {
-                prompt(`Choose hex to place ${pieces[G.active_stack[0]].name} as reinforcement.`)
+                prompt(`Choose hex to place ${piece_get_log_str(G.active_stack[0])} as reinforcement.`)
                 button("delay")
             }
             //debug
@@ -685,7 +685,7 @@ P.reinforcement_segment = {
     action_hex(hex) {
         push_undo()
         set_delete(L.unit_reinforcement, G.active_stack[0])
-        log(`${pieces[G.active_stack[0]].name} placed to ${int_to_hex(hex)}`)
+        log(`${piece_get_log_str(G.active_stack[0])} placed to ${int_to_hex(hex)}`)
         set_location(G.active_stack[0], hex)
         if (pieces[G.active_stack[0]].class === "hq") {
             set_delete(L.allowed_hexes, hex)
@@ -697,7 +697,7 @@ P.reinforcement_segment = {
         push_undo()
         set_location(G.active_stack[0], DELAYED_BOX)
         if (!sent_to_europe(G.active_stack[0])) {
-            log(`${pieces[G.active_stack[0]].name} delayed to next turn`)
+            log(`${piece_get_log_str(G.active_stack[0])} delayed to next turn`)
         }
         update_reinf_active()
     },
@@ -788,7 +788,7 @@ P.replacement_segment = {
     },
     prompt() {
         if (G.active_stack.length > 0) {
-            prompt(`Choose hex to place ${pieces[G.active_stack[0]].name}.`)
+            prompt(`Choose hex to place ${piece_get_log_str(G.active_stack[0])}.`)
             L.allowed_hexes.forEach(h => action_hex(h))
             return
         }
@@ -817,7 +817,7 @@ P.replacement_segment = {
     },
     action_hex(hex) {
         push_undo()
-        log(`${pieces[G.active_stack[0]].name} placed to ${int_to_hex(hex)}`)
+        log(`${piece_get_log_str(G.active_stack[0])} placed to ${int_to_hex(hex)}`)
         set_location(G.active_stack[0], hex)
         G.active_stack = []
     },
@@ -955,7 +955,7 @@ function bombing(u, close_air_base) {
     var success = result < success_rate
     var damaged = result >= 9 && !close_air_base
     var modifier = 0
-    log(`${result} for ${pieces[u].name}`)
+    log(`${result} for ${piece_get_log_str(u)}`)
     if (is_event_active(events.INTERCEPTORS) && !close_air_base) {
         log(`+1 High altitude interceptors`)
         modifier++
@@ -2781,7 +2781,7 @@ P.check_overstacking = {
     unit(u) {
         push_undo()
         var location = G.location[u]
-        log(`${pieces[u].name} removed due to overstacking.`)
+        log(`${piece_get_log_str(u)} removed due to overstacking.`)
         if (set_has(G.oos, u)) {
             eliminate(u)
         } else {
@@ -2810,7 +2810,7 @@ P.check_overstacking = {
 
 function set_location(unit, location) {
     if (location <= LAST_BOARD_HEX) {
-        log(`${pieces[unit].name} moved to ${int_to_hex(location)}`)
+        log(`${piece_get_log_str(unit)} moved to ${int_to_hex(location)}`)
     }
     var prev_location = G.location[unit]
     var pair_location = G.location[pieces[unit].pair]
@@ -3762,8 +3762,8 @@ P.cancel_offensive = {
         discard_card(offensive_card)
         remove_card(L.reactions_card)
         clear_undo()
-        log(`Japan played ${cards[reaction_card].name}`)
-        log(`Offensive resets, ${cards[offensive_card].name} discard`)
+        log(`Japan played ${card_get_log_str(reaction_card)}`)
+        log(`Offensive resets, ${card_get_log_str(offensive_card)} discard`)
         play_event(reaction_card)
         G.offensive.offensive_card = reaction_card
         G.offensive.active_cards = [reaction_card]
@@ -4636,7 +4636,7 @@ P.emergency_move = {
     },
     action_hex(hex) {
         push_undo()
-        log(`${pieces[G.active_stack[0]].name} emergency moved to ${int_to_hex(hex)}`)
+        log(`${piece_get_log_str(G.active_stack[0])} emergency moved to ${int_to_hex(hex)}`)
         set_location(G.active_stack[0], hex)
         G.active_stack = []
         check_supply()
@@ -4916,11 +4916,11 @@ function degrade_india(could_revolt = false) {
 
 function displace_to_turn(unit, turns, not_delayed) {
     if (pieces[unit].notreplaceable && unit_on_board(unit)) {
-        log(`${pieces[unit].name} not replaceable, could not be displaced to turn box`)
+        log(`${piece_get_log_str(unit)} not replaceable, could not be displaced to turn box`)
         eliminate(unit)
         return
     }
-    log(`${pieces[unit].name} displaced to turn box ${G.turn + turns}`)
+    log(`${piece_get_log_str(unit)} displaced to turn box ${G.turn + turns}`)
     set_location(unit, TURN_BOX + G.turn + turns)
     if (not_delayed) {
         set_add(G.not_delayed, unit)
@@ -4942,6 +4942,9 @@ function china_surrender() {
 }
 
 function change_political_will(diff, cause) {
+    // TODO unify cause formatting
+    // right now cards name might be passed as raw str
+    // which means now formatting in log and no tooltip
     G.political_will = Math.max(G.political_will + diff, 0)
     G.political_will = Math.min(G.political_will, 10)
     log(`Political will changed to ${G.political_will} (${diff}) ${cause}`)
@@ -5037,7 +5040,7 @@ P.india_surrender = {
     },
     action_hex(hex) {
         push_undo()
-        log(`${pieces[G.active_stack[0]].name} emergency moved to ${int_to_hex(hex)}`)
+        log(`${piece_get_log_str(G.active_stack[0])} emergency moved to ${int_to_hex(hex)}`)
         set_location(G.active_stack[0], hex)
         G.active_stack = []
         check_supply()
@@ -5800,7 +5803,7 @@ P.coastal_artillery = {
     },
     unit(u) {
         push_undo()
-        log(`${pieces[u].name} hit by coastal defence`)
+        log(`${piece_get_log_str(u)} hit by coastal defence`)
         damage_unit(u)
         set_delete(L.allowed_units, u)
     }
@@ -6071,7 +6074,7 @@ P.worker_strikes_unit = {
     },
     unit(u) {
         push_undo()
-        log(`Worker strikes: ${pieces[u].name}`)
+        log(`Worker strikes: ${piece_get_log_str(u)}`)
         damage_unit(u)
         end()
     }
@@ -6252,14 +6255,14 @@ P.draw_from_discard = {
                     G.offensive.active_cards.push(c)
                 }
             })
-            log(`${R === AP ? "Ap" : "Jp"} discard ${cards[c].name}`)
+            log(`${R === AP ? "Ap" : "Jp"} discard ${card_get_log_str(c)}`)
             discard_card(c)
             return
         }
         set_delete(G.discard[R], c)
         G.hand[R].push(c)
         G.offensive.active_cards = []
-        log(`${R === AP ? "Ap" : "Jp"} draw ${cards[c].name} from discard pile`)
+        log(`${R === AP ? "Ap" : "Jp"} draw ${card_get_log_str(c)} from discard pile`)
         end()
     }
 }
@@ -6504,7 +6507,7 @@ P.kamikaze_attack = {
         push_undo()
         if (L.stage === 1) {
             var location = G.location[u]
-            log(`${pieces[u].name} launch kamikaze attack.`)
+            log(`${piece_get_log_str(u)} launch kamikaze attack.`)
             damage_unit(u)
             L.allowed_units = []
             map_for_each(G.offensive.paths, (ap, path) => {
@@ -6647,7 +6650,7 @@ P.halsey_typhoon = {
     },
     unit(u) {
         push_undo()
-        log(`Halsey\`s typhoon: ${pieces[u].name}`)
+        log(`Halsey\`s typhoon: ${piece_get_log_str(u)}`)
         damage_unit(u)
         end()
     }
@@ -6745,7 +6748,7 @@ P.attack_b29_base = {
     },
     unit(u) {
         push_undo()
-        log(`Japan attacks B29 base: ${pieces[u].name}`)
+        log(`Japan attacks B29 base: ${piece_get_log_str(u)}`)
         damage_unit(u)
         end()
     }
@@ -6786,7 +6789,7 @@ P.fuel_shortage = {
     },
     unit(u) {
         push_undo()
-        log(`Japan attacks B29 base: ${pieces[u].name}`)
+        log(`Japan attacks B29 base: ${piece_get_log_str(u)}`)
         damage_unit(u)
         end()
     }
@@ -6801,7 +6804,7 @@ P.event_unit = {
 
     },
     prompt() {
-        prompt(`${offensive_card_header()} Choose hex to place ${pieces[L.unit].name}.`)
+        prompt(`${offensive_card_header()} Choose hex to place ${piece_get_log_str(L.unit)}.`)
         get_unit_reinforcement_hexes(L.unit).forEach(h => action_hex(h))
     },
     action_hex(h) {
@@ -6855,7 +6858,7 @@ P.submarine_attack = {
         if (L.card === DARTER_DACE) {
             G.active = JP
         }
-        log(`${cards[L.card].name} played`)
+        log(`${card_get_log_str(L.card)} played`)
         var roll = random(10)
         L.hits = 0
         if (roll <= L.success) {
@@ -6888,7 +6891,7 @@ P.submarine_attack = {
     },
     unit(u) {
         push_undo()
-        log(`Submarine attack: ${pieces[u].name}`)
+        log(`Submarine attack: ${piece_get_log_str(u)}`)
         damage_unit(u)
         if (!unit_on_board(u)) {
             set_delete(L.allowed_units, u)
@@ -6933,7 +6936,7 @@ P.place_abda = {
         }
     },
     prompt() {
-        prompt(`${offensive_card_header()} Choose hex to place ${pieces[HQ_ABDA].name}.`)
+        prompt(`${offensive_card_header()} Choose hex to place ${piece_get_log_str(HQ_ABDA)}.`)
         L.allowed_hexes.forEach(h => action_hex(h))
     },
     action_hex(h) {
@@ -7048,7 +7051,7 @@ P.us_raiders = {
     },
     unit(u) {
         push_undo()
-        log(`Us raiders: ${pieces[u].name}`)
+        log(`Us raiders: ${piece_get_log_str(u)}`)
         damage_unit(u)
         if (!unit_on_board(u)) {
             check_supply()
@@ -7094,7 +7097,7 @@ P.repair_avg = {
         push_undo()
         if (set_has(G.reduced, u)) {
             set_delete(G.reduced, u)
-            log(`${pieces[u].name} repaired.`)
+            log(`${piece_get_log_str(u)} repaired.`)
             end()
         } else {
             G.active_stack = [u]
@@ -7163,7 +7166,7 @@ P.wingate = {
         set_location(u, map_get(L.allowed_units, u))
         set_delete(G.offensive.active_units[JP], u)
         map_delete(G.offensive.paths, u)
-        log(`${pieces[u].name} deactivated`)
+        log(`${piece_get_log_str(u)} deactivated`)
         end()
     },
 }
@@ -7201,7 +7204,7 @@ P.skip_bombing = {
         set_location(u, map_get(L.allowed_units, u))
         set_delete(G.offensive.active_units[JP], u)
         map_delete(G.offensive.paths, u)
-        log(`${pieces[u].name} deactivated`)
+        log(`${piece_get_log_str(u)} deactivated`)
         end()
     },
 }
@@ -7523,7 +7526,7 @@ P.place_14_air = {
         set_delete(G.reduced, AP_AIR_14)
     },
     prompt() {
-        prompt(`${offensive_card_header()} Choose hex to place ${pieces[AP_AIR_14].name}.`)
+        prompt(`${offensive_card_header()} Choose hex to place ${piece_get_log_str(AP_AIR_14)}.`)
         L.allowed_hexes.forEach(h => action_hex(h))
     },
     action_hex(h) {
@@ -7593,7 +7596,7 @@ cards[find_card(AP, 60)].can_play = function () {
 function discard_random_card(faction) {
     var i = G.hand[faction][random(G.hand[faction].length)]
     discard_card(i)
-    log(`${cards[i].name} discarded`)
+    log(`${card_get_log_str(i)} discarded`)
     clear_undo()
 }
 
@@ -7668,12 +7671,12 @@ P.airborne_landing = {
         }
     },
     prompt() {
-        prompt(`${offensive_card_header()} Choose hex to place ${pieces[ap_army("11_d")].name}.`)
+        prompt(`${offensive_card_header()} Choose hex to place ${piece_get_log_str(ap_army("11_d"))}.`)
         L.allowed_hexes.forEach(h => action_hex(h))
     },
     action_hex(h) {
         push_undo()
-        log(`${pieces[ap_army("11_d")].name} landed at ${int_to_hex(h)}`)
+        log(`${piece_get_log_str(ap_army("11_d"))} landed at ${int_to_hex(h)}`)
         set_location(ap_army("11_d"), h)
         capture_hex(h, AP)
         check_supply()
@@ -7691,13 +7694,13 @@ P.place_armor = {
         L.allowed_hexes = get_unit_reinforcement_hexes(ARMOR_BRIGADE).filter(h => regions.includes(get_map_data()[h].region))
         set_delete(G.reduced, ARMOR_BRIGADE)
         if (L.allowed_hexes.length <= 0) {
-            log(`Could not place ${pieces[ARMOR_BRIGADE].name}`)
+            log(`Could not place ${piece_get_log_str(ARMOR_BRIGADE)}`)
             eliminate_permanently(ARMOR_BRIGADE)
             end()
         }
     },
     prompt() {
-        prompt(`${offensive_card_header()} Choose hex to place ${pieces[ARMOR_BRIGADE].name}.`)
+        prompt(`${offensive_card_header()} Choose hex to place ${piece_get_log_str(ARMOR_BRIGADE)}.`)
         L.allowed_hexes.forEach(h => action_hex(h))
     },
     action_hex(h) {
@@ -7852,7 +7855,7 @@ function draw_specific_card(card) {
 
 function eliminate_permanently(unit) {
     if (G.location[unit] !== NON_PLACED_BOX) {
-        log(`${pieces[unit].name} removed from game`)
+        log(`${piece_get_log_str(unit)} removed from game`)
     }
     set_location(unit, PERM_ELIMINATED)
     set_delete(G.reduced, unit)
@@ -7869,7 +7872,7 @@ function eliminate(unit) {
         displace_to_turn(unit, 1)
         return
     }
-    log(`${pieces[unit].name} eliminated`)
+    log(`${piece_get_log_str(unit)} eliminated`)
     G.location[unit] = ELIMINATED_BOX
     set_delete(G.reduced, unit)
 }
@@ -7883,7 +7886,7 @@ function damage_unit(unit) {
 }
 
 function reduce_unit(unit) {
-    log(`${pieces[unit].name} reduced`)
+    log(`${piece(unit)} reduced`)
     set_add(G.reduced, unit)
 }
 
@@ -7966,7 +7969,7 @@ P.operation_z = {
         set_add(G.offensive.active_units[JP], find_piece("soryu"))
         set_add(G.offensive.active_units[JP], find_piece("shokaku"))
         set_add(G.offensive.active_units[JP], find_piece("kongo"))
-        G.offensive.active_units[JP].forEach(u => log(`${pieces[u].name} activated`))
+        G.offensive.active_units[JP].forEach(u => log(`${piece_get_log_str(u)} activated`))
     },
     action_hex(h) {
         push_undo()
@@ -7974,7 +7977,7 @@ P.operation_z = {
             set_location(u, h)
             map_set(G.offensive.paths, u, [ATTACK_MOVE, 0, hex_to_int(3705), h, OAHU])
         })
-        G.offensive.active_units[JP].forEach(u => log(`${pieces[u].name} moved to ${int_to_hex(h)}`))
+        G.offensive.active_units[JP].forEach(u => log(`${piece_get_log_str(u)} moved to ${int_to_hex(h)}`))
         G.offensive.battle_hexes = [OAHU]
         check_supply()
         goto("operation_z_battle")
