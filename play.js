@@ -732,6 +732,7 @@ function escape_text(text) {
     text = text.replace(/([ +-]1) hits/g, "$1 hit")
     text = text.replace(/[BRW]\d/g, (m) => ICONS[m] ?? m)
     text = text.replace(/C(\d+)/g, sub_card)
+    text = text.replace(/P(\d+)/g, sub_piece)
     return text
 }
 
@@ -922,12 +923,35 @@ function sub_card(match, p1) {
 }
 
 function on_focus_card_tip(c) {
-	let elem = document.getElementById("tooltip")
+    let elem = document.getElementById("tooltip")
     const card = data.cards[c]
 	elem.classList = `card card_${card.faction ? "ap" : "jp"}_${card.num}`
 }
 
 function on_blur_card_tip(c) {
-	document.getElementById("tooltip").classList = "hide"
+    document.getElementById("tooltip").classList = "hide"
+}
+
+function get_piece_elem(p){
+    return data.pieces[p].element
+}
+
+
+function sub_piece(match, p1) {
+    const piece_id = p1 | 0
+    const name = data.pieces[piece_id].name
+    return `<span class="piece-tip" onclick="on_click_piece_tip(${piece_id})" onmouseenter="on_focus_piece_tip(${piece_id})" onmouseleave="on_blur_piece_tip(${piece_id})">${name}</span>`
+}
+
+function on_click_piece_tip(z) {
+	scroll_into_view(get_piece_elem(z))
+}
+
+function on_focus_piece_tip(z) {
+	get_piece_elem(z).classList.toggle("tip", true)
+}
+
+function on_blur_piece_tip(z) {
+	get_piece_elem(z).classList.toggle("tip", false)
 }
 

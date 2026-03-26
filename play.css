@@ -312,3 +312,10 @@ body.Allies #jp_hand { grid-row: 4; }
 .dialog_body dl { margin: 0; }
 .dialog_body dd { margin-left: 20px; }
 
+.piece-tip {  /* for text in log and dialogs */
+	cursor: pointer; font-style: italic
+}
+
+.piece.tip { /* highlight the piece itself */
+	border: 4px dashed lime;
+}
