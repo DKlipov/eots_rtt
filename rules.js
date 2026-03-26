@@ -1508,7 +1508,7 @@ P.choose_hq = {
         if (G.offensive.type === EC && L.card > 0 && cards[L.card].logistic_alt && cards[L.card].logistic_alt[0].includes(u)) {
             G.offensive.logistic = cards[L.card].logistic_alt[1]
         }
-        log(`${pieces[u].name} activated for ${R === G.offensive.attacker ? "offensive" : "reaction"}`)
+        log(`${piece_get_log_str(u)} activated for ${R === G.offensive.attacker ? "offensive" : "reaction"}`)
         end()
     },
 }
@@ -9021,6 +9021,10 @@ function reset_offensive() {
 
 function card_get_log_str(c){
     return `C${cards[c].num}`
+}
+
+function piece_get_log_str(p){
+    return `P${p}`
 }
 
 /* FRAMEWORK */
