@@ -1876,9 +1876,12 @@ function capture_hex(hex, side = G.active) {
     }
 }
 
-function is_valid_cv_stop() {
-    if (!L.move_data.is_naval_present || !L.move_data.is_naval_present || G.active_stack.length <= 0) {
+function could_stop_here() {
+    if (L.move_data.is_air_present || G.active_stack.length <= 0) {
         return true
+    }
+    if (L.move_data.is_ground_present && G.offensive.stage === POST_BATTLE_STAGE) {
+        return false
     }
     var location = G.location[G.active_stack[0]]
     return set_has(G.offensive.battle_hexes, location) || set_has(G.offensive.landind_hexes, location) || is_space_controlled(location, R) && get_map_data()[location].port
@@ -1888,8 +1891,12 @@ function update_move_hex() {
     if (G.active_stack.length === 0) {
         return
     }
+
     L.move_data = get_move_data()
-    if (!set_has(G.offensive.active_units[G.active], G.active_stack[0])) {
+
+    if (G.offensive.stage === POST_BATTLE_MOVE && L.move_type === BARGES_MOVE) {
+        return compute_barges_pbm()
+    } else if (!set_has(G.offensive.active_units[G.active], G.active_stack[0])) {
         compute_ground_disengagement()
     } else if (L.move_data.is_air_present && (L.move_type === STRAT_MOVE || L.move_type === AVOID_ZOI)) {
         compute_air_move_hexes()
@@ -1899,6 +1906,23 @@ function update_move_hex() {
         compute_ground_naval_strat_move()
     } else {
         compute_ground_naval_move_hexes()
+    }
+}
+
+function compute_barges_pbm() {
+    var path = []
+    var retreat_target = 0
+    map_for_each(G.offensive.paths, (u, p) => {
+        if (p[0] & BARGES_MOVE) {
+            path = p
+            retreat_target = path[path.length - 2]
+        }
+    })
+    path.push(retreat_target)
+    if (L.move_data.is_naval_present && get_map_data()[retreat_target].port || !L.move_data.is_naval_present) {
+        L.allowed_hexes = [retreat_target, path]
+    } else {
+        L.allowed_hexes = []
     }
 }
 
@@ -1998,7 +2022,9 @@ P.move_offensive_units = {
             if (G.offensive.stage === ATTACK_STAGE && pieces[G.active_stack[0]].class === "air") {
                 action_box(TURN_BOX + G.turn + 1)
             }
-            button("regular_movement", L.move_type !== ANY_MOVE)
+            if(G.offensive.stage === ATTACK_STAGE){
+                button("regular_movement", L.move_type !== ANY_MOVE)
+            }
             let loc = G.location[G.active_stack[0]]
             L.movable_units.filter(u => loc === G.location[u]
                 && !L.move_data.is_air_present
@@ -2006,13 +2032,20 @@ P.move_offensive_units = {
                 && L.move_type !== BARGES_MOVE
                 && !set_has(G.active_stack, u))
                 .forEach(u => action_unit(u))
-            if (G.offensive.stage === ATTACK_MOVE || is_valid_cv_stop()) {
+            if (G.offensive.stage === ATTACK_STAGE || could_stop_here()) {
                 button("no_move")
+            } else if (G.offensive.stage === POST_BATTLE_STAGE && L.allowed_hexes.length === 0 && G.active_stack.length === 1) {
+                button("eliminate")
             }
         }
         for (let i = 0; i < L.allowed_hexes.length; i += 2) {
             action_hex(L.allowed_hexes[i])
         }
+    },
+    eliminate() {
+        push_undo()
+        G.active_stack.forEach(u => eliminate(u))
+        G.active_stack = []
     },
     action_box(h) {
         push_undo()
@@ -2052,6 +2085,10 @@ P.move_offensive_units = {
         var path = map_get(G.offensive.paths, u, [ANY_MOVE, 0, G.location[u]])
         if (path[0] & ATTACK_MOVE) {
             path[path.length - 1] = path[path.length - 2]
+        }
+        if (path[0] & BARGES_MOVE) {
+            console.log("barges")
+            L.move_type = BARGES_MOVE
         }
         map_set(G.offensive.paths, u, path)
         update_move_hex()
@@ -2098,6 +2135,9 @@ P.move_offensive_units = {
             map_set(G.offensive.paths, u, curr_path.slice())
         })
         move_units(G.active_stack, curr_path)
+        if (curr_path[0] & BARGES_MOVE) {
+            console.log("barges2")
+        }
         reset_move_type()
         check_supply()
         apply_ground_disengadgement()
@@ -2173,7 +2213,7 @@ P.choose_attack_hex = {
     },
     prompt() {
         prompt(`${offensive_card_header()} Commit units to battle.`)
-        if (is_valid_cv_stop() && G.offensive.stage === ATTACK_STAGE) {
+        if (could_stop_here() && G.offensive.stage === ATTACK_STAGE) {
             button("pass")
         }
         for (let i = 0; i < L.allowed_hexes.length; i += 2) {
@@ -2980,7 +3020,11 @@ function get_move_data() {
     if (L.move_type & BARGES_MOVE) {
         result.naval_move_distance = 1
         result.move_type |= AMPH_MOVE
+        result.move_type |= BARGES_MOVE
         result.asp_points = 0
+    }
+    if (result.is_ground_present && !result.is_naval_present && !(L.move_type & BARGES_MOVE) && G.offensive.stage !== POST_BATTLE_STAGE) {
+        result.move_type |= GROUND_MOVE
     }
     return result
 }
@@ -3094,6 +3138,7 @@ function compute_air_commit_hexes() {
 
 function fast_compute_air_move_hexes() {
     var move_data = L.move_data
+    var location = move_data.location
     let leg_distance = 1
     let distance_incr_i = 0
     var move_type = ANY_MOVE
@@ -3102,6 +3147,10 @@ function fast_compute_air_move_hexes() {
     }
     const selected = [move_data.location, [move_type, leg_distance, move_data.location]]
     let queue = [move_data.location]
+    var bh = G.offensive.battle_hexes
+    if (set_has(G.offensive.battle_hexes, location) && G.offensive.stage === REACTION_STAGE) {
+        bh = [location]
+    }
     for (var i = 0; i < queue.length; i++) {
         let item = queue[i]
         let nh_list = map_get(AIRFIELD_LINKS, item)
@@ -3127,8 +3176,8 @@ function fast_compute_air_move_hexes() {
     }
     L.allowed_hexes = []
     map_for_each(selected, (nh, v) => {
-        if (nh !== AIR_FERRY && !is_faction_ground_units(nh, 1 - R) && !set_has(G.offensive.battle_hexes, nh)
-            && (target_in_battle_range(move_data.extended_battle_range, nh, G.offensive.battle_hexes) || G.offensive.stage !== REACTION_STAGE)) {
+        if (nh !== AIR_FERRY && (!is_faction_ground_units(nh, 1 - R) && !set_has(G.offensive.battle_hexes, nh) || G.offensive.stage === POST_BATTLE_STAGE)
+            && (target_in_battle_range(move_data.extended_battle_range, nh, bh) || G.offensive.stage !== REACTION_STAGE)) {
             map_set(L.allowed_hexes, nh, v)
         }
     })
@@ -3150,6 +3199,10 @@ function compute_air_move_hexes() {
     let queue = [move_data.location]
     let fields_queue = []
     var i = 0
+    var bh = G.offensive.battle_hexes
+    if (set_has(G.offensive.battle_hexes, location) && G.offensive.stage === REACTION_STAGE) {
+        bh = [location]
+    }
     while (true) {
         if (i >= queue.length) {
             break
@@ -3178,8 +3231,8 @@ function compute_air_move_hexes() {
             map_set(distance_map, nh, path_array)
             if (get_map_data()[nh].airfield && is_space_controlled(nh, G.active) && (nh !== AIR_FERRY || !is_faction_units(AIR_FERRY, JP))) {
                 fields_queue.push(nh)
-                if (nh !== AIR_FERRY && !is_faction_ground_units(nh, 1 - R) && !set_has(G.offensive.battle_hexes, nh)
-                    && (target_in_battle_range(move_data.extended_battle_range, nh, G.offensive.battle_hexes) || G.offensive.stage !== REACTION_STAGE)) {
+                if (nh !== AIR_FERRY && (!is_faction_ground_units(nh, 1 - R) && !set_has(G.offensive.battle_hexes, nh) || G.offensive.stage === POST_BATTLE_STAGE)
+                    && (target_in_battle_range(move_data.extended_battle_range, nh, bh) || G.offensive.stage !== REACTION_STAGE)) {
                     path_array = path_array.slice()
                     path_array[0] = move_type
                     map_set(L.allowed_hexes, nh, path_array)
@@ -3214,9 +3267,15 @@ function compute_ground_naval_move_hexes() {
             zoi_mask = zoi_mask | JP_NAVAL_UNITS << (1 - R)
         }
         mt = NAVAL_MOVE
+        if (move_data.move_type & BARGES_MOVE) {
+            mt |= BARGES_MOVE
+        }
         if (move_data.move_type & AVOID_ZOI) {
             zoi_mask = zoi_mask | JP_ZOI << (1 - R)
             mt |= AVOID_ZOI
+        }
+        if (G.offensive.stage === POST_BATTLE_STAGE && move_data.is_ground_present) {
+            zoi_mask = 0
         }
         clear_supply_cache(CLEAN_ATTACK_ZONE_MASK)
         if (G.offensive.stage !== POST_BATTLE_STAGE) {
@@ -3228,10 +3287,14 @@ function compute_ground_naval_move_hexes() {
             } else {
                 v.unshift(mt)
             }
+            if (v[0] & BARGES_MOVE) {
+                console.log("barges1")
+            }
+
             map_set(L.allowed_hexes, k, v)
         })
     }
-    if (move_data.is_ground_present && !move_data.is_naval_present && !(move_data.move_type & BARGES_MOVE)) {
+    if (L.move_data.move_type & GROUND_MOVE) {
         mt = GROUND_MOVE
         if (move_data.move_type & AVOID_ZOI) {
             mt |= AVOID_ZOI
@@ -3453,8 +3516,9 @@ function get_naval_move(zoi_mask) {
     const location = L.move_data.location
     const move_data = L.move_data
     const non_cv_ground_unit = move_data.is_ground_present && !move_data.battle_range
+    var pbm = G.offensive.stage === POST_BATTLE_STAGE
 
-    if (G.supply_cache[location] & zoi_mask || non_cv_ground_unit && has_non_n_zoi(location, 1 - R)) {
+    if (G.supply_cache[location] & zoi_mask || non_cv_ground_unit && has_non_n_zoi(location, 1 - R) && !pbm) {
         return []
     }
     const marine_landed_islands = []
@@ -3478,13 +3542,15 @@ function get_naval_move(zoi_mask) {
         let base_path = map_get(distance_map, item)
         const distance = base_path[0] + 1
         let nh_list = get_near_hexes(item)
+        var item_non_n_zoi = !non_cv_ground_unit || has_non_n_zoi(item, 1 - R)
         for (let j = 0; j < 6; j++) {
             let nh = nh_list[j]
             if (nh <= 0) {
                 continue
             }
             if (G.supply_cache[nh] & zoi_mask
-                || non_cv_ground_unit && has_non_n_zoi(nh, 1 - R)
+                || (non_cv_ground_unit && has_non_n_zoi(nh, 1 - R) && !(pbm && item_non_n_zoi))
+                || pbm && is_faction_units(nh, 1 - R) && move_data.is_ground_present
                 || distance > move_data.naval_move_distance
                 || !(get_map_data()[item].edges_int & WATER << 5 * j)
                 || distance >= map_get(distance_map, nh, [100])[0]) {
@@ -3503,8 +3569,10 @@ function get_naval_move(zoi_mask) {
     map_for_each(distance_map, (nh, v) => {
         var naval_attack = is_amph_attack_possible(nh) && (!us_army_unit_active || set_has(marine_landed_islands, nh) || !get_map_data()[nh].island || G.offensive.stage === REACTION_STAGE)
         var port_transport = (get_map_data()[nh].port && is_space_controlled(nh, R))
-        var aa_landing = (move_data.move_type & AMPH_MOVE && is_hex_asp_capable(nh)
-            && (!move_data.is_naval_present || move_data.move_type & ORGANIC_ONLY))
+        var aa_landing = move_data.move_type & AMPH_MOVE
+            && is_hex_asp_capable(nh)
+            && (!move_data.is_naval_present || move_data.move_type & ORGANIC_ONLY)
+            && !pbm
         var landing = !is_faction_units(nh, 1 - R) &&
             (port_transport || aa_landing) && (G.offensive.stage !== REACTION_STAGE)
         if ((naval_attack || landing) && (!L.move_data.is_ground_present || !ground_move_denied(nh))) {
@@ -3681,8 +3749,6 @@ P.special_reaction = {
             return false
         })
         if (L.possible_hexes.length <= 0) {
-            log("no possible hexes")
-            log(hq_list)
             end()
         }
     },
@@ -4305,8 +4371,9 @@ function apply_loss() {
 
 P.apply_naval_winner = function () {
     var battle = G.offensive.battle
-    if (battle.air_naval[JP].length === 0 && battle.air_naval[AP].length === 0
-        || battle.air_naval[1 - G.offensive.attacker].length === 0) {
+    var battle_takes_place = battle.air_naval[JP].length && (battle.air_naval[AP].length || battle.ground[AP].length)
+        || battle.air_naval[AP].length && (battle.air_naval[JP].length || battle.ground[JP].length)
+    if (!battle_takes_place) {
         end()
         return
     }
@@ -4328,9 +4395,19 @@ P.broken_aa = {
     _begin() {
         var battle = G.offensive.battle
         L.allowed_units = battle.amph_ground.filter(u => unit_on_board(u))
-        var attacker_navy = battle.air_naval[G.offensive.attacker].filter(u => pieces[u].class === "naval" && unit_on_board(u)).length
-        var defender_navy = battle.air_naval[1 - G.offensive.attacker].filter(u => pieces[u].class === "naval" && unit_on_board(u)).length
-        if (defender_navy <= 0 || attacker_navy >= 0 || L.allowed_units.length === 0) {
+        var attacker_navy = []
+        var defender_navy = []
+        for_each_unit_on_map((u, piece, location) => {
+            if (location !== battle.battle_hex || piece.class !== "naval") {
+                return
+            }
+            if (piece.faction === G.offensive.attacker) {
+                set_add(attacker_navy, u)
+            } else {
+                set_add(defender_navy, u)
+            }
+        })
+        if (defender_navy.length <= 0 || attacker_navy.length > 0 || L.allowed_units.length === 0) {
             end()
             return
         }
@@ -4436,7 +4513,8 @@ P.prepare_battle = function () {
         }
     }
     G.committed.forEach(u => set_delete(battle.air_naval[AP], u))
-    if (battle.air_naval[JP].length || battle.air_naval[AP].length) {
+    if (battle.air_naval[JP].length && (battle.air_naval[AP].length || battle.ground[AP].length)
+        || battle.air_naval[AP].length && (battle.air_naval[JP].length || battle.ground[JP].length)) {
         log(`Air/naval combat:`)
     }
     end()

@@ -1,8 +1,6 @@
 Todo list:
 * [WIP]Ground post battle movement
-* Reaction player choose (critical hit and last ground unit step)
 * Ground loss for JP organic transpot destroyed (attacker only!)
-* Skipped amph battle if attacker has no navy
 * skip bombing
 * fuel shortage
 * AP55
@@ -21,5 +19,6 @@ Todo list:
 * Change ground displace
 * Add partially impassable hexsides to data.js
 * surrender once per game
+* commit escort to battle (if could choose)
 * Kunming supply
 * Check supply durning movement
