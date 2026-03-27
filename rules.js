@@ -1275,7 +1275,9 @@ function activate_card(c) {
     }
     G.offensive.naval_move_distance = (cards[c].ops * 5)
     //todo debug
-    // G.offensive.naval_move_distance = 30
+    if (G.debug) {
+        G.offensive.naval_move_distance = 30
+    }
     G.offensive.ground_move_distance = (cards[c].ops * 2)
     G.offensive.air_move_distance = (cards[c].ops)
     G.offensive.logistic = cards[c].ops
@@ -2007,6 +2009,9 @@ P.move_offensive_units = {
         if (G.active_stack.length === 0) {
             L.movable_units.forEach(u => action_unit(u))
         } else {
+            if (G.offensive.stage === ATTACK_STAGE && G.offensive.organic.length > 0) {
+                button("no_organic")
+            }
             if (G.offensive.stage === ATTACK_STAGE && pieces[G.active_stack[0]].parenthetical) {
                 button("extended_air", L.move_type !== AIR_EXTENDED_MOVE)
             }
@@ -2022,7 +2027,7 @@ P.move_offensive_units = {
             if (G.offensive.stage === ATTACK_STAGE && pieces[G.active_stack[0]].class === "air") {
                 action_box(TURN_BOX + G.turn + 1)
             }
-            if(G.offensive.stage === ATTACK_STAGE){
+            if (G.offensive.stage === ATTACK_STAGE) {
                 button("regular_movement", L.move_type !== ANY_MOVE)
             }
             let loc = G.location[G.active_stack[0]]
@@ -2041,6 +2046,13 @@ P.move_offensive_units = {
         for (let i = 0; i < L.allowed_hexes.length; i += 2) {
             action_hex(L.allowed_hexes[i])
         }
+    },
+    no_organic() {
+        push_undo()
+        var a = G.offensive.organic.pop()
+        var b = G.offensive.organic.pop()
+        log(`Organic transport for ${piece_get_log_str(b)} - ${piece_get_log_str(a)} rejected.`)
+        update_move_hex()
     },
     eliminate() {
         push_undo()
@@ -2080,14 +2092,35 @@ P.move_offensive_units = {
         set_mt(ANY_MOVE)
     },
     unit(u) {
+        if (!G.offensive.organic) {
+            G.offensive.organic = []
+        }
         push_undo()
-        G.active_stack.push(u)
+        var piece = pieces[u]
+        if (piece.organic) {
+            var pairs = G.active_stack.filter(au => pieces[au].organic && pieces[au].class !== piece.class && !G.offensive.organic.includes(au))
+            var a = -1;
+            var b;
+            if (pairs.length && piece.class === "naval") {
+                a = u
+                b = pairs[0]
+
+            } else if (pairs.length) {
+                b = u
+                a = pairs[0]
+            }
+            if (a >= 0) {
+                G.offensive.organic.push(a)
+                G.offensive.organic.push(b)
+                log(`Organic transport used. ${piece_get_log_str(a)} carry ${piece_get_log_str(b)}`)
+            }
+        }
+        set_add(G.active_stack, u)
         var path = map_get(G.offensive.paths, u, [ANY_MOVE, 0, G.location[u]])
         if (path[0] & ATTACK_MOVE) {
             path[path.length - 1] = path[path.length - 2]
         }
         if (path[0] & BARGES_MOVE) {
-            console.log("barges")
             L.move_type = BARGES_MOVE
         }
         map_set(G.offensive.paths, u, path)
@@ -2909,7 +2942,9 @@ function check_supply() {
         oos_units[1].forEach(h => set_add(G.oos, h))
     }
     check_burma_road()
-    log("Check supply")
+    if (G.debug) {
+        log("Check supply")
+    }
 }
 
 function extended_pbm_possible() {
@@ -2936,8 +2971,6 @@ function get_move_data() {
         sm_possible: true,
     }
     var asp_move = true
-    var organic_naval_counter = 0
-    var organic_ground_counter = 0
     var organic_only_ships = true
     if (G.offensive.attacker !== G.active) {
         result.move_type |= REACTION_MOVE
@@ -2962,11 +2995,7 @@ function get_move_data() {
             result.extended_battle_range = piece.ebr
             result.move_type |= AIR_EXTENDED_MOVE
         }
-        if (piece.organic && piece.class === "ground") {
-            organic_ground_counter++
-        } else if (piece.organic && piece.class === "naval") {
-            organic_naval_counter++
-        } else if (piece.class === "naval") {
+        if (piece.class === "naval" && (!piece.organic || !G.offensive.organic.includes(u))) {
             organic_only_ships = false
         }
         if (piece.class === "ground" && !piece.strat_move) {
@@ -2974,7 +3003,7 @@ function get_move_data() {
             asp_move = false
         } else if (piece.class === "ground" && !piece.asp) {
             asp_move = false
-        } else if (piece.class === "ground") {
+        } else if (piece.class === "ground" && !G.offensive.organic.includes(u)) {
             result.asp_points += set_has(G.reduced, u) ? piece.aspr : piece.asp
         }
     })
@@ -3007,13 +3036,12 @@ function get_move_data() {
     if (L.move_type & AVOID_ZOI) {
         result.move_type |= AVOID_ZOI
     }
-    result.asp_points -= Math.min(organic_naval_counter, organic_ground_counter)
     if (G.offensive.counter_offensive_card === MATADOR) {
         result.asp_points = 0
     }
     if (result.is_ground_present && asp_move && result.asp_points <= asp_total) {
         result.move_type |= AMPH_MOVE
-        if (organic_only_ships && organic_naval_counter <= organic_ground_counter) {
+        if (organic_only_ships) {
             result.move_type |= ORGANIC_ONLY
         }
     }
@@ -3163,6 +3191,7 @@ function fast_compute_air_move_hexes() {
             }
             var path_array = map_get(selected, item)
             path_array = path_array.slice()
+            path_array.push(nh)
             path_array.push(nh)
             map_set(selected, nh, path_array)
             if (leg_distance < move_data.air_move_legs) {
@@ -4432,6 +4461,40 @@ P.broken_aa = {
     }
 }
 
+P.broken_organic = {
+    _begin() {
+        L.allowed_units = []
+        for (var i = 0; i < G.offensive.organic.length; i += 2) {
+            var nav = G.offensive.organic[i]
+            var gr = G.offensive.organic[i + 1]
+            if (!unit_on_board(nav)) {
+                set_add(L.allowed_units, gr)
+            }
+        }
+        if (L.allowed_units.length === 0 || G.offensive.attacker === AP) {
+            end()
+            return
+        }
+        log(`Losses due to lost organic transport:`)
+    },
+    prompt() {
+        L.allowed_units.forEach(u => action_unit(u))
+        prompt(`Remove units that lost organic transport.`)
+        if (!L.allowed_units.length) {
+            button("done")
+        }
+    },
+    unit(unit) {
+        push_undo()
+        eliminate(unit)
+        set_delete(L.allowed_units, unit)
+    },
+    done() {
+        push_undo()
+        end()
+    }
+}
+
 P.apply_ground_winner = function () {
     var battle = G.offensive.battle
     if (battle.ground[G.offensive.attacker].length === 0) {
@@ -4761,6 +4824,7 @@ P.offensive_sequence = script(`
     call attack_reaction_cards
     set G.offensive.stage BATTLE_STAGE
     call apply_attack_reaction
+    call broken_organic
     if (G.offensive.active_hq[G.active]) {
         call commit_offensive
     }
@@ -4818,6 +4882,8 @@ P.battle_sequence = script(`
         call assign_hits
       }
       call apply_naval_winner
+      set G.active JP
+      call broken_organic
       call prepare_ground_battle
       call execute_attack {active: G.offensive.attacker}
       call execute_attack {active: 1 - G.offensive.attacker}
@@ -7964,7 +8030,7 @@ function damage_unit(unit) {
 }
 
 function reduce_unit(unit) {
-    log(`${piece(unit)} reduced`)
+    log(`${piece_get_log_str(unit)} reduced`)
     set_add(G.reduced, unit)
 }
 
@@ -9085,6 +9151,7 @@ function reset_offensive() {
         ground_move_distance: 0,
         ground_pbm: [],
         active_hq: [],
+        organic: [],
         draw: [],
         active_units: [[], []],
         paths: [],
@@ -9098,13 +9165,14 @@ function reset_offensive() {
 }
 
 /* log formatting helper functions*/
+
 // below are all functions for pretty formatting (tooltips, hover to piece on click etc) in the log
 
-function card_get_log_str(c){
+function card_get_log_str(c) {
     return `C${cards[c].num}`
 }
 
-function piece_get_log_str(p){
+function piece_get_log_str(p) {
     return `P${p}`
 }
 

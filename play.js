@@ -194,19 +194,40 @@ function on_init() {
             on_update()
         }
     }
+    var first_hex = []
+    var last_hex = []
+    for (var i = 0; i < data.map.length; i++) {
+        var hex = hex_to_int(data.map[i].id)
+        let x = Math.floor(hex / 29)
+        let y = hex % 29
+        if (map_get(first_hex, x, 100) > y) {
+            map_set(first_hex, x, y)
+        }
+        if (map_get(last_hex, x, 0) < y) {
+            map_set(last_hex, x, y)
+        }
+    }
     for (var i = 1; i < LAST_BOARD_HEX; ++i) {
+        var x = Math.floor(i / 29)
+        let y = i % 29
+        if (map_get(first_hex, x, 0) > y) {
+            continue
+        }
+        // if (map_get(last_hex, x, 0) < i) {
+        //     continue
+        // }
         let center = hex_center(i)
         define_layout("board_hex", i, [center[0] - 18, center[1] - 14, 45, 45], "stack")
         define_space("action_hex", i, [center[0] - 29, center[1] - 19, 45, 45], "hex")
-        ZOI_HEX.push(define_space("zoi", i, [center[0] - 33, center[1] - 24, 45, 45], "hex hide"))
+        ZOI_HEX[i] = (define_space("zoi", i, [center[0] - 33, center[1] - 24, 45, 45], "hex hide"))
     }
     define_layout("board_hex", NON_PLACED_BOX, [10, 10, 45, 45], "stack")
     define_layout("board_hex", ELIMINATED_BOX, [100, 1280, 45, 45], "stack")
     define_layout("board_hex", PERM_ELIMINATED, [100, 1180, 45, 45], "stack")
     define_layout("board_hex", DELAYED_BOX, [2420, 1540, 45, 45], "stack")
     define_layout("board_hex", CHINA_BOX, [890, 420, 45, 45], "stack")
-    define_layout("status", JP_AGREEMENT, [990, 140, 35, 35])
-    define_layout("status", AP_AGREEMENT, [1054, 140, 35, 35])
+    define_layout("status", JP_AGREEMENT, [990, 143, 35, 35])
+    define_layout("status", AP_AGREEMENT, [1054, 143, 35, 35])
     for (i = 0; i < 11; i++) {
         define_layout("pw", i, [167, 1185 - Math.floor((i * 46.9)), 35, 35])
     }
@@ -343,8 +364,8 @@ function hex_center(i) {
 // }
 
 function init_canvas() {
-    var sizeX = 2290
-    var sizeY = 1490
+    var sizeX = 2550
+    var sizeY = 1650
     CANVAS.style.width = sizeX + "px"
     CANVAS.style.height = sizeY + "px"
 
@@ -357,19 +378,21 @@ function init_canvas() {
 
 function draw_paths() {
     map_for_each(G.offensive.paths, (k, v) => {
-        var clazz = data.pieces[k].class
+        if (G.location[k] > LAST_BOARD_HEX) {
+            return
+        }
         var start = hex_center(v[2])
         var finish
         var color = data.pieces[k].faction ? "blue" : "red"
         var d = data.pieces[k].faction ? -2 : 2
         CANVAS_CTX.strokeStyle = color
         CANVAS_CTX.fillStyle = color
-        CANVAS_CTX.lineWidth = 2;
+        CANVAS_CTX.lineWidth = 1;
         for (var j = 3; j < v.length; j++) {
             start = hex_center(v[j - 1])
             finish = hex_center(v[j])
             CANVAS_CTX.beginPath();
-            if (clazz !== "air" || v[j - 1] === v[j]) {
+            if (v[j - 1] === v[j] || j === 3) {
                 CANVAS_CTX.arc(start[0], start[1] + d, 4, 0, 2 * Math.PI);
                 CANVAS_CTX.fill();
                 CANVAS_CTX.stroke();
@@ -507,20 +530,24 @@ function on_update() {
     //show zoi
     for (i = 1; i < LAST_BOARD_HEX; i++) {
         const zoi_state = G.supply_cache[i] & 3
+        var hex = ZOI_HEX[i]
+        if (!hex) {
+            continue
+        }
         if (zoi_state === 0) {
-            ZOI_HEX[i].classList.add("hide")
+            hex.classList.add("hide")
         } else if (zoi_state === 1) {
-            ZOI_HEX[i].classList.remove("hide")
-            ZOI_HEX[i].classList.remove("ap_zoi")
-            ZOI_HEX[i].classList.add("jp_zoi")
+            hex.classList.remove("hide")
+            hex.classList.remove("ap_zoi")
+            hex.classList.add("jp_zoi")
         } else if (zoi_state === 2) {
-            ZOI_HEX[i].classList.remove("hide")
-            ZOI_HEX[i].classList.remove("jp_zoi")
-            ZOI_HEX[i].classList.add("ap_zoi")
+            hex.classList.remove("hide")
+            hex.classList.remove("jp_zoi")
+            hex.classList.add("ap_zoi")
         } else {
-            ZOI_HEX[i].classList.remove("hide")
-            ZOI_HEX[i].classList.remove("jp_zoi")
-            ZOI_HEX[i].classList.remove("ap_zoi")
+            hex.classList.remove("hide")
+            hex.classList.remove("jp_zoi")
+            hex.classList.remove("ap_zoi")
         }
     }
 
@@ -603,6 +630,7 @@ function on_update() {
     action_button("done", "Done")
     action_button("delay", "Delay")
     action_button("all", "Choose all")
+    action_button("no_organic", "Disable organic")
     action_button("avoid_zoi", "Avoid ZOI")
     action_button("strat_move", "Strategic move")
     action_button("regular_movement", "Regular movement")
@@ -783,156 +811,153 @@ function on_log(text) {
 // Below is code imported from Imperial struggle for dialog windows etc
 // still not completely integrated. commented out code should be looked at
 
-function on_reply(q, params)
-{
-	if (q === "event_cards") {
-		toggle_dialog("event_card_dialog")
-	}
+function on_reply(q, params) {
+    if (q === "event_cards") {
+        toggle_dialog("event_card_dialog")
+    }
 }
 
-function toggle_dialog(id)
-{
-	if (document.getElementById(id).classList.contains("show")) {
-		hide_dialog(id)
-	} else {
-		show_card_list(id, null)
-	}
+function toggle_dialog(id) {
+    if (document.getElementById(id).classList.contains("show")) {
+        hide_dialog(id)
+    } else {
+        show_card_list(id, null)
+    }
 }
 
 function show_dialog(id, dialog_generator) {
-	document.getElementById(id).classList.add("show")
-	let body = document.getElementById(id).querySelector(".dialog_body")
-	body.replaceChildren()
-	if (dialog_generator) {
-		dialog_generator(body)
-	}
-	if (!is_mobile()) dragElement(document.getElementById(id))
+    document.getElementById(id).classList.add("show")
+    let body = document.getElementById(id).querySelector(".dialog_body")
+    body.replaceChildren()
+    if (dialog_generator) {
+        dialog_generator(body)
+    }
+    if (!is_mobile()) dragElement(document.getElementById(id))
 }
 
 function hide_dialog(id) {
-	document.getElementById(id).classList.remove("show")
-	_tip_blur_mobile_tip()
+    document.getElementById(id).classList.remove("show")
+    _tip_blur_mobile_tip()
 }
 
 function toggle_dialog_collapse(id) {
-	let dialog_body = document.getElementById(id).querySelector(".dialog_body")
-	let dialog_x = document.getElementById(id).querySelector(".dialog_x")
-	if (dialog_body.className.includes("hide")) {
-		dialog_body.classList.remove("hide")
-		dialog_x.textContent = "A"
-	} else {
-		dialog_body.classList.add("hide")
-		dialog_x.textContent = "V"
-	}
+    let dialog_body = document.getElementById(id).querySelector(".dialog_body")
+    let dialog_x = document.getElementById(id).querySelector(".dialog_x")
+    if (dialog_body.className.includes("hide")) {
+        dialog_body.classList.remove("hide")
+        dialog_x.textContent = "A"
+    } else {
+        dialog_body.classList.add("hide")
+        dialog_x.textContent = "V"
+    }
 }
 
 //BR// Makes an element/dialog draggable by the player
 function dragElement(e) {
-	var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0
-	var the_e = e
-	if (document.getElementById(e.id + "header")) {
-		document.getElementById(e.id + "header").onmousedown = dragMouseDown  // Drag by the header if it exists
-	} else {
-		e.onmousedown = dragMouseDown                                                  // Otherwise drag by the whole element
-	}
+    var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0
+    var the_e = e
+    if (document.getElementById(e.id + "header")) {
+        document.getElementById(e.id + "header").onmousedown = dragMouseDown  // Drag by the header if it exists
+    } else {
+        e.onmousedown = dragMouseDown                                                  // Otherwise drag by the whole element
+    }
 
-	function dragMouseDown(e) {
-		e.preventDefault()
-		pos3 = e.clientX
-		pos4 = e.clientY
-		document.onmouseup = closeDragElement
-		document.onmousemove = elementDrag
-	}
+    function dragMouseDown(e) {
+        e.preventDefault()
+        pos3 = e.clientX
+        pos4 = e.clientY
+        document.onmouseup = closeDragElement
+        document.onmousemove = elementDrag
+    }
 
-	function elementDrag(e) {
-		e.preventDefault()
+    function elementDrag(e) {
+        e.preventDefault()
 
-		pos1 = pos3 - e.clientX
-		pos2 = pos4 - e.clientY
-		pos3 = e.clientX
-		pos4 = e.clientY
+        pos1 = pos3 - e.clientX
+        pos2 = pos4 - e.clientY
+        pos3 = e.clientX
+        pos4 = e.clientY
 
-		// set the element's new position
+        // set the element's new position
 
-		the_e.style.position = "absolute";
-		the_e.style.top = (the_e.offsetTop - pos2) + "px"
-		the_e.style.left = (the_e.offsetLeft - pos1) + "px"
-	}
+        the_e.style.position = "absolute";
+        the_e.style.top = (the_e.offsetTop - pos2) + "px"
+        the_e.style.left = (the_e.offsetLeft - pos1) + "px"
+    }
 
-	function closeDragElement() {
-		// stop moving when mouse button is released
-		document.onmouseup = null
-		document.onmousemove = null
-	}
+    function closeDragElement() {
+        // stop moving when mouse button is released
+        document.onmouseup = null
+        document.onmousemove = null
+    }
 }
 
 // Returns true if we're playing this on a mobile platform e.g. phone
 function is_mobile() {
-	return ("ontouchstart" in window)
+    return ("ontouchstart" in window)
 }
 
 function show_card_list(id, params) {
-	show_dialog(id, (body) => {
-		let dl = document.createElement("dl")
-		let append_header = (text) => {
-			let header = document.createElement("dt")
-			header.textContent = text
-			dl.appendChild(header)
-		}
-		let append_card = (c) => {
-			let p = document.createElement("dd")
-			p.className = "cardtip"
-			p.onmouseenter = () => on_focus_card_tip(c)
-			p.onmouseleave = () => on_blur_card_tip()
-			//p.onmousedown = () => _tip_focus_event_mobile(NONE, c, "card event_card c" + c)
-			p.innerHTML = format_card_info(c)
-			dl.appendChild(p)
-		}
+    show_dialog(id, (body) => {
+        let dl = document.createElement("dl")
+        let append_header = (text) => {
+            let header = document.createElement("dt")
+            header.textContent = text
+            dl.appendChild(header)
+        }
+        let append_card = (c) => {
+            let p = document.createElement("dd")
+            p.className = "cardtip"
+            p.onmouseenter = () => on_focus_card_tip(c)
+            p.onmouseleave = () => on_blur_card_tip()
+            //p.onmousedown = () => _tip_focus_event_mobile(NONE, c, "card event_card c" + c)
+            p.innerHTML = format_card_info(c)
+            dl.appendChild(p)
+        }
 
-		if (id === "event_card_dialog") {
-			append_header(`Japanese Discard Pile (${G.discard[JP].length})`)
-			G.discard[JP].forEach(append_card)
-			append_header(`Allies Discard Pile (${G.discard[AP].length})`)
-			G.discard[AP].forEach(append_card)
-			append_header(`Removed Cards (${G.removed.length})`)
-			G.removed.forEach(append_card)
-			//if (!is_observing()) {
-			//	append_header(`Your Hand (${V.hand[R].length})`)
-			//	V.hand[R].forEach(append_card)
-			//}
-		}
+        if (id === "event_card_dialog") {
+            append_header(`Japanese Discard Pile (${G.discard[JP].length})`)
+            G.discard[JP].forEach(append_card)
+            append_header(`Allies Discard Pile (${G.discard[AP].length})`)
+            G.discard[AP].forEach(append_card)
+            append_header(`Removed Cards (${G.removed.length})`)
+            G.removed.forEach(append_card)
+            //if (!is_observing()) {
+            //	append_header(`Your Hand (${V.hand[R].length})`)
+            //	V.hand[R].forEach(append_card)
+            //}
+        }
 
-		body.appendChild(dl)
-	})
+        body.appendChild(dl)
+    })
 }
 
-function is_observing()
-{
-	return (R !== JP) && (R !== AP)
+function is_observing() {
+    return (R !== JP) && (R !== AP)
 }
 
 function format_card_info(c) {
-	let text = "C" + c
-	return escape_text(text)
+    let text = "C" + c
+    return escape_text(text)
 }
 
 function sub_card(match, p1) {
-	const c = p1 | 0
-	const cn = "card-tip"
-	return `<span class="${cn}" onmouseenter="on_focus_card_tip(${c})" onmouseleave="on_blur_card_tip()">${data.cards[c].name}</span>`
+    const c = p1 | 0
+    const cn = "card-tip"
+    return `<span class="${cn}" onmouseenter="on_focus_card_tip(${c})" onmouseleave="on_blur_card_tip()">${data.cards[c].name}</span>`
 }
 
 function on_focus_card_tip(c) {
     let elem = document.getElementById("tooltip")
     const card = data.cards[c]
-	elem.classList = `card card_${card.faction ? "ap" : "jp"}_${card.num}`
+    elem.classList = `card card_${card.faction ? "ap" : "jp"}_${card.num}`
 }
 
 function on_blur_card_tip(c) {
     document.getElementById("tooltip").classList = "hide"
 }
 
-function get_piece_elem(p){
+function get_piece_elem(p) {
     return data.pieces[p].element
 }
 
@@ -944,14 +969,14 @@ function sub_piece(match, p1) {
 }
 
 function on_click_piece_tip(z) {
-	scroll_into_view(get_piece_elem(z))
+    scroll_into_view(get_piece_elem(z))
 }
 
 function on_focus_piece_tip(z) {
-	get_piece_elem(z).classList.toggle("tip", true)
+    get_piece_elem(z).classList.toggle("tip", true)
 }
 
 function on_blur_piece_tip(z) {
-	get_piece_elem(z).classList.toggle("tip", false)
+    get_piece_elem(z).classList.toggle("tip", false)
 }
 

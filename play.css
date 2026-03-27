@@ -133,8 +133,8 @@ body.Allies #jp_hand { grid-row: 4; }
 }
 
 #canvas {
-	width: 2290px;
-	height: 1490px;
+	width: 2550px;
+	height: 1650px;
 	position: absolute;
 	z-index: 1;
 	pointer-events: none;
@@ -324,4 +324,5 @@ body.Allies #jp_hand { grid-row: 4; }
 
 .piece.tip { /* highlight the piece itself */
 	border: 4px dashed lime;
+	z-index: 100;
 }

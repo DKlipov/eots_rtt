@@ -4763,6 +4763,7 @@ data.map = [
     {id: 1304, terrain: OCEAN, edges: [1, 16, 16, 16, 1, 1]},
     {id: 1205, terrain: OCEAN, edges: [1, 1, 16, 1, 1, 1]},
     {id: 1010, terrain: OCEAN, edges: [1, 1, 1, 16, 16, 16]},
+    {id: 1103, terrain: OCEAN, edges: [16, 16, 1, 1, 1, 16]},
     {id: 1110, terrain: OCEAN, edges: [1, 1, 1, 16, 16, 1]},
     {id: 1211, terrain: OCEAN, edges: [1, 1, 1, 16, 16, 1]},
     {id: 1311, terrain: OCEAN, edges: [1, 1, 1, 16, 16, 1]},
@@ -5888,7 +5889,17 @@ data.map = [
         terrain: MIXED,
         island: true
     },
-
+    {id: 3800, region: "Oceania", terrain: OCEAN, edges: [16, 16, 1, 1, 1, 16]},
+    {id: 4000, region: "Oceania", terrain: OCEAN, edges: [16, 16, 1, 1, 1, 16]},
+    {id: 4400, region: "Oceania", terrain: OCEAN, edges: [16, 16, 1, 1, 1, 16]},
+    {id: 5200, region: "Oceania", terrain: OCEAN, edges: [16, 16, 1, 1, 1, 16]},
+    {id: 3900, region: "Oceania", terrain: OCEAN, edges: [16, 1, 1, 1, 1, 1]},
+    {id: 3900, region: "Oceania", terrain: OCEAN, edges: [16, 1, 1, 1, 1, 1]},
+    {id: 4100, region: "Oceania", terrain: OCEAN, edges: [16, 1, 1, 1, 1, 1]},
+    {id: 4300, region: "Oceania", terrain: OCEAN, edges: [16, 1, 1, 1, 1, 1]},
+    {id: 4300, region: "Oceania", terrain: OCEAN, edges: [16, 1, 1, 1, 1, 1]},
+    {id: 4500, region: "Oceania", terrain: OCEAN, edges: [16, 1, 1, 1, 1, 1]},
+    {id: 4900, region: "Oceania", terrain: OCEAN, edges: [16, 1, 1, 1, 1, 1]},
 ]
 
 data.sp_map = [
