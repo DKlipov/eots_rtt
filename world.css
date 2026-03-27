@@ -105,7 +105,7 @@ body.hide-pieces .piece {
 }
 
 .hex {
-    height: 50px;
+    height: 55px;
     aspect-ratio: 1/cos(30deg);
     clip-path: polygon(50% -50%, 100% 50%, 50% 150%, 0 50%);
     box-sizing: border-box;

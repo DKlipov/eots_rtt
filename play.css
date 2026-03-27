@@ -128,8 +128,8 @@ body.Allies #ap_hand { grid-row: 2; }
 body.Allies #jp_hand { grid-row: 4; }
 
 #mapwrap {
-	width: 2290px;
-	height: 1490px;
+	width: 2550px;
+	height: 1650px;
 }
 
 #canvas {
@@ -141,10 +141,16 @@ body.Allies #jp_hand { grid-row: 4; }
 }
 
 #map {
-	width: 2290px;
-	height: 1490px;
-	background-image: url(map75.jpg);
-	background-size: 2290px 1490px;
+	width: 2550px;
+	height: 1650px;
+	background-image: url(images/map_eots.75.avif);
+	background-size: 2550px 1650px;
+}
+
+@media (min-resolution: 97dpi) {
+	#map {
+		background-image: url(images/map_eots.150.avif);
+	}
 }
 
 /* CARDS */
