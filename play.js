@@ -198,39 +198,39 @@ function on_init() {
         let center = hex_center(i)
         define_layout("board_hex", i, [center[0] - 18, center[1] - 14, 45, 45], "stack")
         define_space("action_hex", i, [center[0] - 29, center[1] - 19, 45, 45], "hex")
-        ZOI_HEX.push(define_space("zoi", i, [center[0] - 29, center[1] - 19, 45, 45], "hex hide"))
+        ZOI_HEX.push(define_space("zoi", i, [center[0] - 33, center[1] - 24, 45, 45], "hex hide"))
     }
     define_layout("board_hex", NON_PLACED_BOX, [10, 10, 45, 45], "stack")
-    define_layout("board_hex", ELIMINATED_BOX, [100, 1180, 45, 45], "stack")
+    define_layout("board_hex", ELIMINATED_BOX, [100, 1280, 45, 45], "stack")
     define_layout("board_hex", PERM_ELIMINATED, [100, 1180, 45, 45], "stack")
-    define_layout("board_hex", DELAYED_BOX, [2170, 1380, 45, 45], "stack")
-    define_layout("board_hex", CHINA_BOX, [790, 380, 45, 45], "stack")
-    define_layout("status", JP_AGREEMENT, [890, 130, 35, 35])
-    define_layout("status", AP_AGREEMENT, [945, 130, 35, 35])
+    define_layout("board_hex", DELAYED_BOX, [2420, 1540, 45, 45], "stack")
+    define_layout("board_hex", CHINA_BOX, [890, 420, 45, 45], "stack")
+    define_layout("status", JP_AGREEMENT, [990, 140, 35, 35])
+    define_layout("status", AP_AGREEMENT, [1054, 140, 35, 35])
     for (i = 0; i < 11; i++) {
-        define_layout("pw", i, [147, 1068 - Math.floor((i * 42.3)), 35, 35])
+        define_layout("pw", i, [167, 1185 - Math.floor((i * 46.9)), 35, 35])
     }
     for (i = 0; i < 11; i++) {
-        define_layout("wie", i, [243, 645 + Math.floor((i * 42.3)), 35, 35])
+        define_layout("wie", i, [273, 715 + Math.floor((i * 46.9)), 35, 35])
     }
     for (i = 1; i < 13; i++) {
-        define_layout("turn", i, [63, 1110 - Math.floor((i * 42.3)), 35, 35], "stack")
+        define_layout("turn", i, [68, 1232 - Math.floor((i * 46.9)), 35, 35], "stack")
         define_space("action_box", i + TURN_BOX, [63, 1110 - Math.floor((i * 42.3)), 35, 35])
     }
     for (i = 0; i < 10; i++) {
-        define_layout("track", i, [343, 1430 - Math.floor((i * 42.3)), 35, 35], "stack")
+        define_layout("track", i, [383, 1585 - Math.floor((i * 46.5)), 35, 35], "stack")
     }
     for (i = 0; i < 5; i++) {
-        define_layout("india", i, [540 - Math.floor((i * 45)), 50, 35, 35])
+        define_layout("india", i, [603 - Math.floor((i * 50)), 65, 35, 35])
     }
     for (i = 0; i < 3; i++) {
-        define_layout("burma", i, [475 - Math.floor((i * 55)), 120, 35, 35])
+        define_layout("burma", i, [533 - Math.floor((i * 63)), 135, 35, 35])
     }
     for (i = 0; i < 6; i++) {
-        define_layout("china", i, [755 - Math.floor((i * 42.3)), 138, 35, 35])
+        define_layout("china", i, [843 - Math.floor((i * 46.9)), 152, 35, 35])
     }
     for (i = 0; i < 13; i++) {
-        define_layout("divisions", i, [606 + Math.floor((i * 42.1)), 42, 35, 35])
+        define_layout("divisions", i, [678 + Math.floor((i * 46.9)), 47, 35, 35])
     }
     define_marker("divisions", 0, "divisions_china")
     for (let i = 1; i < data.pieces.length; ++i) {
@@ -327,7 +327,7 @@ function int_to_hex(i) {
 
 function hex_center(i) {
     let column = (Math.floor(i / 29))
-    return [71 + column * 43.0, 43 + (i % 29) * 50 + (column % 2) * 25]
+    return [77 + column * 48.0, 50 + (i % 29) * 55.3 + (column % 2) * 25]
 }
 
 // for (let i = 1; i < LAST_BOARD_HEX; ++i) {
