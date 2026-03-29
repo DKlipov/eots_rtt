@@ -3880,7 +3880,7 @@ data.cards = [
         "type": MILITARY,
         "remove": true,
         "intelligence": SURPRISE,
-        "name": "Operztion Z",
+        "name": "Operation Z",
     },
     {
         "num": 2,
