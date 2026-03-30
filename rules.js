@@ -3648,7 +3648,7 @@ function commit_to_attack(unit, hex) {
 P.declare_battle_hexes = {
     _begin() {
         check_supply()
-        G.offensive.battle_hexes.forEach(h => log(`Battle declared in hex ${hex_get_log_str(h)}`))
+        G.offensive.battle_hexes.forEach(h => log(`Battle declared in ${hex_get_log_str(h)}`))
         compute_possible_battle_hexes()
         if (L.possible_units.length <= 0) {
             log("Additional battle hexes could not be declared")
@@ -4253,7 +4253,7 @@ P.choose_battle = {
         G.offensive.battle = {
             battle_hex: hex,
         }
-        log(`Battle hex ${hex_get_log_str(hex)} chosen for battle`)
+        log(`Battle ${hex_get_log_str(hex)} chosen for battle`)
         end()
     },
 }
