@@ -1849,7 +1849,7 @@ function capture_hex(hex, side = G.active) {
     }
     var md = get_map_data()[hex]
     if (side && set_has(G.control, hex)) {
-        log(`AP captured ${int_to_hex(hex)}`)
+        log(`AP captured ${hex_get_log_str(hex)}`)
         set_delete(G.control, hex)
         if (md.region === "NIndia") {
             india_stable()
@@ -1860,7 +1860,7 @@ function capture_hex(hex, side = G.active) {
             check_jp_resources_event()
         }
     } else if (!side && !set_has(G.control, hex)) {
-        log(`JP captured ${int_to_hex(hex)}`)
+        log(`JP captured ${hex_get_log_str(hex)}`)
         set_add(G.control, hex)
     } else {
         return
@@ -2269,7 +2269,7 @@ P.choose_attack_hex = {
     },
     action_hex(hex) {
         push_undo()
-        log(`Units ${G.active_stack} committed to attack to ${int_to_hex(hex)}`)
+        log(`Units ${G.active_stack} committed to attack to ${hex_get_log_str(hex)}`)
         this.attack_hex(hex)
     },
 }
@@ -2881,7 +2881,7 @@ P.check_overstacking = {
 
 function set_location(unit, location) {
     if (location <= LAST_BOARD_HEX) {
-        log(`${piece_get_log_str(unit)} moved to ${int_to_hex(location)}`)
+        log(`${piece_get_log_str(unit)} moved to ${hex_get_log_str(location)}`)
     }
     var prev_location = G.location[unit]
     var pair_location = G.location[pieces[unit].pair]
@@ -3648,7 +3648,7 @@ function commit_to_attack(unit, hex) {
 P.declare_battle_hexes = {
     _begin() {
         check_supply()
-        G.offensive.battle_hexes.forEach(h => log(`Battle declared in hex ${int_to_hex(h)}`))
+        G.offensive.battle_hexes.forEach(h => log(`Battle declared in hex ${hex_get_log_str(h)}`))
         compute_possible_battle_hexes()
         if (L.possible_units.length <= 0) {
             log("Additional battle hexes could not be declared")
@@ -3787,7 +3787,7 @@ P.special_reaction = {
         this._begin()
     },
     action_hex(hex) {
-        log(`Special reaction in ${int_to_hex(hex)}`)
+        log(`Special reaction in ${hex_get_log_str(hex)}`)
         const success = roll_intelligence_dice()
         set_delete(L.possible_hexes, hex)
         if (success) {
@@ -4253,7 +4253,7 @@ P.choose_battle = {
         G.offensive.battle = {
             battle_hex: hex,
         }
-        log(`Battle hex ${int_to_hex(hex)} chosen for battle`)
+        log(`Battle hex ${hex_get_log_str(hex)} chosen for battle`)
         end()
     },
 }
@@ -4269,7 +4269,7 @@ P.assign_hits = script(`
       `)
 
 function battle_header() {
-    return `${G.offensive.battle.ground_stage ? "Ground" : "naval"} battle ${int_to_hex(G.offensive.battle.battle_hex)}.`
+    return `${G.offensive.battle.ground_stage ? "Ground" : "naval"} battle ${hex_get_log_str(G.offensive.battle.battle_hex)}.`
 }
 
 P.apply_hits = {
@@ -4500,7 +4500,7 @@ P.apply_ground_winner = function () {
     }
     var attacker_win = battle.damaged[G.offensive.attacker].length > battle.damaged[1 - G.offensive.attacker].length ||
         battle.ground[G.offensive.attacker].filter(unit_on_board).length && !battle.ground[1 - G.offensive.attacker].filter(unit_on_board).length
-    log(`${attacker_win ? "Attacker" : "Defender"} win in ground combat ${int_to_hex(battle.battle_hex)}`)
+    log(`${attacker_win ? "Attacker" : "Defender"} win in ground combat ${hex_get_log_str(battle.battle_hex)}`)
     battle.winner = (attacker_win == G.offensive.attacker) + 0
     if (attacker_win) {
         capture_hex(battle.battle_hex, G.offensive.attacker)
@@ -4600,7 +4600,7 @@ P.prepare_ground_battle = function () {
     battle = G.offensive.battle
     var hex = battle.battle_hex
     if (battle.ground[G.offensive.attacker].filter(u => unit_on_board(u)).length) {
-        log(`Ground combat at ${int_to_hex(hex)}`)
+        log(`Ground combat at ${hex_get_log_str(hex)}`)
     }
     end()
 }
@@ -6303,7 +6303,7 @@ P.tokyo_express = {
     },
     action_hex(h) {
         push_undo()
-        log(`Tokyo Express placed: ${int_to_hex(h)}`)
+        log(`Tokyo Express placed: ${hex_get_log_str(h)}`)
         G.events[events.TOKYO_EXPRESS.id] = h
         check_supply()
         end()
@@ -6764,7 +6764,7 @@ P.paratroopers = {
     },
     action_hex(h) {
         push_undo()
-        log(`Paratroopers landing ${int_to_hex(h)}`)
+        log(`Paratroopers landing ${hex_get_log_str(h)}`)
         capture_hex(h)
         for_each_unit_on_map((u, piece, location) => {
             if (location === h) {
@@ -7824,7 +7824,7 @@ P.airborne_landing = {
     },
     action_hex(h) {
         push_undo()
-        log(`${piece_get_log_str(ap_army("11_d"))} landed at ${int_to_hex(h)}`)
+        log(`${piece_get_log_str(ap_army("11_d"))} landed at ${hex_get_log_str(h)}`)
         set_location(ap_army("11_d"), h)
         capture_hex(h, AP)
         check_supply()
@@ -9189,6 +9189,10 @@ function reset_offensive() {
 /* log formatting helper functions*/
 
 // below are all functions for pretty formatting (tooltips, hover to piece on click etc) in the log
+
+function hex_get_log_str(h) {
+    return `H${h}`
+}
 
 function card_get_log_str(c) {
     return `C${c}`

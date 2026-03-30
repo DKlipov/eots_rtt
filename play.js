@@ -761,6 +761,7 @@ function escape_text(text) {
     text = text.replace(/[BRW]\d/g, (m) => ICONS[m] ?? m)
     text = text.replace(/C(\d+)/g, sub_card)
     text = text.replace(/P(\d+)/g, sub_piece)
+    text = text.replace(/H(\d+)/g, sub_hex)
     return text
 }
 
@@ -980,3 +981,40 @@ function on_blur_piece_tip(z) {
     get_piece_elem(z).classList.toggle("tip", false)
 }
 
+function get_hex_elem(h){
+    //perhaps should cache this somewhere ?
+    return lookup_thing("board_hex", h)
+}
+
+function get_hex_name(h){
+    const hex = int_to_hex(h)
+    const hex_id = data.map.findIndex((element) => element.id === hex)
+    if(hex_id != -1){
+        const hex_data = data.map[hex_id]
+        if(hex_data.airfield || hex_data.port || hex_data.port || hex_data.city || hex_data.resource){
+            return hex_data.name
+        }
+    }
+    
+    return `hex ${hex}`
+    
+}
+
+function sub_hex(match, p1) {
+    const hex_id = p1 | 0
+    const name = get_hex_name(hex_id)
+    return `<span class="hex-tip" onclick="on_click_hex_tip(${hex_id})" onmouseenter="on_focus_hex_tip(${hex_id})" onmouseleave="on_blur_hex_tip(${hex_id})">${name}</span>`
+}
+
+
+function on_click_hex_tip(z) {
+    scroll_into_view(get_hex_elem(z))
+}
+
+function on_focus_hex_tip(z) {
+    get_hex_elem(z).classList.toggle("tip", true)
+}
+
+function on_blur_hex_tip(z) {
+    get_hex_elem(z).classList.toggle("tip", false)
+}
