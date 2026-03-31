@@ -2039,7 +2039,7 @@ P.move_offensive_units = {
                 && L.move_type !== BARGES_MOVE
                 && !set_has(G.active_stack, u))
                 .forEach(u => action_unit(u))
-            if (G.offensive.stage === ATTACK_STAGE || could_stack_stop_here()) {
+            if (G.offensive.stage !== REACTION_STAGE && could_stack_stop_here()) {
                 button("no_move")
             } else if (G.offensive.stage === POST_BATTLE_STAGE && L.allowed_hexes.length === 0 && G.active_stack.length === 1) {
                 button("eliminate")
@@ -2149,9 +2149,13 @@ P.move_offensive_units = {
         } else if (is_space_controlled(hex, 1 - R) && curr_path[0] & AMPH_MOVE) {
             set_add(G.offensive.landind_hexes, hex)
         }
-
-        if (curr_path[0] & AMPH_MOVE && !(get_map_data()[hex].port && is_space_controlled(hex, R) && !is_faction_units(hex, 1 - R))) {
+        if (curr_path[0] & AMPH_MOVE && G.offensive.stage !== REACTION_STAGE) {
+            G.asp[R][1] += 1
+            G.offensive.r_asp = 1
+        } else if (curr_path[0] & AMPH_MOVE &&
+            (!get_map_data()[hex].port || !is_space_controlled(hex, R) || is_faction_units(hex, 1 - R) || G.offensive.stage !== POST_BATTLE_STAGE)) {
             G.asp[R][1] += L.move_data.asp_points
+            G.offensive.r_asp += L.move_data.asp_points
         }
         const prev_path = map_get(G.offensive.paths, G.active_stack[0])
         curr_path = [curr_path[0], curr_path[1], ...prev_path.slice(2), ...curr_path.slice(3)]
@@ -2836,6 +2840,8 @@ P.check_overstacking = {
         if (L.allowed_units.length === 0) {
             end()
             return
+        } else {
+            log(`${R} overstacking losses.`)
         }
     },
     prompt() {
@@ -2852,7 +2858,6 @@ P.check_overstacking = {
     unit(u) {
         push_undo()
         var location = G.location[u]
-        log(`${piece_get_log_str(u)} removed due to overstacking.`)
         if (set_has(G.oos, u)) {
             eliminate(u)
         } else {
@@ -2896,6 +2901,7 @@ function set_location(unit, location) {
 }
 
 function fill_overstack() {
+    console.log("OVERSYTACKK!!!!")
     for (var i = 0; i <= LAST_BOARD_HEX; i++) {
         G.overstack[i] = 0
     }
@@ -2906,7 +2912,7 @@ function fill_overstack() {
             G.overstack[location] |= 1
         } else if (location <= LAST_BOARD_HEX && piece.class === "naval") {
             G.overstack[location] += (1 << 7)
-        } else if ((location <= LAST_BOARD_HEX && location === CHINA_BOX) && (piece.type !== "lrb" || pair_location !== location)) {
+        } else if ((location <= LAST_BOARD_HEX || location === CHINA_BOX) && (piece.type !== "lrb" || pair_location !== location)) {
             G.overstack[location] += (1 << 1)
         }
     })
@@ -3027,6 +3033,9 @@ function get_move_data() {
     var asp_total = Math.max(G.asp[R][0] - G.asp[R][1], 0)
     if (!R && G.inter_service[0]) {
         asp_total = Math.ceil(asp_total / 2)
+    }
+    if (G.offensive.stage === REACTION_STAGE) {
+        asp_total = Math.min(asp_total, 1 - G.offensive.r_asp)
     }
     if (result.sm_possible && L.move_type & STRAT_MOVE) {
         result.move_type |= STRAT_MOVE
@@ -3309,7 +3318,7 @@ function compute_ground_naval_move_hexes() {
             mark_participate_attack_hex()
         }
         map_for_each(get_naval_move(zoi_mask), (k, v) => {
-            if ((!is_space_controlled(k, R) || !get_map_data()[k].port) && move_data.is_ground_present) {
+            if (move_data.is_ground_present) {
                 v.unshift(mt | AMPH_MOVE)
             } else {
                 v.unshift(mt)
@@ -3875,7 +3884,6 @@ P.define_intelligence_condition = {
         G.offensive.logistic = cards[G.offensive.offensive_card].ops
     },
     prompt() {
-        button("stop")
         prompt(`${offensive_card_header()} Change intelligence condition.`)
         if (G.offensive.type === EC && cards[G.offensive.offensive_card].intelligence && !L.card && !L.rolled) {
             button("skip")
@@ -3896,9 +3904,6 @@ P.define_intelligence_condition = {
         if (L.rolled || L.card) {
             button("done")
         }
-    },
-    stop() {
-        call("special_reaction")
     },
     done() {
         push_undo()
@@ -3961,6 +3966,7 @@ P.apply_attack_reaction = {
     _begin() {
         if (G.offensive.battle_hexes.length <= 0 && G.offensive.stage !== BATTLE_STAGE) {
             end()
+            return
         }
         var stage = G.offensive.stage === POST_BATTLE_STAGE ? AFTER_COMBAT : BEFORE_COMBAT
         L.allowed_cards = []
@@ -3971,6 +3977,7 @@ P.apply_attack_reaction = {
             .forEach(c => set_add(L.allowed_cards, c))
         if (L.allowed_cards.length <= 0) {
             end()
+            return
         }
     },
     prompt() {
@@ -4842,7 +4849,7 @@ P.offensive_sequence = script(`
     set G.offensive.stage POST_BATTLE_STAGE
     set G.active 1-G.offensive.attacker
     call apply_attack_reaction
-    if (G.offensive.active_units[G.active].filter(u=>unit_on_board(u)).length) {
+    if (G.offensive.intelligence !== SURPRISE) {
         call move_offensive_units
         set G.offensive.active_units[1-G.offensive.attacker] []
         call check_overstacking
@@ -9175,6 +9182,7 @@ function reset_offensive() {
         active_hq: [],
         organic: [],
         draw: [],
+        r_asp: 0,
         active_units: [[], []],
         paths: [],
         battle_hexes: [],
