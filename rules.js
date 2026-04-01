@@ -1102,7 +1102,7 @@ P.future_offensive = {
     },
     event(c) {
         push_undo()
-        military_card(c)
+        play_event(c)
         log(`${R} played ${card_get_log_str(c)} as event card`)
         goto("offensive_sequence")
     },
@@ -1242,12 +1242,15 @@ function play_event(c) {
         into_turn_draw(faction)
     }
     G.offensive.active_cards.push(c)
+    discard_card(c)
     if (cards[c].type === MILITARY) {
-        activate_card(c)
+        military_card(c)
     }
     if (cards[c].remove) {
         set_add(G.removed, c)
         set_delete(G.discard[faction], c)
+    } else {
+        set_add(G.discard[faction], c)
     }
 }
 
@@ -1255,12 +1258,7 @@ function activate_card(c) {
     var faction = cards[c].faction
     G.offensive.active_cards.push(c)
     G.offensive.offensive_card = c
-    if (G.future_offensive[faction] === c) {
-        G.future_offensive[faction] = -1
-        G.events[events.FUTURE_OFFENSIVE_JP.id + faction] = 0
-    } else {
-        array_delete_item(G.hand[faction], c)
-    }
+    discard_card(c)
     set_add(G.discard[faction], c)
     G.offensive.attacker = faction
     if (cards[c].faction === JP && cards[c].ops >= 3 && is_event_active(events.BARGES)) {
@@ -1342,14 +1340,15 @@ P.offensive_segment = {
     draw() {
         push_undo()
         G.offensive.active_cards = [TOJO_RESIGNS]
-        G.draw[R].forEach(c => discard_card(c))
+        var a = G.draw[R].slice()
+        a.forEach(c => discard_card(c))
         call("draw_from_discard")
     },
     event(c) {
         push_undo()
         log(`${R} played ${card_get_log_str(c)} as event card`)
         if (cards[c].type === MILITARY) {
-            military_card(c)
+            play_event(c)
             goto("offensive_sequence")
         } else {
             play_event(c)
@@ -8986,7 +8985,7 @@ function remove_card(card) {
 
 function discard_card(card) {
     var faction = cards[card].faction
-    array_delete(G.draw[faction], card)
+    array_delete_item(G.draw[faction], card)
     set_add(G.discard[faction], card)
     if (G.future_offensive[faction] === card.c) {
         G.future_offensive[faction] = -1
