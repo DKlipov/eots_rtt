@@ -1899,8 +1899,6 @@ function update_move_hex() {
 
     if (G.offensive.stage === POST_BATTLE_MOVE && L.move_type === BARGES_MOVE) {
         return compute_barges_pbm()
-    } else if (!set_has(G.offensive.active_units[G.active], G.active_stack[0])) {
-        compute_ground_disengagement()
     } else if (L.move_data.is_air_present && (L.move_type === STRAT_MOVE || L.move_type === AVOID_ZOI)) {
         compute_air_move_hexes()
     } else if (L.move_data.is_air_present) {
@@ -1929,37 +1927,8 @@ function compute_barges_pbm() {
     }
 }
 
-function apply_ground_disengadgement() {
-    if (G.offensive.stage !== REACTION_STAGE) {
-        return
-    }
-    L.disen.forEach(u => set_delete(L.movable_units, u))
-    var battles = []
-    G.offensive.battle_hexes.forEach(b => {
-        map_set(battles, b, [0, 0])
-    })
-    for_each_unit_on_map((u, piece, location) => {
-        var bh = map_get(battles, location)
-        if (piece.class === "ground" && bh) {
-            bh[piece.faction] += set_has(G.reduced, u) ? piece.rcf : piece.cf
-        }
-    })
-    L.disen.forEach(u => {
-        if (map_has(G.offensive.paths, u)) {
-            return
-        }
-        var piece = pieces[u]
-        var bh = map_get(battles, G.location[u])
-        var cf = set_has(G.reduced, u) ? piece.rcf : piece.cf
-        if (bh[G.offensive.attacker] < bh[1 - G.offensive.attacker] - cf) {
-            set_add(L.movable_units, u)
-        }
-    })
-}
-
 P.move_offensive_units = {
     _begin() {
-        L.disen = []
         L.move_data = {}
         L.move_type = ANY_MOVE
         L.movable_units = []
@@ -1987,13 +1956,7 @@ P.move_offensive_units = {
                     set_add(of_entered_hex, location)
                 }
             })
-            for_each_unit_on_map((u, piece, location) => {
-                if (piece.faction !== G.offensive.attacker && piece.class === "ground" && set_has(of_entered_hex, location)) {
-                    set_add(L.disen, u)
-                }
-            })
         }
-        apply_ground_disengadgement()
         if (L.movable_units.length <= 0) {
             log(`No movable units ${G.active ? "AP" : "JP"}`)
             end()
@@ -2004,9 +1967,6 @@ P.move_offensive_units = {
         if (G.offensive.stage === ATTACK_STAGE
             || G.offensive.stage === POST_BATTLE_STAGE && !G.active_stack.length && L.movable_units.filter(u => !could_unit_stop_here(u)).length === 0) {
             button("done")
-        }
-        if (L.movable_units.length > 0 && L.movable_units.filter(u => set_has(L.disen, u)).length === L.movable_units.length) {
-            button("no_disen")
         }
         if (G.active_stack.length === 0) {
             L.movable_units.forEach(u => action_unit(u))
@@ -2066,14 +2026,6 @@ P.move_offensive_units = {
         G.active_stack.forEach(u => displace_to_turn(u, 1, true))
         G.active_stack = []
         L.allowed_hexes = []
-        if (L.movable_units.length <= 0) {
-            end()
-        }
-    },
-    no_disen() {
-        push_undo()
-        L.disen.forEach(u => set_delete(L.movable_units, u))
-        L.disen = []
         if (L.movable_units.length <= 0) {
             end()
         }
@@ -2175,7 +2127,6 @@ P.move_offensive_units = {
         move_units(G.active_stack, curr_path)
         reset_move_type()
         check_supply()
-        apply_ground_disengadgement()
         this.check_dist_attack(hex)
     },
     check_dist_attack(hex) {
@@ -2773,10 +2724,10 @@ function check_burma_road() {
     check_hump()
 }
 
-function is_overstack(hex, unit) {
+function is_overstack(hex, unit, multip = 1) {
     var overstack = G.overstack[hex]
     var piece = pieces[unit]
-    var multiplier = (G.location[unit] === hex || G.location[piece.pair] === hex) ? 0 : 1
+    var multiplier = ((G.location[unit] === hex || G.location[piece.pair] === hex) ? 0 : 1) * multiplier
     if (piece.class === "hq") {
         return overstack & 1
     } else if (piece.class !== "naval") {
@@ -2864,7 +2815,7 @@ P.check_overstacking = {
             displace_to_turn(u, 1, true)
         }
         set_delete(L.allowed_units, u)
-        var still_overstack = is_overstack(location, u)
+        var still_overstack = is_overstack(location, u, 0)
         if (!still_overstack && pieces[u].class === "naval") {
             L.allowed_units = L.allowed_units.filter(u => G.location[u] !== location || pieces[u].class !== "naval")
         } else if (!still_overstack && pieces[u].class === "ground") {
@@ -2901,7 +2852,6 @@ function set_location(unit, location) {
 }
 
 function fill_overstack() {
-    console.log("OVERSYTACKK!!!!")
     for (var i = 0; i <= LAST_BOARD_HEX; i++) {
         G.overstack[i] = 0
     }
@@ -3387,19 +3337,97 @@ function compute_ground_naval_strat_move() {
     map_delete(L.allowed_hexes, location)
 }
 
-function compute_ground_disengagement() {
-    let location = L.move_data.location
-    L.allowed_hexes = []
-    let move_data = L.move_data
-
-    var just_enetered = []
-    map_for_each(G.offensive.paths, (u, path) => {
-        var piece = pieces[u]
-        var a_location = G.location[u]
-        if (piece.faction === G.offensive.attacker && a_location === location && piece.class === "ground") {
-            set_add(just_enetered, path[path.length - 2])
+P.ground_disengagement = {
+    _begin() {
+        L.cf_sum = []
+        G.offensive.battle_hexes.forEach(b => {
+            map_set(L.cf_sum, b, [0, 0])
+        })
+        L.just_enetered = []
+        map_for_each(G.offensive.paths, (u, path) => {
+            var piece = pieces[u]
+            var location = G.location[u]
+            if (piece.faction === G.offensive.attacker && piece.class === "ground" && path[0] & GROUND_MOVE
+                && set_has(G.offensive.battle_hexes, location)) {
+                set_add(L.just_enetered, path[path.length - 2])
+            }
+        })
+        L.allowed_units = []
+        L.moved = []
+        for_each_unit_on_map((u, piece, location) => {
+            var bh = map_get(L.cf_sum, location)
+            if (piece.class === "ground" && bh) {
+                bh[piece.faction] += set_has(G.reduced, u) ? piece.rcf : piece.cf
+                if (piece.faction !== G.offensive.attacker && get_disengagement_hexes(location).length) {
+                    set_add(L.allowed_units, u)
+                }
+            }
+        })
+        if (get_disengagement_units().length <= 0) {
+            end()
         }
+    },
+    prompt() {
+        if (G.active_stack.length === 0) {
+            prompt(`Choose unit for disengagement.`)
+            var du = get_disengagement_units()
+            du.forEach(u => action_unit(u))
+            button("done")
+        } else {
+            prompt(`Choose hex to disengagement.`)
+            L.allowed_hexes.forEach(h => action_hex(h))
+        }
+    },
+    done() {
+        push_undo()
+        check_supply()
+        L.moved.forEach(u => map_delete(G.offensive.paths, u))
+        end()
+    },
+    unit(u) {
+        push_undo()
+        set_delete(L.allowed_units, u)
+        G.active_stack = [u]
+        var cf = set_has(G.reduced, u) ? pieces[u].rcf : pieces[u].cf
+        map_get(L.cf_sum, G.location[u])[1 - G.offensive.attacker] -= cf
+        set_add(L.moved, u)
+        compute_ground_disengagement(u)
+    },
+    action_hex(hex) {
+        push_undo()
+        var curr_path = map_get(L.allowed_hexes, hex)
+        G.active_stack.forEach(u => {
+            map_set(G.offensive.paths, u, curr_path.slice())
+        })
+        move_units(G.active_stack, curr_path)
+        G.active_stack = []
+    }
+}
+
+function get_disengagement_units() {
+    return L.allowed_units.filter(u => {
+        var bh = map_get(L.cf_sum, G.location[u])
+        return (bh[G.offensive.attacker] < bh[1 - G.offensive.attacker] && bh[G.offensive.attacker] > 0)
     })
+}
+
+function get_disengagement_hexes(hex) {
+    var result = []
+    var nh_array = get_near_hexes(hex)
+    for (var i = 0; i < nh_array.length; i++) {
+        var nh = nh_array[i]
+        var distance = get_ground_move_cost(hex, nh, i, R)
+        if (nh > 0 && !set_has(L.just_enetered, nh) && !is_faction_units(nh, G.offensive.attacker) && distance < 10) {
+            set_add(result, nh)
+        }
+    }
+    return result
+}
+
+function compute_ground_disengagement(unit) {
+    let location = G.location[unit]
+    L.allowed_hexes = []
+    var ground_move_distance = G.offensive.ground_move_distance
     const queue = [location]
     const distance_map = [location, [0, location]]
 
@@ -3413,8 +3441,8 @@ function compute_ground_disengagement() {
                 continue
             }
             var distance = base_distance[0] + get_ground_move_cost(item, nh, j, R)
-            if (is_faction_units(nh, G.offensive.attacker) || set_has(nh, just_enetered) || distance >= 100
-                || item !== location && (distance > move_data.ground_move_distance || distance >= map_get(distance_map, nh, [100])[0])) {
+            if (is_faction_units(nh, G.offensive.attacker) || set_has(L.just_enetered, nh) || distance >= 100
+                || item !== location && (distance > ground_move_distance || distance >= map_get(distance_map, nh, [100])[0])) {
                 continue
             }
             const stop_move = should_ground_move_stop(nh, R)
@@ -3424,13 +3452,13 @@ function compute_ground_disengagement() {
             path_array[0] = distance
             map_set(distance_map, nh, path_array)
 
-            if (distance < move_data.ground_move_distance && !stop_move) {
+            if (distance < ground_move_distance && !stop_move) {
                 queue.push(nh)
             }
         }
     }
     map_for_each(distance_map, (k, v) => {
-        v.unshift(GROUND_DISENGAGEMENT | REACTION_MOVE)
+        v.unshift(GROUND_DISENGAGEMENT | REACTION_MOVE | GROUND_MOVE)
         map_set(L.allowed_hexes, k, v)
     })
     map_delete(L.allowed_hexes, location)
@@ -4822,6 +4850,7 @@ P.offensive_sequence = script(`
         trigger_event("before_reaction")
     }
     log ("Offensive reaction.")
+    call ground_disengagement
     call special_reaction
     call define_intelligence_condition
     if (G.offensive.intelligence != SURPRISE) {

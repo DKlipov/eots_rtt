@@ -5613,6 +5613,7 @@ data.map = [
         edges: [3, 3, 2, 2, 2, 2]
     },
     {id: 2826, region: "Australia", terrain: OPEN, edges: [2, 2, 16, 16, 16, 2]},
+    {id: 2923, region: "Australia", terrain: JUNGLE, edges: [1, 3, 2, 3, 1, 1]},
     {id: 2924, region: "Australia", terrain: JUNGLE, edges: [3, 2, 2, 2, 3, 1]},
     {id: 2925, region: "Australia", terrain: OPEN, edges: [2, 2, 2, 16, 2, 2]},
     {
