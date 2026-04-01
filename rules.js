@@ -1263,7 +1263,7 @@ function activate_card(c) {
     G.offensive.naval_move_distance = (cards[c].ops * 5)
     //todo debug
     if (G.debug) {
-        G.offensive.naval_move_distance = 30
+        // G.offensive.naval_move_distance = 30
     }
     G.offensive.ground_move_distance = (cards[c].ops * 2)
     G.offensive.air_move_distance = (cards[c].ops)
@@ -2100,11 +2100,11 @@ P.move_offensive_units = {
         } else if (is_space_controlled(hex, 1 - R) && curr_path[0] & AMPH_MOVE) {
             create_landing_hex(hex)
         }
-        if (curr_path[0] & AMPH_MOVE && G.offensive.stage !== REACTION_STAGE) {
+        if (curr_path[0] & AMPH_MOVE && G.offensive.stage === REACTION_STAGE) {
             G.asp[R][1] += 1
             G.offensive.r_asp = 1
         } else if (curr_path[0] & AMPH_MOVE &&
-            (!get_map_data()[hex].port || !is_space_controlled(hex, R) || is_faction_units(hex, 1 - R) || G.offensive.stage !== POST_BATTLE_STAGE)) {
+            (!get_map_data()[hex].port || !is_space_controlled(hex, R) || is_faction_units(hex, 1 - R))) {
             G.asp[R][1] += L.move_data.asp_points
             G.offensive.r_asp += L.move_data.asp_points
         }

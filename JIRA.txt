@@ -1,7 +1,5 @@
 Todo list:
-* [WIP] Сommit escort to battle (if could choose)
-* Split removed cards
-* JP CV ressign hits step
+* [WIP] JP CV ressign hits step
 * Distant hits by units, no steps
 * skip bombing
 * fuel shortage
@@ -21,3 +19,4 @@ Todo list:
 * Kunming supply
 * Check supply durning movement
 * Unify logs
+* Split removed cards
