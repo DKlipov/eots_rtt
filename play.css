@@ -334,6 +334,10 @@ body.Allies #jp_hand { grid-row: 4; }
 	text-align: center;
 }
 
+.marker.battle.gray {
+	background-color: gray;
+}
+
 .marker.battle {
 	background-color: lawngreen;
 }
@@ -345,6 +349,7 @@ body.Allies #jp_hand { grid-row: 4; }
 .unit > .marker {
 	width: 20px;
 	height: 20px;
+	background-size: 20px 20px;
 	font-size: 15px;
 	/*border: 0 solid black;*/
 	right: 0;

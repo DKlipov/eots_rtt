@@ -48,6 +48,41 @@ for (let item of document.getElementById("card_popup").querySelectorAll("li")) {
     }
 }
 
+//Move types
+const ANY_MOVE = 0
+const STRAT_MOVE = 1 << 0
+const NAVAL_MOVE = 1 << 1
+const GROUND_MOVE = 1 << 2
+const AMPH_MOVE = 1 << 3
+const AIR_STRAT_MOVE = 1 << 4
+const AIR_MOVE = 1 << 5
+const BARGES_MOVE = 1 << 6
+const POST_BATTLE_MOVE = 1 << 7
+const REACTION_MOVE = 1 << 8
+const AIR_EXTENDED_MOVE = 1 << 9
+const AVOID_ZOI = 1 << 11
+const ORGANIC_ONLY = 1 << 12
+const GROUND_DISENGAGEMENT = 1 << 13
+
+const UNIT_MOVEMENT_MARKERS = [
+    {
+        "name": "BARGES_MOVE",
+        "path": BARGES_MOVE,
+        counter: "marker barges",
+    },
+    {
+        "name": "STRAT_MOVE",
+        "path": STRAT_MOVE,
+        counter: "marker doolitle",
+    },
+    {
+        "name": "AMPH_MOVE",
+        "path": AMPH_MOVE,
+        counter: "marker naval_repl",
+    },
+
+]
+
 const TRACK_MARKERS = [
     {
         counter: "resource_jp",
@@ -415,6 +450,7 @@ function draw_paths() {
 }
 
 function place_unit(u, location) {
+    var piece = data.pieces[u]
     var unit
     if (location > TURN_BOX && location <= (TURN_BOX + 12)) {
         unit = populate("turn", location - TURN_BOX, "unit", u)
@@ -430,10 +466,24 @@ function place_unit(u, location) {
         unit.classList.toggle("activated", G.offensive.active_units.includes(u))
         unit.classList.toggle("selected", G.active_stack.includes(u))
         var battle = map_get(G.offensive.committed, u)
+        var path = map_get(G.offensive.paths, u, [0])[0]
         if (battle && set_has(G.offensive.battle_hexes, battle)) {
             apply_conflict_marker(populate_generic_to_parent(unit, "marker conflict battle"), battle)
         } else if (battle && set_has(G.offensive.landing_hexes, battle)) {
             apply_conflict_marker(populate_generic_to_parent(unit, "marker conflict landing"), battle)
+        } else if (battle && piece.parenthetical) {
+            apply_conflict_marker(populate_generic_to_parent(unit, "marker conflict battle gray"), battle)
+        } else if (piece.organic && !(path & STRAT_MOVE) && G.offensive.organic.includes(u)) {
+            populate_generic_to_parent(unit, "marker tokyo_express")
+        } else {
+            for (var i = 0; i < UNIT_MOVEMENT_MARKERS.length; i++) {
+                var m = UNIT_MOVEMENT_MARKERS[i]
+                if (path & m.path) {
+                    populate_generic_to_parent(unit, m.counter)
+                    return
+                }
+            }
+
         }
     }
 }

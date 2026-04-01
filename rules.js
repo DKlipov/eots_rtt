@@ -371,9 +371,6 @@ for (var i = 1; i < pieces.length; i++) {
     piece.replacement = get_unit_replacement_type(piece)
     if (piece.class === "naval" && !piece.faction) {
         piece.service = "navy"
-        if (["ca", "cl", "apd"].includes(piece.type)) {
-            piece.organic = true
-        }
     }
 
     if (!piece.ebr && piece.br) {
@@ -2131,7 +2128,13 @@ P.move_offensive_units = {
     },
     check_dist_attack(hex) {
         L.allowed_hexes = []
-        var distant_attack = L.move_data.battle_range && G.active_stack.length >= 1
+        var escort = G.offensive.active_units[R].filter(u => {
+            var piece = pieces[u]
+            return G.location[u] === hex && piece.br && piece.class === "naval"
+        }).length
+        var distant_attack =
+            (L.move_data.battle_range || escort)
+            && G.active_stack.length >= 1
             && !set_has(G.offensive.battle_hexes, hex)
             && G.offensive.stage !== POST_BATTLE_STAGE
             && !G.committed.includes(G.active_stack[0])
@@ -2188,7 +2191,18 @@ P.choose_attack_hex = {
             return
         }
         L.move_data = get_move_data()
-        compute_air_commit_hexes()
+        if (!L.move_data.battle_range) {
+            L.allowed_hexes = []
+            G.offensive.active_units[R].forEach(u => {
+                var piece = pieces[u]
+                var bh = map_get(G.offensive.committed, u)
+                if (G.location[u] === L.move_data.location && piece.br && piece.class === "naval" && bh) {
+                    set_add(L.allowed_hexes, bh)
+                }
+            })
+        } else {
+            compute_air_commit_hexes()
+        }
         var path = map_get(G.offensive.paths, G.active_stack[0])
         if (G.offensive.stage === REACTION_STAGE && set_has(G.offensive.battle_hexes, path[2])) {
             this.attack_hex(path[2])
@@ -3527,13 +3541,15 @@ function mark_participate_attack_hex() {
         mark_attack_zone(base_location, L.move_data.battle_range)
         return;
     }
-    map_for_each(G.offensive.paths, (u, path) => {
-        var piece = pieces[u]
-        if (piece.faction === G.active && piece.class === "naval" && piece.br && !set_has(G.active_stack, u)) {
-            var location = G.location[u]
-            G.supply_cache[location] = G.supply_cache[location] | HEX_TEMP_FLAG1
-        }
-    })
+    if (!L.move_data.is_ground_present) {
+        map_for_each(G.offensive.paths, (u, path) => {
+            var piece = pieces[u]
+            if (piece.faction === G.active && piece.class === "naval" && piece.br && !set_has(G.active_stack, u)) {
+                var location = G.location[u]
+                G.supply_cache[location] = G.supply_cache[location] | HEX_TEMP_FLAG1
+            }
+        })
+    }
     G.offensive.battle_hexes.forEach(h => mark_attack_zone(h, L.move_data.battle_range))
     if (G.offensive.stage === ATTACK_STAGE) {
         G.offensive.landing_hexes.forEach(h => mark_attack_zone(h, L.move_data.battle_range))
@@ -4907,6 +4923,7 @@ P.battle_sequence = script(`
       call assign_hits
       call apply_ground_winner
       call retreat
+      set G.offensive.battle {}
     }
 `)
 
@@ -8026,7 +8043,7 @@ function eliminate(unit) {
     var size = get_overstack_size(unit)
     var location = G.location[unit]
     if (location <= LAST_BOARD_HEX || location === CHINA_BOX) {
-        G.overstack[i] -= size
+        G.overstack[location] -= size
     }
     if (piece.class === "hq" && !piece.notreplaceable) {
         displace_to_turn(unit, 1)
@@ -8136,7 +8153,7 @@ P.operation_z = {
         G.offensive.active_units[JP].forEach(u => {
             set_location(u, h)
         })
-        G.offensive.battle_hexes = [OAHU]
+        create_battle_hex(OAHU)
         G.offensive.active_units[JP].forEach(u => commit_to_attack(u, OAHU))
         check_supply()
         goto("operation_z_battle")
@@ -9126,6 +9143,7 @@ function on_view() {
         landing_hexes: G.offensive.landing_hexes,
         committed: G.offensive.committed,
         battle_names: G.offensive.battle_names,
+        organic: G.offensive.organic,
         damaged: G.offensive.battle && G.offensive.battle.damaged ? G.offensive.battle.damaged[R] : [],
     }
     V.garrison = []
