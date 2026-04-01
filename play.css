@@ -326,3 +326,26 @@ body.Allies #jp_hand { grid-row: 4; }
 	border: 4px dashed lime;
 	z-index: 100;
 }
+
+.marker.conflict {
+	border: 1px solid black;
+	font-size: 25px;
+	font-weight: bold;
+	text-align: center;
+}
+
+.marker.battle {
+	background-color: lawngreen;
+}
+
+.marker.landing {
+	background-color: yellow;
+}
+
+.unit > .marker {
+	width: 20px;
+	height: 20px;
+	font-size: 15px;
+	/*border: 0 solid black;*/
+	right: 0;
+}

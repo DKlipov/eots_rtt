@@ -1,6 +1,6 @@
 /*MARKERS*/
-.marker.attack { background-image: url(markers75/attack.webp);  }
-.marker.landing { background-image: url(markers75/landing.webp);  }
+/*.marker.attack { background-image: url(markers75/attack.webp);  }*/
+/*.marker.landing { background-image: url(markers75/landing.webp);  }*/
 .marker.oos { background-image: url(markers75/ap_oos.webp);  }
 .marker.control_jp { background-image: url(markers75/control_jp.png);  }
 .marker.capture_jp { background-image: url(markers75/capture_jp.png);  }

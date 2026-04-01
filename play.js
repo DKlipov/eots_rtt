@@ -429,6 +429,12 @@ function place_unit(u, location) {
         unit.classList.toggle("oos", set_has(G.oos, u))
         unit.classList.toggle("activated", G.offensive.active_units.includes(u))
         unit.classList.toggle("selected", G.active_stack.includes(u))
+        var battle = map_get(G.offensive.committed, u)
+        if (battle && set_has(G.offensive.battle_hexes, battle)) {
+            apply_conflict_marker(populate_generic_to_parent(unit, "marker conflict battle"), battle)
+        } else if (battle && set_has(G.offensive.landing_hexes, battle)) {
+            apply_conflict_marker(populate_generic_to_parent(unit, "marker conflict landing"), battle)
+        }
     }
 }
 
@@ -574,8 +580,9 @@ function on_update() {
         document.getElementById("active_cards").classList.add("hide")
     }
 
-    G.offensive.battle_hexes.forEach(h => populate_generic("board_hex", h, "marker attack"))
-    G.offensive.landind_hexes.forEach(h => populate_generic("board_hex", h, "marker landing"))
+
+    G.offensive.battle_hexes.forEach(h => apply_conflict_marker(populate_generic("board_hex", h, "marker conflict battle"), h))
+    G.offensive.landing_hexes.forEach(h => apply_conflict_marker(populate_generic("board_hex", h, "marker conflict landing"), h))
 
     G.inter_service.forEach((v, i) => populate_generic("status", i, `marker ${v ? "rivalry" : "agreement"}_${i ? "ap" : "jp"}`))
     populate_generic("pw", G.political_will, "marker pw")
@@ -648,6 +655,10 @@ function on_update() {
 
     action_button("undo", "Undo")
     end_update()
+}
+
+function apply_conflict_marker(marker, hex) {
+    marker.innerText = String.fromCharCode(65 + G.offensive.battle_names.indexOf(hex))
 }
 
 function on_click_card(evt) {

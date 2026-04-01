@@ -73,8 +73,8 @@ body.hide-pieces .piece {
 
 .piece.activated {
     border-color: red;
-    box-shadow: 0 0 2px black, inset 0 0 2px black;
-    border-width: 2px;
+    box-shadow: 0 0 1px black, inset 0 0 1px black;
+    border-width: 1px;
     border-style: solid;
 }
 

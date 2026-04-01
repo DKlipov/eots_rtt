@@ -17,6 +17,7 @@ Todo list:
 * One-step ground units at ground battle FULL streight
 * Add partially impassable hexsides to data.js
 * surrender once per game
+* south pacific scenario
 * Kunming supply
 * Check supply durning movement
 * Unify logs
