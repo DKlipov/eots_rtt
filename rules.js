@@ -711,10 +711,12 @@ function get_replacement_points() {
         result.AIR = G.reinforcements.AIR
         return result
     }
-    if (is_space_controlled(OAHU, AP)) {
-        result.NAVAL = 2
-    } else {
+    if (G.turn % 2 === 0) {
         result.NAVAL = 1
+    }
+    if (is_space_controlled(OAHU, AP)) {
+        result.NAVAL++
+        log(`+1 US Naval Replacement Point (AP controlled Oahu).`)
     }
     if ([6, 9, 12].includes(G.turn) && COM_REPLACEMENT_POINTS.filter(h => is_space_controlled(h, AP)).length) {
         result.COMMONWEALTH = 1
@@ -4577,8 +4579,7 @@ P.prepare_battle = function () {
     var attacker = G.offensive.attacker
     for_each_unit_on_map((u, piece) => {
         var location = G.location[u]
-        if (location === hex && (piece.class === "air" || piece.class === "naval")
-            && !set_has(G.offensive.active_units[piece.faction], u)) {
+        if (location === hex && (piece.class === "air" || piece.class === "naval")) {
             set_add(battle.air_naval[piece.faction], u)
         } else if (location === hex && piece.class === "ground") {
             set_add(battle.ground[piece.faction], u)

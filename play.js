@@ -67,17 +67,22 @@ const GROUND_DISENGAGEMENT = 1 << 13
 const UNIT_MOVEMENT_MARKERS = [
     {
         "name": "BARGES_MOVE",
-        "path": BARGES_MOVE,
+        condition: (u, piece, path) => path & BARGES_MOVE,
         counter: "marker barges_small",
     },
     {
         "name": "STRAT_MOVE",
-        "path": STRAT_MOVE,
+        condition: (u, piece, path) => path & STRAT_MOVE && piece.class !== "air",
         counter: "marker strat_small",
     },
     {
+        "name": "STRAT_MOVE",
+        condition: (u, piece, path) => path & STRAT_MOVE && piece.class === "air",
+        counter: "marker strat_air_small",
+    },
+    {
         "name": "AMPH_MOVE",
-        "path": AMPH_MOVE,
+        condition: (u, piece, path) => path & AMPH_MOVE && piece.class === "ground",
         counter: "marker aa_small",
     },
 
@@ -478,7 +483,7 @@ function place_unit(u, location) {
         } else {
             for (var i = 0; i < UNIT_MOVEMENT_MARKERS.length; i++) {
                 var m = UNIT_MOVEMENT_MARKERS[i]
-                if (path & m.path) {
+                if (m.condition(u, piece, path)) {
                     populate_generic_to_parent(unit, m.counter)
                     return
                 }
