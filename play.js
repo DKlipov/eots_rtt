@@ -991,7 +991,7 @@ function get_hex_name(h){
     const hex_id = data.map.findIndex((element) => element.id === hex)
     if(hex_id != -1){
         const hex_data = data.map[hex_id]
-        if(hex_data.airfield || hex_data.port || hex_data.port || hex_data.city || hex_data.resource){
+        if(hex_data.name){
             return hex_data.name
         }
     }
