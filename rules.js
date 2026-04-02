@@ -4357,8 +4357,8 @@ P.apply_hits = {
 P.ground_bombardment = {
     _begin() {
         G.active = (1 - G.offensive.attacker)
-        battle.hit_able_units = [[], []]
         var battle = G.offensive.battle
+        battle.hit_able_units = [[], []]
         L.allowed_units = battle.ground[G.active].filter(u => unit_on_board(u))
         L.garrison_present = L.allowed_units.filter(u => pieces[u].garrison).length
         if (L.allowed_units.length === 1 && set_has(G.reduced, pieces[L.allowed_units[0]])) {
