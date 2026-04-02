@@ -351,6 +351,11 @@ body.Allies #jp_hand { grid-row: 4; }
 	height: 20px;
 	background-size: 20px 20px;
 	font-size: 15px;
-	/*border: 0 solid black;*/
+	border: 1px solid black;
 	right: 0;
+}
+
+.unit > .marker.barges_small {
+	border-color: #1FC4F4;
+	/*border: 1px solid gree;*/
 }

@@ -60,6 +60,11 @@
 .marker.pt_boats { background-image: url(markers75/pt_boats.png);  }
 .marker.us_sub { background-image: url(markers75/us_sub.png);  }
 .marker.no_garrison { background-image: url(markers75/no_garrison.png);  }
+.marker.organic_small { background-image: url(markers75/organic_small.png); }
+.marker.aa_small { background-image: url(markers75/aa_small.png); }
+.marker.strat_small { background-image: url(markers75/strat_small.png); }
+.marker.barges_small { background-image: url(markers75/barges_small.png); }
+.marker.oos_small { background-image: url(markers75/oos_small.webp); }
 
 
 /* ARMIES (45x45) */

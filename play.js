@@ -68,17 +68,17 @@ const UNIT_MOVEMENT_MARKERS = [
     {
         "name": "BARGES_MOVE",
         "path": BARGES_MOVE,
-        counter: "marker barges",
+        counter: "marker barges_small",
     },
     {
         "name": "STRAT_MOVE",
         "path": STRAT_MOVE,
-        counter: "marker doolitle",
+        counter: "marker strat_small",
     },
     {
         "name": "AMPH_MOVE",
         "path": AMPH_MOVE,
-        counter: "marker naval_repl",
+        counter: "marker aa_small",
     },
 
 ]
@@ -455,14 +455,12 @@ function place_unit(u, location) {
     if (location > TURN_BOX && location <= (TURN_BOX + 12)) {
         unit = populate("turn", location - TURN_BOX, "unit", u)
         unit.classList.toggle("reduced", set_has(G.reduced, u))
-        unit.classList.remove("oos")
         unit.classList.remove("activated")
         unit.classList.remove("selected")
     } else if (location === ELIMINATED_BOX && !data.pieces[u].notreplaceable || location !== ELIMINATED_BOX) {
         unit = populate("board_hex", location, "unit", u)
         unit.classList.toggle("reduced", set_has(G.reduced, u) || location === ELIMINATED_BOX
             || data.pieces[u].class === "hq" && G.inter_service[data.pieces[u].faction])
-        unit.classList.toggle("oos", set_has(G.oos, u))
         unit.classList.toggle("activated", G.offensive.active_units.includes(u))
         unit.classList.toggle("selected", G.active_stack.includes(u))
         var battle = map_get(G.offensive.committed, u)
@@ -474,7 +472,9 @@ function place_unit(u, location) {
         } else if (battle && piece.parenthetical) {
             apply_conflict_marker(populate_generic_to_parent(unit, "marker conflict battle gray"), battle)
         } else if (piece.organic && !(path & STRAT_MOVE) && G.offensive.organic.includes(u)) {
-            populate_generic_to_parent(unit, "marker tokyo_express")
+            populate_generic_to_parent(unit, "marker organic_small")
+        } else if (set_has(G.oos, u)) {
+            populate_generic_to_parent(unit, "marker oos_small")
         } else {
             for (var i = 0; i < UNIT_MOVEMENT_MARKERS.length; i++) {
                 var m = UNIT_MOVEMENT_MARKERS[i]
