@@ -4170,11 +4170,11 @@ function get_ground_roll_modifiers(faction) {
                 air[pieces[u].faction] = true
             }
         })
-        if (air[faction] && !air[faction]) {
+        if (air[faction] && !air[1 - faction]) {
             result += 2
             log(`+2 ${faction ? "Ap" : "Jp"} air support`)
         }
-        if (naval[faction] && !naval[faction]) {
+        if (naval[faction] && !naval[1 - faction]) {
             result += 2
             log(`+2 ${faction ? "Ap" : "Jp"} naval support`)
         }
@@ -4624,7 +4624,7 @@ P.prepare_ground_battle = function () {
     G.offensive.battle = {
         battle_hex: battle.battle_hex,
         ground_stage: true,
-        air_naval: [[], []],
+        air_naval: battle.air_naval,
         ground: battle.ground,
         amph_ground: battle.amph_ground,
         strength: [0, 0],
