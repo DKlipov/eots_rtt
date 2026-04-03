@@ -1492,6 +1492,13 @@ P.choose_hq = {
     prompt() {
         prompt(`${offensive_card_header()} Choose HQ.`)
         L.possible_units.forEach(u => action_unit(u))
+        if (!L.possible_units.length) {
+            button("skip")
+        }
+    },
+    skip() {
+        push_undo()
+        end()
     },
     unit(u) {
         push_undo()
@@ -1790,6 +1797,9 @@ P.activate_units = {
         var hq = G.offensive.active_hq[G.active]
         L.possible_units = get_activatable_units(hq, pieces[hq].supply)
         trigger_event("before_unit_activation")
+        if (!L.possible_units.length) {
+            end()
+        }
     },
     prompt() {
         prompt(`${offensive_card_header()} Activate units ${G.offensive.logistic} + ${L.hq_bonus} / ${G.offensive.active_units[R].length}.`)
