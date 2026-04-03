@@ -4098,6 +4098,7 @@ function fill_hit_able_units(faction) {
     }
     var result = []
     var reduced = []
+    var has_full_size = 0
     var critical = battle.critical[faction]
     var lower_lf_unit = [100]
     var hit_limit = battle.hits[faction]
@@ -4111,6 +4112,7 @@ function fill_hit_able_units(faction) {
         total_lf += loss_factor
         if (reduced_status === 0) {
             total_lf += loss_factor
+            has_full_size = 1
         }
         var could_be_damaged = loss_factor <= hit_limit && (distant_hits || !piece.br || G.location[unit] === battle.battle_hex)
         if (could_be_damaged && (critical || reduced_status === 0)) {
@@ -4123,7 +4125,7 @@ function fill_hit_able_units(faction) {
             lower_lf_unit = [loss_factor, unit]
         }
     }
-    if (!result.length && reduced.length) {
+    if (!result.length && reduced.length && !has_full_size) {
         result = reduced
     }
     if (ground_bomb && get_map_data()[battle.battle_hex].city > CITY) {
@@ -4253,6 +4255,7 @@ P.execute_attack = function () {
     battle.strength[faction] = sum_combat_factor(pool)
     log(`${G.offensive.attacker === faction ? "Attacker" : "Defender"} fire (${battle.strength[faction]})`)
     battle.roll[faction] = random(10)
+    battle.roll[faction] = 0
     clear_undo()
     battle.roll_modifiers = 0
     if (battle.ground_stage && is_col_tsuji_applied(faction)) {
