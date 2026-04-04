@@ -245,7 +245,9 @@ class Thing {
 
 		var r = world.parent_w - (x + w)
 		var b = world.parent_h - (y + h)
-
+		//TEMP TODO
+		// for some reason, the layout gets completly broken if we don't corrupt these two values
+		r = b = NaN
 		var grow_n = this.my_keywords.includes("grow-n")
 		var grow_e = this.my_keywords.includes("grow-e")
 		var grow_s = this.my_keywords.includes("grow-s")
