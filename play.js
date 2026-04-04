@@ -48,6 +48,46 @@ for (let item of document.getElementById("card_popup").querySelectorAll("li")) {
     }
 }
 
+//Move types
+const ANY_MOVE = 0
+const STRAT_MOVE = 1 << 0
+const NAVAL_MOVE = 1 << 1
+const GROUND_MOVE = 1 << 2
+const AMPH_MOVE = 1 << 3
+const AIR_STRAT_MOVE = 1 << 4
+const AIR_MOVE = 1 << 5
+const BARGES_MOVE = 1 << 6
+const POST_BATTLE_MOVE = 1 << 7
+const REACTION_MOVE = 1 << 8
+const AIR_EXTENDED_MOVE = 1 << 9
+const AVOID_ZOI = 1 << 11
+const ORGANIC_ONLY = 1 << 12
+const GROUND_DISENGAGEMENT = 1 << 13
+
+const UNIT_MOVEMENT_MARKERS = [
+    {
+        "name": "BARGES_MOVE",
+        condition: (u, piece, path) => path & BARGES_MOVE,
+        counter: "marker barges_small",
+    },
+    {
+        "name": "STRAT_MOVE",
+        condition: (u, piece, path) => path & STRAT_MOVE && piece.class !== "air",
+        counter: "marker strat_small",
+    },
+    {
+        "name": "STRAT_MOVE",
+        condition: (u, piece, path) => path & STRAT_MOVE && piece.class === "air",
+        counter: "marker strat_air_small",
+    },
+    {
+        "name": "AMPH_MOVE",
+        condition: (u, piece, path) => path & AMPH_MOVE && piece.class === "ground",
+        counter: "marker aa_small",
+    },
+
+]
+
 const TRACK_MARKERS = [
     {
         counter: "resource_jp",
@@ -415,20 +455,41 @@ function draw_paths() {
 }
 
 function place_unit(u, location) {
+    var piece = data.pieces[u]
     var unit
     if (location > TURN_BOX && location <= (TURN_BOX + 12)) {
         unit = populate("turn", location - TURN_BOX, "unit", u)
         unit.classList.toggle("reduced", set_has(G.reduced, u))
-        unit.classList.remove("oos")
         unit.classList.remove("activated")
         unit.classList.remove("selected")
     } else if (location === ELIMINATED_BOX && !data.pieces[u].notreplaceable || location !== ELIMINATED_BOX) {
         unit = populate("board_hex", location, "unit", u)
         unit.classList.toggle("reduced", set_has(G.reduced, u) || location === ELIMINATED_BOX
             || data.pieces[u].class === "hq" && G.inter_service[data.pieces[u].faction])
-        unit.classList.toggle("oos", set_has(G.oos, u))
         unit.classList.toggle("activated", G.offensive.active_units.includes(u))
         unit.classList.toggle("selected", G.active_stack.includes(u))
+        var battle = map_get(G.offensive.committed, u)
+        var path = map_get(G.offensive.paths, u, [0])[0]
+        if (battle && set_has(G.offensive.battle_hexes, battle)) {
+            apply_conflict_marker(populate_generic_to_parent(unit, "marker conflict battle"), battle)
+        } else if (battle && set_has(G.offensive.landing_hexes, battle)) {
+            apply_conflict_marker(populate_generic_to_parent(unit, "marker conflict landing"), battle)
+        } else if (battle && piece.parenthetical) {
+            apply_conflict_marker(populate_generic_to_parent(unit, "marker conflict battle gray"), battle)
+        } else if (piece.organic && !(path & STRAT_MOVE) && G.offensive.organic.includes(u)) {
+            populate_generic_to_parent(unit, "marker organic_small")
+        } else if (set_has(G.oos, u)) {
+            populate_generic_to_parent(unit, "marker oos_small")
+        } else {
+            for (var i = 0; i < UNIT_MOVEMENT_MARKERS.length; i++) {
+                var m = UNIT_MOVEMENT_MARKERS[i]
+                if (m.condition(u, piece, path)) {
+                    populate_generic_to_parent(unit, m.counter)
+                    return
+                }
+            }
+
+        }
     }
 }
 
@@ -577,8 +638,9 @@ function on_update() {
         document.getElementById("active_cards").classList.add("hide")
     }
 
-    G.offensive.battle_hexes.forEach(h => populate_generic("board_hex", h, "marker attack"))
-    G.offensive.landind_hexes.forEach(h => populate_generic("board_hex", h, "marker landing"))
+
+    G.offensive.battle_hexes.forEach(h => apply_conflict_marker(populate_generic("board_hex", h, "marker conflict battle"), h))
+    G.offensive.landing_hexes.forEach(h => apply_conflict_marker(populate_generic("board_hex", h, "marker conflict landing"), h))
 
     G.inter_service.forEach((v, i) => populate_generic("status", i, `marker ${v ? "rivalry" : "agreement"}_${i ? "ap" : "jp"}`))
     populate_generic("pw", G.political_will, "marker pw")
@@ -651,6 +713,10 @@ function on_update() {
 
     action_button("undo", "Undo")
     end_update()
+}
+
+function apply_conflict_marker(marker, hex) {
+    marker.innerText = String.fromCharCode(65 + G.offensive.battle_names.indexOf(hex))
 }
 
 function on_click_card(evt) {
