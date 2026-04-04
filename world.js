@@ -559,6 +559,7 @@ function populate(parent_action, arg2, arg3, arg4) {
 	var child = lookup_thing(child_action, child_id)
 	parent.ensure_parent()
 	parent.element.appendChild(child.element)
+	return child.element
 }
 
 // populate_with_list(parent_action, [parent_id], child_action, child_id_list, fallback)
@@ -620,10 +621,61 @@ function populate_generic(parent_action, arg2, arg3, arg4) {
 		parent.element.appendChild(_create_generic(keywords))
 }
 
+function populate_generic_to_parent(parent, keywords) {
+    var child = _create_generic(keywords)
+    child.className = keywords
+    child.parent = parent
+    parent.appendChild(child)
+    return child
+ }
+
 function update_position(action, id, x, y) {
 	var thing = lookup_thing(action, id)
 	thing.element.style.left = Math.round(x) + "px"
 	thing.element.style.top = Math.round(y) + "px"
+}
+function set_add(set, item) {
+    var a = 0
+    var b = set.length - 1
+    // optimize fast case of appending items in order
+    if (item > set[b]) {
+        set[b + 1] = item
+        return
+    }
+    while (a <= b) {
+        var m = (a + b) >> 1
+        var x = set[m]
+        if (item < x)
+            b = m - 1
+        else if (item > x)
+            a = m + 1
+        else
+            return
+    }
+    array_insert(set, a, item)
+}
+
+function array_insert(array, index, item) {
+    for (var i = array.length; i > index; --i)
+        array[i] = array[i - 1]
+    array[index] = item
+}
+
+function set_delete(set, item) {
+    var a = 0
+    var b = set.length - 1
+    while (a <= b) {
+        var m = (a + b) >> 1
+        var x = set[m]
+        if (item < x)
+            b = m - 1
+        else if (item > x)
+            a = m + 1
+        else {
+            array_delete(set, m)
+            return
+        }
+    }
 }
 
 function update_size(action, id, w, h) {
@@ -1454,6 +1506,52 @@ function map_get(map, key, missing) {
 function map_for_each(map, f) {
 	for (var i = 0; i < map.length; i += 2)
 		f(map[i], map[i+1])
+}
+
+function map_set(map, key, value) {
+    var a = 0
+    var b = (map.length >> 1) - 1
+    while (a <= b) {
+        var m = (a + b) >> 1
+        var x = map[m << 1]
+        if (key < x)
+            b = m - 1
+        else if (key > x)
+            a = m + 1
+        else {
+            map[(m << 1) + 1] = value
+            return
+        }
+    }
+    array_insert_pair(map, a << 1, key, value)
+}
+
+
+function set_toggle(set, item) {
+    var a = 0
+    var b = set.length - 1
+    while (a <= b) {
+        var m = (a + b) >> 1
+        var x = set[m]
+        if (item < x)
+            b = m - 1
+        else if (item > x)
+            a = m + 1
+        else {
+            array_delete(set, m)
+            return
+        }
+    }
+    array_insert(set, a, item)
+}
+
+function array_insert_pair(array, index, key, value) {
+    for (var i = array.length; i > index; i -= 2) {
+        array[i] = array[i - 2]
+        array[i + 1] = array[i - 1]
+    }
+    array[index] = key
+    array[index + 1] = value
 }
 
 function q(obj) {

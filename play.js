@@ -264,9 +264,9 @@ function on_init() {
         card.element.onclick = on_click_card
         card.element.card = i
     }
-    define_panel("hand", JP, "jp_hand")
-    define_panel("hand", AP, "ap_hand")
-    define_panel("hand", 2, "active_cards")
+    define_panel("#jp_hand", "hand", JP)
+    define_panel("#ap_hand", "hand", AP)
+    define_panel("#active_cards","hand", 2)
 }
 
 function push_stack(stk, elt) {
@@ -289,7 +289,7 @@ function update_hand(side) {
     if (G.future_offensive[side] > 0) {
         fo_card = populate("hand", side, "card", G.future_offensive[side])
     } else if (G.events[data.events.FUTURE_OFFENSIVE_JP.id + side] > 0) {
-        fo_card = populate_generic("hand", side, side === JP ? "card card_jp_0" : "card card_ap_0")
+        fo_card = populate_generic_to_parent(lookup_thing("hand", side).element, side === JP ? "card card_jp_0" : "card card_ap_0")
     }
     if (G.events[data.events.FUTURE_OFFENSIVE_JP.id + side] === G.turn) {
         populate_generic_to_parent(fo_card, "marker future_offensive_inactive")
@@ -530,10 +530,13 @@ function on_update() {
     //show zoi
     for (i = 1; i < LAST_BOARD_HEX; i++) {
         const zoi_state = G.supply_cache[i] & 3
-        var hex = ZOI_HEX[i]
+        let hex = ZOI_HEX[i]
         if (!hex) {
             continue
+        }else{
+            hex = hex.element
         }
+
         if (zoi_state === 0) {
             hex.classList.add("hide")
         } else if (zoi_state === 1) {
