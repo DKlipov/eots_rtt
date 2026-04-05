@@ -2106,6 +2106,14 @@ P.move_offensive_units = {
             G.offensive.barges = 1
             log(`Barges ability used`)
         }
+        if (G.offensive.stage === REACTION_STAGE && is_faction_units(hex, G.offensive.attacker) && set_has(G.offensive.battle_hexes, hex)) {
+            G.offensive.active_units[1 - R].filter(u => G.location[u] === hex).map(u => map_get(G.offensive.paths, u))
+                .forEach(path => {
+                    if (path[path.length - 1] !== hex) {
+                        path.pop()
+                    }
+                })
+        }
         var curr_path = map_get(L.allowed_hexes, hex)
         if (is_faction_units(hex, 1 - R) && G.active === G.offensive.attacker && G.offensive.stage === ATTACK_STAGE) {
             create_battle_hex(hex)
@@ -2120,25 +2128,13 @@ P.move_offensive_units = {
             G.asp[R][1] += L.move_data.asp_points
             G.offensive.r_asp += L.move_data.asp_points
         }
-        const prev_path = map_get(G.offensive.paths, G.active_stack[0])
-        curr_path = [curr_path[0], curr_path[1], ...prev_path.slice(2), ...curr_path.slice(3)]
-        if (G.offensive.stage === REACTION_STAGE && is_faction_units(hex, G.offensive.attacker) && set_has(G.offensive.battle_hexes, hex)) {
-            G.offensive.active_units[1 - R].filter(u => G.location[u] === hex).map(u => map_get(G.offensive.paths, u))
-                .forEach(path => {
-                    if (path[path.length - 1] !== hex) {
-                        path.pop()
-                    }
-                })
-        }
-        G.active_stack.forEach(u => {
-            map_set(G.offensive.paths, u, curr_path.slice())
-        })
         move_units(G.active_stack, curr_path)
         reset_move_type()
         check_supply()
         this.check_dist_attack(hex)
     },
     check_dist_attack(hex) {
+        var move_hexes = L.allowed_hexes
         L.allowed_hexes = []
         var escort = G.offensive.active_units[R].filter(u => {
             var piece = pieces[u]
@@ -2151,15 +2147,16 @@ P.move_offensive_units = {
             && G.offensive.stage !== POST_BATTLE_STAGE
             && !G.committed.includes(G.active_stack[0])
         if (L.movable_units.length <= 0 && distant_attack) {
-            goto("choose_attack_hex")
+            goto("choose_attack_hex", {move_hexes})
         } else if (distant_attack) {
-            call("choose_attack_hex")
+            call("choose_attack_hex", {move_hexes})
         } else if (L.movable_units.length <= 0) {
             G.active_stack = []
             end()
         } else {
             G.active_stack = []
         }
+
     },
     no_move() {
         push_undo()
@@ -2241,7 +2238,18 @@ P.choose_attack_hex = {
         if (is_faction_units(hex, 1 - R)) {
             create_battle_hex(hex)
         }
-        G.active_stack.forEach(u => commit_to_attack(u, hex))
+        var path_to_bh = map_get(L.move_hexes, hex, 0)
+        var non_cv = []
+        G.active_stack.forEach(u => {
+            if (!path_to_bh || is_cv_unit(pieces[u])) {
+                commit_to_attack(u, hex)
+            } else {
+                set_add(non_cv, u)
+            }
+        })
+        if (non_cv.length && path_to_bh) {
+            move_units(non_cv, path_to_bh)
+        }
         G.active_stack = []
         end()
     },
@@ -2253,6 +2261,11 @@ P.choose_attack_hex = {
 }
 
 function move_units(units, path) {
+    const prev_path = map_get(G.offensive.paths, units[0])
+    var full_path = [path[0], path[1], ...prev_path.slice(2), ...path.slice(3)]
+    units.forEach(u => {
+        map_set(G.offensive.paths, u, full_path.slice())
+    })
     if (path.length === 3) {
         return
     }
@@ -3403,11 +3416,7 @@ P.ground_disengagement = {
     },
     action_hex(hex) {
         push_undo()
-        var curr_path = map_get(L.allowed_hexes, hex)
-        G.active_stack.forEach(u => {
-            map_set(G.offensive.paths, u, curr_path.slice())
-        })
-        move_units(G.active_stack, curr_path)
+        move_units(G.active_stack, map_get(L.allowed_hexes, hex))
         G.active_stack = []
     }
 }
@@ -4102,7 +4111,7 @@ function fill_hit_able_units(faction) {
     var critical = battle.critical[faction]
     var lower_lf_unit = [100]
     var hit_limit = battle.hits[faction]
-    var distant_hits = battle.distant_hits_provided[faction] > 0
+    var distant_hits = battle.distant_hits[faction] - battle.distant_hits_list[faction].length > 0
     for (var i = 0; i < L.pool.length; i += 2) {
         var unit = L.pool[i]
         var piece = pieces[unit]
@@ -4114,7 +4123,8 @@ function fill_hit_able_units(faction) {
             total_lf += loss_factor
             has_full_size = 1
         }
-        var could_be_damaged = loss_factor <= hit_limit && (distant_hits || !piece.br || G.location[unit] === battle.battle_hex)
+        var could_be_damaged = loss_factor <= hit_limit && (!piece.br || distant_hits || set_has(battle.distant_hits_list[faction], unit)
+            || G.location[unit] === battle.battle_hex)
         if (could_be_damaged && (critical || reduced_status === 0)) {
             map_set(result, unit, loss_factor)
         } else if (could_be_damaged) {
@@ -4269,7 +4279,7 @@ P.execute_attack = function () {
     var modififed_roll = roll + battle.roll_modifiers
     var table = battle.ground_stage ? ground_battle_table : naval_battle_table
     battle.hits[faction] = Math.ceil(battle.strength[faction] * (table(modififed_roll)))
-    battle.distant_hits_provided[faction] = pool.filter(u => unit_on_board(u) && pieces[u].br).length
+    battle.distant_hits[faction] = pool.filter(u => unit_on_board(u) && pieces[u].br).length
     if ((roll === 9 || battle.roll_modifiers + roll >= 9 && G.offensive.active_cards.includes(ROCHEFORT)) && !battle.ground_stage) {
         battle.critical[faction] = true
     }
@@ -4329,10 +4339,12 @@ P.apply_hits = {
             end()
             return
         }
+        L.dmg_list = [[], []]
         L.done = [!battle.hit_able_units[0].length, !battle.hit_able_units[1].length]
     },
     prompt() {
         map_for_each(G.offensive.battle.hit_able_units[R], u => action_unit(u))
+        button("undo", L.dmg_list[R].length)
         if (!G.offensive.battle.hit_able_units[R].length) {
             button("done")
             prompt(`${battle_header()} Commit hits. Remaining: ${Math.max(G.offensive.battle.hits[R], 0)}.`)
@@ -4340,8 +4352,21 @@ P.apply_hits = {
             prompt(`${battle_header()} Apply hits. ${G.offensive.battle.hits[R]}`)
         }
     },
+    undo() {
+        var battle = G.offensive.battle
+        var lf = L.dmg_list[R].pop()
+        var unit = L.dmg_list[R].pop()
+        var status = map_get(G.offensive.battle.damaged[R], unit, -1)
+        if (status >= 4) {
+            map_set(G.offensive.battle.damaged[R], unit, 2)
+        } else {
+            map_delete(G.offensive.battle.damaged[R], unit)
+            set_delete(battle.distant_hits_list[R], unit)
+        }
+        battle.hits[R] += lf
+        fill_hit_able_units(R)
+    },
     unit(unit) {
-        push_undo()
         var piece = pieces[unit]
         var battle = G.offensive.battle
         var status = map_get(battle.damaged[R], unit, -1)
@@ -4350,18 +4375,21 @@ P.apply_hits = {
         }
         status += 2
         map_set(battle.damaged[R], unit, status)
-        battle.hits[R] -= map_get(G.offensive.battle.hit_able_units[R], unit)
+        var lf = map_get(G.offensive.battle.hit_able_units[R], unit)
+        battle.hits[R] -= lf
+        L.dmg_list[R].push(unit)
+        L.dmg_list[R].push(lf)
         if (G.location[unit] !== battle.battle_hex && piece.br) {
-            battle.distant_hits_provided[R] -= 1
+            set_add(battle.distant_hits_list[R], unit)
         }
         fill_hit_able_units(R)
     },
     done() {
-        push_undo()
         L.done[R] = true
         if (!L.done[1 - R]) {
             G.active = 1 - R
         } else {
+            push_undo()
             apply_loss()
             check_supply()
             end()
@@ -4380,7 +4408,7 @@ P.jp_cv_reassign = {
             }
         })
         L.to_damage = G.offensive.battle.air_naval[JP].filter(u => is_cv_unit(pieces[u]) && unit_on_board(u))
-        if (L.to_repair.length === 0 || L.to_damage === 0 || G.offensive.battle.critical[AP]) {
+        if (L.to_repair.length === 0 || L.to_damage.length === 0 || G.offensive.battle.critical[AP]) {
             end()
             return;
         } else {
@@ -4532,6 +4560,9 @@ function apply_loss() {
         }
     }
     check_us_casualties()
+    if (battle.damaged[0].length && battle.damaged[1].length) {
+        clear_undo()
+    }
 }
 
 P.apply_naval_winner = function () {
@@ -4687,7 +4718,8 @@ P.prepare_battle = function () {
         hits: [0, 0],
         roll: [-1, -1],
         hit_able_units: [[], []],
-        distant_hits_provided: [0, 0],
+        distant_hits: [0, 0],
+        distant_hits_list: [[], []],
         critical: [false, false],
         damaged: [[], []],
     }
@@ -4743,7 +4775,8 @@ P.prepare_ground_battle = function () {
         hits: [0, 0],
         roll: [-1, -1],
         hit_able_units: [[], []],
-        distant_hits_provided: [0, 0],
+        distant_hits: [0, 0],
+        distant_hits_list: [[], []],
         critical: [false, false],
         damaged: [[], []],
         winner: 1 - G.offensive.attacker

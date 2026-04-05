@@ -1,6 +1,5 @@
 Todo list:
-* [WIP] Distant hits by units, no steps
-* skip bombing
+* [WIP] skip bombing
 * fuel shortage
 * AP55
 * Hq displace and return
