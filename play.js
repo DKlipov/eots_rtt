@@ -462,7 +462,7 @@ function place_unit(u, location) {
         unit.classList.toggle("reduced", set_has(G.reduced, u))
         unit.classList.remove("activated")
         unit.classList.remove("selected")
-    } else if (location === ELIMINATED_BOX && !data.pieces[u].notreplaceable || location !== ELIMINATED_BOX) {
+    } else if (location === ELIMINATED_BOX && (!data.pieces[u].notreplaceable || is_action("unit", u)) || location !== ELIMINATED_BOX) {
         unit = populate("board_hex", location, "unit", u)
         unit.classList.toggle("reduced", set_has(G.reduced, u) || location === ELIMINATED_BOX
             || data.pieces[u].class === "hq" && G.inter_service[data.pieces[u].faction])
@@ -499,7 +499,7 @@ function on_update() {
 
     console.log(G)
     map_for_each(G.offensive.damaged, (u, s) => {
-        if (s >= 2) {
+        if (s > 2) {
             G.location[u] = ELIMINATED_BOX
         } else {
             set_add(G.reduced, u)

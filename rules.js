@@ -4086,13 +4086,13 @@ function fill_hit_able_units(faction) {
     var units = ((battle.ground_stage || battle.air_naval[enemy_faction].length === 0)
         ? battle.ground[enemy_faction] : battle.air_naval[enemy_faction])
     units.forEach(u => {
-        if (unit_on_board(u) && get_reduced_status(u, faction) < 2) {
+        if (unit_on_board(u) && get_reduced_status(u, faction) <= 2) {
             var piece = pieces[u]
             map_set(L.pool, u, piece.lf)
         }
     })
     trigger_event("before_apply_hits", faction)
-    if (ground_bomb && L.pool.length === 2 && get_reduced_status(L.pool[0], faction) === 1) {
+    if (ground_bomb && L.pool.length === 2 && get_reduced_status(L.pool[0], faction) > 0) {
         battle.hit_able_units[faction] = []
         return
     }
@@ -4248,14 +4248,12 @@ P.execute_attack = function () {
     var battle = G.offensive.battle
     var pool = (battle.ground_stage ? battle.ground : battle.air_naval)[faction].filter(u => unit_on_board(u))
     if (pool.length <= 0 || (battle.ground[enemy_faction].length + battle.air_naval[enemy_faction].length) === 0) {
-        // log(`${G.offensive.attacker === faction ? "Attacker" : "Defender"} has no ${battle.ground_stage ? "ground" : "air/naval"} units`)
         end()
         return
     }
     battle.strength[faction] = sum_combat_factor(pool)
     log(`${G.offensive.attacker === faction ? "Attacker" : "Defender"} fire (${battle.strength[faction]})`)
     battle.roll[faction] = random(10)
-    battle.roll[faction] = 0
     clear_undo()
     battle.roll_modifiers = 0
     if (battle.ground_stage && is_col_tsuji_applied(faction)) {
@@ -4309,6 +4307,9 @@ P.assign_hits = script(`
         call assign_crit
       }
       call apply_hits
+      if (G.offensive.battle.jp_cv_damaged){
+        call jp_cv_reassign
+      }
       `)
 
 function battle_header() {
@@ -4347,7 +4348,8 @@ P.apply_hits = {
         if (status < 0) {
             status = set_has(G.reduced, unit) ? 1 : 0
         }
-        map_set(battle.damaged[R], unit, ++status)
+        status += 2
+        map_set(battle.damaged[R], unit, status)
         battle.hits[R] -= map_get(G.offensive.battle.hit_able_units[R], unit)
         if (G.location[unit] !== battle.battle_hex && piece.br) {
             battle.distant_hits_provided[R] -= 1
@@ -4364,6 +4366,92 @@ P.apply_hits = {
             check_supply()
             end()
         }
+    }
+}
+
+P.jp_cv_reassign = {
+    _begin() {
+        L.allowed_hexes = []
+        G.offensive.battle.jp_cv_damaged = 0
+        L.to_repair = []
+        map_for_each(G.offensive.battle.damaged[1 - JP], (u, d) => {
+            if (is_cv_unit(pieces[u])) {
+                map_set(L.to_repair, u, d)
+            }
+        })
+        L.to_damage = G.offensive.battle.air_naval[JP].filter(u => is_cv_unit(pieces[u]) && unit_on_board(u))
+        if (L.to_repair.length === 0 || L.to_damage === 0 || G.offensive.battle.critical[AP]) {
+            end()
+            return;
+        } else {
+            log("Japanese naval aircraft range advantage:")
+            G.active = JP
+            L.stage = 0
+            L.hits = 0
+        }
+    },
+    prompt() {
+        if (L.stage === 0) {
+            prompt(`Japanese naval aircraft range advantage. Choose units to damage. Chosen: ${L.hits}`)
+            L.to_damage.forEach(u => action_unit(u))
+            if (L.hits > 0) {
+                button("next")
+            } else {
+                button("skip")
+            }
+
+        } else {
+            prompt(`Japanese naval aircraft range advantage. Choose units to repair. Chosen: ${L.hits}`)
+            if (L.hits === 0) {
+                button("done")
+            } else {
+                for (var i = 0; i < L.to_repair.length; i += 2) {
+                    action_unit(L.to_repair[i])
+                }
+            }
+        }
+    },
+    unit(u) {
+        push_undo()
+        if (L.stage === 0) {
+            L.hits += 1
+            map_delete(L.to_repair, u)
+            if (set_has(G.reduced, u)) {
+                eliminate(u)
+                set_delete(L.to_damage, u)
+            } else {
+                damage_unit(u)
+            }
+            if (L.hits >= Math.min(get_hits_count(L.to_repair), L.to_damage.map(u => set_has(G.reduced, u) ? 1 : 2).reduce((a, b) => a + b, 0))) {
+                L.stage = 1
+            }
+        } else {
+            L.hits -= 1
+            if (unit_on_board(u)) {
+                set_delete(G.reduced, u)
+                map_delete(L.to_repair, u)
+                log(`${piece_get_log_str(u)} flipped to full size.`)
+            } else {
+                set_location(u, G.offensive.battle.battle_hex)
+                set_add(G.reduced, u)
+                G.active_stack = []
+                if (map_get(L.to_repair, u, 3) === 3) {
+                    map_delete(L.to_repair, u)
+                }
+            }
+        }
+    },
+    done() {
+        push_undo()
+        end()
+    },
+    skip() {
+        push_undo()
+        end()
+    },
+    next() {
+        push_undo()
+        L.stage = 1
     }
 }
 
@@ -4424,15 +4512,23 @@ P.assign_crit = {
     }
 }
 
+function is_cv_unit(piece) {
+    return piece.br && piece.class === "naval"
+}
+
 function apply_loss() {
     var battle = G.offensive.battle
     var d = battle.damaged[0].concat(battle.damaged[1])
     for (var i = 1; i < d.length; i += 2) {
         var unit = d[i - 1]
-        if (d[i] === 2) {
+        if (d[i] > 2) {
             eliminate(unit)
         } else {
             reduce_unit(unit)
+        }
+        var piece = pieces[unit]
+        if (piece.faction === JP && is_cv_unit(piece)) {
+            battle.jp_cv_damaged = 1
         }
     }
     check_us_casualties()
@@ -4535,13 +4631,26 @@ P.broken_organic = {
     }
 }
 
+function get_hits_count(d) {
+    var result = 0
+    for (var i = 0; i < d.length; i += 2) {
+        if (d[i + 1] >= 4) {
+            result += 2
+        } else {
+            result++
+        }
+    }
+    console.log(`hits count ${result}`)
+    return result
+}
+
 P.apply_ground_winner = function () {
     var battle = G.offensive.battle
     if (battle.ground[G.offensive.attacker].length === 0) {
         end()
         return
     }
-    var attacker_win = battle.damaged[G.offensive.attacker].length > battle.damaged[1 - G.offensive.attacker].length ||
+    var attacker_win = get_hits_count(battle.damaged[G.offensive.attacker]) > get_hits_count(battle.damaged[1 - G.offensive.attacker]) ||
         battle.ground[G.offensive.attacker].filter(unit_on_board).length && !battle.ground[1 - G.offensive.attacker].filter(unit_on_board).length
     log(`${attacker_win ? "Attacker" : "Defender"} win in ground combat ${int_to_hex(battle.battle_hex)}`)
     battle.winner = (attacker_win == G.offensive.attacker) + 0
