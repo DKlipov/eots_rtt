@@ -3646,9 +3646,9 @@ function get_naval_move(zoi_mask) {
             && is_hex_asp_capable(nh)
             && (!move_data.is_naval_present || move_data.move_type & ORGANIC_ONLY)
             && !pbm
-        var landing = !is_faction_units(nh, 1 - R) &&
-            (port_transport || aa_landing) && (G.offensive.stage !== REACTION_STAGE)
-        if ((naval_attack || landing) && (!L.move_data.is_ground_present || !ground_move_denied(nh))) {
+        var no_enemy_units = !is_faction_units(nh, 1 - R)
+        var landing = port_transport && (no_enemy_units || G.offensive.stage === POST_BATTLE_STAGE) || aa_landing && no_enemy_units
+        if ((naval_attack || landing && G.offensive.stage !== REACTION_STAGE) && (!L.move_data.is_ground_present || !ground_move_denied(nh))) {
             map_set(result, nh, v)
         }
     })
@@ -4855,9 +4855,10 @@ function select_retreat_hex() {
         var h = nh[i]
         if (h < 0 || h > LAST_BOARD_HEX || set_has(just_entered, h) || is_overstack(h, G.active_stack[0])
             || is_faction_units(h, G.offensive.attacker) || get_ground_move_cost(G.offensive.battle.battle_hex, h, i, JP) >= 100) {
-            return
+            continue
+        } else {
+            set_add(able, h)
         }
-        set_add(able, h)
     }
     L.hex_to_retreat = able.filter(h => MAP_DATA[h].named && is_space_controlled(h, 1 - G.offensive.attacker))
     if (L.hex_to_retreat.length === 0) {

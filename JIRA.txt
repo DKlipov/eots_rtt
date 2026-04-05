@@ -1,6 +1,5 @@
 Todo list:
-* [WIP] fix pbm with AA
-* Distant hits by units, no steps
+* [WIP] Distant hits by units, no steps
 * skip bombing
 * fuel shortage
 * AP55
@@ -12,6 +11,7 @@ Todo list:
 * Kwai and jp shq
 * China air box
 * Apply draw card to commit
+* operation z distance by water only
 * Amph assault battle roll modifier (if only air was present it should apply)
 * One-step ground units at ground battle FULL streight
 * Add partially impassable hexsides to data.js
