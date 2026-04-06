@@ -1,11 +1,9 @@
 Todo list:
 * [WIP] fuel shortage
-* AP55
 * Hq displace and return
 * Japan lack of resources win condition
 * Check overstack for india surrender
 * B29 attack restrictions
-* Burma road and SE airfield
 * Kwai and jp shq
 * China air box
 * Apply draw card to commit
@@ -18,6 +16,7 @@ Todo list:
 * surrender once per game
 * south pacific scenario
 * Kunming supply
+* Burma road and SE airfield
 * Check supply durning movement
 * Unify logs
 * Split removed cards

@@ -3836,7 +3836,6 @@ P.special_reaction = {
             return false
         })
         if (L.possible_hexes.length <= 0) {
-            G.offensive.no_battle = !G.offensive.battle_hexes.length
             end()
         }
     },
@@ -3847,7 +3846,6 @@ P.special_reaction = {
     },
     pass() {
         push_undo()
-        G.offensive.no_battle = !G.offensive.battle_hexes.length
         end()
     },
     action_hex(hex) {
@@ -3859,7 +3857,6 @@ P.special_reaction = {
         }
         clear_undo()
         if (L.possible_hexes.length <= 0) {
-            G.offensive.no_battle = !G.offensive.battle_hexes.length
             end()
         }
     },
@@ -4029,7 +4026,7 @@ P.apply_attack_reaction = {
         G.offensive.active_cards.filter(c =>
             (G.offensive.type === EC || c !== G.offensive.offensive_card)
             && cards[c].faction === G.active
-            && (cards[c].stage === stage || G.offensive.no_battle && G.offensive.stage === BATTLE_STAGE && cards[c].stage))
+            && (cards[c].stage === stage || G.offensive.all_bh.length === 0 && G.offensive.stage === BATTLE_STAGE && cards[c].stage))
             .forEach(c => set_add(L.allowed_cards, c))
         if (L.allowed_cards.length <= 0) {
             end()
@@ -5019,6 +5016,7 @@ P.offensive_sequence = script(`
     log ("Offensive reaction.")
     call ground_disengagement
     call special_reaction
+    set G.offensive.all_bh G.offensive.battle_hexes.slice()
     call define_intelligence_condition
     if (G.offensive.intelligence != SURPRISE) {
         set G.offensive.stage REACTION_STAGE
@@ -5040,6 +5038,9 @@ P.offensive_sequence = script(`
     call battle_sequence
     eval {
         capture_landing_hexes()
+    }
+    eval {
+        trigger_event("before_pbm")
     }
     log ("Post battle movement.")
     set G.offensive.stage POST_BATTLE_STAGE
@@ -7946,25 +7947,47 @@ cards[find_card(AP, 55)].before_battle_roll = function (faction) {
     }
 }
 
-cards[find_card(AP, 55)].before_battle_roll = function (faction) {
-    if (faction === AP || G.offensive.battle.ground_stage) {
-        return
-    }
-    var modifier = 0
-    G.offensive.battle.air_naval[JP].filter(u => unit_on_board(u)).map(u => pieces[u]).forEach(piece => {
-        if (piece.class === "naval" && piece.br) {
-            G.offensive.battle.strength[faction] -= 2
-            modifier -= 2
-        }
-    })
-    if (modifier) {
-        log(`${modifier} attack strength (The Great Marianas Turkey Shoot)`)
-    }
+cards[find_card(AP, 55)].before_pbm = function () {
+    call("turkey_shoot")
 }
 
-cards[find_card(AP, 55)].before_commit_offensive = function () {
-    if (G.offensive.stage !== POST_BATTLE_MOVE || G.active === JP) {
-        return
+P.turkey_shoot = {
+    _begin() {
+        L.allowed_units = []
+        G.offensive.active_units[JP].forEach(u => {
+            if (unit_on_board(u) && pieces[u].class === "air") {
+                set_add(L.allowed_units, u)
+            }
+        })
+        for_each_unit_on_map((u, piece, location) => {
+            if (piece.faction === JP && piece.class === "air" && set_has(G.offensive.all_bh, location)) {
+                set_add(L.allowed_units, u)
+            }
+        })
+        if (L.allowed_units.length <= 0) {
+            end()
+            return
+        } else {
+            G.active = AP
+        }
+    },
+    prompt() {
+        prompt(`The Great Marianas Turkey Shoot. Choose unit to hit.`)
+        if (L.done) {
+            button("done")
+        } else {
+            L.allowed_units.forEach(u => action_unit(u))
+        }
+    },
+    unit(u) {
+        push_undo()
+        log("The Great Marianas Turkey Shoot:")
+        damage_unit(u)
+        L.done = 1
+    },
+    done() {
+        push_undo()
+        end()
     }
 }
 
