@@ -4,6 +4,24 @@
 
 var G, V, R // convenient aliases so that we can share bits of code verbatim from rules.js
 
+/* CUSTOM */
+
+function onc_click_focus(e,evt) {
+
+	if (world.focus !== e.parent) {
+		if (world.focus != null) {
+			world.focus.classList.remove("focus")
+		}
+		world.focus = e.parent
+		e.parent.classList.add("focus")
+		on_update()
+		if (e.parent.childNodes.length > 1) {
+			evt.stopPropagation()
+		}
+	}
+}
+
+
 /* MISC */
 
 function assert(exp, msg) {
@@ -135,6 +153,14 @@ class Thing {
 		if (!world.things[action])
 			world.things[action] = []
 		world.things[action][id] = this
+	}
+
+	register_focusable(){
+		register_focusable(this.element)
+		this.element.addEventListener("mousedown", e=>console.log(e))
+		console.log(this.element)
+		this.element.onclick = function() { alert('blah'); };
+		return this
 	}
 
 	action() {
@@ -348,9 +374,10 @@ function _on_click_thing(evt) {
 	if (evt.button === 0) {
 		var thing = evt.currentTarget.thing
 		evt.stopPropagation()
-		if (_focus_stack(thing.element.parentElement.thing))
-			if (!send_action(thing.my_action, thing.my_id))
-				_blur_stack()
+		onc_click_focus(this.element, evt)
+		// if (_focus_stack(thing.element.parentElement.thing))
+		// 	if (!send_action(thing.my_action, thing.my_id))
+		// 		_blur_stack()
 	}
 }
 
@@ -507,6 +534,7 @@ function define_piece(action, id, keywords) {
 		.action()
 		.animate()
 		.keyword(keywords)
+		.stackable()
 }
 
 function define_marker(action, id, keywords) {
@@ -515,6 +543,7 @@ function define_marker(action, id, keywords) {
 		.action()
 		.animate()
 		.keyword(keywords)
+		.stackable()
 }
 
 function define_card(action, id, keywords) {

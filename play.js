@@ -599,7 +599,7 @@ function on_update() {
         }
 
         if (zoi_state === 0) {
-            hex.classList.add("hide")
+            // hex.classList.add("hide")
         } else if (zoi_state === 1) {
             hex.classList.remove("hide")
             hex.classList.remove("ap_zoi")
