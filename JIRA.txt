@@ -1,6 +1,5 @@
 Todo list:
-* [WIP] skip bombing
-* fuel shortage
+* [WIP] fuel shortage
 * AP55
 * Hq displace and return
 * Japan lack of resources win condition
@@ -14,6 +13,8 @@ Todo list:
 * Amph assault battle roll modifier (if only air was present it should apply)
 * One-step ground units at ground battle FULL streight
 * Add partially impassable hexsides to data.js
+* conditions for submarines and other reactions
+* intelligence modifier for fast_air_move
 * surrender once per game
 * south pacific scenario
 * Kunming supply
