@@ -3986,14 +3986,14 @@ P.define_intelligence_condition = {
         }
     },
     roll() {
+        clear_undo()
         log('Change intelligence condition')
         var success = roll_intelligence_dice()
         if (success) {
             G.offensive.intelligence = INTERCEPT
             log(`Intelligence condition changed to ${get_named_intelligence(G.offensive.intelligence)}`)
         }
-        L.rolled = true
-        clear_undo()
+        L.rolled = 1
         if (success || !get_hand(R).includes(JN_25_SPECIAL)) {
             end()
         }
