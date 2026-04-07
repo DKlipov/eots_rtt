@@ -353,6 +353,7 @@ body.Allies #jp_hand { grid-row: 4; }
 	font-size: 15px;
 	border: 1px solid black;
 	right: 0;
+	pointer-events: none;
 }
 
 .unit > .marker.barges_small {

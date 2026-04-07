@@ -502,7 +502,6 @@ function get_unit_reinforcement_hexes(u) {
             && check_unit_supply(i, u, piece)
             && !has_non_n_zoi(i, 1 - faction)
             && !is_overstack(i, u)) {
-
             set_add(result, i)
         }
 
@@ -716,7 +715,11 @@ function get_replacement_points() {
         result.NAVAL = 1
     }
     if (is_space_controlled(OAHU, AP)) {
-        result.NAVAL++
+        if (result.NAVAL) {
+            result.NAVAL++
+        } else {
+            result.NAVAL = 1
+        }
         log(`+1 US Naval Replacement Point (AP controlled Oahu).`)
     }
     if ([6, 9, 12].includes(G.turn) && COM_REPLACEMENT_POINTS.filter(h => is_space_controlled(h, AP)).length) {
@@ -777,7 +780,7 @@ P.replacement_segment = {
                 && !piece.notreplaceable
                 && !is_reinforcement_denied(piece)
                 && !set_has(G.oos, u)
-                && (location === ELIMINATED_BOX || set_has(G.reduced, u))) {
+                && (location === ELIMINATED_BOX || set_has(G.reduced, u) && (location === CHINA_BOX || location < LAST_BOARD_HEX))) {
                 set_add(L.replacable_units, u)
             }
         })
@@ -1033,7 +1036,7 @@ P.deal_cards = function () {
     ap_cards = Math.max(ap_cards, 4)
     G.passes[AP] = Math.min(G.passes[AP], 2)
     log(`Allied draw ${ap_cards} cards, receive ${G.passes[AP]} passes`)
-    while (G.hand[AP] < ap_cards) {
+    while (G.hand[AP].length < ap_cards) {
         draw_card(AP)
     }
     end()
@@ -1102,7 +1105,6 @@ P.future_offensive = {
     event(c) {
         push_undo()
         play_event(c)
-        log(`${R} played ${card_get_log_str(c)} as event card`)
         goto("offensive_sequence")
     },
     pass() {
@@ -1347,14 +1349,14 @@ P.offensive_segment = {
     },
     event(c) {
         push_undo()
-        log(`${R} played ${card_get_log_str(c)} as event card`)
         if (cards[c].type === MILITARY) {
             play_event(c)
             goto("offensive_sequence")
         } else {
-            play_event(c)
             G.offensive.offensive_card = c
-            goto("default_event")
+            goto("end_action")
+            play_event(c)
+            call("default_event")
         }
     },
     discard(c) {
@@ -1363,7 +1365,12 @@ P.offensive_segment = {
         log(`${R} discards ${card_get_log_str(c)}`)
         goto("end_action")
     },
-    inter_service() {
+    inter_service(c) {
+        push_undo()
+        activate_card(c)
+        log(`${R} played ${card_get_log_str(c)} to resolve ISR.`)
+        set_inter_service(cards[c].faction, 0)
+        goto("end_action")
     },
     jarhat(c) {
         build_road(c, events.JARHAT_ROAD)
@@ -2767,7 +2774,7 @@ function check_burma_road() {
 function is_overstack(hex, unit, multip = 1) {
     var overstack = G.overstack[hex]
     var piece = pieces[unit]
-    var multiplier = ((G.location[unit] === hex || G.location[piece.pair] === hex) ? 0 : 1) * multiplier
+    var multiplier = ((G.location[unit] === hex || G.location[piece.pair] === hex) ? 0 : 1) * multip
     if (piece.class === "hq") {
         return overstack & 1
     } else if (piece.class !== "naval") {
@@ -3915,14 +3922,14 @@ P.cancel_offensive = {
         discard_card(offensive_card)
         remove_card(L.reactions_card)
         clear_undo()
-        log(`Japan played ${card_get_log_str(reaction_card)}`)
-        log(`Offensive resets, ${card_get_log_str(offensive_card)} discard`)
-        play_event(reaction_card)
+        end()
         G.offensive.offensive_card = reaction_card
         G.offensive.cancelled = offensive
-        end()
         G.active = JP
-        goto("default_event")
+        play_event(reaction_card)
+        log(`Offensive resets, ${card_get_log_str(offensive_card)} discard`)
+        goto("end_action")
+        call("default_event")
     }
 }
 
@@ -7110,40 +7117,150 @@ cards[find_card(JP, 77)].event = function () {
     call("fuel_shortage")
 }
 
-cards[find_card(JP, 77)].can_play = function () {
-    return unit_on_board(HQ_YAMAMOTO) || unit_on_board(HQ_OZAWA)
+function check_fuel_shortage_data() {
+    var result = []
+    let location = L.target
+    if (G.active_stack.length) {
+        location = G.location[G.active_stack[0]]
+    }
+    if (has_non_n_zoi(location, 1 - R)) {
+        return []
+    }
+    clear_supply_cache(CLEAN_ATTACK_ZONE_MASK)
+    G.supply_cache[location] |= HEX_TEMP_FLAG1
+    const queue = [location]
+    const distance_map = [location, 0]
+    for (var i = 0; i < queue.length; i++) {
+        let item = queue[i]
+        const distance = map_get(distance_map, item) + 1
+        let nh_list = get_near_hexes(item)
+        for (let j = 0; j < 6; j++) {
+            let nh = nh_list[j]
+            if (nh <= 0) {
+                continue
+            }
+            if (has_non_n_zoi(nh, 1 - R)
+                || !(get_map_data()[item].edges_int & WATER << 5 * j)
+                || distance >= map_get(distance_map, nh, [500])) {
+                continue
+            }
+            queue.push(nh)
+            map_set(distance_map, nh, distance)
+            if (get_map_data()[nh].port) {
+                G.supply_cache[nh] |= HEX_TEMP_FLAG1
+            }
+        }
+    }
+    if (L.limit > 0) {
+        var non_selected = !G.active_stack.length
+        for_each_unit_on_map((u, piece, loc) => {
+            if (G.supply_cache[loc] & HEX_TEMP_FLAG1 && (piece.class === "naval" && piece.faction === JP)
+                && (non_selected || loc === location)) {
+                set_add(result, u)
+            }
+        })
+    }
+    var hq = [HQ_YAMAMOTO, HQ_OZAWA]
+    hq.forEach(u => {
+        var loc = G.location[u]
+        if (G.supply_cache[loc] & HEX_TEMP_FLAG1
+            && (non_selected || loc === location)) {
+            set_add(result, u)
+        }
+    })
+    L.moved.forEach(u => set_delete(result, u))
+    G.active_stack.forEach(u => set_delete(result, u))
+    L.allowed_hexes = []
+    if (G.active_stack.length && L.target && G.supply_cache[L.target] & HEX_TEMP_FLAG1) {
+        L.allowed_hexes = [L.target]
+    } else if (G.active_stack.length && !L.target) {
+        var hq = (G.active_stack.includes(HQ_YAMAMOTO) || G.active_stack.includes(HQ_OZAWA)) + 0
+        var ships_count = G.active_stack.length - hq
+        L.ports.forEach(h => {
+            var over = G.overstack[h]
+            var hex_ship_count = over >> 7
+            if (G.supply_cache[h] & HEX_TEMP_FLAG1
+                && (!hq || (over & 1) === 0)
+                && hex_ship_count + ships_count <= 6) {
+                set_add(L.allowed_hexes, h)
+            }
+        })
+    }
+    if (G.active_stack.length) {
+        set_delete(L.allowed_hexes, location)
+    }
+    L.allowed_units = result
+    if (G.active_stack.length === 0 && L.allowed_units.length === 0 && L.allowed_hexes.length === 0) {
+        end()
+    }
 }
 
-//todo when BGG thread resolved
 P.fuel_shortage = {
     _begin() {
+        L.move_type = STRAT_MOVE
         L.allowed_units = []
-        for_each_unit_on_map((u, piece) => {
-            if (u === HQ_YAMAMOTO || u === HQ_OZAWA || piece.faction === JP && piece.class === "naval") {
+        L.allowed_hexes = []
+        L.ports = []
+        G.control.forEach(h => {
+            if (get_map_data()[h].resource) {
+                for_each_hex_in_range(h, 3, rh => {
+                    var md = get_map_data()[rh]
+                    if (md.port && is_space_controlled(rh, JP) && !has_non_n_zoi(rh, AP)) {
+                        set_add(L.ports, rh)
+                    }
+                })
+            }
+        })
+        for_each_unit_on_map((u, piece, location) => {
+            if ((piece.class === "naval" && piece.faction === JP || u === HQ_YAMAMOTO || u === HQ_OZAWA)
+                && !has_non_n_zoi(location, AP)) {
                 set_add(L.allowed_units, u)
             }
         })
         L.moved = []
-        L.limit = 0
+        L.limit = 4
+        L.stage = 0
     },
     prompt() {
-        prompt(`${offensive_card_header()} Move units.`)
-        L.allowed_units.forEach(u => {
-            if (G.active_stack.length === 0 || G.location[G.active_stack[0] === G.location[u]])
-                action_unit(u)
-        })
-        if (G.active_stack.length > 0) {
-            L.allowed_hexes.forEach(h => action_hex(h))
-        }
-        if (L.limit & 8) {
+        prompt(`${offensive_card_header()} Move units. Ship could be selected: ${L.limit}.`)
+        L.allowed_units.forEach(u => action_unit(u))
+        L.allowed_hexes.forEach(h => action_hex(h))
+        if (L.moved.length && !G.active_stack.length) {
             button("done")
         }
     },
+    done() {
+        push_undo()
+        end()
+    },
+    action_hex(hex) {
+        push_undo()
+        var over = G.overstack[hex]
+        if (over & 1) {
+            set_add(L.moved, HQ_YAMAMOTO)
+            set_add(L.moved, HQ_OZAWA)
+        }
+        L.limit -= over >> 7
+        L.target = hex
+        G.active_stack.forEach(u => {
+            set_location(u, hex)
+            set_add(L.moved, u)
+        })
+        G.active_stack = []
+        check_supply()
+        check_fuel_shortage_data()
+    },
     unit(u) {
         push_undo()
-        log(`Japan attacks B29 base: ${piece_get_log_str(u)}`)
-        damage_unit(u)
-        end()
+        var piece = pieces[u]
+        set_add(G.active_stack, u)
+        if (is_cv_unit(piece)) {
+            check_supply()
+        }
+        if (piece.class === "naval") {
+            L.limit -= 1
+        }
+        check_fuel_shortage_data()
     }
 }
 
@@ -8220,9 +8337,7 @@ P.default_event = script(`
         if (cards[G.offensive.offensive_card].china) {
             update_china_status(cards[G.offensive.offensive_card].china)
         }
-        cards[G.offensive.offensive_card].event()
     }
-    goto end_action
 `)
 
 /* SETUP */
@@ -9214,7 +9329,7 @@ function discard_card(card) {
     var faction = cards[card].faction
     array_delete_item(G.draw[faction], card)
     set_add(G.discard[faction], card)
-    if (G.future_offensive[faction] === card.c) {
+    if (G.future_offensive[faction] === card) {
         G.future_offensive[faction] = -1
         G.events[events.FUTURE_OFFENSIVE_JP.id + faction] = 0
     } else {

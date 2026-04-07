@@ -1,6 +1,5 @@
 Todo list:
-* [WIP] fuel shortage
-* Hq displace and return
+* [WIP] Hq displace and return
 * Japan lack of resources win condition
 * Check overstack for india surrender
 * B29 attack restrictions
