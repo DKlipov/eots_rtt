@@ -4511,7 +4511,7 @@ P.ground_bombardment = {
         battle.hit_able_units = [[], []]
         L.allowed_units = battle.ground[G.active].filter(u => unit_on_board(u))
         L.garrison_present = L.allowed_units.filter(u => pieces[u].garrison).length
-        if (L.allowed_units.length === 1 && set_has(G.reduced, pieces[L.allowed_units[0]])) {
+        if (L.allowed_units.length === 1 && set_has(G.reduced, L.allowed_units[0])) {
             end()
         }
     },
@@ -4692,7 +4692,6 @@ function get_hits_count(d) {
             result++
         }
     }
-    console.log(`hits count ${result}`)
     return result
 }
 
