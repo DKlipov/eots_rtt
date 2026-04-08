@@ -360,3 +360,11 @@ body.Allies #jp_hand { grid-row: 4; }
 	border-color: #1FC4F4;
 	/*border: 1px solid gree;*/
 }
+
+.main_action {
+	/*font-weight: bold;*/
+}
+
+.small_action {
+	font-style: italic;
+}

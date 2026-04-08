@@ -1,19 +1,17 @@
 Todo list:
-* [WIP] Hq displace and return
-* Japan lack of resources win condition
-* Check overstack for india surrender
+* [WIP] Check overstack for india surrender
+* operation z distance by water only
+* Apply draw card to commit
+* South pacific scenario
 * B29 attack restrictions
 * Kwai and jp shq
 * China air box
-* Apply draw card to commit
-* operation z distance by water only
 * Amph assault battle roll modifier (if only air was present it should apply)
 * One-step ground units at ground battle FULL streight
 * Add partially impassable hexsides to data.js
-* conditions for submarines and other reactions
-* intelligence modifier for fast_air_move
-* surrender once per game
-* south pacific scenario
+* Conditions for submarines and other reactions
+* Intelligence modifier for fast_air_move
+* Surrender once per game
 * Kunming supply
 * Burma road and SE airfield
 * Check supply durning movement

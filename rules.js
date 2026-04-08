@@ -226,6 +226,13 @@ const MUKDEN = hex_to_int(3303)
 const TOKYO_AIR_BASES = [3307, 3704, 3407, 3506, 3507, 3607, 3706, 3705, 3305, 3306, 3303, 3209, 3709].map(h => hex_to_int(h))
 
 const COM_REPLACEMENT_POINTS = [1307, 1308, 2114, 2709, 3727].map(h => hex_to_int(h))
+const HQ_LIST = []
+
+for (let i = 1; i < pieces.length; i++) {
+    if (pieces[i].class === "hq") {
+        set_add(HQ_LIST, i)
+    }
+}
 
 function find_piece(id) {
     for (let i = 1; i < pieces.length; i++) {
@@ -1160,35 +1167,32 @@ function get_infrastructure_actions() {
 
 function get_allowed_actions(num) {
     let card = cards[num]
+    var result = ["discard"]
 
-    if (num === SANDCRAB && events.ALASKA_OCCUPATION.keys.filter(k => is_faction_units(hex_to_int(k), JP)).length) {
-        return ["event", "discard"]
-    } else if (num === SANDCRAB) {
-        return ["ops", "discard"]
-    }
-
-    let result = ["ops", "discard"]
-
-    if (card.pw && scenario_data().one_year) {
-        //do nothing
-    } else if (num === TOJO_RESIGNS && G.turn >= 8 || num === SOVIET_INVADE && is_event_active(events.TOJO)) {
+    if (num === TOJO_RESIGNS && G.turn >= 8 || num === SOVIET_INVADE && card.can_play()) {
         return ["event"]
-    } else if (num === TOJO_RESIGNS) {
-        return ["event", "ops", "discard"]
-    } else if (num === SOVIET_INVADE) {
-        return ["ops", "discard"]
-    } else if ((card.type === MILITARY || card.type === POLITICAL || card.type === RESOURCE) && card.can_play()) {
+    }
+    if (!(card.pw && scenario_data().one_year)
+        && (card.type === MILITARY || card.type === POLITICAL || card.type === RESOURCE) && card.can_play()) {
         result.push("event")
     }
-    if (card.ops >= 3) {
-        if (G.inter_service[card.faction] && scenario_data().one_year) {
-            result.push("inter_service")
+    if (num !== SANDCRAB || !result.includes("event")) {
+        result.push("ops")
+        result.push("displace_hq")
+        if (HQ_LIST.filter(u => G.location[u] > TURN_BOX && pieces[u].faction === R).length) {
+            result.push("return_hq")
         }
-        get_infrastructure_actions().forEach(a => result.push(a))
-        if (R === JP && G.turn - G.events[events.CHINA_OFFENSIVE.id] > 1 && G.surrender[nations.CHINA.id] < 5) {
-            result.push("china_offensive")
+        if (card.ops >= 3) {
+            if (G.inter_service[card.faction] && scenario_data().one_year) {
+                result.push("inter_service")
+            }
+            get_infrastructure_actions().forEach(a => result.push(a))
+            if (R === JP && G.turn - G.events[events.CHINA_OFFENSIVE.id] > 1 && G.surrender[nations.CHINA.id] < 5) {
+                result.push("china_offensive")
+            }
         }
     }
+
     if (G.future_offensive[R] <= 0 && !card.reshuffle) {
         result.push("future_offensive")
     }
@@ -1384,7 +1388,20 @@ P.offensive_segment = {
     china_offensive(c) {
         push_undo()
         activate_card(c)
+        log(`${card_get_log_str(c)} played for Chinese Offensive.`)
         goto("china_offensive")
+    },
+    displace_hq(c) {
+        push_undo()
+        activate_card(c)
+        log(`${card_get_log_str(c)} played for withdraw HQ.`)
+        goto("displace_hq")
+    },
+    return_hq(c) {
+        push_undo()
+        activate_card(c)
+        log(`${card_get_log_str(c)} played for return HQ.`)
+        goto("return_hq")
     },
     future_offensive(c) {
         push_undo()
@@ -1436,6 +1453,61 @@ P.offensive_segment = {
         set_location(ap_air("20_bc"), hex_to_int(3709))
         set_location(ap_air("21_bc"), hex_to_int(3709))
     },
+}
+
+P.displace_hq = {
+    prompt() {
+        prompt(`Choose HQ to displace.`)
+        HQ_LIST.forEach(u => {
+            if (unit_on_board(u) && pieces[u].faction === R) {
+                action_unit(u)
+            }
+        })
+    },
+    unit(u) {
+        push_undo()
+        eliminate(u)
+        check_supply()
+        goto("end_action")
+    },
+}
+
+P.return_hq = {
+    prompt() {
+        if (!G.active_stack.length) {
+            prompt(`Choose HQ return.`)
+            HQ_LIST.forEach(u => {
+                if (G.location[u] > TURN_BOX && pieces[u].faction === R) {
+                    action_unit(u)
+                }
+            })
+        } else {
+            prompt(`Hex to place ${piece_get_log_str(G.active_stack[0])}.`)
+            G.allowed_hexes.forEach(h => action_hex(h))
+        }
+    },
+    unit(u) {
+        push_undo()
+        G.active_stack = [u]
+        var allied_regions = ["Australia", "AMandates", "India", "NIndia", "Ceylon"]
+        G.allowed_hexes = get_unit_reinforcement_hexes(u).filter(h => {
+            var piece = pieces[u]
+            var region = get_map_data()[h].region
+            if (piece.faction === JP) {
+                return region === "Japan"
+            } else {
+                return h === OAHU || allied_regions.includes(region)
+            }
+        })
+    },
+    action_hex(hex) {
+        push_undo()
+        log(`${piece_get_log_str(G.active_stack[0])} selected for early return.`)
+        set_location(G.active_stack[0], hex)
+        G.active_stack = []
+        check_supply()
+        goto("end_action")
+    }
 }
 
 P.china_offensive = {
@@ -7778,6 +7850,10 @@ cards[find_card(AP, 29)].before_battle_roll = function (faction) {
     log(`+1 Artillery support`)
 }
 
+cards[SANDCRAB].can_play = function () {
+    return events.ALASKA_OCCUPATION.keys.filter(k => is_faction_units(hex_to_int(k), JP)).length
+}
+
 cards[SANDCRAB].before_commit_offensive = function () {
     if (G.offensive.stage !== ATTACK_STAGE) {
         return
@@ -8291,6 +8367,10 @@ cards[find_card(AP, 78)].before_battles = function () {
         }
     })
     call("submarine_attack", {success: 9, card: find_card(AP, 78), pre_allowed_units: allowed_units})
+}
+
+cards[SOVIET_INVADE].can_play = function () {
+    return is_event_active(events.TOJO)
 }
 
 cards[SOVIET_INVADE].event = function () {
