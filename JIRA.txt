@@ -1,6 +1,5 @@
 Todo list:
-* [WIP] Check overstack for india surrender
-* operation z distance by water only
+* [WIP] operation z distance by water only
 * Apply draw card to commit
 * South pacific scenario
 * B29 attack restrictions

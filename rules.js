@@ -695,6 +695,7 @@ P.reinforcement_segment = {
         update_reinf_active()
     },
     delay() {
+        console.log(G.non_control)
         push_undo()
         set_location(G.active_stack[0], DELAYED_BOX)
         if (!sent_to_europe(G.active_stack[0])) {
@@ -832,6 +833,7 @@ P.replacement_segment = {
         if (set_has(G.reduced, u)) {
             set_delete(G.reduced, u)
             set_delete(L.replacable_units, u)
+            log(`${piece_get_log_str(u)} flipped to full size.`)
         } else {
             set_add(G.reduced, u)
             G.active_stack = [u]
@@ -1936,6 +1938,10 @@ function capture_hex(hex, side = G.active) {
     }
     if (!is_controllable_hex(hex)) {
         return
+    }
+    if (G.non_control) {
+        set_delete(G.non_control, hex)
+        log(`AP captured ${int_to_hex(hex)}`)
     }
     var md = get_map_data()[hex]
     if (side && set_has(G.control, hex)) {
@@ -3766,7 +3772,7 @@ function is_faction_ground_units(hex, faction) {
 }
 
 function is_space_controlled(hex, faction) {
-    return is_controllable_hex(hex) && set_has(G.control, hex) == 1 - faction
+    return is_controllable_hex(hex) && set_has(G.control, hex) == 1 - faction && (!G.non_control || !set_has(G.non_control, hex))
 }
 
 function target_in_battle_range(range, location, targets) {
@@ -5415,7 +5421,7 @@ P.india_surrender = {
         L.hex_to_retreat = []
         L.unit_to_retreat = []
         for_each_unit((u, piece, location) => {
-            var in_india = nations.INDIA.regions.includes(get_map_data()[location].region)
+            var in_india = unit_on_board(u) && nations.INDIA.regions.includes(get_map_data()[location].region)
             if (in_india && piece.class === "hq" && piece.service === "br") {
                 eliminate(u)
             } else if (piece.service === "ind" && location <= LAST_BOARD_HEX || in_india) {
@@ -5430,7 +5436,7 @@ P.india_surrender = {
         check_supply()
         G.surrender[nations.INDIA.id] = 5
         if (!L.unit_to_retreat.length) {
-            end()
+            this.update_control()
         }
     },
     prompt() {
@@ -5456,7 +5462,11 @@ P.india_surrender = {
     },
     eliminate() {
         push_undo()
-        eliminate_permanently(pieces[G.active_stack[0]])
+        eliminate_permanently(G.active_stack[0])
+        G.active_stack = []
+    },
+    no_move() {
+        push_undo()
         G.active_stack = []
     },
     unit(u) {
@@ -5475,8 +5485,19 @@ P.india_surrender = {
         G.active_stack = []
         check_supply()
     },
+    update_control() {
+        check_supply()
+        G.non_control = []
+        if (!is_faction_units(MADRAS, AP)) {
+            set_add(G.non_control, MADRAS)
+        }
+        if (!is_faction_units(hex_to_int(1805), AP)) {
+            set_add(G.non_control, hex_to_int(1805))
+        }
+    },
     done() {
         push_undo()
+        this.update_control()
         end()
     }
 }
