@@ -6196,11 +6196,38 @@ cards[find_card(JP, 2)].before_unit_activation = function () {
     G.offensive.aa_hexes = []
     G.control.forEach(h => {
         if (get_map_data()[h].port) {
-            for_each_hex_in_range(h, 5, rh => {
-                set_add(G.offensive.aa_hexes, rh)
-            })
+            mark_hexes_in_move_range(h, 5)
         }
     })
+}
+
+function mark_hexes_in_move_range(hex, range) {
+    const location = hex
+    const queue = [location]
+    const distance_map = [location, 0]
+    for (var i = 0; i < queue.length; i++) {
+        let item = queue[i]
+        const distance = map_get(distance_map, item) + 1
+        let nh_list = get_near_hexes(item)
+        for (let j = 0; j < 6; j++) {
+            let nh = nh_list[j]
+            if (nh <= 0) {
+                continue
+            }
+            if (distance > range
+                || !(get_map_data()[item].edges_int & WATER << 5 * j)
+                || distance >= map_get(distance_map, nh, [100])) {
+                continue
+            }
+            if (distance < range) {
+                queue.push(nh)
+            }
+            map_set(distance_map, nh, distance)
+            if (get_map_data()[nh].terrain > OCEAN) {
+                set_add(G.offensive.aa_hexes, nh)
+            }
+        }
+    }
 }
 
 cards[find_card(JP, 2)].before_unit_move = function () {
