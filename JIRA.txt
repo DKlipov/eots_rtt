@@ -1,7 +1,5 @@
 Todo list:
-* [WIP] operation z distance by water only
-* Apply draw card to commit
-* South pacific scenario
+* [WIP] South pacific scenario
 * B29 attack restrictions
 * Kwai and jp shq
 * China air box

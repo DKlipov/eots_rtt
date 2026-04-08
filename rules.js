@@ -1063,6 +1063,7 @@ P.offensive_phase = script(`
         if (G.hand[G.active].length > 0){
             call offensive_segment
             eval {
+                commit_into_turn_draw()
                 G.active = 1 - G.offensive.attacker
                 reset_offensive()
                 G.offensive.attacker = G.active
@@ -3861,8 +3862,18 @@ P.commit_offensive = {
         }
     },
     next() {
+        resolve_into_turn_draw(JP)
+        resolve_into_turn_draw(AP)
         end()
     },
+}
+
+function commit_into_turn_draw() {
+    resolve_into_turn_draw(JP)
+    resolve_into_turn_draw(AP)
+    G.offensive.draw[AP].forEach(c => G.hand[AP].push(c))
+    G.offensive.draw[JP].forEach(c => G.hand[JP].push(c))
+    G.offensive.draw = []
 }
 
 P.end_action = {
@@ -3952,9 +3963,20 @@ function into_turn_draw(faction) {
         log(`${faction === AP ? "AP" : "JP"} already drown 3 cards, draw skipped`)
         return
     }
-    log(`${faction === AP ? "AP" : "JP"} draw additional card`)
     G.draw_counter[faction]++
-    set_add(G.offensive.draw, draw_card(faction, false))
+    G.offensive.draw[faction].push(-1)
+}
+
+function resolve_into_turn_draw(faction) {
+    var count = G.offensive.draw[faction].filter(c => c <= 0).length
+    if (count <= 0) {
+        return
+    }
+    G.offensive.draw[faction] = G.offensive.draw[faction].filter(c => c >= 0)
+    for (var i = 0; i < count; i++) {
+        log(`${faction === AP ? "AP" : "JP"} draw additional card`)
+        G.offensive.draw[faction].push(draw_card(faction, false))
+    }
     clear_undo()
 }
 
@@ -4092,6 +4114,8 @@ P.attack_reaction_cards = {
     },
     done() {
         push_undo()
+        resolve_into_turn_draw(AP)
+        resolve_into_turn_draw(JP)
         end()
     },
     card(c) {
@@ -9630,17 +9654,17 @@ function on_view() {
 
 
     if (R !== JP) {
-        V.hand[JP] = G.hand[JP].length + G.offensive.draw.filter(c => cards[c].faction === JP).length
+        V.hand[JP] = G.hand[JP].length + G.offensive.draw[JP].filter(c => c >= 0 && cards[c].faction === JP).length
     } else {
         V.hand[JP] = G.hand[JP].slice()
-        G.offensive.draw.filter(c => cards[c].faction === JP).forEach(c => V.hand[JP].push(c))
+        G.offensive.draw[JP].filter(c => c >= 0 && cards[c].faction === JP).forEach(c => V.hand[JP].push(c))
         V.future_offensive[JP] = G.future_offensive[JP]
     }
     if (R !== AP) {
-        V.hand[AP] = G.hand[AP].length + G.offensive.draw.filter(c => cards[c].faction === AP).length
+        V.hand[AP] = G.hand[AP].length + G.offensive.draw[AP].filter(c => c >= 0 && cards[c].faction === AP).length
     } else {
         V.hand[AP] = G.hand[AP].slice()
-        G.offensive.draw.filter(c => cards[c].faction === AP).forEach(c => V.hand[AP].push(c))
+        G.offensive.draw[AP].filter(c => c >= 0 && cards[c].faction === AP).forEach(c => V.hand[AP].push(c))
         V.future_offensive[AP] = G.future_offensive[AP]
     }
 }
@@ -9685,7 +9709,7 @@ reset_offensive() {
         ground_pbm: [],
         active_hq: [],
         organic: [],
-        draw: [],
+        draw: [[], []],
         r_asp: 0,
         active_units: [[], []],
         paths: [],
