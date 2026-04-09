@@ -11,5 +11,6 @@ Todo list:
 * Surrender once per game
 * Kunming supply
 * Burma road and SE airfield
-* Check supply durning movement
+* Air movement with stacking
+* Check supply during movement
 * Unify logs
