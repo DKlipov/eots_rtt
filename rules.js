@@ -1257,7 +1257,7 @@ function play_event(c) {
         cards[c].event()
     }
     if (cards[c].remove) {
-        set_add(G.removed, c)
+        set_add(G.removed[faction], c)
         set_delete(G.discard[faction], c)
     } else {
         set_add(G.discard[faction], c)
@@ -6171,7 +6171,7 @@ function filter_activation_units(condition, faction) {
 
 function could_play(card) {
     var faction = card.faction
-    return get_hand(faction).length && !set_has(G.discard[faction], card.c) && !set_has(G.removed, card.c)
+    return get_hand(faction).length && !set_has(G.discard[faction], card.c) && !set_has(G.removed[faction], card.c)
 }
 
 function trigger_event(stage, arg) {
@@ -6389,7 +6389,7 @@ cards[find_card(JP, 5)].event = function () {
 }
 
 cards[find_card(JP, 6)].can_play = function () {
-    return set_has(G.removed, DOOLITLE_RAID)
+    return set_has(G.removed[AP], DOOLITLE_RAID)
 }
 
 cards[find_card(JP, 8)].before_unit_activation = function () {
@@ -9465,7 +9465,7 @@ function future_offencive_card(card, turn) {
 
     array_delete_item(G.discard[faction], card)
     array_delete_item(G.draw[faction], card)
-    array_delete_item(G.removed, card)
+    array_delete_item(G.removed[faction], card)
 }
 
 function remove_card(card) {
@@ -9473,7 +9473,7 @@ function remove_card(card) {
     discard_card(card)
     array_delete_item(G.discard[faction], card)
     array_delete_item(G.draw[faction], card)
-    set_add(G.removed, card)
+    set_add(G.removed[faction], card)
 }
 
 function discard_card(card) {
@@ -9529,7 +9529,7 @@ function on_setup(scenario, options) {
     G.active = JP
     G.turn = 1
     G.passes = [0, 0]
-    G.removed = [] // removed one-time events (both sides)
+    G.removed = [[], []] // removed one-time events
     G.hand = [[], []]
     G.future_offensive = [-1, -1]
     G.discard = [[], []]

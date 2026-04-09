@@ -13,4 +13,3 @@ Todo list:
 * Burma road and SE airfield
 * Check supply durning movement
 * Unify logs
-* Split removed cards

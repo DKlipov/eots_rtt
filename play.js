@@ -984,10 +984,12 @@ function show_card_list(id, params) {
         if (id === "event_card_dialog") {
             append_header(`Japanese Discard Pile (${G.discard[JP].length})`)
             G.discard[JP].forEach(append_card)
+            append_header(`Japanese Removed Cards (${G.removed[JP].length})`)
+            G.removed[JP].forEach(append_card)
             append_header(`Allies Discard Pile (${G.discard[AP].length})`)
             G.discard[AP].forEach(append_card)
-            append_header(`Removed Cards (${G.removed.length})`)
-            G.removed.forEach(append_card)
+            append_header(`Allies Removed Cards (${G.removed[AP].length})`)
+            G.removed[AP].forEach(append_card)
             //if (!is_observing()) {
             //	append_header(`Your Hand (${V.hand[R].length})`)
             //	V.hand[R].forEach(append_card)
