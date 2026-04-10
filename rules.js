@@ -221,6 +221,7 @@ const DACCA = hex_to_int(1905)
 const MADRAS = hex_to_int(1406)
 const KUNMING = hex_to_int(2407)
 const TOKYO = hex_to_int(3706)
+const TRUK = hex_to_int(4017)
 const SINGAPORE = hex_to_int(2015)
 const MANILA = hex_to_int(2813)
 const PALAU = hex_to_int(3416)
@@ -1718,6 +1719,7 @@ function mark_asp_reaction_hexes(hex) {
     }
     const asp_capable = is_hex_asp_capable(hex)
     const location = hex
+    G.supply_cache[location] |= HEX_TEMP_FLAG1
     const queue = [location]
     const distance_map = [location, 0]
     const range = G.offensive.naval_move_distance
@@ -1759,7 +1761,7 @@ function get_reaction_able_units() {
             set_add(L.reaction_able_units, u)
         } else if (piece.faction === R && piece.class === "ground" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG2 && has_asp) {
             set_add(L.asp_ground_units, u)
-        } else if (piece.faction === R && piece.class === "naval" && !piece.br && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG1) {
+        } else if (piece.faction === R && piece.class === "naval" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG1) {
             set_add(L.reaction_able_units, u)
         }
     })
@@ -3078,7 +3080,6 @@ function check_supply() {
         }
     })
     check_infrastructure()
-
     var oos_units = [[], []]
     G.oos = []
     check_faction_supply_not_changed(AP, false, oos_units)
@@ -3094,6 +3095,10 @@ function check_supply() {
     G.oos = oos_units[0]
     if (G.turn > 1) {
         oos_units[1].forEach(h => set_add(G.oos, h))
+    }
+    if (scenario_data().id === SOUTH_PACIFIC && G.turn === 3) {
+        var mask = G.supply_cache[TRUK] & JP_UNITS
+        G.supply_cache[TRUK] ^= (mask)
     }
     check_burma_road()
     if (G.debug) {
@@ -6255,9 +6260,21 @@ function trigger_event(stage, arg) {
     }
     G.offensive.active_cards.forEach(c => {
         if (c !== G.offensive.offensive_card && cards[c][stage]) {
-            result += cards[c][stage](arg)
+            if (result) {
+                result += cards[c][stage](arg)
+            } else {
+                result = cards[c][stage](arg)
+            }
+
         }
     })
+    if (scenario_data()[stage]) {
+        if (result) {
+            result += scenario_data()[stage](arg)
+        } else {
+            result = scenario_data()[stage](arg)
+        }
+    }
     return result
 }
 
@@ -8534,9 +8551,22 @@ cards[find_card(AP, 80)].event = function () {
     }
 }
 
-
 cards[CARRIER_RAID].before_unit_activation = function () {
     filter_activation_units((u, piece) => is_us_unit(piece) && piece.class === "naval" && piece.br, AP)
+}
+
+SCENARIO_DATA[SOUTH_PACIFIC].before_commit_offensive = function () {
+    if (G.turn === 3 && (set_has(G.offensive.battle_hexes, TRUK) ||
+        set_has(G.offensive.landing_hexes, TRUK) || is_faction_units(TRUK, AP))) {
+        return "The Allied player cannot declare Truk a battle hex during game turn 3."
+    }
+
+}
+
+SCENARIO_DATA[SOUTH_PACIFIC].before_unit_activation = function () {
+    if (G.turn === 3) {
+        filter_activation_units((u) => G.location[u] !== TRUK, JP)
+    }
 }
 
 
@@ -9424,35 +9454,22 @@ function setup_scenario_south_pacific() {
 
     for_each_unit(u => G.location[u] = PERM_ELIMINATED)
 
-    //ap setup
-    for (let i = 1; i < pieces.length; i++) {
-        var piece = pieces[i]
-        if (piece.reinforcement !== 5) {
-            continue
-        }
-        if (piece.faction) {
-            G.location[i] = DELAYED_BOX
-        }
-        if (piece.start_reduced) {
-            set_add(G.reduced, i)
-        }
-    }
     setup_jp_unit(ap_air(5), 3626)
     setup_jp_unit(ap_air("5_lrb"), 3626)
     setup_jp_unit(ap_air("13"), 4825)
     setup_jp_unit(ap_air("13_lrb"), 4825)
-    setup_jp_unit(ap_air("14_lrb"), CHINA_BOX)
+    // setup_jp_unit(ap_air("14_lrb"), CHINA_BOX)
     setup_jp_unit(ap_air("1_maw"), 4826)
-    setup_jp_unit(ap_air("2_maw"), NON_PLACED_BOX)
+    setup_jp_unit(ap_air("2_maw"), int_to_hex(NON_PLACED_BOX))
     setup_jp_unit(ap_army("mb"), 4825)
     setup_jp_unit(ap_army("sf"), 4828)
     setup_jp_unit(ap_army("1_m"), 4828)
-    setup_jp_unit(ap_army("2_m"), NON_PLACED_BOX)
-    setup_jp_unit(ap_army("3_m"), NON_PLACED_BOX)
+    setup_jp_unit(ap_army("2_m"), int_to_hex(NON_PLACED_BOX))
+    setup_jp_unit(ap_army("3_m"), int_to_hex(NON_PLACED_BOX))
     setup_jp_unit(ap_army("1"), 3727, true)
     setup_jp_unit(ap_army("11"), 5808)
     setup_jp_unit(ap_army("14"), 3626, true)
-    setup_jp_unit(ap_army("24"), NON_PLACED_BOX)
+    setup_jp_unit(ap_army("24"), int_to_hex(NON_PLACED_BOX))
     setup_jp_unit(HQ_CENTRAL_PACIFIC, 5808)
     setup_jp_unit(HQ_SOUTH_GHORMLEY, 4828)
     setup_jp_unit(HQ_SOUTH_WEST, 3727)
@@ -9461,14 +9478,14 @@ function setup_scenario_south_pacific() {
     setup_jp_unit(find_piece("lexington"), 4828, true)
     setup_jp_unit(find_piece("northampton"), 4828)
     setup_jp_unit(find_piece("carolina"), 4828)
-    setup_jp_unit(find_piece("washington"), NON_PLACED_BOX)
-    setup_jp_unit(find_piece("mass"), NON_PLACED_BOX)
-    setup_jp_unit(find_piece("jacinto"), NON_PLACED_BOX)
-    setup_jp_unit(find_piece("bunker"), NON_PLACED_BOX)
-    setup_jp_unit(find_piece("essex"), NON_PLACED_BOX)
-    setup_jp_unit(find_piece("belleau"), NON_PLACED_BOX)
-    setup_jp_unit(find_piece("sangamon"), NON_PLACED_BOX)
-    setup_jp_unit(find_piece("cowpens"), NON_PLACED_BOX)
+    setup_jp_unit(find_piece("washington"), int_to_hex(NON_PLACED_BOX))
+    setup_jp_unit(find_piece("mass"), int_to_hex(NON_PLACED_BOX))
+    setup_jp_unit(find_piece("jacinto"), int_to_hex(NON_PLACED_BOX))
+    setup_jp_unit(find_piece("bunker"), int_to_hex(NON_PLACED_BOX))
+    setup_jp_unit(find_piece("essex"), int_to_hex(NON_PLACED_BOX))
+    setup_jp_unit(find_piece("belleau"), int_to_hex(NON_PLACED_BOX))
+    setup_jp_unit(find_piece("sangamon"), int_to_hex(NON_PLACED_BOX))
+    setup_jp_unit(find_piece("cowpens"), int_to_hex(NON_PLACED_BOX))
     setup_jp_unit(ap_air("au"), 3823)
     setup_jp_unit(ap_army("1_au"), 3023)
     setup_jp_unit(ap_army("2_au"), 3727)
@@ -9484,9 +9501,9 @@ function setup_scenario_south_pacific() {
     setup_jp_unit(jp_air("21"), 4021)
     setup_jp_unit(jp_air("25"), 3822)
     setup_jp_unit(jp_air("26"), 3119)
-    setup_jp_unit(jp_air("7"), NON_PLACED_BOX)
-    setup_jp_unit(jp_air("27"), NON_PLACED_BOX)
-    setup_jp_unit(jp_air("28"), NON_PLACED_BOX)
+    setup_jp_unit(jp_air("7"), int_to_hex(NON_PLACED_BOX))
+    setup_jp_unit(jp_air("27"), int_to_hex(NON_PLACED_BOX))
+    setup_jp_unit(jp_air("28"), int_to_hex(NON_PLACED_BOX))
     setup_jp_unit(jp_army("4sn"), 4423, true)
     setup_jp_unit(jp_army("ss"), 3822)
     setup_jp_unit(jp_army("17"), 4021)
@@ -9508,7 +9525,7 @@ function setup_scenario_south_pacific() {
     G.political_will = 4
     G.asp[JP] = [7, 0]
     G.asp[AP] = [2, 0]
-    G.wie = 4
+    G.wie = 2
     G.reinforcements = {NAVAL: 2, AIR: 2}
     G.surrender[nations.CHINA.id] = 2
     G.inter_service = [1, 1]
@@ -9580,9 +9597,9 @@ function jp_army(id) {
 
 function setup_jp_unit(piece, hex_id, reduced = false) {
     let hex = hex_to_int(hex_id)
-    if (is_controllable_hex(hex) && pieces[piece].faction === JP) {
+    if (hex < LAST_BOARD_HEX && is_controllable_hex(hex) && pieces[piece].faction === JP) {
         set_add(G.control, hex)
-    } else if (is_controllable_hex(hex) && pieces[piece].faction === AP) {
+    } else if (hex < LAST_BOARD_HEX && is_controllable_hex(hex) && pieces[piece].faction === AP) {
         set_delete(G.control, hex)
     }
     G.location[piece] = hex
@@ -9752,7 +9769,9 @@ function action_unit(p) {
 }
 
 function action_hex(p) {
-    action("action_hex", p)
+    if (p < TUNNEL_BOX) {
+        action("action_hex", p)
+    }
 }
 
 function action_box(p) {

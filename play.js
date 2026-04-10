@@ -263,7 +263,7 @@ function on_init() {
     }
     define_layout("board_hex", NON_PLACED_BOX, [10, 10, 45, 45], "stack")
     define_layout("board_hex", ELIMINATED_BOX, [100, 1280, 45, 45], "stack")
-    define_layout("board_hex", PERM_ELIMINATED, [100, 1180, 45, 45], "stack")
+    define_layout("board_hex", PERM_ELIMINATED, [-100, -1180, 45, 45], "stack")
     define_layout("board_hex", DELAYED_BOX, [2420, 1540, 45, 45], "stack")
     define_layout("board_hex", CHINA_BOX, [890, 420, 45, 45], "stack")
     define_layout("status", JP_AGREEMENT, [990, 143, 35, 35])
@@ -590,26 +590,28 @@ function on_update() {
 
     //show zoi
     for (i = 1; i < LAST_BOARD_HEX; i++) {
-        const zoi_state = G.supply_cache[i] & 3
+        // const zoi_state = G.supply_cache[i] & 3
+        const zoi_state = G.supply_cache[i] & 1 << 21
         var hex = ZOI_HEX[i]
         if (!hex) {
             continue
         }
         if (zoi_state === 0) {
             hex.classList.add("hide")
-        } else if (zoi_state === 1) {
+        } else if (zoi_state) {
             hex.classList.remove("hide")
             hex.classList.remove("ap_zoi")
             hex.classList.add("jp_zoi")
-        } else if (zoi_state === 2) {
-            hex.classList.remove("hide")
-            hex.classList.remove("jp_zoi")
-            hex.classList.add("ap_zoi")
-        } else {
-            hex.classList.remove("hide")
-            hex.classList.remove("jp_zoi")
-            hex.classList.remove("ap_zoi")
         }
+        // else if (zoi_state === 2) {
+        //     hex.classList.remove("hide")
+        //     hex.classList.remove("jp_zoi")
+        //     hex.classList.add("ap_zoi")
+        // } else {
+        //     hex.classList.remove("hide")
+        //     hex.classList.remove("jp_zoi")
+        //     hex.classList.remove("ap_zoi")
+        // }
     }
 
     // show attack range
