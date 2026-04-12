@@ -1,6 +1,5 @@
 Todo list:
-* [WIP] South pacific scenario
-* B29 attack restrictions
+* [WIP] B29 attack restrictions
 * Kwai and jp shq
 * China air box
 * Amph assault battle roll modifier (if only air was present it should apply)

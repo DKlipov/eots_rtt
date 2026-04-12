@@ -590,28 +590,26 @@ function on_update() {
 
     //show zoi
     for (i = 1; i < LAST_BOARD_HEX; i++) {
-        // const zoi_state = G.supply_cache[i] & 3
-        const zoi_state = G.supply_cache[i] & 1 << 21
+        const zoi_state = G.supply_cache[i] & 3
         var hex = ZOI_HEX[i]
         if (!hex) {
             continue
         }
         if (zoi_state === 0) {
             hex.classList.add("hide")
-        } else if (zoi_state) {
+        } else if (zoi_state === 1) {
             hex.classList.remove("hide")
             hex.classList.remove("ap_zoi")
             hex.classList.add("jp_zoi")
+        } else if (zoi_state === 2) {
+            hex.classList.remove("hide")
+            hex.classList.remove("jp_zoi")
+            hex.classList.add("ap_zoi")
+        } else {
+            hex.classList.remove("hide")
+            hex.classList.remove("jp_zoi")
+            hex.classList.remove("ap_zoi")
         }
-        // else if (zoi_state === 2) {
-        //     hex.classList.remove("hide")
-        //     hex.classList.remove("jp_zoi")
-        //     hex.classList.add("ap_zoi")
-        // } else {
-        //     hex.classList.remove("hide")
-        //     hex.classList.remove("jp_zoi")
-        //     hex.classList.remove("ap_zoi")
-        // }
     }
 
     // show attack range

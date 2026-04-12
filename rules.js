@@ -4,23 +4,6 @@ var G, L, R, V, P = {}
 
 const ROLES = ["Japan", "Allies"]
 
-const SOUTH_PACIFIC = 0
-
-const SCENARIO_DATA = [
-    {id: SOUTH_PACIFIC, name: "South Pacific", setup: setup_scenario_south_pacific, victory: victory_south_pacific},
-    {id: 1, name: "1941-1945 (The Full Campaign)", setup: setup_scenario_1941, victory: victory_1945},
-    {id: 2, name: "1942", setup: setup_scenario_1942, victory: victory_1942, one_year: true},
-    {id: 3, name: "1942-1943", setup: setup_scenario_1942, victory: victory_1943},
-    {id: 4, name: "1942-1944", setup: setup_scenario_1942, victory: victory_1944},
-    {id: 5, name: "1942-1945 (The Shortened Campaign)", setup: setup_scenario_1942, victory: victory_1945},
-    {id: 6, name: "1943", setup: setup_scenario_1943, victory: victory_1943, one_year: true},
-    {id: 7, name: "1943-1944", setup: setup_scenario_1943, victory: victory_1944},
-    {id: 8, name: "1943-1945 (The Even Shorter Campaign)", setup: setup_scenario_1943, victory: victory_1945},
-    {id: 9, name: "1944", setup: setup_scenario_1944, victory: victory_1944, one_year: true},
-]
-
-const SCENARIOS = SCENARIO_DATA.map(s => s.name)
-
 exports.default_scenario = "South Pacific"
 
 const JP = 0
@@ -148,6 +131,56 @@ const ROAD_EVENTS = Object.keys(events).filter(k => events[k].road).map(k => {
 })
 
 const GARRISONED_CITY = [...Array(Object.keys(map).length).keys()].map(i => map[i]).filter(h => h.city > CITY).map(h => hex_to_int(h.id))
+
+const SOUTH_PACIFIC = 0
+
+const S_P_DECK = S_P_deck()
+
+const SCENARIO_DATA = [
+    {
+        id: SOUTH_PACIFIC,
+        name: "South Pacific",
+        setup: setup_scenario_south_pacific,
+        victory: victory_south_pacific,
+        deal_cards: S_P_deal_cards,
+        replacement_points: get_S_P_replacement_points,
+        has_card: c => set_has(S_P_DECK, c)
+    },
+    {id: 1, name: "1941-1945 (The Full Campaign)", setup: setup_scenario_1941, victory: victory_1945},
+    {id: 2, name: "1942", setup: setup_scenario_1942, victory: victory_1942, one_year: true},
+    {id: 3, name: "1942-1943", setup: setup_scenario_1942, victory: victory_1943},
+    {id: 4, name: "1942-1944", setup: setup_scenario_1942, victory: victory_1944},
+    {id: 5, name: "1942-1945 (The Shortened Campaign)", setup: setup_scenario_1942, victory: victory_1945},
+    {id: 6, name: "1943", setup: setup_scenario_1943, victory: victory_1943, one_year: true},
+    {id: 7, name: "1943-1944", setup: setup_scenario_1943, victory: victory_1944},
+    {id: 8, name: "1943-1945 (The Even Shorter Campaign)", setup: setup_scenario_1943, victory: victory_1945},
+    {id: 9, name: "1944", setup: setup_scenario_1944, victory: victory_1944, one_year: true},
+]
+
+SCENARIO_DATA.forEach(s => {
+    if (!s.replacement_points) {
+        s.replacement_points = get_replacement_points
+    }
+    if (!s.deal_cards) {
+        s.deal_cards = deal_cards
+    }
+    if (!s.has_card) {
+        s.has_card = a => true
+    }
+    s.removed_cards = []
+})
+
+const SCENARIOS = SCENARIO_DATA.map(s => s.name)
+
+function S_P_deck() {
+    var ap_draw = [8, 13, 20, 21, 23, 24, 25, 27, 28, 29, 31, 32, 36, 40, 43, 44, 46, 50, 52, 56, 64, 66, 81, 82]
+    var jp_draw = [9, 13, 16, 17, 20, 23, 25, 27, 28, 29, 32, 33, 34, 35, 42, 44, 48, 49, 51, 52, 73, 75, 84, 85]
+    var deck = []
+    jp_draw.map(c => find_card(0, c)).forEach(c => set_add(deck, c))
+    ap_draw.map(c => find_card(1, c)).forEach(c => set_add(deck, c))
+    return deck
+}
+
 
 //cards
 const OPERATION_NO_1 = find_card(JP, 2)
@@ -490,8 +523,8 @@ P.strategic_phase = script(`
         }
         call arcadia
     }
-    call deal_cards
     eval {
+        scenario_data().deal_cards()
         G.pow = Math.min(4,G.asp[AP][0])
     }
     goto offensive_phase
@@ -766,12 +799,15 @@ P.reinforcement_segment = {
 
 function get_replacement_points() {
     var result = {}
+    L.replacement_points = result
     if (G.active === JP) {
         G.reinforcements.NAVAL += ([3, 4, 11].includes(G.turn) ? 1 : 0)
         result.NAVAL = G.reinforcements.NAVAL
         result.AIR = G.reinforcements.AIR
+        L.divisions = Math.min(2, G.china_divisions)
         return result
     }
+    L.divisions = undefined
     if (G.turn % 2 === 0) {
         result.NAVAL = 1
     }
@@ -791,6 +827,27 @@ function get_replacement_points() {
     if (G.turn >= 3 && G.turn % 2 === 1) {
         result.CHINESE = 1
     }
+    if (is_event_active(events.INDEPENDENCE_CAMPAIGN)) {
+        result.GROUND = Math.max(0, result.GROUND - is_event_active(events.INDEPENDENCE_CAMPAIGN))
+        log(`-${is_event_active(events.INDEPENDENCE_CAMPAIGN)} AP ground replacement, Indian independence campaign (no commonwealth units could be replaced)`)
+        G.events[events.INDEPENDENCE_CAMPAIGN.id] = 0
+    }
+    return result
+}
+
+function get_S_P_replacement_points() {
+    var result = {}
+    L.replacement_points = result
+    if (G.active === JP) {
+        result.NAVAL = G.reinforcements.NAVAL
+        result.AIR = G.reinforcements.AIR
+        L.divisions = Math.min(1, G.china_divisions)
+        return result
+    }
+    L.divisions = undefined
+    result.NAVAL = 1
+    result.GROUND = 1
+    result.AIR = 4
     if (is_event_active(events.INDEPENDENCE_CAMPAIGN)) {
         result.GROUND = Math.max(0, result.GROUND - is_event_active(events.INDEPENDENCE_CAMPAIGN))
         log(`-${is_event_active(events.INDEPENDENCE_CAMPAIGN)} AP ground replacement, Indian independence campaign (no commonwealth units could be replaced)`)
@@ -830,8 +887,7 @@ P.replacement_segment = {
     _begin() {
         check_supply()
         if (L.scheduled_points) {
-            L.replacement_points = get_replacement_points()
-            L.divisions = G.active === JP ? Math.min(2, G.china_divisions) : undefined
+            scenario_data().replacement_points()
         }
         L.divisions_used = 0
         L.replacable_units = []
@@ -1038,7 +1094,7 @@ function bombing(u, close_air_base) {
     return success
 }
 
-P.deal_cards = function () {
+function deal_cards() {
     var jp_cards = 7
     if (G.turn > 4) {
         var jp_resources = get_jp_resources()
@@ -1101,7 +1157,38 @@ P.deal_cards = function () {
     while (G.hand[AP].length < ap_cards) {
         draw_card(AP)
     }
-    end()
+}
+
+function S_P_deal_cards() {
+    var jp_cards = 4
+    G.passes[JP] = 0
+    if (G.strategic_warfare) {
+        jp_cards -= G.strategic_warfare
+        log(`Strategic warfare reduces draw to ${jp_cards} (-${G.strategic_warfare})`)
+        G.passes[JP] = 1
+    }
+    log(`Japan receives ${jp_cards} cards.`)
+    if (G.passes[JP]) {
+        log(`Japan receives ${G.passes[JP]} passes.`)
+    }
+    while (G.hand[JP].length < jp_cards) {
+        draw_card(JP)
+    }
+
+    let ap_cards = 4
+    G.passes[AP] = 0
+    if (G.surrender[nations.CHINA.id] >= 5) {
+        ap_cards -= 1
+        G.passes[AP]++
+        log(`Allied draw reduced by China.`)
+    }
+    log(`Allied draw ${ap_cards} cards.`)
+    if (G.passes[AP]) {
+        log(`Allied receive ${G.passes[AP]} passes.`)
+    }
+    while (G.hand[AP].length < ap_cards) {
+        draw_card(AP)
+    }
 }
 
 P.offensive_phase = script(`
@@ -1572,19 +1659,29 @@ P.china_offensive = {
         button("roll")
     },
     roll() {
+        var burma_road = (2 - G.burma_road) * 4
+        log(`Japan started China offensive.`)
+        log(`Japanese divisions ${G.china_divisions}.`)
+        log(`+${burma_road} (Burma road).`)
         G.events[events.CHINA_OFFENSIVE.id] = G.turn
         let result = random(10)
         var air_support = 0
-        for_each_unit_on_map((u, piece, location) => {
-            if (location === CHINA_BOX && (piece.type !== "lrb" || u === LRB_14)) {
-                air_support++
-            }
-        })
-        var burma_road = (2 - G.burma_road) * 4
+
+        if (scenario_data().id === SOUTH_PACIFIC) {
+            air_support++
+            log(`+1 ${piece_get_log_str(ap_air("14_lrb"))}.`)
+        } else {
+            for_each_unit_on_map((u, piece, location) => {
+                if (location === CHINA_BOX && (piece.type !== "lrb" || u === LRB_14)) {
+                    log(`+1 ${piece_get_log_str(u)}.`)
+                    air_support++
+                }
+            })
+        }
+
         var baseline = G.china_divisions - burma_road - air_support
         var success = result <= baseline
-        log(`Japan started China offensive`)
-        log(`Japanese divisions ${G.china_divisions}, burma road ${burma_road}, AP air support ${air_support}`)
+
         log(`Roll ${result} ${success ? "<=" : ">"} ${baseline} (${success ? "SUCCESS" : "FAILED"})`)
         if (success) {
             update_china_status(1)
@@ -2153,7 +2250,7 @@ P.move_offensive_units = {
             let loc = G.location[G.active_stack[0]]
             L.movable_units.filter(u => loc === G.location[u]
                 && !L.move_data.is_air_present
-                && pieces[u].type !== "air"
+                && pieces[u].class !== "air"
                 && L.move_type !== BARGES_MOVE
                 && !set_has(G.active_stack, u))
                 .forEach(u => action_unit(u))
@@ -2867,6 +2964,9 @@ function check_hump() {
 
 function check_burma_road() {
     G.burma_road = 2
+    if (scenario_data().id === SOUTH_PACIFIC) {
+        return;
+    }
     const faction = AP
     const location = KUNMING
     var queue = [location]
@@ -5304,6 +5404,13 @@ P.political_phase = script(`
 
 P.national_status_segment = function () {
     log(`Turn ${G.turn}. National status segment`)
+    if (check_nation_surrender(nations.NEW_GUINEA)) {
+        set_control_over_nation(nations.NEW_GUINEA, false)
+    }
+    if (scenario_data().id === SOUTH_PACIFIC) {
+        end()
+        return;
+    }
     if (check_nation_surrender(nations.PHILIPPINES)) {
         if (G.surrender[nations.PHILIPPINES.id]) {
             for_each_unit_on_map((u, piece, location) => {
@@ -5350,9 +5457,6 @@ P.national_status_segment = function () {
     }
     if (check_nation_surrender(nations.AUSTRALIAN_MANDATES)) {
         set_control_over_nation(nations.AUSTRALIAN_MANDATES)
-    }
-    if (check_nation_surrender(nations.NEW_GUINEA)) {
-        set_control_over_nation(nations.NEW_GUINEA, false)
     }
     if (check_nation_surrender(nations.MARSHALL)) {
         set_control_over_nation(nations.MARSHALL)
@@ -5510,7 +5614,7 @@ function change_wie(diff, cause) {
         return
     }
     G.wie = Math.max(G.wie + diff, 0)
-    G.wie = Math.min(G.wie, 10)
+    G.wie = Math.min(G.wie, scenario_data().id === SOUTH_PACIFIC ? 7 : 10)
     log(`War in europe changed to ${get_wie_level()} (${3 - G.wie}), ${cause} (${diff})`)
 }
 
@@ -6226,7 +6330,114 @@ function victory_1945() {
 }
 
 function victory_south_pacific() {
+    if (G.turn < 6) {
+        return
+    }
+    var vp = 0
+    if (G.surrender[nations.CHINA.id] > 5) {
+        vp += 5
+        log(`+5 VP - China surrender`)
+    }
+    if (G.burma_road >= 1) {
+        vp += 1
+        log(`+1 VP - Burma road closed`)
+    }
+    if (!check_supply_line(hex_to_int(3727), OAHU, AP)) {
+        vp += 5
+        log(`+5 VP - Townsville isolated from Oahu`)
+    }
+    var india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
+    if (india) {
+        vp += india
+        log(`+${india} VP - Jp controlled hexes of Northern India`)
+    }
+    var india_status = G.surrender[nations.INDIA.id]
+    if (india_status > 0 && india_status <= 2) {
+        vp += 1
+        log(`+1 VP - India ${nations.INDIA.statuses[india_status]}`)
+    } else if (india_status > 0) {
+        vp += 2
+        log(`+2 VP - India ${nations.INDIA.statuses[india_status]}`)
+    }
+    var amh = 0
+    for_each_hex_in_range(hex_to_int(4222), 4, h => {
+        if (get_map_data(h).region === "AMandates" && (is_space_controlled(h, AP) || is_faction_units(h, AP))) {
+            amh++
+        }
+    })
+    if (G.surrender[nations.AUSTRALIAN_MANDATES.id]) {
+        vp += 3
+        log(`+3 VP - Japanese control of Australian Mandates`)
+    } else {
+        vp -= 3
+        log(`-3 VP - Allied control of Australian Mandates`)
+    }
+    if (G.surrender[nations.AUSTRALIAN_MANDATES.id] && amh >= 4) {
+        vp -= 1
+        log(`-1 VP - Allied control of 4 Australian Mandates hexes`)
+    }
 
+    if (G.political_will <= 5) {
+        vp += G.political_will - 4
+        log(`+${G.political_will - 4} VP - Political will`)
+    } else if (G.political_will >= 6) {
+        vp -= G.political_will - 5
+        log(`-${G.political_will - 5} VP - Political will`)
+    }
+    if (set_has(G.captured_once, OAHU)) {
+        vp += 3
+        log(`+3 VP - Oahu was captured`)
+    }
+    if (set_has(G.captured_once, hex_to_int(5708))) {
+        vp += 1
+        log(`+1 VP - Kauai was captured`)
+    } else if (set_has(G.captured_once, hex_to_int(5908))) {
+        vp += 1
+        log(`+1 VP - Hawaii was captured`)
+    }
+
+
+    if (check_nation_controlled(nations.MARSHALL, AP)) {
+        vp -= 3
+        log(`-3 VP - Allied control of Marshall Islands`)
+    }
+    var new_guinea = 0
+    for_each_hex_in_range(hex_to_int(3621), 5, h => {
+        if (get_map_data(h).region === "Guinea" && (is_space_controlled(h, AP) || is_faction_units(h, AP)) && get_map_data(h).port) {
+            new_guinea++
+        }
+    })
+    if (check_nation_controlled(nations.NEW_GUINEA, AP)) {
+        vp -= 3
+        log(`-3 VP - Allied control of New Guinea`)
+    } else if (new_guinea >= 4) {
+        vp -= 1
+        log(`-1 VP - Allied control of 4 New Guinea port hexes`)
+    }
+    var tokyo_ports = 0
+    for_each_hex_in_range(TOKYO, 11, h => {
+        if (get_map_data(h).port && (is_space_controlled(h, AP) || is_faction_units(h, AP))) {
+            tokyo_ports++
+        }
+    })
+    if (tokyo_ports) {
+        vp -= 3
+        log(`-3 VP - Allies control a port that is 11 or less hexes from Tokyo`)
+    }
+    if (get_jp_resources() <= 14) {
+        vp -= 14 - get_jp_resources()
+        log(`-${14 - get_jp_resources()} VP - Allied controlled resource hexes`)
+    }
+    log(`Total VP - ${vp}`)
+    if (vp <= 2) {
+        finish("Allies", "Allied Decisive Victory")
+    } else if (vp <= 5) {
+        finish("Allies", "Allied Tactical Victory")
+    } else if (vp <= 9) {
+        finish("Japan", "Japanese Tactical Victory")
+    } else {
+        finish("Japan", "Japanese Decisive Victory")
+    }
 }
 
 function set_inter_service(faction, rivalry) {
@@ -6250,7 +6461,7 @@ function filter_activation_units(condition, faction) {
 
 function could_play(card) {
     var faction = card.faction
-    return get_hand(faction).length && !set_has(G.discard[faction], card.c) && !set_has(G.removed[faction], card.c)
+    return get_hand(faction).length && !set_has(G.discard[faction], card.c) && !set_has(G.removed[faction], card.c) && scenario_data().has_card(card.c)
 }
 
 function trigger_event(stage, arg) {
@@ -7715,8 +7926,10 @@ cards[find_card(AP, 10)].event = function () {
     call("draw_from_discard")
 }
 
-cards[find_card(AP, 13)].after_unit_activation = function () {
-    filter_activation_units((u, piece) => piece.class !== "ground", AP)
+cards[find_card(AP, 13)].after_unit_activation = function (u) {
+    if (pieces[u].class === "ground") {
+        filter_activation_units((u, piece) => piece.class !== "ground", AP)
+    }
 }
 
 cards[find_card(AP, 15)].event = function () {
@@ -8566,6 +8779,9 @@ SCENARIO_DATA[SOUTH_PACIFIC].before_commit_offensive = function () {
 SCENARIO_DATA[SOUTH_PACIFIC].before_unit_activation = function () {
     if (G.turn === 3) {
         filter_activation_units((u) => G.location[u] !== TRUK, JP)
+    }
+    if (G.offensive.active_hq[G.active] === HQ_CENTRAL_PACIFIC) {
+        filter_activation_units((u) => get_map_data(G.location[u]).region === "Hebrides", AP)
     }
 }
 
@@ -9438,18 +9654,39 @@ function setup_scenario_1944() {
 function setup_scenario_south_pacific() {
     log("#1942 South pacific")
 
-    var ap_draw = [8, 20, 21, 23, 24, 25, 27, 28, 29, 31, 32, 36, 40, 43, 44, 46, 50, 52, 56, 64, 66, 81, 82]
-    var jp_draw = [9, 13, 16, 17, 20, 23, 25, 27, 28, 29, 32, 33, 34, 35, 42, 44, 48, 49, 51, 52, 73, 75, 84, 85]
-    G.draw = []
-    G.draw[JP] = jp_draw.map(c => find_card(JP, c))
-    G.draw[AP] = ap_draw.map(c => find_card(AP, c))
-    G.surrender[nations.AUSTRALIAN_MANDATES.id] = 1
+    for_each_card((i, card) => {
+        if (scenario_data().has_card(i)) {
+            G.draw[card.faction].push(i)
+        }
+    })
+
+    var removed = []
+    for (var i = 1; i < cards.length; i++) {
+        var faction = cards[i].faction
+        if (!set_has(G.draw[faction], i)) {
+            set_add(removed, i)
+        }
+    }
+
+    future_offencive_card(find_card(AP, 13), 2)
+    while (G.hand[AP].length < 2) {
+        draw_card(AP)
+    }
+    draw_specific_card(find_card(JP, 17))
+    while (G.hand[JP].length < 3) {
+        draw_card(JP)
+    }
+
+
     var surrender = [nations.AUSTRALIAN_MANDATES, nations.NEW_GUINEA]
     surrender.forEach(n => {
+        G.surrender[n.id] = 1
         set_control_over_nation(n)
     })
     var ap_controlled = [5808, 3823, 4024, 4828]
     ap_controlled.forEach(h => set_delete(G.control, hex_to_int(h)))
+    control_hex(hex_to_int(4719), JP)
+    control_hex(hex_to_int(3017), JP)
     G.reduced = []
 
     for_each_unit(u => G.location[u] = PERM_ELIMINATED)
@@ -9530,16 +9767,6 @@ function setup_scenario_south_pacific() {
     G.surrender[nations.CHINA.id] = 2
     G.inter_service = [1, 1]
     G.china_divisions = 9
-
-    future_offencive_card(find_card(AP, 13), 2)
-
-    while (G.hand[AP].length < 2) {
-        draw_card(AP)
-    }
-    draw_specific_card(find_card(JP, 17))
-    while (G.hand[JP].length < 3) {
-        draw_card(JP)
-    }
 
     check_supply()
     fill_overstack()
