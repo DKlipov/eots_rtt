@@ -1,11 +1,11 @@
 Todo list:
-* [WIP] One-step ground units at ground battle FULL streight
-* China air box
+* [WIP] China air box
 * Amph assault battle roll modifier (if only air was present it should apply)
 * Kwai and jp shq
 * Conditions for submarines and other reactions
 * Intelligence modifier for fast_air_move
 * Surrender once per game
+* arcadia 1941 and 1942 bugs
 * Add partially impassable hexsides to data.js
 * Kunming supply
 * Burma road and SE airfield

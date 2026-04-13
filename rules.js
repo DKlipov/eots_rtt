@@ -467,6 +467,9 @@ for (var i = 1; i < pieces.length; i++) {
         piece.service = "navy"
     }
 
+    if (piece.start_reduced && pieces.notreplaceable) {
+        piece.one_step = 1
+    }
     if (!piece.ebr && piece.br) {
         piece.ebr = piece.br
     }
@@ -4448,7 +4451,7 @@ function fill_hit_able_units(faction) {
         }
         var could_be_damaged = loss_factor <= hit_limit && (!piece.br || distant_hits || set_has(battle.distant_hits_list[faction], unit)
             || G.location[unit] === battle.battle_hex)
-        if (could_be_damaged && (critical || reduced_status === 0)) {
+        if (could_be_damaged && (critical || reduced_status === 0 || piece.one_step && battle.ground_stage)) {
             map_set(result, unit, loss_factor)
         } else if (could_be_damaged) {
             map_set(reduced, unit, loss_factor)
