@@ -85,6 +85,10 @@ const UNIT_MOVEMENT_MARKERS = [
         condition: (u, piece, path) => path & AMPH_MOVE && piece.class === "ground",
         counter: "marker aa_small",
     },
+    {
+        condition: (u, piece, path) => piece.b29 && G.b29u & 2 << piece.b29,
+        counter: "marker strat_bombing",
+    },
 
 ]
 

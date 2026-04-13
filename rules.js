@@ -1896,7 +1896,7 @@ function get_activatable_units(hq, hq_supply_type) {
         const occupied_land = solely_occupied_land(item, 1 - faction)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             if (map_get(distance_map, nh, 100) > distance
@@ -1965,7 +1965,7 @@ function is_cv_reaction_able(u) {
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             if (distance > range
@@ -2149,6 +2149,14 @@ function could_stack_stop_here() {
     return set_has(G.offensive.battle_hexes, location) || set_has(G.offensive.landing_hexes, location) || is_space_controlled(location, R) && get_map_data(location).port
 }
 
+function could_air_stop_here() {
+    if (!L.move_data.is_air_present || G.active_stack.length <= 0) {
+        return false
+    }
+    var location = G.location[G.active_stack[0]]
+    return set_has(G.offensive.battle_hexes, location) || is_space_controlled(location, R) && get_map_data(location).airfield
+}
+
 function update_move_hex() {
     if (G.active_stack.length === 0) {
         return
@@ -2265,7 +2273,7 @@ P.move_offensive_units = {
                 && L.move_type !== BARGES_MOVE
                 && !set_has(G.active_stack, u))
                 .forEach(u => action_unit(u))
-            if (G.offensive.stage !== REACTION_STAGE && could_stack_stop_here()) {
+            if (G.offensive.stage !== REACTION_STAGE && could_stack_stop_here() || could_air_stop_here()) {
                 button("no_move")
             } else if (G.offensive.stage === POST_BATTLE_STAGE && L.allowed_hexes.length === 0 && G.active_stack.length === 1) {
                 button("eliminate")
@@ -3353,7 +3361,7 @@ function compute_possible_battle_hexes() {
     const new_battle_allowed = G.offensive.type === EC || G.offensive.battle_hexes.length <= 0
     G.offensive.active_units[R].filter(u => pieces[u].br).forEach(u => {
         const location = G.location[u]
-        var piece = pieces
+        var piece = pieces[u]
         var path = map_get(G.offensive.paths, u)
         var range = pieces[u].ebr ? pieces[u].ebr : pieces[u].br
         if (pieces[u].parenthetical) {
@@ -9945,6 +9953,7 @@ function on_view() {
     V.control = G.control
     V.capture = G.capture
     V.oos = G.oos
+    V.b29u = G.b29u
     V.supply_cache = G.supply_cache
     V.hand = []
     V.pow = G.pow
