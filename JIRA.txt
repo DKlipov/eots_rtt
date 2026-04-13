@@ -1,13 +1,13 @@
 Todo list:
 * [WIP] B29 attack restrictions
-* Kwai and jp shq
+* One-step ground units at ground battle FULL streight
 * China air box
 * Amph assault battle roll modifier (if only air was present it should apply)
-* One-step ground units at ground battle FULL streight
-* Add partially impassable hexsides to data.js
+* Kwai and jp shq
 * Conditions for submarines and other reactions
 * Intelligence modifier for fast_air_move
 * Surrender once per game
+* Add partially impassable hexsides to data.js
 * Kunming supply
 * Burma road and SE airfield
 * Air movement with stacking

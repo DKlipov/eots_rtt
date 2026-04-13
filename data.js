@@ -1767,6 +1767,7 @@ data.pieces = [
         "br": 8,
         "rcf": 3,
         "reinforcement": 9,
+        "b29": 1,
     },
     {
         id: "air_ap_21_bc",
@@ -1782,6 +1783,7 @@ data.pieces = [
         "br": 8,
         "rcf": 3,
         "reinforcement": 10,
+        "b29": 4,
     },
     {
         id: "missouri",

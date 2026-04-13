@@ -74,6 +74,10 @@ const ROAD = 4
 const UNPLAYABLE_WATER = 8
 const UNPLAYABLE_LAND = 16
 
+//B29 status
+const B29_REPLACED = 1
+const B29_BOMBED = 2
+
 
 const SUPPLY_PORT_RANGE = 4 * 2 //ground movement points count with multiplier
 
@@ -469,8 +473,10 @@ for (var i = 1; i < pieces.length; i++) {
 
     if (piece.type === "lrb" && i !== LRB_19 && i !== LRB_10) {
         var pair = find_piece(piece.id.replace("_lrb", ""))
-        pieces[pair].pair = i
-        piece.pair = pair
+        if (pair !== i) {
+            pieces[pair].pair = i
+            piece.pair = pair
+        }
     }
 
     if (i === jp_army("kor")) {
@@ -743,7 +749,6 @@ P.reinforcement_segment = {
             }
         })
         if (hq_in_list) {
-            // prompt(`Choose hq to place as reinforcement.`)
             return
         }
         L.unit_reinforcement.forEach(u => {
@@ -754,7 +759,6 @@ P.reinforcement_segment = {
         if (!L.unit_reinforcement.length) {
             button("done")
         }
-        // prompt(`Choose unit to place as reinforcement.`)
     },
     auto() {
         while (L.unit_reinforcement.length) {
@@ -947,6 +951,9 @@ P.replacement_segment = {
             set_add(G.reduced, u)
             G.active_stack = [u]
             L.allowed_hexes = get_unit_reinforcement_hexes(u)
+            if (pieces[u].b29) {
+                G.b29u |= B29_REPLACED << pieces[u].b29
+            }
             trigger_event("before_place_replacement")
         }
         L.replacement_points[pieces[u].replacement] -= 1
@@ -1019,8 +1026,9 @@ P.strategic_bombing = {
         L.allowed_units = []
         var units = [B_29_1, B_29_2]
         units.forEach(u => {
+            var piece = pieces[u]
             var check_location = G.location[u] < LAST_BOARD_HEX && get_distance(G.location[u], TOKYO) <= 8 || G.location[u] === CHINA_BOX
-            if (check_location && !set_has(G.oos, u) && !G.committed.includes(u)) {
+            if (check_location && !set_has(G.oos, u) && !(G.b29u & B29_REPLACED << piece.b29)) {
                 set_add(L.allowed_units, u)
             }
         })
@@ -1084,7 +1092,7 @@ function bombing(u, close_air_base) {
     } else if (damaged) {
         set_add(G.reduced, u)
     }
-    set_add(G.committed, u)
+    G.b29u |= B29_BOMBED << pieces[u].b29
     if (success) {
         G.strategic_warfare++
         check_event(events.STRAT_BOMBING)
@@ -1917,13 +1925,16 @@ function get_activatable_units(hq, hq_supply_type) {
             && (piece.class !== "ground" || !set_has(G.offensive.battle_hexes, G.location[i]))
             && !set_has(G.offensive.active_units[R], i)
             && (!set_has(G.oos, i) || L.card === GENERAL_ADACHI)
-            && (!reaction_movement || is_unit_reaction_able(i))
-            && (!G.committed.includes(i) || reaction_movement && is_faction_units(G.location[i], JP))
+            && (!reaction_movement || is_unit_reaction_able(i) && (!is_b29_bombed(piece) || is_faction_units(G.location[i], JP)))
         ) {
             set_add(result, i)
         }
     }
     return result
+}
+
+function is_b29_bombed(piece) {
+    return piece.b29 && (G.b29u & (B29_BOMBED << piece.b29))
 }
 
 function is_unit_reaction_able(i) {
@@ -2381,12 +2392,13 @@ P.move_offensive_units = {
             var piece = pieces[u]
             return G.location[u] === hex && piece.br && piece.class === "naval"
         }).length
+        var piece = pieces[G.active_stack[0]]
         var distant_attack =
             (L.move_data.battle_range || escort)
             && G.active_stack.length >= 1
             && !set_has(G.offensive.battle_hexes, hex)
             && G.offensive.stage !== POST_BATTLE_STAGE
-            && !G.committed.includes(G.active_stack[0])
+            && (G.offensive.stage === REACTION_STAGE || !is_b29_bombed(piece))
         if (L.movable_units.length <= 0 && distant_attack) {
             goto("choose_attack_hex", {move_hexes})
         } else if (distant_attack) {
@@ -2748,7 +2760,7 @@ function mark_supply_ports_oversea(hq, piece) {
             if (!set_has(distance_map, nh) && get_map_data(item).edges_int & WATER << 5 * j && !non_neutral_zoi) {
                 set_add(distance_map, nh)
                 queue.push(nh)
-                if (G.supply_cache[nh] & JP_SUPPLY_PORT << faction) {
+                if (G.supply_cache[nh] & JP_SUPPLY_PORT << faction || nh > LAST_BOARD_HEX) {
                     return
                 }
                 if (get_map_data(nh).port && is_space_controlled(nh, faction)) {
@@ -2817,7 +2829,7 @@ function mark_hexes_supplied_from(hq, piece) {
         const distance = map_get(oversea_set, item) + 1
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             const non_neutral_zoi = non_neutral_zoi_s || G.supply_cache[nh] & JP_ZOI << (1 - faction) && !(G.supply_cache[nh] & JP_ZOI_NTRL << (1 - faction))
@@ -3341,13 +3353,14 @@ function compute_possible_battle_hexes() {
     const new_battle_allowed = G.offensive.type === EC || G.offensive.battle_hexes.length <= 0
     G.offensive.active_units[R].filter(u => pieces[u].br).forEach(u => {
         const location = G.location[u]
+        var piece = pieces
         var path = map_get(G.offensive.paths, u)
         var range = pieces[u].ebr ? pieces[u].ebr : pieces[u].br
         if (pieces[u].parenthetical) {
             range = pieces[u].br
         }
         if (map_has(G.offensive.committed, u) || path[0] & STRAT_MOVE || path[0] & AIR_EXTENDED_MOVE || is_faction_units(location, 1 - pieces[u].faction)
-            || G.committed.includes(u)) {
+            || is_b29_bombed(piece)) {
             return
         }
         var saved_value = map_get(unit_ranges, location, [range])
@@ -5056,7 +5069,6 @@ P.prepare_battle = function () {
             set_add(battle.ground[JP], d)
         }
     }
-    G.committed.forEach(u => set_delete(battle.air_naval[AP], u))
     if (battle.air_naval[JP].length && (battle.air_naval[AP].length || battle.ground[AP].length)
         || battle.air_naval[AP].length && (battle.air_naval[JP].length || battle.ground[JP].length)) {
         log(`Air/naval combat:`)
@@ -5929,7 +5941,7 @@ P.end_of_turn_phase = script(`
     set G.asp[JP][1] 0
     set G.asp[AP][1] 0
     set G.capture []
-    set G.committed []
+    set G.b29u 0
     set G.draw_counter [0,0]
     set G.strategic_warfare 0
     set G.passes [0,0]
@@ -9873,7 +9885,7 @@ function on_setup(scenario, options) {
     Object.keys(events).forEach(k => G.events[events[k].id] = 0)
     G.surrender = [...Array(Object.keys(nations).length).keys()].map(i => 0)
     G.surrender[nations.MARSHALL.id] = true //only nation under JP control
-    G.committed = []
+    G.b29u = 0
     G.supply_cache = []
     G.overstack = []
     G.pow = 0
