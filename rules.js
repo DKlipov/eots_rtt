@@ -9677,6 +9677,9 @@ function setup_scenario_1944() {
 function setup_scenario_south_pacific() {
     log("#1942 South pacific")
 
+    G.draw = [[], []]
+    G.removed = [[], []]
+    G.discard = [[], []]
     for_each_card((i, card) => {
         if (scenario_data().has_card(i)) {
             G.draw[card.faction].push(i)
