@@ -233,13 +233,16 @@ const ARMOR_BRIGADE = ap_army("7")
 const JP_GARRISON_JP = jp_army("g_mainland")
 const JP_GARRISON_CN = [jp_army("g_1"), jp_army("g_2"), jp_army("g_3")]
 
-
+//HQ
 const HQ_YAMAMOTO = find_piece("hq_jp_cy")
 const HQ_OZAWA = find_piece("hq_jp_co")
 const HQ_JP_SOUTH = find_piece("hq_jp_s")
 const HQ_SOUTH_SEAS = find_piece("hq_jp_ss")
 const KOREAN_ARMY = find_piece("army_jp_kor")
 const ED_ARMY = find_piece("army_jp_ed")
+
+//Regions
+const KWAI_HQ_MOD = ["NIndia", "Burma", "Ceylon"]
 
 //hexes
 const AIR_FERRY = hex_to_int(5408)
@@ -1831,7 +1834,7 @@ function mark_ground_reaction_hexes(location) {
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             var distance = base_distance + get_ground_move_cost(nh, item, (j + 3) % 6, R)//to correct distance processing with backward tracing
@@ -1865,7 +1868,7 @@ function mark_asp_reaction_hexes(hex) {
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             if (distance > range
@@ -2072,6 +2075,17 @@ function is_air_reaction_able(u) {
     return false
 }
 
+function get_kwai_modifier(hq) {
+    if (hq.faction === AP) {
+        return 0
+    }
+    if (is_space_controlled(RANGOON, JP) && is_event_active(events.KWAI_RIVER_BRIDGE)) {
+        return 1
+    } else if (is_space_controlled(RANGOON, AP) && !is_event_active(events.KWAI_RIVER_BRIDGE)) {
+        return -1
+    }
+}
+
 P.activate_units = {
     _begin() {
         if (R === G.offensive.attacker && G.offensive.type === EC && cards[G.offensive.offensive_card].hq) {
@@ -2082,6 +2096,7 @@ P.activate_units = {
         L.hq_bonus = pieces[G.offensive.active_hq[G.active]].cm
         var hq = G.offensive.active_hq[G.active]
         L.possible_units = get_activatable_units(hq, pieces[hq].supply)
+        L.kwai = get_kwai_modifier(pieces[hq])
         trigger_event("before_unit_activation")
         if (!L.possible_units.length) {
             end()
@@ -2094,6 +2109,11 @@ P.activate_units = {
     },
     unit(u) {
         push_undo()
+        if (L.kwai && KWAI_HQ_MOD.includes(get_map_data(G.location[u]).region)) {
+            log(`${L.kwai > 0 ? "+" : ""}${L.kwai} activation (Bridge over the River Kwai).`)
+            L.hq_bonus += L.kwai
+            L.kwai = 0
+        }
         set_add(G.offensive.active_units[R], u)
         set_delete(L.possible_units, u)
         apply_inter_service(u)
@@ -2102,6 +2122,16 @@ P.activate_units = {
             L.asp_ground_units = []
         }
         trigger_event("after_unit_activation", u)
+        if (L.kwai < 0 && G.offensive.logistic + L.hq_bonus <= G.offensive.active_units[R].length + 1) {
+            L.possible_units = L.possible_units.filter(u => !KWAI_HQ_MOD.includes(get_map_data(G.location[u]).region))
+        } else if (L.kwai > 0 && G.offensive.logistic + L.hq_bonus === G.offensive.active_units[R].length) {
+            L.possible_units = L.possible_units.filter(u => KWAI_HQ_MOD.includes(get_map_data(G.location[u]).region))
+            if (L.possible_units.length) {
+                log(`+1 activation (Bridge over the River Kwai).`)
+                L.hq_bonus += L.kwai
+                L.kwai = 0
+            }
+        }
         if (G.offensive.active_units[R].length >= (G.offensive.logistic + L.hq_bonus) || L.possible_units.length <= 0) {
             end()
         }
@@ -2729,7 +2759,7 @@ function check_hq_in_supply(hq, piece) {
         const oversea = set_has(oversea_set, item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             var reachable = false
@@ -2766,7 +2796,7 @@ function mark_supply_ports_overland(hq, piece) {
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             const occupied_land = G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
@@ -2801,7 +2831,7 @@ function mark_supply_ports_oversea(hq, piece) {
         const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             const non_neutral_zoi = non_neutral_zoi_s || G.supply_cache[nh] & JP_ZOI << (1 - faction) && !(G.supply_cache[nh] & JP_ZOI_NTRL << (1 - faction))
@@ -2838,7 +2868,7 @@ function supply_source_in_range(location, faction) {
         const nh_list = get_near_hexes(item)
         for (var j = 0; j < nh_list.length; j++) {
             const nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
 
@@ -2907,7 +2937,7 @@ function mark_hexes_supplied_from(hq, piece) {
         const distance = map_get(overland_set, item) + 1
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             const occupied_land = G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
@@ -2937,7 +2967,7 @@ function mark_hexes_supplied_from(hq, piece) {
         const distance = map_get(oversea_set, item) + 1
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             const non_neutral_zoi = non_neutral_zoi_s || G.supply_cache[nh] & JP_ZOI << (1 - faction) && !(G.supply_cache[nh] & JP_ZOI_NTRL << (1 - faction))
@@ -3044,7 +3074,7 @@ function check_burma_road() {
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             const occupied_land = G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
@@ -3075,7 +3105,7 @@ function check_burma_road() {
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             if (map_has(distance_map, nh) || has_non_n_zoi(nh, JP)) {
@@ -3391,6 +3421,7 @@ function get_move_data() {
     if (result.is_ground_present && !result.is_naval_present && !(L.move_type & BARGES_MOVE) && G.offensive.stage !== POST_BATTLE_STAGE) {
         result.move_type |= GROUND_MOVE
     }
+    console.log(result.is_new_battle_allowed)
     return result
 }
 
@@ -3690,7 +3721,8 @@ function compute_ground_naval_move_hexes() {
         }
         map_for_each(get_ground_move(move_data.move_type & AVOID_ZOI), (k, v) => {
             v.unshift(GROUND_MOVE)
-            if (G.offensive.stage === ATTACK_STAGE || set_has(G.offensive.battle_hexes, k)) {
+            if (G.offensive.stage === ATTACK_STAGE && (move_data.is_new_battle_allowed || !is_faction_units(k, 1 - G.active))
+                || set_has(G.offensive.battle_hexes, k)) {
                 map_set(L.allowed_hexes, k, v)
             }
         })
@@ -3716,7 +3748,7 @@ function compute_ground_naval_strat_move() {
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             if (has_non_n_zoi(nh, 1 - R)
@@ -3839,7 +3871,7 @@ function compute_ground_disengagement(unit) {
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             var distance = base_distance[0] + get_ground_move_cost(item, nh, j, R)
@@ -3902,7 +3934,7 @@ function get_ground_move(avoid_zoi) {
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             var distance = base_distance[0] + get_ground_move_cost(item, nh, j, R)
@@ -4012,7 +4044,7 @@ function get_naval_move(zoi_mask) {
         var item_non_n_zoi = !non_cv_ground_unit || has_non_n_zoi(item, 1 - R)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             if (G.supply_cache[nh] & zoi_mask
@@ -5628,7 +5660,7 @@ function check_japan_resource_trace() {
         const oversea = set_has(oversea_set, item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             var reachable = false
@@ -6208,7 +6240,7 @@ function check_supply_line(hex1, hex2, faction) {
         const oversea = set_has(oversea_set, item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             var reachable = false
@@ -6666,7 +6698,7 @@ function mark_hexes_in_move_range(hex, range) {
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             if (distance > range
@@ -7275,7 +7307,7 @@ function get_guadalcanal_evacuation_destination(location) {
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             if (distance > move_data.naval_move_distance
@@ -7710,7 +7742,7 @@ function check_fuel_shortage_data() {
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             if (has_non_n_zoi(nh, 1 - R)

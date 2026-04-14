@@ -1,8 +1,7 @@
 Todo list:
-* [WIP] Kwai and jp shq
-* Conditions for submarines and other reactions
-* Surrender once per game
+* [WIP] Conditions for submarines and other reactions
 * arcadia 1941 and 1942 bugs
+* Surrender once per game
 * Add partially impassable hexsides to data.js
 * Kunming supply
 * Burma road and supply eligable airfield
@@ -11,4 +10,4 @@ Todo list:
 * Strat move check zoi only enter hex
 * Chin surrender - diplace all air
 * Build bridge with  card - no conditions
-china box - add ledo to check
+* china box - add ledo to check
