@@ -8,7 +8,6 @@ Todo list:
 * arcadia 1941 and 1942 bugs
 * Add partially impassable hexsides to data.js
 * Kunming supply
-* Burma road and SE airfield
-* Air movement with stacking
+* Burma road and supply eligable airfield
 * Check supply during movement
 * Unify logs

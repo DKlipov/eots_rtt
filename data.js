@@ -1766,7 +1766,7 @@ data.pieces = [
         "lf": 10,
         "br": 8,
         "rcf": 3,
-        "reinforcement": 9,
+        "reinforcement": 6,
         "b29": 1,
     },
     {

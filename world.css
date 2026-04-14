@@ -56,6 +56,7 @@ body.hide-pieces #canvas {
 
 .space {
     position: absolute;
+    z-index: -1;
 }
 
 .layout {
@@ -124,6 +125,7 @@ body.hide-pieces #canvas {
 .space.action {
     background: rgba(255, 255, 0, 0.4);
     pointer-events: auto;
+    z-index: 100;
     /*border-color: yellow;*/
     /*box-shadow: 0 0 3px black, inset 0 0 3px black;*/
 }

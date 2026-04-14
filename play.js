@@ -270,6 +270,7 @@ function on_init() {
     define_layout("board_hex", PERM_ELIMINATED, [-100, -1180, 45, 45], "stack")
     define_layout("board_hex", DELAYED_BOX, [2420, 1540, 45, 45], "stack")
     define_layout("board_hex", CHINA_BOX, [890, 420, 45, 45], "stack")
+    define_space("action_hex", CHINA_BOX, [890, 420, 45, 45])
     define_layout("status", JP_AGREEMENT, [990, 143, 35, 35])
     define_layout("status", AP_AGREEMENT, [1054, 143, 35, 35])
     for (i = 0; i < 11; i++) {
@@ -280,7 +281,7 @@ function on_init() {
     }
     for (i = 1; i < 13; i++) {
         define_layout("turn", i, [68, 1232 - Math.floor((i * 46.9)), 35, 35], "stack")
-        define_space("action_box", i + TURN_BOX, [63, 1110 - Math.floor((i * 42.3)), 35, 35])
+        define_space("action_box", i + TURN_BOX, [68, 1232 - Math.floor((i * 46.9)), 35, 35])
     }
     for (i = 0; i < 10; i++) {
         define_layout("track", i, [383, 1585 - Math.floor((i * 46.5)), 35, 35], "stack")
@@ -391,6 +392,9 @@ function int_to_hex(i) {
 }
 
 function hex_center(i) {
+    if (i === CHINA_BOX) {
+        return [890, 420]
+    }
     let column = (Math.floor(i / 29))
     return [77 + column * 48.0, 50 + (i % 29) * 55.3 + (column % 2) * 25]
 }
@@ -422,7 +426,7 @@ function init_canvas() {
 
 function draw_paths() {
     map_for_each(G.offensive.paths, (k, v) => {
-        if (G.location[k] > LAST_BOARD_HEX) {
+        if (G.location[k] > LAST_BOARD_HEX && G.location[k] !== CHINA_BOX) {
             return
         }
         var start = hex_center(v[2])
