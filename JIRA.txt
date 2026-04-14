@@ -1,9 +1,6 @@
 Todo list:
-* [WIP] China air box
-* Amph assault battle roll modifier (if only air was present it should apply)
-* Kwai and jp shq
+* [WIP] Kwai and jp shq
 * Conditions for submarines and other reactions
-* Intelligence modifier for fast_air_move
 * Surrender once per game
 * arcadia 1941 and 1942 bugs
 * Add partially impassable hexsides to data.js
@@ -11,3 +8,7 @@ Todo list:
 * Burma road and supply eligable airfield
 * Check supply during movement
 * Unify logs
+* Strat move check zoi only enter hex
+* Chin surrender - diplace all air
+* Build bridge with  card - no conditions
+china box - add ledo to check

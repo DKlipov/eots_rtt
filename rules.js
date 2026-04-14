@@ -1329,6 +1329,22 @@ function get_infrastructure_actions() {
     return []
 }
 
+function get_event_infrastructure_actions() {
+    if (!is_event_active(events.JARHAT_ROAD) && !is_faction_units(JARHAT, JP)) {
+        return ["jarhat"]
+    } else if (is_faction_units(JARHAT, JP)) {
+        return []
+    }
+    var result = []
+    if (!is_event_active(events.LEDO_ROAD) && !is_faction_units(LEDO, JP)) {
+        result.push("ledo")
+    }
+    if (!is_event_active(events.IMPHAL_ROAD) && !is_faction_units(IMPHAL, JP)) {
+        result.push("imphal")
+    }
+    return result
+}
+
 function get_allowed_actions(num) {
     let card = cards[num]
     var result = ["discard"]
@@ -2408,7 +2424,9 @@ P.move_offensive_units = {
         } else if (curr_path[0] & AMPH_MOVE &&
             (!get_map_data(hex).port || !is_space_controlled(hex, R) || is_faction_units(hex, 1 - R))) {
             G.asp[R][1] += L.move_data.asp_points
-            G.offensive.r_asp += L.move_data.asp_points
+            if (G.offensive.stage === REACTION_STAGE) {
+                G.offensive.r_asp += L.move_data.asp_points
+            }
         }
         move_units(G.active_stack, curr_path)
         reset_move_type()
@@ -4066,9 +4084,24 @@ function commit_to_attack(unit, hex) {
     map_set(G.offensive.committed, unit, hex)
 }
 
+function check_amph_mod() {
+    var faction = 1 - G.active
+    G.offensive.battle_hexes.forEach(h => {
+        if (G.supply_cache[h] & ((JP_GROUND_UNITS | JP_HQ_UNITS) << faction)) {
+            set_add(G.offensive.amp_mod, h)
+        }
+    })
+    G.offensive.landing_hexes.forEach(h => {
+        if (G.supply_cache[h] & ((JP_GROUND_UNITS | JP_HQ_UNITS) << faction)) {
+            set_add(G.offensive.amp_mod, h)
+        }
+    })
+}
+
 P.declare_battle_hexes = {
     _begin() {
         check_supply()
+        check_amph_mod()
         G.offensive.battle_hexes.forEach(h => log(`Battle declared in hex ${int_to_hex(h)}`))
         compute_possible_battle_hexes()
         if (L.possible_units.length <= 0) {
@@ -4605,10 +4638,9 @@ function get_ground_roll_modifiers(faction) {
             log(`-3 Mountains`)
         }
     }
-    if (faction !== G.offensive.attacker && battle.amph_ground.filter(u => unit_on_board(u)).length) {
+    if (faction !== G.offensive.attacker && battle.amph_ground.filter(u => unit_on_board(u)).length && set_has(G.offensive.amp_mod, battle.battle_hex)) {
         result += 3
-        //todo
-        log(`+3 Amphibious assault (do not check that reaction unit present)`)
+        log(`+3 Amphibious assault`)
     }
     if (faction === AP && G.location[ARMOR_BRIGADE] === battle.battle_hex) {
         result += 1
@@ -8347,14 +8379,14 @@ cards[find_card(AP, 33)].before_activation = function () {
 
 P.build_road = {
     _begin() {
-        if (!get_infrastructure_actions().length) {
-            log("CBI could not be built")
+        if (!get_event_infrastructure_actions().length) {
+            log("CBI could not be built.")
             end()
         }
     },
     prompt() {
-        prompt(`${offensive_card_header()} Choose hex.`)
-        get_infrastructure_actions().map(h => {
+        prompt(`${offensive_card_header()} Choose hex to build CBI.`)
+        get_event_infrastructure_actions().map(h => {
             if (h === "jarhat") {
                 return JARHAT
             } else if (h === "imphal") {
@@ -8363,6 +8395,7 @@ P.build_road = {
                 return LEDO
             }
         }).forEach(h => action_hex(h))
+        button("skip")
     },
     action_hex(h) {
         push_undo()
@@ -8372,6 +8405,11 @@ P.build_road = {
         check_supply()
         end()
     },
+    skip() {
+        push_undo()
+        log("CBI build skipped.")
+        end()
+    }
 }
 
 cards[find_card(AP, 33)].before_unit_activation = function () {
@@ -10124,6 +10162,7 @@ reset_offensive() {
         type: EC,
         attacker: JP,
         active_cards: [],
+        amp_mod: [],
         offensive_card: -1,
         counter_offensive_card: -1,
         intelligence: SURPRISE,
