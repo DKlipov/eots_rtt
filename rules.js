@@ -1157,7 +1157,7 @@ function deal_cards() {
     if (G.turn === 1) {
         ap_cards = 0
     } else if (G.turn === 2) {
-        ap_cards = 5
+        ap_cards = G.hand[AP].length
         G.passes[AP] = 2
     } else if (G.turn === 3) {
         ap_cards = 6
@@ -8034,6 +8034,7 @@ cards[find_card(AP, 4)].event = function () {
 
 P.place_abda = {
     _begin() {
+        log("place abda")
         var dei = ["Java", "Borneo", "Sumatra", "Celebes"]
         L.allowed_hexes = get_unit_reinforcement_hexes(HQ_ABDA).filter(h => dei.includes(get_map_data(h).region))
         if (L.allowed_hexes.length <= 0) {
@@ -9413,9 +9414,8 @@ P.arcadia = {
     },
     event(c) {
         push_undo()
-        play_event(c)
         G.offensive.offensive_card = c
-        cards[c].event()
+        play_event(c)
     },
     done() {
         end()
