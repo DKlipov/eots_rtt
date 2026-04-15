@@ -2606,7 +2606,11 @@ P.choose_attack_hex = {
 
 function move_units(units, path) {
     const prev_path = map_get(G.offensive.paths, units[0])
-    var full_path = [path[0], path[1], ...prev_path.slice(2), ...path.slice(3)]
+    var full_path = [path[0], path[1]]
+    if (prev_path) {
+        full_path.push(...prev_path.slice(2))
+    }
+    full_path.push(...path.slice(3))
     units.forEach(u => {
         map_set(G.offensive.paths, u, full_path.slice())
     })
@@ -4382,7 +4386,8 @@ P.cancel_offensive = {
         G.offensive.cancelled = offensive
         G.active = JP
         play_event(reaction_card)
-        log(`Offensive resets, ${card_get_log_str(offensive_card)} discard`)
+        log(`${card_get_log_str(reaction_card)} played.`)
+        log(`Offensive cancelled, ${card_get_log_str(offensive_card)} discarded.`)
         goto("end_action")
         call("default_event")
     }
@@ -7086,6 +7091,12 @@ cards[find_card(JP, 23)].before_battle_roll = function (faction) {
     }
 }
 
+function has_active_naval_units(faction) {
+    return G.offensive.active_units[faction].filter(u => unit_on_board(u) && pieces[u].class === "naval").length
+}
+
+cards[find_card(JP, 24)].can_play = () => has_active_naval_units(AP)
+
 cards[find_card(JP, 24)].after_battles = function () {
     call("submarine_attack", {success: 4, card: find_card(JP, 24)})
 }
@@ -7105,6 +7116,8 @@ cards[find_card(JP, 25)].before_battle_roll = function (faction) {
         log(`${modifier} attack strength (Allied tactical confusion)`)
     }
 }
+
+cards[find_card(JP, 27)].can_play = () => has_active_naval_units(AP)
 
 cards[find_card(JP, 27)].after_battles = function () {
     call("submarine_attack", {success: 4, critical: 7, card: find_card(JP, 27)})
@@ -7339,6 +7352,8 @@ function get_guadalcanal_evacuation_destination(location) {
     }
     return result
 }
+
+cards[find_card(JP, 36)].can_play = () => has_active_naval_units(AP)
 
 cards[find_card(JP, 36)].before_battles = function () {
     call("submarine_attack", {success: 4, card: find_card(JP, 36)})
@@ -7684,6 +7699,8 @@ cards[find_card(JP, 73)].before_activation = function () {
     }
 }
 
+cards[find_card(JP, 75)].can_play = () => has_active_naval_units(AP)
+
 cards[find_card(JP, 75)].before_battles = function () {
     call("submarine_attack", {success: 4, card: find_card(JP, 75)})
 }
@@ -7935,6 +7952,8 @@ cards[find_card(JP, 85)].before_unit_activation = function () {
     G.offensive.logistic = cards[G.offensive.offensive_card].oc
     filter_activation_units((u, piece) => piece.class === "naval", JP)
 }
+
+cards[find_card(JP, 86)].can_play = () => has_active_naval_units(AP)
 
 cards[find_card(JP, 86)].after_battles = function () {
     call("submarine_attack", {success: 7, card: find_card(JP, 86)})
@@ -8760,6 +8779,8 @@ cards[find_card(AP, 60)].event = function () {
     discard_random_card(JP)
 }
 
+cards[DARTER_DACE].can_play = () => has_active_naval_units(JP)
+
 cards[DARTER_DACE].before_battles = function () {
     call("submarine_attack", {success: 14, critical: 17, card: DARTER_DACE})
 }
@@ -8785,6 +8806,8 @@ cards[find_card(AP, 67)].can_play = function () {
 
 cards[find_card(AP, 67)].event = cards[find_card(AP, 60)].event
 
+
+cards[find_card(AP, 68)].can_play = () => has_active_naval_units(JP)
 
 cards[find_card(AP, 68)].after_battles = function () {
     call("submarine_attack", {success: 7, card: find_card(AP, 68)})
@@ -8913,7 +8936,7 @@ cards[find_card(AP, 76)].before_unit_activation = function () {
     filter_activation_units((u, piece) => piece.class !== "ground" || piece.service === "au", AP)
 }
 
-cards[find_card(AP, 78)].before_battles = function () {
+function x_craft_targets() {
     var allowed_units = []
     for_each_unit_on_map((u, piece, location) => {
         if (piece.faction === JP && piece.class === "naval"
@@ -8922,6 +8945,15 @@ cards[find_card(AP, 78)].before_battles = function () {
             set_add(allowed_units, u)
         }
     })
+    return allowed_units
+}
+
+cards[find_card(AP, 78)].can_play = function () {
+    return x_craft_targets().length
+}
+
+cards[find_card(AP, 78)].before_battles = function () {
+    var allowed_units = x_craft_targets()
     call("submarine_attack", {success: 9, card: find_card(AP, 78), pre_allowed_units: allowed_units})
 }
 

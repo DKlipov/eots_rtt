@@ -1,6 +1,5 @@
 Todo list:
-* [WIP] Conditions for submarines and other reactions
-* arcadia 1941 and 1942 bugs
+* [WIP] arcadia 1941 and 1942 bugs
 * Hex by hex move
 * Surrender once per game
 * Add partially impassable hexsides to data.js
