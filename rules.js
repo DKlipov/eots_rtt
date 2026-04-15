@@ -345,8 +345,8 @@ for (let i = 0; i <= LAST_BOARD_HEX; ++i) {
         } else if (hex.island || hex.terrain === ATOLL || hex.terrain === OCEAN) {
             border = 1
         }
-        if (j === 3 && border === MAP_BORDER) {
-            hex.supply_source = AP //south side of the map
+        if (i % 29 >= 27) {
+            hex.supply_source |= JOINT_SUPPLIED_HEX
         }
         hex.coastal = hex.coastal || (border & WATER)
         hex.edges_int = hex.edges_int | (border << 5 * j)
@@ -358,14 +358,17 @@ for (let i = 0; i <= LAST_BOARD_HEX; ++i) {
         hex.named = true
     }
     if (hex.city === JAPANESE_CITY) {
-        hex.supply_source = JP
-    } else if (i < 29 || i > (LAST_BOARD_HEX - 29)) {
-        hex.supply_source = AP ////left or right side of the map
+        hex.supply_source |= JP_SUPPLIED_HEX
+    } else if (i < 29) {
+        hex.supply_source |= JOINT_SUPPLIED_HEX
+    } else if (i > (LAST_BOARD_HEX - 29)) {
+        hex.supply_source |= US_SUPPLIED_HEX
+        hex.supply_source |= JOINT_SUPPLIED_HEX
     }
     apply_south_pacific(Object.assign({}, hex))
 }
 S_P_MAP_DATA[OAHU] = Object.assign({}, MAP_DATA[OAHU])
-S_P_MAP_DATA[OAHU].supply_source = AP
+S_P_MAP_DATA[OAHU].supply_source = JOINT_SUPPLIED_HEX | US_SUPPLIED_HEX
 S_P_TONNELLING_SET.filter(h => h !== OAHU).forEach(h => S_P_MAP_DATA[h].edges_int += (WATER << 30))
 
 function apply_south_pacific(hex) {
@@ -383,11 +386,15 @@ function apply_south_pacific(hex) {
             hex.edges_int = hex.edges_int | (sp_map_item.edges[j] << 5 * j)
         }
     }
-    if (x === 20 || x === 40) {
-        hex.supply_source = AP
+    if (x === 20) {
+        hex.supply_source |= JOINT_SUPPLIED_HEX
+    }
+    if (x === 40) {
+        hex.supply_source |= JOINT_SUPPLIED_HEX
+        hex.supply_source |= US_SUPPLIED_HEX
     }
     if (sp_map_item && sp_map_item.top) {
-        hex.supply_source = JP
+        hex.supply_source |= JP_SUPPLIED_HEX
     }
     S_P_MAP_DATA[id] = hex
 }
@@ -628,11 +635,12 @@ function get_unit_reinforcement_hexes(u) {
 function get_hq_reinforcement_hexes() {
     let result = []
     const faction = G.active
+    var supply = G.active === AP ? JOINT_SUPPLIED_HEX : JP_SUPPLIED_HEX
     let queue = []
     const overland_set = []
     const oversea_set = []
     for (var i = 0; i < LAST_BOARD_HEX; i++) {
-        if (get_map_data(i).supply_source === faction) {
+        if (get_map_data(i).supply_source & supply) {
             queue.push(i)
             set_add(overland_set, i)
             set_add(oversea_set, i)
@@ -2095,6 +2103,11 @@ P.activate_units = {
         }
         L.hq_bonus = pieces[G.offensive.active_hq[G.active]].cm
         var hq = G.offensive.active_hq[G.active]
+        var piece = pieces[hq]
+        if ((piece.service === "joint" || piece.service === "us") && !check_hq_in_supply(hq, piece, US_SUPPLIED_HEX)) {
+            L.hq_bonus -= 1
+            log("-1 activation (US Line of Communication).")
+        }
         L.possible_units = get_activatable_units(hq, pieces[hq].supply)
         L.kwai = get_kwai_modifier(pieces[hq])
         trigger_event("before_unit_activation")
@@ -2739,10 +2752,10 @@ function mark_unit(i, piece) {
     }
 }
 
-function check_hq_in_supply(hq, piece) {
+function check_hq_in_supply(hq, piece, supply) {
     const faction = piece.faction
     const location = G.location[hq]
-    if (get_map_data(location).supply_source === piece.faction) {
+    if (get_map_data(location).supply_source & supply) {
         return true
     }
     let queue = [location]
@@ -2763,7 +2776,7 @@ function check_hq_in_supply(hq, piece) {
                 continue
             }
             var reachable = false
-            const enemy_port = enemy_port_s || (MD.port && set_has(G.control, nh) == (1 - faction))
+            const enemy_port = enemy_port_s || (MD.port && is_space_controlled(item, 1 - faction))
             const occupied_land = occupied_land_s || G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
             if (!set_has(overland_set, nh) && (overland || (MD.port && !enemy_port)) && MD.edges_int & GROUND << 5 * j && !occupied_land) {
                 reachable = true
@@ -2775,7 +2788,7 @@ function check_hq_in_supply(hq, piece) {
                 set_add(oversea_set, nh)
             }
             if (reachable) {
-                if (get_map_data(nh).supply_source === piece.faction) {
+                if (get_map_data(nh).supply_source & supply) {
                     return true
                 }
                 queue.push(nh)
@@ -3026,7 +3039,7 @@ function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
     var size = oos_units[faction].length
     oos_units[faction] = []
     for_each_unit_on_map((i, p) => {
-        if (p.class === "hq" && p.faction === faction && check_hq_in_supply(i, p)) {
+        if (p.class === "hq" && p.faction === faction && check_hq_in_supply(i, p, p.faction === AP ? JOINT_SUPPLIED_HEX : JP_SUPPLIED_HEX)) {
             mark_hexes_supplied_from(i, p)
         } else if (p.class === "hq" && p.faction === faction) {
             set_add(oos_units[faction], i)
@@ -3112,7 +3125,7 @@ function check_burma_road() {
                 continue
             }
             map_set(distance_map, nh, 1)
-            if (nh === MADRAS || get_map_data(nh).supply_source === AP) {
+            if (nh === MADRAS || get_map_data(nh).supply_source & JOINT_SUPPLIED_HEX) {
                 G.burma_road = 0
                 return
             } else {

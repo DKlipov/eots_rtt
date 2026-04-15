@@ -598,7 +598,7 @@ function on_update() {
 
     //show zoi
     for (i = 1; i < LAST_BOARD_HEX; i++) {
-        const zoi_state = G.supply_cache[i] & 3
+        var zoi_state = G.supply_cache[i] & 3
         var hex = ZOI_HEX[i]
         if (!hex) {
             continue
