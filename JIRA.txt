@@ -1,22 +1,11 @@
 Todo list:
-* [WIP] JP CV ressign hits step
-* Distant hits by units, no steps
-* skip bombing
-* fuel shortage
-* AP55
-* Hq displace and return
-* Japan lack of resources win condition
-* Check overstack for india surrender
-* B29 attack restrictions
-* Burma road and SE airfield
-* Kwai and jp shq
-* China air box
-* Amph assault battle roll modifier (if only air was present it should apply)
-* One-step ground units at ground battle FULL streight
+* Surrender once per game
 * Add partially impassable hexsides to data.js
-* surrender once per game
-* south pacific scenario
 * Kunming supply
-* Check supply durning movement
+* Burma road and supply eligable airfield
+* Check supply during movement
 * Unify logs
-* Split removed cards
+* Strat move check zoi only enter hex
+* Chin surrender - diplace all air
+* china box - add ledo to check
+* Hex by hex move for naval and air?

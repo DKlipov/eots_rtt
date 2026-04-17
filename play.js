@@ -85,6 +85,10 @@ const UNIT_MOVEMENT_MARKERS = [
         condition: (u, piece, path) => path & AMPH_MOVE && piece.class === "ground",
         counter: "marker aa_small",
     },
+    {
+        condition: (u, piece, path) => piece.b29 && G.b29u & 2 << piece.b29,
+        counter: "marker strat_bombing",
+    },
 
 ]
 
@@ -263,9 +267,10 @@ function on_init() {
     }
     define_layout("board_hex", NON_PLACED_BOX, [10, 10, 45, 45], "stack")
     define_layout("board_hex", ELIMINATED_BOX, [100, 1280, 45, 45], "stack")
-    define_layout("board_hex", PERM_ELIMINATED, [100, 1180, 45, 45], "stack")
+    define_layout("board_hex", PERM_ELIMINATED, [-100, -1180, 45, 45], "stack")
     define_layout("board_hex", DELAYED_BOX, [2420, 1540, 45, 45], "stack")
     define_layout("board_hex", CHINA_BOX, [890, 420, 45, 45], "stack")
+    define_space("action_hex", CHINA_BOX, [890, 420, 45, 45])
     define_layout("status", JP_AGREEMENT, [990, 143, 35, 35])
     define_layout("status", AP_AGREEMENT, [1054, 143, 35, 35])
     for (i = 0; i < 11; i++) {
@@ -276,7 +281,7 @@ function on_init() {
     }
     for (i = 1; i < 13; i++) {
         define_layout("turn", i, [68, 1232 - Math.floor((i * 46.9)), 35, 35], "stack")
-        define_space("action_box", i + TURN_BOX, [63, 1110 - Math.floor((i * 42.3)), 35, 35])
+        define_space("action_box", i + TURN_BOX, [68, 1232 - Math.floor((i * 46.9)), 35, 35])
     }
     for (i = 0; i < 10; i++) {
         define_layout("track", i, [383, 1585 - Math.floor((i * 46.5)), 35, 35], "stack")
@@ -387,6 +392,9 @@ function int_to_hex(i) {
 }
 
 function hex_center(i) {
+    if (i === CHINA_BOX) {
+        return [890, 420]
+    }
     let column = (Math.floor(i / 29))
     return [77 + column * 48.0, 50 + (i % 29) * 55.3 + (column % 2) * 25]
 }
@@ -418,7 +426,7 @@ function init_canvas() {
 
 function draw_paths() {
     map_for_each(G.offensive.paths, (k, v) => {
-        if (G.location[k] > LAST_BOARD_HEX) {
+        if (G.location[k] > LAST_BOARD_HEX && G.location[k] !== CHINA_BOX) {
             return
         }
         var start = hex_center(v[2])
@@ -462,7 +470,7 @@ function place_unit(u, location) {
         unit.classList.toggle("reduced", set_has(G.reduced, u))
         unit.classList.remove("activated")
         unit.classList.remove("selected")
-    } else if (location === ELIMINATED_BOX && !data.pieces[u].notreplaceable || location !== ELIMINATED_BOX) {
+    } else if (location === ELIMINATED_BOX && (!data.pieces[u].notreplaceable || is_action("unit", u)) || location !== ELIMINATED_BOX) {
         unit = populate("board_hex", location, "unit", u)
         unit.classList.toggle("reduced", set_has(G.reduced, u) || location === ELIMINATED_BOX
             || data.pieces[u].class === "hq" && G.inter_service[data.pieces[u].faction])
@@ -499,7 +507,7 @@ function on_update() {
 
     console.log(G)
     map_for_each(G.offensive.damaged, (u, s) => {
-        if (s >= 2) {
+        if (s > 2) {
             G.location[u] = ELIMINATED_BOX
         } else {
             set_add(G.reduced, u)
@@ -698,17 +706,19 @@ function on_update() {
     action_button("no_organic", "Disable organic")
     action_button("avoid_zoi", "Avoid ZOI")
     action_button("strat_move", "Strategic move")
+    action_button("ground_move", "Ground move")
     action_button("regular_movement", "Regular movement")
     action_button("extended_air", "Use extended range")
     action_button("barges", "Use barges")
     action_button("no_disen", "Skip ground disengagement")
 
     //debug
-    action_button("isr", "isr(dbg)")
+    action_button("isr", "Flip isr(dbg)")
+    action_button("check_s", "Check supply(dbg)")
     action_button("deploy_b29", "deploy_b29(dbg)")
-    action_button("ns", "end turn(dbg)")
-    action_button("control", "change control(dbg)")
-    action_button("draw", "draw card(dbg)")
+    action_button("ns", "discard cards(dbg)")
+    action_button("control", "change hex control(dbg)")
+    action_button("draw", "draw specific card(dbg)")
     action_button("auto", "auto(dbg)")
 
     action_button("undo", "Undo")
@@ -988,10 +998,12 @@ function show_card_list(id, params) {
         if (id === "event_card_dialog") {
             append_header(`Japanese Discard Pile (${G.discard[JP].length})`)
             G.discard[JP].forEach(append_card)
+            append_header(`Japanese Removed Cards (${G.removed[JP].length})`)
+            G.removed[JP].forEach(append_card)
             append_header(`Allies Discard Pile (${G.discard[AP].length})`)
             G.discard[AP].forEach(append_card)
-            append_header(`Removed Cards (${G.removed.length})`)
-            G.removed.forEach(append_card)
+            append_header(`Allies Removed Cards (${G.removed[AP].length})`)
+            G.removed[AP].forEach(append_card)
             //if (!is_observing()) {
             //	append_header(`Your Hand (${V.hand[R].length})`)
             //	V.hand[R].forEach(append_card)
