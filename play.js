@@ -300,7 +300,7 @@ function on_init() {
     }
     for (let i = 1; i < data.cards.length; ++i) {
         let card = data.cards[i]
-        card.element = define_card("card", i, `action card_${card.faction ? "ap" : "jp"}_${card.num}`)
+        card.element = define_card("card", i, `card_${card.faction ? "ap" : "jp"}_${card.num}`)
         card.element.onclick = on_click_card
         card.element.card = i
     }
