@@ -703,6 +703,7 @@ function on_update() {
     action_button("no_organic", "Disable organic")
     action_button("avoid_zoi", "Avoid ZOI")
     action_button("strat_move", "Strategic move")
+    action_button("ground_move", "Ground move")
     action_button("regular_movement", "Regular movement")
     action_button("extended_air", "Use extended range")
     action_button("barges", "Use barges")

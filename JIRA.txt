@@ -1,5 +1,4 @@
 Todo list:
-* [WIP] Hex by hex move
 * Surrender once per game
 * Add partially impassable hexsides to data.js
 * Kunming supply
@@ -8,5 +7,5 @@ Todo list:
 * Unify logs
 * Strat move check zoi only enter hex
 * Chin surrender - diplace all air
-* Build bridge with  card - no conditions
 * china box - add ledo to check
+* Hex by hex move for naval and air?

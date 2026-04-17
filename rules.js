@@ -41,6 +41,7 @@ const AIR_EXTENDED_MOVE = 1 << 9
 const AVOID_ZOI = 1 << 11
 const ORGANIC_ONLY = 1 << 12
 const GROUND_DISENGAGEMENT = 1 << 13
+const MANUAL_MOVEMENT = 1 << 14
 
 //Offensive stages
 const ATTACK_STAGE = 1 << 10
@@ -2338,6 +2339,9 @@ P.move_offensive_units = {
             if (G.offensive.stage === ATTACK_STAGE && L.move_data.sm_possible) {
                 button("strat_move", L.move_type !== STRAT_MOVE)
             }
+            if (G.offensive.stage === ATTACK_STAGE || L.move_data.move_type & GROUND_MOVE) {
+                button("ground_move", L.move_type !== MANUAL_MOVEMENT)
+            }
             if (G.offensive.stage === ATTACK_STAGE && G.offensive.barges) {
                 button("barges", L.move_type !== BARGES_MOVE && G.offensive.barges > 1 && G.active_stack.filter(u => pieces[u].class === "ground").length === 1)
             }
@@ -2362,6 +2366,12 @@ P.move_offensive_units = {
         }
         for (let i = 0; i < L.allowed_hexes.length; i += 2) {
             action_hex(L.allowed_hexes[i])
+        }
+    },
+    _resume() {
+        if (L.movable_units.length <= 0) {
+            G.active_stack = []
+            end()
         }
     },
     no_organic() {
@@ -2393,6 +2403,12 @@ P.move_offensive_units = {
     },
     strat_move() {
         set_mt(STRAT_MOVE)
+    },
+    ground_move() {
+        push_undo()
+        L.allowed_hexes = []
+        set_mt(ANY_MOVE)
+        call("ground_move")
     },
     avoid_zoi() {
         set_mt(AVOID_ZOI)
@@ -2447,14 +2463,6 @@ P.move_offensive_units = {
             G.offensive.barges = 1
             log(`Barges ability used`)
         }
-        if (G.offensive.stage === REACTION_STAGE && is_faction_units(hex, G.offensive.attacker) && set_has(G.offensive.battle_hexes, hex)) {
-            G.offensive.active_units[1 - R].filter(u => G.location[u] === hex).map(u => map_get(G.offensive.paths, u))
-                .forEach(path => {
-                    if (path[path.length - 1] !== hex) {
-                        path.pop()
-                    }
-                })
-        }
         var curr_path = map_get(L.allowed_hexes, hex)
         if (is_faction_units(hex, 1 - R) && G.active === G.offensive.attacker && G.offensive.stage === ATTACK_STAGE) {
             create_battle_hex(hex)
@@ -2463,6 +2471,7 @@ P.move_offensive_units = {
         }
         if (curr_path[0] & AMPH_MOVE && G.offensive.stage === REACTION_STAGE) {
             G.asp[R][1] += 1
+
             G.offensive.r_asp = 1
         } else if (curr_path[0] & AMPH_MOVE &&
             (!get_map_data(hex).port || !is_space_controlled(hex, R) || is_faction_units(hex, 1 - R))) {
@@ -2517,6 +2526,45 @@ P.move_offensive_units = {
         end()
     },
 }
+
+P.ground_move = {
+    _begin() {
+        L.allowed_hexes = []
+        L.move_type = ANY_MOVE
+        L.move_data = get_move_data()
+        check_supply()
+        compute_ground_move_hexes()
+    },
+    prompt() {
+        prompt(`${offensive_card_header()} Move activated units.`)
+        if (G.offensive.stage !== REACTION_STAGE || set_has(G.offensive.battle_hexes, G.location[G.active_stack[0]])) {
+            button("done")
+        }
+        for (let i = 0; i < L.allowed_hexes.length; i += 2) {
+            action_hex(L.allowed_hexes[i])
+        }
+    },
+    action_hex(hex) {
+        var curr_path = map_get(L.allowed_hexes, hex)
+        move_units(G.active_stack, curr_path)
+        check_supply()
+        L.move_data.ground_move_distance -= curr_path[1]
+        L.move_data.location = hex
+        L.allowed_hexes = []
+        if (!should_ground_move_stop(hex, R)) {
+            compute_ground_move_hexes()
+        }
+    },
+    done() {
+        push_undo()
+        if (is_faction_units(G.location[G.active_stack[0]], 1 - G.active)) {
+            create_battle_hex(G.location[G.active_stack[0]])
+        }
+        G.active_stack = []
+        end()
+    }
+}
+
 
 function set_mt(mt) {
     if (mt === STRAT_MOVE || L.move_type === STRAT_MOVE) {
@@ -3732,20 +3780,27 @@ function compute_ground_naval_move_hexes() {
         })
     }
     if (L.move_data.move_type & GROUND_MOVE) {
-        mt = GROUND_MOVE
-        if (move_data.move_type & AVOID_ZOI) {
-            mt |= AVOID_ZOI
-        }
-        map_for_each(get_ground_move(move_data.move_type & AVOID_ZOI), (k, v) => {
-            v.unshift(GROUND_MOVE)
-            if (G.offensive.stage === ATTACK_STAGE && (move_data.is_new_battle_allowed || !is_faction_units(k, 1 - G.active))
-                || set_has(G.offensive.battle_hexes, k)) {
-                map_set(L.allowed_hexes, k, v)
-            }
-        })
+        compute_ground_move_hexes()
     }
     if (G.offensive.stage !== POST_BATTLE_STAGE) {
         map_delete(L.allowed_hexes, location)
+    }
+}
+
+function compute_ground_move_hexes() {
+    var mt = GROUND_MOVE
+    if (L.move_data.move_type & AVOID_ZOI) {
+        mt |= AVOID_ZOI
+    }
+    map_for_each(get_ground_move(L.move_data.move_type & AVOID_ZOI), (k, v) => {
+        v.unshift(mt)
+        if (G.offensive.stage === ATTACK_STAGE && (L.move_data.is_new_battle_allowed || !is_faction_units(k, 1 - G.active))
+            || set_has(G.offensive.battle_hexes, k)) {
+            map_set(L.allowed_hexes, k, v)
+        }
+    })
+    if (G.offensive.stage !== POST_BATTLE_STAGE) {
+        map_delete(L.allowed_hexes, L.move_data.location)
     }
 }
 
