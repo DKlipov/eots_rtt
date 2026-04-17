@@ -710,11 +710,12 @@ function on_update() {
     action_button("no_disen", "Skip ground disengagement")
 
     //debug
-    action_button("isr", "isr(dbg)")
+    action_button("isr", "Flip isr(dbg)")
+    action_button("check_s", "Check supply(dbg)")
     action_button("deploy_b29", "deploy_b29(dbg)")
-    action_button("ns", "end turn(dbg)")
-    action_button("control", "change control(dbg)")
-    action_button("draw", "draw card(dbg)")
+    action_button("ns", "discard cards(dbg)")
+    action_button("control", "change hex control(dbg)")
+    action_button("draw", "draw specific card(dbg)")
     action_button("auto", "auto(dbg)")
 
     action_button("undo", "Undo")

@@ -1512,6 +1512,7 @@ P.offensive_segment = {
         }
         if (G.debug) {
             button("isr")
+            button("check_s")
             button("ns")
             button("control")
             button("eliminate")
@@ -1612,6 +1613,10 @@ P.offensive_segment = {
     //debug
     isr() {
         G.inter_service[R] = 1 - G.inter_service[R]
+    },
+    check_s() {
+        log("Forced supply check.")
+        check_supply()
     },
     ns() {
         G.hand[AP].forEach(c => {
@@ -4792,7 +4797,8 @@ P.execute_attack = function () {
     var enemy_faction = 1 - faction
     var battle = G.offensive.battle
     var pool = (battle.ground_stage ? battle.ground : battle.air_naval)[faction].filter(u => unit_on_board(u))
-    if (pool.length <= 0 || (battle.ground[enemy_faction].length + battle.air_naval[enemy_faction].length) === 0) {
+    if (pool.length <= 0 || (battle.ground[enemy_faction].length + battle.air_naval[enemy_faction].length) === 0
+        || battle.ground_stage && battle.ground[enemy_faction].length === 0) {
         end()
         return
     }
@@ -5316,7 +5322,7 @@ P.prepare_ground_battle = function () {
     }
     battle = G.offensive.battle
     var hex = battle.battle_hex
-    if (battle.ground[G.offensive.attacker].filter(u => unit_on_board(u)).length) {
+    if (battle.ground[G.offensive.attacker].filter(u => unit_on_board(u)).length && battle.ground[1 - G.offensive.attacker].filter(u => unit_on_board(u)).length) {
         log(`Ground combat at ${int_to_hex(hex)}`)
     }
     end()
