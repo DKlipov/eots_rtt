@@ -3486,7 +3486,6 @@ function get_move_data() {
     if (result.is_ground_present && !result.is_naval_present && !(L.move_type & BARGES_MOVE) && G.offensive.stage !== POST_BATTLE_STAGE) {
         result.move_type |= GROUND_MOVE
     }
-    console.log(result.is_new_battle_allowed)
     return result
 }
 
@@ -3631,7 +3630,6 @@ function fast_compute_air_move_hexes() {
             map_set(L.allowed_hexes, nh, v)
         }
     })
-    console.log(G.overstack[CHINA_BOX])
     map_delete(L.allowed_hexes, move_data.location)
     check_china_box_restriction()
 }
