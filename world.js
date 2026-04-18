@@ -227,6 +227,17 @@ class Thing {
 		return this
 	}
 
+	tooltip_image(tip) {
+		var id = this.my_id
+		this.element.addEventListener("mouseenter", function () {
+			if (typeof tip === "function") tip(id, true)
+		})
+		this.element.addEventListener("mouseleave", function () {
+			if (typeof tip === "function") tip(id, false)
+		})
+		return this
+	}
+
 	layout(rect, keywords) {
 		var e = this.element
 

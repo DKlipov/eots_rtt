@@ -303,7 +303,7 @@ function on_init() {
     define_marker("divisions", 0, "divisions_china")
     for (let i = 1; i < data.pieces.length; ++i) {
         let piece = data.pieces[i]
-        piece.element = define_piece("unit", i, piece.counter)
+        piece.element = define_piece("unit", i, piece.counter).tooltip_image(unit_tooltip_image)
     }
     for (let i = 1; i < data.cards.length; ++i) {
         let card = data.cards[i]
@@ -975,15 +975,7 @@ function sub_card(match, p1) {
     return `<span class="${cn}" onmouseenter="on_focus_card_tip(${c})" onmouseleave="on_blur_card_tip()">${data.cards[c].name}</span>`
 }
 
-function on_focus_card_tip(c) {
-    let elem = document.getElementById("tooltip")
-    const card = data.cards[c]
-    elem.classList = `card card_${card.faction ? "ap" : "jp"}_${card.num}`
-}
 
-function on_blur_card_tip(c) {
-    document.getElementById("tooltip").classList = "hide"
-}
 
 function get_piece_elem(p) {
     return data.pieces[p].element.element
@@ -1044,4 +1036,40 @@ function on_focus_hex_tip(z) {
 
 function on_blur_hex_tip(z) {
     get_hex_elem(z).classList.toggle("tip", false)
+}
+/* TOOLTIP ON FOCUS */
+
+function unit_tooltip_image(a, onoff) {
+	if (onoff) {
+		on_focus_unit_tip(a)
+	} else {
+		on_blur_unit_tip()
+	}
+}
+
+function on_focus_unit_tip(a) {
+	world.tip.hidden = is_mobile()
+    const piece = data.pieces[a]
+	// Show BOTH sides of the marker
+	world.tip.innerHTML = `
+    <div class="unit-tip piece ${piece.counter}"></div>	
+    <div class="unit-tip piece ${piece.counter} reduced"></div>`
+    world.tip.classList = "zoomed"
+}
+
+function on_blur_unit_tip() {
+	world.tip.hidden = true
+	world.tip.innerHTML = ""
+    world.tip.classList = ''
+}
+
+function on_focus_card_tip(c) {
+    world.tip.hidden = is_mobile()
+    const card = data.cards[c]
+    world.tip.classList = `card card_${card.faction ? "ap" : "jp"}_${card.num}`
+}
+
+function on_blur_card_tip(c) {
+    world.tip.hidden = true
+    world.tip.classList = ''
 }

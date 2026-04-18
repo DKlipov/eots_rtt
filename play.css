@@ -153,14 +153,56 @@ body.Allies #jp_hand { grid-row: 4; }
 	}
 }
 
-/* CARDS */
+/* TOOLTIPS */
+/* #status - standard tooltip */
+/* #tip - additional tooltip images */
+/* #map_tip - additional tooltip image using map cutout */
+/* #mobile_tip - special tooltip only used for cards, and only on mobile */
 
-#tooltip {
+/* data-tooltip - behaves like title attribute attached to element */
+#tip {
+	pointer-events: none;
 	position: fixed;
-	z-index: 100;
-	right: 240px;
-	top: 60px;
+	z-index: 1000;
+	margin: 6px;
 }
+
+.zoomed {
+	transform: scale(2); 
+}
+
+[data-tooltip] {
+	position: relative;
+}
+
+[data-tooltip]:after {
+	content: attr(data-tooltip);
+	position: absolute;
+	pointer-events: none;
+	background-color: oldlace;
+	border: 1px solid black;
+	border-radius: 5px;
+	padding: 0 5px;
+	width: max-content;
+	display: none;
+	z-index: 100;
+}
+
+[data-tooltip]:hover:after {
+	display: block;
+}
+
+span[data-tooltip]:after {
+	top: 20px;
+	left: 20px;
+}
+
+div[data-tooltip]:after {
+	top: 20px;
+	left: 5px;
+}
+
+/* CARDS */
 
 .card {
 	width: 250px;
@@ -200,6 +242,15 @@ body.Allies #jp_hand { grid-row: 4; }
 	transition: left 200ms, top 200ms;
 	position: absolute;
 	/*background-size: auto 100%;*/
+	background-repeat: no-repeat;
+	border-radius: 5px;
+	width:35px;
+	height:35px;
+    background-size: 35px 35px;
+}
+
+.unit-tip{
+	transition: left 200ms, top 200ms;
 	background-repeat: no-repeat;
 	border-radius: 5px;
 	width:35px;
