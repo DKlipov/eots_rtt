@@ -1501,14 +1501,14 @@ P.offensive_segment = {
         }
     },
     prompt() {
-        prompt("Turn " + G.turn + " Take one action.")
+        prompt("Turn " + G.turn + " Select card to play.")
         if (G.passes[R] > 0) {
             button("pass")
         }
         var hand = get_hand(R)
         for (let i = 0; i < hand.length; i++) {
             let card = hand[i]
-            get_allowed_actions(card).forEach(a => action(a, card))
+            action_card(card)
         }
         if (G.debug) {
             button("isr")
@@ -1530,85 +1530,9 @@ P.offensive_segment = {
             for_each_unit_on_map(u => action_unit(u))
         }
     },
-    ops(c) {
+    card(c){
         push_undo()
-        activate_card(c)
-        G.offensive.type = OC
-        log(`${R} played ${card_get_log_str(c)} as operation card`)
-        goto("offensive_sequence")
-    },
-    draw() {
-        push_undo()
-        G.offensive.active_cards = [TOJO_RESIGNS]
-        var a = G.draw[R].slice()
-        a.forEach(c => discard_card(c))
-        call("draw_from_discard")
-    },
-    event(c) {
-        push_undo()
-        if (cards[c].type === MILITARY) {
-            play_event(c)
-            goto("offensive_sequence")
-        } else {
-            G.offensive.offensive_card = c
-            goto("end_action")
-            play_event(c)
-            call("default_event")
-        }
-    },
-    discard(c) {
-        push_undo()
-        activate_card(c)
-        log(`${R} discards ${card_get_log_str(c)}`)
-        goto("end_action")
-    },
-    inter_service(c) {
-        push_undo()
-        activate_card(c)
-        log(`${R} played ${card_get_log_str(c)} to resolve ISR.`)
-        set_inter_service(cards[c].faction, 0)
-        goto("end_action")
-    },
-    jarhat(c) {
-        build_road(c, events.JARHAT_ROAD)
-    },
-    imphal(c) {
-        build_road(c, events.IMPHAL_ROAD)
-    },
-    ledo(c) {
-        build_road(c, events.LEDO_ROAD)
-    },
-    china_offensive(c) {
-        push_undo()
-        activate_card(c)
-        log(`${card_get_log_str(c)} played for Chinese Offensive.`)
-        goto("china_offensive")
-    },
-    displace_hq(c) {
-        push_undo()
-        activate_card(c)
-        log(`${card_get_log_str(c)} played for withdraw HQ.`)
-        goto("displace_hq")
-    },
-    return_hq(c) {
-        push_undo()
-        activate_card(c)
-        log(`${card_get_log_str(c)} played for return HQ.`)
-        goto("return_hq")
-    },
-    future_offensive(c) {
-        push_undo()
-        log(`${R} played future offensive`)
-        G.events[events.FUTURE_OFFENSIVE_JP.id + R] = G.turn
-        G.future_offensive[R] = c
-        array_delete_item(G.hand[R], c)
-        goto("end_action")
-    },
-    pass() {
-        push_undo()
-        G.passes[R] -= 1
-        log(`${R} passed, ${G.passes[R]} passes remains.`)
-        goto("end_action")
+        goto("offensive_segment_card_action", {c:c})
     },
     //debug
     isr() {
@@ -1653,6 +1577,94 @@ P.offensive_segment = {
         set_location(ap_air("21_bc"), JARHAT)
     },
 }
+
+P.offensive_segment_card_action={
+    prompt() {
+        prompt(`${card_get_log_str(L.c)} : Select action.`)
+        get_allowed_actions(L.c).forEach(a => button(a))
+    },
+    ops() {
+        push_undo()
+        activate_card(L.c)
+        G.offensive.type = OC
+        log(`${R} played ${card_get_log_str(L.c)} as operation card`)
+        goto("offensive_sequence")
+    },
+    draw() {
+        push_undo()
+        G.offensive.active_cards = [TOJO_RESIGNS]
+        var a = G.draw[R].slice()
+        a.forEach(c => discard_card(c))
+        call("draw_from_discard")
+    },
+    event() {
+        push_undo()
+        if (cards[L.c].type === MILITARY) {
+            play_event(L.c)
+            goto("offensive_sequence")
+        } else {
+            G.offensive.offensive_card = L.c
+            goto("end_action")
+            play_event(G.offensive.offensive_card)
+            call("default_event")
+        }
+    },
+    discard() {
+        push_undo()
+        activate_card(L.c)
+        log(`${R} discards ${card_get_log_str(L.c)}`)
+        goto("end_action")
+    },
+    inter_service() {
+        push_undo()
+        activate_card(L.c)
+        log(`${R} played ${card_get_log_str(L.c)} to resolve ISR.`)
+        set_inter_service(cards[c].faction, 0)
+        goto("end_action")
+    },
+    jarhat() {
+        build_road(L.c, events.JARHAT_ROAD)
+    },
+    imphal() {
+        build_road(L.c, events.IMPHAL_ROAD)
+    },
+    ledo() {
+        build_road(L.c, events.LEDO_ROAD)
+    },
+    china_offensive() {
+        push_undo()
+        activate_card(L.c)
+        log(`${card_get_log_str(L.c)} played for Chinese Offensive.`)
+        goto("china_offensive")
+    },
+    displace_hq(c) {
+        push_undo()
+        activate_card(c)
+        log(`${card_get_log_str(c)} played for withdraw HQ.`)
+        goto("displace_hq")
+    },
+    return_hq(c) {
+        push_undo()
+        activate_card(c)
+        log(`${card_get_log_str(c)} played for return HQ.`)
+        goto("return_hq")
+    },
+    future_offensive(c) {
+        push_undo()
+        log(`${R} played future offensive`)
+        G.events[events.FUTURE_OFFENSIVE_JP.id + R] = G.turn
+        G.future_offensive[R] = c
+        array_delete_item(G.hand[R], c)
+        goto("end_action")
+    },
+    pass() {
+        push_undo()
+        G.passes[R] -= 1
+        log(`${R} passed, ${G.passes[R]} passes remains.`)
+        goto("end_action")
+    },
+}
+
 
 P.displace_hq = {
     prompt() {

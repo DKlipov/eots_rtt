@@ -41,13 +41,6 @@ const ROAD_EVENTS = Object.keys(data.events).filter(k => data.events[k].road).ma
 
 const CARD_ACTIONS = ["card"]
 
-for (let item of document.getElementById("card_popup").querySelectorAll("li")) {
-    let action = item.dataset.action
-    if (action) {
-        CARD_ACTIONS.push(action)
-    }
-}
-
 //Move types
 const ANY_MOVE = 0
 const STRAT_MOVE = 1 << 0
@@ -315,7 +308,6 @@ function on_init() {
     for (let i = 1; i < data.cards.length; ++i) {
         let card = data.cards[i]
         card.element = define_card("card", i, `card_${card.faction ? "ap" : "jp"}_${card.num}`)
-        card.element.onclick = on_click_card
         card.element.card = i
     }
     define_panel("#jp_hand", "hand", JP)
@@ -705,6 +697,20 @@ function on_update() {
     action_button("amphibious", "Amphibious")
 
 
+    action_button("discard", "Discard")
+    action_button("event", "Play Event")
+    action_button("ops", "Play for Operations")
+    action_button("displace_hq", "HQ Withdrawal")
+    action_button("return_hq", "Early HQ Return")
+    action_button("inter_service", "Remove Inter-Service Rivalry")
+    action_button("china_offensive", "China Offensive")
+    action_button("future_offensive","Future Offensive")
+    action_button("jarhat","Build Jarhat Road")
+    action_button("imphal","Build Imphal Road")
+    action_button("ledo","Build Ledo Road")
+    action_button("hold","Hold")
+
+
     action_button("pass", "Pass")
     action_button("skip", "Skip")
     action_button("no_move", "No move")
@@ -736,75 +742,6 @@ function on_update() {
 
 function apply_conflict_marker(marker, hex) {
     marker.innerText = String.fromCharCode(65 + G.offensive.battle_names.indexOf(hex))
-}
-
-function on_click_card(evt) {
-    console.log(evt)
-    let card = evt.target.card
-    if (is_action('card', card)) {
-        send_action('card', card)
-    } else {
-        show_popup_menu(evt, "card_popup", card, data.cards[card].name)
-    }
-}
-
-function show_popup_menu(evt, menu_id, target_id, title, hide = '') {
-    let menu = document.getElementById(menu_id)
-
-    let show = false
-    for (let item of menu.querySelectorAll("li")) {
-        let action = item.dataset.action
-        if (action) {
-            if (action === hide) {
-                item.classList.remove("action")
-                item.hidden = true
-                item.onclick = null
-            } else {
-                if (is_action(action, target_id)) {
-                    show = true
-                    item.classList.add("action")
-                    item.classList.remove("disabled")
-                    item.hidden = false
-                    item.onclick = function () {
-                        send_action(action, target_id)
-                        hide_popup_menu()
-                        evt.stopPropagation()
-                    }
-                } else {
-                    item.classList.remove("action")
-                    item.hidden = true
-                    item.classList.remove("disabled")
-                    item.onclick = null
-                }
-            }
-        }
-    }
-    if (show) {
-        menu.onmouseleave = hide_popup_menu
-        menu.hidden = false
-        if (title) {
-            let item = menu.querySelector("li.title")
-            if (item) {
-                item.onclick = hide_popup_menu
-                item.textContent = title
-            }
-        }
-
-        let w = menu.clientWidth
-        let h = menu.clientHeight
-        let x = Math.max(5, Math.min(evt.clientX - w / 2, window.innerWidth - w - 5))
-        let y = Math.max(5, Math.min(evt.clientY - 12, window.innerHeight - h - 40))
-        menu.style.left = x + "px"
-        menu.style.top = y + "px"
-
-        evt.stopPropagation()
-    } else {
-        menu.hidden = true
-    }
-}
-
-function hide_popup_menu() {
-    document.getElementById("card_popup").hidden = true
 }
 
 const ICONS = {
