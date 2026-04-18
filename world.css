@@ -14,11 +14,87 @@ body.hide-pieces .piece { display: none }
 }
 
 .board > * {
-	position: absolute;
+    position: absolute;
+}
+
+.decor {
+    position: absolute;
+}
+
+.space {
+    position: absolute;
+    z-index: -1;
 }
 
 .layout {
-	pointer-events: none;
+    position: absolute;
+    pointer-events: none;
+}
+
+.card {
+    position: relative
+}
+
+.piece {
+    position: relative;
+}
+
+.piece.selected {
+    transform: rotate(22.5deg);
+}
+
+.piece.activated {
+    border-color: red;
+    box-shadow: 0 0 1px black, inset 0 0 1px black;
+    border-width: 1px;
+    border-style: solid;
+}
+
+.piece.moved {
+    border-color: blue;
+    box-shadow: 0 0 2px black, inset 0 0 2px black;
+    border-width: 2px;
+    border-style: solid;
+}
+
+
+.marker {
+    position: relative;
+}
+
+.zoi {
+    pointer-events: none;
+    background: rgba(255, 130, 255, 0.2);
+    z-index: -1;
+}
+
+.jp_zoi {
+    background: rgba(255, 0, 0, 0.2);
+}
+
+.ap_zoi {
+    background: rgba(0, 130, 255, 0.2);
+}
+
+.hex {
+    height: 55px;
+    aspect-ratio: 1/cos(30deg);
+    clip-path: polygon(50% -50%, 100% 50%, 50% 150%, 0 50%);
+    box-sizing: border-box;
+    border-width: 4px;
+    border-style: solid;
+    border-color: transparent;
+    box-shadow: none;
+    border-radius: 16px;
+    pointer-events: none;
+}
+
+.space.action {
+    background: rgba(255, 255, 0, 0.4);
+    pointer-events: auto;
+    z-index: 95;
+    /*border-color: yellow;*/
+    /*box-shadow: 0 0 3px black, inset 0 0 3px black;*/
 }
 
 .layout > * {

@@ -4,22 +4,7 @@ var G, L, R, V, P = {}
 
 const ROLES = ["Japan", "Allies"]
 
-const SCENARIO_DATA = [
-    {name: "1941-1945 (The Full Campaign)", setup: setup_scenario_1941, victory: victory_1945},
-    // {name: "South Pacific", id: SOUTH_PACIFIC, setup: setup_scenario_south_pacific, victory: victory_south_pacific}, should be implemented later
-    {name: "1942", setup: setup_scenario_1942, victory: victory_1942, one_year: true},
-    {name: "1942-1943", setup: setup_scenario_1942, victory: victory_1943},
-    {name: "1942-1944", setup: setup_scenario_1942, victory: victory_1944},
-    {name: "1942-1945 (The Shortened Campaign)", setup: setup_scenario_1942, victory: victory_1945},
-    {name: "1943", setup: setup_scenario_1943, victory: victory_1943, one_year: true},
-    {name: "1943-1944", setup: setup_scenario_1943, victory: victory_1944},
-    {name: "1943-1945 (The Even Shorter Campaign)", setup: setup_scenario_1943, victory: victory_1945},
-    {name: "1944", setup: setup_scenario_1944, victory: victory_1944, one_year: true},
-]
-
-const SCENARIOS = SCENARIO_DATA.map(s => s.name)
-
-exports.default_scenario = "1943"
+exports.default_scenario = "South Pacific"
 
 const JP = 0
 const AP = 1
@@ -56,6 +41,7 @@ const AIR_EXTENDED_MOVE = 1 << 9
 const AVOID_ZOI = 1 << 11
 const ORGANIC_ONLY = 1 << 12
 const GROUND_DISENGAGEMENT = 1 << 13
+const MANUAL_MOVEMENT = 1 << 14
 
 //Offensive stages
 const ATTACK_STAGE = 1 << 10
@@ -82,11 +68,16 @@ const MOUNTAIN = 4
 const ATOLL = 5
 
 // Hex sides
+const MAP_BORDER = 0
 const WATER = 1
 const GROUND = 2
 const ROAD = 4
-const UNPLAYABLE = 8
-const MAP_BORDER = 16
+const UNPLAYABLE_WATER = 8
+const UNPLAYABLE_LAND = 16
+
+//B29 status
+const B29_REPLACED = 1
+const B29_BOMBED = 2
 
 
 const SUPPLY_PORT_RANGE = 4 * 2 //ground movement points count with multiplier
@@ -134,6 +125,7 @@ const DELAYED_BOX = 1479
 const CHINA_BOX = 1480
 const PERM_ELIMINATED = 1481
 const TURN_BOX = 1490
+const TUNNEL_BOX = 1600
 
 const {pieces, cards, map, sp_map, nations, events} = require("./data.js")
 
@@ -145,6 +137,56 @@ const ROAD_EVENTS = Object.keys(events).filter(k => events[k].road).map(k => {
 
 const GARRISONED_CITY = [...Array(Object.keys(map).length).keys()].map(i => map[i]).filter(h => h.city > CITY).map(h => hex_to_int(h.id))
 
+const SOUTH_PACIFIC = 0
+
+const S_P_DECK = S_P_deck()
+
+const SCENARIO_DATA = [
+    {
+        id: SOUTH_PACIFIC,
+        name: "South Pacific",
+        setup: setup_scenario_south_pacific,
+        victory: victory_south_pacific,
+        deal_cards: S_P_deal_cards,
+        replacement_points: get_S_P_replacement_points,
+        has_card: c => set_has(S_P_DECK, c)
+    },
+    {id: 1, name: "1941-1945 (The Full Campaign)", setup: setup_scenario_1941, victory: victory_1945},
+    {id: 2, name: "1942", setup: setup_scenario_1942, victory: victory_1942, one_year: true},
+    {id: 3, name: "1942-1943", setup: setup_scenario_1942, victory: victory_1943},
+    {id: 4, name: "1942-1944", setup: setup_scenario_1942, victory: victory_1944},
+    {id: 5, name: "1942-1945 (The Shortened Campaign)", setup: setup_scenario_1942, victory: victory_1945},
+    {id: 6, name: "1943", setup: setup_scenario_1943, victory: victory_1943, one_year: true},
+    {id: 7, name: "1943-1944", setup: setup_scenario_1943, victory: victory_1944},
+    {id: 8, name: "1943-1945 (The Even Shorter Campaign)", setup: setup_scenario_1943, victory: victory_1945},
+    {id: 9, name: "1944", setup: setup_scenario_1944, victory: victory_1944, one_year: true},
+]
+
+SCENARIO_DATA.forEach(s => {
+    if (!s.replacement_points) {
+        s.replacement_points = get_replacement_points
+    }
+    if (!s.deal_cards) {
+        s.deal_cards = deal_cards
+    }
+    if (!s.has_card) {
+        s.has_card = a => true
+    }
+    s.removed_cards = []
+})
+
+const SCENARIOS = SCENARIO_DATA.map(s => s.name)
+
+function S_P_deck() {
+    var ap_draw = [8, 13, 20, 21, 23, 24, 25, 27, 28, 29, 31, 32, 36, 40, 43, 44, 46, 50, 52, 56, 64, 66, 81, 82]
+    var jp_draw = [9, 13, 16, 17, 20, 23, 25, 27, 28, 29, 32, 33, 34, 35, 42, 44, 48, 49, 51, 52, 73, 75, 84, 85]
+    var deck = []
+    jp_draw.map(c => find_card(0, c)).forEach(c => set_add(deck, c))
+    ap_draw.map(c => find_card(1, c)).forEach(c => set_add(deck, c))
+    return deck
+}
+
+
 //cards
 const OPERATION_NO_1 = find_card(JP, 2)
 const COL_TSUJI = find_card(JP, 3)
@@ -155,6 +197,7 @@ const GENERAL_ADACHI = find_card(JP, 48)
 const MATADOR = find_card(AP, 5)
 const DOOLITLE_RAID = find_card(AP, 8)
 const ROCHEFORT = find_card(AP, 12)
+const SKIP_BOMBING = find_card(AP, 24)
 const SANDCRAB = find_card(AP, 30)
 const DARTER_DACE = find_card(AP, 61)
 const KING_II = find_card(AP, 62)
@@ -191,13 +234,16 @@ const ARMOR_BRIGADE = ap_army("7")
 const JP_GARRISON_JP = jp_army("g_mainland")
 const JP_GARRISON_CN = [jp_army("g_1"), jp_army("g_2"), jp_army("g_3")]
 
-
+//HQ
 const HQ_YAMAMOTO = find_piece("hq_jp_cy")
 const HQ_OZAWA = find_piece("hq_jp_co")
 const HQ_JP_SOUTH = find_piece("hq_jp_s")
 const HQ_SOUTH_SEAS = find_piece("hq_jp_ss")
 const KOREAN_ARMY = find_piece("army_jp_kor")
 const ED_ARMY = find_piece("army_jp_ed")
+
+//Regions
+const KWAI_HQ_MOD = ["NIndia", "Burma", "Ceylon"]
 
 //hexes
 const AIR_FERRY = hex_to_int(5408)
@@ -216,6 +262,7 @@ const DACCA = hex_to_int(1905)
 const MADRAS = hex_to_int(1406)
 const KUNMING = hex_to_int(2407)
 const TOKYO = hex_to_int(3706)
+const TRUK = hex_to_int(4017)
 const SINGAPORE = hex_to_int(2015)
 const MANILA = hex_to_int(2813)
 const PALAU = hex_to_int(3416)
@@ -225,6 +272,13 @@ const MUKDEN = hex_to_int(3303)
 const TOKYO_AIR_BASES = [3307, 3704, 3407, 3506, 3507, 3607, 3706, 3705, 3305, 3306, 3303, 3209, 3709].map(h => hex_to_int(h))
 
 const COM_REPLACEMENT_POINTS = [1307, 1308, 2114, 2709, 3727].map(h => hex_to_int(h))
+const HQ_LIST = []
+
+for (let i = 1; i < pieces.length; i++) {
+    if (pieces[i].class === "hq") {
+        set_add(HQ_LIST, i)
+    }
+}
 
 function find_piece(id) {
     for (let i = 1; i < pieces.length; i++) {
@@ -246,10 +300,28 @@ function find_card(faction, num) {
 
 /* INIT */
 
+const SP_TONNELLING = [hex_to_int(4825), 21, hex_to_int(4826), 22, hex_to_int(4828), 24, hex_to_int(4926), 22]
+const S_P_TONNELLING_SET = [hex_to_int(4825), hex_to_int(4826), hex_to_int(4828), hex_to_int(4926), OAHU]
+const OAHU_NEAR = S_P_TONNELLING_SET.filter(h => h !== OAHU).map((h, i) => TUNNEL_BOX + 100 * i + map_get(SP_TONNELLING, h))
+const NON_PLAYABLE_HEX = {id: 0, terrain: OCEAN, region: "Ocean", edges_int: 0}
+const TUNNEL_HEX = {id: 0, terrain: OCEAN, region: "Ocean", edges_int: 1}
 const MAP_DATA = []
+const S_P_MAP_DATA = []
 const AIRFIELD_LINKS = []
 
 map.forEach(h => MAP_DATA[hex_to_int(h.id)] = h)
+
+var S_P_first_hex = []
+for (var i = 0; i < sp_map.length; i++) {
+    var hex = hex_to_int(sp_map[i].id)
+    let x = Math.floor(hex / 29)
+    let y = hex % 29
+    if (sp_map[i].top) {
+        map_set(S_P_first_hex, x, y)
+    }
+}
+
+MAP_DATA[CHINA_BOX] = {id: int_to_hex(CHINA_BOX), terrain: OCEAN, region: "Ocean", airfield: true}
 
 for (let i = 0; i <= LAST_BOARD_HEX; ++i) {
     let hex = MAP_DATA[i]
@@ -260,7 +332,7 @@ for (let i = 0; i <= LAST_BOARD_HEX; ++i) {
 
     hex.edges_int = 0
     hex.coastal = false
-    let nh = get_near_hexes(i)
+    let nh = get_edge_hexes(i)
     for (let j = 0; j < nh.length; j++) {
         let near_hex = MAP_DATA[nh[j]]
         let nh_index = (j + 3) % 6
@@ -274,8 +346,8 @@ for (let i = 0; i <= LAST_BOARD_HEX; ++i) {
         } else if (hex.island || hex.terrain === ATOLL || hex.terrain === OCEAN) {
             border = 1
         }
-        if (j === 3 && border & MAP_BORDER) {
-            hex.supply_source = AP //south side of the map
+        if (i % 29 >= 27) {
+            hex.supply_source |= JOINT_SUPPLIED_HEX
         }
         hex.coastal = hex.coastal || (border & WATER)
         hex.edges_int = hex.edges_int | (border << 5 * j)
@@ -287,10 +359,45 @@ for (let i = 0; i <= LAST_BOARD_HEX; ++i) {
         hex.named = true
     }
     if (hex.city === JAPANESE_CITY) {
-        hex.supply_source = JP
-    } else if (i < 29 || i > (LAST_BOARD_HEX - 29)) {
-        hex.supply_source = AP ////left or right side of the map
+        hex.supply_source |= JP_SUPPLIED_HEX
+    } else if (i < 29) {
+        hex.supply_source |= JOINT_SUPPLIED_HEX
+    } else if (i > (LAST_BOARD_HEX - 29)) {
+        hex.supply_source |= US_SUPPLIED_HEX
+        hex.supply_source |= JOINT_SUPPLIED_HEX
     }
+    apply_south_pacific(Object.assign({}, hex))
+}
+S_P_MAP_DATA[OAHU] = Object.assign({}, MAP_DATA[OAHU])
+S_P_MAP_DATA[OAHU].supply_source = JOINT_SUPPLIED_HEX | US_SUPPLIED_HEX
+S_P_TONNELLING_SET.filter(h => h !== OAHU).forEach(h => S_P_MAP_DATA[h].edges_int += (WATER << 30))
+
+function apply_south_pacific(hex) {
+    var id = hex_to_int(hex.id)
+    var x = Math.floor(id / 29)
+    let y = id % 29
+    if (map_get(S_P_first_hex, x, 0) > y || x < 20 || x > 40) {
+        S_P_MAP_DATA[id] = NON_PLAYABLE_HEX
+        return
+    }
+    var sp_map_item = sp_map.filter(h => h.id === hex.id)[0]
+    if (sp_map_item && sp_map_item.edges) {
+        hex.edges_int = 0
+        for (let j = 0; j < 6; j++) {
+            hex.edges_int = hex.edges_int | (sp_map_item.edges[j] << 5 * j)
+        }
+    }
+    if (x === 20) {
+        hex.supply_source |= JOINT_SUPPLIED_HEX
+    }
+    if (x === 40) {
+        hex.supply_source |= JOINT_SUPPLIED_HEX
+        hex.supply_source |= US_SUPPLIED_HEX
+    }
+    if (sp_map_item && sp_map_item.top) {
+        hex.supply_source |= JP_SUPPLIED_HEX
+    }
+    S_P_MAP_DATA[id] = hex
 }
 
 for (var i = 0; i < map.length; i++) {
@@ -309,8 +416,13 @@ for (var i = 0; i < map.length; i++) {
             links.push([hex_j, distance])
         }
     }
+    if (hex_i === JARHAT || hex_i === DACCA) {
+        links.push([CHINA_BOX, 1])
+    }
     map_set(AIRFIELD_LINKS, hex_i, links.sort((a, b) => a[1] - b[1]).flatMap(a => a))
 }
+
+map_set(AIRFIELD_LINKS, CHINA_BOX, [JARHAT, 1, DACCA, 1])
 
 function get_hq_supply_type(piece) {
     if (!piece.faction) {
@@ -373,14 +485,19 @@ for (var i = 1; i < pieces.length; i++) {
         piece.service = "navy"
     }
 
+    if (piece.start_reduced && pieces.notreplaceable) {
+        piece.one_step = 1
+    }
     if (!piece.ebr && piece.br) {
         piece.ebr = piece.br
     }
 
     if (piece.type === "lrb" && i !== LRB_19 && i !== LRB_10) {
         var pair = find_piece(piece.id.replace("_lrb", ""))
-        pieces[pair].pair = i
-        piece.pair = pair
+        if (pair !== i) {
+            pieces[pair].pair = i
+            piece.pair = pair
+        }
     }
 
     if (i === jp_army("kor")) {
@@ -433,8 +550,8 @@ P.strategic_phase = script(`
         }
         call arcadia
     }
-    call deal_cards
     eval {
+        scenario_data().deal_cards()
         G.pow = Math.min(4,G.asp[AP][0])
     }
     goto offensive_phase
@@ -482,8 +599,13 @@ function sent_to_europe(u) {
     return result
 }
 
-function get_map_data() {
-    return MAP_DATA
+function get_map_data(hex) {
+    if (hex > TUNNEL_BOX) {
+        return TUNNEL_HEX
+    } else if (scenario_data().id === SOUTH_PACIFIC) {
+        return S_P_MAP_DATA[hex]
+    }
+    return MAP_DATA[hex]
 }
 
 function get_unit_reinforcement_hexes(u) {
@@ -495,16 +617,18 @@ function get_unit_reinforcement_hexes(u) {
     }
     var i = hex_to_int(1308)
     for (var i = 0; i < LAST_BOARD_HEX; i++) {
-        var map_data = get_map_data()[i]
+        var map_data = get_map_data(i)
         if ((piece.class === "air" && map_data.airfield || piece.class !== "air" && map_data.port)
             && is_space_controlled(i, faction)
             && check_unit_supply(i, u, piece)
             && !has_non_n_zoi(i, 1 - faction)
             && !is_overstack(i, u)) {
-
             set_add(result, i)
         }
-
+    }
+    if (faction === AP && piece.class === "air" && G.burma_road < 2 && G.surrender[nations.CHINA.id] < 5 && !is_overstack(CHINA_BOX, u)
+        && (!piece.b29 || G.location[B_29_1] !== CHINA_BOX && G.location[B_29_2] !== CHINA_BOX)) {
+        set_add(result, CHINA_BOX)
     }
     return result
 }
@@ -512,15 +636,16 @@ function get_unit_reinforcement_hexes(u) {
 function get_hq_reinforcement_hexes() {
     let result = []
     const faction = G.active
+    var supply = G.active === AP ? JOINT_SUPPLIED_HEX : JP_SUPPLIED_HEX
     let queue = []
     const overland_set = []
     const oversea_set = []
     for (var i = 0; i < LAST_BOARD_HEX; i++) {
-        if (get_map_data()[i].supply_source === faction) {
+        if (get_map_data(i).supply_source & supply) {
             queue.push(i)
             set_add(overland_set, i)
             set_add(oversea_set, i)
-            if (get_map_data()[i].port && is_space_controlled(i, faction) && !(G.overstack[i] & 1)) {
+            if (get_map_data(i).port && is_space_controlled(i, faction) && !(G.overstack[i] & 1)) {
                 set_add(result, i)
             }
         }
@@ -528,13 +653,13 @@ function get_hq_reinforcement_hexes() {
     for (var i = 0; i < queue.length; i++) {
         let item = queue[i]
         let nh_list = get_near_hexes(item)
-        const MD = get_map_data()[item]
+        const MD = get_map_data(item)
         const overland = set_has(overland_set, item)
         const non_neutral_zoi_s = has_non_n_zoi(item, 1 - faction)
         const enemy_port_s = (MD.port && is_space_controlled(item, 1 - faction))
         const occupied_land_s = G.supply_cache[item] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[item] & JP_GAH_UNITS << faction)
         const oversea = set_has(oversea_set, item)
-        for (let j = 0; j < 6; j++) {
+        for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
             if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
@@ -554,7 +679,7 @@ function get_hq_reinforcement_hexes() {
             if (reachable) {
                 queue.push(nh)
             }
-            if (reachable && get_map_data()[nh].port && is_space_controlled(nh, faction) && !(G.overstack[nh] & 1)) {
+            if (reachable && get_map_data(nh).port && is_space_controlled(nh, faction) && !(G.overstack[nh] & 1)) {
                 set_add(result, nh)
             }
         }
@@ -649,7 +774,6 @@ P.reinforcement_segment = {
             }
         })
         if (hq_in_list) {
-            // prompt(`Choose hq to place as reinforcement.`)
             return
         }
         L.unit_reinforcement.forEach(u => {
@@ -660,7 +784,6 @@ P.reinforcement_segment = {
         if (!L.unit_reinforcement.length) {
             button("done")
         }
-        // prompt(`Choose unit to place as reinforcement.`)
     },
     auto() {
         while (L.unit_reinforcement.length) {
@@ -705,17 +828,24 @@ P.reinforcement_segment = {
 
 function get_replacement_points() {
     var result = {}
+    L.replacement_points = result
     if (G.active === JP) {
         G.reinforcements.NAVAL += ([3, 4, 11].includes(G.turn) ? 1 : 0)
         result.NAVAL = G.reinforcements.NAVAL
         result.AIR = G.reinforcements.AIR
+        L.divisions = Math.min(2, G.china_divisions)
         return result
     }
+    L.divisions = undefined
     if (G.turn % 2 === 0) {
         result.NAVAL = 1
     }
     if (is_space_controlled(OAHU, AP)) {
-        result.NAVAL++
+        if (result.NAVAL) {
+            result.NAVAL++
+        } else {
+            result.NAVAL = 1
+        }
         log(`+1 US Naval Replacement Point (AP controlled Oahu).`)
     }
     if ([6, 9, 12].includes(G.turn) && COM_REPLACEMENT_POINTS.filter(h => is_space_controlled(h, AP)).length) {
@@ -726,6 +856,27 @@ function get_replacement_points() {
     if (G.turn >= 3 && G.turn % 2 === 1) {
         result.CHINESE = 1
     }
+    if (is_event_active(events.INDEPENDENCE_CAMPAIGN)) {
+        result.GROUND = Math.max(0, result.GROUND - is_event_active(events.INDEPENDENCE_CAMPAIGN))
+        log(`-${is_event_active(events.INDEPENDENCE_CAMPAIGN)} AP ground replacement, Indian independence campaign (no commonwealth units could be replaced)`)
+        G.events[events.INDEPENDENCE_CAMPAIGN.id] = 0
+    }
+    return result
+}
+
+function get_S_P_replacement_points() {
+    var result = {}
+    L.replacement_points = result
+    if (G.active === JP) {
+        result.NAVAL = G.reinforcements.NAVAL
+        result.AIR = G.reinforcements.AIR
+        L.divisions = Math.min(1, G.china_divisions)
+        return result
+    }
+    L.divisions = undefined
+    result.NAVAL = 1
+    result.GROUND = 1
+    result.AIR = 4
     if (is_event_active(events.INDEPENDENCE_CAMPAIGN)) {
         result.GROUND = Math.max(0, result.GROUND - is_event_active(events.INDEPENDENCE_CAMPAIGN))
         log(`-${is_event_active(events.INDEPENDENCE_CAMPAIGN)} AP ground replacement, Indian independence campaign (no commonwealth units could be replaced)`)
@@ -765,8 +916,7 @@ P.replacement_segment = {
     _begin() {
         check_supply()
         if (L.scheduled_points) {
-            L.replacement_points = get_replacement_points()
-            L.divisions = G.active === JP ? Math.min(2, G.china_divisions) : undefined
+            scenario_data().replacement_points()
         }
         L.divisions_used = 0
         L.replacable_units = []
@@ -776,7 +926,7 @@ P.replacement_segment = {
                 && !piece.notreplaceable
                 && !is_reinforcement_denied(piece)
                 && !set_has(G.oos, u)
-                && (location === ELIMINATED_BOX || set_has(G.reduced, u))) {
+                && (location === ELIMINATED_BOX || set_has(G.reduced, u) && (location === CHINA_BOX || location < LAST_BOARD_HEX))) {
                 set_add(L.replacable_units, u)
             }
         })
@@ -821,10 +971,14 @@ P.replacement_segment = {
         if (set_has(G.reduced, u)) {
             set_delete(G.reduced, u)
             set_delete(L.replacable_units, u)
+            log(`${piece_get_log_str(u)} flipped to full size.`)
         } else {
             set_add(G.reduced, u)
             G.active_stack = [u]
             L.allowed_hexes = get_unit_reinforcement_hexes(u)
+            if (pieces[u].b29) {
+                G.b29u |= B29_REPLACED << pieces[u].b29
+            }
             trigger_event("before_place_replacement")
         }
         L.replacement_points[pieces[u].replacement] -= 1
@@ -897,8 +1051,9 @@ P.strategic_bombing = {
         L.allowed_units = []
         var units = [B_29_1, B_29_2]
         units.forEach(u => {
+            var piece = pieces[u]
             var check_location = G.location[u] < LAST_BOARD_HEX && get_distance(G.location[u], TOKYO) <= 8 || G.location[u] === CHINA_BOX
-            if (check_location && !set_has(G.oos, u) && !G.committed.includes(u)) {
+            if (check_location && !set_has(G.oos, u) && !(G.b29u & B29_REPLACED << piece.b29)) {
                 set_add(L.allowed_units, u)
             }
         })
@@ -962,7 +1117,7 @@ function bombing(u, close_air_base) {
     } else if (damaged) {
         set_add(G.reduced, u)
     }
-    set_add(G.committed, u)
+    G.b29u |= B29_BOMBED << pieces[u].b29
     if (success) {
         G.strategic_warfare++
         check_event(events.STRAT_BOMBING)
@@ -972,7 +1127,7 @@ function bombing(u, close_air_base) {
     return success
 }
 
-P.deal_cards = function () {
+function deal_cards() {
     var jp_cards = 7
     if (G.turn > 4) {
         var jp_resources = get_jp_resources()
@@ -1003,7 +1158,7 @@ P.deal_cards = function () {
     if (G.turn === 1) {
         ap_cards = 0
     } else if (G.turn === 2) {
-        ap_cards = 5
+        ap_cards = G.hand[AP].length
         G.passes[AP] = 2
     } else if (G.turn === 3) {
         ap_cards = 6
@@ -1032,10 +1187,41 @@ P.deal_cards = function () {
     ap_cards = Math.max(ap_cards, 4)
     G.passes[AP] = Math.min(G.passes[AP], 2)
     log(`Allied draw ${ap_cards} cards, receive ${G.passes[AP]} passes`)
-    while (G.hand[AP] < ap_cards) {
+    while (G.hand[AP].length < ap_cards) {
         draw_card(AP)
     }
-    end()
+}
+
+function S_P_deal_cards() {
+    var jp_cards = 4
+    G.passes[JP] = 0
+    if (G.strategic_warfare) {
+        jp_cards -= G.strategic_warfare
+        log(`Strategic warfare reduces draw to ${jp_cards} (-${G.strategic_warfare})`)
+        G.passes[JP] = 1
+    }
+    log(`Japan receives ${jp_cards} cards.`)
+    if (G.passes[JP]) {
+        log(`Japan receives ${G.passes[JP]} passes.`)
+    }
+    while (G.hand[JP].length < jp_cards) {
+        draw_card(JP)
+    }
+
+    let ap_cards = 4
+    G.passes[AP] = 0
+    if (G.surrender[nations.CHINA.id] >= 5) {
+        ap_cards -= 1
+        G.passes[AP]++
+        log(`Allied draw reduced by China.`)
+    }
+    log(`Allied draw ${ap_cards} cards.`)
+    if (G.passes[AP]) {
+        log(`Allied receive ${G.passes[AP]} passes.`)
+    }
+    while (G.hand[AP].length < ap_cards) {
+        draw_card(AP)
+    }
 }
 
 P.offensive_phase = script(`
@@ -1050,6 +1236,7 @@ P.offensive_phase = script(`
         if (G.hand[G.active].length > 0){
             call offensive_segment
             eval {
+                commit_into_turn_draw()
                 G.active = 1 - G.offensive.attacker
                 reset_offensive()
                 G.offensive.attacker = G.active
@@ -1101,7 +1288,6 @@ P.future_offensive = {
     event(c) {
         push_undo()
         play_event(c)
-        log(`${R} played ${card_get_log_str(c)} as event card`)
         goto("offensive_sequence")
     },
     pass() {
@@ -1155,37 +1341,50 @@ function get_infrastructure_actions() {
     return []
 }
 
+function get_event_infrastructure_actions() {
+    if (!is_event_active(events.JARHAT_ROAD) && !is_faction_units(JARHAT, JP)) {
+        return ["jarhat"]
+    } else if (is_faction_units(JARHAT, JP)) {
+        return []
+    }
+    var result = []
+    if (!is_event_active(events.LEDO_ROAD) && !is_faction_units(LEDO, JP)) {
+        result.push("ledo")
+    }
+    if (!is_event_active(events.IMPHAL_ROAD) && !is_faction_units(IMPHAL, JP)) {
+        result.push("imphal")
+    }
+    return result
+}
+
 function get_allowed_actions(num) {
     let card = cards[num]
+    var result = ["discard"]
 
-    if (num === SANDCRAB && events.ALASKA_OCCUPATION.keys.filter(k => is_faction_units(hex_to_int(k), JP)).length) {
-        return ["event", "discard"]
-    } else if (num === SANDCRAB) {
-        return ["ops", "discard"]
-    }
-
-    let result = ["ops", "discard"]
-
-    if (card.pw && scenario_data().one_year) {
-        //do nothing
-    } else if (num === TOJO_RESIGNS && G.turn >= 8 || num === SOVIET_INVADE && is_event_active(events.TOJO)) {
+    if (num === TOJO_RESIGNS && G.turn >= 8 || num === SOVIET_INVADE && card.can_play()) {
         return ["event"]
-    } else if (num === TOJO_RESIGNS) {
-        return ["event", "ops", "discard"]
-    } else if (num === SOVIET_INVADE) {
-        return ["ops", "discard"]
-    } else if ((card.type === MILITARY || card.type === POLITICAL || card.type === RESOURCE) && card.can_play()) {
+    }
+    if (!(card.pw && scenario_data().one_year)
+        && (card.type === MILITARY || card.type === POLITICAL || card.type === RESOURCE) && card.can_play()) {
         result.push("event")
     }
-    if (card.ops >= 3) {
-        if (G.inter_service[card.faction] && scenario_data().one_year) {
-            result.push("inter_service")
+    if (num !== SANDCRAB || !result.includes("event")) {
+        result.push("ops")
+        result.push("displace_hq")
+        if (HQ_LIST.filter(u => G.location[u] > TURN_BOX && pieces[u].faction === R).length) {
+            result.push("return_hq")
         }
-        get_infrastructure_actions().forEach(a => result.push(a))
-        if (R === JP && G.turn - G.events[events.CHINA_OFFENSIVE.id] > 1 && G.surrender[nations.CHINA.id] < 5) {
-            result.push("china_offensive")
+        if (card.ops >= 3) {
+            if (G.inter_service[card.faction] && scenario_data().one_year) {
+                result.push("inter_service")
+            }
+            get_infrastructure_actions().forEach(a => result.push(a))
+            if (R === JP && G.turn - G.events[events.CHINA_OFFENSIVE.id] > 1 && G.surrender[nations.CHINA.id] < 5) {
+                result.push("china_offensive")
+            }
         }
     }
+
     if (G.future_offensive[R] <= 0 && !card.reshuffle) {
         result.push("future_offensive")
     }
@@ -1243,9 +1442,11 @@ function play_event(c) {
     discard_card(c)
     if (cards[c].type === MILITARY) {
         military_card(c)
+    } else {
+        cards[c].event()
     }
     if (cards[c].remove) {
-        set_add(G.removed, c)
+        set_add(G.removed[faction], c)
         set_delete(G.discard[faction], c)
     } else {
         set_add(G.discard[faction], c)
@@ -1300,17 +1501,18 @@ P.offensive_segment = {
         }
     },
     prompt() {
-        prompt("Turn " + G.turn + " Take one action.")
+        prompt("Turn " + G.turn + " Select card to play.")
         if (G.passes[R] > 0) {
             button("pass")
         }
         var hand = get_hand(R)
         for (let i = 0; i < hand.length; i++) {
             let card = hand[i]
-            get_allowed_actions(card).forEach(a => action(a, card))
+            action_card(card)
         }
         if (G.debug) {
             button("isr")
+            button("check_s")
             button("ns")
             button("control")
             button("eliminate")
@@ -1318,7 +1520,7 @@ P.offensive_segment = {
             button("draw")
         }
         if (L.debug) {
-            for (var i = 1; i < get_map_data().length; i++) {
+            for (var i = 1; i < LAST_BOARD_HEX; i++) {
                 if (is_controllable_hex(i)) {
                     action_hex(i)
                 }
@@ -1328,70 +1530,17 @@ P.offensive_segment = {
             for_each_unit_on_map(u => action_unit(u))
         }
     },
-    ops(c) {
+    card(c){
         push_undo()
-        activate_card(c)
-        G.offensive.type = OC
-        log(`${R} played ${card_get_log_str(c)} as operation card`)
-        goto("offensive_sequence")
-    },
-    draw() {
-        push_undo()
-        G.offensive.active_cards = [TOJO_RESIGNS]
-        var a = G.draw[R].slice()
-        a.forEach(c => discard_card(c))
-        call("draw_from_discard")
-    },
-    event(c) {
-        push_undo()
-        log(`${R} played ${card_get_log_str(c)} as event card`)
-        if (cards[c].type === MILITARY) {
-            play_event(c)
-            goto("offensive_sequence")
-        } else {
-            play_event(c)
-            G.offensive.offensive_card = c
-            goto("default_event")
-        }
-    },
-    discard(c) {
-        push_undo()
-        activate_card(c)
-        log(`${R} discards ${card_get_log_str(c)}`)
-        goto("end_action")
-    },
-    inter_service() {
-    },
-    jarhat(c) {
-        build_road(c, events.JARHAT_ROAD)
-    },
-    imphal(c) {
-        build_road(c, events.IMPHAL_ROAD)
-    },
-    ledo(c) {
-        build_road(c, events.LEDO_ROAD)
-    },
-    china_offensive(c) {
-        push_undo()
-        activate_card(c)
-        goto("china_offensive")
-    },
-    future_offensive(c) {
-        push_undo()
-        log(`${R} played future offensive`)
-        G.events[events.FUTURE_OFFENSIVE_JP.id + R] = G.turn
-        G.future_offensive[R] = c
-        array_delete_item(G.hand[R], c)
-        goto("end_action")
-    },
-    pass() {
-        push_undo()
-        G.passes[R] -= 1
-        goto("end_action")
+        goto("offensive_segment_card_action", {c:c})
     },
     //debug
     isr() {
         G.inter_service[R] = 1 - G.inter_service[R]
+    },
+    check_s() {
+        log("Forced supply check.")
+        check_supply()
     },
     ns() {
         G.hand[AP].forEach(c => {
@@ -1423,8 +1572,153 @@ P.offensive_segment = {
     deploy_b29() {
         capture_hex(hex_to_int(3709), AP)
         set_location(ap_air("20_bc"), hex_to_int(3709))
+        set_location(ap_air("20_bc"), JARHAT)
         set_location(ap_air("21_bc"), hex_to_int(3709))
+        set_location(ap_air("21_bc"), JARHAT)
     },
+}
+
+P.offensive_segment_card_action={
+    prompt() {
+        prompt(`${card_get_log_str(L.c)} : Select action.`)
+        get_allowed_actions(L.c).forEach(a => button(a))
+    },
+    ops() {
+        push_undo()
+        activate_card(L.c)
+        G.offensive.type = OC
+        log(`${R} played ${card_get_log_str(L.c)} as operation card`)
+        goto("offensive_sequence")
+    },
+    draw() {
+        push_undo()
+        G.offensive.active_cards = [TOJO_RESIGNS]
+        var a = G.draw[R].slice()
+        a.forEach(c => discard_card(c))
+        call("draw_from_discard")
+    },
+    event() {
+        push_undo()
+        if (cards[L.c].type === MILITARY) {
+            play_event(L.c)
+            goto("offensive_sequence")
+        } else {
+            G.offensive.offensive_card = L.c
+            goto("end_action")
+            play_event(G.offensive.offensive_card)
+            call("default_event")
+        }
+    },
+    discard() {
+        push_undo()
+        activate_card(L.c)
+        log(`${R} discards ${card_get_log_str(L.c)}`)
+        goto("end_action")
+    },
+    inter_service() {
+        push_undo()
+        activate_card(L.c)
+        log(`${R} played ${card_get_log_str(L.c)} to resolve ISR.`)
+        set_inter_service(cards[c].faction, 0)
+        goto("end_action")
+    },
+    jarhat() {
+        build_road(L.c, events.JARHAT_ROAD)
+    },
+    imphal() {
+        build_road(L.c, events.IMPHAL_ROAD)
+    },
+    ledo() {
+        build_road(L.c, events.LEDO_ROAD)
+    },
+    china_offensive() {
+        push_undo()
+        activate_card(L.c)
+        log(`${card_get_log_str(L.c)} played for Chinese Offensive.`)
+        goto("china_offensive")
+    },
+    displace_hq(c) {
+        push_undo()
+        activate_card(c)
+        log(`${card_get_log_str(c)} played for withdraw HQ.`)
+        goto("displace_hq")
+    },
+    return_hq(c) {
+        push_undo()
+        activate_card(c)
+        log(`${card_get_log_str(c)} played for return HQ.`)
+        goto("return_hq")
+    },
+    future_offensive(c) {
+        push_undo()
+        log(`${R} played future offensive`)
+        G.events[events.FUTURE_OFFENSIVE_JP.id + R] = G.turn
+        G.future_offensive[R] = c
+        array_delete_item(G.hand[R], c)
+        goto("end_action")
+    },
+    pass() {
+        push_undo()
+        G.passes[R] -= 1
+        log(`${R} passed, ${G.passes[R]} passes remains.`)
+        goto("end_action")
+    },
+}
+
+
+P.displace_hq = {
+    prompt() {
+        prompt(`Choose HQ to displace.`)
+        HQ_LIST.forEach(u => {
+            if (unit_on_board(u) && pieces[u].faction === R) {
+                action_unit(u)
+            }
+        })
+    },
+    unit(u) {
+        push_undo()
+        eliminate(u)
+        check_supply()
+        goto("end_action")
+    },
+}
+
+P.return_hq = {
+    prompt() {
+        if (!G.active_stack.length) {
+            prompt(`Choose HQ return.`)
+            HQ_LIST.forEach(u => {
+                if (G.location[u] > TURN_BOX && pieces[u].faction === R) {
+                    action_unit(u)
+                }
+            })
+        } else {
+            prompt(`Hex to place ${piece_get_log_str(G.active_stack[0])}.`)
+            G.allowed_hexes.forEach(h => action_hex(h))
+        }
+    },
+    unit(u) {
+        push_undo()
+        G.active_stack = [u]
+        var allied_regions = ["Australia", "AMandates", "India", "NIndia", "Ceylon"]
+        G.allowed_hexes = get_unit_reinforcement_hexes(u).filter(h => {
+            var piece = pieces[u]
+            var region = get_map_data(h).region
+            if (piece.faction === JP) {
+                return region === "Japan"
+            } else {
+                return h === OAHU || allied_regions.includes(region)
+            }
+        })
+    },
+    action_hex(hex) {
+        push_undo()
+        log(`${piece_get_log_str(G.active_stack[0])} selected for early return.`)
+        set_location(G.active_stack[0], hex)
+        G.active_stack = []
+        check_supply()
+        goto("end_action")
+    }
 }
 
 P.china_offensive = {
@@ -1433,19 +1727,29 @@ P.china_offensive = {
         button("roll")
     },
     roll() {
+        var burma_road = (2 - G.burma_road) * 4
+        log(`Japan started China offensive.`)
+        log(`Japanese divisions ${G.china_divisions}.`)
+        log(`+${burma_road} (Burma road).`)
         G.events[events.CHINA_OFFENSIVE.id] = G.turn
         let result = random(10)
         var air_support = 0
-        for_each_unit_on_map((u, piece, location) => {
-            if (location === CHINA_BOX && (piece.type !== "lrb" || u === LRB_14)) {
-                air_support++
-            }
-        })
-        var burma_road = (2 - G.burma_road) * 4
+
+        if (scenario_data().id === SOUTH_PACIFIC) {
+            air_support++
+            log(`+1 ${piece_get_log_str(ap_air("14_lrb"))}.`)
+        } else {
+            for_each_unit_on_map((u, piece, location) => {
+                if (location === CHINA_BOX && (piece.type !== "lrb" || u === LRB_14) && !set_has(G.oos, u)) {
+                    log(`+1 ${piece_get_log_str(u)}.`)
+                    air_support++
+                }
+            })
+        }
+
         var baseline = G.china_divisions - burma_road - air_support
         var success = result <= baseline
-        log(`Japan started China offensive`)
-        log(`Japanese divisions ${G.china_divisions}, burma road ${burma_road}, AP air support ${air_support}`)
+
         log(`Roll ${result} ${success ? "<=" : ">"} ${baseline} (${success ? "SUCCESS" : "FAILED"})`)
         if (success) {
             update_china_status(1)
@@ -1545,7 +1849,7 @@ function solely_occupied_land(hex, faction) {
 }
 
 function mark_ground_reaction_hexes(location) {
-    if (get_map_data()[location].island) {
+    if (get_map_data(location).island) {
         return
     }
     const queue = [location]
@@ -1554,9 +1858,9 @@ function mark_ground_reaction_hexes(location) {
         let item = queue[i]
         let base_distance = map_get(distance_map, item)
         let nh_list = get_near_hexes(item)
-        for (let j = 0; j < 6; j++) {
+        for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             var distance = base_distance + get_ground_move_cost(nh, item, (j + 3) % 6, R)//to correct distance processing with backward tracing
@@ -1575,11 +1879,12 @@ function mark_ground_reaction_hexes(location) {
 }
 
 function mark_asp_reaction_hexes(hex) {
-    if (!get_map_data()[hex].coastal) {
+    if (!get_map_data(hex).coastal) {
         return;
     }
     const asp_capable = is_hex_asp_capable(hex)
     const location = hex
+    G.supply_cache[location] |= HEX_TEMP_FLAG1
     const queue = [location]
     const distance_map = [location, 0]
     const range = G.offensive.naval_move_distance
@@ -1587,13 +1892,13 @@ function mark_asp_reaction_hexes(hex) {
         let item = queue[i]
         const distance = map_get(distance_map, item) + 1
         let nh_list = get_near_hexes(item)
-        for (let j = 0; j < 6; j++) {
+        for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             if (distance > range
-                || !(get_map_data()[item].edges_int & WATER << 5 * j)
+                || !(get_map_data(item).edges_int & WATER << 5 * j)
                 || distance >= map_get(distance_map, nh, 100)) {
                 continue
             }
@@ -1621,7 +1926,7 @@ function get_reaction_able_units() {
             set_add(L.reaction_able_units, u)
         } else if (piece.faction === R && piece.class === "ground" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG2 && has_asp) {
             set_add(L.asp_ground_units, u)
-        } else if (piece.faction === R && piece.class === "naval" && !piece.br && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG1) {
+        } else if (piece.faction === R && piece.class === "naval" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG1) {
             set_add(L.reaction_able_units, u)
         }
     })
@@ -1645,20 +1950,20 @@ function get_activatable_units(hq, hq_supply_type) {
     for (var i = 0; i < queue.length; i++) {
         let item = queue[i]
         let nh_list = get_near_hexes(item)
-        const MD = get_map_data()[item]
+        const MD = get_map_data(item)
         const distance = map_get(distance_map, item) + 1
         const non_neutral_zoi = has_non_n_zoi(item, 1 - faction)
         const occupied_land = solely_occupied_land(item, 1 - faction)
-        for (let j = 0; j < 6; j++) {
+        for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             if (map_get(distance_map, nh, 100) > distance
                 && (
                     (MD.edges_int & GROUND << 5 * j && !occupied_land && !solely_occupied_land(nh, 1 - faction)) ||
                     (MD.edges_int & WATER << 5 * j && !non_neutral_zoi && !has_non_n_zoi(nh, 1 - faction)) ||
-                    MD.edges_int & UNPLAYABLE << 5 * j
+                    MD.edges_int & UNPLAYABLE_WATER << 5 * j
                 )) {
                 map_set(distance_map, nh, distance)
                 G.supply_cache[nh] |= HEX_TEMP_FLAG3
@@ -1672,21 +1977,31 @@ function get_activatable_units(hq, hq_supply_type) {
     L.air_reaction_hex_map = []
     L.move_data = {}
     G.offensive.battle_hexes.forEach(h => mark_attack_zone(h, R === AP ? 2 : 3))
+    var hump = is_event_active(events.HUMP)
+    if (faction === AP && (G.supply_cache[KUNMING] & HEX_TEMP_FLAG3 || hump && (G.supply_cache[JARHAT] & HEX_TEMP_FLAG3) || hump && (G.supply_cache[DACCA] & HEX_TEMP_FLAG3))) {
+        G.supply_cache[CHINA_BOX] |= HEX_TEMP_FLAG3
+    } else {
+        G.supply_cache[CHINA_BOX] &= CLEAN_ATTACK_ZONE_MASK
+    }
     for (let i = 1; i < pieces.length; i++) {
         let piece = pieces[i]
+        var loc = G.location[i]
         if (piece.supply & hq_supply_type
-            && G.supply_cache[G.location[i]] & HEX_TEMP_FLAG3
+            && G.supply_cache[loc] & HEX_TEMP_FLAG3
             && piece.class !== "hq"
-            && (piece.class !== "ground" || !set_has(G.offensive.battle_hexes, G.location[i]))
+            && (piece.class !== "ground" || !set_has(G.offensive.battle_hexes, loc))
             && !set_has(G.offensive.active_units[R], i)
             && (!set_has(G.oos, i) || L.card === GENERAL_ADACHI)
-            && (!reaction_movement || is_unit_reaction_able(i))
-            && (!G.committed.includes(i) || reaction_movement && is_faction_units(G.location[i], JP))
+            && (!reaction_movement || is_unit_reaction_able(i) && (!is_b29_bombed(piece) || is_faction_units(loc, JP)))
         ) {
             set_add(result, i)
         }
     }
     return result
+}
+
+function is_b29_bombed(piece) {
+    return piece.b29 && (G.b29u & (B29_BOMBED << piece.b29))
 }
 
 function is_unit_reaction_able(i) {
@@ -1715,13 +2030,13 @@ function is_cv_reaction_able(u) {
         let item = queue[i]
         const distance = map_get(distance_map, item) + 1
         let nh_list = get_near_hexes(item)
-        for (let j = 0; j < 6; j++) {
+        for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             if (distance > range
-                || !(get_map_data()[item].edges_int & WATER << 5 * j)
+                || !(get_map_data(item).edges_int & WATER << 5 * j)
                 || distance >= map_get(distance_map, nh, 100)) {
                 continue
             }
@@ -1786,6 +2101,17 @@ function is_air_reaction_able(u) {
     return false
 }
 
+function get_kwai_modifier(hq) {
+    if (hq.faction === AP) {
+        return 0
+    }
+    if (is_space_controlled(RANGOON, JP) && is_event_active(events.KWAI_RIVER_BRIDGE)) {
+        return 1
+    } else if (is_space_controlled(RANGOON, AP) && !is_event_active(events.KWAI_RIVER_BRIDGE)) {
+        return -1
+    }
+}
+
 P.activate_units = {
     _begin() {
         if (R === G.offensive.attacker && G.offensive.type === EC && cards[G.offensive.offensive_card].hq) {
@@ -1795,7 +2121,13 @@ P.activate_units = {
         }
         L.hq_bonus = pieces[G.offensive.active_hq[G.active]].cm
         var hq = G.offensive.active_hq[G.active]
+        var piece = pieces[hq]
+        if ((piece.service === "joint" || piece.service === "us") && !check_hq_in_supply(hq, piece, US_SUPPLIED_HEX)) {
+            L.hq_bonus -= 1
+            log("-1 activation (US Line of Communication).")
+        }
         L.possible_units = get_activatable_units(hq, pieces[hq].supply)
+        L.kwai = get_kwai_modifier(pieces[hq])
         trigger_event("before_unit_activation")
         if (!L.possible_units.length) {
             end()
@@ -1808,6 +2140,11 @@ P.activate_units = {
     },
     unit(u) {
         push_undo()
+        if (L.kwai && KWAI_HQ_MOD.includes(get_map_data(G.location[u]).region)) {
+            log(`${L.kwai > 0 ? "+" : ""}${L.kwai} activation (Bridge over the River Kwai).`)
+            L.hq_bonus += L.kwai
+            L.kwai = 0
+        }
         set_add(G.offensive.active_units[R], u)
         set_delete(L.possible_units, u)
         apply_inter_service(u)
@@ -1816,6 +2153,16 @@ P.activate_units = {
             L.asp_ground_units = []
         }
         trigger_event("after_unit_activation", u)
+        if (L.kwai < 0 && G.offensive.logistic + L.hq_bonus <= G.offensive.active_units[R].length + 1) {
+            L.possible_units = L.possible_units.filter(u => !KWAI_HQ_MOD.includes(get_map_data(G.location[u]).region))
+        } else if (L.kwai > 0 && G.offensive.logistic + L.hq_bonus === G.offensive.active_units[R].length) {
+            L.possible_units = L.possible_units.filter(u => KWAI_HQ_MOD.includes(get_map_data(G.location[u]).region))
+            if (L.possible_units.length) {
+                log(`+1 activation (Bridge over the River Kwai).`)
+                L.hq_bonus += L.kwai
+                L.kwai = 0
+            }
+        }
         if (G.offensive.active_units[R].length >= (G.offensive.logistic + L.hq_bonus) || L.possible_units.length <= 0) {
             end()
         }
@@ -1831,7 +2178,7 @@ function offensive_card_header() {
 }
 
 function is_controllable_hex(hex) {
-    return get_map_data()[hex].named || hex === WEST_HONSHU || hex === KWAI_BRIDGE || hex === KWAI_BRIDGE_1 || get_map_data()[hex].region === "AMandates"
+    return get_map_data(hex).named || hex === WEST_HONSHU || hex === KWAI_BRIDGE || hex === KWAI_BRIDGE_1 || hex === CHINA_BOX || get_map_data(hex).region === "AMandates"
 }
 
 //setup only, reduced checks and logging
@@ -1854,7 +2201,11 @@ function capture_hex(hex, side = G.active) {
     if (!is_controllable_hex(hex)) {
         return
     }
-    var md = get_map_data()[hex]
+    if (G.non_control) {
+        set_delete(G.non_control, hex)
+        log(`AP captured ${int_to_hex(hex)}`)
+    }
+    var md = get_map_data(hex)
     if (side && set_has(G.control, hex)) {
         log(`AP captured ${hex_get_log_str(hex)}`)
         set_delete(G.control, hex)
@@ -1883,7 +2234,7 @@ function could_unit_stop_here(u) {
         return true
     }
     var loc = G.location[u]
-    return is_space_controlled(loc, piece.faction) && get_map_data()[loc].port
+    return is_space_controlled(loc, piece.faction) && get_map_data(loc).port
 }
 
 function could_stack_stop_here() {
@@ -1894,7 +2245,15 @@ function could_stack_stop_here() {
         return false
     }
     var location = G.location[G.active_stack[0]]
-    return set_has(G.offensive.battle_hexes, location) || set_has(G.offensive.landing_hexes, location) || is_space_controlled(location, R) && get_map_data()[location].port
+    return set_has(G.offensive.battle_hexes, location) || set_has(G.offensive.landing_hexes, location) || is_space_controlled(location, R) && get_map_data(location).port
+}
+
+function could_air_stop_here() {
+    if (!L.move_data.is_air_present || G.active_stack.length <= 0) {
+        return false
+    }
+    var location = G.location[G.active_stack[0]]
+    return set_has(G.offensive.battle_hexes, location) || is_space_controlled(location, R) && get_map_data(location).airfield
 }
 
 function update_move_hex() {
@@ -1906,10 +2265,10 @@ function update_move_hex() {
 
     if (G.offensive.stage === POST_BATTLE_MOVE && L.move_type === BARGES_MOVE) {
         return compute_barges_pbm()
-    } else if (L.move_data.is_air_present && (L.move_type === STRAT_MOVE || L.move_type === AVOID_ZOI)) {
+    } else if (L.move_data.is_air_present) {
         compute_air_move_hexes()
     } else if (L.move_data.is_air_present) {
-        fast_compute_air_move_hexes()
+        // fast_compute_air_move_hexes()
     } else if (L.move_data.move_type & STRAT_MOVE) {
         compute_ground_naval_strat_move()
     } else {
@@ -1927,7 +2286,7 @@ function compute_barges_pbm() {
         }
     })
     path.push(retreat_target)
-    if (L.move_data.is_naval_present && get_map_data()[retreat_target].port || !L.move_data.is_naval_present) {
+    if (L.move_data.is_naval_present && get_map_data(retreat_target).port || !L.move_data.is_naval_present) {
         L.allowed_hexes = [retreat_target, path]
     } else {
         L.allowed_hexes = []
@@ -1964,7 +2323,7 @@ P.move_offensive_units = {
             log(`pbm ${G.active ? "AP" : "JP"}`)
         }
         G.offensive.active_units[G.active].filter(u => {
-            if (!unit_on_board(u)
+            if (!unit_on_board(u) && G.location[u] !== CHINA_BOX
                 || G.offensive.stage === POST_BATTLE_STAGE && (pieces[u].class === "ground" && !set_has(G.offensive.ground_pbm, u) || map_get(G.offensive.paths, u, [0])[0] & STRAT_MOVE)
                 || G.offensive.stage === REACTION_STAGE && set_has(G.offensive.battle_hexes, G.location[u]) && !pieces[u].br) {
                 return false
@@ -1997,6 +2356,9 @@ P.move_offensive_units = {
             if (G.offensive.stage === ATTACK_STAGE && L.move_data.sm_possible) {
                 button("strat_move", L.move_type !== STRAT_MOVE)
             }
+            if (G.offensive.stage === ATTACK_STAGE || L.move_data.move_type & GROUND_MOVE) {
+                button("ground_move", L.move_type !== MANUAL_MOVEMENT)
+            }
             if (G.offensive.stage === ATTACK_STAGE && G.offensive.barges) {
                 button("barges", L.move_type !== BARGES_MOVE && G.offensive.barges > 1 && G.active_stack.filter(u => pieces[u].class === "ground").length === 1)
             }
@@ -2009,11 +2371,11 @@ P.move_offensive_units = {
             let loc = G.location[G.active_stack[0]]
             L.movable_units.filter(u => loc === G.location[u]
                 && !L.move_data.is_air_present
-                && pieces[u].type !== "air"
+                && pieces[u].class !== "air"
                 && L.move_type !== BARGES_MOVE
                 && !set_has(G.active_stack, u))
                 .forEach(u => action_unit(u))
-            if (G.offensive.stage !== REACTION_STAGE && could_stack_stop_here()) {
+            if (G.offensive.stage !== REACTION_STAGE && could_stack_stop_here() || could_air_stop_here()) {
                 button("no_move")
             } else if (G.offensive.stage === POST_BATTLE_STAGE && L.allowed_hexes.length === 0 && G.active_stack.length === 1) {
                 button("eliminate")
@@ -2021,6 +2383,12 @@ P.move_offensive_units = {
         }
         for (let i = 0; i < L.allowed_hexes.length; i += 2) {
             action_hex(L.allowed_hexes[i])
+        }
+    },
+    _resume() {
+        if (L.movable_units.length <= 0) {
+            G.active_stack = []
+            end()
         }
     },
     no_organic() {
@@ -2052,6 +2420,12 @@ P.move_offensive_units = {
     },
     strat_move() {
         set_mt(STRAT_MOVE)
+    },
+    ground_move() {
+        push_undo()
+        L.allowed_hexes = []
+        set_mt(ANY_MOVE)
+        call("ground_move")
     },
     avoid_zoi() {
         set_mt(AVOID_ZOI)
@@ -2114,52 +2488,45 @@ P.move_offensive_units = {
         }
         if (curr_path[0] & AMPH_MOVE && G.offensive.stage === REACTION_STAGE) {
             G.asp[R][1] += 1
+
             G.offensive.r_asp = 1
         } else if (curr_path[0] & AMPH_MOVE &&
-            (!get_map_data()[hex].port || !is_space_controlled(hex, R) || is_faction_units(hex, 1 - R))) {
+            (!get_map_data(hex).port || !is_space_controlled(hex, R) || is_faction_units(hex, 1 - R))) {
             G.asp[R][1] += L.move_data.asp_points
-            G.offensive.r_asp += L.move_data.asp_points
+            if (G.offensive.stage === REACTION_STAGE) {
+                G.offensive.r_asp += L.move_data.asp_points
+            }
         }
-        const prev_path = map_get(G.offensive.paths, G.active_stack[0])
-        curr_path = [curr_path[0], curr_path[1], ...prev_path.slice(2), ...curr_path.slice(3)]
-        if (G.offensive.stage === REACTION_STAGE && is_faction_units(hex, G.offensive.attacker) && set_has(G.offensive.battle_hexes, hex)) {
-            G.offensive.active_units[1 - R].filter(u => G.location[u] === hex).map(u => map_get(G.offensive.paths, u))
-                .forEach(path => {
-                    if (path[path.length - 1] !== hex) {
-                        path.pop()
-                    }
-                })
-        }
-        G.active_stack.forEach(u => {
-            map_set(G.offensive.paths, u, curr_path.slice())
-        })
         move_units(G.active_stack, curr_path)
         reset_move_type()
         check_supply()
         this.check_dist_attack(hex)
     },
     check_dist_attack(hex) {
+        var move_hexes = L.allowed_hexes
         L.allowed_hexes = []
         var escort = G.offensive.active_units[R].filter(u => {
             var piece = pieces[u]
             return G.location[u] === hex && piece.br && piece.class === "naval"
         }).length
+        var piece = pieces[G.active_stack[0]]
         var distant_attack =
             (L.move_data.battle_range || escort)
             && G.active_stack.length >= 1
             && !set_has(G.offensive.battle_hexes, hex)
             && G.offensive.stage !== POST_BATTLE_STAGE
-            && !G.committed.includes(G.active_stack[0])
+            && (G.offensive.stage === REACTION_STAGE || !is_b29_bombed(piece))
         if (L.movable_units.length <= 0 && distant_attack) {
-            goto("choose_attack_hex")
+            goto("choose_attack_hex", {move_hexes})
         } else if (distant_attack) {
-            call("choose_attack_hex")
+            call("choose_attack_hex", {move_hexes})
         } else if (L.movable_units.length <= 0) {
             G.active_stack = []
             end()
         } else {
             G.active_stack = []
         }
+
     },
     no_move() {
         push_undo()
@@ -2176,6 +2543,45 @@ P.move_offensive_units = {
         end()
     },
 }
+
+P.ground_move = {
+    _begin() {
+        L.allowed_hexes = []
+        L.move_type = ANY_MOVE
+        L.move_data = get_move_data()
+        check_supply()
+        compute_ground_move_hexes()
+    },
+    prompt() {
+        prompt(`${offensive_card_header()} Move activated units.`)
+        if (G.offensive.stage !== REACTION_STAGE || set_has(G.offensive.battle_hexes, G.location[G.active_stack[0]])) {
+            button("done")
+        }
+        for (let i = 0; i < L.allowed_hexes.length; i += 2) {
+            action_hex(L.allowed_hexes[i])
+        }
+    },
+    action_hex(hex) {
+        var curr_path = map_get(L.allowed_hexes, hex)
+        move_units(G.active_stack, curr_path)
+        check_supply()
+        L.move_data.ground_move_distance -= curr_path[1]
+        L.move_data.location = hex
+        L.allowed_hexes = []
+        if (!should_ground_move_stop(hex, R)) {
+            compute_ground_move_hexes()
+        }
+    },
+    done() {
+        push_undo()
+        if (is_faction_units(G.location[G.active_stack[0]], 1 - G.active)) {
+            create_battle_hex(G.location[G.active_stack[0]])
+        }
+        G.active_stack = []
+        end()
+    }
+}
+
 
 function set_mt(mt) {
     if (mt === STRAT_MOVE || L.move_type === STRAT_MOVE) {
@@ -2241,7 +2647,18 @@ P.choose_attack_hex = {
         if (is_faction_units(hex, 1 - R)) {
             create_battle_hex(hex)
         }
-        G.active_stack.forEach(u => commit_to_attack(u, hex))
+        var path_to_bh = map_get(L.move_hexes, hex, 0)
+        var non_cv = []
+        G.active_stack.forEach(u => {
+            if (!path_to_bh || is_cv_unit(pieces[u])) {
+                commit_to_attack(u, hex)
+            } else {
+                set_add(non_cv, u)
+            }
+        })
+        if (non_cv.length && path_to_bh) {
+            move_units(non_cv, path_to_bh)
+        }
         G.active_stack = []
         end()
     },
@@ -2253,6 +2670,15 @@ P.choose_attack_hex = {
 }
 
 function move_units(units, path) {
+    const prev_path = map_get(G.offensive.paths, units[0])
+    var full_path = [path[0], path[1]]
+    if (prev_path) {
+        full_path.push(...prev_path.slice(2))
+    }
+    full_path.push(...path.slice(3))
+    units.forEach(u => {
+        map_set(G.offensive.paths, u, full_path.slice())
+    })
     if (path.length === 3) {
         return
     }
@@ -2302,7 +2728,7 @@ function for_each_hex_in_range(hex, range, lambda) {
     }
 }
 
-function get_near_hexes(hex) {
+function get_edge_hexes(hex) {
     let y = hex % 29
     let x = (hex - y) / 29
 
@@ -2315,6 +2741,25 @@ function get_near_hexes(hex) {
     result.push((-((-hex - 1 - y1_diff) % 29 >> 31) - 1) * (hex + 2) + hex + 1)                                     //S or -1
     result.push((-((-x >> 31) & ((-hex - 1) % 29 >> 31)) - 1) * (hex - 28 + y1_diff) + hex - 29 + y1_diff)      //SW or -1
     result.push((-((-x >> 31) & (-y1_diff | -hex % 29 >> 31)) - 1) * (hex - 28 - y_diff) + hex - 29 - y_diff)   //NW or -1
+    return result
+}
+
+function get_near_hexes(hex) {
+    if (hex > TUNNEL_BOX) {
+        hex -= 1
+        if (hex % 100 === 0) {
+            return [S_P_TONNELLING_SET[(hex - 1600) / 100]]
+        } else {
+            return [hex]
+        }
+    }
+    var result = get_edge_hexes(hex)
+    if (G.sid === SOUTH_PACIFIC && S_P_TONNELLING_SET.includes(hex)) {
+        if (hex === OAHU) {
+            return OAHU_NEAR
+        }
+        result.push(TUNNEL_BOX + map_get(SP_TONNELLING, hex) + 400)
+    }
     return result
 }
 
@@ -2357,7 +2802,7 @@ function set_zoi(i, piece, oos_units) {
             mask = mask | JP_ZOI_NTRL << 1 - piece.faction
         }
         G.supply_cache[location] = G.supply_cache[location] | mask
-        get_near_hexes(location).flatMap(h => get_near_hexes(h)).forEach(h => {
+        get_edge_hexes(location).flatMap(h => get_edge_hexes(h)).forEach(h => {
             G.supply_cache[h] = G.supply_cache[h] | mask
         })
     }
@@ -2376,28 +2821,31 @@ function mark_unit(i, piece) {
     }
 }
 
-function check_hq_in_supply(hq, piece) {
+function check_hq_in_supply(hq, piece, supply) {
     const faction = piece.faction
     const location = G.location[hq]
+    if (get_map_data(location).supply_source & supply) {
+        return true
+    }
     let queue = [location]
     const overland_set = [location]
     const oversea_set = [location]
     for (var i = 0; i < queue.length; i++) {
         let item = queue[i]
         let nh_list = get_near_hexes(item)
-        const MD = get_map_data()[item]
+        const MD = get_map_data(item)
         const overland = set_has(overland_set, item)
         const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))
         const enemy_port_s = (MD.port && is_space_controlled(item, 1 - faction))
         const occupied_land_s = G.supply_cache[item] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[item] & JP_GAH_UNITS << faction)
         const oversea = set_has(oversea_set, item)
-        for (let j = 0; j < 6; j++) {
+        for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             var reachable = false
-            const enemy_port = enemy_port_s || (MD.port && set_has(G.control, nh) == (1 - faction))
+            const enemy_port = enemy_port_s || (MD.port && is_space_controlled(item, 1 - faction))
             const occupied_land = occupied_land_s || G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
             if (!set_has(overland_set, nh) && (overland || (MD.port && !enemy_port)) && MD.edges_int & GROUND << 5 * j && !occupied_land) {
                 reachable = true
@@ -2409,7 +2857,7 @@ function check_hq_in_supply(hq, piece) {
                 set_add(oversea_set, nh)
             }
             if (reachable) {
-                if (get_map_data()[nh].supply_source === piece.faction) {
+                if (get_map_data(nh).supply_source & supply) {
                     return true
                 }
                 queue.push(nh)
@@ -2428,9 +2876,9 @@ function mark_supply_ports_overland(hq, piece) {
         let item = queue[i]
         let base_distance = map_get(distance_map, item)
         let nh_list = get_near_hexes(item)
-        for (let j = 0; j < 6; j++) {
+        for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             const occupied_land = G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
@@ -2443,10 +2891,10 @@ function mark_supply_ports_overland(hq, piece) {
             if (distance < SUPPLY_PORT_RANGE) {
                 queue.push(nh)
             }
-            if (get_map_data()[nh].port && is_space_controlled(nh, faction)) {
+            if (get_map_data(nh).port && is_space_controlled(nh, faction)) {
                 G.supply_cache[nh] = G.supply_cache[nh] | JP_SUPPLY_PORT << faction
             }
-            if (get_map_data()[nh].airfield && is_space_controlled(nh, faction)) {
+            if (get_map_data(nh).airfield && is_space_controlled(nh, faction)) {
                 G.supply_cache[nh] = G.supply_cache[nh] | JP_SUPPLY_AIRFIELD << faction
             }
         }
@@ -2463,22 +2911,22 @@ function mark_supply_ports_oversea(hq, piece) {
         let item = queue[i]
         let nh_list = get_near_hexes(item)
         const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))
-        for (let j = 0; j < 6; j++) {
+        for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             const non_neutral_zoi = non_neutral_zoi_s || G.supply_cache[nh] & JP_ZOI << (1 - faction) && !(G.supply_cache[nh] & JP_ZOI_NTRL << (1 - faction))
-            if (!set_has(distance_map, nh) && get_map_data()[item].edges_int & WATER << 5 * j && !non_neutral_zoi) {
+            if (!set_has(distance_map, nh) && get_map_data(item).edges_int & WATER << 5 * j && !non_neutral_zoi) {
                 set_add(distance_map, nh)
                 queue.push(nh)
-                if (G.supply_cache[nh] & JP_SUPPLY_PORT << faction) {
+                if (G.supply_cache[nh] & JP_SUPPLY_PORT << faction || nh > LAST_BOARD_HEX) {
                     return
                 }
-                if (get_map_data()[nh].port && is_space_controlled(nh, faction)) {
+                if (get_map_data(nh).port && is_space_controlled(nh, faction)) {
                     G.supply_cache[nh] = G.supply_cache[nh] | JP_SUPPLY_PORT << faction
                 }
-                if (get_map_data()[nh].airfield && is_space_controlled(nh, faction)) {
+                if (get_map_data(nh).airfield && is_space_controlled(nh, faction)) {
                     G.supply_cache[nh] = G.supply_cache[nh] | JP_SUPPLY_AIRFIELD << faction
                 }
             }
@@ -2487,7 +2935,7 @@ function mark_supply_ports_oversea(hq, piece) {
 }
 
 function supply_source_in_range(location, faction) {
-    if (!is_faction_units(location, faction) && !get_map_data()[location].airfield) {
+    if (!is_faction_units(location, faction) && !get_map_data(location).airfield) {
         return false
     } else if (G.supply_cache[location] & JP_SUPPLY_PORT << faction) {
         return true
@@ -2500,9 +2948,9 @@ function supply_source_in_range(location, faction) {
         const item = queue[i]
         const base_distance = map_get(distance_map, item)
         const nh_list = get_near_hexes(item)
-        for (var j = 0; j < 6; j++) {
+        for (var j = 0; j < nh_list.length; j++) {
             const nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
 
@@ -2536,12 +2984,12 @@ function mark_hexes_supplied_from(hq, piece) {
     for (var i = 0; i < queue.length; i++) {
         let item = queue[i]
         let nh_list = get_near_hexes(item)
-        const MD = get_map_data()[item]
+        const MD = get_map_data(item)
         const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))
         const distance = map_get(oversea_set, item) + 1
-        for (let j = 0; j < 6; j++) {
+        for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             const non_neutral_zoi = non_neutral_zoi_s || G.supply_cache[nh] & JP_ZOI << (1 - faction) && !(G.supply_cache[nh] & JP_ZOI_NTRL << (1 - faction))
@@ -2550,13 +2998,13 @@ function mark_hexes_supplied_from(hq, piece) {
             }
             if (distance < piece.cr) {
                 queue.push(nh)
-                const friendly_port = (get_map_data()[nh].port && set_has(G.control, nh) !== faction)
-                if (friendly_port && !get_map_data()[nh].island && get_map_data()[nh].terrain !== ATOLL) {
+                const friendly_port = (get_map_data(nh).port && set_has(G.control, nh) !== faction)
+                if (friendly_port && !get_map_data(nh).island && get_map_data(nh).terrain !== ATOLL) {
                     map_set(overland_set, nh, distance)
                 }
             }
             map_set(oversea_set, nh, distance)
-            if (get_map_data()[nh].terrain > 0) {
+            if (get_map_data(nh).terrain > 0) {
                 G.supply_cache[nh] = G.supply_cache[nh] | supply_type
             }
         }
@@ -2567,11 +3015,11 @@ function mark_hexes_supplied_from(hq, piece) {
     for (; i < queue.length; i++) {
         let item = queue[i]
         let nh_list = get_near_hexes(item)
-        const MD = get_map_data()[item]
+        const MD = get_map_data(item)
         const distance = map_get(overland_set, item) + 1
-        for (let j = 0; j < 6; j++) {
+        for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             const occupied_land = G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
@@ -2580,7 +3028,7 @@ function mark_hexes_supplied_from(hq, piece) {
             }
             if (distance < piece.cr) {
                 queue.push(nh)
-                const friendly_port = get_map_data()[nh].port && is_space_controlled(nh, faction)
+                const friendly_port = get_map_data(nh).port && is_space_controlled(nh, faction)
                 if (friendly_port && map_get(oversea_set, nh, 100) > distance) {
                     map_set(oversea_set, nh, distance)
                     second_ports.push(nh)
@@ -2596,12 +3044,12 @@ function mark_hexes_supplied_from(hq, piece) {
     for (; i < queue.length; i++) {
         let item = queue[i]
         let nh_list = get_near_hexes(item)
-        const MD = get_map_data()[item]
+        const MD = get_map_data(item)
         const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))
         const distance = map_get(oversea_set, item) + 1
-        for (let j = 0; j < 6; j++) {
+        for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             const non_neutral_zoi = non_neutral_zoi_s || G.supply_cache[nh] & JP_ZOI << (1 - faction) && !(G.supply_cache[nh] & JP_ZOI_NTRL << (1 - faction))
@@ -2612,7 +3060,7 @@ function mark_hexes_supplied_from(hq, piece) {
                 queue.push(nh)
             }
             map_set(oversea_set, nh, distance)
-            if (get_map_data()[nh].terrain > 0) {
+            if (get_map_data(nh).terrain > 0) {
                 G.supply_cache[nh] = G.supply_cache[nh] | supply_type
             }
         }
@@ -2634,6 +3082,9 @@ function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
     }
     if (G.burma_road < 2) {
         G.supply_cache[KUNMING] |= AP_SUPPLY_PORT
+        G.supply_cache[CHINA_BOX] = JOINT_SUPPLIED_HEX
+    } else {
+        G.supply_cache[CHINA_BOX] = 0
     }
     if (G.turn === 1 && faction === AP) {
         for_each_unit_on_map((u, piece) => {
@@ -2657,7 +3108,7 @@ function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
     var size = oos_units[faction].length
     oos_units[faction] = []
     for_each_unit_on_map((i, p) => {
-        if (p.class === "hq" && p.faction === faction && check_hq_in_supply(i, p)) {
+        if (p.class === "hq" && p.faction === faction && check_hq_in_supply(i, p, p.faction === AP ? JOINT_SUPPLIED_HEX : JP_SUPPLIED_HEX)) {
             mark_hexes_supplied_from(i, p)
         } else if (p.class === "hq" && p.faction === faction) {
             set_add(oos_units[faction], i)
@@ -2667,8 +3118,10 @@ function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
     if (tokyo_express > 0) {
         G.supply_cache[tokyo_express] |= JP_SUPPLIED_HEX
     }
-    for_each_unit_on_map((i, p) => {
-        if (p.class !== "hq" && p.faction === faction && !check_unit_supply(G.location[i], i, p)) {
+    for_each_unit((i, p, location) => {
+        if ((location <= LAST_BOARD_HEX || location === CHINA_BOX) &&
+            p.class !== "hq" && p.faction === faction && !check_unit_supply(G.location[i], i, p)
+        ) {
             set_add(oos_units[faction], i)
         }
     })
@@ -2682,12 +3135,17 @@ function check_infrastructure() {
 function check_hump() {
     if (is_event_active(events.HUMP)
         && ((G.supply_cache[JARHAT] & AP_SUPPLY_AIRFIELD) || (G.supply_cache[DACCA] & AP_SUPPLY_AIRFIELD))) {
-        G.burma_road = 1
+        G.burma_road = Math.min(1, G.burma_road)
+        return true
     }
+    return false
 }
 
 function check_burma_road() {
     G.burma_road = 2
+    if (scenario_data().id === SOUTH_PACIFIC) {
+        return;
+    }
     const faction = AP
     const location = KUNMING
     var queue = [location]
@@ -2696,9 +3154,9 @@ function check_burma_road() {
     for (var i = 0; i < queue.length; i++) {
         let item = queue[i]
         let nh_list = get_near_hexes(item)
-        for (let j = 0; j < 6; j++) {
+        for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             const occupied_land = G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
@@ -2727,16 +3185,16 @@ function check_burma_road() {
     for (i = 0; i < queue.length; i++) {
         let item = queue[i]
         let nh_list = get_near_hexes(item)
-        for (let j = 0; j < 6; j++) {
+        for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             if (map_has(distance_map, nh) || has_non_n_zoi(nh, JP)) {
                 continue
             }
             map_set(distance_map, nh, 1)
-            if (nh === MADRAS || get_map_data()[nh].supply_source === AP) {
+            if (nh === MADRAS || get_map_data(nh).supply_source & JOINT_SUPPLIED_HEX) {
                 G.burma_road = 0
                 return
             } else {
@@ -2750,7 +3208,16 @@ function check_burma_road() {
 function is_overstack(hex, unit, multip = 1) {
     var overstack = G.overstack[hex]
     var piece = pieces[unit]
-    var multiplier = ((G.location[unit] === hex || G.location[piece.pair] === hex) ? 0 : 1) * multiplier
+    var multiplier = ((G.location[unit] === hex || G.location[piece.pair] === hex) ? 0 : 1) * multip
+    if (hex === CHINA_BOX && piece.b29) {
+        var count = 0
+        count += unit === B_29_1 ? G.location[B_29_2] === CHINA_BOX : 0
+        count += unit === B_29_2 ? G.location[B_29_1] === CHINA_BOX : 0
+        if (count) {
+            return false
+        }
+    }
+
     if (piece.class === "hq") {
         return overstack & 1
     } else if (piece.class !== "naval") {
@@ -2859,8 +3326,8 @@ P.check_overstacking = {
 }
 
 function set_location(unit, location) {
-    if (location <= LAST_BOARD_HEX) {
-        log(`${piece_get_log_str(unit)} moved to ${hex_get_log_str(location)}`)
+    if (location <= LAST_BOARD_HEX || location === CHINA_BOX) {
+         log(`${piece_get_log_str(unit)} moved to ${hex_get_log_str(location)}`)
     }
     var prev_location = G.location[unit]
     var pair_location = G.location[pieces[unit].pair]
@@ -2878,7 +3345,7 @@ function fill_overstack() {
     for (var i = 0; i <= LAST_BOARD_HEX; i++) {
         G.overstack[i] = 0
     }
-    G.overstack[CHINA_BOX] = 0
+    G.overstack[CHINA_BOX] = 2
     for_each_unit((u, piece, location) => {
         var pair_location = G.location[pieces[u].pair]
         if (location <= LAST_BOARD_HEX && piece.class === "hq") {
@@ -2896,12 +3363,11 @@ function check_supply() {
     G.supply_cache = []
     for_each_unit_on_map(mark_unit)
     GARRISONED_CITY.forEach(h => {
-        if (is_space_controlled(h, JP) && (get_map_data()[h].city === CHINESE_CITY || !set_has(G.garr_elim, h))) {
+        if (is_space_controlled(h, JP) && (get_map_data(h).city === CHINESE_CITY || !set_has(G.garr_elim, h))) {
             G.supply_cache[h] = G.supply_cache[h] | JP_GROUND_UNITS
         }
     })
     check_infrastructure()
-
     var oos_units = [[], []]
     G.oos = []
     check_faction_supply_not_changed(AP, false, oos_units)
@@ -2917,6 +3383,10 @@ function check_supply() {
     G.oos = oos_units[0]
     if (G.turn > 1) {
         oos_units[1].forEach(h => set_add(G.oos, h))
+    }
+    if (scenario_data().id === SOUTH_PACIFIC && G.turn === 3) {
+        var mask = G.supply_cache[TRUK] & JP_UNITS
+        G.supply_cache[TRUK] ^= (mask)
     }
     check_burma_road()
     if (G.debug) {
@@ -2984,7 +3454,7 @@ function get_move_data() {
         }
     })
     result.location = G.location[G.active_stack[0]]
-    if (result.sm_possible && !result.is_air_present && get_map_data()[result.location].coastal) {
+    if (result.sm_possible && !result.is_air_present && get_map_data(result.location).coastal) {
         result.move_type |= NAVAL_MOVE
     }
     result.naval_move_distance = G.offensive.naval_move_distance
@@ -3037,16 +3507,16 @@ function get_move_data() {
 }
 
 function get_ground_move_cost(from, to, direction, faction) {
-    if (!(get_map_data()[from].edges_int & GROUND << 5 * direction)) {
+    if (!(get_map_data(from).edges_int & GROUND << 5 * direction)) {
         return 100;
     }
-    if ((get_map_data()[from].edges_int & ROAD << (5 * direction))
+    if ((get_map_data(from).edges_int & ROAD << (5 * direction))
         && !(G.supply_cache[to] & (TRANSPORT_ROUTE_DISABLED | (JP_GA_UNITS << 1 - faction)))
         && !(G.supply_cache[from] & TRANSPORT_ROUTE_DISABLED)
     ) {
         return 1;
     } else {
-        return ((get_map_data()[to].terrain >> 1) + 1) * 2
+        return ((get_map_data(to).terrain >> 1) + 1) * 2
     }
 }
 
@@ -3059,13 +3529,14 @@ function compute_possible_battle_hexes() {
     const new_battle_allowed = G.offensive.type === EC || G.offensive.battle_hexes.length <= 0
     G.offensive.active_units[R].filter(u => pieces[u].br).forEach(u => {
         const location = G.location[u]
+        var piece = pieces[u]
         var path = map_get(G.offensive.paths, u)
         var range = pieces[u].ebr ? pieces[u].ebr : pieces[u].br
         if (pieces[u].parenthetical) {
             range = pieces[u].br
         }
         if (map_has(G.offensive.committed, u) || path[0] & STRAT_MOVE || path[0] & AIR_EXTENDED_MOVE || is_faction_units(location, 1 - pieces[u].faction)
-            || G.committed.includes(u)) {
+            || is_b29_bombed(piece)) {
             return
         }
         var saved_value = map_get(unit_ranges, location, [range])
@@ -3077,7 +3548,7 @@ function compute_possible_battle_hexes() {
         map_set(unit_ranges, location, saved_value)
     })
     map_for_each(unit_ranges, (attacker_stack_hex, value) => for_each_hex_in_range(attacker_stack_hex, value[0], (h) => {
-        if (new_battle_allowed && is_faction_units(h, 1 - R) && get_map_data()[h].region !== "IChina"
+        if (new_battle_allowed && is_faction_units(h, 1 - R) && get_map_data(h).region !== "IChina"
             || set_has(G.offensive.battle_hexes, h) || set_has(G.offensive.landing_hexes, h)) {
             set_add(selected_hexes, h)
             var has_not_selected = false
@@ -3122,7 +3593,7 @@ function compute_air_commit_hexes() {
     if (move_data.is_new_battle_allowed) {
         for (i = 0; i < G.supply_cache.length; i++) {
             if ((G.supply_cache[i] & JP_UNITS << (1 - R)) && get_distance(i, location) <= range
-                && get_map_data()[i].region !== "IChina") {
+                && get_map_data(i).region !== "IChina") {
                 set_add(result, i)
             }
         }
@@ -3177,6 +3648,37 @@ function fast_compute_air_move_hexes() {
         }
     })
     map_delete(L.allowed_hexes, move_data.location)
+    check_china_box_restriction()
+}
+
+function check_china_box_restriction() {
+    if (G.overstack[CHINA_BOX] >= 6 || pieces[G.active_stack[0]].b29 && (G.location[B_29_1] === CHINA_BOX || G.location[B_29_2] === CHINA_BOX)) {
+        map_delete(L.allowed_hexes, CHINA_BOX)
+    }
+}
+
+function process_china_box_move(hex, base_path, move_type) {
+    var faction = pieces[G.active_stack[0]].faction
+    var move_data = L.move_data
+    var china_rebase = faction === AP && base_path[0] % 10 === 0 && base_path[1] <= move_data.air_move_legs
+    if (china_rebase && (hex === DACCA || hex === JARHAT) && G.supply_cache[hex] & AP_SUPPLY_AIRFIELD && !map_has(L.allowed_hexes, CHINA_BOX)) {
+        var path_array = base_path.slice()
+        path_array.push(CHINA_BOX)
+        path_array[0] = move_type
+        map_set(L.allowed_hexes, CHINA_BOX, path_array)
+    } else if (china_rebase && hex === CHINA_BOX && base_path[1] === 1) {
+        var result = []
+        if (G.supply_cache[DACCA] & AP_SUPPLY_AIRFIELD) {
+            result.push(DACCA)
+        }
+        if (G.supply_cache[JARHAT] & AP_SUPPLY_AIRFIELD) {
+            result.push(JARHAT)
+        }
+        if (result.length) {
+            return result
+        }
+    }
+    return []
 }
 
 function compute_air_move_hexes() {
@@ -3204,9 +3706,15 @@ function compute_air_move_hexes() {
         }
         let item = queue[i]
         let base_path = map_get(distance_map, item)
-        const distance = base_path[0] + 1
+        var china_result = process_china_box_move(item, base_path, move_type)
         let nh_list = get_near_hexes(item)
-        for (let j = 0; j < 6; j++) {
+        var distance = base_path[0] + 1
+        if (item === CHINA_BOX) {
+            nh_list = china_result
+            distance = L.move_data.extended_battle_range
+        }
+
+        for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
             if (nh <= 0 || nh > LAST_BOARD_HEX || nh === HARBIN || nh === MUKDEN) {
                 continue
@@ -3224,7 +3732,7 @@ function compute_air_move_hexes() {
             path_array.push(nh)
             path_array[0] = distance
             map_set(distance_map, nh, path_array)
-            if (get_map_data()[nh].airfield && is_space_controlled(nh, G.active) && (nh !== AIR_FERRY || !is_faction_units(AIR_FERRY, JP))) {
+            if (get_map_data(nh).airfield && is_space_controlled(nh, G.active) && (nh !== AIR_FERRY || !is_faction_units(AIR_FERRY, JP))) {
                 fields_queue.push(nh)
                 if (nh !== AIR_FERRY && (!is_faction_ground_units(nh, 1 - R) && !set_has(G.offensive.battle_hexes, nh) || G.offensive.stage === POST_BATTLE_STAGE)
                     && (target_in_battle_range(move_data.extended_battle_range, nh, bh) || G.offensive.stage !== REACTION_STAGE)) {
@@ -3249,6 +3757,7 @@ function compute_air_move_hexes() {
         }
     }
     map_delete(L.allowed_hexes, location)
+    check_china_box_restriction()
 }
 
 function compute_ground_naval_move_hexes() {
@@ -3286,19 +3795,27 @@ function compute_ground_naval_move_hexes() {
         })
     }
     if (L.move_data.move_type & GROUND_MOVE) {
-        mt = GROUND_MOVE
-        if (move_data.move_type & AVOID_ZOI) {
-            mt |= AVOID_ZOI
-        }
-        map_for_each(get_ground_move(move_data.move_type & AVOID_ZOI), (k, v) => {
-            v.unshift(GROUND_MOVE)
-            if (G.offensive.stage === ATTACK_STAGE || set_has(G.offensive.battle_hexes, k)) {
-                map_set(L.allowed_hexes, k, v)
-            }
-        })
+        compute_ground_move_hexes()
     }
     if (G.offensive.stage !== POST_BATTLE_STAGE) {
         map_delete(L.allowed_hexes, location)
+    }
+}
+
+function compute_ground_move_hexes() {
+    var mt = GROUND_MOVE
+    if (L.move_data.move_type & AVOID_ZOI) {
+        mt |= AVOID_ZOI
+    }
+    map_for_each(get_ground_move(L.move_data.move_type & AVOID_ZOI), (k, v) => {
+        v.unshift(mt)
+        if (G.offensive.stage === ATTACK_STAGE && (L.move_data.is_new_battle_allowed || !is_faction_units(k, 1 - G.active))
+            || set_has(G.offensive.battle_hexes, k)) {
+            map_set(L.allowed_hexes, k, v)
+        }
+    })
+    if (G.offensive.stage !== POST_BATTLE_STAGE) {
+        map_delete(L.allowed_hexes, L.move_data.location)
     }
 }
 
@@ -3316,14 +3833,14 @@ function compute_ground_naval_strat_move() {
         let base_path = map_get(distance_map, item)
         const distance = base_path[0] + 1
         let nh_list = get_near_hexes(item)
-        for (let j = 0; j < 6; j++) {
+        for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             if (has_non_n_zoi(nh, 1 - R)
                 || distance > move_data.naval_move_distance
-                || !(get_map_data()[item].edges_int & WATER << 5 * j)
+                || !(get_map_data(item).edges_int & WATER << 5 * j)
                 || distance >= map_get(distance_map, nh, [100])[0]) {
                 continue
             }
@@ -3334,7 +3851,7 @@ function compute_ground_naval_strat_move() {
             path_array.push(nh)
             path_array[0] = distance
             map_set(distance_map, nh, path_array)
-            if (get_map_data()[nh].port && is_space_controlled(nh, G.active)) {
+            if (get_map_data(nh).port && is_space_controlled(nh, G.active)) {
                 path_array = path_array.slice()
                 path_array.unshift(STRAT_MOVE)
                 map_set(L.allowed_hexes, nh, path_array)
@@ -3403,11 +3920,7 @@ P.ground_disengagement = {
     },
     action_hex(hex) {
         push_undo()
-        var curr_path = map_get(L.allowed_hexes, hex)
-        G.active_stack.forEach(u => {
-            map_set(G.offensive.paths, u, curr_path.slice())
-        })
-        move_units(G.active_stack, curr_path)
+        move_units(G.active_stack, map_get(L.allowed_hexes, hex))
         G.active_stack = []
     }
 }
@@ -3443,9 +3956,9 @@ function compute_ground_disengagement(unit) {
         let item = queue[i]
         let base_distance = map_get(distance_map, item)
         let nh_list = get_near_hexes(item)
-        for (let j = 0; j < 6; j++) {
+        for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             var distance = base_distance[0] + get_ground_move_cost(item, nh, j, R)
@@ -3480,7 +3993,7 @@ function ground_move_denied(hex) {
     if (hex === HARBIN || hex === MUKDEN) {
         return true
     }
-    var region = get_map_data()[hex].region
+    var region = get_map_data(hex).region
     if (region === "IChina") {
         return G.active_stack.filter(u => pieces[u].service !== "ch").length
     }
@@ -3506,9 +4019,9 @@ function get_ground_move(avoid_zoi) {
         let item = queue[i]
         let base_distance = map_get(distance_map, item)
         let nh_list = get_near_hexes(item)
-        for (let j = 0; j < 6; j++) {
+        for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             var distance = base_distance[0] + get_ground_move_cost(item, nh, j, R)
@@ -3616,16 +4129,16 @@ function get_naval_move(zoi_mask) {
         const distance = base_path[0] + 1
         let nh_list = get_near_hexes(item)
         var item_non_n_zoi = !non_cv_ground_unit || has_non_n_zoi(item, 1 - R)
-        for (let j = 0; j < 6; j++) {
+        for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             if (G.supply_cache[nh] & zoi_mask
                 || (non_cv_ground_unit && has_non_n_zoi(nh, 1 - R) && !(pbm && item_non_n_zoi))
                 || pbm && is_faction_units(nh, 1 - R) && move_data.is_ground_present
                 || distance > move_data.naval_move_distance
-                || !(get_map_data()[item].edges_int & WATER << 5 * j)
+                || !(get_map_data(item).edges_int & WATER << 5 * j)
                 || distance >= map_get(distance_map, nh, [100])[0]) {
                 continue
             }
@@ -3640,15 +4153,15 @@ function get_naval_move(zoi_mask) {
     }
     let result = []
     map_for_each(distance_map, (nh, v) => {
-        var naval_attack = is_amph_attack_possible(nh) && (!us_army_unit_active || set_has(marine_landed_islands, nh) || !get_map_data()[nh].island || G.offensive.stage === REACTION_STAGE)
-        var port_transport = (get_map_data()[nh].port && is_space_controlled(nh, R))
+        var naval_attack = is_amph_attack_possible(nh) && (!us_army_unit_active || set_has(marine_landed_islands, nh) || !get_map_data(nh).island || G.offensive.stage === REACTION_STAGE)
+        var port_transport = (get_map_data(nh).port && is_space_controlled(nh, R))
         var aa_landing = move_data.move_type & AMPH_MOVE
             && is_hex_asp_capable(nh)
             && (!move_data.is_naval_present || move_data.move_type & ORGANIC_ONLY)
             && !pbm
-        var landing = !is_faction_units(nh, 1 - R) &&
-            (port_transport || aa_landing) && (G.offensive.stage !== REACTION_STAGE)
-        if ((naval_attack || landing) && (!L.move_data.is_ground_present || !ground_move_denied(nh))) {
+        var no_enemy_units = !is_faction_units(nh, 1 - R)
+        var landing = port_transport && (no_enemy_units || G.offensive.stage === POST_BATTLE_STAGE) || aa_landing && no_enemy_units
+        if ((naval_attack || landing && G.offensive.stage !== REACTION_STAGE) && (!L.move_data.is_ground_present || !ground_move_denied(nh))) {
             map_set(result, nh, v)
         }
     })
@@ -3661,7 +4174,7 @@ function is_amph_attack_possible(hex) {
 }
 
 function is_hex_asp_capable(hex) {
-    const terrain = get_map_data()[hex].terrain
+    const terrain = get_map_data(hex).terrain
     return hex === MORESBY || (terrain !== OCEAN && terrain !== MOUNTAIN)
 }
 
@@ -3674,7 +4187,7 @@ function is_faction_ground_units(hex, faction) {
 }
 
 function is_space_controlled(hex, faction) {
-    return is_controllable_hex(hex) && set_has(G.control, hex) == 1 - faction
+    return faction === AP && hex === CHINA_BOX || is_controllable_hex(hex) && set_has(G.control, hex) == 1 - faction && (!G.non_control || !set_has(G.non_control, hex))
 }
 
 function target_in_battle_range(range, location, targets) {
@@ -3690,9 +4203,24 @@ function commit_to_attack(unit, hex) {
     map_set(G.offensive.committed, unit, hex)
 }
 
+function check_amph_mod() {
+    var faction = 1 - G.active
+    G.offensive.battle_hexes.forEach(h => {
+        if (G.supply_cache[h] & ((JP_GROUND_UNITS | JP_HQ_UNITS) << faction)) {
+            set_add(G.offensive.amp_mod, h)
+        }
+    })
+    G.offensive.landing_hexes.forEach(h => {
+        if (G.supply_cache[h] & ((JP_GROUND_UNITS | JP_HQ_UNITS) << faction)) {
+            set_add(G.offensive.amp_mod, h)
+        }
+    })
+}
+
 P.declare_battle_hexes = {
     _begin() {
         check_supply()
+        check_amph_mod()
         G.offensive.battle_hexes.forEach(h => log(`Battle declared in ${hex_get_log_str(h)}`))
         compute_possible_battle_hexes()
         if (L.possible_units.length <= 0) {
@@ -3742,6 +4270,9 @@ P.declare_battle_hexes = {
 P.commit_offensive = {
     _begin() {
         check_supply()
+        if (get_hand(AP).includes(SKIP_BOMBING)) {
+            cache_skip_bombing()
+        }
         L.verify_error = trigger_event("before_commit_offensive")
     },
     prompt() {
@@ -3760,8 +4291,18 @@ P.commit_offensive = {
         }
     },
     next() {
+        resolve_into_turn_draw(JP)
+        resolve_into_turn_draw(AP)
         end()
     },
+}
+
+function commit_into_turn_draw() {
+    resolve_into_turn_draw(JP)
+    resolve_into_turn_draw(AP)
+    G.offensive.draw[AP].forEach(c => G.hand[AP].push(c))
+    G.offensive.draw[JP].forEach(c => G.hand[JP].push(c))
+    G.offensive.draw = []
 }
 
 P.end_action = {
@@ -3809,7 +4350,7 @@ P.special_reaction = {
             }
         })
         L.possible_hexes = G.offensive.landing_hexes.filter(h => {
-            if (!get_map_data()[h].named || !has_zoi(h, G.active)) {
+            if (!get_map_data(h).named || !has_zoi(h, G.active)) {
                 return false
             }
             for (var i = 1; i < hq_list.length; i += 2) {
@@ -3829,7 +4370,8 @@ P.special_reaction = {
         L.possible_hexes.forEach(h => action_hex(h))
     },
     pass() {
-        this._begin()
+        push_undo()
+        end()
     },
     action_hex(hex) {
         log(`Special reaction in ${hex_get_log_str(hex)}`)
@@ -3850,9 +4392,20 @@ function into_turn_draw(faction) {
         log(`${faction === AP ? "AP" : "JP"} already drown 3 cards, draw skipped`)
         return
     }
-    log(`${faction === AP ? "AP" : "JP"} draw additional card`)
     G.draw_counter[faction]++
-    set_add(G.offensive.draw, draw_card(faction, false))
+    G.offensive.draw[faction].push(-1)
+}
+
+function resolve_into_turn_draw(faction) {
+    var count = G.offensive.draw[faction].filter(c => c <= 0).length
+    if (count <= 0) {
+        return
+    }
+    G.offensive.draw[faction] = G.offensive.draw[faction].filter(c => c >= 0)
+    for (var i = 0; i < count; i++) {
+        log(`${faction === AP ? "AP" : "JP"} draw additional card`)
+        G.offensive.draw[faction].push(draw_card(faction, false))
+    }
     clear_undo()
 }
 
@@ -3898,14 +4451,15 @@ P.cancel_offensive = {
         discard_card(offensive_card)
         remove_card(L.reactions_card)
         clear_undo()
-        log(`Japan played ${card_get_log_str(reaction_card)}`)
-        log(`Offensive resets, ${card_get_log_str(offensive_card)} discard`)
-        play_event(reaction_card)
+        end()
         G.offensive.offensive_card = reaction_card
         G.offensive.cancelled = offensive
-        end()
         G.active = JP
-        goto("default_event")
+        play_event(reaction_card)
+        log(`${card_get_log_str(reaction_card)} played.`)
+        log(`Offensive cancelled, ${card_get_log_str(offensive_card)} discarded.`)
+        goto("end_action")
+        call("default_event")
     }
 }
 
@@ -3962,14 +4516,14 @@ P.define_intelligence_condition = {
         }
     },
     roll() {
+        clear_undo()
         log('Change intelligence condition')
         var success = roll_intelligence_dice()
         if (success) {
             G.offensive.intelligence = INTERCEPT
             log(`Intelligence condition changed to ${get_named_intelligence(G.offensive.intelligence)}`)
         }
-        L.rolled = true
-        clear_undo()
+        L.rolled = 1
         if (success || !get_hand(R).includes(JN_25_SPECIAL)) {
             end()
         }
@@ -3978,7 +4532,8 @@ P.define_intelligence_condition = {
 
 P.attack_reaction_cards = {
     _begin() {
-        if (get_hand(R).filter(c => cards[c].type === REACTION && cards[c].can_play()).length <= 0) {
+        log("attack reaction cards")
+        if (get_hand(G.active).filter(c => cards[c].type === REACTION && cards[c].can_play()).length <= 0) {
             end()
         }
     },
@@ -3989,6 +4544,8 @@ P.attack_reaction_cards = {
     },
     done() {
         push_undo()
+        resolve_into_turn_draw(AP)
+        resolve_into_turn_draw(JP)
         end()
     },
     card(c) {
@@ -4008,7 +4565,7 @@ P.apply_attack_reaction = {
         G.offensive.active_cards.filter(c =>
             (G.offensive.type === EC || c !== G.offensive.offensive_card)
             && cards[c].faction === G.active
-            && (cards[c].stage === stage || G.offensive.battle_hexes.length <= 0 && G.offensive.stage === BATTLE_STAGE && cards[c].stage))
+            && (cards[c].stage === stage || G.offensive.all_bh.length === 0 && G.offensive.stage === BATTLE_STAGE && cards[c].stage))
             .forEach(c => set_add(L.allowed_cards, c))
         if (L.allowed_cards.length <= 0) {
             end()
@@ -4029,7 +4586,12 @@ P.apply_attack_reaction = {
         if (L.allowed_cards.length <= 0) {
             end()
         }
-        cards[c].event()
+        if (cards[c].before_battles) {
+            cards[c].before_battles()
+        }
+        if (cards[c].after_battles) {
+            cards[c].after_battles()
+        }
     }
 }
 
@@ -4086,13 +4648,13 @@ function fill_hit_able_units(faction) {
     var units = ((battle.ground_stage || battle.air_naval[enemy_faction].length === 0)
         ? battle.ground[enemy_faction] : battle.air_naval[enemy_faction])
     units.forEach(u => {
-        if (unit_on_board(u) && get_reduced_status(u, faction) < 2) {
+        if (unit_on_board(u) && get_reduced_status(u, faction) <= 2) {
             var piece = pieces[u]
             map_set(L.pool, u, piece.lf)
         }
     })
     trigger_event("before_apply_hits", faction)
-    if (ground_bomb && L.pool.length === 2 && get_reduced_status(L.pool[0], faction) === 1) {
+    if (ground_bomb && L.pool.length === 2 && get_reduced_status(L.pool[0], faction) > 0) {
         battle.hit_able_units[faction] = []
         return
     }
@@ -4102,7 +4664,7 @@ function fill_hit_able_units(faction) {
     var critical = battle.critical[faction]
     var lower_lf_unit = [100]
     var hit_limit = battle.hits[faction]
-    var distant_hits = battle.distant_hits_provided[faction] > 0
+    var distant_hits = battle.distant_hits[faction] - battle.distant_hits_list[faction].length > 0
     for (var i = 0; i < L.pool.length; i += 2) {
         var unit = L.pool[i]
         var piece = pieces[unit]
@@ -4114,8 +4676,9 @@ function fill_hit_able_units(faction) {
             total_lf += loss_factor
             has_full_size = 1
         }
-        var could_be_damaged = loss_factor <= hit_limit && (distant_hits || !piece.br || G.location[unit] === battle.battle_hex)
-        if (could_be_damaged && (critical || reduced_status === 0)) {
+        var could_be_damaged = loss_factor <= hit_limit && (!piece.br || distant_hits || set_has(battle.distant_hits_list[faction], unit)
+            || G.location[unit] === battle.battle_hex)
+        if (could_be_damaged && (critical || reduced_status === 0 || piece.one_step && battle.ground_stage)) {
             map_set(result, unit, loss_factor)
         } else if (could_be_damaged) {
             map_set(reduced, unit, loss_factor)
@@ -4128,7 +4691,7 @@ function fill_hit_able_units(faction) {
     if (!result.length && reduced.length && !has_full_size) {
         result = reduced
     }
-    if (ground_bomb && get_map_data()[battle.battle_hex].city > CITY) {
+    if (ground_bomb && get_map_data(battle.battle_hex).city > CITY) {
         var garrisons = []
         map_for_each(result, u => {
             if (pieces[u].garrison) {
@@ -4182,7 +4745,7 @@ function get_ground_roll_modifiers(faction) {
         }
     }
     if (faction === G.offensive.attacker) {
-        var terrain = get_map_data()[battle.battle_hex].terrain
+        var terrain = get_map_data(battle.battle_hex).terrain
         if (terrain === JUNGLE) {
             result -= 1
             log(`-1 Jungle`)
@@ -4195,16 +4758,15 @@ function get_ground_roll_modifiers(faction) {
             log(`-3 Mountains`)
         }
     }
-    if (faction !== G.offensive.attacker && battle.amph_ground.filter(u => unit_on_board(u)).length) {
+    if (faction !== G.offensive.attacker && battle.amph_ground.filter(u => unit_on_board(u)).length && set_has(G.offensive.amp_mod, battle.battle_hex)) {
         result += 3
-        //todo
-        log(`+3 Amphibious assault (do not check that reaction unit present)`)
+        log(`+3 Amphibious assault`)
     }
     if (faction === AP && G.location[ARMOR_BRIGADE] === battle.battle_hex) {
         result += 1
         log(`+1 Armor brigade`)
     }
-    if (faction === JP && is_event_active(events.NEW_OPERATION_PLAN) && get_map_data()[battle.battle_hex].island) {
+    if (faction === JP && is_event_active(events.NEW_OPERATION_PLAN) && get_map_data(battle.battle_hex).island) {
         result += 1
         log(`+1 Defensive doctrine`)
     }
@@ -4238,7 +4800,7 @@ function is_col_tsuji_applied(faction) {
         && G.offensive.battle.ground_stage)) {
         return false
     }
-    var map_data = get_map_data()[G.offensive.battle.battle_hex]
+    var map_data = get_map_data(G.offensive.battle.battle_hex)
     return map_data.terrain === JUNGLE || map_data.terrain === MIXED || map_data.region === "Malaya"
 }
 
@@ -4247,15 +4809,14 @@ P.execute_attack = function () {
     var enemy_faction = 1 - faction
     var battle = G.offensive.battle
     var pool = (battle.ground_stage ? battle.ground : battle.air_naval)[faction].filter(u => unit_on_board(u))
-    if (pool.length <= 0 || (battle.ground[enemy_faction].length + battle.air_naval[enemy_faction].length) === 0) {
-        // log(`${G.offensive.attacker === faction ? "Attacker" : "Defender"} has no ${battle.ground_stage ? "ground" : "air/naval"} units`)
+    if (pool.length <= 0 || (battle.ground[enemy_faction].length + battle.air_naval[enemy_faction].length) === 0
+        || battle.ground_stage && battle.ground[enemy_faction].length === 0) {
         end()
         return
     }
     battle.strength[faction] = sum_combat_factor(pool)
     log(`${G.offensive.attacker === faction ? "Attacker" : "Defender"} fire (${battle.strength[faction]})`)
     battle.roll[faction] = random(10)
-    battle.roll[faction] = 0
     clear_undo()
     battle.roll_modifiers = 0
     if (battle.ground_stage && is_col_tsuji_applied(faction)) {
@@ -4271,7 +4832,7 @@ P.execute_attack = function () {
     var modififed_roll = roll + battle.roll_modifiers
     var table = battle.ground_stage ? ground_battle_table : naval_battle_table
     battle.hits[faction] = Math.ceil(battle.strength[faction] * (table(modififed_roll)))
-    battle.distant_hits_provided[faction] = pool.filter(u => unit_on_board(u) && pieces[u].br).length
+    battle.distant_hits[faction] = pool.filter(u => unit_on_board(u) && pieces[u].br).length
     if ((roll === 9 || battle.roll_modifiers + roll >= 9 && G.offensive.active_cards.includes(ROCHEFORT)) && !battle.ground_stage) {
         battle.critical[faction] = true
     }
@@ -4309,6 +4870,9 @@ P.assign_hits = script(`
         call assign_crit
       }
       call apply_hits
+      if (G.offensive.battle.jp_cv_damaged){
+        call jp_cv_reassign
+      }
       `)
 
 function battle_header() {
@@ -4328,10 +4892,12 @@ P.apply_hits = {
             end()
             return
         }
+        L.dmg_list = [[], []]
         L.done = [!battle.hit_able_units[0].length, !battle.hit_able_units[1].length]
     },
     prompt() {
         map_for_each(G.offensive.battle.hit_able_units[R], u => action_unit(u))
+        button("undo", L.dmg_list[R].length)
         if (!G.offensive.battle.hit_able_units[R].length) {
             button("done")
             prompt(`${battle_header()} Commit hits. Remaining: ${Math.max(G.offensive.battle.hits[R], 0)}.`)
@@ -4339,31 +4905,134 @@ P.apply_hits = {
             prompt(`${battle_header()} Apply hits. ${G.offensive.battle.hits[R]}`)
         }
     },
+    undo() {
+        var battle = G.offensive.battle
+        var lf = L.dmg_list[R].pop()
+        var unit = L.dmg_list[R].pop()
+        var status = map_get(G.offensive.battle.damaged[R], unit, -1)
+        if (status >= 4) {
+            map_set(G.offensive.battle.damaged[R], unit, 2)
+        } else {
+            map_delete(G.offensive.battle.damaged[R], unit)
+            set_delete(battle.distant_hits_list[R], unit)
+        }
+        battle.hits[R] += lf
+        fill_hit_able_units(R)
+    },
     unit(unit) {
-        push_undo()
         var piece = pieces[unit]
         var battle = G.offensive.battle
         var status = map_get(battle.damaged[R], unit, -1)
         if (status < 0) {
             status = set_has(G.reduced, unit) ? 1 : 0
         }
-        map_set(battle.damaged[R], unit, ++status)
-        battle.hits[R] -= map_get(G.offensive.battle.hit_able_units[R], unit)
+        status += 2
+        map_set(battle.damaged[R], unit, status)
+        var lf = map_get(G.offensive.battle.hit_able_units[R], unit)
+        battle.hits[R] -= lf
+        L.dmg_list[R].push(unit)
+        L.dmg_list[R].push(lf)
         if (G.location[unit] !== battle.battle_hex && piece.br) {
-            battle.distant_hits_provided[R] -= 1
+            set_add(battle.distant_hits_list[R], unit)
         }
         fill_hit_able_units(R)
     },
     done() {
-        push_undo()
         L.done[R] = true
         if (!L.done[1 - R]) {
             G.active = 1 - R
         } else {
+            push_undo()
             apply_loss()
             check_supply()
             end()
         }
+    }
+}
+
+P.jp_cv_reassign = {
+    _begin() {
+        L.allowed_hexes = []
+        G.offensive.battle.jp_cv_damaged = 0
+        L.to_repair = []
+        map_for_each(G.offensive.battle.damaged[1 - JP], (u, d) => {
+            if (is_cv_unit(pieces[u])) {
+                map_set(L.to_repair, u, d)
+            }
+        })
+        L.to_damage = G.offensive.battle.air_naval[JP].filter(u => is_cv_unit(pieces[u]) && unit_on_board(u))
+        if (L.to_repair.length === 0 || L.to_damage.length === 0 || G.offensive.battle.critical[AP]) {
+            end()
+            return;
+        } else {
+            log("Japanese naval aircraft range advantage:")
+            G.active = JP
+            L.stage = 0
+            L.hits = 0
+        }
+    },
+    prompt() {
+        if (L.stage === 0) {
+            prompt(`Japanese naval aircraft range advantage. Choose units to damage. Chosen: ${L.hits}`)
+            L.to_damage.forEach(u => action_unit(u))
+            if (L.hits > 0) {
+                button("next")
+            } else {
+                button("skip")
+            }
+
+        } else {
+            prompt(`Japanese naval aircraft range advantage. Choose units to repair. Chosen: ${L.hits}`)
+            if (L.hits === 0) {
+                button("done")
+            } else {
+                for (var i = 0; i < L.to_repair.length; i += 2) {
+                    action_unit(L.to_repair[i])
+                }
+            }
+        }
+    },
+    unit(u) {
+        push_undo()
+        if (L.stage === 0) {
+            L.hits += 1
+            map_delete(L.to_repair, u)
+            if (set_has(G.reduced, u)) {
+                eliminate(u)
+                set_delete(L.to_damage, u)
+            } else {
+                damage_unit(u)
+            }
+            if (L.hits >= Math.min(get_hits_count(L.to_repair), L.to_damage.map(u => set_has(G.reduced, u) ? 1 : 2).reduce((a, b) => a + b, 0))) {
+                L.stage = 1
+            }
+        } else {
+            L.hits -= 1
+            if (unit_on_board(u)) {
+                set_delete(G.reduced, u)
+                map_delete(L.to_repair, u)
+                log(`${piece_get_log_str(u)} flipped to full size.`)
+            } else {
+                set_location(u, G.offensive.battle.battle_hex)
+                set_add(G.reduced, u)
+                G.active_stack = []
+                if (map_get(L.to_repair, u, 3) === 3) {
+                    map_delete(L.to_repair, u)
+                }
+            }
+        }
+    },
+    done() {
+        push_undo()
+        end()
+    },
+    skip() {
+        push_undo()
+        end()
+    },
+    next() {
+        push_undo()
+        L.stage = 1
     }
 }
 
@@ -4374,7 +5043,7 @@ P.ground_bombardment = {
         battle.hit_able_units = [[], []]
         L.allowed_units = battle.ground[G.active].filter(u => unit_on_board(u))
         L.garrison_present = L.allowed_units.filter(u => pieces[u].garrison).length
-        if (L.allowed_units.length === 1 && set_has(G.reduced, pieces[L.allowed_units[0]])) {
+        if (L.allowed_units.length === 1 && set_has(G.reduced, L.allowed_units[0])) {
             end()
         }
     },
@@ -4424,18 +5093,29 @@ P.assign_crit = {
     }
 }
 
+function is_cv_unit(piece) {
+    return piece.br && piece.class === "naval"
+}
+
 function apply_loss() {
     var battle = G.offensive.battle
     var d = battle.damaged[0].concat(battle.damaged[1])
     for (var i = 1; i < d.length; i += 2) {
         var unit = d[i - 1]
-        if (d[i] === 2) {
+        if (d[i] > 2) {
             eliminate(unit)
         } else {
             reduce_unit(unit)
         }
+        var piece = pieces[unit]
+        if (piece.faction === JP && is_cv_unit(piece)) {
+            battle.jp_cv_damaged = 1
+        }
     }
     check_us_casualties()
+    if (battle.damaged[0].length && battle.damaged[1].length) {
+        clear_undo()
+    }
 }
 
 P.apply_naval_winner = function () {
@@ -4535,13 +5215,25 @@ P.broken_organic = {
     }
 }
 
+function get_hits_count(d) {
+    var result = 0
+    for (var i = 0; i < d.length; i += 2) {
+        if (d[i + 1] >= 4) {
+            result += 2
+        } else {
+            result++
+        }
+    }
+    return result
+}
+
 P.apply_ground_winner = function () {
     var battle = G.offensive.battle
     if (battle.ground[G.offensive.attacker].length === 0) {
         end()
         return
     }
-    var attacker_win = battle.damaged[G.offensive.attacker].length > battle.damaged[1 - G.offensive.attacker].length ||
+    var attacker_win = get_hits_count(battle.damaged[G.offensive.attacker]) > get_hits_count(battle.damaged[1 - G.offensive.attacker]) ||
         battle.ground[G.offensive.attacker].filter(unit_on_board).length && !battle.ground[1 - G.offensive.attacker].filter(unit_on_board).length
     log(`${attacker_win ? "Attacker" : "Defender"} win in ground combat ${hex_get_log_str(battle.battle_hex)}`)
     battle.winner = (attacker_win == G.offensive.attacker) + 0
@@ -4578,7 +5270,8 @@ P.prepare_battle = function () {
         hits: [0, 0],
         roll: [-1, -1],
         hit_able_units: [[], []],
-        distant_hits_provided: [0, 0],
+        distant_hits: [0, 0],
+        distant_hits_list: [[], []],
         critical: [false, false],
         damaged: [[], []],
     }
@@ -4601,11 +5294,11 @@ P.prepare_battle = function () {
             }
         }
     })
-    if (is_space_controlled(hex, JP) && get_map_data()[hex].city === JAPANESE_CITY) {
+    if (is_space_controlled(hex, JP) && get_map_data(hex).city === JAPANESE_CITY) {
         G.location[JP_GARRISON_JP] = hex
         set_add(G.reduced, JP_GARRISON_JP)
         set_add(battle.ground[JP], JP_GARRISON_JP)
-    } else if (is_space_controlled(hex, JP) && get_map_data()[hex].city === CHINESE_CITY && !set_has(G.garr_elim, hex)) {
+    } else if (is_space_controlled(hex, JP) && get_map_data(hex).city === CHINESE_CITY && !set_has(G.garr_elim, hex)) {
         var count = get_garrison_count()
         for (var i = 0; i < count; i++) {
             var d = JP_GARRISON_CN[i]
@@ -4614,7 +5307,6 @@ P.prepare_battle = function () {
             set_add(battle.ground[JP], d)
         }
     }
-    G.committed.forEach(u => set_delete(battle.air_naval[AP], u))
     if (battle.air_naval[JP].length && (battle.air_naval[AP].length || battle.ground[AP].length)
         || battle.air_naval[AP].length && (battle.air_naval[JP].length || battle.ground[JP].length)) {
         log(`Air/naval combat:`)
@@ -4634,14 +5326,15 @@ P.prepare_ground_battle = function () {
         hits: [0, 0],
         roll: [-1, -1],
         hit_able_units: [[], []],
-        distant_hits_provided: [0, 0],
+        distant_hits: [0, 0],
+        distant_hits_list: [[], []],
         critical: [false, false],
         damaged: [[], []],
         winner: 1 - G.offensive.attacker
     }
     battle = G.offensive.battle
     var hex = battle.battle_hex
-    if (battle.ground[G.offensive.attacker].filter(u => unit_on_board(u)).length) {
+    if (battle.ground[G.offensive.attacker].filter(u => unit_on_board(u)).length && battle.ground[1 - G.offensive.attacker].filter(u => unit_on_board(u)).length) {
         log(`Ground combat at ${hex_get_log_str(hex)}`)
     }
     end()
@@ -4658,7 +5351,7 @@ function reset_garrison() {
 
 P.retreat = {
     _begin() {
-        if (get_map_data()[G.offensive.battle.battle_hex].city > CITY) {
+        if (get_map_data(G.offensive.battle.battle_hex).city > CITY) {
             reset_garrison()
         }
         G.active = G.offensive.attacker
@@ -4746,9 +5439,10 @@ function select_retreat_hex() {
         var h = nh[i]
         if (h < 0 || h > LAST_BOARD_HEX || set_has(just_entered, h) || is_overstack(h, G.active_stack[0])
             || is_faction_units(h, G.offensive.attacker) || get_ground_move_cost(G.offensive.battle.battle_hex, h, i, JP) >= 100) {
-            return
+            continue
+        } else {
+            set_add(able, h)
         }
-        set_add(able, h)
     }
     L.hex_to_retreat = able.filter(h => MAP_DATA[h].named && is_space_controlled(h, 1 - G.offensive.attacker))
     if (L.hex_to_retreat.length === 0) {
@@ -4761,8 +5455,8 @@ function get_emergency_retreat_hexes(unit) {
     var range = piece.class === "air" ? piece.ebr : 10
     var result = []
     for_each_hex_in_range(G.location[unit], range, h => {
-        if (is_space_controlled(h, piece.faction) && (get_map_data()[h].port && piece.class === "naval"
-            || get_map_data()[h].airfield && piece.class === "air")) {
+        if (is_space_controlled(h, piece.faction) && (get_map_data(h).port && piece.class === "naval"
+            || get_map_data(h).airfield && piece.class === "air")) {
             set_add(result, h)
         }
     })
@@ -4775,7 +5469,7 @@ P.emergency_move = {
         L.unit_to_retreat = L.unit_to_retreat ? L.unit_to_retreat : []
         for_each_unit_on_map((u, piece, location) => {
             if (piece.faction !== G.active
-                || is_space_controlled(location, G.active) && (piece.class === "air" && get_map_data()[location].airfield || get_map_data()[location].port)
+                || is_space_controlled(location, G.active) && (piece.class === "air" && get_map_data(location).airfield || get_map_data(location).port)
                 || piece.class === "ground") {
                 return
             }
@@ -4859,6 +5553,7 @@ P.offensive_sequence = script(`
     log ("Offensive reaction.")
     call ground_disengagement
     call special_reaction
+    set G.offensive.all_bh G.offensive.battle_hexes.slice()
     call define_intelligence_condition
     if (G.offensive.intelligence != SURPRISE) {
         set G.offensive.stage REACTION_STAGE
@@ -4880,6 +5575,9 @@ P.offensive_sequence = script(`
     call battle_sequence
     eval {
         capture_landing_hexes()
+    }
+    eval {
+        trigger_event("before_pbm")
     }
     log ("Post battle movement.")
     set G.offensive.stage POST_BATTLE_STAGE
@@ -4956,13 +5654,20 @@ P.political_phase = script(`
 
 P.national_status_segment = function () {
     log(`Turn ${G.turn}. National status segment`)
+    if (check_nation_surrender(nations.NEW_GUINEA)) {
+        set_control_over_nation(nations.NEW_GUINEA, false)
+    }
+    if (scenario_data().id === SOUTH_PACIFIC) {
+        end()
+        return;
+    }
     if (check_nation_surrender(nations.PHILIPPINES)) {
         if (G.surrender[nations.PHILIPPINES.id]) {
             for_each_unit_on_map((u, piece, location) => {
                 if ((piece.class === "ground" || piece.class === "hq" ||
                         (piece.service !== "army" && piece.service !== "navy" && piece.service !== "us"))
                     && piece.faction === AP
-                    && nations.PHILIPPINES.regions.includes(get_map_data()[location].region)) {
+                    && nations.PHILIPPINES.regions.includes(get_map_data(location).region)) {
                     eliminate(u)
                 }
             })
@@ -5003,9 +5708,6 @@ P.national_status_segment = function () {
     if (check_nation_surrender(nations.AUSTRALIAN_MANDATES)) {
         set_control_over_nation(nations.AUSTRALIAN_MANDATES)
     }
-    if (check_nation_surrender(nations.NEW_GUINEA)) {
-        set_control_over_nation(nations.NEW_GUINEA, false)
-    }
     if (check_nation_surrender(nations.MARSHALL)) {
         set_control_over_nation(nations.MARSHALL)
     }
@@ -5039,15 +5741,15 @@ function check_japan_resource_trace() {
     for (var i = 0; i < queue.length; i++) {
         let item = queue[i]
         let nh_list = get_near_hexes(item)
-        const MD = get_map_data()[item]
+        const MD = get_map_data(item)
         const overland = set_has(overland_set, item)
         const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))
         const enemy_port_s = (MD.port && is_space_controlled(item, 1 - faction))
         const occupied_land_s = G.supply_cache[item] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[item] & JP_GAH_UNITS << faction)
         const oversea = set_has(oversea_set, item)
-        for (let j = 0; j < 6; j++) {
+        for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             var reachable = false
@@ -5063,7 +5765,7 @@ function check_japan_resource_trace() {
                 set_add(oversea_set, nh)
             }
             if (reachable) {
-                if (get_map_data()[nh].resource) {
+                if (get_map_data(nh).resource) {
                     return true
                 }
                 queue.push(nh)
@@ -5162,7 +5864,7 @@ function change_wie(diff, cause) {
         return
     }
     G.wie = Math.max(G.wie + diff, 0)
-    G.wie = Math.min(G.wie, 10)
+    G.wie = Math.min(G.wie, scenario_data().id === SOUTH_PACIFIC ? 7 : 10)
     log(`War in europe changed to ${get_wie_level()} (${3 - G.wie}), ${cause} (${diff})`)
 }
 
@@ -5176,7 +5878,7 @@ P.india_surrender = {
         L.hex_to_retreat = []
         L.unit_to_retreat = []
         for_each_unit((u, piece, location) => {
-            var in_india = nations.INDIA.regions.includes(get_map_data()[location].region)
+            var in_india = unit_on_board(u) && nations.INDIA.regions.includes(get_map_data(location).region)
             if (in_india && piece.class === "hq" && piece.service === "br") {
                 eliminate(u)
             } else if (piece.service === "ind" && location <= LAST_BOARD_HEX || in_india) {
@@ -5191,7 +5893,7 @@ P.india_surrender = {
         check_supply()
         G.surrender[nations.INDIA.id] = 5
         if (!L.unit_to_retreat.length) {
-            end()
+            this.update_control()
         }
     },
     prompt() {
@@ -5217,7 +5919,11 @@ P.india_surrender = {
     },
     eliminate() {
         push_undo()
-        eliminate_permanently(pieces[G.active_stack[0]])
+        eliminate_permanently(G.active_stack[0])
+        G.active_stack = []
+    },
+    no_move() {
+        push_undo()
         G.active_stack = []
     },
     unit(u) {
@@ -5236,8 +5942,19 @@ P.india_surrender = {
         G.active_stack = []
         check_supply()
     },
+    update_control() {
+        check_supply()
+        G.non_control = []
+        if (!is_faction_units(MADRAS, AP)) {
+            set_add(G.non_control, MADRAS)
+        }
+        if (!is_faction_units(hex_to_int(1805), AP)) {
+            set_add(G.non_control, hex_to_int(1805))
+        }
+    },
     done() {
         push_undo()
+        this.update_control()
         end()
     }
 }
@@ -5267,8 +5984,8 @@ function set_control_over_nation(nation, only_ground = true) {
     clear_supply_cache(CLEAN_UNITS_MASK)
     for_each_unit_on_map(mark_unit)
     var faction = G.surrender[nation.id] ? JP : AP
-    for (var i = 1; i < get_map_data().length; i++) {
-        var hex_data = get_map_data()[i]
+    for (var i = 1; i < LAST_BOARD_HEX; i++) {
+        var hex_data = get_map_data(i)
         if (!nation.regions.includes(hex_data.region)) {
             continue
         }
@@ -5368,7 +6085,7 @@ function check_occupation(event) {
 }
 
 function get_jp_resources() {
-    return G.control.filter(h => get_map_data()[h].resource).length
+    return G.control.filter(h => get_map_data(h).resource).length
 }
 
 P.attrition = {
@@ -5380,14 +6097,14 @@ P.attrition = {
                 set_add(hq_list, u)
             }
         })
-        for_each_unit_on_map((u, piece, location) => {
-            if (piece.faction !== G.active || pieces[u].class === "naval" || pieces[u].class === "hq") {
+        for_each_unit((u, piece, location) => {
+            if (location > LAST_BOARD_HEX && location !== CHINA_BOX || piece.faction !== G.active || pieces[u].class === "naval" || pieces[u].class === "hq") {
                 return;
             }
             if (set_has(G.oos, u)) {
                 if (!set_has(G.reduced, u)) {
                     set_add(L.unit_to_attrition, u)
-                } else {
+                } else if (location !== CHINA_BOX) {
                     for (var i = 0; i < hq_list.length; i++) {
                         var hq = hq_list[i]
                         if (get_distance(location, G.location[hq]) <= pieces[hq].cr) {
@@ -5462,7 +6179,7 @@ P.end_of_turn_phase = script(`
     set G.asp[JP][1] 0
     set G.asp[AP][1] 0
     set G.capture []
-    set G.committed []
+    set G.b29u 0
     set G.draw_counter [0,0]
     set G.strategic_warfare 0
     set G.passes [0,0]
@@ -5528,7 +6245,7 @@ function victory_1942() {
     }
     var new_guinea = 0
     G.control.forEach(h => {
-        if (get_map_data()[h].port && get_map_data()[h].region === "Guinea") {
+        if (get_map_data(h).port && get_map_data(h).region === "Guinea") {
             new_guinea++
         }
     })
@@ -5595,24 +6312,24 @@ function check_supply_line(hex1, hex2, faction) {
     if (!is_space_controlled(hex1, faction) || !is_space_controlled(hex2, faction)) {
         return false
     }
-    if (get_map_data()[hex1].terrain > OCEAN) {
+    if (get_map_data(hex1).terrain > OCEAN) {
         overland_set.push(hex1)
     }
-    if (get_map_data()[hex1].coastal) {
+    if (get_map_data(hex1).coastal) {
         oversea_set.push(hex1)
     }
     for (var i = 0; i < queue.length; i++) {
         let item = queue[i]
         let nh_list = get_near_hexes(item)
-        const MD = get_map_data()[item]
+        const MD = get_map_data(item)
         const overland = set_has(overland_set, item)
         const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))
         const enemy_port_s = (MD.port && is_space_controlled(item, 1 - faction))
         const occupied_land_s = G.supply_cache[item] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[item] & JP_GAH_UNITS << faction)
         const oversea = set_has(oversea_set, item)
-        for (let j = 0; j < 6; j++) {
+        for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             var reachable = false
@@ -5676,7 +6393,7 @@ function victory_1943() {
     }
     var amh = 0
     for_each_hex_in_range(hex_to_int(4222), 4, h => {
-        if (get_map_data()[h].region === "AMandates" && (is_space_controlled(h, AP) || is_faction_units(h, AP))) {
+        if (get_map_data(h).region === "AMandates" && (is_space_controlled(h, AP) || is_faction_units(h, AP))) {
             amh++
         }
     })
@@ -5718,7 +6435,7 @@ function victory_1943() {
     }
     var new_guinea = 0
     for_each_hex_in_range(hex_to_int(3621), 5, h => {
-        if (get_map_data()[h].region === "Guinea" && (is_space_controlled(h, AP) || is_faction_units(h, AP)) && get_map_data()[h].port) {
+        if (get_map_data(h).region === "Guinea" && (is_space_controlled(h, AP) || is_faction_units(h, AP)) && get_map_data(h).port) {
             new_guinea++
         }
     })
@@ -5731,7 +6448,7 @@ function victory_1943() {
     }
     var tokyo_ports = 0
     for_each_hex_in_range(TOKYO, 11, h => {
-        if (get_map_data()[h].port && (is_space_controlled(h, AP) || is_faction_units(h, AP))) {
+        if (get_map_data(h).port && (is_space_controlled(h, AP) || is_faction_units(h, AP))) {
             tokyo_ports++
         }
     })
@@ -5825,7 +6542,7 @@ function victory_1944() {
     }
     var tokyo_ports = 0
     for_each_hex_in_range(TOKYO, 8, h => {
-        if (get_map_data()[h].port && (is_space_controlled(h, AP) || is_faction_units(h, AP))) {
+        if (get_map_data(h).port && (is_space_controlled(h, AP) || is_faction_units(h, AP))) {
             tokyo_ports++
         }
     })
@@ -5863,7 +6580,114 @@ function victory_1945() {
 }
 
 function victory_south_pacific() {
+    if (G.turn < 6) {
+        return
+    }
+    var vp = 0
+    if (G.surrender[nations.CHINA.id] > 5) {
+        vp += 5
+        log(`+5 VP - China surrender`)
+    }
+    if (G.burma_road >= 1) {
+        vp += 1
+        log(`+1 VP - Burma road closed`)
+    }
+    if (!check_supply_line(hex_to_int(3727), OAHU, AP)) {
+        vp += 5
+        log(`+5 VP - Townsville isolated from Oahu`)
+    }
+    var india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
+    if (india) {
+        vp += india
+        log(`+${india} VP - Jp controlled hexes of Northern India`)
+    }
+    var india_status = G.surrender[nations.INDIA.id]
+    if (india_status > 0 && india_status <= 2) {
+        vp += 1
+        log(`+1 VP - India ${nations.INDIA.statuses[india_status]}`)
+    } else if (india_status > 0) {
+        vp += 2
+        log(`+2 VP - India ${nations.INDIA.statuses[india_status]}`)
+    }
+    var amh = 0
+    for_each_hex_in_range(hex_to_int(4222), 4, h => {
+        if (get_map_data(h).region === "AMandates" && (is_space_controlled(h, AP) || is_faction_units(h, AP))) {
+            amh++
+        }
+    })
+    if (G.surrender[nations.AUSTRALIAN_MANDATES.id]) {
+        vp += 3
+        log(`+3 VP - Japanese control of Australian Mandates`)
+    } else {
+        vp -= 3
+        log(`-3 VP - Allied control of Australian Mandates`)
+    }
+    if (G.surrender[nations.AUSTRALIAN_MANDATES.id] && amh >= 4) {
+        vp -= 1
+        log(`-1 VP - Allied control of 4 Australian Mandates hexes`)
+    }
 
+    if (G.political_will <= 5) {
+        vp += G.political_will - 4
+        log(`+${G.political_will - 4} VP - Political will`)
+    } else if (G.political_will >= 6) {
+        vp -= G.political_will - 5
+        log(`-${G.political_will - 5} VP - Political will`)
+    }
+    if (set_has(G.captured_once, OAHU)) {
+        vp += 3
+        log(`+3 VP - Oahu was captured`)
+    }
+    if (set_has(G.captured_once, hex_to_int(5708))) {
+        vp += 1
+        log(`+1 VP - Kauai was captured`)
+    } else if (set_has(G.captured_once, hex_to_int(5908))) {
+        vp += 1
+        log(`+1 VP - Hawaii was captured`)
+    }
+
+
+    if (check_nation_controlled(nations.MARSHALL, AP)) {
+        vp -= 3
+        log(`-3 VP - Allied control of Marshall Islands`)
+    }
+    var new_guinea = 0
+    for_each_hex_in_range(hex_to_int(3621), 5, h => {
+        if (get_map_data(h).region === "Guinea" && (is_space_controlled(h, AP) || is_faction_units(h, AP)) && get_map_data(h).port) {
+            new_guinea++
+        }
+    })
+    if (check_nation_controlled(nations.NEW_GUINEA, AP)) {
+        vp -= 3
+        log(`-3 VP - Allied control of New Guinea`)
+    } else if (new_guinea >= 4) {
+        vp -= 1
+        log(`-1 VP - Allied control of 4 New Guinea port hexes`)
+    }
+    var tokyo_ports = 0
+    for_each_hex_in_range(TOKYO, 11, h => {
+        if (get_map_data(h).port && (is_space_controlled(h, AP) || is_faction_units(h, AP))) {
+            tokyo_ports++
+        }
+    })
+    if (tokyo_ports) {
+        vp -= 3
+        log(`-3 VP - Allies control a port that is 11 or less hexes from Tokyo`)
+    }
+    if (get_jp_resources() <= 14) {
+        vp -= 14 - get_jp_resources()
+        log(`-${14 - get_jp_resources()} VP - Allied controlled resource hexes`)
+    }
+    log(`Total VP - ${vp}`)
+    if (vp <= 2) {
+        finish("Allies", "Allied Decisive Victory")
+    } else if (vp <= 5) {
+        finish("Allies", "Allied Tactical Victory")
+    } else if (vp <= 9) {
+        finish("Japan", "Japanese Tactical Victory")
+    } else {
+        finish("Japan", "Japanese Decisive Victory")
+    }
 }
 
 function set_inter_service(faction, rivalry) {
@@ -5887,7 +6711,7 @@ function filter_activation_units(condition, faction) {
 
 function could_play(card) {
     var faction = card.faction
-    return get_hand(faction).length && !set_has(G.discard[faction], card.c) && !set_has(G.removed, card.c)
+    return get_hand(faction).length && !set_has(G.discard[faction], card.c) && !set_has(G.removed[faction], card.c) && scenario_data().has_card(card.c)
 }
 
 function trigger_event(stage, arg) {
@@ -5897,9 +6721,21 @@ function trigger_event(stage, arg) {
     }
     G.offensive.active_cards.forEach(c => {
         if (c !== G.offensive.offensive_card && cards[c][stage]) {
-            result += cards[c][stage](arg)
+            if (result) {
+                result += cards[c][stage](arg)
+            } else {
+                result = cards[c][stage](arg)
+            }
+
         }
     })
+    if (scenario_data()[stage]) {
+        if (result) {
+            result += scenario_data()[stage](arg)
+        } else {
+            result = scenario_data()[stage](arg)
+        }
+    }
     return result
 }
 
@@ -5935,12 +6771,39 @@ cards[find_card(JP, 2)].before_unit_activation = function () {
     })
     G.offensive.aa_hexes = []
     G.control.forEach(h => {
-        if (get_map_data()[h].port) {
-            for_each_hex_in_range(h, 5, rh => {
-                set_add(G.offensive.aa_hexes, rh)
-            })
+        if (get_map_data(h).port) {
+            mark_hexes_in_move_range(h, 5)
         }
     })
+}
+
+function mark_hexes_in_move_range(hex, range) {
+    const location = hex
+    const queue = [location]
+    const distance_map = [location, 0]
+    for (var i = 0; i < queue.length; i++) {
+        let item = queue[i]
+        const distance = map_get(distance_map, item) + 1
+        let nh_list = get_near_hexes(item)
+        for (let j = 0; j < nh_list.length; j++) {
+            let nh = nh_list[j]
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
+                continue
+            }
+            if (distance > range
+                || !(get_map_data(item).edges_int & WATER << 5 * j)
+                || distance >= map_get(distance_map, nh, [100])) {
+                continue
+            }
+            if (distance < range) {
+                queue.push(nh)
+            }
+            map_set(distance_map, nh, distance)
+            if (get_map_data(nh).terrain > OCEAN) {
+                set_add(G.offensive.aa_hexes, nh)
+            }
+        }
+    }
 }
 
 cards[find_card(JP, 2)].before_unit_move = function () {
@@ -6007,7 +6870,7 @@ P.conquest_of_se_asia_reaction = {
         L.manila_coastal_hexes = []
         G.offensive.active_units[JP].forEach(u => {
             var piece = pieces[u]
-            var location = get_map_data()[G.location[u]]
+            var location = get_map_data(G.location[u])
             if (piece.class === "naval" && location.region === "Malaya") {
                 set_add(L.manila_coastal_hexes, G.location[u])
             }
@@ -6078,7 +6941,7 @@ cards[find_card(JP, 5)].event = function () {
 }
 
 cards[find_card(JP, 6)].can_play = function () {
-    return set_has(G.removed, DOOLITLE_RAID)
+    return set_has(G.removed[AP], DOOLITLE_RAID)
 }
 
 cards[find_card(JP, 8)].before_unit_activation = function () {
@@ -6115,7 +6978,7 @@ cards[find_card(JP, 12)].before_commit_offensive = function () {
     if (G.offensive.stage !== ATTACK_STAGE) {
         return
     }
-    if (G.offensive.battle_hexes.filter(h => !get_map_data()[h].island).length) {
+    if (G.offensive.battle_hexes.filter(h => !get_map_data(h).island).length) {
         return "All battles must be fought in one hex island."
     }
 }
@@ -6299,7 +7162,13 @@ cards[find_card(JP, 23)].before_battle_roll = function (faction) {
     }
 }
 
-cards[find_card(JP, 24)].event = function () {
+function has_active_naval_units(faction) {
+    return G.offensive.active_units[faction].filter(u => unit_on_board(u) && pieces[u].class === "naval").length
+}
+
+cards[find_card(JP, 24)].can_play = () => has_active_naval_units(AP)
+
+cards[find_card(JP, 24)].after_battles = function () {
     call("submarine_attack", {success: 4, card: find_card(JP, 24)})
 }
 
@@ -6319,7 +7188,9 @@ cards[find_card(JP, 25)].before_battle_roll = function (faction) {
     }
 }
 
-cards[find_card(JP, 27)].event = function () {
+cards[find_card(JP, 27)].can_play = () => has_active_naval_units(AP)
+
+cards[find_card(JP, 27)].after_battles = function () {
     call("submarine_attack", {success: 4, critical: 7, card: find_card(JP, 27)})
 }
 
@@ -6337,7 +7208,7 @@ P.tokyo_express = {
         for_each_unit_on_map((u, piece, location) => {
             if (piece.class === "hq" && piece.faction === JP && !set_has(G.oos, u)) {
                 for_each_hex_in_range(location, piece.cr, h => {
-                    if (get_map_data()[h].terrain > OCEAN && !is_space_controlled(h, AP) && !is_faction_units(h, AP)) {
+                    if (get_map_data(h).terrain > OCEAN && is_space_controlled(h, JP)) {
                         action_hex(h)
                     }
                 })
@@ -6466,7 +7337,7 @@ P.guadalcanal_evacuation = {
     _begin() {
         L.allowed_hexes = []
         for (var i = 0; i < LAST_BOARD_HEX; i++) {
-            if (is_faction_units(i, JP) && get_map_data()[i].coastal) {
+            if (is_faction_units(i, JP) && get_map_data(i).coastal) {
                 set_add(L.allowed_hexes, i)
             }
         }
@@ -6521,7 +7392,7 @@ P.guadalcanal_evacuation = {
 
 function get_guadalcanal_evacuation_destination(location) {
     const move_data = {naval_move_distance: 15}
-    if (get_map_data()[location].port && is_space_controlled(location, JP)) {
+    if (get_map_data(location).port && is_space_controlled(location, JP)) {
         move_data.naval_move_distance = 30
     }
     const queue = [location]
@@ -6531,13 +7402,13 @@ function get_guadalcanal_evacuation_destination(location) {
         let item = queue[i]
         const distance = map_get(distance_map, item) + 1
         let nh_list = get_near_hexes(item)
-        for (let j = 0; j < 6; j++) {
+        for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0) {
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
                 continue
             }
             if (distance > move_data.naval_move_distance
-                || !(get_map_data()[item].edges_int & WATER << 5 * j)
+                || !(get_map_data(item).edges_int & WATER << 5 * j)
                 || distance >= map_get(distance_map, nh, [100])) {
                 continue
             }
@@ -6545,7 +7416,7 @@ function get_guadalcanal_evacuation_destination(location) {
                 queue.push(nh)
             }
             map_set(distance_map, nh, distance)
-            if (get_map_data()[nh].port && is_space_controlled(nh, JP)) {
+            if (get_map_data(nh).port && is_space_controlled(nh, JP)) {
                 set_add(result, nh)
             }
         }
@@ -6553,7 +7424,9 @@ function get_guadalcanal_evacuation_destination(location) {
     return result
 }
 
-cards[find_card(JP, 36)].event = function () {
+cards[find_card(JP, 36)].can_play = () => has_active_naval_units(AP)
+
+cards[find_card(JP, 36)].before_battles = function () {
     call("submarine_attack", {success: 4, card: find_card(JP, 36)})
 }
 
@@ -6897,7 +7770,9 @@ cards[find_card(JP, 73)].before_activation = function () {
     }
 }
 
-cards[find_card(JP, 75)].event = function () {
+cards[find_card(JP, 75)].can_play = () => has_active_naval_units(AP)
+
+cards[find_card(JP, 75)].before_battles = function () {
     call("submarine_attack", {success: 4, card: find_card(JP, 75)})
 }
 
@@ -6949,40 +7824,150 @@ cards[find_card(JP, 77)].event = function () {
     call("fuel_shortage")
 }
 
-cards[find_card(JP, 77)].can_play = function () {
-    return unit_on_board(HQ_YAMAMOTO) || unit_on_board(HQ_OZAWA)
+function check_fuel_shortage_data() {
+    var result = []
+    let location = L.target
+    if (G.active_stack.length) {
+        location = G.location[G.active_stack[0]]
+    }
+    if (has_non_n_zoi(location, 1 - R)) {
+        return []
+    }
+    clear_supply_cache(CLEAN_ATTACK_ZONE_MASK)
+    G.supply_cache[location] |= HEX_TEMP_FLAG1
+    const queue = [location]
+    const distance_map = [location, 0]
+    for (var i = 0; i < queue.length; i++) {
+        let item = queue[i]
+        const distance = map_get(distance_map, item) + 1
+        let nh_list = get_near_hexes(item)
+        for (let j = 0; j < nh_list.length; j++) {
+            let nh = nh_list[j]
+            if (nh <= 0 || nh > LAST_BOARD_HEX) {
+                continue
+            }
+            if (has_non_n_zoi(nh, 1 - R)
+                || !(get_map_data(item).edges_int & WATER << 5 * j)
+                || distance >= map_get(distance_map, nh, [500])) {
+                continue
+            }
+            queue.push(nh)
+            map_set(distance_map, nh, distance)
+            if (get_map_data(nh).port) {
+                G.supply_cache[nh] |= HEX_TEMP_FLAG1
+            }
+        }
+    }
+    if (L.limit > 0) {
+        var non_selected = !G.active_stack.length
+        for_each_unit_on_map((u, piece, loc) => {
+            if (G.supply_cache[loc] & HEX_TEMP_FLAG1 && (piece.class === "naval" && piece.faction === JP)
+                && (non_selected || loc === location)) {
+                set_add(result, u)
+            }
+        })
+    }
+    var hq = [HQ_YAMAMOTO, HQ_OZAWA]
+    hq.forEach(u => {
+        var loc = G.location[u]
+        if (G.supply_cache[loc] & HEX_TEMP_FLAG1
+            && (non_selected || loc === location)) {
+            set_add(result, u)
+        }
+    })
+    L.moved.forEach(u => set_delete(result, u))
+    G.active_stack.forEach(u => set_delete(result, u))
+    L.allowed_hexes = []
+    if (G.active_stack.length && L.target && G.supply_cache[L.target] & HEX_TEMP_FLAG1) {
+        L.allowed_hexes = [L.target]
+    } else if (G.active_stack.length && !L.target) {
+        var hq = (G.active_stack.includes(HQ_YAMAMOTO) || G.active_stack.includes(HQ_OZAWA)) + 0
+        var ships_count = G.active_stack.length - hq
+        L.ports.forEach(h => {
+            var over = G.overstack[h]
+            var hex_ship_count = over >> 7
+            if (G.supply_cache[h] & HEX_TEMP_FLAG1
+                && (!hq || (over & 1) === 0)
+                && hex_ship_count + ships_count <= 6) {
+                set_add(L.allowed_hexes, h)
+            }
+        })
+    }
+    if (G.active_stack.length) {
+        set_delete(L.allowed_hexes, location)
+    }
+    L.allowed_units = result
+    if (G.active_stack.length === 0 && L.allowed_units.length === 0 && L.allowed_hexes.length === 0) {
+        end()
+    }
 }
 
-//todo when BGG thread resolved
 P.fuel_shortage = {
     _begin() {
+        L.move_type = STRAT_MOVE
         L.allowed_units = []
-        for_each_unit_on_map((u, piece) => {
-            if (u === HQ_YAMAMOTO || u === HQ_OZAWA || piece.faction === JP && piece.class === "naval") {
+        L.allowed_hexes = []
+        L.ports = []
+        G.control.forEach(h => {
+            if (get_map_data(h).resource) {
+                for_each_hex_in_range(h, 3, rh => {
+                    var md = get_map_data(rh)
+                    if (md.port && is_space_controlled(rh, JP) && !has_non_n_zoi(rh, AP)) {
+                        set_add(L.ports, rh)
+                    }
+                })
+            }
+        })
+        for_each_unit_on_map((u, piece, location) => {
+            if ((piece.class === "naval" && piece.faction === JP || u === HQ_YAMAMOTO || u === HQ_OZAWA)
+                && !has_non_n_zoi(location, AP)) {
                 set_add(L.allowed_units, u)
             }
         })
         L.moved = []
-        L.limit = 0
+        L.limit = 4
+        L.stage = 0
     },
     prompt() {
-        prompt(`${offensive_card_header()} Move units.`)
-        L.allowed_units.forEach(u => {
-            if (G.active_stack.length === 0 || G.location[G.active_stack[0] === G.location[u]])
-                action_unit(u)
-        })
-        if (G.active_stack.length > 0) {
-            L.allowed_hexes.forEach(h => action_hex(h))
-        }
-        if (L.limit & 8) {
+        prompt(`${offensive_card_header()} Move units. Ship could be selected: ${L.limit}.`)
+        L.allowed_units.forEach(u => action_unit(u))
+        L.allowed_hexes.forEach(h => action_hex(h))
+        if (L.moved.length && !G.active_stack.length) {
             button("done")
         }
     },
+    done() {
+        push_undo()
+        end()
+    },
+    action_hex(hex) {
+        push_undo()
+        var over = G.overstack[hex]
+        if (over & 1) {
+            set_add(L.moved, HQ_YAMAMOTO)
+            set_add(L.moved, HQ_OZAWA)
+        }
+        L.limit -= over >> 7
+        L.target = hex
+        G.active_stack.forEach(u => {
+            set_location(u, hex)
+            set_add(L.moved, u)
+        })
+        G.active_stack = []
+        check_supply()
+        check_fuel_shortage_data()
+    },
     unit(u) {
         push_undo()
-        log(`Japan attacks B29 base: ${piece_get_log_str(u)}`)
-        damage_unit(u)
-        end()
+        var piece = pieces[u]
+        set_add(G.active_stack, u)
+        if (is_cv_unit(piece)) {
+            check_supply()
+        }
+        if (piece.class === "naval") {
+            L.limit -= 1
+        }
+        check_fuel_shortage_data()
     }
 }
 
@@ -7039,7 +8024,9 @@ cards[find_card(JP, 85)].before_unit_activation = function () {
     filter_activation_units((u, piece) => piece.class === "naval", JP)
 }
 
-cards[find_card(JP, 86)].event = function () {
+cards[find_card(JP, 86)].can_play = () => has_active_naval_units(AP)
+
+cards[find_card(JP, 86)].after_battles = function () {
     call("submarine_attack", {success: 7, card: find_card(JP, 86)})
 }
 
@@ -7109,7 +8096,7 @@ cards[find_card(AP, 3)].before_replacement = function () {
 }
 
 cards[find_card(AP, 3)].before_place_replacement = function () {
-    L.allowed_hexes = L.allowed_hexes.filter(h => get_map_data()[h].region === "Australia")
+    L.allowed_hexes = L.allowed_hexes.filter(h => get_map_data(h).region === "Australia")
 }
 
 cards[find_card(AP, 4)].event = function () {
@@ -7118,8 +8105,9 @@ cards[find_card(AP, 4)].event = function () {
 
 P.place_abda = {
     _begin() {
+        log("place abda")
         var dei = ["Java", "Borneo", "Sumatra", "Celebes"]
-        L.allowed_hexes = get_unit_reinforcement_hexes(HQ_ABDA).filter(h => dei.includes(get_map_data()[h].region))
+        L.allowed_hexes = get_unit_reinforcement_hexes(HQ_ABDA).filter(h => dei.includes(get_map_data(h).region))
         if (L.allowed_hexes.length <= 0) {
             log(`ABDA HQ could not be placed`)
             eliminate_permanently(HQ_ABDA)
@@ -7187,7 +8175,7 @@ cards[find_card(AP, 9)].before_commit_offensive = function () {
     G.asp[AP][0] -= G.temp_asp[0]
     G.asp[AP][1] -= Math.min(G.asp[AP][1] - G.temp_asp[1], 4)
     delete G['temp_asp']
-    var jp_battles = G.offensive.battle_hexes.filter(h => get_map_data()[h].region === "Japan")
+    var jp_battles = G.offensive.battle_hexes.filter(h => get_map_data(h).region === "Japan")
     var required_battles = false
     G.offensive.active_units[AP].forEach(u => {
         if (set_has(jp_battles, G.location[u]) && pieces[u].class === "ground") {
@@ -7203,8 +8191,10 @@ cards[find_card(AP, 10)].event = function () {
     call("draw_from_discard")
 }
 
-cards[find_card(AP, 13)].after_unit_activation = function () {
-    filter_activation_units((u, piece) => piece.class !== "ground", AP)
+cards[find_card(AP, 13)].after_unit_activation = function (u) {
+    if (pieces[u].class === "ground") {
+        filter_activation_units((u, piece) => piece.class !== "ground", AP)
+    }
 }
 
 cards[find_card(AP, 15)].event = function () {
@@ -7231,7 +8221,7 @@ P.us_raiders = {
                     range = true
                 }
             })
-            if (range && piece.class === "air" && piece.faction === JP && get_map_data()[G.location[u]].region !== "Japan") {
+            if (range && piece.class === "air" && piece.faction === JP && get_map_data(G.location[u]).region !== "Japan") {
                 set_add(L.allowed_units, u)
             }
         })
@@ -7261,13 +8251,13 @@ P.repair_avg = {
     _begin() {
         L.allowed_units = []
         var regions = ["NIndia", "Burma"]
-        L.allowed_hexes = get_unit_reinforcement_hexes(ap_air(14)).filter(h => regions.includes(get_map_data()[h].region))
+        L.allowed_hexes = get_unit_reinforcement_hexes(ap_air(14)).filter(h => regions.includes(get_map_data(h).region))
         var avg_location = G.location[ap_air("avg")]
-        if (set_has(G.reduced, ap_air("avg")) && (avg_location === CHINA_BOX || regions.includes(get_map_data()[avg_location].region))) {
+        if (set_has(G.reduced, ap_air("avg")) && (avg_location === CHINA_BOX || regions.includes(get_map_data(avg_location).region))) {
             set_add(L.allowed_units, ap_air("avg"))
         }
         var location_14 = G.location[ap_air(14)]
-        if (set_has(G.reduced, ap_air(14)) && (location_14 === CHINA_BOX || regions.includes(get_map_data()[location_14].region))
+        if (set_has(G.reduced, ap_air(14)) && (location_14 === CHINA_BOX || regions.includes(get_map_data(location_14).region))
             || location_14 === ELIMINATED_BOX && L.allowed_hexes.length) {
             set_add(L.allowed_units, ap_air(14))
         }
@@ -7328,7 +8318,7 @@ cards[find_card(AP, 20)].before_activation = function () {
 cards[find_card(AP, 22)].can_play = function () {
     var regions = ["Burma", "NIndia"]
     return G.offensive.active_units[JP].filter(u => pieces[u].class === "ground" &&
-        regions.includes(get_map_data()[map_get(G.offensive.paths, u, [0, 0, 0])[2]].region)).length
+        regions.includes(get_map_data(map_get(G.offensive.paths, u, [0, 0, 0])[2]).region)).length
 }
 
 cards[find_card(AP, 22)].event = function () {
@@ -7343,7 +8333,7 @@ P.wingate = {
         G.offensive.active_units[JP].forEach(u => {
             var location = map_get(G.offensive.paths, u, [0, 0, 0])[2]
             if (pieces[u].class === "ground" &&
-                regions.includes(get_map_data()[location].region)) {
+                regions.includes(get_map_data(location).region)) {
                 map_set(L.allowed_units, u, location)
             }
         })
@@ -7367,37 +8357,71 @@ cards[find_card(AP, 23)].event = function () {
     G.events[events.BARGES.id] = 0
 }
 
-cards[find_card(AP, 24)].event = function () {
+cards[SKIP_BOMBING].event = function () {
     change_asp(JP, -1)
+}
+
+cards[SKIP_BOMBING].before_battles = function () {
     call("skip_bombing")
+}
+
+function cache_skip_bombing() {
+    clear_supply_cache(CLEAN_ATTACK_ZONE_MASK)
+    for_each_unit_on_map((u, piece, location) => {
+        if (is_us_unit(piece) && piece.br && piece.class === "air" && piece.type !== "lrb") {
+            for_each_hex_in_range(location, piece.ebr, h => {
+                G.supply_cache[h] |= HEX_TEMP_FLAG1
+            })
+        }
+    })
+    G.offensive.skip_bomb_able = []
+    G.offensive.active_units[JP].filter(u => {
+        var piece = pieces[u]
+        return piece.type === "ca" || piece.type === "cl" || piece.type === "apd"
+    }).forEach(u => {
+        var path = map_get(G.offensive.paths, u, [0, 0, 0])
+        for (var i = 3; i < path.length; i++) {
+            var location = path[i]
+            if (location !== path[i - 1] && G.supply_cache[location] & HEX_TEMP_FLAG1) {
+                set_add(G.offensive.skip_bomb_able, u)
+                return
+            }
+        }
+    })
 }
 
 P.skip_bombing = {
     _begin() {
-        var target_hex = []
-        for_each_unit()
-        L.allowed_units = []
-        var regions = ["Burma", "NIndia"]
-        G.offensive.active_units[JP].forEach(u => {
-            var location = map_get(G.offensive.paths, u, [0, 0, 0])[2]
-            if (pieces[u].class === "ground" &&
-                regions.includes(get_map_data()[location].region)) {
-                map_set(L.allowed_units, u, location)
-            }
-        })
+        if (G.offensive.skip_bomb_able.length === 1) {
+            log("Skip bombing:")
+            damage_unit(G.offensive.skip_bomb_able[0])
+            end()
+            return
+        } else if (G.offensive.skip_bomb_able.length === 0) {
+            end()
+            return
+        }
+        G.active = JP
     },
     prompt() {
-        prompt(`${offensive_card_header()} Choose unit.`)
-        map_for_each(L.allowed_units, k => action_unit(k))
+        prompt(`${card_get_log_str(SKIP_BOMBING)}. Choose unit to assign hit.`)
+        if (L.done) {
+            button("done")
+        } else {
+            map_for_each(G.offensive.skip_bomb_able, k => action_unit(k))
+        }
     },
     unit(u) {
         push_undo()
-        set_location(u, map_get(L.allowed_units, u))
-        set_delete(G.offensive.active_units[JP], u)
-        map_delete(G.offensive.paths, u)
-        log(`${piece_get_log_str(u)} deactivated`)
-        end()
+        log("Skip bombing:")
+        damage_unit(u)
+        L.done = 1
     },
+    done() {
+        push_undo()
+        G.active = AP
+        end()
+    }
 }
 
 cards[find_card(AP, 25)].before_unit_activation = function () {
@@ -7449,9 +8473,9 @@ cards[find_card(AP, 28)].before_commit_offensive = function () {
         return
     }
     G.offensive.landing_hexes.forEach(l => {
-        if (get_map_data()[l].island) {
+        if (get_map_data(l).island) {
             for_each_hex_in_range(l, 1, h => {
-                if (h !== l && get_map_data()[h].island && !is_faction_units(h, JP)) {
+                if (h !== l && get_map_data(h).island && !is_faction_units(h, JP)) {
                     capture_hex(h, AP)
                 }
             })
@@ -7467,11 +8491,15 @@ cards[find_card(AP, 29)].before_battle_roll = function (faction) {
     log(`+1 Artillery support`)
 }
 
+cards[SANDCRAB].can_play = function () {
+    return events.ALASKA_OCCUPATION.keys.filter(k => is_faction_units(hex_to_int(k), JP)).length
+}
+
 cards[SANDCRAB].before_commit_offensive = function () {
     if (G.offensive.stage !== ATTACK_STAGE) {
         return
     }
-    if (!G.offensive.battle_hexes.filter(h => get_map_data()[h].region === "Alaska").length) {
+    if (!G.offensive.battle_hexes.filter(h => get_map_data(h).region === "Alaska").length) {
         return "At least one battle at Aleutian islands should be declared."
     }
 }
@@ -7487,14 +8515,14 @@ cards[find_card(AP, 33)].before_activation = function () {
 
 P.build_road = {
     _begin() {
-        if (!get_infrastructure_actions().length) {
-            log("CBI could not be built")
+        if (!get_event_infrastructure_actions().length) {
+            log("CBI could not be built.")
             end()
         }
     },
     prompt() {
-        prompt(`${offensive_card_header()} Choose hex.`)
-        get_infrastructure_actions().map(h => {
+        prompt(`${offensive_card_header()} Choose hex to build CBI.`)
+        get_event_infrastructure_actions().map(h => {
             if (h === "jarhat") {
                 return JARHAT
             } else if (h === "imphal") {
@@ -7503,6 +8531,7 @@ P.build_road = {
                 return LEDO
             }
         }).forEach(h => action_hex(h))
+        button("skip")
     },
     action_hex(h) {
         push_undo()
@@ -7512,6 +8541,11 @@ P.build_road = {
         check_supply()
         end()
     },
+    skip() {
+        push_undo()
+        log("CBI build skipped.")
+        end()
+    }
 }
 
 cards[find_card(AP, 33)].before_unit_activation = function () {
@@ -7536,7 +8570,7 @@ for (var i = 1; i < cards.length; i++) {
         cards[i].event = always_true
     }
     if (cards[i].kamikaze) {
-        cards[i].event = () => call("kamikaze_attack")
+        cards[i].before_battles = () => call("kamikaze_attack")
         cards[i].can_play = () => check_kamikaze_playable()
     }
 }
@@ -7575,7 +8609,7 @@ cards[find_card(AP, 37)].before_battle_roll = function (faction) {
     if (faction === JP || !G.offensive.battle.ground_stage) {
         return
     }
-    if (get_map_data()[G.offensive.battle.battle_hex].island) {
+    if (get_map_data(G.offensive.battle.battle_hex).island) {
         G.offensive.battle.roll_modifiers += 2
         log(`+2 Banzai charge`)
     }
@@ -7710,7 +8744,7 @@ cards[find_card(AP, 51)].before_activation = function () {
 
 P.place_14_air = {
     _begin() {
-        L.allowed_hexes = get_unit_reinforcement_hexes(AP_AIR_14).filter(h => h === CHINA_BOX || get_map_data()[h].region === "NIndia")
+        L.allowed_hexes = get_unit_reinforcement_hexes(AP_AIR_14).filter(h => h === CHINA_BOX || get_map_data(h).region === "NIndia")
         if (!L.allowed_hexes.length) {
             L.allowed_hexes = get_unit_reinforcement_hexes(AP_AIR_14)
         }
@@ -7752,25 +8786,47 @@ cards[find_card(AP, 55)].before_battle_roll = function (faction) {
     }
 }
 
-cards[find_card(AP, 55)].before_battle_roll = function (faction) {
-    if (faction === AP || G.offensive.battle.ground_stage) {
-        return
-    }
-    var modifier = 0
-    G.offensive.battle.air_naval[JP].filter(u => unit_on_board(u)).map(u => pieces[u]).forEach(piece => {
-        if (piece.class === "naval" && piece.br) {
-            G.offensive.battle.strength[faction] -= 2
-            modifier -= 2
-        }
-    })
-    if (modifier) {
-        log(`${modifier} attack strength (The Great Marianas Turkey Shoot)`)
-    }
+cards[find_card(AP, 55)].before_pbm = function () {
+    call("turkey_shoot")
 }
 
-cards[find_card(AP, 55)].before_commit_offensive = function () {
-    if (G.offensive.stage !== POST_BATTLE_MOVE || G.active === JP) {
-        return
+P.turkey_shoot = {
+    _begin() {
+        L.allowed_units = []
+        G.offensive.active_units[JP].forEach(u => {
+            if (unit_on_board(u) && pieces[u].class === "air") {
+                set_add(L.allowed_units, u)
+            }
+        })
+        for_each_unit_on_map((u, piece, location) => {
+            if (piece.faction === JP && piece.class === "air" && set_has(G.offensive.all_bh, location)) {
+                set_add(L.allowed_units, u)
+            }
+        })
+        if (L.allowed_units.length <= 0) {
+            end()
+            return
+        } else {
+            G.active = AP
+        }
+    },
+    prompt() {
+        prompt(`The Great Marianas Turkey Shoot. Choose unit to hit.`)
+        if (L.done) {
+            button("done")
+        } else {
+            L.allowed_units.forEach(u => action_unit(u))
+        }
+    },
+    unit(u) {
+        push_undo()
+        log("The Great Marianas Turkey Shoot:")
+        damage_unit(u)
+        L.done = 1
+    },
+    done() {
+        push_undo()
+        end()
     }
 }
 
@@ -7795,7 +8851,9 @@ cards[find_card(AP, 60)].event = function () {
     discard_random_card(JP)
 }
 
-cards[DARTER_DACE].event = function () {
+cards[DARTER_DACE].can_play = () => has_active_naval_units(JP)
+
+cards[DARTER_DACE].before_battles = function () {
     call("submarine_attack", {success: 14, critical: 17, card: DARTER_DACE})
 }
 
@@ -7803,7 +8861,7 @@ cards[KING_II].before_commit_offensive = function () {
     if (G.offensive.stage !== ATTACK_STAGE || G.active === JP) {
         return
     }
-    if (!G.offensive.battle_hexes.filter(h => get_map_data()[h].region === "Philippines").length) {
+    if (!G.offensive.battle_hexes.filter(h => get_map_data(h).region === "Philippines").length) {
         return "At least one battle hex should be Philippines"
     }
 }
@@ -7821,7 +8879,9 @@ cards[find_card(AP, 67)].can_play = function () {
 cards[find_card(AP, 67)].event = cards[find_card(AP, 60)].event
 
 
-cards[find_card(AP, 68)].event = function () {
+cards[find_card(AP, 68)].can_play = () => has_active_naval_units(JP)
+
+cards[find_card(AP, 68)].after_battles = function () {
     call("submarine_attack", {success: 7, card: find_card(AP, 68)})
 }
 
@@ -7852,7 +8912,7 @@ P.airborne_landing = {
         }
         L.allowed_hexes = []
         for_each_hex_in_range(air_location, range, h => {
-            if (!has_non_n_zoi(h, JP) && !is_faction_units(h, JP) && !is_faction_units(h, AP) && get_map_data()[h].terrain > OCEAN) {
+            if (!has_non_n_zoi(h, JP) && !is_faction_units(h, JP) && !is_faction_units(h, AP) && get_map_data(h).terrain > OCEAN) {
                 set_add(L.allowed_hexes, h)
             }
         })
@@ -7882,7 +8942,7 @@ cards[find_card(AP, 70)].before_activation = function () {
 P.place_armor = {
     _begin() {
         var regions = ["NIndia", "Burma", "India", "Ceylon"]
-        L.allowed_hexes = get_unit_reinforcement_hexes(ARMOR_BRIGADE).filter(h => regions.includes(get_map_data()[h].region))
+        L.allowed_hexes = get_unit_reinforcement_hexes(ARMOR_BRIGADE).filter(h => regions.includes(get_map_data(h).region))
         set_delete(G.reduced, ARMOR_BRIGADE)
         if (L.allowed_hexes.length <= 0) {
             log(`Could not place ${piece_get_log_str(ARMOR_BRIGADE)}`)
@@ -7909,7 +8969,7 @@ cards[find_card(AP, 72)].before_reaction = function () {
         var target = get_unit_battle_hex(u)
         var piece = pieces[u]
         if (is_us_unit(piece) && piece.class === "naval" && piece.br && set_has(G.offensive.battle_hexes, target)
-            && get_map_data()[target].region === "Japan") {
+            && get_map_data(target).region === "Japan") {
             condition = true
         }
     })
@@ -7948,16 +9008,29 @@ cards[find_card(AP, 76)].before_unit_activation = function () {
     filter_activation_units((u, piece) => piece.class !== "ground" || piece.service === "au", AP)
 }
 
-cards[find_card(AP, 78)].event = function () {
+function x_craft_targets() {
     var allowed_units = []
     for_each_unit_on_map((u, piece, location) => {
         if (piece.faction === JP && piece.class === "naval"
-            && !set_has(G.offensive.active_units[JP], u) && get_map_data()[location].region !== "Japan"
+            && !set_has(G.offensive.active_units[JP], u) && get_map_data(location).region !== "Japan"
         ) {
             set_add(allowed_units, u)
         }
     })
+    return allowed_units
+}
+
+cards[find_card(AP, 78)].can_play = function () {
+    return x_craft_targets().length
+}
+
+cards[find_card(AP, 78)].before_battles = function () {
+    var allowed_units = x_craft_targets()
     call("submarine_attack", {success: 9, card: find_card(AP, 78), pre_allowed_units: allowed_units})
+}
+
+cards[SOVIET_INVADE].can_play = function () {
+    return is_event_active(events.TOJO)
 }
 
 cards[SOVIET_INVADE].event = function () {
@@ -7975,9 +9048,25 @@ cards[find_card(AP, 80)].event = function () {
     }
 }
 
-
 cards[CARRIER_RAID].before_unit_activation = function () {
     filter_activation_units((u, piece) => is_us_unit(piece) && piece.class === "naval" && piece.br, AP)
+}
+
+SCENARIO_DATA[SOUTH_PACIFIC].before_commit_offensive = function () {
+    if (G.turn === 3 && (set_has(G.offensive.battle_hexes, TRUK) ||
+        set_has(G.offensive.landing_hexes, TRUK) || is_faction_units(TRUK, AP))) {
+        return "The Allied player cannot declare Truk a battle hex during game turn 3."
+    }
+
+}
+
+SCENARIO_DATA[SOUTH_PACIFIC].before_unit_activation = function () {
+    if (G.turn === 3) {
+        filter_activation_units((u) => G.location[u] !== TRUK, JP)
+    }
+    if (G.offensive.active_hq[G.active] === HQ_CENTRAL_PACIFIC) {
+        filter_activation_units((u) => get_map_data(G.location[u]).region === "Hebrides", AP)
+    }
 }
 
 
@@ -8003,9 +9092,7 @@ P.default_event = script(`
         if (cards[G.offensive.offensive_card].china) {
             update_china_status(cards[G.offensive.offensive_card].china)
         }
-        cards[G.offensive.offensive_card].event()
     }
-    goto end_action
 `)
 
 /* SETUP */
@@ -8050,6 +9137,7 @@ function eliminate_permanently(unit) {
     }
     set_location(unit, PERM_ELIMINATED)
     set_delete(G.reduced, unit)
+    set_delete(G.oos, unit)
 }
 
 function eliminate(unit) {
@@ -8066,6 +9154,7 @@ function eliminate(unit) {
     log(`${piece_get_log_str(unit)} eliminated`)
     G.location[unit] = ELIMINATED_BOX
     set_delete(G.reduced, unit)
+    set_delete(G.oos, unit)
 }
 
 function damage_unit(unit) {
@@ -8396,9 +9485,8 @@ P.arcadia = {
     },
     event(c) {
         push_undo()
-        play_event(c)
         G.offensive.offensive_card = c
-        cards[c].event()
+        play_event(c)
     },
     done() {
         end()
@@ -8634,6 +9722,7 @@ function setup_scenario_1943() {
     G.pow = 4
     G.political_will = 6
     G.china_divisions = 7
+    G.burma_road = 1
     G.surrender[nations.CHINA.id] = 2
     G.reinforcements = {NAVAL: 1, AIR: 2}
     G.wie = 4
@@ -8821,6 +9910,7 @@ function setup_scenario_1944() {
     G.political_will = 5
     G.inter_service = [1, 1]
     G.wie = 1
+    G.burma_road = 1
     G.events[events.PT_BOATS.id] = 5
     G.events[events.HUMP.id] = 1
     G.events[events.JARHAT_ROAD.id] = 1
@@ -8851,51 +9941,62 @@ function setup_scenario_1944() {
 function setup_scenario_south_pacific() {
     log("#1942 South pacific")
 
-    var ap_draw = [8, 20, 21, 23, 24, 25, 27, 28, 29, 31, 32, 36, 40, 43, 44, 46, 50, 52, 56, 64, 66, 81, 82]
-    var jp_draw = [9, 13, 16, 17, 20, 23, 25, 27, 28, 29, 32, 33, 34, 35, 42, 44, 48, 49, 51, 52, 73, 75, 84, 85]
-    G.draw = []
-    G.draw[JP] = jp_draw.map(c => find_card(JP, c))
-    G.draw[AP] = ap_draw.map(c => find_card(AP, c))
-    G.surrender[nations.AUSTRALIAN_MANDATES.id] = 1
+    G.draw = [[], []]
+    G.removed = [[], []]
+    G.discard = [[], []]
+    for_each_card((i, card) => {
+        if (scenario_data().has_card(i)) {
+            G.draw[card.faction].push(i)
+        }
+    })
+
+    var removed = []
+    for (var i = 1; i < cards.length; i++) {
+        var faction = cards[i].faction
+        if (!set_has(G.draw[faction], i)) {
+            set_add(removed, i)
+        }
+    }
+
+    future_offencive_card(find_card(AP, 13), 2)
+    while (G.hand[AP].length < 2) {
+        draw_card(AP)
+    }
+    draw_specific_card(find_card(JP, 17))
+    while (G.hand[JP].length < 3) {
+        draw_card(JP)
+    }
+
+
     var surrender = [nations.AUSTRALIAN_MANDATES, nations.NEW_GUINEA]
     surrender.forEach(n => {
+        G.surrender[n.id] = 1
         set_control_over_nation(n)
     })
     var ap_controlled = [5808, 3823, 4024, 4828]
     ap_controlled.forEach(h => set_delete(G.control, hex_to_int(h)))
+    control_hex(hex_to_int(4719), JP)
+    control_hex(hex_to_int(3017), JP)
     G.reduced = []
 
     for_each_unit(u => G.location[u] = PERM_ELIMINATED)
 
-    //ap setup
-    for (let i = 1; i < pieces.length; i++) {
-        var piece = pieces[i]
-        if (piece.reinforcement !== 5) {
-            continue
-        }
-        if (piece.faction) {
-            G.location[i] = DELAYED_BOX
-        }
-        if (piece.start_reduced) {
-            set_add(G.reduced, i)
-        }
-    }
     setup_jp_unit(ap_air(5), 3626)
     setup_jp_unit(ap_air("5_lrb"), 3626)
     setup_jp_unit(ap_air("13"), 4825)
     setup_jp_unit(ap_air("13_lrb"), 4825)
-    setup_jp_unit(ap_air("14_lrb"), CHINA_BOX)
+    // setup_jp_unit(ap_air("14_lrb"), CHINA_BOX)
     setup_jp_unit(ap_air("1_maw"), 4826)
-    setup_jp_unit(ap_air("2_maw"), NON_PLACED_BOX)
+    setup_jp_unit(ap_air("2_maw"), int_to_hex(NON_PLACED_BOX))
     setup_jp_unit(ap_army("mb"), 4825)
     setup_jp_unit(ap_army("sf"), 4828)
     setup_jp_unit(ap_army("1_m"), 4828)
-    setup_jp_unit(ap_army("2_m"), NON_PLACED_BOX)
-    setup_jp_unit(ap_army("3_m"), NON_PLACED_BOX)
+    setup_jp_unit(ap_army("2_m"), int_to_hex(NON_PLACED_BOX))
+    setup_jp_unit(ap_army("3_m"), int_to_hex(NON_PLACED_BOX))
     setup_jp_unit(ap_army("1"), 3727, true)
     setup_jp_unit(ap_army("11"), 5808)
     setup_jp_unit(ap_army("14"), 3626, true)
-    setup_jp_unit(ap_army("24"), NON_PLACED_BOX)
+    setup_jp_unit(ap_army("24"), int_to_hex(NON_PLACED_BOX))
     setup_jp_unit(HQ_CENTRAL_PACIFIC, 5808)
     setup_jp_unit(HQ_SOUTH_GHORMLEY, 4828)
     setup_jp_unit(HQ_SOUTH_WEST, 3727)
@@ -8904,14 +10005,14 @@ function setup_scenario_south_pacific() {
     setup_jp_unit(find_piece("lexington"), 4828, true)
     setup_jp_unit(find_piece("northampton"), 4828)
     setup_jp_unit(find_piece("carolina"), 4828)
-    setup_jp_unit(find_piece("washington"), NON_PLACED_BOX)
-    setup_jp_unit(find_piece("mass"), NON_PLACED_BOX)
-    setup_jp_unit(find_piece("jacinto"), NON_PLACED_BOX)
-    setup_jp_unit(find_piece("bunker"), NON_PLACED_BOX)
-    setup_jp_unit(find_piece("essex"), NON_PLACED_BOX)
-    setup_jp_unit(find_piece("belleau"), NON_PLACED_BOX)
-    setup_jp_unit(find_piece("sangamon"), NON_PLACED_BOX)
-    setup_jp_unit(find_piece("cowpens"), NON_PLACED_BOX)
+    setup_jp_unit(find_piece("washington"), int_to_hex(NON_PLACED_BOX))
+    setup_jp_unit(find_piece("mass"), int_to_hex(NON_PLACED_BOX))
+    setup_jp_unit(find_piece("jacinto"), int_to_hex(NON_PLACED_BOX))
+    setup_jp_unit(find_piece("bunker"), int_to_hex(NON_PLACED_BOX))
+    setup_jp_unit(find_piece("essex"), int_to_hex(NON_PLACED_BOX))
+    setup_jp_unit(find_piece("belleau"), int_to_hex(NON_PLACED_BOX))
+    setup_jp_unit(find_piece("sangamon"), int_to_hex(NON_PLACED_BOX))
+    setup_jp_unit(find_piece("cowpens"), int_to_hex(NON_PLACED_BOX))
     setup_jp_unit(ap_air("au"), 3823)
     setup_jp_unit(ap_army("1_au"), 3023)
     setup_jp_unit(ap_army("2_au"), 3727)
@@ -8927,9 +10028,9 @@ function setup_scenario_south_pacific() {
     setup_jp_unit(jp_air("21"), 4021)
     setup_jp_unit(jp_air("25"), 3822)
     setup_jp_unit(jp_air("26"), 3119)
-    setup_jp_unit(jp_air("7"), NON_PLACED_BOX)
-    setup_jp_unit(jp_air("27"), NON_PLACED_BOX)
-    setup_jp_unit(jp_air("28"), NON_PLACED_BOX)
+    setup_jp_unit(jp_air("7"), int_to_hex(NON_PLACED_BOX))
+    setup_jp_unit(jp_air("27"), int_to_hex(NON_PLACED_BOX))
+    setup_jp_unit(jp_air("28"), int_to_hex(NON_PLACED_BOX))
     setup_jp_unit(jp_army("4sn"), 4423, true)
     setup_jp_unit(jp_army("ss"), 3822)
     setup_jp_unit(jp_army("17"), 4021)
@@ -8951,21 +10052,11 @@ function setup_scenario_south_pacific() {
     G.political_will = 4
     G.asp[JP] = [7, 0]
     G.asp[AP] = [2, 0]
-    G.wie = 4
+    G.wie = 2
     G.reinforcements = {NAVAL: 2, AIR: 2}
     G.surrender[nations.CHINA.id] = 2
     G.inter_service = [1, 1]
     G.china_divisions = 9
-
-    future_offencive_card(find_card(AP, 13), 2)
-
-    while (G.hand[AP].length < 2) {
-        draw_card(AP)
-    }
-    draw_specific_card(find_card(JP, 17))
-    while (G.hand[JP].length < 3) {
-        draw_card(JP)
-    }
 
     check_supply()
     fill_overstack()
@@ -8982,7 +10073,7 @@ function future_offencive_card(card, turn) {
 
     array_delete_item(G.discard[faction], card)
     array_delete_item(G.draw[faction], card)
-    array_delete_item(G.removed, card)
+    array_delete_item(G.removed[faction], card)
 }
 
 function remove_card(card) {
@@ -8990,14 +10081,14 @@ function remove_card(card) {
     discard_card(card)
     array_delete_item(G.discard[faction], card)
     array_delete_item(G.draw[faction], card)
-    set_add(G.removed, card)
+    set_add(G.removed[faction], card)
 }
 
 function discard_card(card) {
     var faction = cards[card].faction
     array_delete_item(G.draw[faction], card)
     set_add(G.discard[faction], card)
-    if (G.future_offensive[faction] === card.c) {
+    if (G.future_offensive[faction] === card) {
         G.future_offensive[faction] = -1
         G.events[events.FUTURE_OFFENSIVE_JP.id + faction] = 0
     } else {
@@ -9023,9 +10114,9 @@ function jp_army(id) {
 
 function setup_jp_unit(piece, hex_id, reduced = false) {
     let hex = hex_to_int(hex_id)
-    if (is_controllable_hex(hex) && pieces[piece].faction === JP) {
+    if (hex < LAST_BOARD_HEX && is_controllable_hex(hex) && pieces[piece].faction === JP) {
         set_add(G.control, hex)
-    } else if (is_controllable_hex(hex) && pieces[piece].faction === AP) {
+    } else if (hex < LAST_BOARD_HEX && is_controllable_hex(hex) && pieces[piece].faction === AP) {
         set_delete(G.control, hex)
     }
     G.location[piece] = hex
@@ -9042,11 +10133,11 @@ function setup_jp_unit(piece, hex_id, reduced = false) {
 function on_setup(scenario, options) {
 
     G.scenario = scenario
-
+    G.sid = SCENARIO_DATA.filter(s => s.name === G.scenario)[0].id//scenario id
     G.active = JP
     G.turn = 1
     G.passes = [0, 0]
-    G.removed = [] // removed one-time events (both sides)
+    G.removed = [[], []] // removed one-time events
     G.hand = [[], []]
     G.future_offensive = [-1, -1]
     G.discard = [[], []]
@@ -9072,7 +10163,7 @@ function on_setup(scenario, options) {
     Object.keys(events).forEach(k => G.events[events[k].id] = 0)
     G.surrender = [...Array(Object.keys(nations).length).keys()].map(i => 0)
     G.surrender[nations.MARSHALL.id] = true //only nation under JP control
-    G.committed = []
+    G.b29u = 0
     G.supply_cache = []
     G.overstack = []
     G.pow = 0
@@ -9082,7 +10173,7 @@ function on_setup(scenario, options) {
         G.debug = 1
     }
     for (let i = 1; i < LAST_BOARD_HEX; i++) {
-        if (is_controllable_hex(i) && ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Siam", "Caroline", "Marshall", "Japan"].includes(get_map_data()[i].region)) {
+        if (is_controllable_hex(i) && ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Siam", "Caroline", "Marshall", "Japan"].includes(get_map_data(i).region)) {
             set_add(G.control, i)
         }
     }
@@ -9105,7 +10196,7 @@ function on_setup(scenario, options) {
 }
 
 function scenario_data() {
-    return SCENARIO_DATA.filter(s => s.name === G.scenario)[0]
+    return SCENARIO_DATA[G.sid]
 }
 
 function get_garrison_count() {
@@ -9132,6 +10223,7 @@ function on_view() {
     V.control = G.control
     V.capture = G.capture
     V.oos = G.oos
+    V.b29u = G.b29u
     V.supply_cache = G.supply_cache
     V.hand = []
     V.pow = G.pow
@@ -9163,7 +10255,7 @@ function on_view() {
     V.garrison = []
     var div_count = get_garrison_count()
     G.offensive.battle_hexes.forEach(h => {
-        var city = get_map_data()[h].city
+        var city = get_map_data(h).city
         if ((city === CHINESE_CITY || city === JAPANESE_CITY && !set_has(G.garr_elim, h)) && is_space_controlled(h, JP)) {
             map_set(V.garrison, h, city === JAPANESE_CITY ? 0 : div_count)
         }
@@ -9171,17 +10263,17 @@ function on_view() {
 
 
     if (R !== JP) {
-        V.hand[JP] = G.hand[JP].length + G.offensive.draw.filter(c => cards[c].faction === JP).length
+        V.hand[JP] = G.hand[JP].length + G.offensive.draw[JP].filter(c => c >= 0 && cards[c].faction === JP).length
     } else {
         V.hand[JP] = G.hand[JP].slice()
-        G.offensive.draw.filter(c => cards[c].faction === JP).forEach(c => V.hand[JP].push(c))
+        G.offensive.draw[JP].filter(c => c >= 0 && cards[c].faction === JP).forEach(c => V.hand[JP].push(c))
         V.future_offensive[JP] = G.future_offensive[JP]
     }
     if (R !== AP) {
-        V.hand[AP] = G.hand[AP].length + G.offensive.draw.filter(c => cards[c].faction === AP).length
+        V.hand[AP] = G.hand[AP].length + G.offensive.draw[AP].filter(c => c >= 0 && cards[c].faction === AP).length
     } else {
         V.hand[AP] = G.hand[AP].slice()
-        G.offensive.draw.filter(c => cards[c].faction === AP).forEach(c => V.hand[AP].push(c))
+        G.offensive.draw[AP].filter(c => c >= 0 && cards[c].faction === AP).forEach(c => V.hand[AP].push(c))
         V.future_offensive[AP] = G.future_offensive[AP]
     }
 }
@@ -9195,7 +10287,9 @@ function action_unit(p) {
 }
 
 function action_hex(p) {
-    action("action_hex", p)
+    if (p < TUNNEL_BOX) {
+        action("action_hex", p)
+    }
 }
 
 function action_box(p) {
@@ -9216,6 +10310,7 @@ reset_offensive() {
         type: EC,
         attacker: JP,
         active_cards: [],
+        amp_mod: [],
         offensive_card: -1,
         counter_offensive_card: -1,
         intelligence: SURPRISE,
@@ -9226,7 +10321,7 @@ reset_offensive() {
         ground_pbm: [],
         active_hq: [],
         organic: [],
-        draw: [],
+        draw: [[], []],
         r_asp: 0,
         active_units: [[], []],
         paths: [],

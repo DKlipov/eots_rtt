@@ -41,13 +41,6 @@ const ROAD_EVENTS = Object.keys(data.events).filter(k => data.events[k].road).ma
 
 const CARD_ACTIONS = ["card"]
 
-for (let item of document.getElementById("card_popup").querySelectorAll("li")) {
-    let action = item.dataset.action
-    if (action) {
-        CARD_ACTIONS.push(action)
-    }
-}
-
 //Move types
 const ANY_MOVE = 0
 const STRAT_MOVE = 1 << 0
@@ -84,6 +77,10 @@ const UNIT_MOVEMENT_MARKERS = [
         "name": "AMPH_MOVE",
         condition: (u, piece, path) => path & AMPH_MOVE && piece.class === "ground",
         counter: "marker aa_small",
+    },
+    {
+        condition: (u, piece, path) => piece.b29 && G.b29u & 2 << piece.b29,
+        counter: "marker strat_bombing",
     },
 
 ]
@@ -226,14 +223,15 @@ function clear_paths() {
 
 function on_init() {
     init_canvas()
-    let map = document.getElementById("map")
-    map.onclick = (a) => {
-        if (a.target === map && world.focus !== null) {
-            world.focus.classList.remove("focus")
-            world.focus = null
-            on_update()
-        }
-    }
+    //let map = document.getElementById("map")
+    //map.onclick = (a) => {
+    //    if (a.target === map && world.focus !== null) {
+    //        world.focus.classList.remove("focus")
+    //        world.focus = null
+    //        on_update()
+    //    }
+    //}
+    define_board("#map", 2550, 1650, [12, 12, 12, 12])
     var first_hex = []
     var last_hex = []
     for (var i = 0; i < data.map.length; i++) {
@@ -257,15 +255,24 @@ function on_init() {
         //     continue
         // }
         let center = hex_center(i)
-        define_layout("board_hex", i, [center[0] - 18, center[1] - 14, 45, 45], "stack")
+        define_layout("board_hex", i, [center[0] - 18, center[1] - 14, 45, 45])
+        define_stack("s-loc", i,
+			[center[0] - 18, center[1] - 14, 45, 45],
+			-6, -9, // closed offset
+			0, -52, // open offset (major axis)
+			52, 0, // open offset (minor axis)
+			1, // threshold to auto-open
+			6 // wrap limit
+		)
         define_space("action_hex", i, [center[0] - 29, center[1] - 19, 45, 45], "hex")
         ZOI_HEX[i] = (define_space("zoi", i, [center[0] - 33, center[1] - 24, 45, 45], "hex hide"))
     }
-    define_layout("board_hex", NON_PLACED_BOX, [10, 10, 45, 45], "stack")
-    define_layout("board_hex", ELIMINATED_BOX, [100, 1280, 45, 45], "stack")
-    define_layout("board_hex", PERM_ELIMINATED, [100, 1180, 45, 45], "stack")
-    define_layout("board_hex", DELAYED_BOX, [2420, 1540, 45, 45], "stack")
-    define_layout("board_hex", CHINA_BOX, [890, 420, 45, 45], "stack")
+    define_layout("s-loc", NON_PLACED_BOX, [10, 10, 45, 45], "stack")
+    define_layout("s-loc", ELIMINATED_BOX, [100, 1280, 45, 45], "stack")
+    define_layout("s-loc", PERM_ELIMINATED, [-100, -1180, 45, 45], "stack")
+    define_layout("s-loc", DELAYED_BOX, [2420, 1540, 45, 45], "stack")
+    define_layout("s-loc", CHINA_BOX, [890, 420, 45, 45], "stack")
+    define_space("action_hex", CHINA_BOX, [890, 420, 45, 45])
     define_layout("status", JP_AGREEMENT, [990, 143, 35, 35])
     define_layout("status", AP_AGREEMENT, [1054, 143, 35, 35])
     for (i = 0; i < 11; i++) {
@@ -276,7 +283,7 @@ function on_init() {
     }
     for (i = 1; i < 13; i++) {
         define_layout("turn", i, [68, 1232 - Math.floor((i * 46.9)), 35, 35], "stack")
-        define_space("action_box", i + TURN_BOX, [63, 1110 - Math.floor((i * 42.3)), 35, 35])
+        define_space("action_box", i + TURN_BOX, [68, 1232 - Math.floor((i * 46.9)), 35, 35])
     }
     for (i = 0; i < 10; i++) {
         define_layout("track", i, [383, 1585 - Math.floor((i * 46.5)), 35, 35], "stack")
@@ -296,12 +303,11 @@ function on_init() {
     define_marker("divisions", 0, "divisions_china")
     for (let i = 1; i < data.pieces.length; ++i) {
         let piece = data.pieces[i]
-        piece.element = define_piece("unit", i, piece.counter)
+        piece.element = define_piece("unit", i, piece.counter).tooltip_image(unit_tooltip_image)
     }
     for (let i = 1; i < data.cards.length; ++i) {
         let card = data.cards[i]
-        card.element = define_card("card", i, `action card_${card.faction ? "ap" : "jp"}_${card.num}`)
-        card.element.onclick = on_click_card
+        card.element = define_card("card", i, `card_${card.faction ? "ap" : "jp"}_${card.num}`)
         card.element.card = i
     }
     define_panel("#jp_hand", "hand", JP)
@@ -387,6 +393,9 @@ function int_to_hex(i) {
 }
 
 function hex_center(i) {
+    if (i === CHINA_BOX) {
+        return [890, 420]
+    }
     let column = (Math.floor(i / 29))
     return [77 + column * 48.0, 50 + (i % 29) * 55.3 + (column % 2) * 25]
 }
@@ -418,7 +427,7 @@ function init_canvas() {
 
 function draw_paths() {
     map_for_each(G.offensive.paths, (k, v) => {
-        if (G.location[k] > LAST_BOARD_HEX) {
+        if (G.location[k] > LAST_BOARD_HEX && G.location[k] !== CHINA_BOX) {
             return
         }
         var start = hex_center(v[2])
@@ -462,8 +471,8 @@ function place_unit(u, location) {
         unit.classList.toggle("reduced", set_has(G.reduced, u))
         unit.classList.remove("activated")
         unit.classList.remove("selected")
-    } else if (location === ELIMINATED_BOX && !data.pieces[u].notreplaceable || location !== ELIMINATED_BOX) {
-        unit = populate("board_hex", location, "unit", u)
+    } else if (location === ELIMINATED_BOX && (!data.pieces[u].notreplaceable || is_action("unit", u)) || location !== ELIMINATED_BOX) {
+        unit = populate("s-loc", location, "unit", u)
         unit.classList.toggle("reduced", set_has(G.reduced, u) || location === ELIMINATED_BOX
             || data.pieces[u].class === "hq" && G.inter_service[data.pieces[u].faction])
         unit.classList.toggle("activated", G.offensive.active_units.includes(u))
@@ -499,7 +508,7 @@ function on_update() {
 
     console.log(G)
     map_for_each(G.offensive.damaged, (u, s) => {
-        if (s >= 2) {
+        if (s > 2) {
             G.location[u] = ELIMINATED_BOX
         } else {
             set_add(G.reduced, u)
@@ -688,6 +697,20 @@ function on_update() {
     action_button("amphibious", "Amphibious")
 
 
+    action_button("discard", "Discard")
+    action_button("event", "Play Event")
+    action_button("ops", "Play for Operations")
+    action_button("displace_hq", "HQ Withdrawal")
+    action_button("return_hq", "Early HQ Return")
+    action_button("inter_service", "Remove Inter-Service Rivalry")
+    action_button("china_offensive", "China Offensive")
+    action_button("future_offensive","Future Offensive")
+    action_button("jarhat","Build Jarhat Road")
+    action_button("imphal","Build Imphal Road")
+    action_button("ledo","Build Ledo Road")
+    action_button("hold","Hold")
+
+
     action_button("pass", "Pass")
     action_button("skip", "Skip")
     action_button("no_move", "No move")
@@ -698,17 +721,19 @@ function on_update() {
     action_button("no_organic", "Disable organic")
     action_button("avoid_zoi", "Avoid ZOI")
     action_button("strat_move", "Strategic move")
+    action_button("ground_move", "Ground move")
     action_button("regular_movement", "Regular movement")
     action_button("extended_air", "Use extended range")
     action_button("barges", "Use barges")
     action_button("no_disen", "Skip ground disengagement")
 
     //debug
-    action_button("isr", "isr(dbg)")
+    action_button("isr", "Flip isr(dbg)")
+    action_button("check_s", "Check supply(dbg)")
     action_button("deploy_b29", "deploy_b29(dbg)")
-    action_button("ns", "end turn(dbg)")
-    action_button("control", "change control(dbg)")
-    action_button("draw", "draw card(dbg)")
+    action_button("ns", "discard cards(dbg)")
+    action_button("control", "change hex control(dbg)")
+    action_button("draw", "draw specific card(dbg)")
     action_button("auto", "auto(dbg)")
 
     action_button("undo", "Undo")
@@ -717,75 +742,6 @@ function on_update() {
 
 function apply_conflict_marker(marker, hex) {
     marker.innerText = String.fromCharCode(65 + G.offensive.battle_names.indexOf(hex))
-}
-
-function on_click_card(evt) {
-    console.log(evt)
-    let card = evt.target.card
-    if (is_action('card', card)) {
-        send_action('card', card)
-    } else {
-        show_popup_menu(evt, "card_popup", card, data.cards[card].name)
-    }
-}
-
-function show_popup_menu(evt, menu_id, target_id, title, hide = '') {
-    let menu = document.getElementById(menu_id)
-
-    let show = false
-    for (let item of menu.querySelectorAll("li")) {
-        let action = item.dataset.action
-        if (action) {
-            if (action === hide) {
-                item.classList.remove("action")
-                item.hidden = true
-                item.onclick = null
-            } else {
-                if (is_action(action, target_id)) {
-                    show = true
-                    item.classList.add("action")
-                    item.classList.remove("disabled")
-                    item.hidden = false
-                    item.onclick = function () {
-                        send_action(action, target_id)
-                        hide_popup_menu()
-                        evt.stopPropagation()
-                    }
-                } else {
-                    item.classList.remove("action")
-                    item.hidden = true
-                    item.classList.remove("disabled")
-                    item.onclick = null
-                }
-            }
-        }
-    }
-    if (show) {
-        menu.onmouseleave = hide_popup_menu
-        menu.hidden = false
-        if (title) {
-            let item = menu.querySelector("li.title")
-            if (item) {
-                item.onclick = hide_popup_menu
-                item.textContent = title
-            }
-        }
-
-        let w = menu.clientWidth
-        let h = menu.clientHeight
-        let x = Math.max(5, Math.min(evt.clientX - w / 2, window.innerWidth - w - 5))
-        let y = Math.max(5, Math.min(evt.clientY - 12, window.innerHeight - h - 40))
-        menu.style.left = x + "px"
-        menu.style.top = y + "px"
-
-        evt.stopPropagation()
-    } else {
-        menu.hidden = true
-    }
-}
-
-function hide_popup_menu() {
-    document.getElementById("card_popup").hidden = true
 }
 
 const ICONS = {
@@ -988,10 +944,12 @@ function show_card_list(id, params) {
         if (id === "event_card_dialog") {
             append_header(`Japanese Discard Pile (${G.discard[JP].length})`)
             G.discard[JP].forEach(append_card)
+            append_header(`Japanese Removed Cards (${G.removed[JP].length})`)
+            G.removed[JP].forEach(append_card)
             append_header(`Allies Discard Pile (${G.discard[AP].length})`)
             G.discard[AP].forEach(append_card)
-            append_header(`Removed Cards (${G.removed.length})`)
-            G.removed.forEach(append_card)
+            append_header(`Allies Removed Cards (${G.removed[AP].length})`)
+            G.removed[AP].forEach(append_card)
             //if (!is_observing()) {
             //	append_header(`Your Hand (${V.hand[R].length})`)
             //	V.hand[R].forEach(append_card)
@@ -1017,18 +975,10 @@ function sub_card(match, p1) {
     return `<span class="${cn}" onmouseenter="on_focus_card_tip(${c})" onmouseleave="on_blur_card_tip()">${data.cards[c].name}</span>`
 }
 
-function on_focus_card_tip(c) {
-    let elem = document.getElementById("tooltip")
-    const card = data.cards[c]
-    elem.classList = `card card_${card.faction ? "ap" : "jp"}_${card.num}`
-}
 
-function on_blur_card_tip(c) {
-    document.getElementById("tooltip").classList = "hide"
-}
 
 function get_piece_elem(p) {
-    return data.pieces[p].element
+    return data.pieces[p].element.element
 }
 
 
@@ -1086,4 +1036,40 @@ function on_focus_hex_tip(z) {
 
 function on_blur_hex_tip(z) {
     get_hex_elem(z).classList.toggle("tip", false)
+}
+/* TOOLTIP ON FOCUS */
+
+function unit_tooltip_image(a, onoff) {
+	if (onoff) {
+		on_focus_unit_tip(a)
+	} else {
+		on_blur_unit_tip()
+	}
+}
+
+function on_focus_unit_tip(a) {
+	world.tip.hidden = is_mobile()
+    const piece = data.pieces[a]
+	// Show BOTH sides of the marker
+	world.tip.innerHTML = `
+    <div class="unit-tip piece ${piece.counter}"></div>	
+    <div class="unit-tip piece ${piece.counter} reduced"></div>`
+    world.tip.classList = "zoomed"
+}
+
+function on_blur_unit_tip() {
+	world.tip.hidden = true
+	world.tip.innerHTML = ""
+    world.tip.classList = ''
+}
+
+function on_focus_card_tip(c) {
+    world.tip.hidden = is_mobile()
+    const card = data.cards[c]
+    world.tip.classList = `card card_${card.faction ? "ap" : "jp"}_${card.num}`
+}
+
+function on_blur_card_tip(c) {
+    world.tip.hidden = true
+    world.tip.classList = ''
 }
