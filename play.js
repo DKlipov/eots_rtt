@@ -230,14 +230,15 @@ function clear_paths() {
 
 function on_init() {
     init_canvas()
-    let map = document.getElementById("map")
-    map.onclick = (a) => {
-        if (a.target === map && world.focus !== null) {
-            world.focus.classList.remove("focus")
-            world.focus = null
-            on_update()
-        }
-    }
+    //let map = document.getElementById("map")
+    //map.onclick = (a) => {
+    //    if (a.target === map && world.focus !== null) {
+    //        world.focus.classList.remove("focus")
+    //        world.focus = null
+    //        on_update()
+    //    }
+    //}
+    define_board("#map", 2550, 1650, [12, 12, 12, 12])
     var first_hex = []
     var last_hex = []
     for (var i = 0; i < data.map.length; i++) {
@@ -261,15 +262,23 @@ function on_init() {
         //     continue
         // }
         let center = hex_center(i)
-        define_layout("board_hex", i, [center[0] - 18, center[1] - 14, 45, 45], "stack")
+        define_layout("board_hex", i, [center[0] - 18, center[1] - 14, 45, 45])
+        define_stack("s-loc", i,
+			[center[0] - 18, center[1] - 14, 45, 45],
+			-6, -9, // closed offset
+			0, -52, // open offset (major axis)
+			52, 0, // open offset (minor axis)
+			1, // threshold to auto-open
+			6 // wrap limit
+		)
         define_space("action_hex", i, [center[0] - 29, center[1] - 19, 45, 45], "hex")
         ZOI_HEX[i] = (define_space("zoi", i, [center[0] - 33, center[1] - 24, 45, 45], "hex hide"))
     }
-    define_layout("board_hex", NON_PLACED_BOX, [10, 10, 45, 45], "stack")
-    define_layout("board_hex", ELIMINATED_BOX, [100, 1280, 45, 45], "stack")
-    define_layout("board_hex", PERM_ELIMINATED, [-100, -1180, 45, 45], "stack")
-    define_layout("board_hex", DELAYED_BOX, [2420, 1540, 45, 45], "stack")
-    define_layout("board_hex", CHINA_BOX, [890, 420, 45, 45], "stack")
+    define_layout("s-loc", NON_PLACED_BOX, [10, 10, 45, 45], "stack")
+    define_layout("s-loc", ELIMINATED_BOX, [100, 1280, 45, 45], "stack")
+    define_layout("s-loc", PERM_ELIMINATED, [-100, -1180, 45, 45], "stack")
+    define_layout("s-loc", DELAYED_BOX, [2420, 1540, 45, 45], "stack")
+    define_layout("s-loc", CHINA_BOX, [890, 420, 45, 45], "stack")
     define_space("action_hex", CHINA_BOX, [890, 420, 45, 45])
     define_layout("status", JP_AGREEMENT, [990, 143, 35, 35])
     define_layout("status", AP_AGREEMENT, [1054, 143, 35, 35])
@@ -471,7 +480,7 @@ function place_unit(u, location) {
         unit.classList.remove("activated")
         unit.classList.remove("selected")
     } else if (location === ELIMINATED_BOX && (!data.pieces[u].notreplaceable || is_action("unit", u)) || location !== ELIMINATED_BOX) {
-        unit = populate("board_hex", location, "unit", u)
+        unit = populate("s-loc", location, "unit", u)
         unit.classList.toggle("reduced", set_has(G.reduced, u) || location === ELIMINATED_BOX
             || data.pieces[u].class === "hq" && G.inter_service[data.pieces[u].faction])
         unit.classList.toggle("activated", G.offensive.active_units.includes(u))

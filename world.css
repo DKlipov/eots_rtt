@@ -13,7 +13,7 @@ body.hide-pieces .piece { display: none }
 	position: relative;
 }
 
-.board > svg {
+.board > * {
     position: absolute;
 }
 
