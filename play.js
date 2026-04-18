@@ -986,7 +986,7 @@ function on_blur_card_tip(c) {
 }
 
 function get_piece_elem(p) {
-    return data.pieces[p].element
+    return data.pieces[p].element.element
 }
 
 
