@@ -476,9 +476,6 @@ function draw_paths() {
     })
 }
 
-var par
-var un
-
 function place_unit(u, location) {
     var piece = data.pieces[u]
     var unit
@@ -492,7 +489,11 @@ function place_unit(u, location) {
         unit = populate("s-loc", location, "unit", u)
         unit.classList.toggle("reduced", set_has(G.reduced, u) || location === ELIMINATED_BOX
             || data.pieces[u].class === "hq" && G.inter_service[data.pieces[u].faction])
-        unit.classList.toggle("activated", G.offensive.active_units.includes(u))
+        if (piece.faction === JP) {
+            unit.classList.toggle("activated_red", G.offensive.active_units.includes(u))
+        } else {
+            unit.classList.toggle("activated_blue", G.offensive.active_units.includes(u))
+        }
         unit.classList.toggle("selected", G.active_stack.includes(u))
         unit.innerHTML = '';
         var battle = map_get(G.offensive.committed, u)
@@ -711,8 +712,8 @@ function on_update() {
     action_button("eliminate", "Eliminate")
     action_button("stop", "Stop")
     action_button("displace", "Displace")
-
     action_button("amphibious", "Amphibious")
+    action_button("divisions", "Reduce divisions track.")
 
 
     action_button("event", "Play Event")

@@ -943,9 +943,10 @@ P.replacement_segment = {
         }
         if (L.divisions) {
             action("divisions", 0)
+            button("divisions")
         }
         var ru = L.replacable_units.filter(u => L.replacement_points[pieces[u].replacement] > 0)
-        prompt(`Choose unit to reinforce. ${ru.length ? print_reinforcements() : "(Done)."}`)
+        prompt(`Choose unit to reinforce. ${ru.length || L.divisions ? print_reinforcements() : "(Done)."}`)
         ru.forEach(u => action_unit(u))
 
     },

@@ -43,18 +43,18 @@ body.hide-pieces .piece { display: none }
     transform: rotate(22.5deg);
 }
 
-.piece.activated {
-    border-color: red;
+.piece.activated_red,.piece.activated_blue {
     box-shadow: 0 0 1px black, inset 0 0 1px black;
     border-width: 1px;
     border-style: solid;
 }
 
-.piece.moved {
-    border-color: blue;
-    box-shadow: 0 0 2px black, inset 0 0 2px black;
-    border-width: 2px;
-    border-style: solid;
+.piece.activated_red {
+	border-color: red;
+}
+
+.piece.activated_blue {
+	border-color: blue;
 }
 
 
