@@ -277,7 +277,7 @@ class Thing {
 		return this
 	}
 
-	stack(rect, dx, dy, major_dx, major_dy, minor_dx, minor_dy, threshold, wrap, gravity_x, gravity_y) {
+	stack(rect, dx, dy, major_dx, major_dy, minor_dx, minor_dy, threshold, wrap, gravity_x, gravity_y, small_dx, small_dy, small_threshold) {
 		world.parent.appendChild(this.element)
 
 		if (Array.isArray(rect))
@@ -298,6 +298,7 @@ class Thing {
 			threshold,
 			wrap,
 			gravity_x, gravity_y,
+			small_dx, small_dy, small_threshold // // overrided for small stacks
 		}
 
 		world.stack_list.push(this)
@@ -427,10 +428,10 @@ function sort_board(x_weight = 1, y_weight = 2) {
 		parent.appendChild(e)
 }
 
-function define_stack(action, id, rect, dx=-12, dy=-12, major_dx=dx, major_dy=dy, minor_dx=0, minor_dy=0, threshold=1, wrap=1000, gravity_x=0.5, gravity_y=0.5) {
+function define_stack(action, id, rect, dx = -12, dy = -12, major_dx = dx, major_dy = dy, minor_dx = 0, minor_dy = 0, threshold = 1, wrap = 1000, small_dx, small_dy,small_treshhold,  gravity_x = 0.5, gravity_y = 0.5) {
 	return define_thing(action, id)
 		.keyword("stack")
-		.stack(rect, dx, dy, major_dx, major_dy, minor_dx, minor_dy, threshold, wrap, gravity_x, gravity_y)
+		.stack(rect, dx, dy, major_dx, major_dy, minor_dx, minor_dy, threshold, wrap, gravity_x, gravity_y, small_dx, small_dy, small_treshhold)
 }
 
 function define_layout(action, id, rect, keywords, styles) {
@@ -790,11 +791,17 @@ function _layout_stacks() {
 			cache.push(null)
 			continue
 		}
+		var dx = stack.my_stack.dx
+		var dy = stack.my_stack.dy
+		if (stack.element.children.length <= stack.my_stack.small_threshold) {
+			dx = stack.my_stack.small_dx
+			dy = stack.my_stack.small_dy
+		}
 
 		var expand = (world.focus === stack || n <= _(stack.my_stack.threshold))
 		var z = (world.focus === stack ? 1 : null)
-		var major_dx = expand ? _(stack.my_stack.major_dx) : _(stack.my_stack.dx)
-		var major_dy = expand ? _(stack.my_stack.major_dy) : _(stack.my_stack.dy)
+		var major_dx = expand ? _(stack.my_stack.major_dx) : _(dx)
+		var major_dy = expand ? _(stack.my_stack.major_dy) : _(dy)
 		var minor_dx = expand ? _(stack.my_stack.minor_dx) : _(0)
 		var minor_dy = expand ? _(stack.my_stack.minor_dy) : _(0)
 		var wrap = expand ? _(stack.my_stack.wrap) : n

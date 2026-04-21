@@ -228,7 +228,8 @@ function define_s_loc(id, rect) {
         0, -40, // open offset (major axis)
         40, 0, // open offset (minor axis)
         1, // threshold to auto-open
-        8 // wrap limit
+        8, // wrap limit
+        -6, -9, 4
     )
 }
 
@@ -284,7 +285,8 @@ function on_init() {
             0, -40, // open offset (major axis)
             40, 0, // open offset (minor axis)
             1, // threshold to auto-open
-            8 // wrap limit
+            8, // wrap limit
+            -6, -9, 4
         )
         define_space("action_box", i + TURN_BOX, [68, 1232 - Math.floor((i * 46.9)), 35, 35])
     }
@@ -295,7 +297,8 @@ function on_init() {
             0, -40, // open offset (major axis)
             40, 0, // open offset (minor axis)
             1, // threshold to auto-open
-            8 // wrap limit
+            8, // wrap limit
+            -6, -9, 4
         )
     }
     for (i = 0; i < 5; i++) {
