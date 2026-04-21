@@ -781,12 +781,15 @@ function focus_stack_with_thing(action, id) {
 
 function _layout_stacks() {
 	function _(x) { return (typeof x === "function") ? x(n, stack) : x }
+	let cache = []
 	for (var stack of world.stack_list) {
 		var padding = stack.element.parentElement.my_padding
 
 		var n = stack.element.children.length
-		if (n === 0)
+		if (n === 0){
+			cache.push(null)
 			continue
+		}
 
 		var expand = (world.focus === stack || n <= _(stack.my_stack.threshold))
 		var z = (world.focus === stack ? 1 : null)
@@ -822,21 +825,35 @@ function _layout_stacks() {
 		// use stack-local coords for children
 		start_x -= stack.element.offsetLeft
 		start_y -= stack.element.offsetTop
-
-		var i = 0, k = 0
+		let sub_cache = []
+		let i = 0, k = 0
 		for (var child of stack.element.children) {
 			var w = child.offsetWidth
 			var h = child.offsetHeight
 			var x = start_x + major_dx * i + minor_dx * k + (stack_w - w) * grav_x
 			var y = start_y + major_dy * i + minor_dy * k + (stack_h - h) * grav_y
-			child.style.left = x + "px"
-			child.style.top = y + "px"
-			child.style.zIndex = z
+			sub_cache.push([x,y,z])
+
 			if (++i === wrap) {
 				i = 0
 				++k
 			}
 		}
+		cache.push(sub_cache)
+	}
+
+	// quick workaround to avoid layout thrashing caused by reading offsetWidth, offsetHeight etc
+	let i = 0;
+	for (var stack of world.stack_list) {
+		let k = 0;
+		for (var child of stack.element.children) {
+			const pre_calc = cache[i][k]
+			k ++ 
+			child.style.left = pre_calc[0] + "px"
+			child.style.top = pre_calc[1] + "px"
+			child.style.zIndex = pre_calc[2]
+		}
+		i++;
 	}
 }
 
