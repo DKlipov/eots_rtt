@@ -275,6 +275,7 @@ const DACCA = hex_to_int(1905)
 const MADRAS = hex_to_int(1406)
 const KUNMING = hex_to_int(2407)
 const TOKYO = hex_to_int(3706)
+const VOGELKOP = hex_to_int(3219)
 const TRUK = hex_to_int(4017)
 const SINGAPORE = hex_to_int(2015)
 const MANILA = hex_to_int(2813)
@@ -565,7 +566,13 @@ P.strategic_phase = script(`
     }
     eval {
         scenario_data().deal_cards()
-        G.pow = Math.min(4,G.asp[AP][0])
+        G.pow = 0
+        if(G.turn>=4){
+            G.pow = Math.min(4,G.asp[AP][0])
+        }
+        if (scenario_data().id === SOUTH_PACIFIC){
+            G.pow = 2
+        }
     }
     goto offensive_phase
 `)
@@ -674,7 +681,7 @@ function get_hq_reinforcement_hexes() {
         const oversea = set_has(oversea_set, item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0 || nh > LAST_BOARD_HEX) {
+            if (nh <= 0) {
                 continue
             }
             var reachable = false
@@ -1879,7 +1886,7 @@ function mark_ground_reaction_hexes(location) {
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0 || nh > LAST_BOARD_HEX) {
+            if (nh <= 0) {
                 continue
             }
             var distance = base_distance + get_ground_move_cost(nh, item, (j + 3) % 6, R)//to correct distance processing with backward tracing
@@ -1913,7 +1920,7 @@ function mark_asp_reaction_hexes(hex) {
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0 || nh > LAST_BOARD_HEX) {
+            if (nh <= 0) {
                 continue
             }
             if (distance > range
@@ -1975,7 +1982,7 @@ function get_activatable_units(hq, hq_supply_type) {
         const occupied_land = solely_occupied_land(item, 1 - faction)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0 || nh > LAST_BOARD_HEX) {
+            if (nh <= 0) {
                 continue
             }
             if (map_get(distance_map, nh, 100) > distance
@@ -2051,7 +2058,7 @@ function is_cv_reaction_able(u) {
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0 || nh > LAST_BOARD_HEX) {
+            if (nh <= 0) {
                 continue
             }
             if (distance > range
@@ -2860,7 +2867,7 @@ function check_hq_in_supply(hq, piece, supply) {
         const oversea = set_has(oversea_set, item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0 || nh > LAST_BOARD_HEX) {
+            if (nh <= 0) {
                 continue
             }
             var reachable = false
@@ -2897,7 +2904,7 @@ function mark_supply_ports_overland(hq, piece) {
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0 || nh > LAST_BOARD_HEX) {
+            if (nh <= 0) {
                 continue
             }
             const occupied_land = G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
@@ -2932,7 +2939,7 @@ function mark_supply_ports_oversea(hq, piece) {
         const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0 || nh > LAST_BOARD_HEX) {
+            if (nh <= 0) {
                 continue
             }
             const non_neutral_zoi = non_neutral_zoi_s || G.supply_cache[nh] & JP_ZOI << (1 - faction) && !(G.supply_cache[nh] & JP_ZOI_NTRL << (1 - faction))
@@ -2969,7 +2976,7 @@ function supply_source_in_range(location, faction) {
         const nh_list = get_near_hexes(item)
         for (var j = 0; j < nh_list.length; j++) {
             const nh = nh_list[j]
-            if (nh <= 0 || nh > LAST_BOARD_HEX) {
+            if (nh <= 0) {
                 continue
             }
 
@@ -3008,7 +3015,7 @@ function mark_hexes_supplied_from(hq, piece) {
         const distance = map_get(oversea_set, item) + 1
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0 || nh > LAST_BOARD_HEX) {
+            if (nh <= 0) {
                 continue
             }
             const non_neutral_zoi = non_neutral_zoi_s || G.supply_cache[nh] & JP_ZOI << (1 - faction) && !(G.supply_cache[nh] & JP_ZOI_NTRL << (1 - faction))
@@ -3038,7 +3045,7 @@ function mark_hexes_supplied_from(hq, piece) {
         const distance = map_get(overland_set, item) + 1
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0 || nh > LAST_BOARD_HEX) {
+            if (nh <= 0) {
                 continue
             }
             const occupied_land = G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
@@ -3068,7 +3075,7 @@ function mark_hexes_supplied_from(hq, piece) {
         const distance = map_get(oversea_set, item) + 1
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0 || nh > LAST_BOARD_HEX) {
+            if (nh <= 0) {
                 continue
             }
             const non_neutral_zoi = non_neutral_zoi_s || G.supply_cache[nh] & JP_ZOI << (1 - faction) && !(G.supply_cache[nh] & JP_ZOI_NTRL << (1 - faction))
@@ -3175,7 +3182,7 @@ function check_burma_road() {
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0 || nh > LAST_BOARD_HEX) {
+            if (nh <= 0) {
                 continue
             }
             const occupied_land = G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
@@ -3206,7 +3213,7 @@ function check_burma_road() {
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0 || nh > LAST_BOARD_HEX) {
+            if (nh <= 0) {
                 continue
             }
             if (map_has(distance_map, nh) || has_non_n_zoi(nh, JP)) {
@@ -3735,7 +3742,7 @@ function compute_air_move_hexes() {
 
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0 || nh > LAST_BOARD_HEX || nh === HARBIN || nh === MUKDEN) {
+            if (nh <= 0 || nh === HARBIN || nh === MUKDEN) {
                 continue
             }
             var cached = map_get(distance_map, nh, [9])[0]
@@ -3854,7 +3861,7 @@ function compute_ground_naval_strat_move() {
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0 || nh > LAST_BOARD_HEX) {
+            if (nh <= 0) {
                 continue
             }
             if (has_non_n_zoi(nh, 1 - R)
@@ -3977,7 +3984,7 @@ function compute_ground_disengagement(unit) {
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0 || nh > LAST_BOARD_HEX) {
+            if (nh <= 0) {
                 continue
             }
             var distance = base_distance[0] + get_ground_move_cost(item, nh, j, R)
@@ -4040,7 +4047,7 @@ function get_ground_move(avoid_zoi) {
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0 || nh > LAST_BOARD_HEX) {
+            if (nh <= 0) {
                 continue
             }
             var distance = base_distance[0] + get_ground_move_cost(item, nh, j, R)
@@ -4150,7 +4157,7 @@ function get_naval_move(zoi_mask) {
         var item_non_n_zoi = !non_cv_ground_unit || has_non_n_zoi(item, 1 - R)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0 || nh > LAST_BOARD_HEX) {
+            if (nh <= 0) {
                 continue
             }
             if (G.supply_cache[nh] & zoi_mask
@@ -4317,8 +4324,6 @@ P.commit_offensive = {
 }
 
 function commit_into_turn_draw() {
-    console.log("draw")
-    console.log(G.offensive.draw)
     resolve_into_turn_draw(JP)
     resolve_into_turn_draw(AP)
     G.offensive.draw[AP].forEach(c => G.hand[AP].push(c))
@@ -5790,7 +5795,7 @@ function check_japan_resource_trace() {
         const oversea = set_has(oversea_set, item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0 || nh > LAST_BOARD_HEX) {
+            if (nh <= 0) {
                 continue
             }
             var reachable = false
@@ -6061,7 +6066,7 @@ P.political_will_segment = function () {
 }
 
 function check_progress_of_war() {
-    if (G.turn < 4) {
+    if (G.pow <= 0) {
         return
     }
     var pow_count = G.capture.filter(h => !set_has(G.control, h)).length
@@ -6090,7 +6095,7 @@ function check_naval_situation() {
 }
 
 function check_jp_resources_event() {
-    if (get_jp_resources() <= 3 && G.turn >= 5) {
+    if (get_jp_resources() <= 3 && G.turn >= 5 && scenario_data().id !== SOUTH_PACIFIC) {
         check_event(events.JAPAN_LACK_OF_RESOURCES)
     }
 }
@@ -6234,7 +6239,7 @@ function victory_check() {
         finish("Japan", "US surrenders")
     }
     var vp = scenario_data().victory()
-    if (scenario_data().last_turn >= G.turn) {
+    if (scenario_data().last_turn <= G.turn) {
         vp.text.forEach(t => log(t))
         finish(vp.won_side, vp.won_text)
     }
@@ -6254,13 +6259,6 @@ function victory_1942() {
         text: [],
         won_side: "",
         won_text: "",
-    }
-    if (get_jp_resources() < 12) {
-        result.won_side = "Allies"
-        result.won_text = "Japan captured less than 12 resource hexes"
-        if (G.turn < 4) {
-            return result
-        }
     }
     if (G.surrender[nations.CHINA.id] > 0) {
         result.vp += G.surrender[nations.CHINA.id]
@@ -6360,6 +6358,10 @@ function victory_1942() {
         result.won_side = "Japan"
         result.won_text = `${result.vp} - Japanese Decisive Victory`
     }
+    if (get_jp_resources() < 12) {
+        result.won_side = "Allies"
+        result.won_text = "Japan captured less than 12 resource hexes"
+    }
     return result
 }
 
@@ -6387,7 +6389,7 @@ function check_supply_line(hex1, hex2, faction) {
         const oversea = set_has(oversea_set, item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0 || nh > LAST_BOARD_HEX) {
+            if (nh <= 0) {
                 continue
             }
             var reachable = false
@@ -6456,7 +6458,6 @@ function victory_1943() {
     var amh = 0
     for_each_hex_in_range(hex_to_int(4222), 4, h => {
         if (get_map_data(h).region === "AMandates" && is_space_controlled(h, AP)) {
-            console.log(`amh ${int_to_hex(h)}`)
             amh++
         }
     })
@@ -6660,108 +6661,91 @@ function victory_1945() {
 }
 
 function victory_south_pacific() {
-    if (G.turn < 6) {
-        return
-    }
     var result = {
         vp: 0,
         text: [],
         won_side: "",
         won_text: "",
     }
-    if (G.surrender[nations.CHINA.id] > 5) {
-        result.vp += 5
-        result.text.push(`+5 VP - China surrender`)
+
+    if (G.surrender[nations.CHINA.id] > 2) {
+        result.vp += G.surrender[nations.CHINA.id] - 2
+        result.text.push(`+${G.surrender[nations.CHINA.id]} VP - China government status.`)
+    } else {
+        result.text.push(`0 VP - China government status.`)
     }
-    if (G.burma_road >= 1) {
-        result.vp += 1
-        result.text.push(`+1 VP - Burma road closed`)
+    if (G.surrender[nations.CHINA.id] > 5) {
+        result.vp += 3
+        result.text.push(`+3 VP - China surrender.`)
     }
     if (!check_supply_line(hex_to_int(3727), OAHU, AP)) {
         result.vp += 5
-        result.text.push(`+5 VP - Townsville isolated from Oahu`)
-    }
-    var india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
-    if (india) {
-        result.vp += india
-        result.text.push(`+${india} VP - Jp controlled hexes of Northern India`)
-    }
-    var india_status = G.surrender[nations.INDIA.id]
-    if (india_status > 0 && india_status <= 2) {
-        result.vp += 1
-        result.text.push(`+1 VP - India ${nations.INDIA.statuses[india_status]}`)
-    } else if (india_status > 0) {
-        result.vp += 2
-        result.text.push(`+2 VP - India ${nations.INDIA.statuses[india_status]}`)
-    }
-    var amh = 0
-    for_each_hex_in_range(hex_to_int(4222), 4, h => {
-        if (get_map_data(h).region === "AMandates" && (is_space_controlled(h, AP) || is_faction_units(h, AP))) {
-            amh++
-        }
-    })
-    if (G.surrender[nations.AUSTRALIAN_MANDATES.id]) {
-        result.vp += 3
-        result.text.push(`+3 VP - Japanese control of Australian Mandates`)
+        result.text.push(`+5 VP - Townsville isolated from Oahu.`)
     } else {
-        result.vp -= 3
-        result.text.push(`-3 VP - Allied control of Australian Mandates`)
-    }
-    if (G.surrender[nations.AUSTRALIAN_MANDATES.id] && amh >= 4) {
-        result.vp -= 1
-        result.text.push(`-1 VP - Allied control of 4 Australian Mandates hexes`)
+        result.text.push(`0 VP - Townsville did not isolated.`)
     }
 
-    if (G.political_will <= 5) {
-        result.vp += G.political_will - 4
-        result.text.push(`+${G.political_will - 4} VP - Political will`)
-    } else if (G.political_will >= 6) {
-        result.vp -= G.political_will - 5
-        result.text.push(`-${G.political_will - 5} VP - Political will`)
+    if (G.political_will < 4) {
+        result.vp += 4 - G.political_will
+        result.text.push(`+${G.political_will - 4} VP - Political will.`)
+    } else {
+        result.text.push(`0 VP - Political will >= 4.`)
     }
-    if (set_has(G.captured_once, OAHU)) {
+    if (nations.AUSTRALIAN_MANDATES.ports.filter(h => !is_space_controlled(hex_to_int(h), JP)).length === 0) {
         result.vp += 3
-        result.text.push(`+3 VP - Oahu was captured`)
-    }
-    if (set_has(G.captured_once, hex_to_int(5708))) {
-        result.vp += 1
-        result.text.push(`+1 VP - Kauai was captured`)
-    } else if (set_has(G.captured_once, hex_to_int(5908))) {
-        result.vp += 1
-        result.text.push(`+1 VP - Hawaii was captured`)
-    }
-
-
-    if (check_nation_controlled(nations.MARSHALL, AP)) {
+        result.text.push(`+3 VP - JP control of Mandates.`)
+    } else if (nations.AUSTRALIAN_MANDATES.ports.filter(h => !is_space_controlled(hex_to_int(h), AP)).length === 0) {
         result.vp -= 3
-        result.text.push(`-3 VP - Allied control of Marshall Islands`)
+        result.text.push(`-3 VP - AP control of Mandates.`)
+    } else {
+        result.text.push(`0 VP - None control of Mandates.`)
+    }
+    if (check_nation_controlled(nations.NEW_GUINEA, JP)) {
+        result.vp += 3
+        result.text.push(`+3 VP - JP control of New Guinea.`)
+    } else if (check_nation_controlled(nations.NEW_GUINEA, AP)) {
+        result.vp -= 3
+        result.text.push(`-3 VP - AP control of New Guinea.`)
+    } else {
+        result.text.push(`0 VP - None control of New Guinea.`)
     }
     var new_guinea = 0
-    for_each_hex_in_range(hex_to_int(3621), 5, h => {
-        if (get_map_data(h).region === "Guinea" && (is_space_controlled(h, AP) || is_faction_units(h, AP)) && get_map_data(h).port) {
+    nations.NEW_GUINEA.keys.forEach(hex => {
+        var h = hex_to_int(hex)
+        if (is_space_controlled(h, JP) && get_map_data(h).port) {
             new_guinea++
         }
     })
-    if (check_nation_controlled(nations.NEW_GUINEA, AP)) {
-        result.vp -= 3
-        result.text.push(`-3 VP - Allied control of New Guinea`)
-    } else if (new_guinea >= 4) {
-        result.vp -= 1
-        result.text.push(`-1 VP - Allied control of 4 New Guinea port hexes`)
-    }
-    var tokyo_ports = 0
-    for_each_hex_in_range(TOKYO, 11, h => {
-        if (get_map_data(h).port && (is_space_controlled(h, AP) || is_faction_units(h, AP))) {
-            tokyo_ports++
+    result.vp += new_guinea
+    result.text.push(`${new_guinea > 0 ? "+" : ""}${new_guinea} JP control of New Guinea ports.`)
+    var amh = 0
+    nations.AUSTRALIAN_MANDATES.ports.forEach(hex => {
+        var h = hex_to_int(hex)
+        if (is_space_controlled(h, JP) && get_map_data(h).port) {
+            amh++
         }
     })
-    if (tokyo_ports) {
+    result.vp += amh
+    result.text.push(`${amh > 0 ? "+" : ""}${amh} JP control of Mandates ports.`)
+    if (is_space_controlled(VOGELKOP, AP)) {
         result.vp -= 3
-        result.text.push(`-3 VP - Allies control a port that is 11 or less hexes from Tokyo`)
+        result.text.push(`-1 VP - AP control of Vogelkop.`)
+    } else {
+        result.text.push(`0 VP - JP control of Vogelkop.`)
     }
-    if (get_jp_resources() <= 14) {
-        result.vp -= 14 - get_jp_resources()
-        result.text.push(`-${14 - get_jp_resources()} VP - Allied controlled resource hexes`)
+    var heb = G.control.map(h => get_map_data(h)).filter(md => md.region === "Hebrides" && md.port).length
+    if (heb) {
+        result.vp += 1
+        result.text.push(`+1 VP - JP control of New Hebrides port.`)
+    } else {
+        result.text.push(`0 VP - Non JP control of any New Hebrides port.`)
+    }
+    var aus = G.control.map(h => get_map_data(h)).filter(md => md.region === "Australia" && md.port).length
+    if (aus) {
+        result.vp += 1
+        result.text.push(`+1 VP - JP control of Australia mainland port.`)
+    } else {
+        result.text.push(`0 VP - Non JP control of any Australia mainland port.`)
     }
     result.text.push(`2 VP or less - Allied Decisive Victory, 3-5 VP Allied Tactical Victory, 6-9 VP Japanese Tactical Victory, 10 VP Japanese Decisive Victory.`)
     result.text.push(`Total VP: ${result.vp}`)
@@ -6878,7 +6862,7 @@ function mark_hexes_in_move_range(hex, range) {
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0 || nh > LAST_BOARD_HEX) {
+            if (nh <= 0) {
                 continue
             }
             if (distance > range
@@ -7495,7 +7479,7 @@ function get_guadalcanal_evacuation_destination(location) {
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0 || nh > LAST_BOARD_HEX) {
+            if (nh <= 0) {
                 continue
             }
             if (distance > move_data.naval_move_distance
@@ -7934,7 +7918,7 @@ function check_fuel_shortage_data() {
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0 || nh > LAST_BOARD_HEX) {
+            if (nh <= 0) {
                 continue
             }
             if (has_non_n_zoi(nh, 1 - R)
@@ -9156,7 +9140,7 @@ SCENARIO_DATA[SOUTH_PACIFIC].before_unit_activation = function () {
         filter_activation_units((u) => G.location[u] !== TRUK, JP)
     }
     if (G.offensive.active_hq[G.active] === HQ_CENTRAL_PACIFIC) {
-        filter_activation_units((u) => get_map_data(G.location[u]).region === "Hebrides", AP)
+        filter_activation_units((u) => G.location[u] === OAHU || get_map_data(G.location[u]).region === "Hebrides", AP)
     }
 }
 
@@ -10145,6 +10129,7 @@ function setup_scenario_south_pacific() {
     G.asp[JP] = [7, 0]
     G.asp[AP] = [2, 0]
     G.wie = 2
+    G.pow = 1
     G.reinforcements = {NAVAL: 2, AIR: 2}
     G.surrender[nations.CHINA.id] = 2
     G.inter_service = [1, 1]

@@ -138,7 +138,7 @@ const TRACK_MARKERS = [
     {
         counter: "pow_target",
         always_show: G => G.turn > 3,
-        value: G => (G.turn > 3) ? G.pow : 0
+        value: G => (G.pow > 0) ? G.pow : 0
     },
     {
         counter: "pow",
@@ -985,6 +985,9 @@ function vp_dialog(id, response) {
             let header = document.createElement("dt")
             header.textContent = text
             dl.appendChild(header)
+        }
+        if (response.text.length === 0) {
+            response.text.push(response.won_text)
         }
         response.text.forEach(text => {
             let header = document.createElement("div")

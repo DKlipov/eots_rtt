@@ -5611,9 +5611,9 @@ data.map = [
         supply_source: JOINT_SUPPLIED_HEX
     },
     {id: 2625, region: "Australia", terrain: JUNGLE, edges: [3, 2, 2, 2, 2, 3]},
-    {id: 2626, region: "Australia", terrain: OPEN, edges: [2, 2, 0, 0, 0, 2],supply_source: JOINT_SUPPLIED_HEX},
+    {id: 2626, region: "Australia", terrain: OPEN, edges: [2, 2, 0, 0, 0, 2], supply_source: JOINT_SUPPLIED_HEX},
     {id: 2724, region: "Australia", terrain: JUNGLE, edges: [1, 2, 2, 2, 2, 1]},
-    {id: 2725, region: "Australia", terrain: OPEN, edges: [2, 2, 2, 0, 2, 2],supply_source: JOINT_SUPPLIED_HEX},
+    {id: 2725, region: "Australia", terrain: OPEN, edges: [2, 2, 2, 0, 2, 2], supply_source: JOINT_SUPPLIED_HEX},
     {id: 2824, region: "Australia", terrain: JUNGLE, edges: [1, 1, 1, 3, 2, 1]},
     {
         id: 2825,
@@ -5625,10 +5625,10 @@ data.map = [
         terrain: MIXED,
         edges: [3, 3, 2, 2, 2, 2]
     },
-    {id: 2826, region: "Australia", terrain: OPEN, edges: [2, 2, 0, 0, 0, 2],supply_source: JOINT_SUPPLIED_HEX},
+    {id: 2826, region: "Australia", terrain: OPEN, edges: [2, 2, 0, 0, 0, 2], supply_source: JOINT_SUPPLIED_HEX},
     {id: 2923, region: "Australia", terrain: JUNGLE, edges: [1, 3, 2, 3, 1, 1]},
     {id: 2924, region: "Australia", terrain: JUNGLE, edges: [3, 2, 2, 2, 3, 1]},
-    {id: 2925, region: "Australia", terrain: OPEN, edges: [2, 2, 2, 0, 2, 2],supply_source: JOINT_SUPPLIED_HEX},
+    {id: 2925, region: "Australia", terrain: OPEN, edges: [2, 2, 2, 0, 2, 2], supply_source: JOINT_SUPPLIED_HEX},
     {
         id: 3023,
         name: "Darwin",
@@ -5640,26 +5640,33 @@ data.map = [
         edges: [1, 1, 0, 2, 3, 1]
     },
     {id: 3024, region: "Australia", terrain: JUNGLE},
-    {id: 3025, region: "Australia", terrain: OPEN, edges: [2, 2, 2, 1, 2, 2],supply_source: JOINT_SUPPLIED_HEX},
+    {id: 3025, region: "Australia", terrain: OPEN, edges: [2, 2, 2, 1, 2, 2], supply_source: JOINT_SUPPLIED_HEX},
     {id: 3123, region: "Australia", terrain: JUNGLE, edges: [1, 1, 3, 2, 2, 1]},
     {id: 3124, region: "Australia", terrain: JUNGLE},
-    {id: 3125, region: "Australia", terrain: OPEN, edges: [2, 2, 2, 0, 8, 2],supply_source: JOINT_SUPPLIED_HEX},
+    {id: 3125, region: "Australia", terrain: OPEN, edges: [2, 2, 2, 0, 8, 2], supply_source: JOINT_SUPPLIED_HEX},
     {id: 3224, region: "Australia", terrain: JUNGLE, edges: [1, 1, 1, 3, 2, 3]},
     {id: 3225, region: "Australia", terrain: JUNGLE, edges: [3, 1, 1, 3, 2, 2]},
-    {id: 3226, airfield: true, region: "Australia", terrain: JUNGLE, edges: [3, 3, 2, 2, 2, 2],supply_source: JOINT_SUPPLIED_HEX},
-    {id: 3227, region: "Australia", terrain: OPEN, edges: [2, 2, 2, 0, 0, 0],supply_source: JOINT_SUPPLIED_HEX},
+    {
+        id: 3226,
+        airfield: true,
+        region: "Australia",
+        terrain: JUNGLE,
+        edges: [3, 3, 2, 2, 2, 2],
+        supply_source: JOINT_SUPPLIED_HEX
+    },
+    {id: 3227, region: "Australia", terrain: OPEN, edges: [2, 2, 2, 0, 0, 0], supply_source: JOINT_SUPPLIED_HEX},
     {id: 3324, region: "Australia", terrain: OPEN, island: true},
     {id: 3325, region: "Australia", terrain: JUNGLE, edges: [1, 1, 1, 3, 3, 1]},
     {id: 3326, region: "Australia", terrain: JUNGLE, edges: [3, 3, 2, 2, 2, 2]},
-    {id: 3327, region: "Australia", terrain: OPEN, edges: [2, 2, 2, 0, 0, 2],supply_source: JOINT_SUPPLIED_HEX},
+    {id: 3327, region: "Australia", terrain: OPEN, edges: [2, 2, 2, 0, 0, 2], supply_source: JOINT_SUPPLIED_HEX},
     {id: 3425, region: "Australia", terrain: JUNGLE, edges: [1, 3, 2, 3, 1, 1]},
     {id: 3426, region: "Australia", terrain: JUNGLE, edges: [3, 2, 2, 2, 3, 1]},
     {id: 3427, region: "Australia", terrain: JUNGLE},
-    {id: 3428, region: "Australia", terrain: JUNGLE, edges: [2, 2, 0, 0, 0, 2],supply_source: JOINT_SUPPLIED_HEX},
+    {id: 3428, region: "Australia", terrain: JUNGLE, edges: [2, 2, 0, 0, 0, 2], supply_source: JOINT_SUPPLIED_HEX},
     {id: 3524, region: "Australia", terrain: OPEN, edges: [1, 3, 2, 2, 3, 1]},
     {id: 3525, region: "Australia", terrain: MOUNTAIN, edges: [2, 3, 3, 2, 2, 2]},
     {id: 3526, region: "Australia", terrain: MOUNTAIN},
-    {id: 3527, region: "Australia", terrain: MOUNTAIN, edges: [2, 2, 2, 0, 2, 2],supply_source: JOINT_SUPPLIED_HEX},
+    {id: 3527, region: "Australia", terrain: MOUNTAIN, edges: [2, 2, 2, 0, 2, 2], supply_source: JOINT_SUPPLIED_HEX},
     {id: 3624, name: "Cape York", airfield: true, region: "Australia", terrain: MIXED, edges: [1, 1, 1, 3, 3, 1]},
     {id: 3625, region: "Australia", terrain: MIXED, edges: [3, 1, 1, 1, 3, 2]},
     {
@@ -5673,7 +5680,7 @@ data.map = [
         edges: [1, 1, 1, 5, 2, 3]
     },
     {id: 3627, region: "Australia", terrain: MOUNTAIN, edges: [5, 1, 5, 2, 2, 2]},
-    {id: 3628, region: "Australia", terrain: MOUNTAIN, edges: [2, 2, 0, 0, 0, 2],supply_source: JOINT_SUPPLIED_HEX},
+    {id: 3628, region: "Australia", terrain: MOUNTAIN, edges: [2, 2, 0, 0, 0, 2], supply_source: JOINT_SUPPLIED_HEX},
     {
         id: 3727,
         name: "Townsville",
@@ -5998,7 +6005,8 @@ data.nations = {
         id: 6,
         name: "Australia Mandates",
         regions: ["AMandates"],
-        keys: [4021, 4423]
+        keys: [4021, 4423],
+        ports: [4423, 4222, 4021, 4020, 3820]
     },
     NEW_GUINEA: {
         id: 7,
