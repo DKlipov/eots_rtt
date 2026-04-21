@@ -1228,6 +1228,7 @@ P.offensive_phase = script(`
     log ("Offensives phase")
     call initiative_segment
     eval {
+        commit_into_turn_draw()
         G.active = G.first_active 
         reset_offensive()
         G.offensive.attacker = G.active
@@ -1506,6 +1507,8 @@ P.offensive_segment = {
             button("pass")
         }
         var hand = get_hand(R)
+        console.log(G.future_offensive)
+        console.log(G.hand)
         for (let i = 0; i < hand.length; i++) {
             let card = hand[i]
             action_card(card)
@@ -1530,9 +1533,15 @@ P.offensive_segment = {
             for_each_unit_on_map(u => action_unit(u))
         }
     },
-    card(c){
+    card(c) {
         push_undo()
-        goto("offensive_segment_card_action", {c:c})
+        goto("offensive_segment_card_action", {c: c})
+    },
+    pass() {
+        push_undo()
+        G.passes[R] -= 1
+        log(`${R} passed, ${G.passes[R]} passes remains.`)
+        goto("end_action")
     },
     //debug
     isr() {
@@ -1578,7 +1587,7 @@ P.offensive_segment = {
     },
 }
 
-P.offensive_segment_card_action={
+P.offensive_segment_card_action = {
     prompt() {
         prompt(`${card_get_log_str(L.c)} : Select action.`)
         get_allowed_actions(L.c).forEach(a => button(a))
@@ -1637,32 +1646,24 @@ P.offensive_segment_card_action={
         log(`${card_get_log_str(L.c)} played for Chinese Offensive.`)
         goto("china_offensive")
     },
-    displace_hq(c) {
+    displace_hq() {
         push_undo()
-        activate_card(c)
-        log(`${card_get_log_str(c)} played for withdraw HQ.`)
+        activate_card(L.c)
+        log(`${card_get_log_str(L.c)} played for withdraw HQ.`)
         goto("displace_hq")
     },
-    return_hq(c) {
+    return_hq() {
         push_undo()
-        activate_card(c)
-        log(`${card_get_log_str(c)} played for return HQ.`)
+        activate_card(L.c)
+        log(`${card_get_log_str(L.c)} played for return HQ.`)
         goto("return_hq")
     },
-    future_offensive(c) {
+    future_offensive() {
         push_undo()
-        log(`${R} played future offensive`)
-        G.events[events.FUTURE_OFFENSIVE_JP.id + R] = G.turn
-        G.future_offensive[R] = c
-        array_delete_item(G.hand[R], c)
+        log(`${R} played future offensive.`)
+        future_offencive_card(L.c, G.turn)
         goto("end_action")
-    },
-    pass() {
-        push_undo()
-        G.passes[R] -= 1
-        log(`${R} passed, ${G.passes[R]} passes remains.`)
-        goto("end_action")
-    },
+    }
 }
 
 
@@ -1670,7 +1671,7 @@ P.displace_hq = {
     prompt() {
         prompt(`Choose HQ to displace.`)
         HQ_LIST.forEach(u => {
-            if (unit_on_board(u) && pieces[u].faction === R) {
+            if (unit_on_board(u) && pieces[u].faction === R && (scenario_data().id !== SOUTH_PACIFIC || u !== HQ_CENTRAL_PACIFIC)) {
                 action_unit(u)
             }
         })
@@ -3327,7 +3328,7 @@ P.check_overstacking = {
 
 function set_location(unit, location) {
     if (location <= LAST_BOARD_HEX || location === CHINA_BOX) {
-         log(`${piece_get_log_str(unit)} moved to ${hex_get_log_str(location)}`)
+        log(`${piece_get_log_str(unit)} moved to ${hex_get_log_str(location)}`)
     }
     var prev_location = G.location[unit]
     var pair_location = G.location[pieces[unit].pair]
@@ -4298,6 +4299,8 @@ P.commit_offensive = {
 }
 
 function commit_into_turn_draw() {
+    console.log("draw")
+    console.log(G.offensive.draw)
     resolve_into_turn_draw(JP)
     resolve_into_turn_draw(AP)
     G.offensive.draw[AP].forEach(c => G.hand[AP].push(c))
@@ -10074,6 +10077,7 @@ function future_offencive_card(card, turn) {
     array_delete_item(G.discard[faction], card)
     array_delete_item(G.draw[faction], card)
     array_delete_item(G.removed[faction], card)
+    array_delete_item(G.hand[faction], card)
 }
 
 function remove_card(card) {
@@ -10304,8 +10308,7 @@ function int_to_hex(i) {
     return (Math.floor(i / 29) * 100) + 1000 + i % 29
 }
 
-function
-reset_offensive() {
+function reset_offensive() {
     G.offensive = {
         type: EC,
         attacker: JP,

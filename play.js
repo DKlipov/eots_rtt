@@ -263,9 +263,9 @@ function on_init() {
         define_space("action_hex", i, [center[0] - 29, center[1] - 19, 45, 45], "hex")
         ZOI_HEX[i] = (define_space("zoi", i, [center[0] - 33, center[1] - 24, 45, 45], "hex hide"))
     }
-    define_s_loc(NON_PLACED_BOX, [10, 10, 45, 45])
+    define_s_loc(NON_PLACED_BOX, [-1000, -1000, 45, 45])
     define_s_loc(ELIMINATED_BOX, [100, 1280, 45, 45])
-    define_s_loc(PERM_ELIMINATED, [-100, -1180, 45, 45])
+    define_s_loc(PERM_ELIMINATED, [-1000, -1180, 45, 45])
     define_s_loc(DELAYED_BOX, [2420, 1540, 45, 45])
     define_s_loc(CHINA_BOX, [890, 420, 45, 45])
     define_space("action_hex", CHINA_BOX, [890, 420, 45, 45])
@@ -343,9 +343,11 @@ function update_hand(side) {
     var fo_card;
     if (G.future_offensive[side] > 0) {
         fo_card = populate("hand", side, "card", G.future_offensive[side])
+        fo_card.innerHTML = ''
     } else if (G.events[data.events.FUTURE_OFFENSIVE_JP.id + side] > 0) {
         fo_card = populate_generic_to_parent(lookup_thing("hand", side).element, side === JP ? "card card_jp_0" : "card card_ap_0")
     }
+
     if (G.events[data.events.FUTURE_OFFENSIVE_JP.id + side] === G.turn) {
         populate_generic_to_parent(fo_card, "marker future_offensive_inactive")
     } else if (G.events[data.events.FUTURE_OFFENSIVE_JP.id + side] > 0) {
@@ -359,9 +361,8 @@ function update_hand(side) {
     } else {
         for (let i = 0; i < G.hand[side].length; i++) {
             let card = G.hand[side][i]
-            populate("hand", side, "card", card)
-            //.classList.toggle("action", is_active_card(card))
-            // populate("hand", side, "card", card).classList.add("action")
+            var element = populate("hand", side, "card", card)
+            element.innerHTML = ''
         }
     }
 }
@@ -483,12 +484,14 @@ function place_unit(u, location) {
         unit.classList.toggle("reduced", set_has(G.reduced, u))
         unit.classList.remove("activated")
         unit.classList.remove("selected")
-    } else if (location === ELIMINATED_BOX && (!data.pieces[u].notreplaceable || is_action("unit", u)) || location !== ELIMINATED_BOX) {
+    } else if (location === ELIMINATED_BOX && (!data.pieces[u].notreplaceable || is_action("unit", u)) || location < LAST_BOARD_HEX
+        || location === DELAYED_BOX || location === CHINA_BOX) {
         unit = populate("s-loc", location, "unit", u)
         unit.classList.toggle("reduced", set_has(G.reduced, u) || location === ELIMINATED_BOX
             || data.pieces[u].class === "hq" && G.inter_service[data.pieces[u].faction])
         unit.classList.toggle("activated", G.offensive.active_units.includes(u))
         unit.classList.toggle("selected", G.active_stack.includes(u))
+        unit.innerHTML = '';
         var battle = map_get(G.offensive.committed, u)
         var path = map_get(G.offensive.paths, u, [0])[0]
         if (battle && set_has(G.offensive.battle_hexes, battle)) {
@@ -509,7 +512,6 @@ function place_unit(u, location) {
                     return
                 }
             }
-
         }
     }
 }
@@ -710,7 +712,6 @@ function on_update() {
     action_button("amphibious", "Amphibious")
 
 
-    action_button("discard", "Discard")
     action_button("event", "Play Event")
     action_button("ops", "Play for Operations")
     action_button("displace_hq", "HQ Withdrawal")
@@ -722,6 +723,7 @@ function on_update() {
     action_button("imphal", "Build Imphal Road")
     action_button("ledo", "Build Ledo Road")
     action_button("hold", "Hold")
+    action_button("discard", "Discard")
 
 
     action_button("pass", "Pass")
