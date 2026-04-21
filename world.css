@@ -359,3 +359,180 @@ body.hide-pieces .piece { display: none }
 .dice.d4 { background-position: 60% 0; }
 .dice.d5 { background-position: 80% 0; }
 .dice.d6 { background-position: 100% 0; }
+
+
+/* STACK LAYOUT */
+
+.layout.stack {
+	display: block;
+	--stack-dx: -3px;
+	--stack-dy: -3px;
+}
+
+.layout.stack.small {
+	display: block;
+	--stack-dx: -6px;
+	--stack-dy: -6px;
+}
+
+.layout.stack > * {
+	position: absolute;
+}
+
+.layout.stack > :nth-child(1) {
+	top: calc(var(--stack-dy, -10px) * 0);
+	left: calc(var(--stack-dx, -10px) * 0);
+}
+
+.layout.stack > :nth-child(2) {
+	top: calc(var(--stack-dy, -10px) * 1);
+	left: calc(var(--stack-dx, -10px) * 1);
+}
+
+.layout.stack > :nth-child(3) {
+	top: calc(var(--stack-dy, -10px) * 2);
+	left: calc(var(--stack-dx, -10px) * 2);
+}
+
+.layout.stack > :nth-child(4) {
+	top: calc(var(--stack-dy, -10px) * 3);
+	left: calc(var(--stack-dx, -10px) * 3);
+}
+
+.layout.stack > :nth-child(5) {
+	top: calc(var(--stack-dy, -10px) * 4);
+	left: calc(var(--stack-dx, -10px) * 4);
+}
+
+.layout.stack > :nth-child(6) {
+	top: calc(var(--stack-dy, -10px) * 5);
+	left: calc(var(--stack-dx, -10px) * 5);
+}
+
+.layout.stack > :nth-child(7) {
+	top: calc(var(--stack-dy, -10px) * 6);
+	left: calc(var(--stack-dx, -10px) * 6);
+}
+
+.layout.stack > :nth-child(8) {
+	top: calc(var(--stack-dy, -10px) * 7);
+	left: calc(var(--stack-dx, -10px) * 7);
+}
+
+.layout.stack > :nth-child(9) {
+	top: calc(var(--stack-dy, -10px) * 8);
+	left: calc(var(--stack-dx, -10px) * 8);
+}
+
+.layout.stack > :nth-child(10) {
+	top: calc(var(--stack-dy, -10px) * 9);
+	left: calc(var(--stack-dx, -10px) * 9);
+}
+
+.layout.stack > :nth-child(11) {
+	top: calc(var(--stack-dy, -10px) * 10);
+	left: calc(var(--stack-dx, -10px) * 10);
+}
+
+.layout.stack > :nth-child(12) {
+	top: calc(var(--stack-dy, -10px) * 11);
+	left: calc(var(--stack-dx, -10px) * 11);
+}
+
+.layout.stack > :nth-child(13) {
+	top: calc(var(--stack-dy, -10px) * 12);
+	left: calc(var(--stack-dx, -10px) * 12);
+}
+
+.layout.stack > :nth-child(14) {
+	top: calc(var(--stack-dy, -10px) * 13);
+	left: calc(var(--stack-dx, -10px) * 13);
+}
+
+.layout.stack > :nth-child(15) {
+	top: calc(var(--stack-dy, -10px) * 14);
+	left: calc(var(--stack-dx, -10px) * 14);
+}
+
+.layout.stack > :nth-child(16) {
+	top: calc(var(--stack-dy, -10px) * 15);
+	left: calc(var(--stack-dx, -10px) * 15);
+}
+
+.layout.stack > :nth-child(17) {
+	top: calc(var(--stack-dy, -10px) * 16);
+	left: calc(var(--stack-dx, -10px) * 16);
+}
+
+.layout.stack > :nth-child(18) {
+	top: calc(var(--stack-dy, -10px) * 17);
+	left: calc(var(--stack-dx, -10px) * 17);
+}
+
+.layout.stack > :nth-child(19) {
+	top: calc(var(--stack-dy, -10px) * 18);
+	left: calc(var(--stack-dx, -10px) * 18);
+}
+
+.layout.stack > :nth-child(20) {
+	top: calc(var(--stack-dy, -10px) * 19);
+	left: calc(var(--stack-dx, -10px) * 19);
+}
+
+
+.layout.stack.hover-offset\:10:hover {
+	--stack-dx: -10px;
+	--stack-dy: -10px;
+}
+
+.layout.stack.hover-offset\:15:hover {
+	--stack-dx: -15px;
+	--stack-dy: -15px;
+}
+
+.layout.stack.hover-offset\:20:hover {
+	--stack-dx: -20px;
+	--stack-dy: -20px;
+}
+
+
+.focus {
+	/*background-color: black;*/
+	/*opacity: 50%;*/
+	/*z-index: 100;*/
+	/*border-radius: 5px;*/
+}
+
+.layout.stack.focus {
+	--stack-dx: 0;
+	--stack-dy: -40px;
+	z-index: 100;
+}
+
+
+.zoi {
+	pointer-events: none;
+	background: rgba(255, 130, 255, 0.2);
+	z-index: -1;
+}
+
+.jp_zoi {
+	background: rgba(255, 0, 0, 0.2);
+}
+
+.ap_zoi {
+	background: rgba(0, 130, 255, 0.2);
+}
+
+.hex {
+	height: 55px;
+	aspect-ratio: 1/cos(30deg);
+	clip-path: polygon(50% -50%, 100% 50%, 50% 150%, 0 50%);
+	box-sizing: border-box;
+	border-width: 4px;
+	border-style: solid;
+	border-color: transparent;
+	box-shadow: none;
+	border-radius: 16px;
+	pointer-events: none;
+}

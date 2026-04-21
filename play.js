@@ -223,14 +223,6 @@ function clear_paths() {
 
 function on_init() {
     init_canvas()
-    //let map = document.getElementById("map")
-    //map.onclick = (a) => {
-    //    if (a.target === map && world.focus !== null) {
-    //        world.focus.classList.remove("focus")
-    //        world.focus = null
-    //        on_update()
-    //    }
-    //}
     define_board("#map", 2550, 1650, [12, 12, 12, 12])
     var first_hex = []
     var last_hex = []
@@ -257,13 +249,13 @@ function on_init() {
         let center = hex_center(i)
         define_layout("board_hex", i, [center[0] - 18, center[1] - 14, 45, 45])
         define_stack("s-loc", i,
-			[center[0] - 18, center[1] - 14, 45, 45],
-			-6, -9, // closed offset
-			0, -52, // open offset (major axis)
-			52, 0, // open offset (minor axis)
-			1, // threshold to auto-open
-			6 // wrap limit
-		)
+            [center[0] - 18, center[1] - 14, 45, 45],
+            -6, -9, // closed offset
+            0, -52, // open offset (major axis)
+            52, 0, // open offset (minor axis)
+            1, // threshold to auto-open
+            6 // wrap limit
+        )
         define_space("action_hex", i, [center[0] - 29, center[1] - 19, 45, 45], "hex")
         ZOI_HEX[i] = (define_space("zoi", i, [center[0] - 33, center[1] - 24, 45, 45], "hex hide"))
     }
@@ -312,7 +304,7 @@ function on_init() {
     }
     define_panel("#jp_hand", "hand", JP)
     define_panel("#ap_hand", "hand", AP)
-    define_panel("#active_cards","hand", 2)
+    define_panel("#active_cards", "hand", 2)
 }
 
 function push_stack(stk, elt) {
@@ -322,7 +314,6 @@ function push_stack(stk, elt) {
 
 function is_active_card(card) {
     for (let a of CARD_ACTIONS) {
-        // console.log(G.actions[a])
         if (G.actions && G.actions[a] && set_has(G.actions[a], card)) {
             return true
         }
@@ -463,6 +454,9 @@ function draw_paths() {
     })
 }
 
+var par
+var un
+
 function place_unit(u, location) {
     var piece = data.pieces[u]
     var unit
@@ -561,7 +555,8 @@ function on_update() {
         }
     })
     for (var i = 1; i < data.pieces.length; ++i) {
-        if (G.location[i] > 0) {
+        var loc = G.location[i]
+        if (loc > 0) {
             place_unit(i, G.location[i])
         }
     }
@@ -603,12 +598,12 @@ function on_update() {
         let hex = ZOI_HEX[i]
         if (!hex) {
             continue
-        }else{
+        } else {
             hex = hex.element
         }
 
         if (zoi_state === 0) {
-            hex.classList.add("hide")
+            // hex.classList.add("hide")
         } else if (zoi_state === 1) {
             hex.classList.remove("hide")
             hex.classList.remove("ap_zoi")
@@ -704,11 +699,11 @@ function on_update() {
     action_button("return_hq", "Early HQ Return")
     action_button("inter_service", "Remove Inter-Service Rivalry")
     action_button("china_offensive", "China Offensive")
-    action_button("future_offensive","Future Offensive")
-    action_button("jarhat","Build Jarhat Road")
-    action_button("imphal","Build Imphal Road")
-    action_button("ledo","Build Ledo Road")
-    action_button("hold","Hold")
+    action_button("future_offensive", "Future Offensive")
+    action_button("jarhat", "Build Jarhat Road")
+    action_button("imphal", "Build Imphal Road")
+    action_button("ledo", "Build Ledo Road")
+    action_button("hold", "Hold")
 
 
     action_button("pass", "Pass")
@@ -976,7 +971,6 @@ function sub_card(match, p1) {
 }
 
 
-
 function get_piece_elem(p) {
     return data.pieces[p].element.element
 }
@@ -1000,23 +994,24 @@ function on_blur_piece_tip(z) {
     get_piece_elem(z).classList.toggle("tip", false)
 }
 
-function get_hex_elem(h){
+function get_hex_elem(h) {
+    console.log(world.things)
     //perhaps should cache this somewhere ?
     return lookup_thing("board_hex", h)
 }
 
-function get_hex_name(h){
+function get_hex_name(h) {
     const hex = int_to_hex(h)
     const hex_id = data.map.findIndex((element) => element.id === hex)
-    if(hex_id != -1){
+    if (hex_id != -1) {
         const hex_data = data.map[hex_id]
-        if(hex_data.name){
+        if (hex_data.name) {
             return hex_data.name
         }
     }
-    
+
     return `hex ${hex}`
-    
+
 }
 
 function sub_hex(match, p1) {
@@ -1037,29 +1032,30 @@ function on_focus_hex_tip(z) {
 function on_blur_hex_tip(z) {
     get_hex_elem(z).classList.toggle("tip", false)
 }
+
 /* TOOLTIP ON FOCUS */
 
 function unit_tooltip_image(a, onoff) {
-	if (onoff) {
-		on_focus_unit_tip(a)
-	} else {
-		on_blur_unit_tip()
-	}
+    if (onoff) {
+        on_focus_unit_tip(a)
+    } else {
+        on_blur_unit_tip()
+    }
 }
 
 function on_focus_unit_tip(a) {
-	world.tip.hidden = is_mobile()
+    world.tip.hidden = is_mobile()
     const piece = data.pieces[a]
-	// Show BOTH sides of the marker
-	world.tip.innerHTML = `
+    // Show BOTH sides of the marker
+    world.tip.innerHTML = `
     <div class="unit-tip piece ${piece.counter}"></div>	
     <div class="unit-tip piece ${piece.counter} reduced"></div>`
     world.tip.classList = "zoomed"
 }
 
 function on_blur_unit_tip() {
-	world.tip.hidden = true
-	world.tip.innerHTML = ""
+    world.tip.hidden = true
+    world.tip.innerHTML = ""
     world.tip.classList = ''
 }
 

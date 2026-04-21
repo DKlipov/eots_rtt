@@ -137,6 +137,14 @@ class Thing {
 		world.things[action][id] = this
 	}
 
+	register_focusable(){
+		register_focusable(this.element)
+		this.element.addEventListener("mousedown", e=>console.log(e))
+		console.log(this.element)
+		this.element.onclick = function() { alert('blah'); };
+		return this
+	}
+
 	action() {
 		if (!this.is_action) {
 			this.is_action = true
@@ -357,7 +365,7 @@ function lookup_thing(action, id) {
 
 function _on_click_thing(evt) {
 	if (evt.button === 0) {
-		var thing = evt.currentTarget.thing
+		var thing = evt.target.thing
 		evt.stopPropagation()
 		if (_focus_stack(thing.element.parentElement.thing))
 			if (!send_action(thing.my_action, thing.my_id))
@@ -518,6 +526,7 @@ function define_piece(action, id, keywords) {
 		.action()
 		.animate()
 		.keyword(keywords)
+		.stackable()
 }
 
 function define_marker(action, id, keywords) {
@@ -526,6 +535,7 @@ function define_marker(action, id, keywords) {
 		.action()
 		.animate()
 		.keyword(keywords)
+		.stackable()
 }
 
 function define_card(action, id, keywords) {

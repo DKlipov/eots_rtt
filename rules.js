@@ -9486,7 +9486,7 @@ P.arcadia = {
     event(c) {
         push_undo()
         G.offensive.offensive_card = c
-        play_event(c)
+        play_event(find_card(AP, 4))
     },
     done() {
         end()
