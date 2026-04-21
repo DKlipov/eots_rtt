@@ -4,24 +4,6 @@
 
 var G, V, R // convenient aliases so that we can share bits of code verbatim from rules.js
 
-/* CUSTOM */
-
-function onc_click_focus(e,evt) {
-
-	if (world.focus !== e.parent) {
-		if (world.focus != null) {
-			world.focus.classList.remove("focus")
-		}
-		world.focus = e.parent
-		e.parent.classList.add("focus")
-		on_update()
-		if (e.parent.childNodes.length > 1) {
-			evt.stopPropagation()
-		}
-	}
-}
-
-
 /* MISC */
 
 function assert(exp, msg) {
