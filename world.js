@@ -137,14 +137,6 @@ class Thing {
 		world.things[action][id] = this
 	}
 
-	register_focusable(){
-		register_focusable(this.element)
-		this.element.addEventListener("mousedown", e=>console.log(e))
-		console.log(this.element)
-		this.element.onclick = function() { alert('blah'); };
-		return this
-	}
-
 	action() {
 		if (!this.is_action) {
 			this.is_action = true
@@ -367,7 +359,7 @@ function _on_click_thing(evt) {
 	if (evt.button === 0) {
 		var thing = evt.target.thing
 		evt.stopPropagation()
-		if (_focus_stack(thing.element.parentElement.thing))
+		if (_focus_stack(evt.target.parentElement.thing))
 			if (!send_action(thing.my_action, thing.my_id))
 				_blur_stack()
 	}
@@ -622,6 +614,8 @@ function _create_generic(keywords) {
 		e.className = keywords
 	}
 	used.push(e)
+	e.addEventListener("mousedown", _on_click_thing)
+	e.thing = {element: e}
 	return e
 }
 
@@ -640,14 +634,14 @@ function populate_generic(parent_action, arg2, arg3, arg4) {
 	n = n ?? 1
 	var parent = lookup_thing(parent_action, parent_id)
 	parent.ensure_parent()
-	while (n-- > 0)
-		parent.element.appendChild(_create_generic(keywords))
+	var child = _create_generic(keywords)
+	parent.element.appendChild(child)
+	return child
 }
 
 function populate_generic_to_parent(parent, keywords) {
     var child = _create_generic(keywords)
     child.className = keywords
-    child.parent = parent
     parent.appendChild(child)
     return child
  }

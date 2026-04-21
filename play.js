@@ -221,6 +221,17 @@ function clear_paths() {
     CANVAS_CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
 }
 
+function define_s_loc(id, rect) {
+    define_stack("s-loc", id,
+        rect,
+        -2, -3, // closed offset
+        0, -40, // open offset (major axis)
+        40, 0, // open offset (minor axis)
+        1, // threshold to auto-open
+        8 // wrap limit
+    )
+}
+
 function on_init() {
     init_canvas()
     define_board("#map", 2550, 1650, [12, 12, 12, 12])
@@ -247,23 +258,16 @@ function on_init() {
         //     continue
         // }
         let center = hex_center(i)
-        define_layout("board_hex", i, [center[0] - 18, center[1] - 14, 45, 45])
-        define_stack("s-loc", i,
-            [center[0] - 18, center[1] - 14, 45, 45],
-            -6, -9, // closed offset
-            0, -52, // open offset (major axis)
-            52, 0, // open offset (minor axis)
-            1, // threshold to auto-open
-            6 // wrap limit
-        )
+        // define_layout("board_hex", i, [center[0] - 18, center[1] - 14, 45, 45])
+        define_s_loc(i, [center[0] - 18, center[1] - 14, 45, 45])
         define_space("action_hex", i, [center[0] - 29, center[1] - 19, 45, 45], "hex")
         ZOI_HEX[i] = (define_space("zoi", i, [center[0] - 33, center[1] - 24, 45, 45], "hex hide"))
     }
-    define_layout("s-loc", NON_PLACED_BOX, [10, 10, 45, 45], "stack")
-    define_layout("s-loc", ELIMINATED_BOX, [100, 1280, 45, 45], "stack")
-    define_layout("s-loc", PERM_ELIMINATED, [-100, -1180, 45, 45], "stack")
-    define_layout("s-loc", DELAYED_BOX, [2420, 1540, 45, 45], "stack")
-    define_layout("s-loc", CHINA_BOX, [890, 420, 45, 45], "stack")
+    define_s_loc(NON_PLACED_BOX, [10, 10, 45, 45])
+    define_s_loc(ELIMINATED_BOX, [100, 1280, 45, 45])
+    define_s_loc(PERM_ELIMINATED, [-100, -1180, 45, 45])
+    define_s_loc(DELAYED_BOX, [2420, 1540, 45, 45])
+    define_s_loc(CHINA_BOX, [890, 420, 45, 45])
     define_space("action_hex", CHINA_BOX, [890, 420, 45, 45])
     define_layout("status", JP_AGREEMENT, [990, 143, 35, 35])
     define_layout("status", AP_AGREEMENT, [1054, 143, 35, 35])
@@ -274,11 +278,25 @@ function on_init() {
         define_layout("wie", i, [273, 715 + Math.floor((i * 46.9)), 35, 35])
     }
     for (i = 1; i < 13; i++) {
-        define_layout("turn", i, [68, 1232 - Math.floor((i * 46.9)), 35, 35], "stack")
+        define_stack("turn", i,
+            [68, 1232 - Math.floor((i * 46.9)), 35, 35],
+            -6, -9, // closed offset
+            0, -40, // open offset (major axis)
+            40, 0, // open offset (minor axis)
+            1, // threshold to auto-open
+            8 // wrap limit
+        )
         define_space("action_box", i + TURN_BOX, [68, 1232 - Math.floor((i * 46.9)), 35, 35])
     }
     for (i = 0; i < 10; i++) {
-        define_layout("track", i, [383, 1585 - Math.floor((i * 46.5)), 35, 35], "stack")
+        define_stack("track", i,
+            [383, 1585 - Math.floor((i * 46.5)), 35, 35],
+            -6, -9, // closed offset
+            0, -40, // open offset (major axis)
+            40, 0, // open offset (minor axis)
+            1, // threshold to auto-open
+            8 // wrap limit
+        )
     }
     for (i = 0; i < 5; i++) {
         define_layout("india", i, [603 - Math.floor((i * 50)), 65, 35, 35])
@@ -520,11 +538,11 @@ function on_update() {
 
 
     G.control.filter(h => !set_has(G.capture, h) && !set_has(JP_BOUNDARIES, h))
-        .forEach(h => populate_generic("board_hex", h, "marker control_jp"))
+        .forEach(h => populate_generic("s-loc", h, "marker control_jp"))
     G.control.filter(h => set_has(G.garr_elim, h))
-        .forEach(h => populate_generic("board_hex", h, "marker no_garrison"))
+        .forEach(h => populate_generic("s-loc", h, "marker no_garrison"))
     JP_BOUNDARIES.filter(h => !set_has(G.capture, h) && !set_has(G.control, h) && h !== MANCHURIA_1 && h !== MANCHURIA_2)
-        .forEach(h => populate_generic("board_hex", h, "marker control_ap"))
+        .forEach(h => populate_generic("s-loc", h, "marker control_ap"))
     G.capture.forEach(h => {
         var marker
         if (h === MANCHURIA_1 || h === MANCHURIA_2) {
@@ -534,15 +552,15 @@ function on_update() {
         } else {
             marker = "marker capture_ap"
         }
-        populate_generic("board_hex", h, marker)
+        populate_generic("s-loc", h, marker)
     })
     ROAD_EVENTS.forEach(event => {
         if (!G.events[event.id]) {
-            event.keys.forEach(hex => populate_generic("board_hex", hex, "marker road"))
+            event.keys.forEach(hex => populate_generic("s-loc", hex, "marker road"))
         }
     })
     if (G.events[data.events.TOKYO_EXPRESS.id] > 0) {
-        populate_generic("board_hex", G.events[data.events.TOKYO_EXPRESS.id], "marker tokyo_express")
+        populate_generic("s-loc", G.events[data.events.TOKYO_EXPRESS.id], "marker tokyo_express")
     }
     map_for_each(G.garrison, (h, count) => {
         var marker = JP_GARRISON_CN
@@ -551,7 +569,7 @@ function on_update() {
             marker = JP_GARRISON_JP
         }
         for (var i = 0; i < count; i++) {
-            populate_generic("board_hex", h, "unit " + data.pieces[marker].counter)
+            populate_generic("s-loc", h, "unit " + data.pieces[marker].counter)
         }
     })
     for (var i = 1; i < data.pieces.length; ++i) {
@@ -562,13 +580,13 @@ function on_update() {
     }
     if (G.turn > 3) {
         G.capture.filter(h => !set_has(G.control, h))
-            .forEach(h => populate_generic("board_hex", h, "marker pow"))
+            .forEach(h => populate_generic("s-loc", h, "marker pow"))
     }
     var oos_hex_set = []
     for (i = 0; i < G.oos.length; i++) {
         let hex = G.location[G.oos[i]]
         if (!set_has(oos_hex_set, hex) && hex <= LAST_BOARD_HEX) {
-            populate_generic("board_hex", hex, "marker oos")
+            populate_generic("s-loc", hex, "marker oos")
             set_add(oos_hex_set, hex)
         }
     }
@@ -643,8 +661,8 @@ function on_update() {
     }
 
 
-    G.offensive.battle_hexes.forEach(h => apply_conflict_marker(populate_generic("board_hex", h, "marker conflict battle"), h))
-    G.offensive.landing_hexes.forEach(h => apply_conflict_marker(populate_generic("board_hex", h, "marker conflict landing"), h))
+    G.offensive.battle_hexes.forEach(h => apply_conflict_marker(populate_generic("s-loc", h, "marker conflict battle"), h))
+    G.offensive.landing_hexes.forEach(h => apply_conflict_marker(populate_generic("s-loc", h, "marker conflict landing"), h))
 
     G.inter_service.forEach((v, i) => populate_generic("status", i, `marker ${v ? "rivalry" : "agreement"}_${i ? "ap" : "jp"}`))
     populate_generic("pw", G.political_will, "marker pw")
@@ -988,16 +1006,17 @@ function on_click_piece_tip(z) {
 
 function on_focus_piece_tip(z) {
     get_piece_elem(z).classList.toggle("tip", true)
+    on_focus_unit_tip(z)
 }
 
 function on_blur_piece_tip(z) {
     get_piece_elem(z).classList.toggle("tip", false)
+    on_blur_unit_tip()
 }
 
 function get_hex_elem(h) {
-    console.log(world.things)
     //perhaps should cache this somewhere ?
-    return lookup_thing("board_hex", h)
+    return lookup_thing("s-loc", h)
 }
 
 function get_hex_name(h) {
@@ -1047,9 +1066,10 @@ function on_focus_unit_tip(a) {
     world.tip.hidden = is_mobile()
     const piece = data.pieces[a]
     // Show BOTH sides of the marker
-    world.tip.innerHTML = `
-    <div class="unit-tip piece ${piece.counter}"></div>	
-    <div class="unit-tip piece ${piece.counter} reduced"></div>`
+    world.tip.innerHTML = `<div class="unit-tip piece ${piece.counter}"></div>`
+    if (piece.class !== "hq" && (!piece.start_reduced || !piece.notreplaceable)) {
+        world.tip.innerHTML += `<div class="unit-tip piece ${piece.counter} reduced"></div>`
+    }
     world.tip.classList = "zoomed"
 }
 

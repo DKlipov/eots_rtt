@@ -23,7 +23,7 @@ body.hide-pieces .piece { display: none }
 
 .space {
     position: absolute;
-    z-index: -1;
+    z-index: -100;
 }
 
 .layout {
@@ -65,7 +65,7 @@ body.hide-pieces .piece { display: none }
 .zoi {
     pointer-events: none;
     background: rgba(255, 130, 255, 0.2);
-    z-index: -1;
+    z-index: -10;
 }
 
 .jp_zoi {
@@ -92,7 +92,7 @@ body.hide-pieces .piece { display: none }
 .space.action {
     background: rgba(255, 255, 0, 0.4);
     pointer-events: auto;
-    z-index: 95;
+    z-index: 0;
     /*border-color: yellow;*/
     /*box-shadow: 0 0 3px black, inset 0 0 3px black;*/
 }
@@ -494,21 +494,6 @@ body.hide-pieces .piece { display: none }
 	--stack-dx: -20px;
 	--stack-dy: -20px;
 }
-
-
-.focus {
-	/*background-color: black;*/
-	/*opacity: 50%;*/
-	/*z-index: 100;*/
-	/*border-radius: 5px;*/
-}
-
-.layout.stack.focus {
-	--stack-dx: 0;
-	--stack-dy: -40px;
-	z-index: 100;
-}
-
 
 .zoi {
 	pointer-events: none;

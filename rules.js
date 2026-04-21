@@ -1285,9 +1285,9 @@ P.future_offensive = {
             action("event", G.future_offensive[G.active])
         }
     },
-    event(c) {
+    event() {
         push_undo()
-        play_event(c)
+        play_event(G.future_offensive[G.active])
         goto("offensive_sequence")
     },
     pass() {
@@ -9483,7 +9483,7 @@ P.arcadia = {
             end()
         }
     },
-    event(c) {
+    event() {
         push_undo()
         G.offensive.offensive_card = c
         play_event(find_card(AP, 4))
