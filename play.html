@@ -21,10 +21,22 @@
 </head>
 <body>
 
-<div id="event_card_dialog" class="dialog">
-    <div class="dialog_header">Event Cards</div>
-    <div class="dialog_x" onclick="hide_dialog('event_card_dialog')">&#x274c;</div>
+<div id="event_cards_ap" class="dialog">
+    <div class="dialog_header">Allied Event Cards</div>
+    <div class="dialog_x" onclick="hide_dialog('event_cards_ap')">&#x274c;</div>
     <div class="dialog_body"></div>
+</div>
+
+<div id="event_cards_jp" class="dialog">
+    <div class="dialog_header">Japanese Event Cards</div>
+    <div class="dialog_x" onclick="hide_dialog('event_cards_jp')">&#x274c;</div>
+    <div class="dialog_body"></div>
+</div>
+
+<div id="vp_check" class="dialog">
+    <div class="dialog_header">Victory Points</div>
+    <div class="dialog_body"></div>
+    <div class="dialog_x" onclick="hide_dialog('vp_check')">&#x274c;</div>
 </div>
 
 <div id="tip" class="hide"></div>
@@ -46,9 +58,12 @@
         <details id="info_menu">
             <summary><img src="/images/wooden-sign.svg"></summary>
             <menu>
-                <li onclick="send_query('event_cards')">
-<!--                    <div class="hotkey">E</div>-->
-                    <div>Inspect Event Cards</div>
+                <li onclick="send_query('event_cards_jp')">
+                    <div>Inspect Japanese Cards</div>
+                <li onclick="send_query('event_cards_ap')">
+                    <div>Inspect Allied Cards</div>
+                <li onclick="send_query('vp_check')">
+                    <div>Inspect Victory Points</div>
             </menu>
         </details>
     </div>

@@ -9,3 +9,5 @@ Todo list:
 * Chin surrender - diplace all air
 * china box - add ledo to check
 * Hex by hex move for naval and air?
+* Battle hex confirmation and calculation
+* Hex-to-hex distance calcualtion

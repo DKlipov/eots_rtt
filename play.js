@@ -713,7 +713,7 @@ function on_update() {
     action_button("stop", "Stop")
     action_button("displace", "Displace")
     action_button("amphibious", "Amphibious")
-    action_button("divisions", "Reduce divisions track.")
+    action_button("divisions_button", "Reduce divisions track.")
 
 
     action_button("event", "Play Event")
@@ -856,17 +856,17 @@ function on_log(text) {
 // Below is code imported from Imperial struggle for dialog windows etc
 // still not completely integrated. commented out code should be looked at
 
-function on_reply(q, params) {
-    if (q === "event_cards") {
-        toggle_dialog("event_card_dialog")
-    }
+function on_reply(q, response) {
+    toggle_dialog(q, response)
 }
 
-function toggle_dialog(id) {
+function toggle_dialog(id, response) {
     if (document.getElementById(id).classList.contains("show")) {
         hide_dialog(id)
-    } else {
-        show_card_list(id, null)
+    } else if (id.startsWith("event_cards")) {
+        show_card_list(id, response)
+    } else if (id === "vp_check") {
+        vp_dialog(id, response)
     }
 }
 
@@ -942,7 +942,7 @@ function is_mobile() {
     return ("ontouchstart" in window)
 }
 
-function show_card_list(id, params) {
+function show_card_list(id, response) {
     show_dialog(id, (body) => {
         let dl = document.createElement("dl")
         let append_header = (text) => {
@@ -959,22 +959,38 @@ function show_card_list(id, params) {
             p.innerHTML = format_card_info(c)
             dl.appendChild(p)
         }
+        var faction_name = "Allied"
+        var faction = 1
 
-        if (id === "event_card_dialog") {
-            append_header(`Japanese Discard Pile (${G.discard[JP].length})`)
-            G.discard[JP].forEach(append_card)
-            append_header(`Japanese Removed Cards (${G.removed[JP].length})`)
-            G.removed[JP].forEach(append_card)
-            append_header(`Allies Discard Pile (${G.discard[AP].length})`)
-            G.discard[AP].forEach(append_card)
-            append_header(`Allies Removed Cards (${G.removed[AP].length})`)
-            G.removed[AP].forEach(append_card)
-            //if (!is_observing()) {
-            //	append_header(`Your Hand (${V.hand[R].length})`)
-            //	V.hand[R].forEach(append_card)
-            //}
+        if (id === "event_cards_jp") {
+            faction_name = "Japansese"
+            faction = 0
         }
 
+        append_header(`${faction_name} Removed Cards (${G.removed[faction].length})`)
+        G.removed[faction].forEach(append_card)
+        append_header(`${faction_name} Discard Pile (${G.discard[faction].length})`)
+        G.discard[faction].forEach(append_card)
+        append_header(`${faction_name} Deck and Hand (${response.hand[faction].length})`)
+        response.hand[faction].forEach(append_card)
+
+        body.appendChild(dl)
+    })
+}
+
+function vp_dialog(id, response) {
+    show_dialog(id, (body) => {
+        let dl = document.createElement("dl")
+        let append_header = (text) => {
+            let header = document.createElement("dt")
+            header.textContent = text
+            dl.appendChild(header)
+        }
+        response.text.forEach(text => {
+            let header = document.createElement("div")
+            header.textContent = text
+            dl.appendChild(header)
+        })
         body.appendChild(dl)
     })
 }
