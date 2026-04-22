@@ -118,12 +118,12 @@ const CLEAN_SUPPLY_MASK = [(NON_SUPPLY_MASK | JP_SUPPLY_PORT | JP_SUPPLY_AIRFIEL
 const CLEAN_ATTACK_ZONE_MASK = [...Array(22).keys()].reduce((a, b) => a + Math.pow(2, b - 1), 0)
 const AP_SUPPLIED_HEX = (BR_SUPPLIED_HEX | JOINT_SUPPLIED_HEX | US_SUPPLIED_HEX)
 
-const LAST_BOARD_HEX = 1476
-const NON_PLACED_BOX = 1477
-const ELIMINATED_BOX = 1478
-const DELAYED_BOX = 1479
-const CHINA_BOX = 1480
-const PERM_ELIMINATED = 1481
+const LAST_BOARD_HEX = 1478
+const NON_PLACED_BOX = 1481
+const ELIMINATED_BOX = 1482
+const DELAYED_BOX = 1483
+const CHINA_BOX = 1484
+const PERM_ELIMINATED = 1485
 const TURN_BOX = 1490
 const TUNNEL_BOX = 1600
 
@@ -1560,6 +1560,8 @@ P.offensive_segment = {
     },
     card(c) {
         push_undo()
+        G.offensive.offensive_card = c
+        G.offensive.active_cards.push(c)
         goto("offensive_segment_card_action", {c: c})
     },
     pass() {
@@ -9535,7 +9537,9 @@ P.arcadia = {
             action("discard", find_card(AP, 4))
         } else {
             prompt(`Play Arcadia or pass.`)
-            action("event", find_card(AP, 4))
+            if (G.hand[AP].includes(find_card(AP, 4))) {
+                action("event", find_card(AP, 4))
+            }
             button("done")
         }
     },
@@ -9560,8 +9564,8 @@ P.arcadia = {
     },
     event() {
         push_undo()
-        G.offensive.offensive_card = c
-        play_event(find_card(AP, 4))
+        G.offensive.offensive_card = find_card(AP, 4)
+        play_event(G.offensive.offensive_card)
     },
     done() {
         end()
