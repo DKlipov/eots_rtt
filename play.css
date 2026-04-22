@@ -1,73 +1,123 @@
-main { background-color: dimgray; }
+main {
+    background-color: dimgray;
+}
 
-header { background-color: tan }
+header {
+    background-color: tan
+}
 
 /* LOG */
 
-#log { background-color: floralwhite; }
-#log .h1 { background-color: tan; }
-#log .h1, #log .h2 {
-	padding: 2px 8px;
-	border-top: 1px solid black;
-	border-bottom: 1px solid black;
-	margin: 8px 0;
-	text-align: center;
+#log {
+    background-color: floralwhite;
 }
 
-#log > .q { padding-left: 20px; font-style: italic; opacity: 75%; }
-#log > .i { padding-left: 20px; }
+#log .h1 {
+    background-color: tan;
+}
 
-#log .card-tip { cursor: pointer; font-style: italic }
-#log .zone-tip { cursor: pointer; font-style: italic }
+#log .h1, #log .h2 {
+    padding: 2px 8px;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+    margin: 8px 0;
+    text-align: center;
+}
+
+#log > .q {
+    padding-left: 20px;
+    font-style: italic;
+    opacity: 75%;
+}
+
+#log > .i {
+    padding-left: 20px;
+}
+
+#log .card-tip {
+    cursor: pointer;
+    font-style: italic
+}
+
+#log .zone-tip {
+    cursor: pointer;
+    font-style: italic
+}
 
 #log .die {
-	display: inline-block;
-	vertical-align: -2px;
-	width: 12px;
-	height: 12px;
-	border-radius: 0px;
-	box-shadow: none;
-	border: none;
-	background-size: 600% 100%;
-	background-repeat: no-repeat;
+    display: inline-block;
+    vertical-align: -2px;
+    width: 12px;
+    height: 12px;
+    border-radius: 0px;
+    box-shadow: none;
+    border: none;
+    background-size: 600% 100%;
+    background-repeat: no-repeat;
 }
 
 #log .white {
-	background-image: url(/images/die_black_pips.svg);
-	background-color: #fff;
-	border: 1px solid #444;
+    background-image: url(/images/die_black_pips.svg);
+    background-color: #fff;
+    border: 1px solid #444;
 }
 
 #log .black {
-	background-image: url(/images/die_white_pips.svg);
-	background-color: #666;
-	border: 1px solid #222;
+    background-image: url(/images/die_white_pips.svg);
+    background-color: #666;
+    border: 1px solid #222;
 }
 
 #log .red {
-	background-image: url(/images/die_white_pips.svg);
-	background-color: #c22;
-	border: 1px solid #222;
+    background-image: url(/images/die_white_pips.svg);
+    background-color: #c22;
+    border: 1px solid #222;
 }
 
 #log .fm, #log .gm {
-	text-align: right;
-	margin-top: -18px;
-	float: right;
-	padding: 0 4px;
-	text-indent: 0;
+    text-align: right;
+    margin-top: -18px;
+    float: right;
+    padding: 0 4px;
+    text-indent: 0;
 }
 
-#chat_text .Japan { background-color: lightpink }
-#chat_text .Allies { background-color: lightblue }
-body.Japan header.your_turn { background-color: lightcoral; }
-body.Allies header.your_turn { background-color: lightsteelblue; }
-#role_Japan { background-color: lightcoral; }
-#role_Allies { background-color: lightsteelblue; }
-#log .jp { background-color: lightpink; }
-#log .ap { background-color: lightblue; }
+#chat_text .Japan {
+    background-color: lightpink
+}
 
-.card-tip { cursor: pointer; font-style: italic }
+#chat_text .Allies {
+    background-color: lightblue
+}
+
+body.Japan header.your_turn {
+    background-color: lightcoral;
+}
+
+body.Allies header.your_turn {
+    background-color: lightsteelblue;
+}
+
+#role_Japan {
+    background-color: lightcoral;
+}
+
+#role_Allies {
+    background-color: lightsteelblue;
+}
+
+#log .jp {
+    background-color: lightpink;
+}
+
+#log .ap {
+    background-color: lightblue;
+}
+
+.card-tip {
+    cursor: pointer;
+    font-style: italic
+}
 
 /*#log .fm { background-color: lightblue; }*/
 /*#log .gm { background-color: gainsboro; }*/
@@ -75,82 +125,114 @@ body.Allies header.your_turn { background-color: lightsteelblue; }
 /*#log .gm.dark { background-color: dimgray; }*/
 /*#log .dark { color: white; font-weight: bold; }*/
 
-.d0 { background-position: -100% 0 }
-.d1 { background-position: 0% 0; }
-.d2 { background-position: 20% 0; }
-.d3 { background-position: 40% 0; }
-.d4 { background-position: 60% 0; }
-.d5 { background-position: 80% 0; }
-.d6 { background-position: 100% 0; }
+.d0 {
+    background-position: -100% 0
+}
+
+.d1 {
+    background-position: 0% 0;
+}
+
+.d2 {
+    background-position: 20% 0;
+}
+
+.d3 {
+    background-position: 40% 0;
+}
+
+.d4 {
+    background-position: 60% 0;
+}
+
+.d5 {
+    background-position: 80% 0;
+}
+
+.d6 {
+    background-position: 100% 0;
+}
 
 /* PANELS */
 
 .panel {
-	background-color: #0002;
-	margin: 12px;
+    background-color: #0002;
+    margin: 12px;
 }
 
 .panel-head {
-	background-color: #0002;
-	text-align: center;
-	font-weight: bold;
-	color: white;
+    background-color: #0002;
+    text-align: center;
+    font-weight: bold;
+    color: white;
 }
 
 .panel-body {
-	min-height: 380px;
-	min-width: 248px;
+    min-height: 380px;
+    min-width: 248px;
 }
 
 #panels {
-	display: grid;
-	grid-template-columns: 1fr;
-	max-width: 2894px;
-	margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    max-width: 2894px;
+    margin: 0 auto;
 }
 
 @media (max-width: 1200px) {
-	#panels {
-		width: 2894px;
-	}
+    #panels {
+        width: 2894px;
+    }
 }
 
 #played .panel-body .card.barrage {
-	margin-bottom: -194px;
+    margin-bottom: -194px;
 }
 
-#played_row { grid-row: 1; }
+#played_row {
+    grid-row: 1;
+}
 
-body.Japan #jp_hand { grid-row: 2; }
-body.Japan #ap_hand { grid-row: 4; }
+body.Japan #jp_hand {
+    grid-row: 2;
+}
 
-body.Allies #ap_hand { grid-row: 2; }
-body.Allies #jp_hand { grid-row: 4; }
+body.Japan #ap_hand {
+    grid-row: 4;
+}
+
+body.Allies #ap_hand {
+    grid-row: 2;
+}
+
+body.Allies #jp_hand {
+    grid-row: 4;
+}
 
 #mapwrap {
-	width: 2550px;
-	height: 1650px;
+    width: 2550px;
+    height: 1650px;
 }
 
 #canvas {
-	width: 2550px;
-	height: 1650px;
-	position: absolute;
-	z-index: 1;
-	pointer-events: none;
+    width: 2550px;
+    height: 1650px;
+    position: absolute;
+    z-index: 1;
+    pointer-events: none;
 }
 
 #map {
-	width: 2550px;
-	height: 1650px;
-	background-image: url(images/map_eots.75.avif);
-	background-size: 2550px 1650px;
+    width: 2550px;
+    height: 1650px;
+    background-image: url(images/map_eots.75.avif);
+    background-size: 2550px 1650px;
 }
 
 @media (min-resolution: 97dpi) {
-	#map {
-		background-image: url(images/map_eots.150.avif);
-	}
+    #map {
+        background-image: url(images/map_eots.150.avif);
+    }
 }
 
 /* TOOLTIPS */
@@ -161,75 +243,76 @@ body.Allies #jp_hand { grid-row: 4; }
 
 /* data-tooltip - behaves like title attribute attached to element */
 #tip {
-	pointer-events: none;
-	position: fixed;
-	z-index: 1000;
-	margin: 6px;
+    pointer-events: none;
+    position: fixed;
+    z-index: 1000;
+    margin: 6px;
 }
 
 .zoomed {
-	transform: scale(2); 
+    transform: scale(2);
 }
 
 [data-tooltip] {
-	position: relative;
+    position: relative;
 }
 
 [data-tooltip]:after {
-	content: attr(data-tooltip);
-	position: absolute;
-	pointer-events: none;
-	background-color: oldlace;
-	border: 1px solid black;
-	border-radius: 5px;
-	padding: 0 5px;
-	width: max-content;
-	display: none;
-	z-index: 100;
+    content: attr(data-tooltip);
+    position: absolute;
+    pointer-events: none;
+    background-color: oldlace;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 0 5px;
+    width: max-content;
+    display: none;
+    z-index: 100;
 }
 
 [data-tooltip]:hover:after {
-	display: block;
+    display: block;
 }
 
 span[data-tooltip]:after {
-	top: 20px;
-	left: 20px;
+    top: 20px;
+    left: 20px;
 }
 
 div[data-tooltip]:after {
-	top: 20px;
-	left: 5px;
+    top: 20px;
+    left: 5px;
 }
 
 /* CARDS */
 
 .card {
-	width: 250px;
-	height: 350px;
-	border-radius: 16px;
-	box-shadow: 1px 1px 4px #0004;
-	transition: transform 100ms;
-	background-color: white;
-	background-size: 100%;
-	background-repeat: no-repeat;
-	border: 1px solid black;
+    width: 250px;
+    height: 350px;
+    border-radius: 16px;
+    box-shadow: 1px 1px 4px #0004;
+    transition: transform 100ms;
+    background-color: white;
+    background-size: 100%;
+    background-repeat: no-repeat;
+    border: 1px solid black;
 }
 
 .card.action {
-	box-shadow: 0 0 0 3px yellow;
+    box-shadow: 0 0 0 3px yellow;
 }
 
 /* PIECES */
 
 .piece {
-	/*pointer-events: none;*/
+    /*pointer-events: none;*/
 }
 
 
 .piece.action, .marker.action {
     pointer-events: auto;
-    border-color: yellow;!important;
+    border-color: yellow;
+!important;
     box-shadow: 0 0 2px black, inset 0 0 2px black;
     border-width: 4px;
     /*box-shadow: 0 0 0 3px lime; border-color: #000;*/
@@ -238,23 +321,33 @@ div[data-tooltip]:after {
     border-style: solid;
 }
 
-.unit, .marker{
-	transition: left 200ms, top 200ms;
-	position: absolute;
-	/*background-size: auto 100%;*/
-	background-repeat: no-repeat;
-	border-radius: 5px;
-	width:35px;
-	height:35px;
-    background-size: 35px 35px;
+.unit {
+    border: 1px solid black;
 }
 
-.unit-tip{
-	transition: left 200ms, top 200ms;
-	background-repeat: no-repeat;
-	border-radius: 5px;
-	width:35px;
-	height:35px;
+.unit, .marker {
+    transition: left 200ms, top 200ms;
+    position: absolute;
+    /*background-size: auto 100%;*/
+    background-repeat: no-repeat;
+    border-radius: 5px;
+    width: 35px;
+    height: 35px;
+    background-size: 35px 35px;
+
+}
+
+.piece.big {
+    width: 45px;
+    height: 45px;
+}
+
+.unit-tip {
+    transition: left 200ms, top 200ms;
+    background-repeat: no-repeat;
+    border-radius: 5px;
+    width: 35px;
+    height: 35px;
     background-size: 35px 35px;
 }
 
@@ -267,41 +360,78 @@ div[data-tooltip]:after {
 }
 
 /* MARKER IMAGES */
+.big.unit_ix_2{ background-position-x:  -45px;}
+.big.unit_ix_3{ background-position-x:  -90px;}
+.big.unit_ix_4{ background-position-x:  -135px;}
+.big.unit_ix_5{ background-position-x:  -180px;}
+.big.unit_ix_6{ background-position-x:  -225px;}
+.big.unit_ix_7{ background-position-x:  -270px;}
+.big.unit_ix_8{ background-position-x:  -315px;}
+.big.unit_ix_9{ background-position-x:  -360px;}
+.big.unit_ix_10{ background-position-x:  -405px;}
+.big.unit_ix_11{ background-position-x:  -450px;}
+.big.unit_ix_12{ background-position-x:  -495px;}
+.big.unit_ix_13{ background-position-x:  -540px;}
+.big.unit_ix_14{ background-position-x:  -585px;}
+.big.unit_ix_15{ background-position-x:  -630px;}
+.big.unit_ix_16{ background-position-x:  -675px;}
+.big.unit_ix_17{ background-position-x:  -720px;}
+.big.unit_ix_18{ background-position-x:  -765px;}
+.big.unit_ix_19{ background-position-x:  -810px;}
+.big.unit_ix_20{ background-position-x:  -855px;}
+.big.unit_ix_21{ background-position-x:  -900px;}
+.big.unit_ix_22{ background-position-x:  -945px;}
+.big.unit_ix_23{ background-position-x:  -990px;}
+.big.unit_ix_24{ background-position-x:  -1035px;}
+.big.unit_ix_25{ background-position-x:  -1080px;}
+.big.unit_ix_26{ background-position-x:  -1125px;}
+.big.unit_ix_27{ background-position-x:  -1170px;}
+.big.unit_ix_28{ background-position-x:  -1215px;}
+.big.unit_ix_29{ background-position-x:  -1260px;}
+.big.unit_ix_30{ background-position-x:  -1305px;}
+.big.unit_ix_31{ background-position-x:  -1350px;}
+.big.unit_ix_32{ background-position-x:  -1395px;}
 
-.unit_ix_1 { background-position: 0px 0px; }
-.unit_ix_2 { background-position: -34px 0px; }
-.unit_ix_3 { background-position: -68px 0px; }
-.unit_ix_4 { background-position: -102px 0px; }
-.unit_ix_5 { background-position: -136px 0px; }
-.unit_ix_6 { background-position: -170px 0px; }
-.unit_ix_7 { background-position: -204px 0px; }
-.unit_ix_8 { background-position: -238px 0px; }
-.unit_ix_9 { background-position: -272px 0px; }
-.unit_ix_10 { background-position: -306px 0px; }
-.unit_ix_11 { background-position: -340px 0px; }
-.unit_ix_12 { background-position: -374px 0px; }
-.unit_ix_13 { background-position: -408px 0px; }
-.unit_ix_14 { background-position: -442px 0px; }
-.unit_ix_15 { background-position: -476px 0px; }
-.unit_ix_16 { background-position: -510px 0px; }
+.piece.reduced {
+    background-position-y: -35px;
+}
 
-.unit_ix_1.reduced { background-position: 0px -35px; }
-.unit_ix_2.reduced { background-position: -34px -35px; }
-.unit_ix_3.reduced { background-position: -68px -35px; }
-.unit_ix_4.reduced { background-position: -102px -35px; }
-.unit_ix_5.reduced { background-position: -136px -35px; }
-.unit_ix_6.reduced { background-position: -170px -35px; }
-.unit_ix_7.reduced { background-position: -204px -35px; }
-.unit_ix_8.reduced { background-position: -238px -35px; }
-.unit_ix_9.reduced { background-position: -272px -35px; }
-.unit_ix_10.reduced { background-position: -306px -35px; }
-.unit_ix_11.reduced { background-position: -340px -35px; }
-.unit_ix_12.reduced { background-position: -374px -35px; }
-.unit_ix_13.reduced { background-position: -408px -35px; }
-.unit_ix_14.reduced { background-position: -442px -35px; }
-.unit_ix_15.reduced { background-position: -476px -35px; }
-.unit_ix_16.reduced { background-position: -510px -35px; }
+.unit_ix_1{ background-position-x:  0;}
+.unit_ix_2{ background-position-x:  -35px;}
+.unit_ix_3{ background-position-x:  -70px;}
+.unit_ix_4{ background-position-x:  -105px;}
+.unit_ix_5{ background-position-x:  -140px;}
+.unit_ix_6{ background-position-x:  -175px;}
+.unit_ix_7{ background-position-x:  -210px;}
+.unit_ix_8{ background-position-x:  -245px;}
+.unit_ix_9{ background-position-x:  -280px;}
+.unit_ix_10{ background-position-x:  -315px;}
+.unit_ix_11{ background-position-x:  -350px;}
+.unit_ix_12{ background-position-x:  -385px;}
+.unit_ix_13{ background-position-x:  -420px;}
+.unit_ix_14{ background-position-x:  -455px;}
+.unit_ix_15{ background-position-x:  -490px;}
+.unit_ix_16{ background-position-x:  -525px;}
+.unit_ix_17{ background-position-x:  -560px;}
+.unit_ix_18{ background-position-x:  -595px;}
+.unit_ix_19{ background-position-x:  -630px;}
+.unit_ix_20{ background-position-x:  -665px;}
+.unit_ix_21{ background-position-x:  -700px;}
+.unit_ix_22{ background-position-x:  -735px;}
+.unit_ix_23{ background-position-x:  -770px;}
+.unit_ix_24{ background-position-x:  -805px;}
+.unit_ix_25{ background-position-x:  -840px;}
+.unit_ix_26{ background-position-x:  -875px;}
+.unit_ix_27{ background-position-x:  -910px;}
+.unit_ix_28{ background-position-x:  -945px;}
+.unit_ix_29{ background-position-x:  -980px;}
+.unit_ix_30{ background-position-x:  -1015px;}
+.unit_ix_31{ background-position-x:  -1050px;}
+.unit_ix_32{ background-position-x:  -1085px;}
 
+.piece.reduced.big {
+    background-position-y: -45px;
+}
 
 /* DIALOGS */
 
@@ -322,7 +452,7 @@ div[data-tooltip]:after {
     grid-template-columns: 1fr 30px;
     border: 1px solid black;
     background-color: white;
-    box-shadow: 0px 4px 8px 0px rgba(0,0,0,0.5);
+    box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.5);
     visibility: hidden;
     z-index: 499;
 }
@@ -366,64 +496,72 @@ div[data-tooltip]:after {
     background-color: #F9EEDC; /* floralwhite was previous */
 }
 
-.dialog_body dl { margin: 0; }
-.dialog_body dd { margin-left: 20px; }
+.dialog_body dl {
+    margin: 0;
+}
 
-.piece-tip {  /* for text in log and dialogs */
-	cursor: pointer; font-style: italic
+.dialog_body dd {
+    margin-left: 20px;
+}
+
+.piece-tip { /* for text in log and dialogs */
+    cursor: pointer;
+    font-style: italic
 }
 
 .piece.tip { /* highlight the piece itself */
-	border: 4px dashed lime;
-	z-index: 100;
+    border: 4px dashed lime;
+    z-index: 100;
 }
-.hex-tip {  /* for text in log and dialogs */
-	cursor: pointer; font-style: italic
+
+.hex-tip { /* for text in log and dialogs */
+    cursor: pointer;
+    font-style: italic
 }
 
 .board_hex.tip { /* highlight the piece itself */
-	border: 4px dashed lime;
-	z-index: 100;
+    border: 4px dashed lime;
+    z-index: 100;
 }
 
 .marker.conflict {
-	border: 1px solid black;
-	font-size: 25px;
-	font-weight: bold;
-	text-align: center;
+    border: 1px solid black;
+    font-size: 25px;
+    font-weight: bold;
+    text-align: center;
 }
 
 .marker.battle.gray {
-	background-color: gray;
+    background-color: gray;
 }
 
 .marker.battle {
-	background-color: lawngreen;
+    background-color: lawngreen;
 }
 
 .marker.landing {
-	background-color: yellow;
+    background-color: yellow;
 }
 
 .unit > .marker {
-	width: 20px;
-	height: 20px;
-	background-size: 20px 20px;
-	font-size: 15px;
-	border: 1px solid black;
-	right: 0;
-	pointer-events: none;
+    width: 20px;
+    height: 20px;
+    background-size: 20px 20px;
+    font-size: 15px;
+    border: 1px solid black;
+    right: 0;
+    pointer-events: none;
 }
 
 .unit > .marker.barges_small {
-	border-color: #1FC4F4;
-	/*border: 1px solid gree;*/
+    border-color: #1FC4F4;
+    /*border: 1px solid gree;*/
 }
 
 .main_action {
-	/*font-weight: bold;*/
+    /*font-weight: bold;*/
 }
 
 .small_action {
-	font-style: italic;
+    font-style: italic;
 }

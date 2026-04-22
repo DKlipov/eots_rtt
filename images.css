@@ -95,6 +95,17 @@
 .navy_jp { background-image: url(pieces/navy_jp.png); background-size: 340px 70px; }
 .navy_us { background-image: url(pieces/navy_us.png); background-size: 478px 70px; }
 
+/* PIECES */
+.big_units_blue { background-image: url(pieces150/big_units_blue.150.png); background-size: 1440px 90px; }
+.big_units_white { background-image: url(pieces150/big_units_white.150.png); background-size: 855px 90px; }
+.big_units_beige { background-image: url(pieces150/big_units_beige.150.png); background-size: 405px 90px; }
+.big_units_orange { background-image: url(pieces150/big_units_orange.150.png); background-size: 45px 90px; }
+.small_units_beige { background-image: url(pieces150/small_units_beige.150.png); background-size: 700px 70px; }
+.small_units_beige_air { background-image: url(pieces150/small_units_beige_air.150.png); background-size: 175px 70px; }
+.small_units_blue { background-image: url(pieces150/small_units_blue.150.png); background-size: 420px 70px; }
+.small_units_dkblue { background-image: url(pieces150/small_units_dkblue.150.png); background-size: 70px 70px; }
+.small_units_green { background-image: url(pieces150/small_units_green.150.png); background-size: 420px 70px; }
+
 
 /* CARDS (1x) */
 .card_ap_0{background-image:url(cards/card_ap_85.100.avif)}

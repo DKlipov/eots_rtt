@@ -225,8 +225,8 @@ function define_s_loc(id, rect) {
     define_stack("s-loc", id,
         rect,
         -2, -3, // closed offset
-        0, -40, // open offset (major axis)
-        40, 0, // open offset (minor axis)
+        0, -50, // open offset (major axis)
+        50, 0, // open offset (minor axis)
         1, // threshold to auto-open
         8, // wrap limit
         -6, -9, 4
@@ -479,15 +479,17 @@ function draw_paths() {
 function place_unit(u, location) {
     var piece = data.pieces[u]
     var unit
+    var one_step = piece.notreplaceable && piece.start_reduced
+    one_step=true
     if (location > TURN_BOX && location <= (TURN_BOX + 12)) {
         unit = populate("turn", location - TURN_BOX, "unit", u)
-        unit.classList.toggle("reduced", set_has(G.reduced, u))
+        unit.classList.toggle("reduced", (set_has(G.reduced, u) && !one_step))
         unit.classList.remove("activated")
         unit.classList.remove("selected")
     } else if (location === ELIMINATED_BOX && (!data.pieces[u].notreplaceable || is_action("unit", u)) || location < LAST_BOARD_HEX
         || location === DELAYED_BOX || location === CHINA_BOX) {
         unit = populate("s-loc", location, "unit", u)
-        unit.classList.toggle("reduced", set_has(G.reduced, u) || location === ELIMINATED_BOX
+        unit.classList.toggle("reduced", (set_has(G.reduced, u) && !one_step) || location === ELIMINATED_BOX
             || data.pieces[u].class === "hq" && G.inter_service[data.pieces[u].faction])
         if (piece.faction === JP) {
             unit.classList.toggle("activated_red", G.offensive.active_units.includes(u))
