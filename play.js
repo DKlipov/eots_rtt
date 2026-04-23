@@ -260,7 +260,7 @@ function on_init() {
         // }
         let center = hex_center(i)
         // define_layout("board_hex", i, [center[0] - 18, center[1] - 14, 45, 45])
-        define_s_loc(i, [center[0] - 18, center[1] - 14, 45, 45])
+        define_s_loc(i, [center[0] - 25, center[1] - 22, 45, 45])
         define_space("action_hex", i, [center[0] - 29, center[1] - 19, 45, 45], "hex")
         ZOI_HEX[i] = (define_space("zoi", i, [center[0] - 33, center[1] - 24, 45, 45], "hex hide"))
     }
@@ -480,7 +480,6 @@ function place_unit(u, location) {
     var piece = data.pieces[u]
     var unit
     var one_step = piece.notreplaceable && piece.start_reduced
-    one_step=true
     if (location > TURN_BOX && location <= (TURN_BOX + 12)) {
         unit = populate("turn", location - TURN_BOX, "unit", u)
         unit.classList.toggle("reduced", (set_has(G.reduced, u) && !one_step))
