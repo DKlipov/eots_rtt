@@ -96,15 +96,23 @@
 .navy_us { background-image: url(pieces/navy_us.png); background-size: 478px 70px; }
 
 /* PIECES */
-.big_units_blue { background-image: url(pieces150/big_units_blue.150.png); background-size: 1440px 90px; }
-.big_units_white { background-image: url(pieces150/big_units_white.150.png); background-size: 855px 90px; }
-.big_units_beige { background-image: url(pieces150/big_units_beige.150.png); background-size: 405px 90px; }
-.big_units_orange { background-image: url(pieces150/big_units_orange.150.png); background-size: 45px 90px; }
-.small_units_beige { background-image: url(pieces150/small_units_beige.150.png); background-size: 700px 70px; }
-.small_units_beige_air { background-image: url(pieces150/small_units_beige_air.150.png); background-size: 175px 70px; }
-.small_units_blue { background-image: url(pieces150/small_units_blue.150.png); background-size: 420px 70px; }
-.small_units_dkblue { background-image: url(pieces150/small_units_dkblue.150.png); background-size: 70px 70px; }
-.small_units_green { background-image: url(pieces150/small_units_green.150.png); background-size: 420px 70px; }
+.big_units_blue { background-image: url(pieces75/big_units_blue.75.png); background-size: 1440px 90px; }
+.big_units_white { background-image: url(pieces75/big_units_white.75.png); background-size: 855px 90px; }
+.big_units_beige { background-image: url(pieces75/big_units_beige.75.png); background-size: 405px 90px; }
+.big_units_orange { background-image: url(pieces75/big_units_orange.75.png); background-size: 45px 90px; }
+.small_units_beige { background-image: url(pieces75/small_units_beige.75.png); background-size: 700px 70px; }
+.small_units_beige_air { background-image: url(pieces75/small_units_beige_air.75.png); background-size: 175px 70px; }
+.small_units_blue { background-image: url(pieces75/small_units_blue.75.png); background-size: 420px 70px; }
+.small_units_dkblue { background-image: url(pieces75/small_units_dkblue.75.png); background-size: 70px 70px; }
+.small_units_green { background-image: url(pieces75/small_units_green.75.png); background-size: 420px 70px; }
+.small_units_green_air { background-image: url(pieces75/small_units_green_air.75.png); background-size: 560px 70px; }
+.small_units_ltyellow { background-image: url(pieces75/small_units_ltyellow.75.png); background-size: 140px 70px; }
+.small_units_orange { background-image: url(pieces75/small_units_orange.75.png); background-size: 350px 70px; }
+.small_units_red { background-image: url(pieces75/small_units_red.75.png); background-size: 105px 70px; }
+.small_units_turquoise { background-image: url(pieces75/small_units_turquoise.75.png); background-size: 140px 70px; }
+.small_units_white { background-image: url(pieces75/small_units_white.75.png); background-size: 700px 70px; }
+.small_units_yellow { background-image: url(pieces75/small_units_yellow.75.png); background-size: 735px 70px; }
+.small_units_yellow_air { background-image: url(pieces75/small_units_yellow_air.75.png); background-size: 455px 70px; }
 
 
 /* CARDS (1x) */
@@ -455,4 +463,23 @@
 .card_jp_84{background-image:url(cards/card_jp_84.200.avif)}
 .card_jp_85{background-image:url(cards/card_jp_85.200.avif)}
 .card_jp_86{background-image:url(cards/card_jp_86.200.avif)}
+
+    /* PIECES */
+    .big_units_blue { background-image: url(pieces150/big_units_blue.150.png); background-size: 1440px 90px; }
+    .big_units_white { background-image: url(pieces150/big_units_white.150.png); background-size: 855px 90px; }
+    .big_units_beige { background-image: url(pieces150/big_units_beige.150.png); background-size: 405px 90px; }
+    .big_units_orange { background-image: url(pieces150/big_units_orange.150.png); background-size: 45px 90px; }
+    .small_units_beige { background-image: url(pieces150/small_units_beige.150.png); background-size: 700px 70px; }
+    .small_units_beige_air { background-image: url(pieces150/small_units_beige_air.150.png); background-size: 175px 70px; }
+    .small_units_blue { background-image: url(pieces150/small_units_blue.150.png); background-size: 420px 70px; }
+    .small_units_dkblue { background-image: url(pieces150/small_units_dkblue.150.png); background-size: 70px 70px; }
+    .small_units_green { background-image: url(pieces150/small_units_green.150.png); background-size: 420px 70px; }
+    .small_units_green_air { background-image: url(pieces150/small_units_green_air.150.png); background-size: 560px 70px; }
+    .small_units_ltyellow { background-image: url(pieces150/small_units_ltyellow.150.png); background-size: 140px 70px; }
+    .small_units_orange { background-image: url(pieces150/small_units_orange.150.png); background-size: 350px 70px; }
+    .small_units_red { background-image: url(pieces150/small_units_red.150.png); background-size: 105px 70px; }
+    .small_units_turquoise { background-image: url(pieces150/small_units_turquoise.150.png); background-size: 140px 70px; }
+    .small_units_white { background-image: url(pieces150/small_units_white.150.png); background-size: 700px 70px; }
+    .small_units_yellow { background-image: url(pieces150/small_units_yellow.150.png); background-size: 735px 70px; }
+    .small_units_yellow_air { background-image: url(pieces150/small_units_yellow_air.150.png); background-size: 455px 70px; }
 }
