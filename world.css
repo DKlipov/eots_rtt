@@ -64,16 +64,8 @@ body.hide-pieces .piece { display: none }
 
 .zoi {
     pointer-events: none;
-    background: rgba(255, 130, 255, 0.2);
+    /*background: rgba(255, 130, 255, 0.2);*/
     z-index: -10;
-}
-
-.jp_zoi {
-    background: rgba(255, 0, 0, 0.2);
-}
-
-.ap_zoi {
-    background: rgba(0, 130, 255, 0.2);
 }
 
 .hex {
@@ -493,20 +485,6 @@ body.hide-pieces .piece { display: none }
 .layout.stack.hover-offset\:20:hover {
 	--stack-dx: -20px;
 	--stack-dy: -20px;
-}
-
-.zoi {
-	pointer-events: none;
-	background: rgba(255, 130, 255, 0.2);
-	z-index: -1;
-}
-
-.jp_zoi {
-	background: rgba(255, 0, 0, 0.2);
-}
-
-.ap_zoi {
-	background: rgba(0, 130, 255, 0.2);
 }
 
 .hex {

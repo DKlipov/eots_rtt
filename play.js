@@ -259,10 +259,15 @@ function on_init() {
         //     continue
         // }
         let center = hex_center(i)
+        let column = (Math.floor(i / 29))
+        var x1 = 77 + column * 48.0
+        var y1 = 53 + (i % 29) * 55 + (column % 2) * 28
         // define_layout("board_hex", i, [center[0] - 18, center[1] - 14, 45, 45])
         define_s_loc(i, [center[0] - 25, center[1] - 22, 45, 45])
         define_space("action_hex", i, [center[0] - 29, center[1] - 19, 45, 45], "hex")
-        ZOI_HEX[i] = (define_space("zoi", i, [center[0] - 33, center[1] - 24, 45, 45], "hex hide"))
+        // ZOI_HEX[i] = (define_space("zoi", i, [center[0] - 33, center[1] - 24, 45, 45], "hex hide"))
+        // define_space("action_hex", i, [x1 - 33, y1 - 24, 66, 55], "active_hex")
+        ZOI_HEX[i] = define_space("zoi", i, [x1 - 33, y1 - 24, 66, 55], "")
     }
     define_s_loc(NON_PLACED_BOX, [-1000, -1000, 45, 45])
     define_s_loc(ELIMINATED_BOX, [100, 1280, 45, 45])
@@ -619,29 +624,27 @@ function on_update() {
 
     //show zoi
     for (i = 1; i < LAST_BOARD_HEX; i++) {
-        const zoi_state = G.supply_cache[i] & 3
+        const zoi_state = G.supply_cache[i]
         let hex = ZOI_HEX[i]
         if (!hex) {
             continue
         } else {
             hex = hex.element
         }
-
-        if (zoi_state === 0) {
-            // hex.classList.add("hide")
-        } else if (zoi_state === 1) {
-            hex.classList.remove("hide")
-            hex.classList.remove("ap_zoi")
+        hex.className = "zoi"
+        // return
+        if ((zoi_state & 3) === 0) {
+            hex.classList.add("hide")
+        } else if ((zoi_state & 7) === 3) {
+            hex.classList.add("lrb_zoi")
+        } else if ((zoi_state & 3) === 3) {
+            hex.classList.add("contested_zoi")
+        } else if (zoi_state & 1) {
             hex.classList.add("jp_zoi")
-        } else if (zoi_state === 2) {
-            hex.classList.remove("hide")
-            hex.classList.remove("jp_zoi")
+        } else if (zoi_state & 2) {
             hex.classList.add("ap_zoi")
-        } else {
-            hex.classList.remove("hide")
-            hex.classList.remove("jp_zoi")
-            hex.classList.remove("ap_zoi")
         }
+        // hex.classList.push()
     }
 
     // show attack range
