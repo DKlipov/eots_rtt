@@ -1,3 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="62" height="62">
-<polygon points="46.5,57.8 62.0,31.0 46.5,4.2 15.5,4.2 0.0,31.0 15.5,57.8" fill="magenta" fill-opacity="0.2"/>
+    <pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="10" height="10" patternTransform="rotate(45)">
+        <line x1="0" y1="0" x2="0" y2="10" stroke="#0069E1" stroke-width="2" />
+    </pattern>
+    <polygon points="46.5,57.8 62.0,31.0 46.5,4.2 15.5,4.2 0.0,31.0 15.5,57.8" fill="crimson" />
+    <polygon points="46.5,57.8 62.0,31.0 46.5,4.2 15.5,4.2 0.0,31.0 15.5,57.8" fill="url(#diagonalHatch)"/>
 </svg>

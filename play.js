@@ -613,25 +613,6 @@ function on_update() {
         }
     }
 
-    // show supply
-    // for (i = 1; i < LAST_BOARD_HEX; i++) {
-    //     if ((G.supply_cache[i] & (1 << 15)) && G.supply_cache[i] & ((1 << 16) | (1 << 17) | (1 << 18))) {
-    //         ZOI_HEX[i].classList.remove("hide")
-    //         ZOI_HEX[i].classList.remove("jp_zoi")
-    //         ZOI_HEX[i].classList.remove("ap_zoi")
-    //     } else if (G.supply_cache[i] & (1 << 15)) {
-    //         ZOI_HEX[i].classList.remove("hide")
-    //         ZOI_HEX[i].classList.remove("ap_zoi")
-    //         ZOI_HEX[i].classList.add("jp_zoi")
-    //     } else if (G.supply_cache[i] & ((1 << 16) | (1 << 17) | (1 << 18))) {
-    //         ZOI_HEX[i].classList.remove("hide")
-    //         ZOI_HEX[i].classList.remove("jp_zoi")
-    //         ZOI_HEX[i].classList.add("ap_zoi")
-    //     } else {
-    //         ZOI_HEX[i].classList.add("hide")
-    //     }
-    // }
-
     //show zoi
     for (var hex of ALL_BOARD_HEXES) {
         const zoi_state = G.supply_cache[hex]
@@ -640,18 +621,6 @@ function on_update() {
         update_keyword("zoi_hex", hex, "jp", (zoi_state & 1) === 1)
         update_keyword("zoi_hex", hex, "ap", (zoi_state & 2) === 2)
     }
-
-    // show attack range
-    // for (i = 1; i < LAST_BOARD_HEX; i++) {
-    //     if ((G.supply_cache[i] & (1 << 19))) {
-    //         ZOI_HEX[i].classList.remove("hide")
-    //         ZOI_HEX[i].classList.remove("jp_zoi")
-    //         ZOI_HEX[i].classList.remove("ap_zoi")
-    //     } else {
-    //         ZOI_HEX[i].classList.add("hide")
-    //     }
-    // }
-
 
     update_hand(AP)
     update_hand(JP)

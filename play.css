@@ -311,10 +311,11 @@ div[data-tooltip]:after {
 	z-index: 1;
 }
 
-.zoi_hex.lrb { background-image: url(images/hex_zoi_lrb.svg) }
+
 .zoi_hex.jp { background-image: url(images/hex_zoi_jp.svg) }
 .zoi_hex.ap { background-image: url(images/hex_zoi_ap.svg) }
 .zoi_hex.contested { background-image: url(images/hex_zoi_contested.svg) }
+.zoi_hex.lrb { background-image: url(images/hex_zoi_lrb.svg); opacity: 0.2 }
 
 .action_hex {
 	box-sizing: border-box;
