@@ -320,7 +320,7 @@ div[data-tooltip]:after {
 .action_hex {
 	box-sizing: border-box;
 	border-radius: 50%;
-	z-index: 2;
+	z-index: 50;
 }
 
 .action_hex.china_box {
