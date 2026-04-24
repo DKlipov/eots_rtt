@@ -1070,15 +1070,15 @@ function sub_hex(match, p1) {
 
 
 function on_click_hex_tip(z) {
-    scroll_into_view(get_hex_elem(z))
+    scroll_into_view(get_hex_elem(z).element)
 }
 
 function on_focus_hex_tip(z) {
-    get_hex_elem(z).classList.toggle("tip", true)
+    get_hex_elem(z).element.classList.toggle("tip", true)
 }
 
 function on_blur_hex_tip(z) {
-    get_hex_elem(z).classList.toggle("tip", false)
+    get_hex_elem(z).element.classList.toggle("tip", false)
 }
 
 /* TOOLTIP ON FOCUS */

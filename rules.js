@@ -3717,7 +3717,7 @@ function compute_air_move_hexes() {
     if (move_data.move_type & STRAT_MOVE) {
         move_type |= STRAT_MOVE
     }
-    if (has_non_n_zoi(location, 1 - R)) {
+    if (L.move_type === AVOID_ZOI && has_non_n_zoi(location, 1 - R)) {
         return []
     }
     const distance_map = [move_data.location, [0, 1, move_data.location]]
@@ -3748,7 +3748,7 @@ function compute_air_move_hexes() {
                 continue
             }
             var cached = map_get(distance_map, nh, [9])[0]
-            if (has_non_n_zoi(nh, 1 - R)
+            if (L.move_type === AVOID_ZOI && has_non_n_zoi(nh, 1 - R)
                 || distance % 10 > L.move_data.extended_battle_range
                 || (distance >= cached && distance % 10 >= cached % 10)) {
                 continue
