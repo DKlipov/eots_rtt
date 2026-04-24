@@ -66,12 +66,6 @@
 .marker.strat_air_small { background-image: url(markers75/strat_air_small.png); }
 .marker.barges_small { background-image: url(markers75/barges_small.png); }
 .marker.oos_small { background-image: url(markers75/oos_small.webp); }
-.lrb_zoi { background-image: url(pieces150/lrb_zoi.png);background-size: 63px 57px;opacity:0.2; background-repeat: no-repeat  }
-.jp_zoi { background-image: url(pieces150/jp_zoi.png);background-size: 63px 57px;opacity:0.2; background-repeat: no-repeat  }
-.ap_zoi { background-image: url(pieces150/ap_zoi.png);background-size: 63px 57px;opacity:0.2; background-repeat: no-repeat  }
-.contested_zoi { background-image: url(pieces150/contested_zoi.png);background-size: 63px 57px;opacity:0.2; background-repeat: no-repeat  }
-.active_hex { background-image: url(pieces150/active_hex.png);background-size: 63px 57px;opacity:0.4; background-repeat: no-repeat  }
-
 
 /* ARMIES (45x45) */
 .air_br { background-image: url(pieces/air_br.png); background-size: 136px 70px; }

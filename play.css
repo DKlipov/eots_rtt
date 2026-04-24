@@ -302,6 +302,42 @@ div[data-tooltip]:after {
     box-shadow: 0 0 0 3px yellow;
 }
 
+/* HEXES */
+
+.zoi_hex {
+	pointer-events: none;
+	box-sizing: border-box;
+	border-radius: 50%;
+	z-index: 1;
+}
+
+.zoi_hex.lrb { background-image: url(images/hex_zoi_lrb.svg) }
+.zoi_hex.jp { background-image: url(images/hex_zoi_jp.svg) }
+.zoi_hex.ap { background-image: url(images/hex_zoi_ap.svg) }
+.zoi_hex.contested { background-image: url(images/hex_zoi_contested.svg) }
+
+.action_hex {
+	box-sizing: border-box;
+	border-radius: 50%;
+	z-index: 2;
+}
+
+.action_hex.china_box {
+	border-radius: 0;
+}
+
+.action_hex.action { background-image: url(images/hex_action.svg) }
+
+.action_hex.china_box.action {
+	border: 4px solid yellow;
+	background-image: none;
+	box-shadow: 0 0 0 1px black, inset 0 0 0 1px black;
+}
+
+.s-loc {
+    z-index: 3;
+}
+
 /* PIECES */
 
 .piece {

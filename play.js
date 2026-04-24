@@ -233,46 +233,54 @@ function define_s_loc(id, rect) {
     )
 }
 
+function center_rect([x, y], w, h) {
+    return [ x - w/2, y - h/2, w, h ]
+}
+
+let ALL_BOARD_HEXES = []
+
 function on_init() {
     init_canvas()
+
     define_board("#map", 2550, 1650, [12, 12, 12, 12])
-    var first_hex = []
-    var last_hex = []
+
+    // used hexes
+    var used_hex = []
+    for (var i = 0; i < 60; ++i) {
+        used_hex[i] = { min: 100, max: -100 }
+    if (i > 27 && i < 45) used_hex[i].max = 28 - (i&1)
+    }
+
     for (var i = 0; i < data.map.length; i++) {
         var hex = hex_to_int(data.map[i].id)
         let x = Math.floor(hex / 29)
         let y = hex % 29
-        if (map_get(first_hex, x, 100) > y) {
-            map_set(first_hex, x, y)
-        }
-        if (map_get(last_hex, x, 0) < y) {
-            map_set(last_hex, x, y)
-        }
+    used_hex[x].min = Math.min(used_hex[x].min, y)
+    used_hex[x].max = Math.max(used_hex[x].max, y)
     }
+
     for (var i = 1; i < LAST_BOARD_HEX; ++i) {
         var x = Math.floor(i / 29)
         let y = i % 29
-        if (map_get(first_hex, x, 0) > y) {
-            continue
-        }
-        // if (map_get(last_hex, x, 0) < i) {
-        //     continue
-        // }
-        let center = hex_center(i)
-        let column = (Math.floor(i / 29))
-        var x1 = 77 + column * 48.0
-        var y1 = 53 + (i % 29) * 55 + (column % 2) * 28
-        define_s_loc(i, [center[0] - 25, center[1] - 22, 45, 45])
-        define_space("action_hex", i, [center[0] - 29, center[1] - 25, 45, 45], "circle")
-        define_space("action_display", i, [x1 - 33, y1 - 24, 66, 55], "active_hex hide")
-        ZOI_HEX[i] = define_space("zoi", i, [x1 - 33, y1 - 24, 66, 55], "")
+
+    if (y < used_hex[x].min) continue
+    if (y > used_hex[x].max) continue
+    ALL_BOARD_HEXES.push(i)
+
+        let xy = hex_center(i)
+        define_s_loc(i, center_rect(xy, 45, 45))
+        define_thing("zoi_hex", i).layout(center_rect(xy, 62, 62))
+        define_space("action_hex", i, center_rect(xy, 68, 68))
     }
+
     define_s_loc(NON_PLACED_BOX, [-1000, -1000, 45, 45])
     define_s_loc(ELIMINATED_BOX, [100, 1280, 45, 45])
     define_s_loc(PERM_ELIMINATED, [-1000, -1180, 45, 45])
     define_s_loc(DELAYED_BOX, [2420, 1540, 45, 45])
     define_s_loc(CHINA_BOX, [890, 420, 45, 45])
-    define_space("action_hex", CHINA_BOX, [890, 420, 45, 45])
+
+    define_space("action_hex", CHINA_BOX, [851, 406, 123, 76], "china_box")
+
     define_layout("status", JP_AGREEMENT, [990, 143, 35, 35])
     define_layout("status", AP_AGREEMENT, [1054, 143, 35, 35])
     for (i = 0; i < 11; i++) {
@@ -412,8 +420,12 @@ function hex_center(i) {
     if (i === CHINA_BOX) {
         return [890, 420]
     }
+    let row = i % 29
     let column = (Math.floor(i / 29))
-    return [77 + column * 48.0, 50 + (i % 29) * 55.3 + (column % 2) * 25]
+    return [
+        (45 + 31.375) + column * 48.0,
+        (25.75 + 27.625) + row * 55.25 + (column & 1) * 27.625
+    ]
 }
 
 // for (let i = 1; i < LAST_BOARD_HEX; ++i) {
@@ -545,11 +557,6 @@ function on_update() {
     // G.actions={}
     // G.actions.board_hex = []
     // G.actions.board_hex.push(hex_to_int(piece.start))
-    var array = world.things["action_display"]
-    array.forEach(h => h.element.classList.add("hide"))
-    if (G.actions && G.actions.action_hex) {
-        G.actions.action_hex.forEach(h => array[h] ? array[h].element.classList.remove("hide") : "")
-    }
 
 
     G.control.filter(h => !set_has(G.capture, h) && !set_has(JP_BOUNDARIES, h))
@@ -626,28 +633,12 @@ function on_update() {
     // }
 
     //show zoi
-    for (i = 1; i < LAST_BOARD_HEX; i++) {
-        const zoi_state = G.supply_cache[i]
-        let hex = ZOI_HEX[i]
-        if (!hex) {
-            continue
-        } else {
-            hex = hex.element
-        }
-        hex.className = "zoi"
-        // return
-        if ((zoi_state & 3) === 0) {
-            hex.classList.add("hide")
-        } else if ((zoi_state & 7) === 3) {
-            hex.classList.add("lrb_zoi")
-        } else if ((zoi_state & 3) === 3) {
-            hex.classList.add("contested_zoi")
-        } else if (zoi_state & 1) {
-            hex.classList.add("jp_zoi")
-        } else if (zoi_state & 2) {
-            hex.classList.add("ap_zoi")
-        }
-        // hex.classList.push()
+    for (var hex of ALL_BOARD_HEXES) {
+        const zoi_state = G.supply_cache[hex]
+        update_keyword("zoi_hex", hex, "lrb", (zoi_state & 7) === 3)
+        update_keyword("zoi_hex", hex, "contested", (zoi_state & 3) === 3)
+        update_keyword("zoi_hex", hex, "jp", (zoi_state & 1) === 1)
+        update_keyword("zoi_hex", hex, "ap", (zoi_state & 2) === 2)
     }
 
     // show attack range
