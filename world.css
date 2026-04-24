@@ -81,6 +81,23 @@ body.hide-pieces .piece { display: none }
     pointer-events: none;
 }
 
+.circle {
+	height: 55px;
+	width: 55px;
+	/*background-color: #bbb;*/
+	border-radius: 50%;
+	display: inline-block;
+}
+
+.space.action.circle{
+	background: none
+}
+
+.space.action_display{
+	z-index: 100;
+	pointer-events: none;
+}
+
 .space.action {
     background: rgba(255, 255, 0, 0.4);
     pointer-events: auto;
@@ -485,17 +502,4 @@ body.hide-pieces .piece { display: none }
 .layout.stack.hover-offset\:20:hover {
 	--stack-dx: -20px;
 	--stack-dy: -20px;
-}
-
-.hex {
-	height: 55px;
-	aspect-ratio: 1/cos(30deg);
-	clip-path: polygon(50% -50%, 100% 50%, 50% 150%, 0 50%);
-	box-sizing: border-box;
-	border-width: 4px;
-	border-style: solid;
-	border-color: transparent;
-	box-shadow: none;
-	border-radius: 16px;
-	pointer-events: none;
 }

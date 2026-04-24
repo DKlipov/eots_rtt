@@ -262,11 +262,9 @@ function on_init() {
         let column = (Math.floor(i / 29))
         var x1 = 77 + column * 48.0
         var y1 = 53 + (i % 29) * 55 + (column % 2) * 28
-        // define_layout("board_hex", i, [center[0] - 18, center[1] - 14, 45, 45])
         define_s_loc(i, [center[0] - 25, center[1] - 22, 45, 45])
-        define_space("action_hex", i, [center[0] - 29, center[1] - 19, 45, 45], "hex")
-        // ZOI_HEX[i] = (define_space("zoi", i, [center[0] - 33, center[1] - 24, 45, 45], "hex hide"))
-        // define_space("action_hex", i, [x1 - 33, y1 - 24, 66, 55], "active_hex")
+        define_space("action_hex", i, [center[0] - 29, center[1] - 25, 45, 45], "circle")
+        define_space("action_display", i, [x1 - 33, y1 - 24, 66, 55], "active_hex hide")
         ZOI_HEX[i] = define_space("zoi", i, [x1 - 33, y1 - 24, 66, 55], "")
     }
     define_s_loc(NON_PLACED_BOX, [-1000, -1000, 45, 45])
@@ -547,6 +545,11 @@ function on_update() {
     // G.actions={}
     // G.actions.board_hex = []
     // G.actions.board_hex.push(hex_to_int(piece.start))
+    var array = world.things["action_display"]
+    array.forEach(h => h.element.classList.add("hide"))
+    if (G.actions && G.actions.action_hex) {
+        G.actions.action_hex.forEach(h => array[h] ? array[h].element.classList.remove("hide") : "")
+    }
 
 
     G.control.filter(h => !set_has(G.capture, h) && !set_has(JP_BOUNDARIES, h))

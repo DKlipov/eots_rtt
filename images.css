@@ -70,7 +70,7 @@
 .jp_zoi { background-image: url(pieces150/jp_zoi.png);background-size: 63px 57px;opacity:0.2; background-repeat: no-repeat  }
 .ap_zoi { background-image: url(pieces150/ap_zoi.png);background-size: 63px 57px;opacity:0.2; background-repeat: no-repeat  }
 .contested_zoi { background-image: url(pieces150/contested_zoi.png);background-size: 63px 57px;opacity:0.2; background-repeat: no-repeat  }
-.active_hex { background-image: url(pieces150/active_hex.png);background-size: 63px 57px;opacity:0.2; background-repeat: no-repeat  }
+.active_hex { background-image: url(pieces150/active_hex.png);background-size: 63px 57px;opacity:0.4; background-repeat: no-repeat  }
 
 
 /* ARMIES (45x45) */
