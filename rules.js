@@ -2451,8 +2451,8 @@ P.move_offensive_units = {
     },
     ground_move() {
         push_undo()
-        L.allowed_hexes = []
         set_mt(ANY_MOVE)
+        L.allowed_hexes = []
         call("ground_move")
     },
     avoid_zoi() {
