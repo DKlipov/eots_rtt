@@ -1571,6 +1571,13 @@ P.offensive_segment = {
         goto("end_action")
     },
     //debug
+    draw() {
+        push_undo()
+        G.offensive.active_cards = [TOJO_RESIGNS]
+        var a = G.draw[R].slice()
+        a.forEach(c => discard_card(c))
+        call("draw_from_discard")
+    },
     isr() {
         G.inter_service[R] = 1 - G.inter_service[R]
     },
@@ -1625,13 +1632,6 @@ P.offensive_segment_card_action = {
         G.offensive.type = OC
         log(`${R} played ${card_get_log_str(L.c)} as operation card`)
         goto("offensive_sequence")
-    },
-    draw() {
-        push_undo()
-        G.offensive.active_cards = [TOJO_RESIGNS]
-        var a = G.draw[R].slice()
-        a.forEach(c => discard_card(c))
-        call("draw_from_discard")
     },
     event() {
         push_undo()
@@ -4584,7 +4584,7 @@ P.attack_reaction_cards = {
 
 P.apply_attack_reaction = {
     _begin() {
-        if (G.offensive.battle_hexes.length <= 0 && G.offensive.stage !== BATTLE_STAGE) {
+        if (G.offensive.all_bh.length === 0 && G.offensive.stage !== BATTLE_STAGE) {
             end()
             return
         }
@@ -4603,6 +4603,9 @@ P.apply_attack_reaction = {
     prompt() {
         prompt(`${offensive_card_header()} Apply reaction cards.`)
         L.allowed_cards.forEach(c => action_card(c))
+        if(L.allowed_cards.length <= 0){
+            button("done")
+        }
     },
     done() {
         push_undo()
@@ -4611,9 +4614,6 @@ P.apply_attack_reaction = {
     card(c) {
         push_undo()
         set_delete(L.allowed_cards, c)
-        if (L.allowed_cards.length <= 0) {
-            end()
-        }
         if (cards[c].before_battles) {
             cards[c].before_battles()
         }
