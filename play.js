@@ -57,6 +57,9 @@ const AVOID_ZOI = 1 << 11
 const ORGANIC_ONLY = 1 << 12
 const GROUND_DISENGAGEMENT = 1 << 13
 
+const SOUTH_PACIFIC_SCENARIO = 0
+const BURMA_SCENARIO = 10
+
 const UNIT_MOVEMENT_MARKERS = [
     {
         "name": "BARGES_MOVE",
@@ -239,8 +242,24 @@ function center_rect([x, y], w, h) {
 
 let ALL_BOARD_HEXES = []
 
-function on_init() {
+function on_init(scenario, game_options, static_view) {
     init_canvas()
+
+    let map_elem = document.getElementById("mapwrap")
+    switch(scenario){
+        case "South Pacific":{
+            map_elem.classList.add("southpac");
+            break;
+        };
+        case  "Burma: The Forgotten War":{
+            map_elem.classList.add("burma");
+            break;
+        };
+        default:
+        {
+            map_elem.classList.add("main");
+        }
+    }
 
     define_board("#map", 2550, 1650, [12, 12, 12, 12])
 
