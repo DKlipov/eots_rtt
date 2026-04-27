@@ -1946,7 +1946,7 @@ function get_reaction_able_units() {
         mark_asp_reaction_hexes(hex)
         mark_ground_reaction_hexes(hex)
     })
-    const has_asp = Math.max(G.asp[R][0] - G.asp[R][1], 0) && G.offensive.counter_offensive_card !== MATADOR
+    const has_asp = get_asp_limit(R) && G.offensive.counter_offensive_card !== MATADOR
     for_each_unit_on_map((u, piece) => {
         if (piece.faction === R && piece.class === "ground" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG3) {
             set_add(L.reaction_able_units, u)
@@ -3495,13 +3495,10 @@ function get_move_data() {
     }
 
 
-    result.is_new_battle_allowed = (R === G.offensive.attacker
+    result.is_new_battle_allowed = (G.active === G.offensive.attacker
         && (G.offensive.type === EC || G.offensive.battle_hexes.length === 0)
         && G.offensive.stage !== POST_BATTLE_STAGE) && L.move_type !== STRAT_MOVE
-    var asp_total = Math.max(G.asp[R][0] - G.asp[R][1], 0)
-    if (!R && G.inter_service[0]) {
-        asp_total = Math.ceil(asp_total / 2)
-    }
+    var asp_total = get_asp_limit(G.active)
     if (G.offensive.stage === REACTION_STAGE) {
         asp_total = Math.min(asp_total, 1 - G.offensive.r_asp)
     }
@@ -3530,6 +3527,14 @@ function get_move_data() {
         result.move_type |= GROUND_MOVE
     }
     return result
+}
+
+function get_asp_limit(faction) {
+    var asp_lim = G.asp[faction][0]
+    if (faction === JP && G.inter_service[0]) {
+        asp_lim = Math.ceil(asp_lim / 2)
+    }
+    return Math.max(asp_lim - G.asp[faction][1], 0)
 }
 
 function get_ground_move_cost(from, to, direction, faction) {
