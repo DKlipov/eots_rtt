@@ -58,6 +58,7 @@ const ORGANIC_ONLY = 1 << 12
 const GROUND_DISENGAGEMENT = 1 << 13
 
 const SOUTH_PACIFIC_SCENARIO = 0
+const MAIN_SCENARIO = 1
 const BURMA_SCENARIO = 10
 
 const UNIT_MOVEMENT_MARKERS = [
@@ -242,26 +243,37 @@ function center_rect([x, y], w, h) {
 
 let ALL_BOARD_HEXES = []
 
+let SID = MAIN_SCENARIO;
+let map_layout = layout.mainmap;
+
 function on_init(scenario, game_options, static_view) {
     init_canvas()
 
     let map_elem = document.getElementById("mapwrap")
     switch(scenario){
         case "South Pacific":{
+            SID = SOUTH_PACIFIC_SCENARIO
+            map_layout = layout.southpac; 
             map_elem.classList.add("southpac");
+            define_board("#map", 1275, 825, [12, 12, 12, 12])
             break;
         };
         case  "Burma: The Forgotten War":{
+            SID = BURMA_SCENARIO
+            map_layout = layout.burma; 
             map_elem.classList.add("burma");
+            define_board("#map", 1275, 825, [12, 12, 12, 12])
             break;
         };
         default:
         {
+            SID = MAIN_SCENARIO
+            map_layout = layout.mainmap; 
             map_elem.classList.add("main");
+            define_board("#map", 2550, 1650, [12, 12, 12, 12])
         }
     }
 
-    define_board("#map", 2550, 1650, [12, 12, 12, 12])
 
     // used hexes
     var used_hex = []
@@ -295,54 +307,24 @@ function on_init(scenario, game_options, static_view) {
     define_s_loc(NON_PLACED_BOX, [-1000, -1000, 45, 45])
     define_s_loc(ELIMINATED_BOX, [100, 1280, 45, 45])
     define_s_loc(PERM_ELIMINATED, [-1000, -1180, 45, 45])
-    define_s_loc(DELAYED_BOX, [2420, 1540, 45, 45])
-    define_s_loc(CHINA_BOX, [890, 420, 45, 45])
+    define_s_loc(DELAYED_BOX, map_layout.box_delayed_reinf)
+    define_s_loc(CHINA_BOX, map_layout.box_air_unit_in_china)
 
-    define_space("action_hex", CHINA_BOX, [851, 406, 123, 76], "china_box")
+    define_space("action_hex", CHINA_BOX, map_layout.box_air_unit_in_china, "china_box")
 
-    define_layout("status", JP_AGREEMENT, [990, 143, 35, 35])
-    define_layout("status", AP_AGREEMENT, [1054, 143, 35, 35])
-    for (i = 0; i < 11; i++) {
-        define_layout("pw", i, [167, 1185 - Math.floor((i * 46.9)), 35, 35])
-    }
-    for (i = 0; i < 11; i++) {
-        define_layout("wie", i, [273, 715 + Math.floor((i * 46.9)), 35, 35])
-    }
-    for (i = 1; i < 13; i++) {
-        define_stack("turn", i,
-            [68, 1232 - Math.floor((i * 46.9)), 35, 35],
-            -6, -9, // closed offset
-            0, -40, // open offset (major axis)
-            40, 0, // open offset (minor axis)
-            1, // threshold to auto-open
-            8, // wrap limit
-            -6, -9, 4
-        )
-        define_space("action_box", i + TURN_BOX, [68, 1232 - Math.floor((i * 46.9)), 35, 35])
-    }
-    for (i = 0; i < 10; i++) {
-        define_stack("track", i,
-            [383, 1585 - Math.floor((i * 46.5)), 35, 35],
-            -6, -9, // closed offset
-            0, -40, // open offset (major axis)
-            40, 0, // open offset (minor axis)
-            1, // threshold to auto-open
-            8, // wrap limit
-            -6, -9, 4
-        )
-    }
-    for (i = 0; i < 5; i++) {
-        define_layout("india", i, [603 - Math.floor((i * 50)), 65, 35, 35])
-    }
-    for (i = 0; i < 3; i++) {
-        define_layout("burma", i, [533 - Math.floor((i * 63)), 135, 35, 35])
-    }
-    for (i = 0; i < 6; i++) {
-        define_layout("china", i, [843 - Math.floor((i * 46.9)), 152, 35, 35])
-    }
-    for (i = 0; i < 13; i++) {
-        define_layout("divisions", i, [678 + Math.floor((i * 46.9)), 47, 35, 35])
-    }
+    define_layout("status", JP_AGREEMENT, map_layout.box_isr_jp)
+    define_layout("status", AP_AGREEMENT, map_layout.box_isr_us)
+    define_layout_track_v("pw",0, 10, map_layout.track_political_will, 0)
+    define_layout_track_v("wie",0, 10, map_layout.track_wie, 0)
+
+    define_layout_track_v("turn",1,12,map_layout.track_game_turn,0)
+    define_layout_track_v("track",0,9,map_layout.track_strat_record,0)
+
+    define_layout_track_h("india", 0, 5, map_layout.track_india_status,0)
+    define_layout_track_h("burma", 0, 3, map_layout.track_burma_road,0)
+    define_layout_track_h("china", 0, 6, map_layout.track_chinese_government,0)
+    define_layout_track_h("divisions", 0, 13, map_layout.track_japanese_divisions_available_china,0)
+
     define_marker("divisions", 0, "divisions_china")
     for (let i = 1; i < data.pieces.length; ++i) {
         let piece = data.pieces[i]
