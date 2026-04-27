@@ -4601,7 +4601,7 @@ P.apply_attack_reaction = {
     prompt() {
         prompt(`${offensive_card_header()} Apply reaction cards.`)
         L.allowed_cards.forEach(c => action_card(c))
-        if(L.allowed_cards.length <= 0){
+        if (L.allowed_cards.length <= 0) {
             button("done")
         }
     },
@@ -7157,7 +7157,7 @@ P.naval_battle_guadalcanal = {
                 set_add(L.allowed_units, u)
             }
         })
-        L.allowed_units = L.allowed_units.filter(u => !set_has(ap_bb_hex, G.location[u]))
+        L.allowed_units = L.allowed_units.filter(u => !set_has(ap_bb_hex, G.location[u]) && set_has(jp_bb_hex, G.location[u]))
     },
     prompt() {
         prompt(`${offensive_card_header()} Choose airfield bombardment target.`)
