@@ -1560,8 +1560,6 @@ P.offensive_segment = {
     },
     card(c) {
         push_undo()
-        G.offensive.offensive_card = c
-        G.offensive.active_cards.push(c)
         goto("offensive_segment_card_action", {c: c})
     },
     pass() {

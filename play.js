@@ -360,6 +360,7 @@ function update_hand(side) {
         fo_card.innerHTML = ''
     } else if (G.events[data.events.FUTURE_OFFENSIVE_JP.id + side] > 0) {
         fo_card = populate_generic_to_parent(lookup_thing("hand", side).element, side === JP ? "card card_jp_0" : "card card_ap_0")
+        fo_card.innerHTML = ''
     }
 
     if (G.events[data.events.FUTURE_OFFENSIVE_JP.id + side] === G.turn) {
@@ -370,7 +371,7 @@ function update_hand(side) {
 
     if (!Array.isArray(G.hand[side])) {
         for (let i = 0; i < G.hand[side]; i++) {
-            populate_generic("hand", side, side === JP ? "card card_jp_0" : "card card_ap_0")
+            populate_generic("hand", side, side === JP ? "card card_jp_0" : "card card_ap_0").innerHTML = ''
         }
     } else {
         for (let i = 0; i < G.hand[side].length; i++) {
