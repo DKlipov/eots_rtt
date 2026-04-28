@@ -959,7 +959,7 @@ function vp_dialog(id, response) {
         }
         response.text.forEach(text => {
             let header = document.createElement("div")
-            header.textContent = text
+            header.innerHTML = text.replace(/H(\d+)/g, sub_hex)
             dl.appendChild(header)
         })
         body.appendChild(dl)

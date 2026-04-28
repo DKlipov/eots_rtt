@@ -534,6 +534,26 @@ for (var i = 1; i < pieces.length; i++) {
 }
 
 
+setup_original_control()
+
+function setup_original_control() {
+    SCENARIO_DATA.forEach(s => {
+        G = {
+            log: []
+        }
+        on_setup(s.name, {})
+        s.original_control = G.control
+        s.controllable = []
+        for (var i = 1; i < LAST_BOARD_HEX; i++) {
+            if (is_controllable_hex(i)) {
+                set_add(s.controllable, i)
+            }
+        }
+    })
+    G = null
+}
+
+
 /* DATA */
 
 
@@ -6239,11 +6259,30 @@ P.end_of_turn_phase = script(`
     goto strategic_phase
 `)
 
+function get_victory() {
+    var data = scenario_data()
+    G.original_control = G.control
+    var adjusted_control = G.control.slice()
+    for (var i = 0; i < data.controllable.length; i++) {
+        var hex = data.controllable[i]
+        var orig = set_has(data.original_control, hex) ? set_add : set_delete
+        var supply = set_has(G.control, hex) ? JP_SUPPLIED_HEX : AP_SUPPLIED_HEX
+        if (!(G.supply_cache[hex] & supply)) {
+            orig(adjusted_control, hex)
+        }
+    }
+    G.control = adjusted_control
+    var vp = data.victory()
+    G.control = G.original_control
+    delete G.original_control
+    return vp
+}
+
 function victory_check() {
     if (G.political_will <= 0) {
         finish("Japan", "US surrenders")
     }
-    var vp = scenario_data().victory()
+    var vp = get_victory()
     if (scenario_data().last_turn <= G.turn) {
         vp.text.forEach(t => log(t))
         finish(vp.won_side, vp.won_text)
@@ -6665,6 +6704,54 @@ function victory_1945() {
     return result
 }
 
+function adjust_vp(result, diff, message, hex_control) {
+    result.text.push(`${diff > 0 ? "+" : ""}${diff} VP - ${message}${get_hex_control_log(hex_control)}.`)
+    result.vp += diff
+}
+
+function get_hex_control_log(hex_control) {
+    var ap = []
+    var jp = []
+    if (!hex_control) {
+        return ""
+    }
+    hex_control.forEach(h => {
+        var or = set_has(G.original_control, h)
+        var curr = set_has(G.control, h)
+        if (or !== curr && or) {
+            ap.push(h)
+        } else if (or !== curr) {
+            jp.push(h)
+        }
+
+    })
+    var hex_log = " (Not supplied hexes counts as "
+    if (ap.length > 0) {
+        hex_log += "AP control: " + ap.map(h => hex_get_log_str(h)).join(",")
+        if (jp.length > 0) {
+            hex_log += ", "
+        }
+    }
+    if (jp.length > 0) {
+        hex_log += "JP control: " + jp.map(h => hex_get_log_str(h)).join(",")
+    }
+    hex_log += ")"
+    if (ap.length === 0 && jp.length === 0) {
+        return ""
+    }
+    return hex_log
+}
+
+function binary_vp(result, condition, diff, message_true, message_false, hex_control) {
+    if (condition) {
+        result.text.push(`${diff > 0 ? "+" : ""}${diff} VP - ${message_true}${get_hex_control_log(hex_control)}.`)
+        result.vp += diff
+    } else {
+        result.text.push(`0 VP - ${message_false}${get_hex_control_log(hex_control)}.`)
+    }
+
+}
+
 function victory_south_pacific() {
     var result = {
         vp: 0,
@@ -6673,22 +6760,13 @@ function victory_south_pacific() {
         won_text: "",
     }
 
-    if (G.surrender[nations.CHINA.id] > 2) {
-        result.vp += G.surrender[nations.CHINA.id] - 2
-        result.text.push(`+${G.surrender[nations.CHINA.id]} VP - China government status.`)
-    } else {
-        result.text.push(`0 VP - China government status.`)
-    }
+    adjust_vp(result, G.surrender[nations.CHINA.id] - 2, "China government status")
     if (G.surrender[nations.CHINA.id] > 5) {
         result.vp += 3
         result.text.push(`+3 VP - China surrender.`)
     }
-    if (!check_supply_line(hex_to_int(3727), OAHU, AP)) {
-        result.vp += 5
-        result.text.push(`+5 VP - Townsville isolated from Oahu.`)
-    } else {
-        result.text.push(`0 VP - Townsville did not isolated.`)
-    }
+    binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
+        "Townsville did not isolated", [hex_to_int(3727), OAHU])
 
     if (G.political_will < 4) {
         result.vp += 4 - G.political_will
@@ -6696,6 +6774,14 @@ function victory_south_pacific() {
     } else {
         result.text.push(`0 VP - Political will >= 4.`)
     }
+    var amh = 0
+    nations.AUSTRALIAN_MANDATES.ports.forEach(hex => {
+        var h = hex_to_int(hex)
+        if (is_space_controlled(h, JP) && get_map_data(h).port) {
+            amh++
+        }
+    })
+    adjust_vp(result, amh, "JP control of Mandates ports", nations.AUSTRALIAN_MANDATES.ports.map(h => hex_to_int(h)))
     if (nations.AUSTRALIAN_MANDATES.ports.filter(h => !is_space_controlled(hex_to_int(h), JP)).length === 0) {
         result.vp += 3
         result.text.push(`+3 VP - JP control of Mandates.`)
@@ -6705,6 +6791,16 @@ function victory_south_pacific() {
     } else {
         result.text.push(`0 VP - None control of Mandates.`)
     }
+    var new_guinea = 0
+    nations.NEW_GUINEA.keys.forEach(hex => {
+        var h = hex_to_int(hex)
+        if (is_space_controlled(h, JP) && get_map_data(h).port) {
+            new_guinea++
+        }
+    })
+    adjust_vp(result, new_guinea, "JP control of New Guinea ports", nations.NEW_GUINEA.keys.map(h => hex_to_int(h)).filter(h => h !== VOGELKOP))
+    binary_vp(result, is_space_controlled(VOGELKOP, AP), -1, "AP control of Vogelkop",
+        "JP control of Vogelkop", [VOGELKOP])
     if (check_nation_controlled(nations.NEW_GUINEA, JP)) {
         result.vp += 3
         result.text.push(`+3 VP - JP control of New Guinea.`)
@@ -6714,46 +6810,14 @@ function victory_south_pacific() {
     } else {
         result.text.push(`0 VP - None control of New Guinea.`)
     }
-    var new_guinea = 0
-    nations.NEW_GUINEA.keys.forEach(hex => {
-        var h = hex_to_int(hex)
-        if (is_space_controlled(h, JP) && get_map_data(h).port) {
-            new_guinea++
-        }
-    })
-    result.vp += new_guinea
-    result.text.push(`${new_guinea > 0 ? "+" : ""}${new_guinea} JP control of New Guinea ports.`)
-    var amh = 0
-    nations.AUSTRALIAN_MANDATES.ports.forEach(hex => {
-        var h = hex_to_int(hex)
-        if (is_space_controlled(h, JP) && get_map_data(h).port) {
-            amh++
-        }
-    })
-    result.vp += amh
-    result.text.push(`${amh > 0 ? "+" : ""}${amh} JP control of Mandates ports.`)
-    if (is_space_controlled(VOGELKOP, AP)) {
-        result.vp -= 3
-        result.text.push(`-1 VP - AP control of Vogelkop.`)
-    } else {
-        result.text.push(`0 VP - JP control of Vogelkop.`)
-    }
+
     var heb = G.control.map(h => get_map_data(h)).filter(md => md.region === "Hebrides" && md.port).length
-    if (heb) {
-        result.vp += 1
-        result.text.push(`+1 VP - JP control of New Hebrides port.`)
-    } else {
-        result.text.push(`0 VP - Non JP control of any New Hebrides port.`)
-    }
+    binary_vp(result, heb, 1, "JP control of New Hebrides port",
+        "Non JP control of any New Hebrides port", G.original_control.filter(h => get_map_data(h).region === "Hebrides" && get_map_data(h).port))
     var aus = G.control.map(h => get_map_data(h)).filter(md => md.region === "Australia" && md.port).length
-    if (aus) {
-        result.vp += 1
-        result.text.push(`+1 VP - JP control of Australia mainland port.`)
-    } else {
-        result.text.push(`0 VP - Non JP control of any Australia mainland port.`)
-    }
+    binary_vp(result, aus, 1, "JP control of Australia mainland port",
+        "Non JP control of any Australia mainland port", G.original_control.filter(h => get_map_data(h).region === "Australia" && get_map_data(h).port))
     result.text.push(`2 VP or less - Allied Decisive Victory, 3-5 VP Allied Tactical Victory, 6-9 VP Japanese Tactical Victory, 10 VP Japanese Decisive Victory.`)
-    result.text.push(`Total VP: ${result.vp}`)
     if (result.vp <= 2) {
         result.won_side = "Allies"
         result.won_text = `${result.vp} - Allied Decisive Victory`
@@ -6767,6 +6831,7 @@ function victory_south_pacific() {
         result.won_side = "Japan"
         result.won_text = `${result.vp} - Japanese Decisive Victory`
     }
+    result.text.push(`Total VP: ${result.vp}.`)
     return result
 }
 
@@ -10457,7 +10522,7 @@ function on_query(q, params) {
 }
 
 function vp_query() {
-    return scenario_data().victory()
+    return get_victory()
 }
 
 function draw_list() {
