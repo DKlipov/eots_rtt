@@ -1,4 +1,8 @@
 Todo list:
+* Battle hex confirmation and calculation
+* Unit sorting
+* show selected only paths
+* Limit ground strat move (no escort)
 * Surrender once per game
 * Add partially impassable hexsides to data.js
 * Kunming supply
@@ -9,5 +13,5 @@ Todo list:
 * Chin surrender - diplace all air
 * china box - add ledo to check
 * Hex by hex move for naval and air?
-* Battle hex confirmation and calculation
 * Hex-to-hex distance calcualtion
+* 1943 VP

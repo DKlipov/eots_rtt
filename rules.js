@@ -976,19 +976,20 @@ P.replacement_segment = {
         trigger_event("before_replacement")
     },
     prompt() {
+        var not_used_unground = L.divisions_used <= 0 || L.replacement_points.GROUND <= 0
         if (G.active_stack.length > 0) {
-            prompt(`Choose hex to place ${piece_get_log_str(G.active_stack[0])}.`)
+            prompt(`Choose hex to place ${piece_get_log_str(G.active_stack[0])}${not_used_unground ? "" : "(Ground replacements should be spent)"}.`)
             L.allowed_hexes.forEach(h => action_hex(h))
             return
         }
-        if (L.divisions_used <= 0 || L.replacement_points.GROUND <= 0) {
+        if (not_used_unground) {
             button("done")
         }
-        if (L.divisions) {
+        var ru = L.replacable_units.filter(u => L.replacement_points[pieces[u].replacement] > 0)
+        if (L.divisions && ru.filter(u => pieces[u].class === "ground").length) {
             action("divisions", 0)
             button("divisions_button")
         }
-        var ru = L.replacable_units.filter(u => L.replacement_points[pieces[u].replacement] > 0)
         prompt(`Choose unit to reinforce. ${ru.length || L.divisions ? print_reinforcements() : "(Done)."}`)
         ru.forEach(u => action_unit(u))
 
