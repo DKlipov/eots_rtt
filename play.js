@@ -247,7 +247,7 @@ let SID = MAIN_SCENARIO;
 let map_layout = layout.mainmap;
 
 function on_init(scenario, game_options, static_view) {
-    init_canvas()
+    init_canvas(scenario)
 
     let map_elem = document.getElementById("mapwrap")
     switch(scenario){
@@ -317,8 +317,24 @@ function on_init(scenario, game_options, static_view) {
     define_layout_track_v("pw",10, 0, map_layout.track_political_will, 0)
     define_layout_track_v("wie",10, 0, map_layout.track_wie, 0)
 
-    define_layout_track_v("turn",12,1,map_layout.track_game_turn,0)
-    define_layout_track_v("track",9,0,map_layout.track_strat_record,0)
+    define_track("turn",12,1,map_layout.track_game_turn,define_stack, "v", 0,        
+        // stack parameters:
+        -5, 0, // closed offset
+        -35, 0, // open offset (major axis)
+        0, 35, // open offset (minor axis)
+        1, // threshold to auto-open
+        8, // wrap limit
+        0, 0, 0 
+    )
+    define_track("track",9,0,map_layout.track_strat_record,define_stack, "v", 0,        
+        // stack parameters:
+        -5, 0, // closed offset
+        -35, 0, // open offset (major axis)
+        0, 35, // open offset (minor axis)
+        1, // threshold to auto-open
+        8, // wrap limit
+        0, 0, 0 
+    )
 
     define_layout_track_h("india", 0, 5, map_layout.track_india_status,0)
     define_layout_track_h("burma", 0, 2, map_layout.track_burma_road,0)
@@ -441,9 +457,22 @@ function hex_center(i) {
 //     document.getElementById("map").appendChild(elt)
 // }
 
-function init_canvas() {
-    var sizeX = 2550
-    var sizeY = 1650
+function init_canvas(scenario) {
+    let sizeX, sizeY;
+    switch(scenario){
+        case "South Pacific":
+        case  "Burma: The Forgotten War":{
+            sizeX = 1275
+            sizeY = 825
+            break;
+        };
+        default:
+        {
+            sizeX = 2550
+            sizeY = 1650
+        }
+    }
+
     CANVAS.style.width = sizeX + "px"
     CANVAS.style.height = sizeY + "px"
 
