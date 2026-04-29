@@ -442,38 +442,58 @@ function define_layout(action, id, rect, keywords, styles) {
 		.layout(rect)
 }
 
-function define_layout_track_h(action, a, b, layout, gap=0, keywords, styles) {
-	var [ x, y, w, h ] = layout
-	var n = 1 + Math.abs(b - a)
-	var cell_w = (w - gap * (n-1)) / n
+
+function _acc_h(layout, cell_nb, length, gap){
+	const [ x, y, w, h ] = layout
+	return [ x + (length + gap)*cell_nb, y, length, h ]
+}
+
+function _acc_v(layout, cell_nb, length, gap){
+	const [ x, y, w, h ] = layout
+	return [ x , y+ (length + gap)*cell_nb, w, length ]
+}
+
+
+function define_track(action, a, b, layout, type_func, orientation="auto", gap=0,  ...args ){
+	let length, acc_func;
+	const n = 1 + Math.abs(b - a)
+	if(orientation === "auto"){
+		if(h > w){
+			orientation = "v"
+		}else{
+			orientation = "h"
+		}
+	}
+	switch(orientation){
+		case "v":
+			length = layout[3]/*h*/
+			acc_func = _acc_v
+			break;
+		case "h":
+			length = layout[2]/*w*/
+			acc_func = _acc_h
+			break;
+		default:
+			throw new Error(`Invalid parameter: ${orientation} valid parameter: "auto", "v", "h"`)
+	}
+	const cell_length = (length - gap * (n-1)) / n
+	let id_arr;
 	if (a < b) {
-		for (var id = a; id <= b; ++id) {
-			define_layout(action, id, [ x, y, cell_w, h ], keywords, styles)
-			x += cell_w + gap
-		}
+		id_arr = Array.from({length: n}, (x, i) => i+a)
 	} else {
-		for (var id = a; id >= b; --id) {
-			define_layout(action, id, [ x, y, cell_w, h ], keywords, styles)
-			x += cell_w + gap
-		}
+		id_arr = Array.from({length: n}, (x, i) => a-i)
+	}
+	for (let i = 0; i < n; ++i) {
+		type_func(action, id_arr[i], acc_func(layout, i, cell_length, gap), ...args)
 	}
 }
 
+function define_layout_track_h(action, a, b, layout, gap=0, keywords, styles) {
+	define_track(action, a, b, layout, define_layout, "h", gap, keywords, styles)
+}
+
 function define_layout_track_v(action, a, b, layout, gap=0, keywords, styles) {
-	var [ x, y, w, h ] = layout
-	var n = 1 + Math.abs(b - a)
-	var cell_h = (h - gap * (n-1)) / n
-	if (a < b) {
-		for (var id = a; id <= b; ++id) {
-			define_layout(action, id, [ x, y, w, cell_h ], keywords, styles)
-			y += cell_h + gap
-		}
-	} else {
-		for (var id = a; id >= b; --id) {
-			define_layout(action, id, [ x, y, w, cell_h ], keywords, styles)
-			y += cell_h + gap
-		}
-	}
+	define_track(action, a, b, layout, define_layout, "v", gap, keywords, styles)
 }
 
 function define_layout_grid(action, order, cols, rows, layout, gapx, gapy, keywords, styles) {
