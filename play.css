@@ -209,29 +209,69 @@ body.Allies #jp_hand {
     grid-row: 4;
 }
 
-#mapwrap {
+#mapwrap.main {
     width: 2550px;
     height: 1650px;
 }
-
-#canvas {
+#mapwrap.southpac {
+    width: 1275px;
+    height: 825px;
+}
+#mapwrap.burma {
+    width: 1275px;
+    height: 825px;
+}
+#mapwrap.main > #canvas {
     width: 2550px;
     height: 1650px;
+}
+#mapwrap.southpac > #canvas {
+    width: 1275px;
+    height: 825px;
+}
+#mapwrap.burma > #canvas{
+    width: 1275px;
+    height: 825px;
+}
+
+#canvas {
     position: absolute;
     z-index: 1;
     pointer-events: none;
 }
 
-#map {
+#mapwrap.main > #map {
     width: 2550px;
     height: 1650px;
     background-image: url(images/map_eots.75.avif);
     background-size: 2550px 1650px;
 }
+#mapwrap.southpac > #map  {
+    width: 1275px;
+    height: 825px;
+    background-image: url(images/map_south_pacific.75.avif);
+    background-size: 1275px 825px;
+}
+#mapwrap.burma > #map  {
+    width: 1275px;
+    height: 825px;
+    background-image: url(images/map_burma.75.avif);
+    background-size: 1275px 825px;
+}
 
 @media (min-resolution: 97dpi) {
-    #map {
+    #map.main {
         background-image: url(images/map_eots.150.avif);
+    }
+}
+@media (min-resolution: 97dpi) {
+    #map.southpac {
+        background-image: url(images/map_south_pacific.150.avif);
+    }
+}
+@media (min-resolution: 97dpi) {
+    #map.burma {
+        background-image: url(images/map_burma.150.avif);
     }
 }
 
