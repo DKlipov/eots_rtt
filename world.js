@@ -799,7 +799,7 @@ function _layout_stacks() {
 		}
 
 		var expand = (world.focus === stack || n <= _(stack.my_stack.threshold))
-		var z = (world.focus === stack ? 1 : null)
+		var z = (world.focus === stack ? 51 : 0)
 		var major_dx = expand ? _(stack.my_stack.major_dx) : _(dx)
 		var major_dy = expand ? _(stack.my_stack.major_dy) : _(dy)
 		var minor_dx = expand ? _(stack.my_stack.minor_dx) : _(0)
@@ -839,7 +839,7 @@ function _layout_stacks() {
 			var h = child.offsetHeight
 			var x = start_x + major_dx * i + minor_dx * k + (stack_w - w) * grav_x
 			var y = start_y + major_dy * i + minor_dy * k + (stack_h - h) * grav_y
-			sub_cache.push([x,y,z])
+			sub_cache.push([x,y,z+i])
 
 			if (++i === wrap) {
 				i = 0
@@ -855,7 +855,7 @@ function _layout_stacks() {
 		let k = 0;
 		for (var child of stack.element.children) {
 			const pre_calc = cache[i][k]
-			k ++ 
+			k ++
 			child.style.left = pre_calc[0] + "px"
 			child.style.top = pre_calc[1] + "px"
 			child.style.zIndex = pre_calc[2]
@@ -1079,7 +1079,7 @@ function update_panel_text(action, id, text) {
 	var thing = lookup_thing(action, id)
 	assert(thing.my_panel, "not a panel")
 	thing.my_panel_head.textContent = text
-	
+
 }
 
 function update_panel_text_html(action, id, text) {

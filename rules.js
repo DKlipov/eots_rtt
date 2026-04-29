@@ -4856,20 +4856,15 @@ function is_col_tsuji_applied(faction) {
     return map_data.terrain === JUNGLE || map_data.terrain === MIXED || map_data.region === "Malaya"
 }
 
-P.execute_attack = function () {
-    var faction = L.active
-    var enemy_faction = 1 - faction
+function prepare_attack(faction) {
     var battle = G.offensive.battle
     var pool = (battle.ground_stage ? battle.ground : battle.air_naval)[faction].filter(u => unit_on_board(u))
-    if (pool.length <= 0 || (battle.ground[enemy_faction].length + battle.air_naval[enemy_faction].length) === 0
-        || battle.ground_stage && battle.ground[enemy_faction].length === 0) {
-        end()
-        return
-    }
     battle.strength[faction] = sum_combat_factor(pool)
-    log(`${G.offensive.attacker === faction ? "Attacker" : "Defender"} fire (${battle.strength[faction]})`)
-    battle.roll[faction] = random(10)
-    clear_undo()
+    battle.distant_hits[faction] = pool.filter(u => unit_on_board(u) && pieces[u].br).length
+}
+
+function get_battle_modifiers(faction) {
+    var battle = G.offensive.battle
     battle.roll_modifiers = 0
     if (battle.ground_stage && is_col_tsuji_applied(faction)) {
         battle.roll_modifiers = 4
@@ -4880,11 +4875,26 @@ P.execute_attack = function () {
         battle.roll_modifiers = get_naval_roll_modifiers(faction)
     }
     trigger_event("before_battle_roll", faction)
+}
+
+P.execute_attack = function () {
+    var faction = L.active
+    var enemy_faction = 1 - faction
+    var battle = G.offensive.battle
+    prepare_attack(faction)
+    if (battle.strength[faction] <= 0 || (battle.ground[enemy_faction].length + battle.air_naval[enemy_faction].length) === 0
+        || battle.ground_stage && battle.ground[enemy_faction].length === 0) {
+        end()
+        return
+    }
+    log(`${G.offensive.attacker === faction ? "Attacker" : "Defender"} fire (${battle.strength[faction]})`)
+    battle.roll[faction] = random(10)
+    clear_undo()
+    get_battle_modifiers(faction)
     let roll = battle.roll[faction]
     var modififed_roll = roll + battle.roll_modifiers
     var table = battle.ground_stage ? ground_battle_table : naval_battle_table
     battle.hits[faction] = Math.ceil(battle.strength[faction] * (table(modififed_roll)))
-    battle.distant_hits[faction] = pool.filter(u => unit_on_board(u) && pieces[u].br).length
     if ((roll === 9 || battle.roll_modifiers + roll >= 9 && G.offensive.active_cards.includes(ROCHEFORT)) && !battle.ground_stage) {
         battle.critical[faction] = true
     }
@@ -5310,7 +5320,7 @@ function check_us_casualties() {
     }
 }
 
-P.prepare_battle = function () {
+function prepare_battle() {
     var hex = G.offensive.battle.battle_hex
     G.offensive.battle = {
         battle_hex: hex,
@@ -5363,10 +5373,14 @@ P.prepare_battle = function () {
         || battle.air_naval[AP].length && (battle.air_naval[JP].length || battle.ground[JP].length)) {
         log(`Air/naval combat:`)
     }
+}
+
+P.prepare_battle = function () {
+    prepare_battle()
     end()
 }
 
-P.prepare_ground_battle = function () {
+function prepare_ground_battle() {
     var battle = G.offensive.battle
     G.offensive.battle = {
         battle_hex: battle.battle_hex,
@@ -5389,6 +5403,11 @@ P.prepare_ground_battle = function () {
     if (battle.ground[G.offensive.attacker].filter(u => unit_on_board(u)).length && battle.ground[1 - G.offensive.attacker].filter(u => unit_on_board(u)).length) {
         log(`Ground combat at ${hex_get_log_str(hex)}`)
     }
+
+}
+
+P.prepare_ground_battle = function () {
+    prepare_ground_battle()
     end()
 }
 
@@ -10392,6 +10411,7 @@ function on_view() {
         set_add(bh, G.offensive.battle.battle_hex)
     }
     V.offensive = {
+        attacker: G.offensive.attacker,
         active_units: G.offensive.active_units[0].concat(G.offensive.active_units[1]),
         paths: G.offensive.paths,
         active_cards: G.offensive.active_cards,
@@ -10514,8 +10534,10 @@ function on_view() {}
 function on_assert() {}
 */
 
-function on_query(q, params) {
-    if (q.startsWith("event_cards")) {
+function on_query(q, params, b) {
+    if (q.name === "battle_info") {
+        return battle_info_query(q.index)
+    } else if (q.startsWith("event_cards")) {
         return draw_list()
     } else if (q === "vp_check") {
         return vp_query()
@@ -10524,6 +10546,51 @@ function on_query(q, params) {
 
 function vp_query() {
     return get_victory()
+}
+
+function battle_info_query(battle) {
+    var result = {
+        naval_cf: [],
+        naval_distant_hits: [],
+        naval_rm: [],
+        naval_log: [],
+        ground_cf: [],
+        ground_rm: [],
+        ground_log: [],
+        battle_hex: G.offensive.battle_names[battle],
+        battle_name: battle,
+    }
+    var battle_hex = G.offensive.battle_names[battle]
+    G.offensive.battle = {battle_hex}
+    prepare_battle()
+    result.air_naval = G.offensive.battle.air_naval
+    G.log = []
+    prepare_attack(JP)
+    get_battle_modifiers(JP)
+    result.naval_cf = G.offensive.battle.strength
+    result.naval_rm[JP] = G.offensive.battle.roll_modifiers
+    result.naval_distant_hits[JP] = G.offensive.battle.distant_hits
+    result.naval_log[JP] = G.log
+    G.log = []
+    prepare_attack(AP)
+    get_battle_modifiers(AP)
+    result.naval_rm[AP] = G.offensive.battle.roll_modifiers
+    result.naval_distant_hits[AP] = G.offensive.battle.distant_hits
+    result.naval_log[AP] = G.log
+    prepare_ground_battle()
+    result.ground = G.offensive.battle.ground
+    G.log = []
+    prepare_attack(JP)
+    get_battle_modifiers(JP)
+    result.ground_cf = G.offensive.battle.strength
+    result.ground_rm[JP] = G.offensive.battle.roll_modifiers
+    result.ground_log[JP] = G.log
+    G.log = []
+    prepare_attack(AP)
+    get_battle_modifiers(AP)
+    result.ground_rm[AP] = G.offensive.battle.roll_modifiers
+    result.ground_log[AP] = G.log
+    return result
 }
 
 function draw_list() {

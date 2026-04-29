@@ -1,5 +1,6 @@
 Todo list:
 * Battle hex confirmation and calculation
+* Marker pieces update
 * Unit sorting
 * show selected only paths
 * Limit ground strat move (no escort)
