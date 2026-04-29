@@ -2,11 +2,9 @@
 
 
 const LAST_BOARD_HEX = 1478
-const NON_PLACED_BOX = 1481
 const ELIMINATED_BOX = 1482
 const DELAYED_BOX = 1483
 const CHINA_BOX = 1484
-const PERM_ELIMINATED = 1485
 const TURN_BOX = 1490
 
 const MANCHURIA_1 = hex_to_int(3302)
@@ -304,9 +302,7 @@ function on_init(scenario, game_options, static_view) {
         define_space("action_hex", i, center_rect(xy, 68, 68))
     }
 
-    define_s_loc(NON_PLACED_BOX, [-1000, -1000, 45, 45])
     define_s_loc(ELIMINATED_BOX, [100, 1280, 45, 45])
-    define_s_loc(PERM_ELIMINATED, [-1000, -1180, 45, 45])
     define_s_loc(DELAYED_BOX, map_layout.box_delayed_reinf)
     define_s_loc(CHINA_BOX, map_layout.box_air_unit_in_china)
 
