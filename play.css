@@ -606,13 +606,13 @@ div[data-tooltip]:after {
 }
 
 .battle_box {
-    /*float:left;*/
-    margin-right: 10px;
+    /*margin-right: 10px;*/
 }
 
-.battle_summary > * {
-    /*float:left;*/
-    /*vertical-align: middle;*/
+#battle_info > .dialog_body > .wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
 }
 
 .icon {

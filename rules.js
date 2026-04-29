@@ -10577,6 +10577,7 @@ function battle_info_query(battle) {
     result.naval_rm[AP] = G.offensive.battle.roll_modifiers
     result.naval_distant_hits[AP] = G.offensive.battle.distant_hits
     result.naval_log[AP] = G.log
+    G.log = []
     prepare_ground_battle()
     result.ground = G.offensive.battle.ground
     G.log = []

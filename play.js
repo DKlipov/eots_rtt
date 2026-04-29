@@ -841,13 +841,11 @@ function on_reply(q, response) {
 }
 
 function toggle_dialog(id, response) {
-    console.log("response")
-    console.log(id)
-    console.log(response)
     var name = id.name ? id.name : id
-    if (document.getElementById(name).classList.contains("show")) {
-        hide_dialog(name)
-    } else if (name.startsWith("event_cards")) {
+    // if (document.getElementById(name).classList.contains("show")) {
+    //     hide_dialog(name)
+    // }
+    if (name.startsWith("event_cards")) {
         show_card_list(name, response)
     } else if (name === "vp_check") {
         vp_dialog(name, response)
@@ -1003,20 +1001,20 @@ function create_flag(faction) {
 
 function battle_info_dialog(id, response) {
     show_dialog(id, (body) => {
-        let dl = document.createElement("dl")
+        let dl = document.createElement("div")
+        dl.className="wrapper"
+        let header = document.createElement("dt")
+        header.innerHTML = `Combat hex ${String.fromCharCode(65 + response.battle_name)} (${sub_hex(null, response.battle_hex)})`
+        body.appendChild(header)
+        body.appendChild(dl)
         if (response.air_naval[0].length || response.air_naval[1].length) {
-            var an_box = document.createElement("div")
-            let header = document.createElement("dt")
-            header.innerHTML = `Combat hex ${String.fromCharCode(65 + response.battle_name)} (${sub_hex(null, response.battle_hex)})`
-            an_box.appendChild(header)
-
             var at = G.offensive.attacker
             var def = 1 - G.offensive.attacker
-            an_box.appendChild(create_battle_box(at,
+            dl.appendChild(create_battle_box(at,
                 response.naval_cf[at], response.naval_rm[at], response.air_naval[at], response.naval_log[at]))
-            an_box.appendChild(create_battle_box(def,
+            dl.appendChild(create_battle_box(def,
                 response.naval_cf[def], response.naval_rm[def], response.air_naval[def], response.naval_log[def]))
-            dl.appendChild(an_box)
+            // dl.appendChild(an_box)
         }
         if (response.ground[0].length || response.ground[1].length) {
             var an_box = document.createElement("div")
@@ -1026,10 +1024,8 @@ function battle_info_dialog(id, response) {
             faction = 1 - faction
             dl.appendChild(create_battle_box(faction,
                 response.ground_cf[faction], response.ground_rm[faction], response.ground[faction], response.ground_log[faction]),)
-            dl.appendChild(an_box)
+            // dl.appendChild(an_box)
         }
-
-        body.appendChild(dl)
     })
 }
 
@@ -1041,14 +1037,6 @@ function create_battle_box(faction, cf, rm, units, log) {
     result.className = "battle_box"
     result.appendChild(create_flag(faction))
     append_header(`${cf}  ${rm > 0 ? "+" : ""}${rm ? rm : ""}`, result)
-    if (log.length) {
-        append_header("Modifiers:", result)
-    }
-    log.forEach(text => {
-        let header = document.createElement("div")
-        header.innerHTML = text.replace(/H(\d+)/g, sub_hex)
-        result.appendChild(header)
-    })
     units.sort((a, b) => G.location[a] - G.location[b])
     var prev = null
     for (var i of units) {
@@ -1061,6 +1049,14 @@ function create_battle_box(faction, cf, rm, units, log) {
         }
         populate_generic_to_parent(result, "icon " + data.pieces[i].counter + (set_has(G.reduced, i) ? " reduced" : ""))
     }
+    if (log.length) {
+        append_header("Modifiers:", result)
+    }
+    log.forEach(text => {
+        let header = document.createElement("div")
+        header.innerHTML = text.replace(/H(\d+)/g, sub_hex)
+        result.appendChild(header)
+    })
     return result
 }
 
