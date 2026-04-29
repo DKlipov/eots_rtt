@@ -442,21 +442,10 @@ function define_layout(action, id, rect, keywords, styles) {
 		.layout(rect)
 }
 
-
-function _acc_h(layout, cell_nb, length, gap){
-	const [ x, y, w, h ] = layout
-	return [ x + (length + gap)*cell_nb, y, length, h ]
-}
-
-function _acc_v(layout, cell_nb, length, gap){
-	const [ x, y, w, h ] = layout
-	return [ x , y+ (length + gap)*cell_nb, w, length ]
-}
-
-
 function define_track(action, a, b, layout, type_func, orientation="auto", gap=0,  ...args ){
 	let length, acc_func;
 	const n = 1 + Math.abs(b - a)
+	const [ x, y, w, h ] = layout
 	if(orientation === "auto"){
 		if(h > w){
 			orientation = "v"
@@ -466,12 +455,12 @@ function define_track(action, a, b, layout, type_func, orientation="auto", gap=0
 	}
 	switch(orientation){
 		case "v":
-			length = layout[3]/*h*/
-			acc_func = _acc_v
+			length = h
+			acc_func = (cell_id) => [ x , y+ (cell_length + gap)*cell_id, w, cell_length ]
 			break;
 		case "h":
-			length = layout[2]/*w*/
-			acc_func = _acc_h
+			length = w
+			acc_func = (cell_id) => [ x + (cell_length + gap)*cell_id, y, cell_length, h ]
 			break;
 		default:
 			throw new Error(`Invalid parameter: ${orientation} valid parameter: "auto", "v", "h"`)
@@ -484,7 +473,7 @@ function define_track(action, a, b, layout, type_func, orientation="auto", gap=0
 		id_arr = Array.from({length: n}, (x, i) => a-i)
 	}
 	for (let i = 0; i < n; ++i) {
-		type_func(action, id_arr[i], acc_func(layout, i, cell_length, gap), ...args)
+		type_func(action, id_arr[i], acc_func(i), ...args)
 	}
 }
 

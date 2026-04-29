@@ -314,16 +314,16 @@ function on_init(scenario, game_options, static_view) {
 
     define_layout("status", JP_AGREEMENT, map_layout.box_isr_jp)
     define_layout("status", AP_AGREEMENT, map_layout.box_isr_us)
-    define_layout_track_v("pw",0, 10, map_layout.track_political_will, 0)
-    define_layout_track_v("wie",0, 10, map_layout.track_wie, 0)
+    define_layout_track_v("pw",10, 0, map_layout.track_political_will, 0)
+    define_layout_track_v("wie",10, 0, map_layout.track_wie, 0)
 
-    define_layout_track_v("turn",1,12,map_layout.track_game_turn,0)
-    define_layout_track_v("track",0,9,map_layout.track_strat_record,0)
+    define_layout_track_v("turn",12,1,map_layout.track_game_turn,0)
+    define_layout_track_v("track",9,0,map_layout.track_strat_record,0)
 
     define_layout_track_h("india", 0, 5, map_layout.track_india_status,0)
-    define_layout_track_h("burma", 0, 3, map_layout.track_burma_road,0)
-    define_layout_track_h("china", 0, 6, map_layout.track_chinese_government,0)
-    define_layout_track_h("divisions", 0, 13, map_layout.track_japanese_divisions_available_china,0)
+    define_layout_track_h("burma", 0, 2, map_layout.track_burma_road,0)
+    define_layout_track_h("china", 0, 5, map_layout.track_chinese_government,0)
+    define_layout_track_h("divisions", 0, 12, map_layout.track_japanese_divisions_available_china,0)
 
     define_marker("divisions", 0, "divisions_china")
     for (let i = 1; i < data.pieces.length; ++i) {
