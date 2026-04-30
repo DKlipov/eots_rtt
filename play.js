@@ -5,6 +5,8 @@ const LAST_BOARD_HEX = 1478
 const ELIMINATED_BOX = 1482
 const DELAYED_BOX = 1483
 const CHINA_BOX = 1484
+const AP_REINF = 1486
+const JP_REINF = 1487
 const TURN_BOX = 1490
 
 const HEX_X_SIZE = 48.0
@@ -161,13 +163,12 @@ const TRACK_MARKERS = [
     },
     {
         counter: "pow_target",
-        always_show: G => G.turn > 3,
-        value: G => (G.pow > 0) ? G.pow : 0
+        value: G => G.pow
     },
     {
         counter: "pow",
-        always_show: G => G.turn > 3,
-        value: G => current_pow(G)
+        always_show: G => G.pow > 0,
+        value: G => (G.pow > 0) ? current_pow(G) : 0
     },
 ]
 
@@ -235,9 +236,6 @@ const TURN_MARKERS = [
 ]
 
 function current_pow(G) {
-    if (G.turn < 4) {
-        return 0
-    }
     return G.capture.filter(h => !set_has(G.control, h)).length
 }
 
@@ -343,14 +341,11 @@ function on_init(scenario, game_options, static_view) {
                 ...VERTICAL_STACK_PARAMS
             )
 
-
             define_s_loc(1400, map_layout.h_5808)
             define_thing("zoi_hex", 1400).layout(map_layout.h_5808)
             define_space("action_hex", 1400, map_layout.h_5808)
-
             break;
         }
-            ;
         case  "Burma: The Forgotten War": {
             SID = BURMA_SCENARIO
             map_layout = layout.burma;
@@ -359,7 +354,6 @@ function on_init(scenario, game_options, static_view) {
             map_info = BURMA_INFO
             break;
         }
-            ;
         default: {
             SID = MAIN_SCENARIO
             map_layout = layout.mainmap;
@@ -403,7 +397,9 @@ function on_init(scenario, game_options, static_view) {
         }
     }
 
-    define_s_loc(ELIMINATED_BOX, [100, 1280, 45, 45])
+    define_s_loc(ELIMINATED_BOX, map_layout.box_eliminated)
+    define_s_loc(AP_REINF, map_layout.box_ap_reinf)
+    define_s_loc(JP_REINF, map_layout.box_jp_reinf)
     define_s_loc(DELAYED_BOX, map_layout.box_delayed_reinf)
     define_s_loc(CHINA_BOX, map_layout.box_air_unit_in_china)
 
@@ -627,13 +623,14 @@ function place_unit(u, location) {
     var piece = data.pieces[u]
     var unit
     var one_step = piece.notreplaceable && piece.start_reduced
+    var slocs = world.things["s-loc"]
     if (location > TURN_BOX && location <= (TURN_BOX + 12)) {
         unit = populate("turn", location - TURN_BOX, "unit", u)
         unit.classList.toggle("reduced", (set_has(G.reduced, u) && !one_step))
         unit.classList.remove("activated")
         unit.classList.remove("selected")
-    } else if (location === ELIMINATED_BOX && (!data.pieces[u].notreplaceable || is_action("unit", u)) || location < LAST_BOARD_HEX
-        || location === DELAYED_BOX || location === CHINA_BOX) {
+    } else if (location === ELIMINATED_BOX && (!data.pieces[u].notreplaceable || is_action("unit", u))
+        || (location !== ELIMINATED_BOX && slocs[location])) {
         unit = populate("s-loc", location, "unit", u)
         unit.classList.toggle("reduced", (set_has(G.reduced, u) && !one_step) || location === ELIMINATED_BOX
             || data.pieces[u].class === "hq" && G.inter_service[data.pieces[u].faction])
@@ -732,7 +729,7 @@ function on_update() {
             place_unit(i, G.location[i])
         }
     }
-    if (G.turn > 3) {
+    if (G.pow > 0) {
         G.capture.filter(h => !set_has(G.control, h))
             .forEach(h => populate_generic("s-loc", h, "marker pow"))
     }
@@ -773,7 +770,7 @@ function on_update() {
     populate_generic("pw", G.political_will, "marker pw")
     populate_generic("wie", G.wie, "marker wie")
 
-    if (G.sid != SOUTH_PACIFIC_SCENARIO) {
+    if (G.sid !== SOUTH_PACIFIC_SCENARIO) {
         populate_generic("india", Math.min(4, G.surrender[data.nations.INDIA.id]),
             `marker ${G.surrender[data.nations.INDIA.id] >= 5 ? "india_status_surrender" : "india_status"}`)
         populate_generic("burma", G.burma_road, `marker burma_road${G.events[data.events.HUMP.id] ? "_hump" : ""}`)

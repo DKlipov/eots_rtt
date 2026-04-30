@@ -124,6 +124,8 @@ const ELIMINATED_BOX = 1482
 const DELAYED_BOX = 1483
 const CHINA_BOX = 1484
 const PERM_ELIMINATED = 1485
+const AP_REINF = 1486
+const JP_REINF = 1487
 const TURN_BOX = 1490
 const TUNNEL_BOX = 1600
 
@@ -137,13 +139,14 @@ const ROAD_EVENTS = Object.keys(events).filter(k => events[k].road).map(k => {
 
 const GARRISONED_CITY = [...Array(Object.keys(map).length).keys()].map(i => map[i]).filter(h => h.city > CITY).map(h => hex_to_int(h.id))
 
-const SOUTH_PACIFIC = 0
+const SOUTH_PACIFIC_SCENARIO = 0
+const BURMA_SCENARIO = 10
 
 const S_P_DECK = S_P_deck()
 
 const SCENARIO_DATA = [
     {
-        id: SOUTH_PACIFIC,
+        id: SOUTH_PACIFIC_SCENARIO,
         name: "South Pacific",
         setup: setup_scenario_south_pacific,
         victory: victory_south_pacific,
@@ -644,7 +647,7 @@ function sent_to_europe(u) {
 function get_map_data(hex) {
     if (hex > TUNNEL_BOX) {
         return TUNNEL_HEX
-    } else if (scenario_data().id === SOUTH_PACIFIC) {
+    } else if (scenario_data().id === SOUTH_PACIFIC_SCENARIO) {
         return S_P_MAP_DATA[hex]
     }
     return MAP_DATA[hex]
@@ -757,7 +760,7 @@ P.reinforcement_segment = {
         }
         L.hq_reinforcement = []
         L.unit_reinforcement = []
-        var reinforcement_hex = G.active === AP ? hex_to_int(5709) : hex_to_int(3808)
+        var reinforcement_hex = G.active === AP ? AP_REINF : JP_REINF
         var delayed_units = false
         for_each_unit((u, piece, location) => {
             if (piece.faction !== G.active || !(
@@ -1719,7 +1722,7 @@ P.displace_hq = {
     prompt() {
         prompt(`Choose HQ to displace.`)
         HQ_LIST.forEach(u => {
-            if (unit_on_board(u) && pieces[u].faction === R && (scenario_data().id !== SOUTH_PACIFIC || u !== HQ_CENTRAL_PACIFIC)) {
+            if (unit_on_board(u) && pieces[u].faction === R && (scenario_data().id !== SOUTH_PACIFIC_SCENARIO || u !== HQ_CENTRAL_PACIFIC)) {
                 action_unit(u)
             }
         })
@@ -1784,7 +1787,7 @@ P.china_offensive = {
         let result = random(10)
         var air_support = 0
 
-        if (scenario_data().id === SOUTH_PACIFIC) {
+        if (scenario_data().id === SOUTH_PACIFIC_SCENARIO) {
             air_support++
             log(`+1 ${piece_get_log_str(ap_air("14_lrb"))}.`)
         } else {
@@ -2800,7 +2803,7 @@ function get_near_hexes(hex) {
         }
     }
     var result = get_edge_hexes(hex)
-    if (G.sid === SOUTH_PACIFIC && S_P_TONNELLING_SET.includes(hex)) {
+    if (G.sid === SOUTH_PACIFIC_SCENARIO && S_P_TONNELLING_SET.includes(hex)) {
         if (hex === OAHU) {
             return OAHU_NEAR
         }
@@ -3189,7 +3192,7 @@ function check_hump() {
 
 function check_burma_road() {
     G.burma_road = 2
-    if (scenario_data().id === SOUTH_PACIFIC) {
+    if (scenario_data().id === SOUTH_PACIFIC_SCENARIO) {
         return;
     }
     const faction = AP
@@ -3430,7 +3433,7 @@ function check_supply() {
     if (G.turn > 1) {
         oos_units[1].forEach(h => set_add(G.oos, h))
     }
-    if (scenario_data().id === SOUTH_PACIFIC && G.turn === 3) {
+    if (scenario_data().id === SOUTH_PACIFIC_SCENARIO && G.turn === 3) {
         var mask = G.supply_cache[TRUK] & JP_UNITS
         G.supply_cache[TRUK] ^= (mask)
     }
@@ -4893,7 +4896,7 @@ P.execute_attack = function () {
     if ((roll === 9 || battle.roll_modifiers + roll >= 9 && G.offensive.active_cards.includes(ROCHEFORT)) && !battle.ground_stage) {
         battle.critical[faction] = true
     }
-    log(`${dice_get_log_str(roll, battle.roll_modifiers)} (${table(modififed_roll)}) x ${battle.strength[faction]} = ${battle.hits[faction]} (${battle.critical[faction] ? " - critical!" : ""}).`)
+    log(`${dice_get_log_str(roll, battle.roll_modifiers)} (${table(modififed_roll)}) x ${battle.strength[faction]} = ${battle.hits[faction]}${battle.critical[faction] ? " (critical!)" : ""}.`)
     fill_hit_able_units(faction)
     end()
 }
@@ -5563,7 +5566,7 @@ P.emergency_move = {
                 set_add(L.unit_to_retreat, u)
             }
         })
-        if (scenario_data().id === SOUTH_PACIFIC && check_sudden_death()) {
+        if (scenario_data().id === SOUTH_PACIFIC_SCENARIO && check_sudden_death()) {
             return
         }
         if (!L.unit_to_retreat.length) {
@@ -5744,7 +5747,7 @@ P.national_status_segment = function () {
     if (check_nation_surrender(nations.NEW_GUINEA)) {
         set_control_over_nation(nations.NEW_GUINEA, false)
     }
-    if (scenario_data().id === SOUTH_PACIFIC) {
+    if (scenario_data().id === SOUTH_PACIFIC_SCENARIO) {
         end()
         return;
     }
@@ -5948,7 +5951,7 @@ function change_wie(diff, cause) {
         return
     }
     G.wie = Math.max(G.wie + diff, 0)
-    G.wie = Math.min(G.wie, scenario_data().id === SOUTH_PACIFIC ? 7 : 10)
+    G.wie = Math.min(G.wie, scenario_data().id === SOUTH_PACIFIC_SCENARIO ? 7 : 10)
     log(`War in europe changed to ${get_wie_level()} (${3 - G.wie}), ${cause} (${diff}).`)
 }
 
@@ -6103,11 +6106,14 @@ P.political_will_segment = function () {
 
 function check_progress_of_war() {
     if (G.pow <= 0) {
+        log(`Progress of War not checked for turn ${G.turn}.`)
         return
     }
     var pow_count = G.capture.filter(h => !set_has(G.control, h)).length
     if (pow_count < G.pow) {
         change_political_will(-1, `current progress of war ${pow_count} < ${G.pow}`)
+    } else {
+        log(`Progress of War ${pow_count} >= ${G.pow}.`)
     }
 }
 
@@ -6131,7 +6137,7 @@ function check_naval_situation() {
 }
 
 function check_jp_resources_event() {
-    if (get_jp_resources() <= 3 && G.turn >= 5 && scenario_data().id !== SOUTH_PACIFIC) {
+    if (get_jp_resources() <= 3 && G.turn >= 5 && scenario_data().id !== SOUTH_PACIFIC_SCENARIO) {
         check_event(events.JAPAN_LACK_OF_RESOURCES)
     }
 }
@@ -9205,7 +9211,7 @@ cards[CARRIER_RAID].before_unit_activation = function () {
     filter_activation_units((u, piece) => is_us_unit(piece) && piece.class === "naval" && piece.br, AP)
 }
 
-SCENARIO_DATA[SOUTH_PACIFIC].before_commit_offensive = function () {
+SCENARIO_DATA[SOUTH_PACIFIC_SCENARIO].before_commit_offensive = function () {
     if (G.turn === 3 && (set_has(G.offensive.battle_hexes, TRUK) ||
         set_has(G.offensive.landing_hexes, TRUK) || is_faction_units(TRUK, AP))) {
         return "The Allied player cannot declare Truk a battle hex during game turn 3."
@@ -9213,7 +9219,7 @@ SCENARIO_DATA[SOUTH_PACIFIC].before_commit_offensive = function () {
 
 }
 
-SCENARIO_DATA[SOUTH_PACIFIC].before_unit_activation = function () {
+SCENARIO_DATA[SOUTH_PACIFIC_SCENARIO].before_unit_activation = function () {
     if (G.turn === 3) {
         filter_activation_units((u) => G.location[u] !== TRUK, JP)
     }
@@ -10360,6 +10366,7 @@ function get_garrison_count() {
 
 function on_view() {
     V.turn = G.turn
+    V.sid = G.sid
     V.location = G.location
     V.removed = G.removed
     V.discard = G.discard
