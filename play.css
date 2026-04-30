@@ -348,7 +348,7 @@ div[data-tooltip]:after {
 	pointer-events: none;
 	box-sizing: border-box;
 	border-radius: 50%;
-	z-index: 1;
+	z-index: -1;
 }
 
 
@@ -376,7 +376,7 @@ div[data-tooltip]:after {
 }
 
 .s-loc {
-    z-index: 3;
+    /*z-index: 3;*/
 }
 
 /* PIECES */
@@ -469,7 +469,7 @@ div[data-tooltip]:after {
 .big.unit_ix_31{ background-position-x:  -1350px;}
 .big.unit_ix_32{ background-position-x:  -1395px;}
 
-.piece.reduced {
+.piece.reduced, .icon.reduced {
     background-position-y: -35px;
 }
 
@@ -506,7 +506,7 @@ div[data-tooltip]:after {
 .unit_ix_31{ background-position-x:  -1050px;}
 .unit_ix_32{ background-position-x:  -1085px;}
 
-.piece.reduced.big {
+.piece.reduced.big, .icon.reduced.big {
     background-position-y: -45px;
 }
 
@@ -606,6 +606,7 @@ div[data-tooltip]:after {
     font-size: 25px;
     font-weight: bold;
     text-align: center;
+    /*pointer-events: auto;*/
 }
 
 .marker.battle.gray {
@@ -613,6 +614,7 @@ div[data-tooltip]:after {
 }
 
 .marker.battle {
+    cursor: pointer;
     background-color: lawngreen;
 }
 
@@ -641,4 +643,27 @@ div[data-tooltip]:after {
 
 .small_action {
     font-style: italic;
+}
+
+.battle_box {
+    /*margin-right: 10px;*/
+}
+
+#battle_info > .dialog_body > .wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.icon {
+    margin: 2px;
+    background-repeat: no-repeat;
+    border-radius: 5px;
+    width: 35px;
+    height: 35px;
+    background-size: 35px 35px;
+}
+.icon.big {
+    width: 45px;
+    height: 45px;
 }

@@ -545,6 +545,26 @@ for (var i = 1; i < pieces.length; i++) {
 }
 
 
+setup_original_control()
+
+function setup_original_control() {
+    SCENARIO_DATA.forEach(s => {
+        G = {
+            log: []
+        }
+        on_setup(s.name, {})
+        s.original_control = G.control
+        s.controllable = []
+        for (var i = 1; i < LAST_BOARD_HEX; i++) {
+            if (is_controllable_hex(i)) {
+                set_add(s.controllable, i)
+            }
+        }
+    })
+    G = null
+}
+
+
 /* DATA */
 
 
@@ -967,19 +987,20 @@ P.replacement_segment = {
         trigger_event("before_replacement")
     },
     prompt() {
+        var not_used_unground = L.divisions_used <= 0 || L.replacement_points.GROUND <= 0
         if (G.active_stack.length > 0) {
-            prompt(`Choose hex to place ${piece_get_log_str(G.active_stack[0])}.`)
+            prompt(`Choose hex to place ${piece_get_log_str(G.active_stack[0])}${not_used_unground ? "" : "(Ground replacements should be spent)"}.`)
             L.allowed_hexes.forEach(h => action_hex(h))
             return
         }
-        if (L.divisions_used <= 0 || L.replacement_points.GROUND <= 0) {
+        if (not_used_unground) {
             button("done")
         }
-        if (L.divisions) {
+        var ru = L.replacable_units.filter(u => L.replacement_points[pieces[u].replacement] > 0)
+        if (L.divisions && ru.filter(u => pieces[u].class === "ground").length) {
             action("divisions", 0)
             button("divisions_button")
         }
-        var ru = L.replacable_units.filter(u => L.replacement_points[pieces[u].replacement] > 0)
         prompt(`Choose unit to reinforce. ${ru.length || L.divisions ? print_reinforcements() : "(Done)."}`)
         ru.forEach(u => action_unit(u))
 
@@ -1571,8 +1592,6 @@ P.offensive_segment = {
     },
     card(c) {
         push_undo()
-        G.offensive.offensive_card = c
-        G.offensive.active_cards.push(c)
         goto("offensive_segment_card_action", {c: c})
     },
     pass() {
@@ -1959,7 +1978,7 @@ function get_reaction_able_units() {
         mark_asp_reaction_hexes(hex)
         mark_ground_reaction_hexes(hex)
     })
-    const has_asp = Math.max(G.asp[R][0] - G.asp[R][1], 0) && G.offensive.counter_offensive_card !== MATADOR
+    const has_asp = get_asp_limit(R) && G.offensive.counter_offensive_card !== MATADOR
     for_each_unit_on_map((u, piece) => {
         if (piece.faction === R && piece.class === "ground" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG3) {
             set_add(L.reaction_able_units, u)
@@ -3508,13 +3527,10 @@ function get_move_data() {
     }
 
 
-    result.is_new_battle_allowed = (R === G.offensive.attacker
+    result.is_new_battle_allowed = (G.active === G.offensive.attacker
         && (G.offensive.type === EC || G.offensive.battle_hexes.length === 0)
         && G.offensive.stage !== POST_BATTLE_STAGE) && L.move_type !== STRAT_MOVE
-    var asp_total = Math.max(G.asp[R][0] - G.asp[R][1], 0)
-    if (!R && G.inter_service[0]) {
-        asp_total = Math.ceil(asp_total / 2)
-    }
+    var asp_total = get_asp_limit(G.active)
     if (G.offensive.stage === REACTION_STAGE) {
         asp_total = Math.min(asp_total, 1 - G.offensive.r_asp)
     }
@@ -3543,6 +3559,14 @@ function get_move_data() {
         result.move_type |= GROUND_MOVE
     }
     return result
+}
+
+function get_asp_limit(faction) {
+    var asp_lim = G.asp[faction][0]
+    if (faction === JP && G.inter_service[0]) {
+        asp_lim = Math.ceil(asp_lim / 2)
+    }
+    return Math.max(asp_lim - G.asp[faction][1], 0)
 }
 
 function get_ground_move_cost(from, to, direction, faction) {
@@ -4614,7 +4638,7 @@ P.apply_attack_reaction = {
     prompt() {
         prompt(`${offensive_card_header()} Apply reaction cards.`)
         L.allowed_cards.forEach(c => action_card(c))
-        if(L.allowed_cards.length <= 0){
+        if (L.allowed_cards.length <= 0) {
             button("done")
         }
     },
@@ -4843,20 +4867,15 @@ function is_col_tsuji_applied(faction) {
     return map_data.terrain === JUNGLE || map_data.terrain === MIXED || map_data.region === "Malaya"
 }
 
-P.execute_attack = function () {
-    var faction = L.active
-    var enemy_faction = 1 - faction
+function prepare_attack(faction) {
     var battle = G.offensive.battle
     var pool = (battle.ground_stage ? battle.ground : battle.air_naval)[faction].filter(u => unit_on_board(u))
-    if (pool.length <= 0 || (battle.ground[enemy_faction].length + battle.air_naval[enemy_faction].length) === 0
-        || battle.ground_stage && battle.ground[enemy_faction].length === 0) {
-        end()
-        return
-    }
     battle.strength[faction] = sum_combat_factor(pool)
-    log(`${G.offensive.attacker === faction ? "Attacker" : "Defender"} fire (${battle.strength[faction]})`)
-    battle.roll[faction] = random(10)
-    clear_undo()
+    battle.distant_hits[faction] = pool.filter(u => unit_on_board(u) && pieces[u].br).length
+}
+
+function get_battle_modifiers(faction) {
+    var battle = G.offensive.battle
     battle.roll_modifiers = 0
     if (battle.ground_stage && is_col_tsuji_applied(faction)) {
         battle.roll_modifiers = 4
@@ -4867,11 +4886,26 @@ P.execute_attack = function () {
         battle.roll_modifiers = get_naval_roll_modifiers(faction)
     }
     trigger_event("before_battle_roll", faction)
+}
+
+P.execute_attack = function () {
+    var faction = L.active
+    var enemy_faction = 1 - faction
+    var battle = G.offensive.battle
+    prepare_attack(faction)
+    if (battle.strength[faction] <= 0 || (battle.ground[enemy_faction].length + battle.air_naval[enemy_faction].length) === 0
+        || battle.ground_stage && battle.ground[enemy_faction].length === 0) {
+        end()
+        return
+    }
+    log(`${G.offensive.attacker === faction ? "Attacker" : "Defender"} fire (${battle.strength[faction]})`)
+    battle.roll[faction] = random(10)
+    clear_undo()
+    get_battle_modifiers(faction)
     let roll = battle.roll[faction]
     var modififed_roll = roll + battle.roll_modifiers
     var table = battle.ground_stage ? ground_battle_table : naval_battle_table
     battle.hits[faction] = Math.ceil(battle.strength[faction] * (table(modififed_roll)))
-    battle.distant_hits[faction] = pool.filter(u => unit_on_board(u) && pieces[u].br).length
     if ((roll === 9 || battle.roll_modifiers + roll >= 9 && G.offensive.active_cards.includes(ROCHEFORT)) && !battle.ground_stage) {
         battle.critical[faction] = true
     }
@@ -5297,7 +5331,7 @@ function check_us_casualties() {
     }
 }
 
-P.prepare_battle = function () {
+function prepare_battle() {
     var hex = G.offensive.battle.battle_hex
     G.offensive.battle = {
         battle_hex: hex,
@@ -5350,10 +5384,14 @@ P.prepare_battle = function () {
         || battle.air_naval[AP].length && (battle.air_naval[JP].length || battle.ground[JP].length)) {
         log(`Air/naval combat:`)
     }
+}
+
+P.prepare_battle = function () {
+    prepare_battle()
     end()
 }
 
-P.prepare_ground_battle = function () {
+function prepare_ground_battle() {
     var battle = G.offensive.battle
     G.offensive.battle = {
         battle_hex: battle.battle_hex,
@@ -5376,6 +5414,11 @@ P.prepare_ground_battle = function () {
     if (battle.ground[G.offensive.attacker].filter(u => unit_on_board(u)).length && battle.ground[1 - G.offensive.attacker].filter(u => unit_on_board(u)).length) {
         log(`Ground combat at ${hex_get_log_str(hex)}`)
     }
+
+}
+
+P.prepare_ground_battle = function () {
+    prepare_ground_battle()
     end()
 }
 
@@ -6247,11 +6290,30 @@ P.end_of_turn_phase = script(`
     goto strategic_phase
 `)
 
+function get_victory() {
+    var data = scenario_data()
+    G.original_control = G.control
+    var adjusted_control = G.control.slice()
+    for (var i = 0; i < data.controllable.length; i++) {
+        var hex = data.controllable[i]
+        var orig = set_has(data.original_control, hex) ? set_add : set_delete
+        var supply = set_has(G.control, hex) ? JP_SUPPLIED_HEX : AP_SUPPLIED_HEX
+        if (!(G.supply_cache[hex] & supply)) {
+            orig(adjusted_control, hex)
+        }
+    }
+    G.control = adjusted_control
+    var vp = data.victory()
+    G.control = G.original_control
+    delete G.original_control
+    return vp
+}
+
 function victory_check() {
     if (G.political_will <= 0) {
         finish("Japan", "US surrenders")
     }
-    var vp = scenario_data().victory()
+    var vp = get_victory()
     if (scenario_data().last_turn <= G.turn) {
         vp.text.forEach(t => log(t))
         finish(vp.won_side, vp.won_text)
@@ -6673,6 +6735,54 @@ function victory_1945() {
     return result
 }
 
+function adjust_vp(result, diff, message, hex_control) {
+    result.text.push(`${diff > 0 ? "+" : ""}${diff} VP - ${message}${get_hex_control_log(hex_control)}.`)
+    result.vp += diff
+}
+
+function get_hex_control_log(hex_control) {
+    var ap = []
+    var jp = []
+    if (!hex_control) {
+        return ""
+    }
+    hex_control.forEach(h => {
+        var or = set_has(G.original_control, h)
+        var curr = set_has(G.control, h)
+        if (or !== curr && or) {
+            ap.push(h)
+        } else if (or !== curr) {
+            jp.push(h)
+        }
+
+    })
+    var hex_log = " (Not supplied hexes counts as "
+    if (ap.length > 0) {
+        hex_log += "AP control: " + ap.map(h => hex_get_log_str(h)).join(",")
+        if (jp.length > 0) {
+            hex_log += ", "
+        }
+    }
+    if (jp.length > 0) {
+        hex_log += "JP control: " + jp.map(h => hex_get_log_str(h)).join(",")
+    }
+    hex_log += ")"
+    if (ap.length === 0 && jp.length === 0) {
+        return ""
+    }
+    return hex_log
+}
+
+function binary_vp(result, condition, diff, message_true, message_false, hex_control) {
+    if (condition) {
+        result.text.push(`${diff > 0 ? "+" : ""}${diff} VP - ${message_true}${get_hex_control_log(hex_control)}.`)
+        result.vp += diff
+    } else {
+        result.text.push(`0 VP - ${message_false}${get_hex_control_log(hex_control)}.`)
+    }
+
+}
+
 function victory_south_pacific() {
     var result = {
         vp: 0,
@@ -6681,22 +6791,13 @@ function victory_south_pacific() {
         won_text: "",
     }
 
-    if (G.surrender[nations.CHINA.id] > 2) {
-        result.vp += G.surrender[nations.CHINA.id] - 2
-        result.text.push(`+${G.surrender[nations.CHINA.id]} VP - China government status.`)
-    } else {
-        result.text.push(`0 VP - China government status.`)
-    }
+    adjust_vp(result, G.surrender[nations.CHINA.id] - 2, "China government status")
     if (G.surrender[nations.CHINA.id] > 5) {
         result.vp += 3
         result.text.push(`+3 VP - China surrender.`)
     }
-    if (!check_supply_line(hex_to_int(3727), OAHU, AP)) {
-        result.vp += 5
-        result.text.push(`+5 VP - Townsville isolated from Oahu.`)
-    } else {
-        result.text.push(`0 VP - Townsville did not isolated.`)
-    }
+    binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
+        "Townsville did not isolated", [hex_to_int(3727), OAHU])
 
     if (G.political_will < 4) {
         result.vp += 4 - G.political_will
@@ -6704,6 +6805,14 @@ function victory_south_pacific() {
     } else {
         result.text.push(`0 VP - Political will >= 4.`)
     }
+    var amh = 0
+    nations.AUSTRALIAN_MANDATES.ports.forEach(hex => {
+        var h = hex_to_int(hex)
+        if (is_space_controlled(h, JP) && get_map_data(h).port) {
+            amh++
+        }
+    })
+    adjust_vp(result, amh, "JP control of Mandates ports", nations.AUSTRALIAN_MANDATES.ports.map(h => hex_to_int(h)))
     if (nations.AUSTRALIAN_MANDATES.ports.filter(h => !is_space_controlled(hex_to_int(h), JP)).length === 0) {
         result.vp += 3
         result.text.push(`+3 VP - JP control of Mandates.`)
@@ -6713,6 +6822,16 @@ function victory_south_pacific() {
     } else {
         result.text.push(`0 VP - None control of Mandates.`)
     }
+    var new_guinea = 0
+    nations.NEW_GUINEA.keys.forEach(hex => {
+        var h = hex_to_int(hex)
+        if (is_space_controlled(h, JP) && get_map_data(h).port) {
+            new_guinea++
+        }
+    })
+    adjust_vp(result, new_guinea, "JP control of New Guinea ports", nations.NEW_GUINEA.keys.map(h => hex_to_int(h)).filter(h => h !== VOGELKOP))
+    binary_vp(result, is_space_controlled(VOGELKOP, AP), -1, "AP control of Vogelkop",
+        "JP control of Vogelkop", [VOGELKOP])
     if (check_nation_controlled(nations.NEW_GUINEA, JP)) {
         result.vp += 3
         result.text.push(`+3 VP - JP control of New Guinea.`)
@@ -6722,46 +6841,14 @@ function victory_south_pacific() {
     } else {
         result.text.push(`0 VP - None control of New Guinea.`)
     }
-    var new_guinea = 0
-    nations.NEW_GUINEA.keys.forEach(hex => {
-        var h = hex_to_int(hex)
-        if (is_space_controlled(h, JP) && get_map_data(h).port) {
-            new_guinea++
-        }
-    })
-    result.vp += new_guinea
-    result.text.push(`${new_guinea > 0 ? "+" : ""}${new_guinea} JP control of New Guinea ports.`)
-    var amh = 0
-    nations.AUSTRALIAN_MANDATES.ports.forEach(hex => {
-        var h = hex_to_int(hex)
-        if (is_space_controlled(h, JP) && get_map_data(h).port) {
-            amh++
-        }
-    })
-    result.vp += amh
-    result.text.push(`${amh > 0 ? "+" : ""}${amh} JP control of Mandates ports.`)
-    if (is_space_controlled(VOGELKOP, AP)) {
-        result.vp -= 3
-        result.text.push(`-1 VP - AP control of Vogelkop.`)
-    } else {
-        result.text.push(`0 VP - JP control of Vogelkop.`)
-    }
+
     var heb = G.control.map(h => get_map_data(h)).filter(md => md.region === "Hebrides" && md.port).length
-    if (heb) {
-        result.vp += 1
-        result.text.push(`+1 VP - JP control of New Hebrides port.`)
-    } else {
-        result.text.push(`0 VP - Non JP control of any New Hebrides port.`)
-    }
+    binary_vp(result, heb, 1, "JP control of New Hebrides port",
+        "Non JP control of any New Hebrides port", G.original_control.filter(h => get_map_data(h).region === "Hebrides" && get_map_data(h).port))
     var aus = G.control.map(h => get_map_data(h)).filter(md => md.region === "Australia" && md.port).length
-    if (aus) {
-        result.vp += 1
-        result.text.push(`+1 VP - JP control of Australia mainland port.`)
-    } else {
-        result.text.push(`0 VP - Non JP control of any Australia mainland port.`)
-    }
+    binary_vp(result, aus, 1, "JP control of Australia mainland port",
+        "Non JP control of any Australia mainland port", G.original_control.filter(h => get_map_data(h).region === "Australia" && get_map_data(h).port))
     result.text.push(`2 VP or less - Allied Decisive Victory, 3-5 VP Allied Tactical Victory, 6-9 VP Japanese Tactical Victory, 10 VP Japanese Decisive Victory.`)
-    result.text.push(`Total VP: ${result.vp}`)
     if (result.vp <= 2) {
         result.won_side = "Allies"
         result.won_text = `${result.vp} - Allied Decisive Victory`
@@ -6775,6 +6862,7 @@ function victory_south_pacific() {
         result.won_side = "Japan"
         result.won_text = `${result.vp} - Japanese Decisive Victory`
     }
+    result.text.push(`Total VP: ${result.vp}.`)
     return result
 }
 
@@ -7170,7 +7258,7 @@ P.naval_battle_guadalcanal = {
                 set_add(L.allowed_units, u)
             }
         })
-        L.allowed_units = L.allowed_units.filter(u => !set_has(ap_bb_hex, G.location[u]))
+        L.allowed_units = L.allowed_units.filter(u => !set_has(ap_bb_hex, G.location[u]) && set_has(jp_bb_hex, G.location[u]))
     },
     prompt() {
         prompt(`${offensive_card_header()} Choose airfield bombardment target.`)
@@ -10335,6 +10423,7 @@ function on_view() {
         set_add(bh, G.offensive.battle.battle_hex)
     }
     V.offensive = {
+        attacker: G.offensive.attacker,
         active_units: G.offensive.active_units[0].concat(G.offensive.active_units[1]),
         paths: G.offensive.paths,
         active_cards: G.offensive.active_cards,
@@ -10457,8 +10546,10 @@ function on_view() {}
 function on_assert() {}
 */
 
-function on_query(q, params) {
-    if (q.startsWith("event_cards")) {
+function on_query(q, params, b) {
+    if (q.name === "battle_info") {
+        return battle_info_query(q.index)
+    } else if (q.startsWith("event_cards")) {
         return draw_list()
     } else if (q === "vp_check") {
         return vp_query()
@@ -10466,7 +10557,53 @@ function on_query(q, params) {
 }
 
 function vp_query() {
-    return scenario_data().victory()
+    return get_victory()
+}
+
+function battle_info_query(battle) {
+    var result = {
+        naval_cf: [],
+        naval_distant_hits: [],
+        naval_rm: [],
+        naval_log: [],
+        ground_cf: [],
+        ground_rm: [],
+        ground_log: [],
+        battle_hex: G.offensive.battle_names[battle],
+        battle_name: battle,
+    }
+    var battle_hex = G.offensive.battle_names[battle]
+    G.offensive.battle = {battle_hex}
+    prepare_battle()
+    result.air_naval = G.offensive.battle.air_naval
+    G.log = []
+    prepare_attack(JP)
+    get_battle_modifiers(JP)
+    result.naval_cf = G.offensive.battle.strength
+    result.naval_rm[JP] = G.offensive.battle.roll_modifiers
+    result.naval_distant_hits[JP] = G.offensive.battle.distant_hits
+    result.naval_log[JP] = G.log
+    G.log = []
+    prepare_attack(AP)
+    get_battle_modifiers(AP)
+    result.naval_rm[AP] = G.offensive.battle.roll_modifiers
+    result.naval_distant_hits[AP] = G.offensive.battle.distant_hits
+    result.naval_log[AP] = G.log
+    G.log = []
+    prepare_ground_battle()
+    result.ground = G.offensive.battle.ground
+    G.log = []
+    prepare_attack(JP)
+    get_battle_modifiers(JP)
+    result.ground_cf = G.offensive.battle.strength
+    result.ground_rm[JP] = G.offensive.battle.roll_modifiers
+    result.ground_log[JP] = G.log
+    G.log = []
+    prepare_attack(AP)
+    get_battle_modifiers(AP)
+    result.ground_rm[AP] = G.offensive.battle.roll_modifiers
+    result.ground_log[AP] = G.log
+    return result
 }
 
 function draw_list() {

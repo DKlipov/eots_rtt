@@ -253,7 +253,7 @@ function define_s_loc(id, rect) {
 }
 
 function center_rect([x, y], w, h) {
-    return [ x - w/2, y - h/2, w, h ]
+    return [x - w / 2, y - h / 2, w, h]
 }
 
 function hex_in_map(x, y){
@@ -393,7 +393,6 @@ function on_init(scenario, game_options, static_view) {
         if (y < used_hex[x].min) continue
         if (y > used_hex[x].max) continue
         
-        
         if(map_info.hex_check(i)){
             ALL_BOARD_HEXES.push(i)
             let xy = hex_center(i)
@@ -433,6 +432,18 @@ function on_init(scenario, game_options, static_view) {
     if(map_layout.track_japanese_divisions_available_china !== undefined){
         define_layout_track_h("divisions", 0, 12, map_layout.track_japanese_divisions_available_china,0)
     }
+    for (i = 0; i < 35; i++) {
+        var battle = define_marker("battle", i, "conflict battle")
+        battle.element.innerText = String.fromCharCode(65 + i)
+        battle.element.index = i
+        battle.element.addEventListener("mousedown", evt => {
+            if (world.focus !== (evt.target.parentElement.thing)) {
+                send_query({name: "battle_info", index: evt.target.index})
+            }
+        })
+        define_marker("landing", i, "conflict landing")
+            .element.innerText = String.fromCharCode(65 + i)
+    }
     define_marker("divisions", 0, "divisions_china")
     for (let i = 1; i < data.pieces.length; ++i) {
         let piece = data.pieces[i]
@@ -469,6 +480,7 @@ function update_hand(side) {
         fo_card.innerHTML = ''
     } else if (G.events[data.events.FUTURE_OFFENSIVE_JP.id + side] > 0) {
         fo_card = populate_generic_to_parent(lookup_thing("hand", side).element, side === JP ? "card card_jp_0" : "card card_ap_0")
+        fo_card.innerHTML = ''
     }
 
     if (G.events[data.events.FUTURE_OFFENSIVE_JP.id + side] === G.turn) {
@@ -479,7 +491,7 @@ function update_hand(side) {
 
     if (!Array.isArray(G.hand[side])) {
         for (let i = 0; i < G.hand[side]; i++) {
-            populate_generic("hand", side, side === JP ? "card card_jp_0" : "card card_ap_0")
+            populate_generic("hand", side, side === JP ? "card card_jp_0" : "card card_ap_0").innerHTML = ''
         }
     } else {
         for (let i = 0; i < G.hand[side].length; i++) {
@@ -757,8 +769,8 @@ function on_update() {
     }
 
 
-    G.offensive.battle_hexes.forEach(h => apply_conflict_marker(populate_generic("s-loc", h, "marker conflict battle"), h))
-    G.offensive.landing_hexes.forEach(h => apply_conflict_marker(populate_generic("s-loc", h, "marker conflict landing"), h))
+    G.offensive.battle_hexes.forEach(h => populate("s-loc", h, "battle", G.offensive.battle_names.indexOf(h)))
+    G.offensive.landing_hexes.forEach(h => populate("s-loc", h, "landing", G.offensive.battle_names.indexOf(h)))
 
     G.inter_service.forEach((v, i) => populate_generic("status", i, `marker ${v ? "rivalry" : "agreement"}_${i ? "ap" : "jp"}`))
     populate_generic("pw", G.political_will, "marker pw")
@@ -953,12 +965,16 @@ function on_reply(q, response) {
 }
 
 function toggle_dialog(id, response) {
-    if (document.getElementById(id).classList.contains("show")) {
-        hide_dialog(id)
-    } else if (id.startsWith("event_cards")) {
-        show_card_list(id, response)
-    } else if (id === "vp_check") {
-        vp_dialog(id, response)
+    var name = id.name ? id.name : id
+    // if (document.getElementById(name).classList.contains("show")) {
+    //     hide_dialog(name)
+    // }
+    if (name.startsWith("event_cards")) {
+        show_card_list(name, response)
+    } else if (name === "vp_check") {
+        vp_dialog(name, response)
+    } else if (name === "battle_info") {
+        battle_info_dialog(name, response)
     }
 }
 
@@ -1083,11 +1099,89 @@ function vp_dialog(id, response) {
         }
         response.text.forEach(text => {
             let header = document.createElement("div")
-            header.textContent = text
+            header.innerHTML = text.replace(/H(\d+)/g, sub_hex)
             dl.appendChild(header)
         })
         body.appendChild(dl)
     })
+}
+
+function append_header(text, dl) {
+    let header = document.createElement("dt")
+    header.textContent = text
+    dl.appendChild(header)
+}
+
+function create_flag(faction) {
+    var result = document.createElement("div")
+    if (faction) {
+        result.className = "control_ap"
+    } else {
+        result.className = "control_jp"
+    }
+    result.classList.add("icon")
+    return result
+}
+
+function battle_info_dialog(id, response) {
+    show_dialog(id, (body) => {
+        let dl = document.createElement("div")
+        dl.className="wrapper"
+        let header = document.createElement("dt")
+        header.innerHTML = `Combat hex ${String.fromCharCode(65 + response.battle_name)} (${sub_hex(null, response.battle_hex)})`
+        body.appendChild(header)
+        body.appendChild(dl)
+        if (response.air_naval[0].length || response.air_naval[1].length) {
+            var at = G.offensive.attacker
+            var def = 1 - G.offensive.attacker
+            dl.appendChild(create_battle_box(at,
+                response.naval_cf[at], response.naval_rm[at], response.air_naval[at], response.naval_log[at]))
+            dl.appendChild(create_battle_box(def,
+                response.naval_cf[def], response.naval_rm[def], response.air_naval[def], response.naval_log[def]))
+            // dl.appendChild(an_box)
+        }
+        if (response.ground[0].length || response.ground[1].length) {
+            var an_box = document.createElement("div")
+            var faction = G.offensive.attacker
+            dl.appendChild(create_battle_box(faction,
+                response.ground_cf[faction], response.ground_rm[faction], response.ground[faction], response.ground_log[faction]))
+            faction = 1 - faction
+            dl.appendChild(create_battle_box(faction,
+                response.ground_cf[faction], response.ground_rm[faction], response.ground[faction], response.ground_log[faction]),)
+            // dl.appendChild(an_box)
+        }
+    })
+}
+
+function create_battle_box(faction, cf, rm, units, log) {
+    var result = document.createElement("div")
+    if (cf === 0) {
+        return result
+    }
+    result.className = "battle_box"
+    result.appendChild(create_flag(faction))
+    append_header(`${cf}  ${rm > 0 ? "+" : ""}${rm ? rm : ""}`, result)
+    units.sort((a, b) => G.location[a] - G.location[b])
+    var prev = null
+    for (var i of units) {
+        var loc = G.location[i]
+        if (loc !== prev) {
+            prev = loc
+            var text = document.createElement("div")
+            text.innerHTML = sub_hex(null, loc)
+            result.appendChild(text)
+        }
+        populate_generic_to_parent(result, "icon " + data.pieces[i].counter + (set_has(G.reduced, i) ? " reduced" : ""))
+    }
+    if (log.length) {
+        append_header("Modifiers:", result)
+    }
+    log.forEach(text => {
+        let header = document.createElement("div")
+        header.innerHTML = text.replace(/H(\d+)/g, sub_hex)
+        result.appendChild(header)
+    })
+    return result
 }
 
 function is_observing() {
