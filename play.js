@@ -7,6 +7,33 @@ const DELAYED_BOX = 1483
 const CHINA_BOX = 1484
 const TURN_BOX = 1490
 
+const HEX_X_SIZE = 48.0
+const HEX_Y_SIZE = 55.25
+
+const MAIN_BOARD_INFO ={
+    "LAST_BOARD_HEX":1478,
+    "COLUMN_HEX_NB":29,
+    "ROW_HEX_NB":50,
+    "grid_x_offset":0,
+    "grid_y_offset":0,
+    "display_x_offset":76.375,
+    "display_y_offset":53.375
+}
+const BURMA_BOARD_INFO ={
+    "LAST_BOARD_HEX":2609,
+    "COLUMN_HEX_NB":13,
+    "ROW_HEX_NB":16
+}
+const SOUTH_PAC_BOARD_INFO ={
+    "LAST_BOARD_HEX":5027,
+    "COLUMN_HEX_NB":29,
+    "ROW_HEX_NB":20,
+    "grid_x_offset":20,
+    "grid_y_offset":17,
+    "display_x_offset":89.375,
+    "display_y_offset":64.375
+}
+
 const MANCHURIA_1 = hex_to_int(3302)
 const MANCHURIA_2 = hex_to_int(3303)
 
@@ -243,6 +270,7 @@ let ALL_BOARD_HEXES = []
 
 let SID = MAIN_SCENARIO;
 let map_layout = layout.mainmap;
+let map_info = MAIN_BOARD_INFO;
 
 function on_init(scenario, game_options, static_view) {
     init_canvas(scenario)
@@ -254,6 +282,7 @@ function on_init(scenario, game_options, static_view) {
             map_layout = layout.southpac; 
             map_elem.classList.add("southpac");
             define_board("#map", 1275, 825, [12, 12, 12, 12])
+            map_info = SOUTH_PAC_BOARD_INFO
             break;
         };
         case  "Burma: The Forgotten War":{
@@ -261,6 +290,7 @@ function on_init(scenario, game_options, static_view) {
             map_layout = layout.burma; 
             map_elem.classList.add("burma");
             define_board("#map", 1275, 825, [12, 12, 12, 12])
+            map_info = BURMA_INFO
             break;
         };
         default:
@@ -269,6 +299,7 @@ function on_init(scenario, game_options, static_view) {
             map_layout = layout.mainmap; 
             map_elem.classList.add("main");
             define_board("#map", 2550, 1650, [12, 12, 12, 12])
+            map_info = MAIN_BOARD_INFO
         }
     }
 
@@ -277,24 +308,27 @@ function on_init(scenario, game_options, static_view) {
     var used_hex = []
     for (var i = 0; i < 60; ++i) {
         used_hex[i] = { min: 100, max: -100 }
-    if (i > 27 && i < 45) used_hex[i].max = 28 - (i&1)
+        if (i > 27 && i < 45){
+            used_hex[i].max = 28 - (i&1)
+        } 
     }
 
     for (var i = 0; i < data.map.length; i++) {
         var hex = hex_to_int(data.map[i].id)
-        let x = Math.floor(hex / 29)
-        let y = hex % 29
-    used_hex[x].min = Math.min(used_hex[x].min, y)
-    used_hex[x].max = Math.max(used_hex[x].max, y)
+        let x = Math.floor(hex / MAIN_BOARD_INFO.COLUMN_HEX_NB)
+        let y = hex % MAIN_BOARD_INFO.COLUMN_HEX_NB
+        used_hex[x].min = Math.min(used_hex[x].min, y)
+        used_hex[x].max = Math.max(used_hex[x].max, y)
     }
 
-    for (var i = 1; i < LAST_BOARD_HEX; ++i) {
-        var x = Math.floor(i / 29)
-        let y = i % 29
+    for (var i = 1; i < MAIN_BOARD_INFO.LAST_BOARD_HEX; ++i) {
+        var x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
+        let y = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
 
-    if (y < used_hex[x].min) continue
-    if (y > used_hex[x].max) continue
-    ALL_BOARD_HEXES.push(i)
+        if (y < used_hex[x].min) continue
+        if (y > used_hex[x].max) continue
+        
+        ALL_BOARD_HEXES.push(i)
 
         let xy = hex_center(i)
         define_s_loc(i, center_rect(xy, 45, 45))
@@ -332,11 +366,18 @@ function on_init(scenario, game_options, static_view) {
         0, 0, 0 
     )
 
-    define_layout_track_h("india", 0, 5, map_layout.track_india_status,0)
-    define_layout_track_h("burma", 0, 2, map_layout.track_burma_road,0)
+    if(map_layout.track_india_status !== undefined){
+        define_layout_track_h("india", 0, 5, map_layout.track_india_status,0)
+    }
+    if(map_layout.track_burma_road !== undefined){
+        define_layout_track_h("burma", 0, 2, map_layout.track_burma_road,0)
+    }
+    
     define_layout_track_h("china", 0, 5, map_layout.track_chinese_government,0)
-    define_layout_track_h("divisions", 0, 12, map_layout.track_japanese_divisions_available_china,0)
 
+    if(map_layout.track_japanese_divisions_available_china !== undefined){
+        define_layout_track_h("divisions", 0, 12, map_layout.track_japanese_divisions_available_china,0)
+    }
     define_marker("divisions", 0, "divisions_china")
     for (let i = 1; i < data.pieces.length; ++i) {
         let piece = data.pieces[i]
@@ -431,13 +472,14 @@ function int_to_hex(i) {
 
 function hex_center(i) {
     if (i === CHINA_BOX) {
+        //TODO
         return [890, 420]
     }
-    let row = i % 29
-    let column = (Math.floor(i / 29))
+    let row = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
+    let column = (Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB))
     return [
-        (45 + 31.375) + column * 48.0,
-        (25.75 + 27.625) + row * 55.25 + (column & 1) * 27.625
+        ( map_info.display_x_offset) + (column-map_info.grid_x_offset) * HEX_X_SIZE,
+        ( map_info.display_y_offset) + (row-map_info.grid_y_offset) * HEX_Y_SIZE + (column & 1) * 27.625
     ]
 }
 
@@ -667,12 +709,14 @@ function on_update() {
     populate_generic("pw", G.political_will, "marker pw")
     populate_generic("wie", G.wie, "marker wie")
 
-    populate_generic("india", Math.min(4, G.surrender[data.nations.INDIA.id]),
-        `marker ${G.surrender[data.nations.INDIA.id] >= 5 ? "india_status_surrender" : "india_status"}`)
+    if(G.sid != SOUTH_PACIFIC_SCENARIO){
+        populate_generic("india", Math.min(4, G.surrender[data.nations.INDIA.id]),
+            `marker ${G.surrender[data.nations.INDIA.id] >= 5 ? "india_status_surrender" : "india_status"}`)
+        populate_generic("burma", G.burma_road, `marker burma_road${G.events[data.events.HUMP.id] ? "_hump" : ""}`)
+        populate("divisions", G.china_divisions, `divisions`, 0)
+    }
 
-    populate_generic("burma", G.burma_road, `marker burma_road${G.events[data.events.HUMP.id] ? "_hump" : ""}`)
     populate_generic("china", Math.min(5, G.surrender[data.nations.CHINA.id]), `marker china`)
-    populate("divisions", G.china_divisions, `divisions`, 0)
 
 
     for (i = 0; i < TURN_MARKERS.length; i++) {
