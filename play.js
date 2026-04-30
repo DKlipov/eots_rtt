@@ -10,29 +10,7 @@ const TURN_BOX = 1490
 const HEX_X_SIZE = 48.0
 const HEX_Y_SIZE = 55.25
 
-const MAIN_BOARD_INFO ={
-    "LAST_BOARD_HEX":1478,
-    "COLUMN_HEX_NB":29,
-    "ROW_HEX_NB":50,
-    "grid_x_offset":0,
-    "grid_y_offset":0,
-    "display_x_offset":76.375,
-    "display_y_offset":53.375
-}
-const BURMA_BOARD_INFO ={
-    "LAST_BOARD_HEX":2609,
-    "COLUMN_HEX_NB":13,
-    "ROW_HEX_NB":16
-}
-const SOUTH_PAC_BOARD_INFO ={
-    "LAST_BOARD_HEX":5027,
-    "COLUMN_HEX_NB":29,
-    "ROW_HEX_NB":20,
-    "grid_x_offset":20,
-    "grid_y_offset":17,
-    "display_x_offset":89.375,
-    "display_y_offset":64.375
-}
+
 
 const MANCHURIA_1 = hex_to_int(3302)
 const MANCHURIA_2 = hex_to_int(3303)
@@ -266,6 +244,65 @@ function center_rect([x, y], w, h) {
     return [ x - w/2, y - h/2, w, h ]
 }
 
+function hex_in_map(x, y){
+    
+    return x >= map_info.grid_x_offset && 
+            y>= map_info.grid_y_offset && 
+            x < map_info.grid_x_offset +map_info.ROW_HEX_NB &&
+            y < map_info.grid_x_offset +map_info.ROW_HEX_NB 
+}
+
+const MAIN_BOARD_INFO ={
+    "LAST_BOARD_HEX":1478,
+    "COLUMN_HEX_NB":29,
+    "ROW_HEX_NB":50,
+    "grid_x_offset":0,
+    "grid_y_offset":0,
+    "display_x_offset":76.375,
+    "display_y_offset":53.375,
+    "turn_a":12,
+    "turn_b":1,
+    "track_a":9,
+    "track_b":0,   
+    "wie_a":0,
+    "wie_b":10,
+    "pw_a":10,
+    "pw_b":0,
+    "hex_check":()=>true
+}
+const BURMA_BOARD_INFO ={
+    "LAST_BOARD_HEX":2609,
+    "COLUMN_HEX_NB":13,
+    "ROW_HEX_NB":16
+}
+const SOUTH_PAC_BOARD_INFO ={
+    "LAST_BOARD_HEX":5027,
+    "COLUMN_HEX_NB":12,
+    "ROW_HEX_NB":20,
+    "grid_x_offset":20,
+    "grid_y_offset":16,
+    "display_x_offset":89.375,
+    "display_y_offset":9.125,
+    "turn_a":3,
+    "turn_b":6,
+    "track_a":3,
+    "track_b":9,    
+    "wie_a":7,
+    "wie_b":0,
+    "pw_a":5,
+    "pw_b":0,
+    "hex_check":(i)=>{
+        let x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
+        let y = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
+        if(x == 24 && y == 16){
+            return true;
+        }else if((x%2==0) && y == 16){
+            return false;
+        }
+        return hex_in_map(x,y)
+    }
+}
+
 let ALL_BOARD_HEXES = []
 
 let SID = MAIN_SCENARIO;
@@ -283,6 +320,31 @@ function on_init(scenario, game_options, static_view) {
             map_elem.classList.add("southpac");
             define_board("#map", 1275, 825, [12, 12, 12, 12])
             map_info = SOUTH_PAC_BOARD_INFO
+
+            define_track("track",0,1,map_layout.track_strat_record_0_1,define_stack, "h", 0,        
+                // stack parameters:
+                -5, 0, // closed offset
+                -35, 0, // open offset (major axis)
+                0, 35, // open offset (minor axis)
+                1, // threshold to auto-open
+                8, // wrap limit
+                0, 0, 0 
+            )
+            define_stack("track", 2,map_layout.track_strat_record_2,                
+                // stack parameters:
+                -5, 0, // closed offset
+                -35, 0, // open offset (major axis)
+                0, 35, // open offset (minor axis)
+                1, // threshold to auto-open
+                8, // wrap limit
+                0, 0, 0 
+            )
+
+
+            define_s_loc(1400, map_layout.h_5808)
+            define_thing("zoi_hex", 1400).layout(map_layout.h_5808)
+            define_space("action_hex", 1400, map_layout.h_5808)
+
             break;
         };
         case  "Burma: The Forgotten War":{
@@ -328,12 +390,14 @@ function on_init(scenario, game_options, static_view) {
         if (y < used_hex[x].min) continue
         if (y > used_hex[x].max) continue
         
-        ALL_BOARD_HEXES.push(i)
-
-        let xy = hex_center(i)
-        define_s_loc(i, center_rect(xy, 45, 45))
-        define_thing("zoi_hex", i).layout(center_rect(xy, 62, 62))
-        define_space("action_hex", i, center_rect(xy, 68, 68))
+        
+        if(map_info.hex_check(i)){
+            ALL_BOARD_HEXES.push(i)
+            let xy = hex_center(i)
+            define_s_loc(i, center_rect(xy, 45, 45))
+            define_thing("zoi_hex", i).layout(center_rect(xy, 62, 62))
+            define_space("action_hex", i, center_rect(xy, 68, 68))
+        }
     }
 
     define_s_loc(ELIMINATED_BOX, [100, 1280, 45, 45])
@@ -344,10 +408,10 @@ function on_init(scenario, game_options, static_view) {
 
     define_layout("status", JP_AGREEMENT, map_layout.box_isr_jp)
     define_layout("status", AP_AGREEMENT, map_layout.box_isr_us)
-    define_layout_track_v("pw",10, 0, map_layout.track_political_will, 0)
-    define_layout_track_v("wie",10, 0, map_layout.track_wie, 0)
+    define_track("pw",map_info.pw_a, map_info.pw_b, map_layout.track_political_will,define_layout,"auto", 0)
+    define_track("wie",map_info.wie_a, map_info.wie_b, map_layout.track_wie,define_layout,"auto", 0)
 
-    define_track("turn",12,1,map_layout.track_game_turn,define_stack, "v", 0,        
+    define_track("turn",map_info.turn_a,map_info.turn_b,map_layout.track_game_turn,define_stack, "auto", 0,        
         // stack parameters:
         -5, 0, // closed offset
         -35, 0, // open offset (major axis)
@@ -356,7 +420,7 @@ function on_init(scenario, game_options, static_view) {
         8, // wrap limit
         0, 0, 0 
     )
-    define_track("track",9,0,map_layout.track_strat_record,define_stack, "v", 0,        
+    define_track("track",map_info.track_a,map_info.track_b,map_layout.track_strat_record,define_stack, "auto", 0,        
         // stack parameters:
         -5, 0, // closed offset
         -35, 0, // open offset (major axis)
@@ -373,7 +437,7 @@ function on_init(scenario, game_options, static_view) {
         define_layout_track_h("burma", 0, 2, map_layout.track_burma_road,0)
     }
     
-    define_layout_track_h("china", 0, 5, map_layout.track_chinese_government,0)
+    define_layout_track_h("china", 5, 0, map_layout.track_chinese_government,0)
 
     if(map_layout.track_japanese_divisions_available_china !== undefined){
         define_layout_track_h("divisions", 0, 12, map_layout.track_japanese_divisions_available_china,0)
@@ -627,13 +691,13 @@ function on_update() {
     // G.actions.board_hex.push(hex_to_int(piece.start))
 
 
-    G.control.filter(h => !set_has(G.capture, h) && !set_has(JP_BOUNDARIES, h))
+    G.control.filter(h => map_info.hex_check(hex_to_int(h)) && !set_has(G.capture, h) && !set_has(JP_BOUNDARIES, h))
         .forEach(h => populate_generic("s-loc", h, "marker control_jp"))
-    G.control.filter(h => set_has(G.garr_elim, h))
+    G.control.filter(h => map_info.hex_check(hex_to_int(h)) && set_has(G.garr_elim, h))
         .forEach(h => populate_generic("s-loc", h, "marker no_garrison"))
-    JP_BOUNDARIES.filter(h => !set_has(G.capture, h) && !set_has(G.control, h) && h !== MANCHURIA_1 && h !== MANCHURIA_2)
+    JP_BOUNDARIES.filter(h => map_info.hex_check(hex_to_int(h)) && !set_has(G.capture, h) && !set_has(G.control, h) && h !== MANCHURIA_1 && h !== MANCHURIA_2)
         .forEach(h => populate_generic("s-loc", h, "marker control_ap"))
-    G.capture.forEach(h => {
+    G.capture.filter(h => map_info.hex_check(hex_to_int(h))).forEach(h => {
         var marker
         if (h === MANCHURIA_1 || h === MANCHURIA_2) {
             marker = "marker capture_sov"
@@ -644,7 +708,7 @@ function on_update() {
         }
         populate_generic("s-loc", h, marker)
     })
-    ROAD_EVENTS.forEach(event => {
+    ROAD_EVENTS.filter(h => map_info.hex_check(hex_to_int(h))).forEach(event => {
         if (!G.events[event.id]) {
             event.keys.forEach(hex => populate_generic("s-loc", hex, "marker road"))
         }

@@ -10049,7 +10049,7 @@ function setup_scenario_south_pacific() {
         }
     }
 
-    future_offencive_card(find_card(AP, 13), 2)
+    future_offencive_card(find_card(AP, 13), 3)
     while (G.hand[AP].length < 2) {
         draw_card(AP)
     }

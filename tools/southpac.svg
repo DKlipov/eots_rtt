@@ -38,9 +38,9 @@
      inkscape:pageshadow="2"
      inkscape:window-width="2560"
      inkscape:window-height="1411"
-     inkscape:zoom="0.99999999"
-     inkscape:cx="472"
-     inkscape:cy="539.50001"
+     inkscape:zoom="2.828427"
+     inkscape:cx="846.76041"
+     inkscape:cy="666.62495"
      inkscape:current-layer="svg89"
      id="namedview6"
      inkscape:document-rotation="0"
@@ -71,12 +71,20 @@
      sodipodi:insensitive="true" />
   <rect
      style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:7.52709;stroke-linejoin:round"
-     inkscape:label="box_delayed_reinf"
+     inkscape:label="h_5808"
      id="zone_0"
      width="115.65938"
      height="95.013458"
      x="1140.371"
      y="710.34076" />
+  <rect
+     style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:4.73828;stroke-linejoin:round"
+     inkscape:label="box_delayed_reinf"
+     id="zone_0-94"
+     width="69.659378"
+     height="62.513458"
+     x="1025.25"
+     y="659.75" />
   <rect
      style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:5.49976;stroke-linejoin:round"
      inkscape:label="box_air_unit_in_china"
@@ -126,19 +134,35 @@
      x="19.422688"
      y="65.748276" />
   <rect
-     style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:9.02295;stroke-linejoin:round"
+     style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:9.2586;stroke-linejoin:round"
      inkscape:label="track_wie"
      id="zone_0-9-8-2-5-1-1-5-7"
-     width="340.27902"
-     height="46.406429"
-     x="789.10406"
+     width="337.09705"
+     height="49.323242"
+     x="794.76093"
      y="755.72791" />
   <rect
-     style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:11.8421;stroke-linejoin:round"
+     style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:8.69445;stroke-linejoin:round"
      inkscape:label="track_strat_record"
      id="zone_0-9-8-2-5-1-1-5-7-1"
-     width="579.8562"
+     width="312.56982"
      height="46.908962"
-     x="335.19238"
-     y="689.23254" />
+     x="602.302"
+     y="690.73517" />
+  <rect
+     style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:10.3545;stroke-linejoin:round"
+     inkscape:label="track_strat_record_0_1"
+     id="zone_0-9-8-2-5-1-1-5-7-1-9"
+     width="176.80533"
+     height="117.61964"
+     x="335.12131"
+     y="687.32056" />
+  <rect
+     style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:4.60163;stroke-linejoin:round"
+     inkscape:label="track_strat_record_2"
+     id="zone_0-9-8-2-5-1-1-5-7-1-9-8"
+     width="87.886658"
+     height="46.732178"
+     x="513.07465"
+     y="690.86145" />
 </svg>
