@@ -538,10 +538,6 @@ function int_to_hex(i) {
 }
 
 function hex_center(i) {
-    if (i === CHINA_BOX) {
-        //TODO
-        return [890, 420]
-    }
     let row = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
     let column = (Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB))
     return [
