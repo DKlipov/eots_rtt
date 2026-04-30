@@ -3129,6 +3129,7 @@ function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
     for (i = 1; i < LAST_BOARD_HEX; i++) {
         G.supply_cache[i] = G.supply_cache[i] & CLEAN_SUPPLY_MASK[1 - faction]
     }
+    var burma = G.burma_road
     if (G.burma_road < 2) {
         G.supply_cache[KUNMING] |= AP_SUPPLY_PORT
         G.supply_cache[CHINA_BOX] = JOINT_SUPPLIED_HEX
@@ -3174,7 +3175,10 @@ function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
             set_add(oos_units[faction], i)
         }
     })
-    return oos_units[faction].length === size
+    if (faction === AP && G.burma_road < 2) {
+        check_burma_road()
+    }
+    return oos_units[faction].length === size && burma === G.burma_road
 }
 
 function check_infrastructure() {
@@ -3408,8 +3412,8 @@ function fill_overstack() {
 }
 
 function check_supply() {
-    check_burma_road()
     G.supply_cache = []
+    G.burma_road = 0
     for_each_unit_on_map(mark_unit)
     GARRISONED_CITY.forEach(h => {
         if (is_space_controlled(h, JP) && (get_map_data(h).city === CHINESE_CITY || !set_has(G.garr_elim, h))) {
@@ -3437,7 +3441,6 @@ function check_supply() {
         var mask = G.supply_cache[TRUK] & JP_UNITS
         G.supply_cache[TRUK] ^= (mask)
     }
-    check_burma_road()
     if (G.debug) {
         log("Check supply.")
     }

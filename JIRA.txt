@@ -7,7 +7,6 @@ Todo list:
 * Surrender once per game
 * Add partially impassable hexsides to data.js
 * Kunming supply
-* Burma road and supply eligable airfield
 * Check supply during movement
 * Strat move check zoi only enter hex
 * Chin surrender - diplace all air
