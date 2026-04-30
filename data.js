@@ -1457,8 +1457,8 @@ data.pieces = [
         "start": 5808,
         "cf": 4,
         "lf": 10,
-        "br": 2,
-        "ebr": 4,
+        "br": 6,
+        "ebr": 6,
         "rcf": 2,
     },
     {
@@ -5987,7 +5987,7 @@ data.nations = {
     },
     INDIA: {
         id: 4,
-        name: "India",
+        name: "Indian revolts.",
         regions: ["India"],
         statuses: ["Stable", "Unrest", "Strikes", "Unstable", "Revolts"],
         pw: 2,

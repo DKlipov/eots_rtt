@@ -560,7 +560,7 @@ function setup_original_control() {
 /* SEQUENCE OF PLAY */
 
 P.strategic_phase = script(`
-    log ("Turn " + G.turn + ", Strategic phase")
+    log ("Turn " + G.turn + ". Strategic phase.")
     eval {
         check_jp_resources_event()
     }
@@ -568,11 +568,13 @@ P.strategic_phase = script(`
     call reinforcement_segment
     set G.active JP 
     call reinforcement_segment
-    log ("Replacement segment")
+    log ("AP replacement segment.")
     set G.active AP 
     call replacement_segment {scheduled_points: 1}
+    log ("JP replacement segment.")
     set G.active JP
     call replacement_segment {scheduled_points: 1}
+    log ("Strategic warfare segment.")
     call submarine_warfare
     call strategic_bombing
     if (G.turn === 2){
@@ -631,7 +633,7 @@ function sent_to_europe(u) {
         var roll = random(10)
         clear_undo()
         result = roll <= modifier
-        log(`${piece_get_log_str(u)} sent to Europe roll ${roll} ${result ? "<=" : ">"} ${modifier} ${G.inter_service[AP] ? "(ISR active)" : ""}`)
+        log(`${piece_get_log_str(u)} sent to Europe roll: ${dice_get_log_str(roll)} ${result ? "<=" : ">"} ${modifier} ${G.inter_service[AP] ? "(ISR active)" : ""}.`)
         if (result) {
             displace_to_turn(u, 3)
         }
@@ -744,14 +746,14 @@ function update_reinf_active() {
 
 P.reinforcement_segment = {
     _begin() {
-        log(`${G.active === AP ? "Allied" : "Japan"} reinforcement segment`)
+        log(`${side_get_log_str(G.active)} reinforcement segment.`)
         if (G.wie <= 7 && G.active === AP) {
             change_asp(AP, 1)
         } else if (G.active === AP) {
-            log(`War in europe prevent from AP amphibious shipping reinforcement`)
+            log(`War in europe prevent from AP amphibious shipping reinforcement.`)
         }
         if (G.active === AP && (is_event_active(events.PANAMA_CANAL) === G.turn - 1)) {
-            log(`Ap reinforcements delayed due to Panama canal attack`)
+            log(`AP reinforcements delayed due to Panama canal attack.`)
         }
         L.hq_reinforcement = []
         L.unit_reinforcement = []
@@ -787,7 +789,7 @@ P.reinforcement_segment = {
             L.allowed_hexes = get_hq_reinforcement_hexes()
         }
         if (delayed_units) {
-            log(`US reinforcements delayed`)
+            log(`AP reinforcements delayed.`)
         }
         update_reinf_active()
     },
@@ -856,7 +858,7 @@ P.reinforcement_segment = {
         push_undo()
         set_location(G.active_stack[0], DELAYED_BOX)
         if (!sent_to_europe(G.active_stack[0])) {
-            log(`${piece_get_log_str(G.active_stack[0])} delayed to next turn`)
+            log(`${piece_get_log_str(G.active_stack[0])} voluntary delayed to next turn.`)
         }
         set_delete(L.unit_reinforcement, G.active_stack[0])
         update_reinf_active()
@@ -901,7 +903,7 @@ function get_replacement_points() {
     }
     if (is_event_active(events.INDEPENDENCE_CAMPAIGN)) {
         result.GROUND = Math.max(0, result.GROUND - is_event_active(events.INDEPENDENCE_CAMPAIGN))
-        log(`-${is_event_active(events.INDEPENDENCE_CAMPAIGN)} AP ground replacement, Indian independence campaign (no commonwealth units could be replaced)`)
+        log(`-${is_event_active(events.INDEPENDENCE_CAMPAIGN)} AP ground replacement, Indian independence campaign (no commonwealth units could be replaced).`)
         G.events[events.INDEPENDENCE_CAMPAIGN.id] = 0
     }
     return result
@@ -922,7 +924,7 @@ function get_S_P_replacement_points() {
     result.AIR = 4
     if (is_event_active(events.INDEPENDENCE_CAMPAIGN)) {
         result.GROUND = Math.max(0, result.GROUND - is_event_active(events.INDEPENDENCE_CAMPAIGN))
-        log(`-${is_event_active(events.INDEPENDENCE_CAMPAIGN)} AP ground replacement, Indian independence campaign (no commonwealth units could be replaced)`)
+        log(`-${is_event_active(events.INDEPENDENCE_CAMPAIGN)} AP ground replacement, Indian independence campaign (no commonwealth units could be replaced).`)
         G.events[events.INDEPENDENCE_CAMPAIGN.id] = 0
     }
     return result
@@ -1002,7 +1004,7 @@ P.replacement_segment = {
         L.divisions -= 1
         G.china_divisions -= 1
         L.divisions_used++
-        log(`Japanese divisions in China reduced to ${G.china_divisions}`)
+        log(`JP divisions in China reduced to ${G.china_divisions}.`)
         if (L.replacement_points.GROUND) {
             L.replacement_points.GROUND++
         } else {
@@ -1049,7 +1051,7 @@ function change_asp(faction, count) {
         G.asp[faction][0] += count
     }
     if (size !== G.asp[faction][0]) {
-        log(`${faction === AP ? "Allied" : "Japanese"} amphibious shipping points changed to ${G.asp[faction][0]} (${count})`)
+        log(`${side_get_log_str(faction)} amphibious shipping points changed to ${G.asp[faction][0]} (${count}).`)
     }
 }
 
@@ -1064,30 +1066,27 @@ P.submarine_warfare = {
     roll() {
         var result = random(10)
         var modifiers = 0
-        log(`US submarine warfare.`)
+        log(`AP submarine warfare.`)
         if (G.turn <= 4) {
             modifiers += 1
-            log(`+1 Defective torpedoes (1942)`)
+            log(`+1 Defective torpedoes (1942).`)
         }
         var escort = is_event_active(events.JP_ESCORTS) >> 4
         if (escort) {
             modifiers += escort
-            log(`+${escort} Escort`)
+            log(`+${escort} JP Escort.`)
         }
-        log(`Submarine warfare roll : ${result} ${modifiers ? "+" + modifiers : ""} `)
-        if (result + modifiers - G.turn <= 0) {
-            log(`(Success) ${result + modifiers} <= ${G.turn}`)
-            G.strategic_warfare++
-            if (escort === 4) {
-                G.events[events.JP_ESCORTS.id] = G.turn + (2 << 4)
-                log(`Escort reduced +2`)
-            } else if (escort) {
-                G.events[events.JP_ESCORTS.id] = 0
-                log(`Escort modifier removed`)
-            }
+        var success = (result + modifiers - G.turn) <= 0
+        log(`${dice_get_log_str(result, modifiers)} <= ${G.turn} ${success ? "(SUCCESS)" : "(FAILED)"}.`)
+        if (success) {
             change_asp(JP, -1)
-        } else {
-            log(`(Failed) ${result + modifiers} > ${G.turn}`)
+        }
+        if (success && escort === 4) {
+            G.events[events.JP_ESCORTS.id] = G.turn + (2 << 4)
+            log(`Escort reduced to +2.`)
+        } else if (success && escort) {
+            G.events[events.JP_ESCORTS.id] = 0
+            log(`Escort reduced to 0.`)
         }
         clear_undo()
         end()
@@ -1108,6 +1107,10 @@ P.strategic_bombing = {
         G.active = AP
         G.active_stack = []
         if (!L.allowed_units.length) {
+            if (G.turn >= 9) {
+                log(`Strategic bombing not possible.`)
+            }
+            G.events[events.STRAT_BOMBING_CAMPAIGN.id] = 0
             end()
         }
     },
@@ -1131,12 +1134,11 @@ P.strategic_bombing = {
         this.roll()
     },
     skip() {
-        log(`No units committed to strategic bombing`)
+        log(`No units committed to strategic bombing.`)
         G.events[events.STRAT_BOMBING_CAMPAIGN.id] = 0
         end()
     },
     roll() {
-        log(`Roll for strategic bombing`)
         var close_air_base = TOKYO_AIR_BASES.filter(h => !set_has(G.control, h)).length > 0
         if (!G.active_stack.map(u => bombing(u, close_air_base)).reduce((a, b) => a || b, false)) {
             G.events[events.STRAT_BOMBING_CAMPAIGN.id] = 0
@@ -1153,17 +1155,14 @@ function bombing(u, close_air_base) {
     var success = result < success_rate
     var damaged = result >= 9 && !close_air_base
     var modifier = 0
-    log(`${result} for ${piece_get_log_str(u)}`)
+    log(`${piece_get_log_str(u)} strategic bombing:`)
     if (is_event_active(events.INTERCEPTORS) && !close_air_base) {
-        log(`+1 High altitude interceptors`)
+        log(`+1 High altitude interceptors.`)
         modifier++
     }
-
-    log(`${success ? "Success" : "Failed"}: ${result}${modifier ? "+1" : ""} ${success ? "<" : ">="} ${success_rate} ${damaged ? "(unit damaged)" : ""}`)
-    if (damaged && set_has(G.reduced, u)) {
-        eliminate(u)
-    } else if (damaged) {
-        set_add(G.reduced, u)
+    log(`${dice_get_log_str(result, modifier)} < ${success_rate} (${success ? "SUCCESS" : "FAILED"}).`)
+    if (damaged) {
+        damage_unit(u)
     }
     G.b29u |= B29_BOMBED << pieces[u].b29
     if (success) {
@@ -1180,13 +1179,13 @@ function deal_cards() {
     if (G.turn > 4) {
         var jp_resources = get_jp_resources()
         jp_cards = Math.max(Math.ceil(jp_resources / 2), 4)
-        log(`Japan resources - ${jp_resources} (${jp_cards} cards)`)
+        log(`JP resources - ${jp_resources} (${jp_cards} cards).`)
     } else {
-        log(`Japan use strategic reserves (${jp_cards} cards)`)
+        log(`JP use strategic reserves (${jp_cards} cards).`)
     }
     if (G.strategic_warfare) {
         jp_cards = Math.max(jp_cards - G.strategic_warfare, 4)
-        log(`Strategic warfare reduces draw to ${jp_cards} (-${G.strategic_warfare})`)
+        log(`Strategic warfare reduces JP draw to ${jp_cards} (-${G.strategic_warfare}).`)
     }
     G.passes[JP] = 0
     if (jp_cards === 6) {
@@ -1195,7 +1194,7 @@ function deal_cards() {
         G.passes[JP] = 2
     }
     if (G.passes[JP]) {
-        log(`Japan receives ${G.passes[JP]} passes`)
+        log(`JP receives ${G.passes[JP]} passes.`)
     }
     while (G.hand[JP].length < jp_cards) {
         draw_card(JP)
@@ -1215,26 +1214,29 @@ function deal_cards() {
     if (G.surrender[nations.CHINA.id] >= 5) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`Allied draw reduced by China`)
+        log(`AP draw reduced by China surrender.`)
     }
     if (G.surrender[nations.INDIA.id] >= 4) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`Allied draw reduced by India`)
+        log(`AP draw reduced by unstable India.`)
     }
     if (G.surrender[nations.AUSTRALIA.id]) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`Allied draw reduced by Australia`)
+        log(`AP draw reduced by Australia surrender.`)
     }
     if (G.wie >= 10) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`Allied draw reduced by War in Europe`)
+        log(`AP draw reduced by War in Europe.`)
     }
     ap_cards = Math.max(ap_cards, 4)
     G.passes[AP] = Math.min(G.passes[AP], 2)
-    log(`Allied draw ${ap_cards} cards, receive ${G.passes[AP]} passes`)
+    log(`AP draw ${ap_cards} cards.`)
+    if (G.passes[AP]) {
+        log(`AP receive ${G.passes[AP]} passes.`)
+    }
     while (G.hand[AP].length < ap_cards) {
         draw_card(AP)
     }
@@ -1245,12 +1247,12 @@ function S_P_deal_cards() {
     G.passes[JP] = 0
     if (G.strategic_warfare) {
         jp_cards -= G.strategic_warfare
-        log(`Strategic warfare reduces draw to ${jp_cards} (-${G.strategic_warfare})`)
+        log(`Strategic warfare reduces JP draw to ${jp_cards} (-${G.strategic_warfare}).`)
         G.passes[JP] = 1
     }
-    log(`Japan receives ${jp_cards} cards.`)
+    log(`JP receive ${jp_cards} cards.`)
     if (G.passes[JP]) {
-        log(`Japan receives ${G.passes[JP]} passes.`)
+        log(`JP receive ${G.passes[JP]} passes.`)
     }
     while (G.hand[JP].length < jp_cards) {
         draw_card(JP)
@@ -1261,11 +1263,11 @@ function S_P_deal_cards() {
     if (G.surrender[nations.CHINA.id] >= 5) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`Allied draw reduced by China.`)
+        log(`AP draw reduced by China.`)
     }
-    log(`Allied draw ${ap_cards} cards.`)
+    log(`AP draw ${ap_cards} cards.`)
     if (G.passes[AP]) {
-        log(`Allied receive ${G.passes[AP]} passes.`)
+        log(`AP receive ${G.passes[AP]} passes.`)
     }
     while (G.hand[AP].length < ap_cards) {
         draw_card(AP)
@@ -1273,7 +1275,7 @@ function S_P_deal_cards() {
 }
 
 P.offensive_phase = script(`
-    log ("Offensives phase")
+    log ("Turn "+ G.turn+". Offensives phase.")
     call initiative_segment
     eval {
         commit_into_turn_draw()
@@ -1467,7 +1469,7 @@ function play_reaction(c) {
     play_event(c)
     if (cards[c].intelligence && G.offensive.intelligence !== AMBUSH && G.offensive.intelligence !== cards[c].intelligence) {
         G.offensive.intelligence = cards[c].intelligence
-        log(`Intelligence condition changed to ${get_named_intelligence(G.offensive.intelligence)}`)
+        log(`Intelligence condition changed to ${get_named_intelligence(G.offensive.intelligence)}.`)
     }
 }
 
@@ -1482,7 +1484,7 @@ function get_named_intelligence(int) {
 }
 
 function play_event(c) {
-    log(`${card_get_log_str(c)} played`)
+    log(`${card_get_log_str(c)} played.`)
     var faction = cards[c].faction
     if (cards[c].draw) {
         into_turn_draw(faction)
@@ -1536,7 +1538,7 @@ function build_road(card, event) {
     push_undo()
     activate_card(card)
     check_event(event)
-    log(`${R === AP ? "Allies" : "Japan"} build infrastructure ${event.name}`)
+    log(`${side_get_log_str(R)} build CBI ${event.name}.`)
     check_supply()
     goto("end_action")
 }
@@ -1586,7 +1588,7 @@ P.offensive_segment = {
     pass() {
         push_undo()
         G.passes[R] -= 1
-        log(`${R} passed, ${G.passes[R]} passes remains.`)
+        log(`${side_get_log_str(R)} passed, ${G.passes[R]} passes remains.`)
         goto("end_action")
     },
     //debug
@@ -1649,7 +1651,7 @@ P.offensive_segment_card_action = {
         push_undo()
         activate_card(L.c)
         G.offensive.type = OC
-        log(`${R} played ${card_get_log_str(L.c)} as operation card`)
+        log(`${side_get_log_str(R)} played ${card_get_log_str(L.c)} as operation card.`)
         goto("offensive_sequence")
     },
     event() {
@@ -1667,13 +1669,13 @@ P.offensive_segment_card_action = {
     discard() {
         push_undo()
         activate_card(L.c)
-        log(`${R} discards ${card_get_log_str(L.c)}`)
+        log(`${side_get_log_str(R)} discards ${card_get_log_str(L.c)}.`)
         goto("end_action")
     },
     inter_service() {
         push_undo()
         activate_card(L.c)
-        log(`${R} played ${card_get_log_str(L.c)} to resolve ISR.`)
+        log(`${side_get_log_str(R)} played ${card_get_log_str(L.c)} to resolve ISR.`)
         set_inter_service(cards[c].faction, 0)
         goto("end_action")
     },
@@ -1706,7 +1708,7 @@ P.offensive_segment_card_action = {
     },
     future_offensive() {
         push_undo()
-        log(`${R} played future offensive.`)
+        log(`${side_get_log_str(R)} played future offensive card.`)
         future_offencive_card(L.c, G.turn)
         goto("end_action")
     }
@@ -1770,12 +1772,12 @@ P.return_hq = {
 
 P.china_offensive = {
     prompt() {
-        prompt(`Start China Offensive.`)
+        prompt(`Roll to China Offensive.`)
         button("roll")
     },
     roll() {
         var burma_road = (2 - G.burma_road) * 4
-        log(`Japan started China offensive.`)
+        log(`JP started China offensive.`)
         log(`Japanese divisions ${G.china_divisions}.`)
         log(`+${burma_road} (Burma road).`)
         G.events[events.CHINA_OFFENSIVE.id] = G.turn
@@ -1793,11 +1795,8 @@ P.china_offensive = {
                 }
             })
         }
-
-        var baseline = G.china_divisions - burma_road - air_support
-        var success = result <= baseline
-
-        log(`Roll ${result} ${success ? "<=" : ">"} ${baseline} (${success ? "SUCCESS" : "FAILED"})`)
+        var success = result <= (G.china_divisions - burma_road - air_support)
+        log(`${dice_get_log_str(result, burma_road + air_support)} <= ${G.china_divisions} (${success ? "SUCCESS" : "FAILED"})`)
         if (success) {
             update_china_status(1)
         } else {
@@ -1837,7 +1836,7 @@ P.choose_hq = {
         if (L.possible_units.length === 1) {
             this.unit(L.possible_units[0])
         } else if (!L.possible_units.length) {
-            log(`No hq could be selected`)
+            log(`No hq could be selected.`)
         }
     },
     prompt() {
@@ -1857,7 +1856,7 @@ P.choose_hq = {
         if (G.offensive.type === EC && L.card > 0 && cards[L.card].logistic_alt && cards[L.card].logistic_alt[0].includes(u)) {
             G.offensive.logistic = cards[L.card].logistic_alt[1]
         }
-        log(`${piece_get_log_str(u)} activated for ${R === G.offensive.attacker ? "offensive" : "reaction"}`)
+        log(`${piece_get_log_str(u)} activated for ${R === G.offensive.attacker ? "offensive" : "reaction"}.`)
         end()
     },
 }
@@ -2242,7 +2241,7 @@ function control_hex(hex, side = G.active) {
 
 function capture_hex(hex, side = G.active) {
     if (side === AP && is_event_active(events.TOKYO_EXPRESS) === hex) {
-        log(`Tokyo express marker removed`)
+        log(`Tokyo express marker removed.`)
         G.events[events.TOKYO_EXPRESS.id] = 0
     }
     if (!is_controllable_hex(hex)) {
@@ -2250,11 +2249,11 @@ function capture_hex(hex, side = G.active) {
     }
     if (G.non_control) {
         set_delete(G.non_control, hex)
-        log(`AP captured ${int_to_hex(hex)}`)
+        log(`AP captured ${int_to_hex(hex)}.`)
     }
     var md = get_map_data(hex)
     if (side && set_has(G.control, hex)) {
-        log(`AP captured ${hex_get_log_str(hex)}`)
+        log(`AP captured ${hex_get_log_str(hex)}.`)
         set_delete(G.control, hex)
         if (md.region === "NIndia") {
             india_stable()
@@ -2265,7 +2264,7 @@ function capture_hex(hex, side = G.active) {
             check_jp_resources_event()
         }
     } else if (!side && !set_has(G.control, hex)) {
-        log(`JP captured ${hex_get_log_str(hex)}`)
+        log(`JP captured ${hex_get_log_str(hex)}.`)
         set_add(G.control, hex)
     } else {
         return
@@ -2367,7 +2366,7 @@ P.move_offensive_units = {
         L.allowed_hexes = []
         L.move_cache = []
         if (G.offensive.stage === POST_BATTLE_STAGE) {
-            log(`pbm ${G.active ? "AP" : "JP"}`)
+            log(`Post battle movement ${side_get_log_str(G.active)}`)
         }
         G.offensive.active_units[G.active].filter(u => {
             if (!unit_on_board(u) && G.location[u] !== CHINA_BOX
@@ -2378,7 +2377,7 @@ P.move_offensive_units = {
             return true
         }).forEach(u => set_add(L.movable_units, u))
         if (L.movable_units.length <= 0) {
-            log(`No movable units ${G.active ? "AP" : "JP"}`)
+            log(`No movable units ${side_get_log_str(G.active)}`)
             end()
         }
     },
@@ -2525,7 +2524,7 @@ P.move_offensive_units = {
         push_undo()
         if (L.move_type === BARGES_MOVE) {
             G.offensive.barges = 1
-            log(`Barges ability used`)
+            log(`Barges ability used.`)
         }
         var curr_path = map_get(L.allowed_hexes, hex)
         if (is_faction_units(hex, 1 - R) && G.active === G.offensive.attacker && G.offensive.stage === ATTACK_STAGE) {
@@ -2711,7 +2710,7 @@ P.choose_attack_hex = {
     },
     action_hex(hex) {
         push_undo()
-        log(`Units ${G.active_stack} committed to attack to ${hex_get_log_str(hex)}`)
+        log(`Units ${G.active_stack.map(u => piece_get_log_str(u)).join(", ")} committed to attack to ${hex_get_log_str(hex)}.`)
         this.attack_hex(hex)
     },
 }
@@ -2731,8 +2730,8 @@ function move_units(units, path) {
     }
     for (var i = 3; i < path.length; i++) {
         var hex = path[i]
-        if (!G.offensive.zoi_intelligence_modifier && has_zoi(hex, 1 - R)) {
-            log("Reaction zoi violated!")
+        if (!G.offensive.zoi_intelligence_modifier && has_zoi(hex, 1 - R) && G.offensive.stage === ATTACK_STAGE) {
+            log("Reaction zoi violated! -2 to reaction intelligence rolls.")
             G.offensive.zoi_intelligence_modifier = 1
         }
         if (path[0] & GROUND_MOVE && !is_faction_units(hex, 1 - R)) {
@@ -3329,7 +3328,7 @@ P.check_overstacking = {
             end()
             return
         } else {
-            log(`${R} overstacking losses.`)
+            log(`${side_get_log_str(G.active)} overstacking losses.`)
         }
     },
     prompt() {
@@ -3374,7 +3373,7 @@ P.check_overstacking = {
 
 function set_location(unit, location) {
     if (location <= LAST_BOARD_HEX || location === CHINA_BOX) {
-        log(`${piece_get_log_str(unit)} moved to ${hex_get_log_str(location)}`)
+        log(`${piece_get_log_str(unit)} moved to ${hex_get_log_str(location)}.`)
     }
     var prev_location = G.location[unit]
     var pair_location = G.location[pieces[unit].pair]
@@ -3437,7 +3436,7 @@ function check_supply() {
     }
     check_burma_road()
     if (G.debug) {
-        log("Check supply")
+        log("Check supply.")
     }
 }
 
@@ -4050,11 +4049,10 @@ function ground_move_denied(hex) {
         return G.active_stack.filter(u => pieces[u].service !== "ch").length
     }
     if (R === JP && region === "India") {
-
         return G.active_stack.filter(u => pieces[u].class === "ground").length
     }
     if (G.active_stack.filter(u => pieces[u].service === "ch").length) {
-        return region === "IChina" || region === "NIndia" || region === "Burma"
+        return !(region === "IChina" || region === "NIndia" || region === "Burma")
     }
 }
 
@@ -4273,7 +4271,7 @@ P.declare_battle_hexes = {
     _begin() {
         check_supply()
         check_amph_mod()
-        G.offensive.battle_hexes.forEach(h => log(`Battle declared in ${hex_get_log_str(h)}`))
+        G.offensive.battle_hexes.forEach(h => log(`Battle ${String.fromCharCode(65 + G.offensive.battle_names.indexOf(h))} declared in ${hex_get_log_str(h)}.`))
         compute_possible_battle_hexes()
         if (L.possible_units.length <= 0) {
             log("Additional battle hexes could not be declared")
@@ -4376,7 +4374,7 @@ function roll_intelligence_dice() {
     var modifier = 0
     if (G.offensive.zoi_intelligence_modifier) {
         modifier -= 2
-        log(`-2 ZOI modifier`)
+        log(`-2 units moved through reaction ZOI.`)
     }
     var event_modifier = trigger_event("before_intelligence_roll")
     if (event_modifier) {
@@ -4384,10 +4382,7 @@ function roll_intelligence_dice() {
     }
     let result = random(10)
     const success = result !== 9 && result + modifier <= card_value
-    if (modifier > 0) {
-        modifier = "+" + modifier
-    }
-    log(`Intelligence roll ${result}${modifier ? modifier : ""}, card value ${card_value} (${success ? "SUCCESS" : "FAILED"})`)
+    log(`${dice_get_log_str(result, modifier)} <= ${Math.min(card_value, 8)} (${success ? "SUCCESS" : "FAILED"}).`)
     clear_undo()
     return success
 }
@@ -4426,7 +4421,7 @@ P.special_reaction = {
         end()
     },
     action_hex(hex) {
-        log(`Special reaction in ${hex_get_log_str(hex)}`)
+        log(`Special reaction in ${hex_get_log_str(hex)}:`)
         const success = roll_intelligence_dice()
         set_delete(L.possible_hexes, hex)
         if (success) {
@@ -4441,7 +4436,7 @@ P.special_reaction = {
 
 function into_turn_draw(faction) {
     if (G.draw_counter[faction] >= 3) {
-        log(`${faction === AP ? "AP" : "JP"} already drown 3 cards, draw skipped`)
+        log(`${side_get_log_str(faction)} already drown 3 cards, draw skipped.`)
         return
     }
     G.draw_counter[faction]++
@@ -4455,7 +4450,7 @@ function resolve_into_turn_draw(faction) {
     }
     G.offensive.draw[faction] = G.offensive.draw[faction].filter(c => c >= 0)
     for (var i = 0; i < count; i++) {
-        log(`${faction === AP ? "AP" : "JP"} draw additional card`)
+        log(`${side_get_log_str(faction)} draw additional card.`)
         G.offensive.draw[faction].push(draw_card(faction, false))
     }
     clear_undo()
@@ -4569,11 +4564,11 @@ P.define_intelligence_condition = {
     },
     roll() {
         clear_undo()
-        log('Change intelligence condition')
+        log('Change intelligence condition:')
         var success = roll_intelligence_dice()
         if (success) {
             G.offensive.intelligence = INTERCEPT
-            log(`Intelligence condition changed to ${get_named_intelligence(G.offensive.intelligence)}`)
+            log(`Intelligence condition changed to ${get_named_intelligence(G.offensive.intelligence)}.`)
         }
         L.rolled = 1
         if (success || !get_hand(R).includes(JN_25_SPECIAL)) {
@@ -4584,7 +4579,7 @@ P.define_intelligence_condition = {
 
 P.attack_reaction_cards = {
     _begin() {
-        log("attack reaction cards")
+        log("Offensive reaction cards.")
         if (get_hand(G.active).filter(c => cards[c].type === REACTION && cards[c].can_play()).length <= 0) {
             end()
         }
@@ -4789,38 +4784,38 @@ function get_ground_roll_modifiers(faction) {
         })
         if (air[faction] && !air[1 - faction]) {
             result += 2
-            log(`+2 ${faction ? "Ap" : "Jp"} air support`)
+            log(`+2 Attacker air support.`)
         }
         if (naval[faction] && !naval[1 - faction]) {
             result += 2
-            log(`+2 ${faction ? "Ap" : "Jp"} naval support`)
+            log(`+2 Attacker naval support.`)
         }
     }
     if (faction === G.offensive.attacker) {
         var terrain = get_map_data(battle.battle_hex).terrain
         if (terrain === JUNGLE) {
             result -= 1
-            log(`-1 Jungle`)
+            log(`-1 Jungle.`)
         } else if (terrain === MIXED) {
             result -= 2
-            log(`-2 Mixed terrain`)
+            log(`-2 Mixed terrain.`)
         }
         if (terrain === MOUNTAIN) {
             result -= 3
-            log(`-3 Mountains`)
+            log(`-3 Mountains.`)
         }
     }
     if (faction !== G.offensive.attacker && battle.amph_ground.filter(u => unit_on_board(u)).length && set_has(G.offensive.amp_mod, battle.battle_hex)) {
         result += 3
-        log(`+3 Amphibious assault`)
+        log(`+3 Amphibious assault.`)
     }
     if (faction === AP && G.location[ARMOR_BRIGADE] === battle.battle_hex) {
         result += 1
-        log(`+1 Armor brigade`)
+        log(`+1 Armor brigade.`)
     }
     if (faction === JP && is_event_active(events.NEW_OPERATION_PLAN) && get_map_data(battle.battle_hex).island) {
         result += 1
-        log(`+1 Defensive doctrine`)
+        log(`+1 Defensive doctrine.`)
     }
     return result
 }
@@ -4830,19 +4825,19 @@ function get_naval_roll_modifiers(faction) {
     var result = 0
     if (faction === AP && G.offensive.intelligence === AMBUSH) {
         result += 4
-        log(`+4 Ambush`)
+        log(`+4 Ambush.`)
     }
     if (faction === G.offensive.attacker && G.offensive.intelligence === SURPRISE) {
         result += 3
-        log(`+3 Surprise attack`)
+        log(`+3 Surprise attack.`)
     }
     var ap_air_superiority = faction === AP && battle.air_naval[AP].filter(u => unit_on_board(u) && pieces[u].br).length > 0
     if (ap_air_superiority && G.turn >= 8) {
         result += 3
-        log(`+3 Allied air superiority (1944-1945)`)
+        log(`+3 AP air superiority (1944-1945).`)
     } else if (ap_air_superiority && G.turn >= 5) {
         result += 1
-        log(`+1 Allied air superiority (1943)`)
+        log(`+1 AP air superiority (1943).`)
     }
     return result
 }
@@ -4868,7 +4863,7 @@ function get_battle_modifiers(faction) {
     battle.roll_modifiers = 0
     if (battle.ground_stage && is_col_tsuji_applied(faction)) {
         battle.roll_modifiers = 4
-        log(`+4 Col.Tsuji`)
+        log(`+4 Col.Tsuji.`)
     } else if (battle.ground_stage) {
         battle.roll_modifiers = get_ground_roll_modifiers(faction)
     } else {
@@ -4887,7 +4882,7 @@ P.execute_attack = function () {
         end()
         return
     }
-    log(`${G.offensive.attacker === faction ? "Attacker" : "Defender"} fire (${battle.strength[faction]})`)
+    log(`${side_get_log_str(faction)} fire (${battle.strength[faction]}).`)
     battle.roll[faction] = random(10)
     clear_undo()
     get_battle_modifiers(faction)
@@ -4898,7 +4893,7 @@ P.execute_attack = function () {
     if ((roll === 9 || battle.roll_modifiers + roll >= 9 && G.offensive.active_cards.includes(ROCHEFORT)) && !battle.ground_stage) {
         battle.critical[faction] = true
     }
-    log(`${roll}${battle.roll_modifiers ? " +" + battle.roll_modifiers : ""} (${table(modififed_roll)}) ${battle.critical[faction] ? " - critical !" : ""} x ${battle.strength[faction]} = ${battle.hits[faction]}`)
+    log(`${dice_get_log_str(roll, battle.roll_modifiers)} (${table(modififed_roll)}) x ${battle.strength[faction]} = ${battle.hits[faction]} (${battle.critical[faction] ? " - critical!" : ""}).`)
     fill_hit_able_units(faction)
     end()
 }
@@ -4919,7 +4914,7 @@ P.choose_battle = {
         G.offensive.battle = {
             battle_hex: hex,
         }
-        log(`Battle hex ${String.fromCharCode(65 + G.offensive.battle_names.indexOf(hex))} (${hex_get_log_str(hex)}) chosen for battle`)
+        log(`Battle hex ${String.fromCharCode(65 + G.offensive.battle_names.indexOf(hex))} (${hex_get_log_str(hex)}) chosen for battle.`)
         end()
     },
 }
@@ -5023,7 +5018,8 @@ P.jp_cv_reassign = {
             }
         })
         L.to_damage = G.offensive.battle.air_naval[JP].filter(u => is_cv_unit(pieces[u]) && unit_on_board(u))
-        if (L.to_repair.length === 0 || L.to_damage.length === 0 || G.offensive.battle.critical[AP]) {
+        if (L.to_repair.length === 0 || L.to_damage.length === 0 || G.offensive.battle.critical[AP] ||
+            L.to_damage.length === 1 && L.to_repair.length === 1 && L.to_repair[0] === L.to_damage[0]) {
             end()
             return;
         } else {
@@ -5195,7 +5191,7 @@ P.apply_naval_winner = function () {
 
     var air_cover = attacker_units.filter(u => pieces[u].br).length || !defender_units.filter(u => pieces[u].br).length
     var attacker_win = attacker_power > defender_power && air_cover || defender_power === 0
-    log(`${attacker_win ? "Attacker" : "Defender"} win battle (${attacker_power} - ${defender_power}) ${!air_cover ? "no attacker CV or air" : ""}`)
+    log(`${attacker_win ? "Attacker" : "Defender"} win battle (${attacker_power} - ${defender_power}) ${!air_cover ? "no attacker CV or air" : ""}.`)
     if (!attacker_win) {
         battle.amph_ground.forEach(u => set_delete(battle.ground[G.offensive.attacker], u))
     }
@@ -5223,7 +5219,7 @@ P.broken_aa = {
             return
         }
         battle.amph_ground.forEach(u => set_delete(battle.ground[G.offensive.attacker], u))
-        log("Amphibious Assault failed due to lack of cover.")
+        log("Amphibious Assault failed due to lack of naval escort.")
     },
     prompt() {
         L.allowed_units.forEach(u => action_unit(u))
@@ -5257,7 +5253,7 @@ P.broken_organic = {
             end()
             return
         }
-        log(`Losses due to lost organic transport:`)
+        log(`Losses due to lost organic transport unit:`)
     },
     prompt() {
         L.allowed_units.forEach(u => action_unit(u))
@@ -5297,7 +5293,7 @@ P.apply_ground_winner = function () {
     }
     var attacker_win = get_hits_count(battle.damaged[G.offensive.attacker]) > get_hits_count(battle.damaged[1 - G.offensive.attacker]) ||
         battle.ground[G.offensive.attacker].filter(unit_on_board).length && !battle.ground[1 - G.offensive.attacker].filter(unit_on_board).length
-    log(`${attacker_win ? "Attacker" : "Defender"} win in ground combat ${hex_get_log_str(battle.battle_hex)}`)
+    log(`${attacker_win ? "Attacker" : "Defender"} win in ground combat ${hex_get_log_str(battle.battle_hex)}.`)
     battle.winner = (attacker_win == G.offensive.attacker) + 0
     if (attacker_win) {
         capture_hex(battle.battle_hex, G.offensive.attacker)
@@ -5401,7 +5397,7 @@ function prepare_ground_battle() {
     battle = G.offensive.battle
     var hex = battle.battle_hex
     if (battle.ground[G.offensive.attacker].filter(u => unit_on_board(u)).length && battle.ground[1 - G.offensive.attacker].filter(u => unit_on_board(u)).length) {
-        log(`Ground combat at ${hex_get_log_str(hex)}`)
+        log(`Ground combat:`)
     }
 
 }
@@ -5731,7 +5727,7 @@ P.battle_sequence = script(`
 `)
 
 P.political_phase = script(`
-    log ("Political phase")
+    log ("Turn"+G.turn+". Political phase.")
   
     call national_status_segment
     call india_surrender
@@ -5744,7 +5740,7 @@ P.political_phase = script(`
 `)
 
 P.national_status_segment = function () {
-    log(`Turn ${G.turn}. National status segment`)
+    log(`Turn ${G.turn}. National status segment.`)
     if (check_nation_surrender(nations.NEW_GUINEA)) {
         set_control_over_nation(nations.NEW_GUINEA, false)
     }
@@ -5812,8 +5808,8 @@ P.national_status_segment = function () {
         finish("Allies", "Japanese Empire surrenders by lack of resources")
         return
     } else {
-        log(`Japan could not trace path to resource hex`)
         check_event(events.JAPAN_TRACE_RESOURCES)
+        log(`JP mainland city could not trace path to resource hex (${G.turn + 1 - is_event_active(events.JAPAN_TRACE_RESOURCES)}/3).`)
     }
     end()
 }
@@ -5870,7 +5866,7 @@ function india_stable() {
     if (G.surrender[nations.INDIA.id] === 0) {
         return
     } else if (G.surrender[nations.INDIA.id] < 4) {
-        log(`India again stable`)
+        log(`India returned to stable.`)
         G.surrender[nations.INDIA.id] = 0
     }
 }
@@ -5888,24 +5884,24 @@ function update_china_status(diff, to_stable = false) {
     if (G.surrender[nations.CHINA.id] === 5) {
         china_surrender()
     } else if (prev !== G.surrender[nations.CHINA.id]) {
-        log(`China status changed to ${nations.CHINA.statuses[G.surrender[nations.CHINA.id]]}`)
+        log(`China status changed to ${nations.CHINA.statuses[G.surrender[nations.CHINA.id]]}.`)
     }
 }
 
 function degrade_india(could_revolt = false) {
     if (G.surrender[nations.INDIA.id] < (could_revolt ? 4 : 3)) {
         G.surrender[nations.INDIA.id] += 1
-        log(`India status changed to ${nations.INDIA.statuses[G.surrender[nations.INDIA.id]]}`)
+        log(`India status changed to ${nations.INDIA.statuses[G.surrender[nations.INDIA.id]]}.`)
     }
 }
 
 function displace_to_turn(unit, turns, not_delayed) {
     if (pieces[unit].notreplaceable && unit_on_board(unit)) {
-        log(`${piece_get_log_str(unit)} not replaceable, could not be displaced to turn box`)
+        log(`${piece_get_log_str(unit)} not replaceable, could not be displaced to turn box.`)
         eliminate(unit)
         return
     }
-    log(`${piece_get_log_str(unit)} displaced to turn box ${G.turn + turns}`)
+    log(`${piece_get_log_str(unit)} displaced to turn box ${G.turn + turns}.`)
     set_location(unit, TURN_BOX + G.turn + turns)
     if (not_delayed) {
         set_add(G.not_delayed, unit)
@@ -5927,12 +5923,9 @@ function china_surrender() {
 }
 
 function change_political_will(diff, cause) {
-    // TODO unify cause formatting
-    // right now cards name might be passed as raw str
-    // which means now formatting in log and no tooltip
     G.political_will = Math.max(G.political_will + diff, 0)
     G.political_will = Math.min(G.political_will, 10)
-    log(`Political will changed to ${G.political_will} (${diff}) ${cause}`)
+    log(`Political will changed to ${G.political_will} (${diff}) ${cause}.`)
 }
 
 function get_wie_level() {
@@ -5951,12 +5944,12 @@ function get_wie_level() {
 
 function change_wie(diff, cause) {
     if (diff === undefined) {
-        log(`No war in europe changed`)
+        log(`No war in europe changed.`)
         return
     }
     G.wie = Math.max(G.wie + diff, 0)
     G.wie = Math.min(G.wie, scenario_data().id === SOUTH_PACIFIC ? 7 : 10)
-    log(`War in europe changed to ${get_wie_level()} (${3 - G.wie}), ${cause} (${diff})`)
+    log(`War in europe changed to ${get_wie_level()} (${3 - G.wie}), ${cause} (${diff}).`)
 }
 
 P.india_surrender = {
@@ -5979,8 +5972,6 @@ P.india_surrender = {
             }
         })
         change_political_will(-nations.INDIA.pw, nations.INDIA.name)
-
-        log(`${nations.INDIA.name} surrendering -2 Political will`)
         check_supply()
         G.surrender[nations.INDIA.id] = 5
         if (!L.unit_to_retreat.length) {
@@ -6064,7 +6055,7 @@ function check_nation_surrender(nation) {
         return false
     }
     G.surrender[nation.id] = set_has(G.control, hex_to_int(nation.keys[0]))
-    log(`${nation.name} ${G.surrender[nation.id] ? "occupied" : "liberated"}`)
+    log(`${nation.name} ${G.surrender[nation.id] ? "occupied" : "liberated"}.`)
     if (nation.pw) {
         change_political_will(nation.pw * (G.surrender[nation.id] ? -1 : 1), "")
     }
@@ -6166,12 +6157,12 @@ function check_occupation(event) {
     var occupied_for = (G.turn - map_value) + 1
     if (!result && map_value > 0 && occupied_for <= event.turns_to_control) {
         G.events[event.id] = 0
-        log(`Timer to ${event.cause} reset`)
+        log(`Timer to ${event.cause} reset.`)
     } else if (result && map_value && occupied_for === event.turns_to_control) {
         change_political_will(event.pw, event.cause)
     } else if (result && map_value <= 0) {
         G.events[event.id] = G.turn
-        log(`Started ${event.cause}`)
+        log(`Started ${event.cause}.`)
     }
 }
 
@@ -6236,7 +6227,7 @@ P.attrition_phase = script(`
     if (G.turn ===1) {
         goto end_of_turn_phase
     }
-    log ("Attrition phase")
+    log ("Turn "+G.turn+". Attrition phase.")
     set G.active JP
     call attrition
     set G.active AP
@@ -6249,19 +6240,19 @@ P.attrition_phase = script(`
 
 function reshuffle() {
     if (G.discard[AP].includes(SOVIET_INVADE)) {
-        log(`Allied deck reshuffled due to Soviet invasion discarded`)
+        log(`AP deck reshuffled due to Soviet invasion discarded.`)
         G.draw[AP].push(...G.discard[AP])
         G.discard[AP] = []
     }
     if (G.discard[JP].includes(TOJO_RESIGNS)) {
-        log(`Japan deck reshuffled due to Tojo resign discarded`)
+        log(`JP deck reshuffled due to Tojo resign discarded.`)
         G.draw[JP].push(...G.discard[JP])
         G.discard[JP] = []
     }
 }
 
 P.end_of_turn_phase = script(`
-    log ("Turn " + G.turn + ", End of turn phase")
+    log ("Turn " + G.turn + ". End of turn phase.")
     eval {
         victory_check()
     }
@@ -6857,10 +6848,10 @@ function victory_south_pacific() {
 
 function set_inter_service(faction, rivalry) {
     if (G.inter_service[faction] && !rivalry) {
-        log(`${faction === AP ? "Allied" : "Japan"} service agreement`)
+        log(`${side_get_log_str(faction)} inter-service agreement.`)
         G.inter_service[faction] = 0
     } else if (!G.inter_service[faction] && rivalry) {
-        log(`${faction === AP ? "Allied" : "Japan"} inter-service rivalry`)
+        log(`${side_get_log_str(faction)} inter-service rivalry active.`)
         G.inter_service[faction] = 1
     }
 }
@@ -7022,7 +7013,7 @@ P.coastal_artillery = {
     },
     unit(u) {
         push_undo()
-        log(`${piece_get_log_str(u)} hit by coastal defence`)
+        log(`${piece_get_log_str(u)} hit by coastal defence.`)
         damage_unit(u)
         set_delete(L.allowed_units, u)
     }
@@ -7125,7 +7116,7 @@ cards[find_card(JP, 8)].before_battle_roll = function (faction) {
     })
     if (any_com_unit) {
         G.offensive.battle.roll_modifiers += 1
-        log(`+1 Operation C`)
+        log(`+1 Operation C.`)
     }
 }
 
@@ -7156,7 +7147,7 @@ cards[find_card(JP, 12)].before_intelligence_roll = function () {
         }
     })
     if ((G.supply_cache[FRENCH_FRIGATE_SHOALS] & AP_ZOI) === 0 && !ca_in_shoals) {
-        log(`+4 Japanese superior information security`)
+        log(`+4 JP superior information security.`)
         return 4
     }
 }
@@ -7207,7 +7198,7 @@ cards[find_card(JP, 17)].before_battle_roll = function (faction) {
         }
     })
     if (modifier) {
-        log(`+${modifier} attack strength (Night fighting advantage)`)
+        log(`+${modifier} attack strength (Night Fighting Advantage).`)
     }
 }
 
@@ -7258,12 +7249,12 @@ P.naval_battle_guadalcanal = {
     },
     skip() {
         push_undo()
-        log(`No airfield bombardment`)
+        log(`No airfield bombardment possible.`)
         end()
     },
     unit(u) {
         push_undo()
-        log(`${G.location[u]} airfield bombardment selected`)
+        log(`${hex_get_log_str(G.location[u])} airfield bombardment selected.`)
         damage_unit(u)
         end()
     }
@@ -7283,7 +7274,7 @@ P.worker_strikes_unit = {
             set_add(L.allowed_units, u)
         })
         if (L.allowed_units.length <= 0) {
-            log(`No full strength Indian corps`)
+            log(`No full strength Indian corps present.`)
             end()
         }
     },
@@ -7323,7 +7314,7 @@ cards[find_card(JP, 23)].before_battle_roll = function (faction) {
     })
     if (any_com_unit) {
         G.offensive.battle.roll_modifiers += 1
-        log(`+1 Operation RE`)
+        log(`+1 Operation RE.`)
     }
 }
 
@@ -7349,7 +7340,7 @@ cards[find_card(JP, 25)].before_battle_roll = function (faction) {
         }
     })
     if (modifier) {
-        log(`${modifier} attack strength (Allied tactical confusion)`)
+        log(`${modifier} attack strength (AP Tactical Confusion).`)
     }
 }
 
@@ -7382,7 +7373,7 @@ P.tokyo_express = {
     },
     action_hex(h) {
         push_undo()
-        log(`Tokyo Express placed: ${hex_get_log_str(h)}`)
+        log(`Tokyo Express placed: ${hex_get_log_str(h)}.`)
         G.events[events.TOKYO_EXPRESS.id] = h
         check_supply()
         end()
@@ -7405,7 +7396,7 @@ cards[find_card(JP, 29)].before_battle_roll = function (faction) {
         }
     })
     if (modifier) {
-        log(`+${modifier} attack strength (Effective aerial torpedo tactics)`)
+        log(`+${modifier} attack strength (Effective Aerial Torpedo Tactics).`)
     }
 }
 
@@ -7435,7 +7426,7 @@ cards[find_card(JP, 32)].before_battle_roll = function (faction) {
     })
     if (cv_present) {
         G.offensive.battle.roll_modifiers += 1
-        log(`+1 Air shuttle`)
+        log(`+1 Air Shuttle.`)
     }
 }
 
@@ -7446,11 +7437,11 @@ cards[find_card(JP, 33)].event = function () {
 P.draw_from_discard = {
     _begin() {
         if (G.discard[R].length === 0 || G.discard[R].length === 1 && G.discard[R][0] === G.offensive.offensive_card) {
-            log(`Discard pile is empty, could not replace card`)
+            log(`Discard pile is empty, could not replace card.`)
             end()
         }
         if (G.future_offensive[R] < 0 && G.hand[R].length === 0) {
-            log(`Have no card to discard, could not replace card`)
+            log(`Have no card to discard, could not replace card.`)
             end()
         }
     },
@@ -7468,7 +7459,7 @@ P.draw_from_discard = {
         }
     },
     skip() {
-        log(`${R === AP ? "Ap" : "Jp"} choose to skip replace card`)
+        log(`${side_get_log_str(R)} choose to skip replace card.`)
         end()
     },
     card(c) {
@@ -7482,14 +7473,14 @@ P.draw_from_discard = {
                     G.offensive.active_cards.push(c)
                 }
             })
-            log(`${R === AP ? "Ap" : "Jp"} discard ${card_get_log_str(c)}`)
+            log(`${side_get_log_str(R)} discard ${card_get_log_str(c)}.`)
             discard_card(c)
             return
         }
         set_delete(G.discard[R], c)
         G.hand[R].push(c)
         G.offensive.active_cards = []
-        log(`${R === AP ? "Ap" : "Jp"} draw ${card_get_log_str(c)} from discard pile`)
+        log(`${side_get_log_str(R)} draw ${card_get_log_str(c)} from discard pile.`)
         end()
     }
 }
@@ -7597,14 +7588,14 @@ cards[find_card(JP, 36)].before_battles = function () {
 
 cards[find_card(JP, 37)].before_activation = function () {
     if (is_event_active(events.SUBMARINE_DOCTRINE)) {
-        log(`US Submarine doctrine suppress JP escorts`)
+        log(`US Submarine Doctrine suppress JP Escorts.`)
         return
     }
     if (is_event_active(events.JP_ESCORTS)) {
-        log(`JP gains +4 escort bonus`)
+        log(`JP gains +4 escort bonus.`)
         G.events[events.JP_ESCORTS.id] = G.turn + (4 << 4)
     } else {
-        log(`JP gains +2 escort bonus`)
+        log(`JP gains +2 escort bonus.`)
         G.events[events.JP_ESCORTS.id] = G.turn + (2 << 4)
     }
 }
@@ -7636,7 +7627,7 @@ cards[find_card(JP, 44)].before_activation = function () {
     G.jp_asp = []
     G.jp_asp[0] = 2 + Math.max(0, G.asp[JP][1] - G.asp[JP][0])
     G.jp_asp[1] = G.asp[JP][1]
-    log('Japan gain 2 temporary ASPs')
+    log('JP gain 2 temporary ASPs.')
     G.asp[JP][0] += G.jp_asp[0]
     call("tokyo_express")
 }
@@ -7689,7 +7680,7 @@ P.kamikaze_attack = {
             }
         })
         if (L.allowed_units.length <= 0) {
-            log(`No kamikaze attack possible`)
+            log(`No kamikaze attack possible.`)
             end()
         }
         L.stage = 1
@@ -7730,7 +7721,7 @@ P.kamikaze_attack = {
         push_undo()
         G.offensive.sho_go = 1
         L.hits += 1
-        log(`+1 kamikaze hit (Sho-go)`)
+        log(`+1 Kamikaze hit (Sho-Go).`)
     },
     unit(u) {
         push_undo()
@@ -7789,7 +7780,7 @@ cards[find_card(JP, 47)].before_battle_roll = function (faction) {
         }
     })
     if (modifier) {
-        log(`+${modifier} attack strength (Float plane tactics)`)
+        log(`+${modifier} Attack strength (Float Plane Tactics).`)
     }
 }
 
@@ -7835,7 +7826,7 @@ P.paratroopers = {
             })
         })
         if (L.allowed_hexes.length <= 0) {
-            log(`No paratroopers landing possible`)
+            log(`No paratroopers landing possible.`)
             end()
         }
     },
@@ -7845,7 +7836,7 @@ P.paratroopers = {
     },
     action_hex(h) {
         push_undo()
-        log(`Paratroopers landing ${hex_get_log_str(h)}`)
+        log(`Paratroopers landing ${hex_get_log_str(h)}.`)
         capture_hex(h)
         for_each_unit_on_map((u, piece, location) => {
             if (location === h) {
@@ -7879,7 +7870,7 @@ P.halsey_typhoon = {
     },
     unit(u) {
         push_undo()
-        log(`Halsey\`s typhoon: ${piece_get_log_str(u)}`)
+        log(`Halsey\`s Typhoon: ${piece_get_log_str(u)}.`)
         damage_unit(u)
         end()
     }
@@ -7930,7 +7921,7 @@ cards[find_card(JP, 72)].event = function () {
 
 cards[find_card(JP, 73)].before_activation = function () {
     if (!is_event_active(events.PT_BOATS)) {
-        log(`Japanese barges active`)
+        log(`JP barges active.`)
         check_event(events.BARGES)
     }
 }
@@ -7964,7 +7955,7 @@ P.attack_b29_base = {
             end()
             return
         }
-        log(`Japan attacks B29 base.`)
+        log(`JP attack to B29 base:`)
         var roll = random(10)
         L.hits = roll <= 4
         log(`${roll} - ${L.hits ? "success" : "No effect"}`)
@@ -7974,12 +7965,11 @@ P.attack_b29_base = {
         }
     },
     prompt() {
-        prompt(`Japan attacks B29 base. Choose unit.`)
+        prompt(`Attack to B29 base. Choose unit.`)
         L.allowed_units.forEach(u => action_unit(u))
     },
     unit(u) {
         push_undo()
-        log(`Japan attacks B29 base: ${piece_get_log_str(u)}`)
         damage_unit(u)
         end()
     }
@@ -8180,7 +8170,7 @@ cards[find_card(JP, 83)].before_battle_roll = function (faction) {
         }
     })
     if (modifier) {
-        log(`+${modifier} attack strength (Long lance torpedoes)`)
+        log(`+${modifier} Attack strength (Long Lance Torpedoes).`)
     }
 }
 
@@ -8201,17 +8191,17 @@ P.submarine_attack = {
         if (L.card === DARTER_DACE) {
             G.active = JP
         }
-        log(`${card_get_log_str(L.card)} played`)
+        log(`${card_get_log_str(L.card)} played.`)
         var roll = random(10)
         L.hits = 0
         if (roll <= L.success) {
-            log(`${roll} - Loss one naval step`)
+            log(`${roll} - Loss one naval step.`)
             L.hits = 1
         } else if (L.critical && roll <= L.critical) {
-            log(`${roll} - Loss two naval steps`)
+            log(`${roll} - Loss two naval steps.`)
             L.hits = 2
         } else {
-            log(`${roll} - No effect`)
+            log(`${roll} - No effect.`)
         }
         L.allowed_units = []
         G.offensive.active_units[1 - cards[L.card].faction].forEach(u => {
@@ -8234,7 +8224,7 @@ P.submarine_attack = {
     },
     unit(u) {
         push_undo()
-        log(`Submarine attack: ${piece_get_log_str(u)}`)
+        log(`Submarine attack: ${piece_get_log_str(u)}.`)
         damage_unit(u)
         if (!unit_on_board(u)) {
             set_delete(L.allowed_units, u)
@@ -8270,11 +8260,10 @@ cards[find_card(AP, 4)].event = function () {
 
 P.place_abda = {
     _begin() {
-        log("place abda")
         var dei = ["Java", "Borneo", "Sumatra", "Celebes"]
         L.allowed_hexes = get_unit_reinforcement_hexes(HQ_ABDA).filter(h => dei.includes(get_map_data(h).region))
         if (L.allowed_hexes.length <= 0) {
-            log(`ABDA HQ could not be placed`)
+            log(`ABDA HQ could not be placed.`)
             eliminate_permanently(HQ_ABDA)
             end()
         }
@@ -8318,7 +8307,7 @@ cards[find_card(AP, 7)].before_battle_roll = function (faction) {
         return
     }
     G.offensive.battle.roll_modifiers += 2
-    log(`+2 Merrill\`s marauders`)
+    log(`+2 Merrill\`s Marauders.`)
 }
 
 cards[find_card(AP, 8)].can_play = function () {
@@ -8329,7 +8318,7 @@ cards[find_card(AP, 9)].before_activation = function () {
     G.temp_asp = []
     G.temp_asp[0] = 2 + Math.max(0, G.asp[AP][1] - G.asp[AP][0])
     G.temp_asp[1] = G.asp[AP][1]
-    log('Allied gain 4 temporary ASPs')
+    log('AP gain 4 temporary ASPs.')
     G.asp[AP][0] += G.temp_asp[0]
 }
 
@@ -8397,7 +8386,7 @@ P.us_raiders = {
     },
     unit(u) {
         push_undo()
-        log(`Us raiders: ${piece_get_log_str(u)}`)
+        log(`US raiders: ${piece_get_log_str(u)}.`)
         damage_unit(u)
         if (!unit_on_board(u)) {
             check_supply()
@@ -8427,7 +8416,7 @@ P.repair_avg = {
             set_add(L.allowed_units, ap_air(14))
         }
         if (L.allowed_units.length <= 0) {
-            log(`Bonus could not be used`)
+            log(`Bonus could not be used.`)
             end()
         }
     },
@@ -8512,7 +8501,7 @@ P.wingate = {
         set_location(u, map_get(L.allowed_units, u))
         set_delete(G.offensive.active_units[JP], u)
         map_delete(G.offensive.paths, u)
-        log(`${piece_get_log_str(u)} deactivated`)
+        log(`${piece_get_log_str(u)} deactivated.`)
         end()
     },
 }
@@ -8615,7 +8604,7 @@ cards[find_card(AP, 25)].before_battle_roll = function (faction) {
         }
     })
     if (modifier) {
-        log(`${modifier} attack strength (US reservists)`)
+        log(`${modifier} Attack strength (US Reservists).`)
     }
 }
 
@@ -8625,7 +8614,7 @@ cards[find_card(AP, 26)].before_battle_roll = function (faction) {
         return
     }
     G.offensive.battle.roll_modifiers += 4
-    log(`+4 Broken army codes`)
+    log(`+4 Broken Army Codes.`)
 }
 
 cards[find_card(AP, 27)].event = function () {
@@ -8653,7 +8642,7 @@ cards[find_card(AP, 29)].before_battle_roll = function (faction) {
         return
     }
     G.offensive.battle.roll_modifiers += 1
-    log(`+1 Artillery support`)
+    log(`+1 Artillery Support.`)
 }
 
 cards[SANDCRAB].can_play = function () {
@@ -8702,7 +8691,7 @@ P.build_road = {
         push_undo()
         var event = ROAD_EVENTS.filter(e => e.keys[0] === h)[0]
         check_event(event)
-        log(`${R === AP ? "Allies" : "Japan"} build infrastructure ${event.name}`)
+        log(`${side_get_log_str(R)} build infrastructure ${event.name}.`)
         check_supply()
         end()
     },
@@ -8760,7 +8749,7 @@ cards[find_card(AP, 36)].before_battle_roll = function (faction) {
         }
     })
     if (modifier) {
-        log(`+${modifier} attack strength (Arleigh Burke)`)
+        log(`+${modifier} attack strength (Arleigh Burke).`)
     }
 }
 
@@ -8776,7 +8765,7 @@ cards[find_card(AP, 37)].before_battle_roll = function (faction) {
     }
     if (get_map_data(G.offensive.battle.battle_hex).island) {
         G.offensive.battle.roll_modifiers += 2
-        log(`+2 Banzai charge`)
+        log(`+2 Banzai Charge.`)
     }
 }
 
@@ -8947,7 +8936,7 @@ cards[find_card(AP, 55)].before_battle_roll = function (faction) {
         }
     })
     if (modifier) {
-        log(`${modifier} attack strength (The Great Marianas Turkey Shoot)`)
+        log(`${modifier} Attack strength (The Great Marianas Turkey Shoot).`)
     }
 }
 
@@ -9008,7 +8997,7 @@ cards[find_card(AP, 60)].can_play = function () {
 function discard_random_card(faction) {
     var i = G.hand[faction][random(G.hand[faction].length)]
     discard_card(i)
-    log(`${card_get_log_str(i)} discarded`)
+    log(`${card_get_log_str(i)} discarded.`)
     clear_undo()
 }
 
@@ -9092,7 +9081,7 @@ P.airborne_landing = {
     },
     action_hex(h) {
         push_undo()
-        log(`${piece_get_log_str(ap_army("11_d"))} landed at ${hex_get_log_str(h)}`)
+        log(`${piece_get_log_str(ap_army("11_d"))} landed at ${hex_get_log_str(h)}.`)
         set_location(ap_army("11_d"), h)
         capture_hex(h, AP)
         check_supply()
@@ -9110,7 +9099,7 @@ P.place_armor = {
         L.allowed_hexes = get_unit_reinforcement_hexes(ARMOR_BRIGADE).filter(h => regions.includes(get_map_data(h).region))
         set_delete(G.reduced, ARMOR_BRIGADE)
         if (L.allowed_hexes.length <= 0) {
-            log(`Could not place ${piece_get_log_str(ARMOR_BRIGADE)}`)
+            log(`Could not place ${piece_get_log_str(ARMOR_BRIGADE)}.`)
             eliminate_permanently(ARMOR_BRIGADE)
             end()
         }
@@ -9199,7 +9188,6 @@ cards[SOVIET_INVADE].can_play = function () {
 }
 
 cards[SOVIET_INVADE].event = function () {
-    log(`Soviets invasion`)
     capture_hex(hex_to_int(3302))
     capture_hex(hex_to_int(3303))
     update_china_status(-2, true)
@@ -9208,7 +9196,7 @@ cards[SOVIET_INVADE].event = function () {
 cards[find_card(AP, 80)].event = function () {
     check_event(events.SUBMARINE_DOCTRINE)
     if (is_event_active(events.JP_ESCORTS)) {
-        log(`JP lose escort bonus`)
+        log(`JP lose escort bonus.`)
         G.events[events.JP_ESCORTS.id] = 0
     }
 }
@@ -9298,7 +9286,7 @@ function draw_specific_card(card) {
 
 function eliminate_permanently(unit) {
     if (G.location[unit] !== NON_PLACED_BOX) {
-        log(`${piece_get_log_str(unit)} removed from game`)
+        log(`${piece_get_log_str(unit)} removed from game.`)
     }
     set_location(unit, PERM_ELIMINATED)
     set_delete(G.reduced, unit)
@@ -9316,7 +9304,7 @@ function eliminate(unit) {
         displace_to_turn(unit, 1)
         return
     }
-    log(`${piece_get_log_str(unit)} eliminated`)
+    log(`${piece_get_log_str(unit)} eliminated.`)
     G.location[unit] = ELIMINATED_BOX
     set_delete(G.reduced, unit)
     set_delete(G.oos, unit)
@@ -9331,7 +9319,7 @@ function damage_unit(unit) {
 }
 
 function reduce_unit(unit) {
-    log(`${piece_get_log_str(unit)} reduced`)
+    log(`${piece_get_log_str(unit)} reduced.`)
     set_add(G.reduced, unit)
 }
 
@@ -9414,7 +9402,7 @@ P.operation_z = {
         set_add(G.offensive.active_units[JP], find_piece("soryu"))
         set_add(G.offensive.active_units[JP], find_piece("shokaku"))
         set_add(G.offensive.active_units[JP], find_piece("hiei"))
-        G.offensive.active_units[JP].forEach(u => log(`${piece_get_log_str(u)} activated`))
+        G.offensive.active_units[JP].forEach(u => log(`${piece_get_log_str(u)} activated.`))
     },
     action_hex(h) {
         push_undo()
@@ -9495,8 +9483,6 @@ P.operation_no_1 = {
 }
 
 function setup_scenario_1942(options) {
-    log("#Japanese Offensive")
-
     if (options.historical) {
         G.options = {historical: true}
     }
@@ -9633,7 +9619,7 @@ P.arcadia = {
     },
     hold() {
         clear_undo()
-        log(`Ap chooses Arcadia + 4 random cards`)
+        log(`AP chooses Arcadia +4 random cards.`)
         while (G.hand[AP].length < 5) {
             draw_card(AP)
         }
@@ -9641,7 +9627,7 @@ P.arcadia = {
     discard() {
         G.hand[AP] = []
         G.draw[AP].push(find_card(AP, 4))
-        log(`Ap chooses 5 random cards`)
+        log(`Ap chooses 5 random cards.`)
         clear_undo()
         while (G.hand[AP].length < 5) {
             draw_card(AP)
@@ -9662,7 +9648,7 @@ P.arcadia = {
 
 function draw_hist_cards() {
     var hist = [find_card(JP, 3), find_card(JP, 47), find_card(JP, 59)]
-    log(`Japan draws historical hand ${hist.map(c => card_get_log_str(c)).join(", ")}`)
+    log(`JP draws historical hand ${hist.map(c => card_get_log_str(c)).join(", ")}.`)
     hist.forEach(c => draw_specific_card(c))
 }
 
@@ -9716,8 +9702,6 @@ function emergency_move_1942() {
 }
 
 function setup_scenario_1943() {
-    log("#1943 War never changes")
-
     G.reduced = []
     //ap setup
     for (var i = 1; i < pieces.length; i++) {
@@ -9924,8 +9908,6 @@ function setup_scenario_1943() {
 }
 
 function setup_scenario_1944() {
-    log("#1944 Allied offensive")
-
     G.reduced = []
     //ap setup
     for_each_unit_on_map((u, piece) => {
@@ -10107,8 +10089,6 @@ function setup_scenario_1944() {
 }
 
 function setup_scenario_south_pacific() {
-    log("#1942 South pacific")
-
     G.draw = [[], []]
     G.removed = [[], []]
     G.discard = [[], []]
@@ -10519,6 +10499,14 @@ function card_get_log_str(c) {
 
 function piece_get_log_str(p) {
     return `P${p}`
+}
+
+function dice_get_log_str(p, modifiers) {
+    return `B${p} ${modifiers > 0 ? "+" : ""}${modifiers ? modifiers : ""}`
+}
+
+function side_get_log_str(side) {
+    return `${side === AP ? "AP" : "JP"}`
 }
 
 /* FRAMEWORK */

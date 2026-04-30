@@ -9,7 +9,6 @@ Todo list:
 * Kunming supply
 * Burma road and supply eligable airfield
 * Check supply during movement
-* Unify logs
 * Strat move check zoi only enter hex
 * Chin surrender - diplace all air
 * china box - add ledo to check

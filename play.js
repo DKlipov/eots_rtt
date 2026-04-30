@@ -744,13 +744,16 @@ function apply_conflict_marker(marker, hex) {
 }
 
 const ICONS = {
-    B0: '<span class="die black d0"></span>',
-    B1: '<span class="die black d1"></span>',
-    B2: '<span class="die black d2"></span>',
-    B3: '<span class="die black d3"></span>',
-    B4: '<span class="die black d4"></span>',
-    B5: '<span class="die black d5"></span>',
-    B6: '<span class="die black d6"></span>',
+    B0: '<span class="dice d0"></span>',
+    B1: '<span class="dice d1"></span>',
+    B2: '<span class="dice d2"></span>',
+    B3: '<span class="dice d3"></span>',
+    B4: '<span class="dice d4"></span>',
+    B5: '<span class="dice d5"></span>',
+    B6: '<span class="dice d6"></span>',
+    B7: '<span class="dice d7"></span>',
+    B8: '<span class="dice d8"></span>',
+    B9: '<span class="dice d9"></span>',
     W0: '<span class="die white d0"></span>',
     W1: '<span class="die white d1"></span>',
     W2: '<span class="die white d2"></span>',
