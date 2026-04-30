@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="1275"
+   height="825"
+   version="1.1"
+   sodipodi:docname="burma.svg"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   id="svg89"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <metadata
+     id="metadata2">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="2560"
+     inkscape:window-height="1411"
+     inkscape:zoom="0.99999999"
+     inkscape:cx="662"
+     inkscape:cy="460.5"
+     inkscape:current-layer="svg89"
+     id="namedview6"
+     inkscape:document-rotation="0"
+     showgrid="true"
+     inkscape:showpageshadow="2"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:window-x="1071"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1">
+    <inkscape:grid
+       type="xygrid"
+       id="grid352"
+       originx="0"
+       originy="0"
+       spacingy="1"
+       spacingx="1"
+       units="px" />
+  </sodipodi:namedview>
+  <image
+     xlink:href="../images/map_burma.75.png"
+     id="image8"
+     x="0"
+     y="0"
+     width="1275"
+     height="825"
+     image-rendering="pixelated"
+     sodipodi:insensitive="true" />
+  <rect
+     style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:6.84542;stroke-linejoin:round"
+     inkscape:label="box_air_unit_in_china"
+     id="zone_0-9"
+     width="120.99577"
+     height="75.117653"
+     x="757.2655"
+     y="299.50531" />
+  <rect
+     style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:3.84668;stroke-linejoin:round"
+     inkscape:label="box_isr_jp"
+     id="zone_0-9-2"
+     width="44.981789"
+     height="63.80394"
+     x="383.03052"
+     y="217.75526" />
+  <rect
+     style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:3.84668;stroke-linejoin:round"
+     inkscape:label="box_isr_us"
+     id="zone_0-9-2-2"
+     width="44.981789"
+     height="63.80394"
+     x="434.92639"
+     y="216.39951" />
+  <rect
+     style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:9.55409;stroke-linejoin:round"
+     inkscape:label="track_chinese_government"
+     id="zone_0-9-8"
+     width="281.04019"
+     height="62.997402"
+     x="367.46033"
+     y="128.52689" />
+  <rect
+     style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:10.6761;stroke-linejoin:round"
+     inkscape:label="track_japanese_divisions_available_china"
+     id="zone_0-9-8-2"
+     width="421.23398"
+     height="52.481789"
+     x="631.89697"
+     y="43.566597" />
+  <rect
+     style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:9.12714;stroke-linejoin:round"
+     inkscape:label="track_india_status"
+     id="zone_0-9-8-2-5"
+     width="250.28421"
+     height="64.55806"
+     x="366.86215"
+     y="42.014717" />
+  <rect
+     style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:6.91944;stroke-linejoin:round"
+     inkscape:label="track_burma_road"
+     id="zone_0-9-8-2-5-1"
+     width="169.46115"
+     height="54.800705"
+     x="1078.0088"
+     y="43.479187" />
+  <rect
+     style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:7.02702;stroke-linejoin:round"
+     inkscape:label="track_game_turn"
+     id="zone_0-9-8-2-5-1-1"
+     width="185.93066"
+     height="51.512146"
+     x="29.349243"
+     y="249.42371" />
+  <rect
+     style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:13.0742;stroke-linejoin:round"
+     inkscape:label="track_political_will"
+     id="zone_0-9-8-2-5-1-1-5"
+     width="516.82733"
+     height="64.150986"
+     x="731.14349"
+     y="732.15448" />
+  <rect
+     style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:9.35258;stroke-linejoin:round"
+     inkscape:label="track_wie"
+     id="zone_0-9-8-2-5-1-1-5-7"
+     width="376.52731"
+     height="45.059101"
+     x="870.75146"
+     y="590.0553" />
+  <rect
+     style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:11.2482;stroke-linejoin:round"
+     inkscape:label="track_strat_record"
+     id="zone_0-9-8-2-5-1-1-5-7-1"
+     width="467.03818"
+     height="52.545002"
+     x="778.89264"
+     y="671.57654" />
+</svg>
