@@ -174,16 +174,6 @@ const SCENARIO_DATA = [
         last_turn: 12
     },
     {id: 9, name: "1944", setup: setup_scenario_1944, victory: victory_1944, one_year: true, last_turn: 10},
-    {
-        id: BURMA_SCENARIO,
-        name: "Burma: The Forgotten War",
-        setup: setup_scenario_south_pacific,
-        victory: victory_south_pacific,
-        deal_cards: S_P_deal_cards,
-        replacement_points: get_S_P_replacement_points,
-        has_card: c => set_has(S_P_DECK, c),
-        last_turn: 6
-    },
 ]
 
 SCENARIO_DATA.forEach(s => {
