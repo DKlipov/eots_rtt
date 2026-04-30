@@ -17,7 +17,7 @@ const HORIZONTAL_STACK_PARAMS = [
     0, 35, // open offset (minor axis)
     1, // threshold to auto-open
     8, // wrap limit
-    0, 0, 0 
+    0, 0, 0
 ]
 const VERTICAL_STACK_PARAMS = [
     // stack parameters:
@@ -256,64 +256,64 @@ function center_rect([x, y], w, h) {
     return [x - w / 2, y - h / 2, w, h]
 }
 
-function hex_in_map(x, y){
-    
-    return x >= map_info.grid_x_offset && 
-            y>= map_info.grid_y_offset && 
-            x < map_info.grid_x_offset +map_info.ROW_HEX_NB &&
-            y < map_info.grid_x_offset +map_info.ROW_HEX_NB 
+function hex_in_map(x, y) {
+
+    return x >= map_info.grid_x_offset &&
+        y >= map_info.grid_y_offset &&
+        x < map_info.grid_x_offset + map_info.ROW_HEX_NB &&
+        y < map_info.grid_x_offset + map_info.ROW_HEX_NB
 }
 
-const MAIN_BOARD_INFO ={
-    "LAST_BOARD_HEX":1478,
-    "COLUMN_HEX_NB":29,
-    "ROW_HEX_NB":50,
-    "grid_x_offset":0,
-    "grid_y_offset":0,
-    "display_x_offset":76.375,
-    "display_y_offset":53.375,
-    "turn_a":12,
-    "turn_b":1,
-    "track_a":9,
-    "track_b":0,   
-    "wie_a":0,
-    "wie_b":10,
-    "pw_a":10,
-    "pw_b":0,
-    "TRACK_STACK_PARAMS":HORIZONTAL_STACK_PARAMS,
-    "hex_check":()=>true
+const MAIN_BOARD_INFO = {
+    "LAST_BOARD_HEX": 1478,
+    "COLUMN_HEX_NB": 29,
+    "ROW_HEX_NB": 50,
+    "grid_x_offset": 0,
+    "grid_y_offset": 0,
+    "display_x_offset": 76.375,
+    "display_y_offset": 53.375,
+    "turn_a": 12,
+    "turn_b": 1,
+    "track_a": 9,
+    "track_b": 0,
+    "wie_a": 0,
+    "wie_b": 10,
+    "pw_a": 10,
+    "pw_b": 0,
+    "TRACK_STACK_PARAMS": HORIZONTAL_STACK_PARAMS,
+    "hex_check": () => true
 }
-const BURMA_BOARD_INFO ={
-    "LAST_BOARD_HEX":2609,
-    "COLUMN_HEX_NB":13,
-    "ROW_HEX_NB":16
+const BURMA_BOARD_INFO = {
+    "LAST_BOARD_HEX": 2609,
+    "COLUMN_HEX_NB": 13,
+    "ROW_HEX_NB": 16
 }
-const SOUTH_PAC_BOARD_INFO ={
-    "LAST_BOARD_HEX":5027,
-    "COLUMN_HEX_NB":12,
-    "ROW_HEX_NB":20,
-    "grid_x_offset":20,
-    "grid_y_offset":16,
-    "display_x_offset":89.375,
-    "display_y_offset":9.125,
-    "turn_a":3,
-    "turn_b":6,
-    "track_a":3,
-    "track_b":9,    
-    "wie_a":7,
-    "wie_b":0,
-    "pw_a":5,
-    "pw_b":0,
-    "TRACK_STACK_PARAMS":VERTICAL_STACK_PARAMS,
-    "hex_check":(i)=>{
+const SOUTH_PAC_BOARD_INFO = {
+    "LAST_BOARD_HEX": 5027,
+    "COLUMN_HEX_NB": 12,
+    "ROW_HEX_NB": 20,
+    "grid_x_offset": 20,
+    "grid_y_offset": 16,
+    "display_x_offset": 89.375,
+    "display_y_offset": 9.125,
+    "turn_a": 3,
+    "turn_b": 6,
+    "track_a": 3,
+    "track_b": 9,
+    "wie_a": 7,
+    "wie_b": 0,
+    "pw_a": 5,
+    "pw_b": 0,
+    "TRACK_STACK_PARAMS": VERTICAL_STACK_PARAMS,
+    "hex_check": (i) => {
         let x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
         let y = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
-        if(x == 24 && y == 16){
+        if (x == 24 && y == 16) {
             return true;
-        }else if((x%2==0) && y == 16){
+        } else if ((x % 2 == 0) && y == 16) {
             return false;
         }
-        return hex_in_map(x,y)
+        return hex_in_map(x, y)
     }
 }
 
@@ -328,18 +328,18 @@ function on_init(scenario, game_options, static_view) {
     init_canvas(scenario)
 
     let map_elem = document.getElementById("mapwrap")
-    switch(scenario){
-        case "South Pacific":{
+    switch (scenario) {
+        case "South Pacific": {
             SID = SOUTH_PACIFIC_SCENARIO
-            map_layout = layout.southpac; 
+            map_layout = layout.southpac;
             map_elem.classList.add("southpac");
             define_board("#map", 1275, 825, [12, 12, 12, 12])
             map_info = SOUTH_PAC_BOARD_INFO
 
-            define_track("track",0,1,map_layout.track_strat_record_0_1,define_stack, "h", 0,        
-                ...VERTICAL_STACK_PARAMS 
+            define_track("track", 0, 1, map_layout.track_strat_record_0_1, define_stack, "h", 0,
+                ...VERTICAL_STACK_PARAMS
             )
-            define_stack("track", 2,map_layout.track_strat_record_2,                
+            define_stack("track", 2, map_layout.track_strat_record_2,
                 ...VERTICAL_STACK_PARAMS
             )
 
@@ -349,19 +349,20 @@ function on_init(scenario, game_options, static_view) {
             define_space("action_hex", 1400, map_layout.h_5808)
 
             break;
-        };
-        case  "Burma: The Forgotten War":{
+        }
+            ;
+        case  "Burma: The Forgotten War": {
             SID = BURMA_SCENARIO
-            map_layout = layout.burma; 
+            map_layout = layout.burma;
             map_elem.classList.add("burma");
             define_board("#map", 1275, 825, [12, 12, 12, 12])
             map_info = BURMA_INFO
             break;
-        };
-        default:
-        {
+        }
+            ;
+        default: {
             SID = MAIN_SCENARIO
-            map_layout = layout.mainmap; 
+            map_layout = layout.mainmap;
             map_elem.classList.add("main");
             define_board("#map", 2550, 1650, [12, 12, 12, 12])
             map_info = MAIN_BOARD_INFO
@@ -372,10 +373,10 @@ function on_init(scenario, game_options, static_view) {
     // used hexes
     var used_hex = []
     for (var i = 0; i < 60; ++i) {
-        used_hex[i] = { min: 100, max: -100 }
-        if (i > 27 && i < 45){
-            used_hex[i].max = 28 - (i&1)
-        } 
+        used_hex[i] = {min: 100, max: -100}
+        if (i > 27 && i < 45) {
+            used_hex[i].max = 28 - (i & 1)
+        }
     }
 
     for (var i = 0; i < data.map.length; i++) {
@@ -392,8 +393,8 @@ function on_init(scenario, game_options, static_view) {
 
         if (y < used_hex[x].min) continue
         if (y > used_hex[x].max) continue
-        
-        if(map_info.hex_check(i)){
+
+        if (map_info.hex_check(i)) {
             ALL_BOARD_HEXES.push(i)
             let xy = hex_center(i)
             define_s_loc(i, center_rect(xy, 45, 45))
@@ -410,27 +411,27 @@ function on_init(scenario, game_options, static_view) {
 
     define_layout("status", JP_AGREEMENT, map_layout.box_isr_jp)
     define_layout("status", AP_AGREEMENT, map_layout.box_isr_us)
-    define_track("pw",map_info.pw_a, map_info.pw_b, map_layout.track_political_will,define_layout,"auto", 0)
-    define_track("wie",map_info.wie_a, map_info.wie_b, map_layout.track_wie,define_layout,"auto", 0)
+    define_track("pw", map_info.pw_a, map_info.pw_b, map_layout.track_political_will, define_layout, "auto", 0)
+    define_track("wie", map_info.wie_a, map_info.wie_b, map_layout.track_wie, define_layout, "auto", 0)
 
-    define_track("turn",map_info.turn_a,map_info.turn_b,map_layout.track_game_turn,define_stack, "auto", 0,        
-         ...map_info.TRACK_STACK_PARAMS
+    define_track("turn", map_info.turn_a, map_info.turn_b, map_layout.track_game_turn, define_stack, "auto", 0,
+        ...map_info.TRACK_STACK_PARAMS
     )
-    define_track("track",map_info.track_a,map_info.track_b,map_layout.track_strat_record,define_stack, "auto", 0,        
+    define_track("track", map_info.track_a, map_info.track_b, map_layout.track_strat_record, define_stack, "auto", 0,
         ...map_info.TRACK_STACK_PARAMS
     )
 
-    if(map_layout.track_india_status !== undefined){
-        define_layout_track_h("india", 0, 5, map_layout.track_india_status,0)
+    if (map_layout.track_india_status !== undefined) {
+        define_layout_track_h("india", 0, 5, map_layout.track_india_status, 0)
     }
-    if(map_layout.track_burma_road !== undefined){
-        define_layout_track_h("burma", 0, 2, map_layout.track_burma_road,0)
+    if (map_layout.track_burma_road !== undefined) {
+        define_layout_track_h("burma", 0, 2, map_layout.track_burma_road, 0)
     }
-    
-    define_layout_track_h("china", 5, 0, map_layout.track_chinese_government,0)
 
-    if(map_layout.track_japanese_divisions_available_china !== undefined){
-        define_layout_track_h("divisions", 0, 12, map_layout.track_japanese_divisions_available_china,0)
+    define_layout_track_h("china", 5, 0, map_layout.track_chinese_government, 0)
+
+    if (map_layout.track_japanese_divisions_available_china !== undefined) {
+        define_layout_track_h("divisions", 0, 12, map_layout.track_japanese_divisions_available_china, 0)
     }
     for (i = 0; i < 35; i++) {
         var battle = define_marker("battle", i, "conflict battle")
@@ -541,8 +542,8 @@ function hex_center(i) {
     let row = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
     let column = (Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB))
     return [
-        ( map_info.display_x_offset) + (column-map_info.grid_x_offset) * HEX_X_SIZE,
-        ( map_info.display_y_offset) + (row-map_info.grid_y_offset) * HEX_Y_SIZE + (column & 1) * 27.625
+        (map_info.display_x_offset) + (column - map_info.grid_x_offset) * HEX_X_SIZE,
+        (map_info.display_y_offset) + (row - map_info.grid_y_offset) * HEX_Y_SIZE + (column & 1) * 27.625
     ]
 }
 
@@ -560,15 +561,15 @@ function hex_center(i) {
 
 function init_canvas(scenario) {
     let sizeX, sizeY;
-    switch(scenario){
+    switch (scenario) {
         case "South Pacific":
-        case  "Burma: The Forgotten War":{
+        case  "Burma: The Forgotten War": {
             sizeX = 1275
             sizeY = 825
             break;
-        };
-        default:
-        {
+        }
+            ;
+        default: {
             sizeX = 2550
             sizeY = 1650
         }
@@ -772,7 +773,7 @@ function on_update() {
     populate_generic("pw", G.political_will, "marker pw")
     populate_generic("wie", G.wie, "marker wie")
 
-    if(G.sid != SOUTH_PACIFIC_SCENARIO){
+    if (G.sid != SOUTH_PACIFIC_SCENARIO) {
         populate_generic("india", Math.min(4, G.surrender[data.nations.INDIA.id]),
             `marker ${G.surrender[data.nations.INDIA.id] >= 5 ? "india_status_surrender" : "india_status"}`)
         populate_generic("burma", G.burma_road, `marker burma_road${G.events[data.events.HUMP.id] ? "_hump" : ""}`)
@@ -781,12 +782,12 @@ function on_update() {
 
     populate_generic("china", Math.min(5, G.surrender[data.nations.CHINA.id]), `marker china`)
 
-
+    var turns = world.things["turn"]
     for (i = 0; i < TURN_MARKERS.length; i++) {
         const marker = TURN_MARKERS[i]
         var value = marker.value(G)
         var counter = (typeof marker.counter === 'function') ? marker.counter(G) : marker.counter
-        if (value > 0) {
+        if (value > 0 && turns[value]) {
             populate_generic("turn", value, "marker " + counter)
         }
     }
@@ -1122,7 +1123,7 @@ function create_flag(faction) {
 function battle_info_dialog(id, response) {
     show_dialog(id, (body) => {
         let dl = document.createElement("div")
-        dl.className="wrapper"
+        dl.className = "wrapper"
         let header = document.createElement("dt")
         header.innerHTML = `Combat hex ${String.fromCharCode(65 + response.battle_name)} (${sub_hex(null, response.battle_hex)})`
         body.appendChild(header)
