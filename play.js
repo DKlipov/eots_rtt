@@ -10,7 +10,24 @@ const TURN_BOX = 1490
 const HEX_X_SIZE = 48.0
 const HEX_Y_SIZE = 55.25
 
-
+const HORIZONTAL_STACK_PARAMS = [
+    // stack parameters:
+    -5, 0, // closed offset
+    -35, 0, // open offset (major axis)
+    0, 35, // open offset (minor axis)
+    1, // threshold to auto-open
+    8, // wrap limit
+    0, 0, 0 
+]
+const VERTICAL_STACK_PARAMS = [
+    // stack parameters:
+    -2, -3, // closed offset
+    0, -50, // open offset (major axis)
+    50, 0, // open offset (minor axis)
+    1, // threshold to auto-open
+    8, // wrap limit
+    -6, -9, 4
+]
 
 const MANCHURIA_1 = hex_to_int(3302)
 const MANCHURIA_2 = hex_to_int(3303)
@@ -231,12 +248,7 @@ function clear_paths() {
 function define_s_loc(id, rect) {
     define_stack("s-loc", id,
         rect,
-        -2, -3, // closed offset
-        0, -50, // open offset (major axis)
-        50, 0, // open offset (minor axis)
-        1, // threshold to auto-open
-        8, // wrap limit
-        -6, -9, 4
+        ...VERTICAL_STACK_PARAMS
     )
 }
 
@@ -268,6 +280,7 @@ const MAIN_BOARD_INFO ={
     "wie_b":10,
     "pw_a":10,
     "pw_b":0,
+    "TRACK_STACK_PARAMS":HORIZONTAL_STACK_PARAMS,
     "hex_check":()=>true
 }
 const BURMA_BOARD_INFO ={
@@ -291,6 +304,7 @@ const SOUTH_PAC_BOARD_INFO ={
     "wie_b":0,
     "pw_a":5,
     "pw_b":0,
+    "TRACK_STACK_PARAMS":VERTICAL_STACK_PARAMS,
     "hex_check":(i)=>{
         let x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
         let y = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
@@ -302,6 +316,7 @@ const SOUTH_PAC_BOARD_INFO ={
         return hex_in_map(x,y)
     }
 }
+
 
 let ALL_BOARD_HEXES = []
 
@@ -322,22 +337,10 @@ function on_init(scenario, game_options, static_view) {
             map_info = SOUTH_PAC_BOARD_INFO
 
             define_track("track",0,1,map_layout.track_strat_record_0_1,define_stack, "h", 0,        
-                // stack parameters:
-                -5, 0, // closed offset
-                -35, 0, // open offset (major axis)
-                0, 35, // open offset (minor axis)
-                1, // threshold to auto-open
-                8, // wrap limit
-                0, 0, 0 
+                ...VERTICAL_STACK_PARAMS 
             )
             define_stack("track", 2,map_layout.track_strat_record_2,                
-                // stack parameters:
-                -5, 0, // closed offset
-                -35, 0, // open offset (major axis)
-                0, 35, // open offset (minor axis)
-                1, // threshold to auto-open
-                8, // wrap limit
-                0, 0, 0 
+                ...VERTICAL_STACK_PARAMS
             )
 
 
@@ -412,22 +415,10 @@ function on_init(scenario, game_options, static_view) {
     define_track("wie",map_info.wie_a, map_info.wie_b, map_layout.track_wie,define_layout,"auto", 0)
 
     define_track("turn",map_info.turn_a,map_info.turn_b,map_layout.track_game_turn,define_stack, "auto", 0,        
-        // stack parameters:
-        -5, 0, // closed offset
-        -35, 0, // open offset (major axis)
-        0, 35, // open offset (minor axis)
-        1, // threshold to auto-open
-        8, // wrap limit
-        0, 0, 0 
+         ...map_info.TRACK_STACK_PARAMS
     )
     define_track("track",map_info.track_a,map_info.track_b,map_layout.track_strat_record,define_stack, "auto", 0,        
-        // stack parameters:
-        -5, 0, // closed offset
-        -35, 0, // open offset (major axis)
-        0, 35, // open offset (minor axis)
-        1, // threshold to auto-open
-        8, // wrap limit
-        0, 0, 0 
+        ...map_info.TRACK_STACK_PARAMS
     )
 
     if(map_layout.track_india_status !== undefined){
