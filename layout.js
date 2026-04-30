@@ -14,8 +14,8 @@ const layout = {
 	"track_strat_record": [366,1158,92,468],
 },
 "southpac" : {
-	"h_5808": [1140,710,116,95],
-	"box_delayed_reinf": [1025,660,70,63],
+	"box_delayed_reinf": [1140,710,116,95],
+	"h_5808": [1025,660,70,63],
 	"box_air_unit_in_china": [19,602,98,60],
 	"box_isr_jp": [127,619,43,43],
 	"box_isr_us": [179,619,42,42],

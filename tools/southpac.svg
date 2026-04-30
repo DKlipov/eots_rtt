@@ -39,8 +39,8 @@
      inkscape:window-width="2560"
      inkscape:window-height="1411"
      inkscape:zoom="2.828427"
-     inkscape:cx="846.76041"
-     inkscape:cy="666.62495"
+     inkscape:cx="847.11396"
+     inkscape:cy="610.40996"
      inkscape:current-layer="svg89"
      id="namedview6"
      inkscape:document-rotation="0"
@@ -71,7 +71,7 @@
      sodipodi:insensitive="true" />
   <rect
      style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:7.52709;stroke-linejoin:round"
-     inkscape:label="h_5808"
+     inkscape:label="box_delayed_reinf"
      id="zone_0"
      width="115.65938"
      height="95.013458"
@@ -79,7 +79,7 @@
      y="710.34076" />
   <rect
      style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:4.73828;stroke-linejoin:round"
-     inkscape:label="box_delayed_reinf"
+     inkscape:label="h_5808"
      id="zone_0-94"
      width="69.659378"
      height="62.513458"
