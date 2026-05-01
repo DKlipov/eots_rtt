@@ -595,7 +595,7 @@ P.strategic_phase = script(`
         if(G.turn>=4){
             G.pow = Math.min(4,G.asp[AP][0])
         }
-        if (scenario_data().id === SOUTH_PACIFIC){
+        if (scenario_data().id === SOUTH_PACIFIC_SCENARIO){
             G.pow = 2
         }
     }
@@ -1566,6 +1566,7 @@ P.offensive_segment = {
         }
         if (G.debug) {
             button("isr")
+            button("tp")
             button("check_s")
             button("ns")
             button("control")
@@ -1608,6 +1609,9 @@ P.offensive_segment = {
     check_s() {
         log("Forced supply check.")
         check_supply()
+    },
+    tp() {
+        call("tp_units")
     },
     ns() {
         G.hand[AP].forEach(c => {
@@ -1770,6 +1774,44 @@ P.return_hq = {
         G.active_stack = []
         check_supply()
         goto("end_action")
+    }
+}
+
+P.tp_units = {
+    prompt() {
+        prompt(`Choose unit and hex.`)
+        if (G.active_stack.length) {
+            var piece = pieces[G.active_stack[0]]
+            for (i = 0; i < LAST_BOARD_HEX; i++) {
+                if (G.location[G.active_stack[0]] === i) {
+                    continue
+                }
+                if (piece.class === "naval" && get_map_data(i).port && is_space_controlled(i, piece.faction) ||
+                    piece.class === "air" && get_map_data(i).airfield && is_space_controlled(i, piece.faction) ||
+                    piece.class === "ground" && get_map_data(i).terrain > OCEAN && !is_faction_units(i, 1 - piece.faction) ||
+                    piece.class === "hq" && get_map_data(i).port && is_space_controlled(i, piece.faction) && !is_overstack(i, G.active_stack[0])
+                ) {
+                    action_hex(i)
+                }
+            }
+        } else {
+            for_each_unit(u => action_unit(u))
+        }
+        button("done")
+    },
+    unit(u) {
+        push_undo()
+        G.active_stack = [u]
+    },
+    action_hex(hex) {
+        push_undo()
+        set_location(G.active_stack[0], hex)
+        G.active_stack = []
+        check_supply()
+    },
+    done() {
+        G.active_stack = []
+        end()
     }
 }
 

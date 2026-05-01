@@ -805,6 +805,9 @@ function on_update() {
 
     action_button("roll", "Roll")
 
+    action_button("event", "Play Event")
+    action_button("ops", "Play for Operations")
+    action_button("hold", "Hold")
     action_button("move", "Move")
     action_button("done", "Done")
     action_button("eliminate", "Eliminate")
@@ -814,8 +817,6 @@ function on_update() {
     action_button("divisions_button", "Reduce divisions track.")
 
 
-    action_button("event", "Play Event")
-    action_button("ops", "Play for Operations")
     action_button("displace_hq", "HQ Withdrawal")
     action_button("return_hq", "Early HQ Return")
     action_button("inter_service", "Remove Inter-Service Rivalry")
@@ -824,7 +825,6 @@ function on_update() {
     action_button("jarhat", "Build Jarhat Road")
     action_button("imphal", "Build Imphal Road")
     action_button("ledo", "Build Ledo Road")
-    action_button("hold", "Hold")
     action_button("discard", "Discard")
 
 
@@ -846,6 +846,7 @@ function on_update() {
 
     //debug
     action_button("isr", "Flip isr(dbg)")
+    action_button("tp", "Teleport(dbg)")
     action_button("check_s", "Check supply(dbg)")
     action_button("deploy_b29", "deploy_b29(dbg)")
     action_button("ns", "discard cards(dbg)")
