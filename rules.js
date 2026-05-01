@@ -591,6 +591,7 @@ P.strategic_phase = script(`
     }
     eval {
         scenario_data().deal_cards()
+        set_pow()
     }
     goto offensive_phase
 `)
