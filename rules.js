@@ -591,16 +591,24 @@ P.strategic_phase = script(`
     }
     eval {
         scenario_data().deal_cards()
-        G.pow = 0
-        if(G.turn>=4){
-            G.pow = Math.min(4,G.asp[AP][0])
-        }
-        if (scenario_data().id === SOUTH_PACIFIC_SCENARIO){
-            G.pow = 2
-        }
     }
     goto offensive_phase
 `)
+
+function set_pow() {
+    G.pow = 0
+    if (G.turn >= 4) {
+        G.pow = Math.min(4, G.asp[AP][0])
+    }
+    if (scenario_data().id === SOUTH_PACIFIC_SCENARIO) {
+        G.pow = 2
+    }
+    if (G.pow) {
+        log(`Progress of war target - ${G.pow}.`)
+    } else {
+        log(`No progress of war required.`)
+    }
+}
 
 function wie_roll_result() {
     if (G.wie >= 10) {
