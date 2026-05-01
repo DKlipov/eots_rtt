@@ -1092,6 +1092,7 @@ P.submarine_warfare = {
         log(`${dice_get_log_str(result, modifiers)} <= ${G.turn} ${success ? "(SUCCESS)" : "(FAILED)"}.`)
         if (success) {
             change_asp(JP, -1)
+            G.strategic_warfare++
         }
         if (success && escort === 4) {
             G.events[events.JP_ESCORTS.id] = G.turn + (2 << 4)
