@@ -2937,7 +2937,7 @@ function mark_unit(i, piece) {
         G.supply_cache[location] = G.supply_cache[location] | (JP_AIR_UNITS << piece.faction)
     } else if (piece.class === "hq") {
         G.supply_cache[location] = G.supply_cache[location] | (JP_HQ_UNITS << piece.faction)
-    } else if (piece.class === "ground") {
+    } else if (piece.class === "ground" && (!L || L.move_type !== STRAT_MOVE || !set_has(G.active_stack, i))) {
         G.supply_cache[location] = G.supply_cache[location] | (JP_GROUND_UNITS << piece.faction)
     } else if (piece.class === "naval") {
         G.supply_cache[location] = G.supply_cache[location] | (JP_NAVAL_UNITS << piece.faction)
@@ -3904,7 +3904,7 @@ function compute_air_move_hexes() {
         move_type |= STRAT_MOVE
     }
     var avoid_zoi_flag = L.move_type === AVOID_ZOI || move_data.move_type & STRAT_MOVE
-    if (avoid_zoi_flag && has_non_n_zoi(location, 1 - R)) {
+    if (L.move_type === AVOID_ZOI && has_non_n_zoi(location, 1 - R)) {
         return []
     }
     const distance_map = [move_data.location, [0, 1, move_data.location]]
@@ -3977,6 +3977,22 @@ function compute_air_move_hexes() {
 
 function compute_ground_naval_move_hexes() {
     let location = L.move_data.location
+    // to check when depart ground unit could change zoi
+    var supply = G.supply_cache
+    var oos = G.oos
+    if (L.move_data.is_ground_present && !L.move_data.battle_range) {
+        var ground_unit_stay = 0
+        for_each_unit_on_map((u, piece, loc) => {
+            if (loc === location && piece.class !== "naval" && piece.faction === G.active && !set_has(G.active_stack, u)) {
+                ground_unit_stay++
+            }
+        })
+        if (!ground_unit_stay) {
+            G.active_stack.forEach(u => G.location[u] = ELIMINATED_BOX)
+            check_supply()
+            G.active_stack.forEach(u => G.location[u] = location)
+        }
+    }
     L.allowed_hexes = []
     let move_data = L.move_data
     var mt = 0
@@ -4015,6 +4031,8 @@ function compute_ground_naval_move_hexes() {
     if (G.offensive.stage !== POST_BATTLE_STAGE) {
         map_delete(L.allowed_hexes, location)
     }
+    G.supply_cache = supply
+    G.oos = oos
 }
 
 function compute_ground_move_hexes() {
@@ -4038,9 +4056,6 @@ function compute_ground_naval_strat_move() {
     let location = L.move_data.location
     L.allowed_hexes = []
     let move_data = L.move_data
-    if (has_non_n_zoi(location, 1 - R)) {
-        return []
-    }
     const queue = [location]
     const distance_map = [location, [0, location]]
     for (var i = 0; i < queue.length; i++) {
@@ -4054,6 +4069,7 @@ function compute_ground_naval_strat_move() {
                 continue
             }
             if (has_non_n_zoi(nh, 1 - R)
+                || set_has(nh, G.offensive.battle_hexes)
                 || distance > move_data.naval_move_distance
                 || !(get_map_data(item).edges_int & WATER << 5 * j)
                 || distance >= map_get(distance_map, nh, [100])[0]) {
@@ -4066,7 +4082,7 @@ function compute_ground_naval_strat_move() {
             path_array.push(nh)
             path_array[0] = distance
             map_set(distance_map, nh, path_array)
-            if (get_map_data(nh).port && is_space_controlled(nh, G.active)) {
+            if (get_map_data(nh).port && is_space_controlled(nh, G.active) && !is_faction_units(nh, 1 - G.active)) {
                 path_array = path_array.slice()
                 path_array.unshift(STRAT_MOVE)
                 map_set(L.allowed_hexes, nh, path_array)

@@ -1,5 +1,4 @@
 Todo list:
-* Strat move check zoi only enter hex
 * Marker pieces update
 * Limit ground strat move (no escort)
 * Surrender once per game
