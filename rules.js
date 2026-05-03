@@ -2987,7 +2987,7 @@ function mark_supply_ports_overland(hq, piece) {
                 continue
             }
             const occupied_land = G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
-            var distance = base_distance + get_ground_move_cost(item, nh, j, faction)
+            var distance = base_distance + get_ground_mp_cost(item, nh, j, faction)
             if (distance > SUPPLY_PORT_RANGE || distance >= map_get(distance_map, nh, [100])[0] || occupied_land) {
                 continue
             }
@@ -3059,7 +3059,7 @@ function supply_source_in_range(location, faction) {
                 continue
             }
 
-            var distance = base_distance + get_ground_move_cost(item, nh, j, faction)
+            var distance = base_distance + get_ground_mp_cost(item, nh, j, faction)
             const occupied_land = G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
             if (distance > SUPPLY_PORT_RANGE || occupied_land || distance >= map_get(distance_map, nh, [100])) {
                 continue
@@ -3094,7 +3094,7 @@ function mark_hexes_supplied_kunming() {
             if (nh <= 0) {
                 continue
             }
-            const distance = distance_base + get_ground_move_cost(nh, item, (j + 3) % 6, AP)
+            const distance = distance_base + get_ground_mp_cost(nh, item, (j + 3) % 6, AP)
             if (distance > SUPPLY_PORT_RANGE || map_get(overland_set, nh, 100) <= distance) {
                 continue
             }
@@ -3336,7 +3336,7 @@ function check_burma_road() {
                 continue
             }
             const occupied_land = G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
-            var distance = get_ground_move_cost(item, nh, j, faction)
+            var distance = get_ground_mp_cost(item, nh, j, faction)
             if (distance > 1 || map_has(distance_map, nh) || occupied_land || is_space_controlled(nh, JP)) {
                 continue
             }
@@ -3693,6 +3693,22 @@ function get_ground_move_cost(from, to, direction, faction) {
     if ((get_map_data(from).edges_int & ROAD << (5 * direction))
         && !(G.supply_cache[to] & (TRANSPORT_ROUTE_DISABLED | (JP_GA_UNITS << 1 - faction)))
         && !(G.supply_cache[from] & TRANSPORT_ROUTE_DISABLED)
+    ) {
+        return 1;
+    } else {
+        return ((get_map_data(to).terrain >> 1) + 1) * 2
+    }
+}
+
+function get_ground_mp_cost(from, to, direction, faction) {
+    if (!(get_map_data(from).edges_int & GROUND << 5 * direction)) {
+        return 100;
+    }
+    if ((get_map_data(from).edges_int & ROAD << (5 * direction))
+        && !(G.supply_cache[to] & TRANSPORT_ROUTE_DISABLED)
+        && !(G.supply_cache[from] & TRANSPORT_ROUTE_DISABLED)
+        && ((G.supply_cache[to] & (JP_UNITS << faction)) || !(G.supply_cache[to] & (JP_UNITS << 1 - faction)))
+        && ((G.supply_cache[from] & (JP_UNITS << faction)) || !(G.supply_cache[from] & (JP_UNITS << 1 - faction)))
     ) {
         return 1;
     } else {
