@@ -3077,6 +3077,36 @@ function supply_source_in_range(location, faction) {
     return false
 }
 
+function mark_hexes_supplied_kunming() {
+    var i = 0
+    const location = KUNMING
+    var queue = []
+    var overland_set = [KUNMING, 0]
+    const supply_type = JOINT_SUPPLIED_HEX
+    G.supply_cache[location] = G.supply_cache[location] | supply_type
+    queue.push(location)
+    for (; i < queue.length; i++) {
+        let item = queue[i]
+        let nh_list = get_near_hexes(item)
+        const distance_base = map_get(overland_set, item)
+        for (let j = 0; j < nh_list.length; j++) {
+            let nh = nh_list[j]
+            if (nh <= 0) {
+                continue
+            }
+            const distance = distance_base + get_ground_move_cost(nh, item, (j + 3) % 6, AP)
+            if (distance > SUPPLY_PORT_RANGE || map_get(overland_set, nh, 100) <= distance) {
+                continue
+            }
+            if (distance < SUPPLY_PORT_RANGE) {
+                queue.push(nh)
+            }
+            map_set(overland_set, nh, distance)
+            G.supply_cache[nh] = G.supply_cache[nh] | supply_type
+        }
+    }
+}
+
 function mark_hexes_supplied_from(hq, piece) {
     var i = 0
     const faction = piece.faction
@@ -3254,6 +3284,9 @@ function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
             set_add(oos_units[faction], hq)
         }
     })
+    if (G.burma_road < 2 && faction === AP) {
+        mark_hexes_supplied_kunming()
+    }
     var tokyo_express = G.events[events.TOKYO_EXPRESS.id]
     if (tokyo_express > 0) {
         G.supply_cache[tokyo_express] |= JP_SUPPLIED_HEX
