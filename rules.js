@@ -1159,7 +1159,8 @@ P.strategic_bombing = {
         end()
     },
     roll() {
-        var close_air_base = TOKYO_AIR_BASES.filter(h => !set_has(G.control, h)).length > 0
+        mark_supply_eligable_ports(AP)
+        var close_air_base = TOKYO_AIR_BASES.filter(h => !set_has(G.control, h) && (G.supply_cache[h] & AP_SUPPLY_AIRFIELD)).length > 0
         if (!G.active_stack.map(u => bombing(u, close_air_base)).reduce((a, b) => a || b, false)) {
             G.events[events.STRAT_BOMBING_CAMPAIGN.id] = 0
         }
@@ -1175,7 +1176,7 @@ function bombing(u, close_air_base) {
     var success = result < success_rate
     var damaged = result >= 9 && !close_air_base
     var modifier = 0
-    log(`${piece_get_log_str(u)} strategic bombing:`)
+    log(`${piece_get_log_str(u)} strategic bombing (${close_air_base ? "Air" : "No air"} base withing range of Tokyo):`)
     if (is_event_active(events.INTERCEPTORS) && !close_air_base) {
         log(`+1 High altitude interceptors.`)
         modifier++
@@ -3262,6 +3263,21 @@ function check_unit_supply(location, i, piece) {
     return G.supply_cache[location] & piece.supply
 }
 
+function mark_supply_eligable_ports(faction) {
+    HQ_LIST.forEach(hq => {
+        var piece = pieces[hq]
+        if (piece.faction === faction && G.location[hq] < LAST_BOARD_HEX) {
+            mark_supply_ports_oversea(hq, piece)
+        }
+    })
+    HQ_LIST.forEach(hq => {
+        var piece = pieces[hq]
+        if (piece.faction === faction && G.location[hq] < LAST_BOARD_HEX) {
+            mark_supply_ports_overland(hq, piece)
+        }
+    })
+}
+
 function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
     for (i = 1; i < LAST_BOARD_HEX; i++) {
         G.supply_cache[i] = G.supply_cache[i] & CLEAN_SUPPLY_MASK[1 - faction]
@@ -3282,18 +3298,7 @@ function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
         return true
     }
     for_each_unit_on_map((i, p) => both_sides_zoi || p.faction === faction ? set_zoi(i, p, oos_units) : null)
-    HQ_LIST.forEach(hq => {
-        var piece = pieces[hq]
-        if (piece.faction === faction && G.location[hq] < LAST_BOARD_HEX) {
-            mark_supply_ports_oversea(hq, piece)
-        }
-    })
-    HQ_LIST.forEach(hq => {
-        var piece = pieces[hq]
-        if (piece.faction === faction && G.location[hq] < LAST_BOARD_HEX) {
-            mark_supply_ports_overland(hq, piece)
-        }
-    })
+    mark_supply_eligable_ports(faction)
     var size = oos_units[faction].filter(u => pieces[u].zoi_generator).length
     oos_units[faction] = []
     HQ_LIST.forEach(hq => {

@@ -832,13 +832,13 @@ function on_update() {
     action_button("discard", "Discard")
 
 
+    action_button("all", "Choose all")
     action_button("pass", "Pass")
     action_button("skip", "Skip")
     action_button("no_move", "No move")
     action_button("next", "Next")
     action_button("done", "Done")
     action_button("delay", "Delay")
-    action_button("all", "Choose all")
     action_button("no_organic", "Disable organic")
     action_button("avoid_zoi", "Avoid ZOI")
     action_button("strat_move", "Strategic move")
