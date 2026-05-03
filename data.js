@@ -3067,7 +3067,7 @@ data.cards = [
     {
         "num": 7,
         "faction": AP,
-        "ops": 3,
+        "ops": 2,
         "type": MILITARY,
         "oc": 2,
         "ec": 4,

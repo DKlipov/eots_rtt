@@ -87,35 +87,38 @@ const JP_ZOI = 1 << 0
 const AP_ZOI = 1 << 1
 const JP_ZOI_NTRL = 1 << 2
 const AP_ZOI_NTRL = 1 << 3
-const JP_AIR_UNITS = 1 << 4
-const AP_AIR_UNITS = 1 << 5
-const JP_GROUND_UNITS = 1 << 6
-const AP_GROUND_UNITS = 1 << 7
-const JP_NAVAL_UNITS = 1 << 8
-const AP_NAVAL_UNITS = 1 << 9
-const JP_HQ_UNITS = 1 << 10
-const AP_HQ_UNITS = 1 << 11
-const TRANSPORT_ROUTE_DISABLED = 1 << 12
-const JP_SUPPLY_PORT = 1 << 13
-const AP_SUPPLY_PORT = 1 << 14
-const JP_SUPPLIED_HEX = 1 << 15
-const BR_SUPPLIED_HEX = 1 << 16
-const JOINT_SUPPLIED_HEX = 1 << 17
-const US_SUPPLIED_HEX = 1 << 18
-const JP_SUPPLY_AIRFIELD = 1 << 19
-const AP_SUPPLY_AIRFIELD = 1 << 20
-const HEX_TEMP_FLAG1 = 1 << 21
-const HEX_TEMP_FLAG2 = 1 << 22
-const HEX_TEMP_FLAG3 = 1 << 23
+const JP_ZOI_DISABLED = 1 << 4
+const AP_ZOI_DISABLED = 1 << 5
+const JP_AIR_UNITS = 1 << 6
+const AP_AIR_UNITS = 1 << 7
+const JP_GROUND_UNITS = 1 << 8
+const AP_GROUND_UNITS = 1 << 9
+const JP_NAVAL_UNITS = 1 << 10
+const AP_NAVAL_UNITS = 1 << 11
+const JP_HQ_UNITS = 1 << 12
+const AP_HQ_UNITS = 1 << 13
+const TRANSPORT_ROUTE_DISABLED = 1 << 14
+const JP_SUPPLY_PORT = 1 << 15
+const AP_SUPPLY_PORT = 1 << 16
+const JP_SUPPLIED_HEX = 1 << 17
+const BR_SUPPLIED_HEX = 1 << 18
+const JOINT_SUPPLIED_HEX = 1 << 19
+const US_SUPPLIED_HEX = 1 << 20
+const JP_SUPPLY_AIRFIELD = 1 << 21
+const AP_SUPPLY_AIRFIELD = 1 << 22
+const HEX_TEMP_FLAG1 = 1 << 23
+const HEX_TEMP_FLAG2 = 1 << 24
+const HEX_TEMP_FLAG3 = 1 << 25
 
+const POSSIBLE_ZOI = JP_ZOI | JP_ZOI_DISABLED
 const JP_UNITS = JP_AIR_UNITS | JP_GROUND_UNITS | JP_NAVAL_UNITS | JP_HQ_UNITS
 const AP_UNITS = JP_UNITS << 1
 const JP_GA_UNITS = JP_AIR_UNITS | JP_GROUND_UNITS
 const JP_GAH_UNITS = JP_AIR_UNITS | JP_GROUND_UNITS | JP_HQ_UNITS
-const NON_SUPPLY_MASK = [...Array(9).keys()].reduce((a, b) => a + Math.pow(2, b + 4), 0)
-const CLEAN_UNITS_MASK = [...Array(24).keys()].filter(a => a < 4 || a > 11).reduce((a, b) => a + Math.pow(2, b), 0)
-const CLEAN_SUPPLY_MASK = [(NON_SUPPLY_MASK | JP_SUPPLY_PORT | JP_SUPPLY_AIRFIELD | JP_SUPPLIED_HEX), (NON_SUPPLY_MASK | AP_SUPPLY_PORT | AP_SUPPLY_AIRFIELD | BR_SUPPLIED_HEX | JOINT_SUPPLIED_HEX | US_SUPPLIED_HEX)]
-const CLEAN_ATTACK_ZONE_MASK = [...Array(22).keys()].reduce((a, b) => a + Math.pow(2, b - 1), 0)
+const NON_SUPPLY_MASK = [...Array(9).keys()].reduce((a, b) => a + Math.pow(2, b + 6), 0)
+const CLEAN_UNITS_MASK = [...Array(26).keys()].filter(a => a < 6 || a > 13).reduce((a, b) => a + Math.pow(2, b), 0)
+const CLEAN_SUPPLY_MASK = [(NON_SUPPLY_MASK), (NON_SUPPLY_MASK)]
+const CLEAN_ATTACK_ZONE_MASK = [...Array(24).keys()].reduce((a, b) => a + Math.pow(2, b - 1), 0)
 const AP_SUPPLIED_HEX = (BR_SUPPLIED_HEX | JOINT_SUPPLIED_HEX | US_SUPPLIED_HEX)
 
 const LAST_BOARD_HEX = 1478
@@ -2461,7 +2464,7 @@ P.move_offensive_units = {
             if (G.offensive.stage === ATTACK_STAGE && L.move_data.sm_possible) {
                 button("strat_move", L.move_type !== STRAT_MOVE)
             }
-            if (G.offensive.stage === ATTACK_STAGE || L.move_data.move_type & GROUND_MOVE) {
+            if (G.offensive.stage === ATTACK_STAGE && L.move_data.move_type & GROUND_MOVE) {
                 button("ground_move", L.move_type !== MANUAL_MOVEMENT)
             }
             if (G.offensive.stage === ATTACK_STAGE && G.offensive.barges) {
@@ -2603,7 +2606,7 @@ P.move_offensive_units = {
             }
         }
         move_units(G.active_stack, curr_path)
-        reset_move_type()
+        L.move_type = ANY_MOVE
         check_supply()
         this.check_dist_attack(hex)
     },
@@ -2763,6 +2766,7 @@ P.choose_attack_hex = {
         })
         if (non_cv.length && path_to_bh) {
             move_units(non_cv, path_to_bh)
+            check_supply()
         }
         G.active_stack = []
         end()
@@ -2787,11 +2791,23 @@ function move_units(units, path) {
     if (path.length === 3) {
         return
     }
-    for (var i = 3; i < path.length; i++) {
+    var i = 3
+    var zoi_flag = !G.offensive.zoi_intelligence_modifier && G.offensive.stage === ATTACK_STAGE
+    if (!zoi_flag && !(path[0] & GROUND_MOVE)) {
+        i = path.length
+    }
+    var zoi_generator_flag = G.active_stack.filter(u => pieces[u].zoi_generator).length
+    var enemy_faction = 1 - pieces[G.active_stack[0]].faction
+    for (; i < path.length; i++) {
         var hex = path[i]
-        if (!G.offensive.zoi_intelligence_modifier && has_zoi(hex, 1 - R) && G.offensive.stage === ATTACK_STAGE) {
+        if (zoi_flag && zoi_generator_flag && (G.supply_cache[hex] & (POSSIBLE_ZOI << enemy_faction))) {
+            units.forEach(u => set_location(u, hex, 1))
+            check_supply()
+        }
+        if (zoi_flag && has_zoi(hex, 1 - R)) {
             log("Reaction zoi violated! -2 to reaction intelligence rolls.")
             G.offensive.zoi_intelligence_modifier = 1
+            zoi_flag = 0
         }
         if (path[0] & GROUND_MOVE && !is_faction_units(hex, 1 - R)) {
             capture_hex(hex)
@@ -2901,15 +2917,17 @@ function for_each_unit_on_map(apply) {
 function set_zoi(i, piece, oos_units) {
     let location = G.location[i]
     var zoi_disabled = L && L.move_type === STRAT_MOVE && set_has(G.active_stack, i)
-    if (piece.br && !set_has(oos_units[piece.faction], i) && !zoi_disabled) {
-        var mask = 0 | (JP_ZOI << piece.faction)
+    var mask = 0
+    if (piece.br && set_has(oos_units[piece.faction], i) && !zoi_disabled) {
+        mask = (JP_ZOI_DISABLED << piece.faction)
+    } else if (piece.br && !zoi_disabled) {
+        mask = (JP_ZOI << piece.faction)
         if (piece.br < 6) {
             mask = mask | JP_ZOI_NTRL << 1 - piece.faction
         }
-        G.supply_cache[location] = G.supply_cache[location] | mask
-        get_edge_hexes(location).flatMap(h => get_edge_hexes(h)).forEach(h => {
-            G.supply_cache[h] = G.supply_cache[h] | mask
-        })
+    }
+    if (mask > 0) {
+        for_each_hex_in_range(location, 2, h => G.supply_cache[h] = G.supply_cache[h] | mask)
     }
 }
 
@@ -3501,8 +3519,8 @@ P.check_overstacking = {
     }
 }
 
-function set_location(unit, location) {
-    if (location <= LAST_BOARD_HEX || location === CHINA_BOX) {
+function set_location(unit, location, no_logs) {
+    if (!no_logs && (location <= LAST_BOARD_HEX || location === CHINA_BOX)) {
         log(`${piece_get_log_str(unit)} moved to ${hex_get_log_str(location)}.`)
     }
     var prev_location = G.location[unit]
@@ -3885,7 +3903,8 @@ function compute_air_move_hexes() {
     if (move_data.move_type & STRAT_MOVE) {
         move_type |= STRAT_MOVE
     }
-    if (L.move_type === AVOID_ZOI && has_non_n_zoi(location, 1 - R)) {
+    var avoid_zoi_flag = L.move_type === AVOID_ZOI || move_data.move_type & STRAT_MOVE
+    if (avoid_zoi_flag && has_non_n_zoi(location, 1 - R)) {
         return []
     }
     const distance_map = [move_data.location, [0, 1, move_data.location]]
@@ -3916,7 +3935,7 @@ function compute_air_move_hexes() {
                 continue
             }
             var cached = map_get(distance_map, nh, [9])[0]
-            if (L.move_type === AVOID_ZOI && has_non_n_zoi(nh, 1 - R)
+            if (avoid_zoi_flag && has_non_n_zoi(nh, 1 - R)
                 || distance % 10 > L.move_data.extended_battle_range
                 || (distance >= cached && distance % 10 >= cached % 10)) {
                 continue
@@ -4118,6 +4137,7 @@ P.ground_disengagement = {
         push_undo()
         move_units(G.active_stack, map_get(L.allowed_hexes, hex))
         G.active_stack = []
+        check_supply()
     }
 }
 

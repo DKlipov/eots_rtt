@@ -1,5 +1,4 @@
 Todo list:
-* Check supply during movement
 * Strat move check zoi only enter hex
 * Marker pieces update
 * Limit ground strat move (no escort)
