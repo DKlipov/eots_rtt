@@ -3061,9 +3061,7 @@ function mark_supply_ports_oversea(hq, piece) {
 }
 
 function supply_source_in_range(location, faction) {
-    if (!is_faction_units(location, faction) && !get_map_data(location).airfield) {
-        return false
-    } else if (G.supply_cache[location] & JP_SUPPLY_PORT << faction) {
+    if (G.supply_cache[location] & JP_SUPPLY_PORT << faction) {
         return true
     }
     const queue = [location]
@@ -3128,7 +3126,11 @@ function mark_hexes_supplied_kunming() {
     }
 }
 
-function mark_hexes_supplied_from(hq, piece) {
+function unit_or_airfield(location, faction) {
+    return is_faction_units(location, faction) || get_map_data(location).airfield
+}
+
+function mark_hexes_supplied_from(hq, piece, is_check_supply_space) {
     var i = 0
     const faction = piece.faction
     const location = G.location[hq]
@@ -3164,7 +3166,7 @@ function mark_hexes_supplied_from(hq, piece) {
                 }
             }
             map_set(overland_set, nh, distance)
-            if (!(G.supply_cache[nh] & extended_supply_type) && supply_source_in_range(nh, faction)) {
+            if (!(G.supply_cache[nh] & extended_supply_type) && is_check_supply_space(location, faction) && supply_source_in_range(nh, faction)) {
                 G.supply_cache[nh] = G.supply_cache[nh] | supply_type
             }
         }
@@ -3300,7 +3302,7 @@ function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
             return
         }
         if (piece.faction === faction && check_hq_in_supply(hq, piece, piece.faction === AP ? JOINT_SUPPLIED_HEX : JP_SUPPLIED_HEX)) {
-            mark_hexes_supplied_from(hq, piece)
+            mark_hexes_supplied_from(hq, piece, unit_or_airfield)
         } else if (piece.faction === faction) {
             set_add(oos_units[faction], hq)
         }
@@ -3878,7 +3880,7 @@ function process_china_box_move(hex, base_path, move_type) {
     var faction = pieces[G.active_stack[0]].faction
     var move_data = L.move_data
     var china_rebase = faction === AP && base_path[0] % 10 === 0 && base_path[1] <= move_data.air_move_legs
-    if (china_rebase && (hex === DACCA || hex === JARHAT|| hex === LEDO) && G.supply_cache[hex] & AP_SUPPLY_AIRFIELD && !map_has(L.allowed_hexes, CHINA_BOX)) {
+    if (china_rebase && (hex === DACCA || hex === JARHAT || hex === LEDO) && G.supply_cache[hex] & AP_SUPPLY_AIRFIELD && !map_has(L.allowed_hexes, CHINA_BOX)) {
         var path_array = base_path.slice()
         path_array.push(CHINA_BOX)
         path_array[0] = move_type
@@ -6463,6 +6465,18 @@ P.end_of_turn_phase = script(`
 
 function get_victory() {
     var data = scenario_data()
+    HQ_LIST.forEach(hq => {
+        var piece = pieces[hq]
+        if (G.location[hq] >= LAST_BOARD_HEX) {
+            return
+        }
+        if (!set_has(G.oos, hq)) {
+            mark_hexes_supplied_from(hq, piece, is_controllable_hex)
+        }
+    })
+    if (G.burma_road < 2) {
+        mark_hexes_supplied_kunming()
+    }
     G.original_control = G.control
     var adjusted_control = G.control.slice()
     for (var i = 0; i < data.controllable.length; i++) {

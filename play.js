@@ -748,10 +748,10 @@ function on_update() {
         update_keyword("zoi_hex", hex, "contested", (zoi_state & 3) === 3)
         update_keyword("zoi_hex", hex, "jp", (zoi_state & 1) === 1)
         update_keyword("zoi_hex", hex, "ap", (zoi_state & 2) === 2)
-
+        //
         // // update_keyword("zoi_hex", hex, "lrb", (zoi_state & 7) === 3)
         // // update_keyword("zoi_hex", hex, "contested", (zoi_state & 3) === 3)
-        // update_keyword("zoi_hex", hex, "jp", (zoi_state & 1 << 15))
+        // update_keyword("zoi_hex", hex, "jp", (zoi_state & (1 << 19)))
         // // update_keyword("zoi_hex", hex, "ap", (zoi_state & 2) === 2)
     }
 
