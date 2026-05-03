@@ -1,7 +1,5 @@
 Todo list:
 * Surrender once per game
-* Chin surrender - diplace all air
-* china box - add ledo to check
 * Marker pieces update
 * Add partially impassable hexsides to data.js
 * Unit sorting

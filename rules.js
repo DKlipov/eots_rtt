@@ -436,13 +436,13 @@ for (var i = 0; i < map.length; i++) {
             links.push([hex_j, distance])
         }
     }
-    if (hex_i === JARHAT || hex_i === DACCA) {
+    if (hex_i === JARHAT || hex_i === DACCA || hex_i === LEDO) {
         links.push([CHINA_BOX, 1])
     }
     map_set(AIRFIELD_LINKS, hex_i, links.sort((a, b) => a[1] - b[1]).flatMap(a => a))
 }
 
-map_set(AIRFIELD_LINKS, CHINA_BOX, [JARHAT, 1, DACCA, 1])
+map_set(AIRFIELD_LINKS, CHINA_BOX, [JARHAT, 1, DACCA, 1, LEDO, 1])
 
 function get_hq_supply_type(piece) {
     if (!piece.faction) {
@@ -2086,7 +2086,10 @@ function get_activatable_units(hq, hq_supply_type) {
     L.move_data = {}
     G.offensive.battle_hexes.forEach(h => mark_attack_zone(h, R === AP ? 2 : 3))
     var hump = is_event_active(events.HUMP)
-    if (faction === AP && (G.supply_cache[KUNMING] & HEX_TEMP_FLAG3 || hump && (G.supply_cache[JARHAT] & HEX_TEMP_FLAG3) || hump && (G.supply_cache[DACCA] & HEX_TEMP_FLAG3))) {
+    if (faction === AP && (G.supply_cache[KUNMING] & HEX_TEMP_FLAG3
+            || hump && (G.supply_cache[JARHAT] & HEX_TEMP_FLAG3)
+            || hump && (G.supply_cache[DACCA] & HEX_TEMP_FLAG3))
+        || hump && (G.supply_cache[LEDO] & HEX_TEMP_FLAG3)) {
         G.supply_cache[CHINA_BOX] |= HEX_TEMP_FLAG3
     } else {
         G.supply_cache[CHINA_BOX] &= CLEAN_ATTACK_ZONE_MASK
@@ -3875,7 +3878,7 @@ function process_china_box_move(hex, base_path, move_type) {
     var faction = pieces[G.active_stack[0]].faction
     var move_data = L.move_data
     var china_rebase = faction === AP && base_path[0] % 10 === 0 && base_path[1] <= move_data.air_move_legs
-    if (china_rebase && (hex === DACCA || hex === JARHAT) && G.supply_cache[hex] & AP_SUPPLY_AIRFIELD && !map_has(L.allowed_hexes, CHINA_BOX)) {
+    if (china_rebase && (hex === DACCA || hex === JARHAT|| hex === LEDO) && G.supply_cache[hex] & AP_SUPPLY_AIRFIELD && !map_has(L.allowed_hexes, CHINA_BOX)) {
         var path_array = base_path.slice()
         path_array.push(CHINA_BOX)
         path_array[0] = move_type
@@ -3887,6 +3890,9 @@ function process_china_box_move(hex, base_path, move_type) {
         }
         if (G.supply_cache[JARHAT] & AP_SUPPLY_AIRFIELD) {
             result.push(JARHAT)
+        }
+        if (G.supply_cache[LEDO] & AP_SUPPLY_AIRFIELD) {
+            result.push(LEDO)
         }
         if (result.length) {
             return result

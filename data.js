@@ -6047,7 +6047,7 @@ data.events = {
         id: 1,
         cause: "allied nations surrendered [16.41]",
         pw: -2,
-        nations: [data.nations.AUSTRALIA, data.nations.BURMA, data.nations.AUSTRALIA, data.nations.DEI, data.nations.MALAYA, data.nations.PHILIPPINES]
+        nations: [data.nations.AUSTRALIA, data.nations.BURMA, data.nations.CHINA, data.nations.DEI, data.nations.MALAYA, data.nations.PHILIPPINES]
             .map(n => n.id)
     },
     ALASKA_OCCUPATION: {
