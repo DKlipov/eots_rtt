@@ -44,7 +44,6 @@ const JP_GARRISON_CN = find_piece("army_jp_g_1")
 
 const CANVAS = document.getElementById("canvas")
 const CANVAS_CTX = document.getElementById("canvas").getContext("2d")
-const ZOI_HEX = [0]
 const RESOURCE_HEX = [...Array(data.map.length).keys()].filter(h => data.map[h].resource).map(h => hex_to_int(data.map[h].id))
 
 const JP_REGIONS = ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Siam", "Caroline", "Marshall", "Japan"]
@@ -749,6 +748,11 @@ function on_update() {
         update_keyword("zoi_hex", hex, "contested", (zoi_state & 3) === 3)
         update_keyword("zoi_hex", hex, "jp", (zoi_state & 1) === 1)
         update_keyword("zoi_hex", hex, "ap", (zoi_state & 2) === 2)
+
+        // // update_keyword("zoi_hex", hex, "lrb", (zoi_state & 7) === 3)
+        // // update_keyword("zoi_hex", hex, "contested", (zoi_state & 3) === 3)
+        // update_keyword("zoi_hex", hex, "jp", (zoi_state & 1 << 15))
+        // // update_keyword("zoi_hex", hex, "ap", (zoi_state & 2) === 2)
     }
 
     update_hand(AP)
@@ -773,7 +777,7 @@ function on_update() {
     if (G.sid !== SOUTH_PACIFIC_SCENARIO) {
         populate_generic("india", Math.min(4, G.surrender[data.nations.INDIA.id]),
             `marker ${G.surrender[data.nations.INDIA.id] >= 5 ? "india_status_surrender" : "india_status"}`)
-        populate_generic("burma", G.burma_road, `marker burma_road${G.events[data.events.HUMP.id] ? "_hump" : ""}`)
+        populate_generic("burma", 2 - G.burma_road, `marker burma_road${G.events[data.events.HUMP.id] ? "_hump" : ""}`)
         populate("divisions", G.china_divisions, `divisions`, 0)
     }
 
