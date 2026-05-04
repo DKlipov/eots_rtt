@@ -79,8 +79,12 @@ const ORGANIC_ONLY = 1 << 12
 const GROUND_DISENGAGEMENT = 1 << 13
 
 const SOUTH_PACIFIC_SCENARIO = 0
-const MAIN_SCENARIO = 1
+const FULL_CAMPAIGN_SCENARIO = 1
+const SHORT_CAMPAIGN_SCENARIO = 5
+const EVEN_SHORT_CAMPAIGN_SCENARIO = 8
 const BURMA_SCENARIO = 10
+
+const CAMPAIGN_SCENARIOS = [FULL_CAMPAIGN_SCENARIO, SHORT_CAMPAIGN_SCENARIO, EVEN_SHORT_CAMPAIGN_SCENARIO]
 
 const UNIT_MOVEMENT_MARKERS = [
     {
@@ -326,7 +330,7 @@ const SOUTH_PAC_BOARD_INFO = {
 
 let ALL_BOARD_HEXES = []
 
-let SID = MAIN_SCENARIO;
+let SID = FULL_CAMPAIGN_SCENARIO;
 let map_layout = layout.mainmap;
 let map_info = MAIN_BOARD_INFO;
 
@@ -363,7 +367,7 @@ function on_init(scenario, game_options, static_view) {
             break;
         }
         default: {
-            SID = MAIN_SCENARIO
+            SID = FULL_CAMPAIGN_SCENARIO
             map_layout = layout.mainmap;
             map_elem.classList.add("main");
             define_board("#map", 2550, 1650, [12, 12, 12, 12])
@@ -694,7 +698,7 @@ function on_update() {
     // G.actions={}
     // G.actions.board_hex = []
     // G.actions.board_hex.push(hex_to_int(piece.start))
-
+    document.getElementById("vp_check_button").classList.toggle("disabled", CAMPAIGN_SCENARIOS.includes(G.sid))
 
     G.control.filter(h => map_info.hex_check(hex_to_int(h)) && !set_has(G.capture, h) && !set_has(JP_BOUNDARIES, h))
         .forEach(h => populate_generic("s-loc", h, "marker control_jp"))
