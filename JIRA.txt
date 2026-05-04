@@ -11,3 +11,5 @@ Todo list:
 * Pw magment page
 * Hex-to-hex distance calcualtion
 * Hex by hex move for naval and air?
+* ferry emergency
+* dacca reinf ships locked

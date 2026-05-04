@@ -60,6 +60,10 @@ const ROAD_EVENTS = Object.keys(data.events).filter(k => data.events[k].road).ma
     return event
 })
 
+for (var key of Object.keys(data.counters)) {
+    data.counters[key] = "marker " + data.counters[key]
+}
+
 const CARD_ACTIONS = ["card"]
 
 //Move types
@@ -90,91 +94,91 @@ const UNIT_MOVEMENT_MARKERS = [
     {
         "name": "BARGES_MOVE",
         condition: (u, piece, path) => path & BARGES_MOVE,
-        counter: "marker barges_small",
+        counter: data.counters.barges_small,
     },
     {
         "name": "STRAT_MOVE",
         condition: (u, piece, path) => path & STRAT_MOVE && piece.class !== "air",
-        counter: "marker strat_small",
+        counter: data.counters.strat_small,
     },
     {
         "name": "STRAT_MOVE",
         condition: (u, piece, path) => path & STRAT_MOVE && piece.class === "air",
-        counter: "marker strat_air_small",
+        counter: data.counters.strat_air_small,
     },
     {
         "name": "AMPH_MOVE",
         condition: (u, piece, path) => path & AMPH_MOVE && piece.class === "ground",
-        counter: "marker aa_small",
+        counter: data.counters.aa_small,
     },
     {
         condition: (u, piece, path) => piece.b29 && G.b29u & 2 << piece.b29,
-        counter: "marker strat_bombing",
+        counter: data.counters.strat_bombing,
     },
 
 ]
 
 const TRACK_MARKERS = [
     {
-        counter: "resource_jp",
-        alt_counter: "resource_jp_1",
+        counter: data.counters.resource_jp,
+        alt_counter: data.counters.resource_jp_1,
         value: G => RESOURCE_HEX.filter(h => set_has(G.control, h)).length
     },
     {
-        counter: "naval_repl",
+        counter: data.counters.naval_repl,
         value: G => G.reinforcements.NAVAL
     },
     {
-        counter: "air_repl",
+        counter: data.counters.air_repl,
         value: G => G.reinforcements.AIR
     },
     {
-        counter: () => G.events[data.events.BARGES.id] > 0 ? "asp_b_jp" : "asp_jp",
+        counter: () => G.events[data.events.BARGES.id] > 0 ? data.counters.asp_b_jp : data.counters.asp_jp,
         value: G => G.asp[0][0]
     },
     {
-        counter: "aspu_jp",
+        counter: data.counters.aspu_jp,
         always_show: true,
         value: G => G.asp[0][1]
     },
     {
-        counter: "asp_ap",
-        alt_counter: "asp_ap_1",
+        counter: data.counters.asp_ap,
+        alt_counter: data.counters.asp_ap_1,
         value: G => G.asp[1][0]
     },
     {
-        counter: "aspu_ap",
-        alt_counter: "aspu_ap_1",
+        counter: data.counters.aspu_ap,
+        alt_counter: data.counters.aspu_ap_1,
         always_show: true,
         value: G => G.asp[1][1]
     },
     {
-        counter: "drawn_jp",
+        counter: data.counters.drawn_jp,
         value: G => G.draw_counter[0]
     },
     {
-        counter: "drawn_ap",
+        counter: data.counters.drawn_ap,
         value: G => G.draw_counter[1]
     },
     {
-        counter: "pass_jp",
+        counter: data.counters.pass_jp,
         value: G => G.passes[0]
     },
     {
-        counter: "pass_ap",
+        counter: data.counters.pass_ap,
         value: G => G.passes[1]
     },
     {
-        counter: "pow_target",
+        counter: data.counters.pow_target,
         value: G => G.pow
     },
     {
-        counter: "pow",
+        counter: data.counters.pow,
         always_show: G => G.pow > 0,
         value: G => (G.pow > 0) ? current_pow(G) : 0
     },
     {
-        counter: "divisions_china",
+        counter: data.counters.divisions_china,
         always_show: G => 0,
         value: G => (G.sid === SOUTH_PACIFIC_SCENARIO) ? G.china_divisions : 0
     },
@@ -182,67 +186,67 @@ const TRACK_MARKERS = [
 
 const TURN_MARKERS = [
     {
-        counter: "future_offensive_jp",
+        counter: data.counters.future_offensive_jp,
         value: G => G.events[data.events.FUTURE_OFFENSIVE_JP.id]
     },
     {
-        counter: "future_offensive_ap",
+        counter: data.counters.future_offensive_ap,
         value: G => G.events[data.events.FUTURE_OFFENSIVE_AP.id]
     },
     {
-        counter: "defensive_doctrine",
+        counter: data.counters.defensive_doctrine,
         value: G => G.events[data.events.NEW_OPERATION_PLAN.id]
     },
     {
-        counter: "barges",
+        counter: data.counters.barges,
         value: G => G.events[data.events.BARGES.id]
     },
     {
-        counter: "kwai_river",
+        counter: data.counters.kwai_river,
         value: G => G.events[data.events.KWAI_RIVER_BRIDGE.id]
     },
     {
-        counter: () => (G.events[data.events.JP_ESCORTS.id] >> 4 === 2) ? "escorts2" : "escorts4",
+        counter: () => (G.events[data.events.JP_ESCORTS.id] >> 4 === 2) ? data.counters.escorts2 : data.counters.escorts4,
         value: G => G.events[data.events.JP_ESCORTS.id] % (1 << 4)
     },
     {
-        counter: "interceptors_jp",
+        counter: data.counters.interceptors_jp,
         value: G => G.events[data.events.INTERCEPTORS.id]
     },
     {
-        counter: "panama_canal",
+        counter: data.counters.panama_canal,
         value: G => G.events[data.events.PANAMA_CANAL.id]
     },
     {
-        counter: "doolitle",
+        counter: data.counters.doolitle,
         value: G => G.events[data.events.DOOLITLE.id]
     },
     {
-        counter: "pt_boats",
+        counter: data.counters.pt_boats,
         value: G => G.events[data.events.PT_BOATS.id]
     },
     {
-        counter: "us_sub",
+        counter: data.counters.us_sub,
         value: G => G.events[data.events.SUBMARINE_DOCTRINE.id]
     },
     {
-        counter: "alaska",
+        counter: data.counters.alaska,
         value: G => G.events[data.events.ALASKA_OCCUPATION.id]
     },
     {
-        counter: "hawaii",
+        counter: data.counters.hawaii,
         value: G => G.events[data.events.HAWAII_OCCUPATION.id]
     },
     {
-        counter: "strat_bombing",
+        counter: data.counters.strat_bombing,
         value: G => G.events[data.events.STRAT_BOMBING_CAMPAIGN.id]
     },
     {
-        counter: "china_offensive",
+        counter: data.counters.china_offensive,
         value: G => G.events[data.events.CHINA_OFFENSIVE.id]
     },
     {
-        counter: G => G.events[data.events.TOJO.id] ? "turn_tr" : "turn_pmt",
+        counter: G => G.events[data.events.TOJO.id] ? data.counters.turn_tr : data.counters.turn_pmt,
         value: G => G.turn
     },
 ]
@@ -453,7 +457,7 @@ function on_init(scenario, game_options, static_view) {
         define_marker("landing", i, "conflict landing")
             .element.innerText = String.fromCharCode(65 + i)
     }
-    define_marker("divisions", 0, "divisions_china")
+    define_marker("divisions", 0, data.counters.divisions_china)
     for (let i = 1; i < data.pieces.length; ++i) {
         let piece = data.pieces[i]
         piece.element = define_piece("unit", i, piece.counter).tooltip_image(unit_tooltip_image)
@@ -493,9 +497,9 @@ function update_hand(side) {
     }
 
     if (G.events[data.events.FUTURE_OFFENSIVE_JP.id + side] === G.turn) {
-        populate_generic_to_parent(fo_card, "marker future_offensive_inactive")
+        populate_generic_to_parent(fo_card, data.counters.future_offensive_inactive)
     } else if (G.events[data.events.FUTURE_OFFENSIVE_JP.id + side] > 0) {
-        populate_generic_to_parent(fo_card, `marker future_offensive_${side === AP ? "ap" : "jp"}`)
+        populate_generic_to_parent(fo_card, ((side === AP) ? data.counters.future_offensive_ap : data.counters.future_offensive_jp))
     }
 
     if (!Array.isArray(G.hand[side])) {
@@ -662,9 +666,9 @@ function place_unit(u, location) {
         } else if (battle && piece.parenthetical) {
             apply_conflict_marker(populate_generic_to_parent(unit, "marker conflict battle gray"), battle)
         } else if (piece.organic && !(path & STRAT_MOVE) && G.offensive.organic.includes(u)) {
-            populate_generic_to_parent(unit, "marker organic_small")
+            populate_generic_to_parent(unit, data.counters.organic_small)
         } else if (set_has(G.oos, u)) {
-            populate_generic_to_parent(unit, "marker oos_small")
+            populate_generic_to_parent(unit, data.counters.oos_small)
         } else {
             for (var i = 0; i < UNIT_MOVEMENT_MARKERS.length; i++) {
                 var m = UNIT_MOVEMENT_MARKERS[i]
@@ -699,21 +703,23 @@ function on_update() {
     // G.actions.board_hex = []
     // G.actions.board_hex.push(hex_to_int(piece.start))
     document.getElementById("vp_check_button").classList.toggle("disabled", CAMPAIGN_SCENARIOS.includes(G.sid))
-
+    if (G.pow <= 0) {
+        G.capture = []
+    }
     G.control.filter(h => map_info.hex_check(hex_to_int(h)) && !set_has(G.capture, h) && !set_has(JP_BOUNDARIES, h))
-        .forEach(h => populate_generic("s-loc", h, "marker control_jp"))
+        .forEach(h => populate_generic("s-loc", h, data.counters.control_jp))
     G.control.filter(h => map_info.hex_check(hex_to_int(h)) && set_has(G.garr_elim, h))
-        .forEach(h => populate_generic("s-loc", h, "marker no_garrison"))
+        .forEach(h => populate_generic("s-loc", h, data.counters.no_garrison))
     JP_BOUNDARIES.filter(h => map_info.hex_check(hex_to_int(h)) && !set_has(G.capture, h) && !set_has(G.control, h) && h !== MANCHURIA_1 && h !== MANCHURIA_2)
-        .forEach(h => populate_generic("s-loc", h, "marker control_ap"))
+        .forEach(h => populate_generic("s-loc", h, data.counters.control_us))
     G.capture.filter(h => map_info.hex_check(hex_to_int(h))).forEach(h => {
         var marker
         if (h === MANCHURIA_1 || h === MANCHURIA_2) {
-            marker = "marker capture_sov"
+            marker = data.counters.capture_sov
         } else if (set_has(G.control, h)) {
-            marker = "marker capture_jp"
+            marker = data.counters.capture_jp
         } else {
-            marker = "marker capture_ap"
+            marker = data.counters.capture_us
         }
         populate_generic("s-loc", h, marker)
     })
@@ -723,7 +729,7 @@ function on_update() {
         }
     })
     if (G.events[data.events.TOKYO_EXPRESS.id] > 0) {
-        populate_generic("s-loc", G.events[data.events.TOKYO_EXPRESS.id], "marker tokyo_express")
+        populate_generic("s-loc", G.events[data.events.TOKYO_EXPRESS.id], data.counters.tokyo_express)
     }
     map_for_each(G.garrison, (h, count) => {
         var marker = JP_GARRISON_CN
@@ -743,13 +749,13 @@ function on_update() {
     }
     if (G.pow > 0) {
         G.capture.filter(h => !set_has(G.control, h))
-            .forEach(h => populate_generic("s-loc", h, "marker pow"))
+            .forEach(h => populate_generic("s-loc", h, data.counters.pow))
     }
     var oos_hex_set = []
     for (i = 0; i < G.oos.length; i++) {
         let hex = G.location[G.oos[i]]
         if (!set_has(oos_hex_set, hex) && hex <= LAST_BOARD_HEX) {
-            populate_generic("s-loc", hex, "marker oos")
+            populate_generic("s-loc", hex, data.counters.oos)
             set_add(oos_hex_set, hex)
         }
     }
@@ -782,19 +788,29 @@ function on_update() {
 
     G.offensive.battle_hexes.forEach(h => populate("s-loc", h, "battle", G.offensive.battle_names.indexOf(h)))
     G.offensive.landing_hexes.forEach(h => populate("s-loc", h, "landing", G.offensive.battle_names.indexOf(h)))
-
-    G.inter_service.forEach((v, i) => populate_generic("status", i, `marker ${v ? "rivalry" : "agreement"}_${i ? "ap" : "jp"}`))
-    populate_generic("pw", G.political_will, "marker pw")
-    populate_generic("wie", G.wie, "marker wie")
+    var isr_marker = (v, i) => {
+        if (v === 1 && i === AP) {
+            return data.counters.rivalry_ap
+        } else if (v === 1 && i === JP) {
+            return data.counters.rivalry_jp
+        } else if (v === 0 && i === AP) {
+            return data.counters.agreement_ap
+        } else {
+            return data.counters.agreement_jp
+        }
+    }
+    G.inter_service.forEach((v, i) => populate_generic("status", i, isr_marker(v, i)))
+    populate_generic("pw", G.political_will, data.counters.pw)
+    populate_generic("wie", G.wie, data.counters.wie)
 
     if (G.sid !== SOUTH_PACIFIC_SCENARIO) {
         populate_generic("india", Math.min(4, G.surrender[data.nations.INDIA.id]),
-            `marker ${G.surrender[data.nations.INDIA.id] >= 5 ? "india_status_surrender" : "india_status"}`)
-        populate_generic("burma", 2 - G.burma_road, `marker burma_road${G.events[data.events.HUMP.id] ? "_hump" : ""}`)
+            (G.surrender[data.nations.INDIA.id] >= 5) ? data.counters.india_status_surrender : data.counters.india_status)
+        populate_generic("burma", 2 - G.burma_road, G.events[data.events.HUMP.id] ? data.counters.burma_road_hump : data.counters.burma_road)
         populate("divisions", G.china_divisions, `divisions`, 0)
     }
 
-    populate_generic("china", Math.min(5, G.surrender[data.nations.CHINA.id]), `marker china`)
+    populate_generic("china", Math.min(5, G.surrender[data.nations.CHINA.id]), data.counters.china)
 
     var turns = world.things["turn"]
     for (i = 0; i < TURN_MARKERS.length; i++) {
@@ -802,7 +818,7 @@ function on_update() {
         var value = marker.value(G)
         var counter = (typeof marker.counter === 'function') ? marker.counter(G) : marker.counter
         if (value > 0 && turns[value]) {
-            populate_generic("turn", value, "marker " + counter)
+            populate_generic("turn", value, counter)
         }
     }
     for (var key of Object.keys(data.nations)) {
@@ -811,10 +827,10 @@ function on_update() {
         var hex = nation.counter_hex
         var value = G.surrender[nation.id]
         if (marker && turns[value] && value) {
-            populate_generic("turn", value, "marker " + marker)
+            populate_generic("turn", value, marker)
         }
         if (counter && hex && value) {
-            populate_generic("s-loc", hex_to_int(hex), "marker " + marker)
+            populate_generic("s-loc", hex_to_int(hex), marker)
         }
     }
 
@@ -828,7 +844,7 @@ function on_update() {
             track = Math.min(9, value - 10)
         }
         if (value > 0 || marker.always_show === true || (typeof marker.always_show === 'function' && marker.always_show(G))) {
-            populate_generic("track", track, "marker " + counter)
+            populate_generic("track", track, counter)
         }
     }
 
@@ -1142,7 +1158,7 @@ function append_header(text, dl) {
 function create_flag(faction) {
     var result = document.createElement("div")
     if (faction) {
-        result.className = "control_ap"
+        result.className = "control_us"
     } else {
         result.className = "control_jp"
     }

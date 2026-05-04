@@ -82,6 +82,10 @@ header {
     text-indent: 0;
 }
 
+.gray {
+    filter: grayscale(100%);
+}
+
 #chat_text .Japan {
     background-color: lightpink
 }
@@ -398,7 +402,7 @@ div[data-tooltip]:after {
     border-style: solid;
 }
 
-.unit {
+.unit, .marker {
     border: 1px solid black;
 }
 
@@ -414,7 +418,7 @@ div[data-tooltip]:after {
 
 }
 
-.piece.big {
+.piece.big, .marker.big {
     width: 45px;
     height: 45px;
 }
@@ -428,12 +432,17 @@ div[data-tooltip]:after {
     background-size: 35px 35px;
 }
 
-.card > .marker {
-    width: 70px;
-    height: 70px;
-    background-size: 70px 70px;
+.card > .big.marker {
+    width: 90px;
+    height: 90px;
     right: 10px;
     top: 10px;
+}
+.card > .big.unit_ix_4 {
+    background-position-x:  -270px;
+}
+.card > .big.unit_ix_5 {
+    background-position-x:  -360px;
 }
 
 /* MARKER IMAGES */

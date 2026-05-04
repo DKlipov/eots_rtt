@@ -1,64 +1,12 @@
 /*MARKERS*/
-/*.marker.attack { background-image: url(markers75/attack.webp);  }*/
-/*.marker.landing { background-image: url(markers75/landing.webp);  }*/
+/*special markers*/
 .marker.oos { background-image: url(markers75/ap_oos.webp);  }
-.control_jp { background-image: url(markers75/control_jp.png);  }
-.marker.capture_jp { background-image: url(markers75/capture_jp.png);  }
-.control_ap { background-image: url(markers75/control_ap.png);  }
-.marker.capture_ap { background-image: url(markers75/capture_ap.png);  }
-.marker.control_sov { background-image: url(markers75/control_sov.png);  }
-.marker.capture_sov { background-image: url(markers75/capture_sov.png);  }
-.marker.pow { background-image: url(markers75/pow_square.png);  }
-.marker.pow_target { background-image: url(markers75/pow_target.png);  }
-.marker.strat_bombing { background-image: url(markers75/strat_bombing.png);  }
-.marker.agreement_jp { background-image: url(markers75/jp_ageement.jpg);  }
-.marker.agreement_ap { background-image: url(markers75/ap_ageement.jpg);  }
-.marker.rivalry_ap { background-image: url(markers75/ap_rivalry.jpg);  }
-.marker.rivalry_jp { background-image: url(markers75/jp_rivalry.jpg);  }
-.marker.asp_jp { background-image: url(markers75/jp_asp.jpg);  }
-.marker.asp_b_jp { background-image: url(markers75/jp_asp_b.jpg);  }
-.marker.asp_nb_jp { background-image: url(markers75/jp_asp_nb.jpg);  }
-.marker.aspu_jp { background-image: url(markers75/jp_aspu.jpg);  }
-.marker.asp_ap { background-image: url(markers75/ap_asp.jpg);  }
-.marker.asp_ap_1 { background-image: url(markers75/ap_asp_1.jpg);  }
-.marker.aspu_ap { background-image: url(markers75/ap_aspu.jpg);  }
-.marker.aspu_ap_1 { background-image: url(markers75/ap_aspu_1.jpg);  }
-.marker.wie { background-image: url(markers75/wie.jpg);  }
-.marker.pw { background-image: url(markers75/pw.jpg);  }
-.marker.turn_pmt { background-image: url(markers75/turn_pmt.jpg);  }
-.marker.turn_tr { background-image: url(markers75/turn_tr.jpg);  }
-.marker.resource_jp { background-image: url(markers75/jp_resources.jpg);  }
-.marker.resource_jp_1 { background-image: url(markers75/jp_resources_1.jpg);  }
-.marker.pass_jp { background-image: url(markers75/jp_pass.jpg);  }
-.marker.pass_ap { background-image: url(markers75/ap_pass.jpg);  }
-.marker.india_status { background-image: url(markers75/india.png);  }
-.marker.india_status_surrender { background-image: url(markers75/india_status_surrender.png);  }
-.marker.alaska { background-image: url(markers75/alaska_occupied.png);  }
-.marker.hawaii { background-image: url(markers75/hawaii_occupied.png);  }
-.marker.future_offensive_ap { background-image: url(markers75/fo_ap.png);  }
-.marker.future_offensive_jp { background-image: url(markers75/fo_jp.png);  }
-.marker.future_offensive_inactive { background-image: url(markers75/fo_inactive.png);  }
-.marker.kwai_river { background-image: url(markers75/kwai.png);  }
-.marker.road { background-image: url(markers75/route.png);  }
-.marker.china { background-image: url(markers75/china.png);  }
-.marker.burma_road { background-image: url(markers75/burma_road_no_hump.png);  }
-.marker.burma_road_hump { background-image: url(markers75/burma_road_hump.png);  }
-.marker.china_offensive { background-image: url(markers75/china_offensive.png);  }
-.marker.divisions_china { background-image: url(markers75/divisions_china.png);  }
-.marker.air_repl { background-image: url(markers75/air_rep.png);  }
-.marker.naval_repl { background-image: url(markers75/naval_rep.png);  }
-.marker.drawn_ap { background-image: url(markers75/drawn_ap.png);  }
-.marker.drawn_jp { background-image: url(markers75/drawn_jp.png);  }
-.marker.tokyo_express { background-image: url(markers75/tokyo_express.png);  }
-.marker.defensive_doctrine { background-image: url(markers75/defensive_doctrine.png);  }
-.marker.escorts2 { background-image: url(markers75/escorts+2.png);  }
-.marker.escorts4 { background-image: url(markers75/escorts+4.png);  }
-.marker.panama_canal { background-image: url(markers75/panama_canal.png);  }
-.marker.interceptors_jp { background-image: url(markers75/interceptors.png);  }
-.marker.barges { background-image: url(markers75/barges.png);  }
-.marker.doolitle { background-image: url(markers75/doolitle.png);  }
-.marker.pt_boats { background-image: url(markers75/pt_boats.png);  }
-.marker.us_sub { background-image: url(markers75/us_sub.png);  }
+.control_jp { background-image: url(markers75/control_jp.png); border: none; }
+.marker.capture_jp { background-image: url(markers75/capture_jp.png); border: none; }
+.control_us { background-image: url(markers75/control_us.png); border: none; }
+.marker.capture_us { background-image: url(markers75/capture_us.png);  border: none;}
+.marker.control_sov { background-image: url(markers75/control_sov.png); border: none; }
+.marker.capture_sov { background-image: url(markers75/capture_sov.png);  border: none;}
 .marker.no_garrison { background-image: url(markers75/no_garrison.png);  }
 .marker.organic_small { background-image: url(markers75/organic_small.png); }
 .marker.aa_small { background-image: url(markers75/aa_small.png); }
@@ -66,11 +14,21 @@
 .marker.strat_air_small { background-image: url(markers75/strat_air_small.png); }
 .marker.barges_small { background-image: url(markers75/barges_small.png); }
 .marker.oos_small { background-image: url(markers75/oos_small.webp); }
-.marker.australia_surrender { background-image: url(markers75/australia_surrender.png); }
-.marker.burma_surrender { background-image: url(markers75/burma_surrender.png); }
-.marker.dei_surrender { background-image: url(markers75/dei_surrender.png); }
-.marker.malaya_surrender { background-image: url(markers75/malaya_surrender.png); }
-.marker.phillipines_surrender { background-image: url(markers75/phillipines_surrender.png); }
+
+/*marker_stripes*/
+.big_markers_blue { background-image: url(pieces150/big_markers_blue.150.png); background-size: 225px 90px; }
+.big_markers_dkblue { background-image: url(pieces150/big_markers_dkblue.150.png); background-size: 45px 90px; }
+.big_markers_white { background-image: url(pieces150/big_markers_white.150.png); background-size: 495px 90px; }
+.card > .big_markers_white {
+    background-size: 990px 180px;
+}
+.big_markers_yellow { background-image: url(pieces150/big_markers_yellow.150.png); background-size: 135px 90px; }
+.small_markers_dkblue { background-image: url(pieces150/small_markers_dkblue.150.png); background-size: 140px 70px; }
+.small_markers_green { background-image: url(pieces150/small_markers_green.150.png); background-size: 105px 70px; }
+.small_markers_red { background-image: url(pieces150/small_markers_red.150.png); background-size: 70px 70px; }
+.small_markers_black { background-image: url(pieces150/small_units_black.150.png); background-size: 280px 70px; }
+.small_markers_brown { background-image: url(pieces150/small_units_brown.150.png); background-size: 140px 70px; }
+.small_markers_yellow { background-image: url(pieces150/small_markers_yellow.150.png); background-size: 420px 70px; }
 
 /* ARMIES (45x45) */
 .air_br { background-image: url(pieces/air_br.png); background-size: 136px 70px; }

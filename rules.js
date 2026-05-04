@@ -9936,6 +9936,9 @@ function setup_scenario_1943() {
         var piece = pieces[i]
         if (piece.faction === AP && piece.start && piece.notreplaceable) {
             G.location[i] = ELIMINATED_BOX
+            if (piece.class === "hq") {
+                G.location[i] = PERM_ELIMINATED
+            }
         }
     }
     for (let i = 1; i < pieces.length; i++) {
@@ -10140,6 +10143,9 @@ function setup_scenario_1944() {
     //ap setup
     for_each_unit_on_map((u, piece) => {
         G.location[u] = ELIMINATED_BOX
+        if (piece.class === "hq") {
+            G.location[u] = PERM_ELIMINATED
+        }
     })
     G.location[find_piece("indomitable")] = hex_to_int(1005)
     G.location[find_piece("warspite")] = hex_to_int(1005)
