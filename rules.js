@@ -6589,8 +6589,7 @@ function victory_1942() {
     } else {
         result.text.push(`0 VP - India ${nations.INDIA.statuses[india_status]}`)
     }
-    binary_vp(result, is_space_controlled(GUADALCANAL, JP) && is_space_controlled(RABAUL, JP), 1, "JP Control of Australian Mandates", `AP Control of Australian Mandates`,
-        [GUADALCANAL, RABAUL])
+    binary_vp(result, G.surrender[nations.AUSTRALIAN_MANDATES.id], 1, "JP Control of Australian Mandates", `AP Control of Australian Mandates`)
     var new_guinea = 0
     G.control.forEach(h => {
         if (get_map_data(h).port && get_map_data(h).region === "Guinea") {
@@ -6600,8 +6599,8 @@ function victory_1942() {
     binary_vp(result, new_guinea >= 4, 2, `JP Control of ${new_guinea} >= 4 New Guinea ports`,
         `JP Control of ${new_guinea} < 4 New Guinea ports`, nations.NEW_GUINEA.keys.map(h => hex_to_int(h)).filter(h => h !== VOGELKOP))
     if (G.political_will <= 5) {
-        result.vp += G.political_will - 4
-        result.text.push(`+${G.political_will - 4} VP - Political will`)
+        result.vp += 6 - G.political_will
+        result.text.push(`+${6 - G.political_will} VP - Political will`)
     } else if (G.political_will >= 6) {
         result.vp -= G.political_will - 5
         result.text.push(`-${G.political_will - 5} VP - Political will`)
@@ -6734,14 +6733,13 @@ function victory_1943() {
         result.text.push(`0 VP - India ${nations.INDIA.statuses[india_status]}`)
     }
     var mandate_diff = 0
-    if (is_space_controlled(GUADALCANAL, JP) && is_space_controlled(RABAUL, JP)) {
+    if (G.surrender[nations.AUSTRALIAN_MANDATES.id]) {
         mandate_diff = 3
-    } else if (is_space_controlled(GUADALCANAL, AP) && is_space_controlled(RABAUL, AP)) {
+    } else {
         mandate_diff = -3
     }
-    adjust_vp(result, mandate_diff, "Control of Australian Mandates",
-        [GUADALCANAL, RABAUL])
-    if (!is_space_controlled(GUADALCANAL, AP) || !is_space_controlled(RABAUL, AP)) {
+    adjust_vp(result, mandate_diff, "Control of Australian Mandates")
+    if (!G.surrender[nations.AUSTRALIAN_MANDATES.id]) {
         var mandate_count = 0
         var mandate_hexes = []
         for_each_hex_in_range(RABAUL, 5, h => {
@@ -6758,8 +6756,8 @@ function victory_1943() {
         )
     }
     if (G.political_will <= 5) {
-        result.vp += G.political_will - 4
-        result.text.push(`+${G.political_will - 4} VP - Political will`)
+        result.vp += 6 - G.political_will
+        result.text.push(`+${6 - G.political_will} VP - Political will`)
     } else if (G.political_will >= 6) {
         result.vp -= G.political_will - 5
         result.text.push(`-${G.political_will - 5} VP - Political will`)
@@ -6852,14 +6850,13 @@ function victory_1944() {
         result.text.push(`0 VP - India ${nations.INDIA.statuses[india_status]}`)
     }
     var mandate_diff = 0
-    if (is_space_controlled(GUADALCANAL, JP) && is_space_controlled(RABAUL, JP)) {
+    if (G.surrender[nations.AUSTRALIAN_MANDATES.id]) {
         mandate_diff = 1
     }
-    adjust_vp(result, mandate_diff, "Control of Australian Mandates",
-        [GUADALCANAL, RABAUL])
+    adjust_vp(result, mandate_diff, "Control of Australian Mandates")
     if (G.political_will <= 5) {
-        result.vp += G.political_will - 4
-        result.text.push(`+${G.political_will - 4} VP - Political will`)
+        result.vp += 6 - G.political_will
+        result.text.push(`+${6 - G.political_will} VP - Political will`)
     } else if (G.political_will >= 6) {
         result.vp -= G.political_will - 5
         result.text.push(`-${G.political_will - 5} VP - Political will`)
