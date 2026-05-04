@@ -169,6 +169,11 @@ const TRACK_MARKERS = [
         always_show: G => G.pow > 0,
         value: G => (G.pow > 0) ? current_pow(G) : 0
     },
+    {
+        counter: "divisions_china",
+        always_show: G => 0,
+        value: G => (G.sid === SOUTH_PACIFIC_SCENARIO) ? G.china_divisions : 0
+    },
 ]
 
 const TURN_MARKERS = [
@@ -187,6 +192,10 @@ const TURN_MARKERS = [
     {
         counter: "barges",
         value: G => G.events[data.events.BARGES.id]
+    },
+    {
+        counter: "kwai_river",
+        value: G => G.events[data.events.KWAI_RIVER_BRIDGE.id]
     },
     {
         counter: () => (G.events[data.events.JP_ESCORTS.id] >> 4 === 2) ? "escorts2" : "escorts4",
@@ -790,6 +799,18 @@ function on_update() {
         var counter = (typeof marker.counter === 'function') ? marker.counter(G) : marker.counter
         if (value > 0 && turns[value]) {
             populate_generic("turn", value, "marker " + counter)
+        }
+    }
+    for (var key of Object.keys(data.nations)) {
+        var nation = data.nations[key]
+        var marker = nation.counter
+        var hex = nation.counter_hex
+        var value = G.surrender[nation.id]
+        if (marker && turns[value] && value) {
+            populate_generic("turn", value, "marker " + marker)
+        }
+        if (counter && hex && value) {
+            populate_generic("s-loc", hex_to_int(hex), "marker " + marker)
         }
     }
 

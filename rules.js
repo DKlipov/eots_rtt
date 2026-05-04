@@ -5922,7 +5922,7 @@ P.battle_sequence = script(`
 `)
 
 P.political_phase = script(`
-    log ("Turn"+G.turn+". Political phase.")
+    log ("Turn "+G.turn+". Political phase.")
   
     call national_status_segment
     call india_surrender
@@ -5980,7 +5980,8 @@ P.national_status_segment = function () {
         india_stable()
     }
 
-    if (check_nation_surrender(nations.AUSTRALIA) && check_event(events.AUSTRALIA_SURRENDER)) {
+    if (!is_event_active(events.AUSTRALIA_SURRENDER) && check_nation_surrender(nations.AUSTRALIA)) {
+        check_event(events.AUSTRALIA_SURRENDER)
         for_each_unit((u, piece, location) => {
             if (piece.service === "au" && location >= LAST_BOARD_HEX) {
                 eliminate_permanently(u)
@@ -5990,8 +5991,11 @@ P.national_status_segment = function () {
     if (check_nation_surrender(nations.AUSTRALIAN_MANDATES)) {
         set_control_over_nation(nations.AUSTRALIAN_MANDATES)
     }
-    if (check_nation_surrender(nations.MARSHALL)) {
+    if (!is_event_active(events.MARSHALL_CAPTURED) && check_nation_controlled(nations.MARSHALL, AP)) {
+        G.surrender[nations.MARSHALL.id] = 0
         set_control_over_nation(nations.MARSHALL)
+        check_event(events.MARSHALL_CAPTURED)
+        log("AP captured Marshall islands.")
     }
     if (check_nation_controlled(nations.JAPAN, AP)) {
         finish("Allies", "Japanese Empire surrenders by Allied invasion")
@@ -6115,6 +6119,10 @@ function china_surrender() {
         }
     })
     change_political_will(-nations.CHINA.pw, "")
+    if (!events.ALLIED_NATIONS_SURRENDERS.nations.filter(n => !G.surrender[n]).length &&
+        G.surrender[nations.INDIA.id] >= 4 && G.surrender[nations.CHINA.id] >= 5) {
+        check_event(events.ALLIED_NATIONS_SURRENDERS)
+    }
 }
 
 function change_political_will(diff, cause) {
@@ -6249,8 +6257,9 @@ function check_nation_surrender(nation) {
     if (!check_nation_controlled(nation, G.surrender[nation.id] ? AP : JP)) {
         return false
     }
-    G.surrender[nation.id] = set_has(G.control, hex_to_int(nation.keys[0]))
-    log(`${nation.name} ${G.surrender[nation.id] ? "occupied" : "liberated"}.`)
+    var faction = (G.surrender[nation.id] ? AP : JP)
+    G.surrender[nation.id] = (faction === AP) ? 0 : G.turn
+    log(`${nation.name} ${faction === JP ? "surrender" : "liberated"}.`)
     if (nation.pw) {
         change_political_will(nation.pw * (G.surrender[nation.id] ? -1 : 1), "")
     }
@@ -6278,7 +6287,8 @@ function set_control_over_nation(nation, only_ground = true) {
 
 
 P.political_will_segment = function () {
-    if (!events.ALLIED_NATIONS_SURRENDERS.nations.filter(n => !G.surrender[n]).length) {
+    if (!events.ALLIED_NATIONS_SURRENDERS.nations.filter(n => !G.surrender[n]).length &&
+        G.surrender[nations.INDIA.id] >= 4 && G.surrender[nations.CHINA.id] >= 5) {
         check_event(events.ALLIED_NATIONS_SURRENDERS)
     }
     check_occupation(events.ALASKA_OCCUPATION)
@@ -10052,7 +10062,7 @@ function setup_scenario_1943() {
 
     var surrender = [nations.MALAYA, nations.PHILIPPINES, nations.DEI, nations.BURMA, nations.AUSTRALIAN_MANDATES]
     surrender.forEach(n => {
-        G.surrender[n.id] = 1
+        G.surrender[n.id] = 3
         set_control_over_nation(n)
     })
 
@@ -10091,7 +10101,7 @@ function setup_scenario_1943() {
     G.events[events.HUMP.id] = 1
     G.events[events.JARHAT_ROAD.id] = 1
     G.events[events.BARGES.id] = 1
-    G.events[events.KWAI_RIVER_BRIDGE.id] = 1
+    G.events[events.KWAI_RIVER_BRIDGE.id] = 2
     G.events[events.ALASKA_OCCUPATION.id] = 3
 
     future_offencive_card(find_card(AP, 29), 3)
@@ -10252,7 +10262,7 @@ function setup_scenario_1944() {
 
     var surrender = [nations.MALAYA, nations.PHILIPPINES, nations.DEI, nations.BURMA, nations.AUSTRALIAN_MANDATES]
     surrender.forEach(n => {
-        G.surrender[n.id] = 1
+        G.surrender[n.id] = 3
         set_control_over_nation(n)
     })
     for_each_unit_on_map(u => control_hex(G.location[u], pieces[u].faction))
@@ -10274,7 +10284,7 @@ function setup_scenario_1944() {
     G.events[events.PT_BOATS.id] = 5
     G.events[events.HUMP.id] = 1
     G.events[events.JARHAT_ROAD.id] = 1
-    G.events[events.KWAI_RIVER_BRIDGE.id] = 1
+    G.events[events.KWAI_RIVER_BRIDGE.id] = 2
 
 
     var jr = [1, 2, 5, 6, 13, 15, 18, 26, 31, 39, 51, 53, 54, 55, 73, 78]
@@ -10331,6 +10341,7 @@ function setup_scenario_south_pacific() {
         G.surrender[n.id] = 1
         set_control_over_nation(n)
     })
+    G.surrender[nations.NEW_GUINEA.id] = 0
     var ap_controlled = [5808, 3823, 4024, 4828]
     ap_controlled.forEach(h => set_delete(G.control, hex_to_int(h)))
     control_hex(hex_to_int(4719), JP)

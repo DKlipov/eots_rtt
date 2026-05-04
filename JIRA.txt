@@ -1,9 +1,13 @@
 Todo list:
-* Surrender once per game
+* 1943 VP
 * Marker pieces update
+* Battle hex confirmation and calculation
+* Tarzan fix
+* Update special move buttons
 * Add partially impassable hexsides to data.js
 * Unit sorting
-* 1943 VP
-* Battle hex confirmation and calculation
+* India tracker (and check trackers)
+* Hide path option
+* Red routes option
 * Hex-to-hex distance calcualtion
 * Hex by hex move for naval and air?

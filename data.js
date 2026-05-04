@@ -5961,6 +5961,8 @@ data.nations = {
         id: 0,
         name: "Philippines",
         pw: 1,
+        counter: "phillipines_surrender",
+        counter_hex: 2712,
         regions: ["Philippines"],
         keys: [2813, 2915],
     },
@@ -5968,6 +5970,8 @@ data.nations = {
         id: 1,
         name: "Malaya",
         pw: 1,
+        counter: "malaya_surrender",
+        counter_hex: 2114,
         regions: ["Malaya"],
         keys: [2014, 2015]
     },
@@ -5975,6 +5979,8 @@ data.nations = {
         id: 2,
         name: "Dutch East India",
         pw: 1,
+        counter: "dei_surrender",
+        counter_hex: 2218,
         regions: ["DEI", "Java", "Sumatra", "Borneo", "Celebes"],
         keys: [2019, 1813, 1916, 2017, 2415, 2616, 2517, 2220]
     },
@@ -5982,6 +5988,8 @@ data.nations = {
         id: 3,
         name: "Burma",
         pw: 1,
+        counter: "burma_surrender",
+        counter_hex: 1907,
         regions: ["Burma"],
         keys: [2008, 2106, 2206, 2305]
     },
@@ -5998,6 +6006,8 @@ data.nations = {
         id: 5,
         name: "Australia",
         pw: 2,
+        counter: "australia_surrender",
+        counter_hex: 3828,
         regions: ["Australia"],
         keys: [3727, 3626, 3624, 3226, 3023, 2825, 2525, 2426]
     },
@@ -6047,7 +6057,7 @@ data.events = {
         id: 1,
         cause: "allied nations surrendered [16.41]",
         pw: -2,
-        nations: [data.nations.AUSTRALIA, data.nations.BURMA, data.nations.CHINA, data.nations.DEI, data.nations.MALAYA, data.nations.PHILIPPINES]
+        nations: [data.nations.AUSTRALIA, data.nations.BURMA, data.nations.DEI, data.nations.MALAYA, data.nations.PHILIPPINES]
             .map(n => n.id)
     },
     ALASKA_OCCUPATION: {
@@ -6162,6 +6172,9 @@ data.events = {
         id: 28,
         name: "Japanese Empire surrenders by lack of resources",
         keys: [3307, 3704, 3407, 3506, 3507, 3607, 3706, 3705]
+    },
+    MARSHALL_CAPTURED: {
+        id: 29,
     },
 }
 
