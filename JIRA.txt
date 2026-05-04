@@ -1,5 +1,4 @@
 Todo list:
-* 1943 VP
 * Marker pieces update
 * Battle hex confirmation and calculation
 * Tarzan fix
@@ -9,5 +8,6 @@ Todo list:
 * India tracker (and check trackers)
 * Hide path option
 * Red routes option
+* Pw magment page
 * Hex-to-hex distance calcualtion
 * Hex by hex move for naval and air?

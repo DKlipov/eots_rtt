@@ -6791,7 +6791,7 @@ function victory_1943() {
             return
         }
         tokyo_ports_list.push(h)
-        if ((is_space_controlled(h, AP) || is_faction_units(h, AP))) {
+        if ((is_space_controlled(h, AP))) {
             tokyo_ports++
         }
     })
@@ -6820,8 +6820,13 @@ function victory_1943() {
 }
 
 function victory_1944() {
-    if (is_space_controlled(OAHU, JP) && get_hand(AP).length === 0 && get_hand(JP).length === 0) {
-        set_add(G.captured_once, OAHU)
+    var hawaii = [hex_to_int(5708), hex_to_int(5808), hex_to_int(5908)]
+    if (get_hand(AP).length === 0 && get_hand(JP).length === 0) {
+        hawaii.forEach(h => {
+            if (is_faction_units(h, JP)) {
+                set_add(G.captured_once, h)
+            }
+        })
     }
     var result = {
         vp: 0,
@@ -6829,23 +6834,13 @@ function victory_1944() {
         won_side: "",
         won_text: "",
     }
-    if (G.surrender[nations.CHINA.id] > 5) {
-        result.vp += 5
-        result.text.push(`+5 VP - China surrender`)
-    }
-    if (G.burma_road >= 1) {
-        result.vp += 1
-        result.text.push(`+1 VP - Burma road closed`)
-    }
-    if (!check_supply_line(hex_to_int(3727), OAHU, AP)) {
-        result.vp += 5
-        result.text.push(`+5 VP - Townsville isolated from Oahu`)
-    }
+    binary_vp(result, G.surrender[nations.CHINA.id] >= 5, 5, "China surrender", `China not surrender`)
+    binary_vp(result, G.burma_road >= 1, 1, "Burma road closed", `Burma road open`)
+    binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
+        "Townsville did not isolated", [hex_to_int(3727), OAHU])
+
     var india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
-    if (india) {
-        result.vp += india
-        result.text.push(`+${india} VP - Jp controlled hexes of Northern India`)
-    }
+    adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
     var india_status = G.surrender[nations.INDIA.id]
     if (india_status > 0 && india_status <= 2) {
         result.vp += 1
@@ -6853,13 +6848,15 @@ function victory_1944() {
     } else if (india_status > 0) {
         result.vp += 2
         result.text.push(`+2 VP - India ${nations.INDIA.statuses[india_status]}`)
+    } else {
+        result.text.push(`0 VP - India ${nations.INDIA.statuses[india_status]}`)
     }
-
-    if (G.surrender[nations.AUSTRALIAN_MANDATES.id]) {
-        result.vp += 1
-        result.text.push(`+1 VP - Japanese control of Australian Mandates`)
+    var mandate_diff = 0
+    if (is_space_controlled(GUADALCANAL, JP) && is_space_controlled(RABAUL, JP)) {
+        mandate_diff = 1
     }
-
+    adjust_vp(result, mandate_diff, "Control of Australian Mandates",
+        [GUADALCANAL, RABAUL])
     if (G.political_will <= 5) {
         result.vp += G.political_will - 4
         result.text.push(`+${G.political_will - 4} VP - Political will`)
@@ -6867,37 +6864,48 @@ function victory_1944() {
         result.vp -= G.political_will - 5
         result.text.push(`-${G.political_will - 5} VP - Political will`)
     }
-    if (set_has(G.captured_once, OAHU)) {
-        result.vp += 3
-        result.text.push(`+3 VP - Oahu was captured`)
-    }
+    binary_vp(result, set_has(G.captured_once, OAHU), 3, `Oahu was captured`,
+        "Oahu was not captured")
+    var ng_diff = 0
     if (check_nation_controlled(nations.NEW_GUINEA, JP)) {
-        result.vp += 5
-        result.text.push(`+5 VP - Japanese control of New Guinea`)
+        ng_diff = 5
+    } else if (!check_nation_controlled(nations.NEW_GUINEA, AP)) {
+        ng_diff = 3
     }
-    if (!is_space_controlled(hex_to_int(4021), AP) && check_unit_supply(hex_to_int(4021), jp_army(27), pieces[jp_army(27)])) {
-        result.vp += 3
-        result.text.push(`+3 VP - Allies have not captured Rabaul`)
+    adjust_vp(result, ng_diff, "Control of New Guinea",
+        nations.NEW_GUINEA.keys.map(h => hex_to_int(h)))
+    binary_vp(result, is_space_controlled(RABAUL, AP) || !(G.supply_cache[RABAUL] & JP_SUPPLIED_HEX), 3,
+        `Rabaul ${is_space_controlled(RABAUL, AP) ? "controlled" : "out of supply"}`,
+        "Rabaul JP controlled and supplied")
+
+    var philipine_ports = [MANILA, hex_to_int(3014), hex_to_int(2915)]
+    var pp = philipine_ports.filter(h => is_space_controlled(h, AP) && (G.supply_cache[h] & AP_SUPPLIED_HEX)).length
+    var phillipine_diff = 0
+    if (pp === 0) {
+        phillipine_diff = 5
+    } else if (pp === 1) {
+        phillipine_diff = 3
+    } else if (pp >= 2) {
+        phillipine_diff = 0
     }
-    var phl = [2813, 3014, 2915]
-    var phl_port_count = phl.filter(h => is_space_controlled(hex_to_int(h), AP)).length
-    if (phl_port_count <= 0) {
-        result.vp += 5
-        result.text.push(`+5 VP - Allies have not captured Phillipines port hex`)
-    } else if (phl_port_count === 1) {
-        result.vp += 3
-        result.text.push(`+3 VP - Allies have captured one Phillipines port hex`)
-    }
+    adjust_vp(result, phillipine_diff, "Control of Philippines ports",
+        philipine_ports)
+
     var tokyo_ports = 0
+    var tokyo_ports_list = []
     for_each_hex_in_range(TOKYO, 8, h => {
-        if (get_map_data(h).port && (is_space_controlled(h, AP) || is_faction_units(h, AP))) {
+        if (!get_map_data(h).port) {
+            return
+        }
+        tokyo_ports_list.push(h)
+        if ((is_space_controlled(h, AP))) {
             tokyo_ports++
         }
     })
-    if (tokyo_ports <= 0) {
-        result.vp += 5
-        result.text.push(`+5 VP - Allies do not control a port that is 8 or less hexes from Tokyo`)
-    }
+    binary_vp(result, tokyo_ports <= 0, 5, `AP do not control a port that is 8 or less hexes from Tokyo`,
+        `AP control a port that is 8 or less hexes from Tokyo`,
+        tokyo_ports_list)
+
     result.text.push(`2 VP or less - Allied Decisive Victory, 3-5 VP Allied Tactical Victory, 6-9 VP Japanese Tactical Victory, 10 VP Japanese Decisive Victory.`)
     result.text.push(`Total VP: ${result.vp}`)
     if (result.vp <= 2) {
