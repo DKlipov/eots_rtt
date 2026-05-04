@@ -10425,6 +10425,12 @@ function setup_scenario_south_pacific() {
     setup_jp_unit(find_piece("kamikaze"), 4021)
     setup_jp_unit(find_piece("nachi"), 4021)
 
+    for (var i = 1; i < pieces.length; i++) {
+        if (G.location[i] === NON_PLACED_BOX && pieces[i].reinforcement) {
+            G.location[i] = TURN_BOX + pieces[i].reinforcement
+        }
+    }
+
     G.turn = 3
     G.political_will = 4
     G.asp[JP] = [7, 0]
