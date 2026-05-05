@@ -832,20 +832,20 @@ function _layout_stacks() {
 		var max_x = stack.element.parentElement.offsetWidth - stack.element.offsetWidth - padding[1]
 		var max_y = stack.element.parentElement.offsetHeight - stack.element.offsetHeight - padding[2]
 
-		// var start_x = stack.element.offsetLeft
-		// var start_y = stack.element.offsetTop
-		// if (start_x < min_x) start_x = min_x
-		// if (start_y < min_y) start_y = min_y
-		// if (start_x > max_x) start_x = max_x
-		// if (start_y > max_y) start_y = max_y
-		// if (start_x + major_dx * major + minor_dx * minor < min_x) start_x = min_x - (major_dx * major + minor_dx * minor)
-		// if (start_y + major_dy * major + minor_dy * minor < min_y) start_y = min_y - (major_dy * major + minor_dy * minor)
-		// if (start_x + major_dx * major + minor_dx * minor > max_x) start_x = max_x - (major_dx * major + minor_dx * minor)
-		// if (start_y + major_dy * major + minor_dy * minor > max_y) start_y = max_y - (major_dy * major + minor_dy * minor)
+		var start_x = stack.element.offsetLeft
+		var start_y = stack.element.offsetTop
+		if (start_x < min_x) start_x = min_x
+		if (start_y < min_y) start_y = min_y
+		if (start_x > max_x) start_x = max_x
+		if (start_y > max_y) start_y = max_y
+		if (start_x + major_dx * major + minor_dx * minor < min_x) start_x = min_x - (major_dx * major + minor_dx * minor)
+		if (start_y + major_dy * major + minor_dy * minor < min_y) start_y = min_y - (major_dy * major + minor_dy * minor)
+		if (start_x + major_dx * major + minor_dx * minor > max_x) start_x = max_x - (major_dx * major + minor_dx * minor)
+		if (start_y + major_dy * major + minor_dy * minor > max_y) start_y = max_y - (major_dy * major + minor_dy * minor)
 
 		// use stack-local coords for children
-		var start_x = stack.my_stack.dx
-		var start_y = stack.my_stack.dy
+		start_x -= stack.element.offsetLeft
+		start_y -= stack.element.offsetTop
 		let sub_cache = []
 		let i = 0, k = 0
         var childs = stack.my_stack.sort_children(stack.element.children, world.focus === stack)
