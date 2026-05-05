@@ -1,6 +1,5 @@
 Todo list:
 * Unit sorting
-* India tracker (and check trackers)
 * Hide path option
 * Red routes option
 * Pw magment page

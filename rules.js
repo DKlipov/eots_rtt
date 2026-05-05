@@ -2863,6 +2863,7 @@ function move_units(units, path) {
         i = path.length
     }
     var zoi_generator_flag = G.active_stack.filter(u => pieces[u].zoi_generator).length
+        || (path[0] & GROUND_MOVE) && G.active_stack.filter(u => pieces[u].class === "ground").length
     var enemy_faction = 1 - pieces[G.active_stack[0]].faction
     for (; i < path.length; i++) {
         var hex = path[i]
