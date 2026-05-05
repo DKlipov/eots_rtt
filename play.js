@@ -84,7 +84,7 @@ for (var key of Object.keys(data.counters)) {
 }
 
 for (var key of Object.keys(data.nations)) {
-    if(data.nations[key].counter){
+    if (data.nations[key].counter) {
         data.nations[key].counter = "marker " + data.nations[key].counter
     }
 }
@@ -288,10 +288,70 @@ function clear_paths() {
     CANVAS_CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
 }
 
+function get_element_weight(e) {
+    var marker = !e.thing || e.thing.my_action !== "unit"
+    if (marker && e.classList.contains("unit_status")) {
+        return 64000;
+    } else if (marker) {
+        return 0;
+    }
+    var value = 0;
+    var unit = e.thing.my_id
+    var piece = data.pieces[unit]
+    if (piece.class === "naval") {
+        value = 2000;
+    } else if (piece.class === "ground") {
+        value = 4000;
+    } else if (piece.class === "hq") {
+        value = 8000;
+    } else if (piece.class === "air") {
+        value = 16000;
+    }
+
+    if (piece.faction === G.offensive.attacker) {
+        value += 32000
+    }
+    if (piece.faction === AP) {
+        value += 8000
+    }
+    if (is_action("unit", unit)) {
+        value += 1000
+    }
+    if (set_has(G.offensive.active_units[piece.faction], unit)) {
+        value += 512
+    }
+    if (set_has(G.reduced, unit)) {
+        value += 256
+    }
+    if (piece.service === "army") {
+        value += 128
+    } else if (piece.service !== "navy") {
+        value += 64
+    }
+    return value;
+}
+
+function sort_unit_stack(a, focus) {
+    var map = []
+    var index = 0;
+    for (var e of a) {
+        // if (e.classList.contains("unit_status") && (!e.thing || e.thing.my_action !== "unit") && !focus) {
+        // continue
+        // }
+        map_set(map, get_element_weight(e) + index, e)
+        index++
+    }
+    if (map.length === 0) {
+        return a
+    }
+    return map.filter((a, index) => index % 2 === 1)
+}
+
 function define_s_loc(id, rect) {
     define_stack("s-loc", id,
         rect,
-        ...VERTICAL_STACK_PARAMS
+        ...VERTICAL_STACK_PARAMS,
+        sort_unit_stack
     )
 }
 
@@ -300,7 +360,6 @@ function center_rect([x, y], w, h) {
 }
 
 function hex_in_map(x, y) {
-
     return x >= map_info.grid_x_offset &&
         y >= map_info.grid_y_offset &&
         x < map_info.grid_x_offset + map_info.ROW_HEX_NB &&
@@ -478,7 +537,7 @@ function on_init(scenario, game_options, static_view) {
         define_layout_track_h("divisions", 0, 12, map_layout.track_japanese_divisions_available_china, 0)
     }
     for (i = 0; i < 35; i++) {
-        var battle = define_marker("battle", i, "conflict battle")
+        var battle = define_marker("battle", i, "conflict battle unit_status")
         battle.element.innerText = String.fromCharCode(65 + i)
         battle.element.index = i
         battle.element.addEventListener("mousedown", evt => {
@@ -486,7 +545,7 @@ function on_init(scenario, game_options, static_view) {
                 send_query({name: "battle_info", index: evt.target.index})
             }
         })
-        define_marker("landing", i, "conflict landing")
+        define_marker("landing", i, "conflict landing unit_status")
             .element.innerText = String.fromCharCode(65 + i)
     }
     define_marker("divisions", 0, data.counters.divisions_china)

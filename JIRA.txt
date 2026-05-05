@@ -1,5 +1,4 @@
 Todo list:
-* Unit sorting
 * Hide path option
 * Red routes option
 * Pw magment page

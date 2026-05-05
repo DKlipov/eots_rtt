@@ -277,29 +277,33 @@ class Thing {
 		return this
 	}
 
-	stack(rect, dx, dy, major_dx, major_dy, minor_dx, minor_dy, threshold, wrap, gravity_x, gravity_y, small_dx, small_dy, small_threshold) {
-		world.parent.appendChild(this.element)
+    stack(rect, dx, dy, major_dx, major_dy, minor_dx, minor_dy, threshold, wrap, gravity_x, gravity_y, small_dx, small_dy, small_threshold, sort_children) {
+        world.parent.appendChild(this.element)
 
-		if (Array.isArray(rect))
-			var [ x, y, w, h ] = rect
-		else
-			var { x, y, w, h } = rect
-		this.element.style.left = Math.round(x) + "px"
-		this.element.style.top = Math.round(y) + "px"
-		this.element.style.width = Math.round(w) + "px"
-		this.element.style.height = Math.round(h) + "px"
+        if (Array.isArray(rect))
+            var [x, y, w, h] = rect
+        else
+            var {x, y, w, h} = rect
+        this.element.style.left = Math.round(x) + "px"
+        this.element.style.top = Math.round(y) + "px"
+        this.element.style.width = Math.round(w) + "px"
+        this.element.style.height = Math.round(h) + "px"
 
-		this.is_stack = true
-		this.my_stack = {
-			w, h,
-			dx, dy, // normal
-			major_dx, major_dy, // expanded major-axis
-			minor_dx, minor_dy, // expanded minor-axis
-			threshold,
-			wrap,
-			gravity_x, gravity_y,
-			small_dx, small_dy, small_threshold // // overrided for small stacks
-		}
+        if (!sort_children) {
+            sort_children = a => a
+        }
+        this.is_stack = true
+        this.my_stack = {
+            w, h,
+            dx, dy, // normal
+            major_dx, major_dy, // expanded major-axis
+            minor_dx, minor_dy, // expanded minor-axis
+            threshold,
+            wrap,
+            gravity_x, gravity_y,
+            small_dx, small_dy, small_threshold, // overrided for small stacks,
+            sort_children
+        }
 
 		world.stack_list.push(this)
 
@@ -428,10 +432,11 @@ function sort_board(x_weight = 1, y_weight = 2) {
 		parent.appendChild(e)
 }
 
-function define_stack(action, id, rect, dx = -12, dy = -12, major_dx = dx, major_dy = dy, minor_dx = 0, minor_dy = 0, threshold = 1, wrap = 1000, small_dx, small_dy,small_treshhold,  gravity_x = 0.5, gravity_y = 0.5) {
-	return define_thing(action, id)
+function define_stack(action, id, rect, dx = -12, dy = -12, major_dx = dx, major_dy = dy, minor_dx = 0, minor_dy = 0, threshold = 1, wrap = 1000, small_dx,
+                      small_dy,small_treshhold,sort_children, gravity_x = 0.5, gravity_y = 0.5) {
+    return define_thing(action, id)
 		.keyword("stack")
-		.stack(rect, dx, dy, major_dx, major_dy, minor_dx, minor_dy, threshold, wrap, gravity_x, gravity_y, small_dx, small_dy, small_treshhold)
+		.stack(rect, dx, dy, major_dx, major_dy, minor_dx, minor_dy, threshold, wrap, gravity_x, gravity_y, small_dx, small_dy, small_treshhold, sort_children)
 }
 
 function define_layout(action, id, rect, keywords, styles) {
@@ -827,29 +832,29 @@ function _layout_stacks() {
 		var max_x = stack.element.parentElement.offsetWidth - stack.element.offsetWidth - padding[1]
 		var max_y = stack.element.parentElement.offsetHeight - stack.element.offsetHeight - padding[2]
 
-		var start_x = stack.element.offsetLeft
-		var start_y = stack.element.offsetTop
-		if (start_x < min_x) start_x = min_x
-		if (start_y < min_y) start_y = min_y
-		if (start_x > max_x) start_x = max_x
-		if (start_y > max_y) start_y = max_y
-		if (start_x + major_dx * major + minor_dx * minor < min_x) start_x = min_x - (major_dx * major + minor_dx * minor)
-		if (start_y + major_dy * major + minor_dy * minor < min_y) start_y = min_y - (major_dy * major + minor_dy * minor)
-		if (start_x + major_dx * major + minor_dx * minor > max_x) start_x = max_x - (major_dx * major + minor_dx * minor)
-		if (start_y + major_dy * major + minor_dy * minor > max_y) start_y = max_y - (major_dy * major + minor_dy * minor)
+		// var start_x = stack.element.offsetLeft
+		// var start_y = stack.element.offsetTop
+		// if (start_x < min_x) start_x = min_x
+		// if (start_y < min_y) start_y = min_y
+		// if (start_x > max_x) start_x = max_x
+		// if (start_y > max_y) start_y = max_y
+		// if (start_x + major_dx * major + minor_dx * minor < min_x) start_x = min_x - (major_dx * major + minor_dx * minor)
+		// if (start_y + major_dy * major + minor_dy * minor < min_y) start_y = min_y - (major_dy * major + minor_dy * minor)
+		// if (start_x + major_dx * major + minor_dx * minor > max_x) start_x = max_x - (major_dx * major + minor_dx * minor)
+		// if (start_y + major_dy * major + minor_dy * minor > max_y) start_y = max_y - (major_dy * major + minor_dy * minor)
 
 		// use stack-local coords for children
-		start_x -= stack.element.offsetLeft
-		start_y -= stack.element.offsetTop
+		var start_x = stack.my_stack.dx
+		var start_y = stack.my_stack.dy
 		let sub_cache = []
 		let i = 0, k = 0
-		for (var child of stack.element.children) {
+        var childs = stack.my_stack.sort_children(stack.element.children, world.focus === stack)
+		for (var child of childs) {
 			var w = child.offsetWidth
 			var h = child.offsetHeight
 			var x = start_x + major_dx * i + minor_dx * k + (stack_w - w) * grav_x
 			var y = start_y + major_dy * i + minor_dy * k + (stack_h - h) * grav_y
 			sub_cache.push([x,y,z+i])
-
 			if (++i === wrap) {
 				i = 0
 				++k
@@ -863,6 +868,10 @@ function _layout_stacks() {
 	for (var stack of world.stack_list) {
 		let k = 0;
 		for (var child of stack.element.children) {
+			child.classList.add("hide")
+		}
+		for (var child of stack.my_stack.sort_children(stack.element.children, world.focus === stack)) {
+			child.classList.remove("hide")
 			const pre_calc = cache[i][k]
 			k ++
 			child.style.left = pre_calc[0] + "px"

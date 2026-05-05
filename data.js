@@ -5957,7 +5957,7 @@ data.sp_map = [
 ]
 
 data.counters = {
-    oos: "oos",
+    oos: "oos unit_status",
     control_jp: "control_jp",
     capture_jp: "capture_jp",
     control_us: "control_us",
@@ -6013,7 +6013,7 @@ data.counters = {
     naval_repl: "small_markers_yellow unit_ix_11",
     drawn_ap: "small_markers_black unit_ix_4",
     drawn_jp: "small_markers_black unit_ix_8",
-    tokyo_express: "big_markers_white big unit_ix_1",
+    tokyo_express: "big_markers_white big unit_ix_1 unit_status",
     defensive_doctrine: "big_markers_yellow big unit_ix_1",
     escorts2: "small_markers_yellow unit_ix_3",
     escorts4: "small_markers_yellow unit_ix_3 reduced",

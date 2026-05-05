@@ -402,6 +402,7 @@ div[data-tooltip]:after {
     /*border-color: transparent;*/
     /*box-shadow: none;*/
     border-style: solid;
+    /*box-sizing: border-box;*/
 }
 
 .unit, .marker {
