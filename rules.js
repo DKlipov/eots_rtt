@@ -1926,6 +1926,7 @@ P.choose_hq = {
                 L.possible_units.push(u)
             }
         })
+        trigger_event("before_choose_hq")
         if (L.possible_units.length === 1) {
             this.unit(L.possible_units[0])
         } else if (!L.possible_units.length) {
@@ -4517,6 +4518,10 @@ P.declare_battle_hexes = {
         G.offensive.battle_names.filter(h => set_has(G.offensive.landing_hexes, h))
             .forEach(h => log(`Amphibious landing ${String.fromCharCode(65 + G.offensive.battle_names.indexOf(h))} declared in ${hex_get_log_str(h)}.`))
         compute_possible_battle_hexes()
+        if (L.possible_units.length <= 0 && G.offensive.battle_hexes.length <= 0) {
+            log("Additional battle hexes could not be declared")
+            end()
+        }
     },
     prompt() {
         if (G.active_stack.length === 0 && L.possible_units.length === 0) {
@@ -9013,13 +9018,36 @@ cards[find_card(AP, 37)].before_battle_roll = function (faction) {
     }
 }
 
-cards[find_card(AP, 38)].before_unit_activation = function () {
-    filter_activation_units((u, piece) => piece.class !== "naval", AP)
-    L.possible_units.forEach(u => {
-        if (pieces[u].service === "ch") {
-            G.offensive.tarzan = true
+cards[find_card(AP, 38)].can_play = function () {
+    var hqs = []
+    HQ_LIST.forEach(hq => {
+        var piece = pieces[hq]
+        if (G.location[hq] < LAST_BOARD_HEX && piece.faction === AP
+            && get_activatable_units(hq, piece.supply).filter(u => pieces[u].service === "ch").length) {
+            hqs.push(hq)
         }
     })
+    return hqs.length === 0 || hqs.filter(hq => !set_has(G.oos, hq)).length > 0
+}
+
+cards[find_card(AP, 38)].before_choose_hq = function () {
+    var hqs = []
+    HQ_LIST.forEach(hq => {
+        var piece = pieces[hq]
+        if (G.location[hq] < LAST_BOARD_HEX && piece.faction === AP
+            && !set_has(G.oos, hq)
+            && get_activatable_units(hq, piece.supply).filter(u => pieces[u].service === "ch").length) {
+            G.offensive.tarzan = true
+            hqs.push(hq)
+        }
+    })
+    if (hqs.length) {
+        L.possible_units = hqs
+    }
+}
+
+cards[find_card(AP, 38)].before_unit_activation = function () {
+    filter_activation_units((u, piece) => piece.class !== "naval", AP)
 }
 
 cards[find_card(AP, 38)].after_unit_activation = function () {
