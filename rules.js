@@ -801,6 +801,7 @@ function update_reinf_active() {
 
 P.reinforcement_segment = {
     _begin() {
+        mark_supply_eligable_ports(G.active)
         log(`${side_get_log_str(G.active)} reinforcement segment.`)
         if (G.wie <= 7 && G.active === AP) {
             change_asp(AP, 1)
@@ -1015,6 +1016,7 @@ function print_reinforcements() {
 P.replacement_segment = {
     _begin() {
         check_supply()
+        mark_supply_eligable_ports(G.active)
         if (L.scheduled_points) {
             scenario_data().replacement_points()
         }
