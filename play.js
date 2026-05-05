@@ -853,7 +853,7 @@ function on_update() {
         if (marker && turns[value] && value) {
             populate_generic("turn", value, marker)
         }
-        if (counter && hex && value) {
+        if (marker && hex && value) {
             populate_generic("s-loc", hex_to_int(hex), marker)
         }
     }
