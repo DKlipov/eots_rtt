@@ -802,6 +802,7 @@ function update_reinf_active() {
 P.reinforcement_segment = {
     _begin() {
         mark_supply_eligable_ports(G.active)
+        mark_supplied_hexes(G.active)
         log(`${side_get_log_str(G.active)} reinforcement segment.`)
         if (G.wie <= 7 && G.active === AP) {
             change_asp(AP, 1)
@@ -1017,6 +1018,7 @@ P.replacement_segment = {
     _begin() {
         check_supply()
         mark_supply_eligable_ports(G.active)
+        mark_supplied_hexes(G.active)
         if (L.scheduled_points) {
             scenario_data().replacement_points()
         }
@@ -3327,6 +3329,19 @@ function check_unit_supply(location, i, piece) {
     }
     return G.supply_cache[location] & piece.supply
 }
+
+function mark_supplied_hexes(faction) {
+    HQ_LIST.forEach(hq => {
+        var piece = pieces[hq]
+        if (G.location[hq] >= LAST_BOARD_HEX) {
+            return
+        }
+        if (piece.faction === faction && !set_has(G.oos, hq)) {
+            mark_hexes_supplied_from(hq, piece, unit_or_airfield)
+        }
+    })
+}
+
 
 function mark_supply_eligable_ports(faction) {
     HQ_LIST.forEach(hq => {
