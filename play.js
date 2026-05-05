@@ -298,24 +298,23 @@ function get_element_weight(e) {
     var value = 0;
     var unit = e.thing.my_id
     var piece = data.pieces[unit]
-    if (piece.class === "naval") {
-        value = 2000;
-    } else if (piece.class === "ground") {
-        value = 4000;
-    } else if (piece.class === "hq") {
-        value = 8000;
-    } else if (piece.class === "air") {
-        value = 16000;
-    }
-
     if (piece.faction === G.offensive.attacker) {
         value += 32000
     }
     if (piece.faction === AP) {
-        value += 8000
+        value += 16000
     }
-    if (is_action("unit", unit)) {
-        value += 1000
+    if (is_action("unit", unit) || set_has(G.active_stack, unit)) {
+        value += 4000
+    }
+    if (piece.class === "naval") {
+        value += 1000;
+    } else if (piece.class === "ground") {
+        value += 7000;
+    } else if (piece.class === "hq") {
+        value += 8000;
+    } else if (piece.class === "air") {
+        value += 9000;
     }
     if (set_has(G.offensive.active_units[piece.faction], unit)) {
         value += 512

@@ -1,8 +1,11 @@
 Todo list:
-* Hide path option
 * Red routes option
+* Hide path option
 * Pw magment page
 * Hex-to-hex distance calcualtion
 * ferry emergency
 * dacca reinf ships locked
 * imclicit declration for any card bonus
+* tooltips on mobile
+* stack refactoring
+* big refactoring
