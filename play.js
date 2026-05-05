@@ -40,6 +40,16 @@ const VERTICAL_STACK_PARAMS = [
     -6, -9, 4
 ]
 
+const VERTICAL_TURN_STACK_PARAMS = [
+    // stack parameters:
+    0, -3, // closed offset
+    0, -50, // open offset (major axis)
+    50, 0, // open offset (minor axis)
+    1, // threshold to auto-open
+    8, // wrap limit
+    0, -6, 3
+]
+
 const MANCHURIA_1 = hex_to_int(3302)
 const MANCHURIA_2 = hex_to_int(3303)
 
@@ -338,7 +348,8 @@ const SOUTH_PAC_BOARD_INFO = {
     "wie_b": 0,
     "pw_a": 5,
     "pw_b": 0,
-    "TRACK_STACK_PARAMS": VERTICAL_STACK_PARAMS,
+    "TURN_STACK_PARAMS": VERTICAL_TURN_STACK_PARAMS,
+    "TRACK_STACK_PARAMS": VERTICAL_TURN_STACK_PARAMS,
     "hex_check": (i) => {
         let x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
         let y = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
@@ -374,7 +385,7 @@ function on_init(scenario, game_options, static_view) {
                 ...VERTICAL_STACK_PARAMS
             )
             define_stack("track", 2, map_layout.track_strat_record_2,
-                ...VERTICAL_STACK_PARAMS
+                ...VERTICAL_TURN_STACK_PARAMS
             )
 
             define_s_loc(1400, map_layout.h_5808)
