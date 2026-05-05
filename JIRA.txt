@@ -4,7 +4,6 @@ Todo list:
 * Red routes option
 * Pw magment page
 * Hex-to-hex distance calcualtion
-* Hex by hex move for naval and air?
 * ferry emergency
 * dacca reinf ships locked
 * imclicit declration for any card bonus

@@ -2577,7 +2577,7 @@ P.move_offensive_units = {
         G.active_stack.forEach(u => eliminate(u))
         G.active_stack = []
     },
-    action_box(h) {
+    turn_box(h) {
         push_undo()
         G.active_stack.forEach(u => displace_to_turn(u, 1, true))
         G.active_stack = []
@@ -10746,7 +10746,7 @@ function action_hex(p) {
 }
 
 function action_box(p) {
-    action("action_box", p)
+    action("turn_box", p)
 }
 
 function hex_to_int(i) {

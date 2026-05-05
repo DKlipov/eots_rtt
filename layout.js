@@ -11,10 +11,10 @@ const layout = {
         "track_japanese_divisions_available_china": [671, 42, 608, 55],
         "track_india_status": [396, 51, 250, 55],
         "track_burma_road": [397, 141, 179, 52],
-        "track_game_turn": [52, 669, 65, 557],
+        "track_game_turn": [54, 665, 70, 562],
         "track_political_will": [157, 712, 64, 517],
         "track_wie": [259, 707, 64, 517],
-        "track_strat_record": [366, 1158, 92, 468],
+        "track_strat_record": [343, 1158, 92, 468],
     },
     "southpac": {
         "box_delayed_reinf": [1140, 710, 116, 95],

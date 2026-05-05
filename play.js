@@ -12,14 +12,23 @@ const TURN_BOX = 1490
 const HEX_X_SIZE = 48.0
 const HEX_Y_SIZE = 55.25
 
-const HORIZONTAL_STACK_PARAMS = [
+const TURN_STACK_PARAMS = [
     // stack parameters:
-    -5, 0, // closed offset
-    -35, 0, // open offset (major axis)
+    5, 0, // closed offset
+    48, 0, // open offset (major axis)
     0, 35, // open offset (minor axis)
     1, // threshold to auto-open
     8, // wrap limit
-    0, 0, 0
+    18, 0, 3
+]
+const TRACK_STACK_PARAMS = [
+    // stack parameters:
+    10, 0, // closed offset
+    48, 0, // open offset (major axis)
+    0, 35, // open offset (minor axis)
+    2, // threshold to auto-open
+    8, // wrap limit
+    18, 0, 4
 ]
 const VERTICAL_STACK_PARAMS = [
     // stack parameters:
@@ -62,6 +71,12 @@ const ROAD_EVENTS = Object.keys(data.events).filter(k => data.events[k].road).ma
 
 for (var key of Object.keys(data.counters)) {
     data.counters[key] = "marker " + data.counters[key]
+}
+
+for (var key of Object.keys(data.nations)) {
+    if(data.nations[key].counter){
+        data.nations[key].counter = "marker " + data.nations[key].counter
+    }
 }
 
 const CARD_ACTIONS = ["card"]
@@ -120,13 +135,17 @@ const UNIT_MOVEMENT_MARKERS = [
 
 const TRACK_MARKERS = [
     {
+        counter: () => G.events[data.events.BARGES.id] > 0 ? data.counters.asp_b_jp : data.counters.asp_jp,
+        value: G => G.asp[0][0]
+    },
+    {
+        counter: () => (G.events[data.events.BARGES.id] > 0 ? data.counters.asp_b_jp : data.counters.asp_jp) + " gray",
+        value: G => (G.inter_service[JP] && G.asp[0][0] > 1) ? Math.ceil(G.asp[0][0] / 2) : 0
+    },
+    {
         counter: data.counters.asp_ap,
         alt_counter: data.counters.asp_ap_1,
         value: G => G.asp[1][0]
-    },
-    {
-        counter: () => G.events[data.events.BARGES.id] > 0 ? data.counters.asp_b_jp : data.counters.asp_jp,
-        value: G => G.asp[0][0]
     },
     {
         counter: data.counters.divisions_china,
@@ -294,7 +313,8 @@ const MAIN_BOARD_INFO = {
     "wie_b": 10,
     "pw_a": 10,
     "pw_b": 0,
-    "TRACK_STACK_PARAMS": HORIZONTAL_STACK_PARAMS,
+    "TURN_STACK_PARAMS": TURN_STACK_PARAMS,
+    "TRACK_STACK_PARAMS": TRACK_STACK_PARAMS,
     "hex_check": () => true
 }
 const BURMA_BOARD_INFO = {
@@ -427,8 +447,9 @@ function on_init(scenario, game_options, static_view) {
     define_track("wie", map_info.wie_a, map_info.wie_b, map_layout.track_wie, define_layout, "auto", 0)
 
     define_track("turn", map_info.turn_a, map_info.turn_b, map_layout.track_game_turn, define_stack, "auto", 0,
-        ...map_info.TRACK_STACK_PARAMS
+        ...map_info.TURN_STACK_PARAMS
     )
+    define_track("turn_box", map_info.turn_a + TURN_BOX, map_info.turn_b + TURN_BOX, map_layout.track_game_turn, define_space, "auto", 0,)
     define_track("track", map_info.track_a, map_info.track_b, map_layout.track_strat_record, define_stack, "auto", 0,
         ...map_info.TRACK_STACK_PARAMS
     )
@@ -813,14 +834,6 @@ function on_update() {
     populate_generic("china", Math.min(5, G.surrender[data.nations.CHINA.id]), data.counters.china)
 
     var turns = world.things["turn"]
-    for (i = 0; i < TURN_MARKERS.length; i++) {
-        const marker = TURN_MARKERS[i]
-        var value = marker.value(G)
-        var counter = (typeof marker.counter === 'function') ? marker.counter(G) : marker.counter
-        if (value > 0 && turns[value]) {
-            populate_generic("turn", value, counter)
-        }
-    }
     for (var key of Object.keys(data.nations)) {
         var nation = data.nations[key]
         var marker = nation.counter
@@ -831,6 +844,14 @@ function on_update() {
         }
         if (counter && hex && value) {
             populate_generic("s-loc", hex_to_int(hex), marker)
+        }
+    }
+    for (i = 0; i < TURN_MARKERS.length; i++) {
+        const marker = TURN_MARKERS[i]
+        var value = marker.value(G)
+        var counter = (typeof marker.counter === 'function') ? marker.counter(G) : marker.counter
+        if (value > 0 && turns[value]) {
+            populate_generic("turn", value, counter)
         }
     }
 

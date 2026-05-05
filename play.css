@@ -373,10 +373,12 @@ div[data-tooltip]:after {
 
 .action_hex.action { background-image: url(images/hex_action.svg); z-index: 50;}
 
-.action_hex.china_box.action {
-	border: 4px solid yellow;
-	background-image: none;
-	box-shadow: 0 0 0 1px black, inset 0 0 0 1px black;
+.action_hex.china_box.action, .turn_box.action {
+    border: 4px solid yellow;
+    background-image: none;
+    box-shadow: 0 0 0 1px black, inset 0 0 0 1px black;
+    z-index: 100;
+    box-sizing: border-box;
 }
 
 .s-loc {
