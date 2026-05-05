@@ -2496,36 +2496,46 @@ P.move_offensive_units = {
     },
     prompt() {
         prompt(`${offensive_card_header()} Move activated units.`)
-        if (G.offensive.stage === ATTACK_STAGE
+        if (L.spec_move) {
+            if (G.offensive.stage === ATTACK_STAGE && pieces[G.active_stack[0]].parenthetical && L.move_type === ANY_MOVE) {
+                button("extended_air")
+            }
+            if (G.offensive.stage === ATTACK_STAGE && !G.offensive.zoi_intelligence_modifier && L.move_type === ANY_MOVE) {
+                button("avoid_zoi")
+            }
+            if (G.offensive.stage === ATTACK_STAGE && L.move_data.sm_possible && L.move_type === ANY_MOVE) {
+                button("strat_move")
+            }
+            if (G.offensive.stage === ATTACK_STAGE && L.move_data.move_type & GROUND_MOVE && L.move_type === ANY_MOVE) {
+                button("ground_move")
+            }
+        } else if (G.offensive.stage === ATTACK_STAGE
             || G.offensive.stage === POST_BATTLE_STAGE && !G.active_stack.length && L.movable_units.filter(u => !could_unit_stop_here(u)).length === 0) {
             button("done")
         }
+
         if (G.active_stack.length === 0) {
             L.movable_units.forEach(u => action_unit(u))
         } else {
-            if (G.offensive.stage === ATTACK_STAGE && G.offensive.organic.length > 0) {
-                button("no_organic")
+            var no_move_p = G.offensive.stage !== REACTION_STAGE && could_stack_stop_here() || could_air_stop_here()
+            var eliminate_p = G.offensive.stage === POST_BATTLE_STAGE && L.allowed_hexes.length === 0 && G.active_stack.length === 1
+            if ((no_move_p) && !L.spec_move) {
+                button("no_move")
             }
-            if (G.offensive.stage === ATTACK_STAGE && pieces[G.active_stack[0]].parenthetical) {
-                button("extended_air", L.move_type !== AIR_EXTENDED_MOVE)
+            if (!no_move_p && eliminate_p) {
+                button("eliminate")
             }
-            if (G.offensive.stage === ATTACK_STAGE && !G.offensive.zoi_intelligence_modifier) {
-                button("avoid_zoi", L.move_type !== AVOID_ZOI)
+            if (!eliminate_p && !L.spec_move) {
+                button("move")
             }
-            if (G.offensive.stage === ATTACK_STAGE && L.move_data.sm_possible) {
-                button("strat_move", L.move_type !== STRAT_MOVE)
-            }
-            if (G.offensive.stage === ATTACK_STAGE && L.move_data.move_type & GROUND_MOVE) {
-                button("ground_move", L.move_type !== MANUAL_MOVEMENT)
-            }
-            if (G.offensive.stage === ATTACK_STAGE && G.offensive.barges) {
+            if (G.offensive.stage === ATTACK_STAGE && G.offensive.barges && !L.spec_move) {
                 button("barges", L.move_type !== BARGES_MOVE && G.offensive.barges > 1 && G.active_stack.filter(u => pieces[u].class === "ground").length === 1)
             }
             if (G.offensive.stage === ATTACK_STAGE && pieces[G.active_stack[0]].class === "air") {
                 action_box(TURN_BOX + G.turn + 1)
             }
-            if (G.offensive.stage === ATTACK_STAGE) {
-                button("regular_movement", L.move_type !== ANY_MOVE)
+            if (G.offensive.stage === ATTACK_STAGE && G.offensive.organic.length > 0) {
+                button("no_organic")
             }
             let loc = G.location[G.active_stack[0]]
             L.movable_units.filter(u => loc === G.location[u]
@@ -2534,15 +2544,15 @@ P.move_offensive_units = {
                 && L.move_type !== BARGES_MOVE
                 && !set_has(G.active_stack, u))
                 .forEach(u => action_unit(u))
-            if (G.offensive.stage !== REACTION_STAGE && could_stack_stop_here() || could_air_stop_here()) {
-                button("no_move")
-            } else if (G.offensive.stage === POST_BATTLE_STAGE && L.allowed_hexes.length === 0 && G.active_stack.length === 1) {
-                button("eliminate")
-            }
+
         }
         for (let i = 0; i < L.allowed_hexes.length; i += 2) {
             action_hex(L.allowed_hexes[i])
         }
+    },
+    move() {
+        push_undo()
+        L.spec_move = 1
     },
     _resume() {
         if (L.movable_units.length <= 0) {
@@ -2572,12 +2582,15 @@ P.move_offensive_units = {
         }
     },
     extended_air() {
+        push_undo()
         set_mt(AIR_EXTENDED_MOVE)
     },
     barges() {
+        push_undo()
         set_mt(BARGES_MOVE)
     },
     strat_move() {
+        push_undo()
         set_mt(STRAT_MOVE)
     },
     ground_move() {
@@ -2587,10 +2600,8 @@ P.move_offensive_units = {
         call("ground_move")
     },
     avoid_zoi() {
+        push_undo()
         set_mt(AVOID_ZOI)
-    },
-    regular_movement() {
-        set_mt(ANY_MOVE)
     },
     unit(u) {
         if (!G.offensive.organic) {
@@ -2685,7 +2696,6 @@ P.move_offensive_units = {
         } else {
             G.active_stack = []
         }
-
     },
     no_move() {
         push_undo()

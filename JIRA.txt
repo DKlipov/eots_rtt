@@ -1,5 +1,4 @@
 Todo list:
-* Update special move buttons
 * Add partially impassable hexsides to data.js
 * Unit sorting
 * India tracker (and check trackers)

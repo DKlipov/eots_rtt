@@ -854,6 +854,7 @@ function on_update() {
     action_button("ops", "Play for Operations")
     action_button("hold", "Hold")
     action_button("move", "Move")
+    action_button("no_move", "No move")
     action_button("done", "Done")
     action_button("eliminate", "Eliminate")
     action_button("stop", "Stop")
@@ -876,7 +877,7 @@ function on_update() {
     action_button("all", "Choose all")
     action_button("pass", "Pass")
     action_button("skip", "Skip")
-    action_button("no_move", "No move")
+
     action_button("next", "Next")
     action_button("done", "Done")
     action_button("delay", "Delay")
