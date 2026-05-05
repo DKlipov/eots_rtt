@@ -120,6 +120,20 @@ const UNIT_MOVEMENT_MARKERS = [
 
 const TRACK_MARKERS = [
     {
+        counter: data.counters.asp_ap,
+        alt_counter: data.counters.asp_ap_1,
+        value: G => G.asp[1][0]
+    },
+    {
+        counter: () => G.events[data.events.BARGES.id] > 0 ? data.counters.asp_b_jp : data.counters.asp_jp,
+        value: G => G.asp[0][0]
+    },
+    {
+        counter: data.counters.divisions_china,
+        always_show: G => 0,
+        value: G => (G.sid === SOUTH_PACIFIC_SCENARIO) ? G.china_divisions : 0
+    },
+    {
         counter: data.counters.resource_jp,
         alt_counter: data.counters.resource_jp_1,
         value: G => RESOURCE_HEX.filter(h => set_has(G.control, h)).length
@@ -131,26 +145,6 @@ const TRACK_MARKERS = [
     {
         counter: data.counters.air_repl,
         value: G => G.reinforcements.AIR
-    },
-    {
-        counter: () => G.events[data.events.BARGES.id] > 0 ? data.counters.asp_b_jp : data.counters.asp_jp,
-        value: G => G.asp[0][0]
-    },
-    {
-        counter: data.counters.aspu_jp,
-        always_show: true,
-        value: G => G.asp[0][1]
-    },
-    {
-        counter: data.counters.asp_ap,
-        alt_counter: data.counters.asp_ap_1,
-        value: G => G.asp[1][0]
-    },
-    {
-        counter: data.counters.aspu_ap,
-        alt_counter: data.counters.aspu_ap_1,
-        always_show: true,
-        value: G => G.asp[1][1]
     },
     {
         counter: data.counters.drawn_jp,
@@ -178,9 +172,15 @@ const TRACK_MARKERS = [
         value: G => (G.pow > 0) ? current_pow(G) : 0
     },
     {
-        counter: data.counters.divisions_china,
-        always_show: G => 0,
-        value: G => (G.sid === SOUTH_PACIFIC_SCENARIO) ? G.china_divisions : 0
+        counter: data.counters.aspu_jp,
+        always_show: true,
+        value: G => G.asp[0][1]
+    },
+    {
+        counter: data.counters.aspu_ap,
+        alt_counter: data.counters.aspu_ap_1,
+        always_show: true,
+        value: G => G.asp[1][1]
     },
 ]
 

@@ -2447,6 +2447,19 @@ function create_battle_hex(hex) {
     }
     set_delete(G.offensive.landing_hexes, hex)
     set_add(G.offensive.battle_hexes, hex)
+    // call("confirm_bh")
+}
+
+P.confirm_bh = {
+    prompt() {
+        var hex = G.offensive.battle_names[G.offensive.battle_names.length - 1]
+        prompt(`New battle hex declared ${String.fromCharCode(65 + G.offensive.battle_names.length - 1)} (${hex_get_log_str(hex)}).`)
+        button("done")
+    },
+    done() {
+        push_undo()
+        end()
+    },
 }
 
 function create_landing_hex(hex) {
@@ -4499,15 +4512,18 @@ P.declare_battle_hexes = {
     _begin() {
         check_supply()
         check_amph_mod()
-        G.offensive.battle_hexes.forEach(h => log(`Battle ${String.fromCharCode(65 + G.offensive.battle_names.indexOf(h))} declared in ${hex_get_log_str(h)}.`))
+        G.offensive.battle_names.filter(h => set_has(G.offensive.battle_hexes, h))
+            .forEach(h => log(`Battle ${String.fromCharCode(65 + G.offensive.battle_names.indexOf(h))} declared in ${hex_get_log_str(h)}.`))
+        G.offensive.battle_names.filter(h => set_has(G.offensive.landing_hexes, h))
+            .forEach(h => log(`Amphibious landing ${String.fromCharCode(65 + G.offensive.battle_names.indexOf(h))} declared in ${hex_get_log_str(h)}.`))
         compute_possible_battle_hexes()
-        if (L.possible_units.length <= 0) {
-            log("Additional battle hexes could not be declared")
-            end()
-        }
     },
     prompt() {
-        prompt(`${offensive_card_header()} Declare battle hexes and commit units.`)
+        if (G.active_stack.length === 0 && L.possible_units.length === 0) {
+            prompt(`${offensive_card_header()} Confirm declared battle hexes.`)
+        } else {
+            prompt(`${offensive_card_header()} Declare battle hexes and commit units.`)
+        }
         if (G.active_stack.length === 0) {
             L.possible_units.forEach(u => action_unit(u))
             button("done")
@@ -10778,6 +10794,7 @@ function vp_query() {
     return get_victory()
 }
 
+//could corrupt G, run only in safe context
 function battle_info_query(battle) {
     var result = {
         naval_cf: [],

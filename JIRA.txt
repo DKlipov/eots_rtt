@@ -1,6 +1,4 @@
 Todo list:
-* Marker pieces update
-* Battle hex confirmation and calculation
 * Tarzan fix
 * Update special move buttons
 * Add partially impassable hexsides to data.js

@@ -1,19 +1,19 @@
 /*MARKERS*/
 /*special markers*/
-.marker.oos { background-image: url(markers75/ap_oos.webp);  }
-.control_jp { background-image: url(markers75/control_jp.png); border: none; }
-.marker.capture_jp { background-image: url(markers75/capture_jp.png); border: none; }
-.control_us { background-image: url(markers75/control_us.png); border: none; }
-.marker.capture_us { background-image: url(markers75/capture_us.png);  border: none;}
-.marker.control_sov { background-image: url(markers75/control_sov.png); border: none; }
-.marker.capture_sov { background-image: url(markers75/capture_sov.png);  border: none;}
-.marker.no_garrison { background-image: url(markers75/no_garrison.png);  }
-.marker.organic_small { background-image: url(markers75/organic_small.png); }
-.marker.aa_small { background-image: url(markers75/aa_small.png); }
-.marker.strat_small { background-image: url(markers75/strat_small.png); }
-.marker.strat_air_small { background-image: url(markers75/strat_air_small.png); }
-.marker.barges_small { background-image: url(markers75/barges_small.png); }
-.marker.oos_small { background-image: url(markers75/oos_small.webp); }
+.marker.oos { background-image: url(pieces150/ap_oos.webp);  }
+.control_jp { background-image: url(pieces150/control_jp.png); border: none; }
+.marker.capture_jp { background-image: url(pieces150/capture_jp.png); border: none; }
+.control_us { background-image: url(pieces150/control_us.png); border: none; }
+.marker.capture_us { background-image: url(pieces150/capture_us.png);  border: none;}
+.marker.control_sov { background-image: url(pieces150/control_sov.png); border: none; }
+.marker.capture_sov { background-image: url(pieces150/capture_sov.png);  border: none;}
+.marker.no_garrison { background-image: url(pieces150/no_garrison.png);  }
+.marker.organic_small { background-image: url(pieces150/organic_small.png); }
+.marker.aa_small { background-image: url(pieces150/aa_small.png); }
+.marker.strat_small { background-image: url(pieces150/strat_small.png); }
+.marker.strat_air_small { background-image: url(pieces150/strat_air_small.png); }
+.marker.barges_small { background-image: url(pieces150/barges_small.png); }
+.marker.oos_small { background-image: url(pieces150/oos_small.webp); }
 
 /*marker_stripes*/
 .big_markers_blue { background-image: url(pieces150/big_markers_blue.150.png); background-size: 225px 90px; }
@@ -29,33 +29,6 @@
 .small_markers_black { background-image: url(pieces150/small_units_black.150.png); background-size: 280px 70px; }
 .small_markers_brown { background-image: url(pieces150/small_units_brown.150.png); background-size: 140px 70px; }
 .small_markers_yellow { background-image: url(pieces150/small_markers_yellow.150.png); background-size: 420px 70px; }
-
-/* ARMIES (45x45) */
-.air_br { background-image: url(pieces/air_br.png); background-size: 136px 70px; }
-.air_jp { background-image: url(pieces/air_jp.png); background-size: 441px 70px; }
-.air_jp_navy { background-image: url(pieces/air_jp_navy.png); background-size: 407px 70px; }
-.air_us { background-image: url(pieces/air_us.png); background-size: 548px 70px; }
-.air_us_marine { background-image: url(pieces/air_us_marine.png); background-size: 135px 70px; }
-.army_aus { background-image: url(pieces/army_aus.png); background-size: 204px 70px; }
-.army_br { background-image: url(pieces/army_br.png); background-size: 407px 70px; }
-.army_cn { background-image: url(pieces/army_cn.png); background-size: 103px 70px; }
-.army_jp_1 { background-image: url(pieces/army_jp_1.png); background-size: 409px 70px; }
-.army_jp_2 { background-image: url(pieces/army_jp_2.png); background-size: 374px 70px; }
-.army_us { background-image: url(pieces/army_us.png); background-size: 408px 70px; }
-.cv_jp { background-image: url(pieces/cv_jp.png); background-size: 306px 70px; }
-.cv_us { background-image: url(pieces/cv_us.png); background-size: 385px 70px; }
-.cvl_us { background-image: url(pieces/cve_us.png); background-size: 245px 70px; }
-.force_aus { background-image: url(pieces/force_aus.png); background-size: 68px 70px; }
-.force_dutch { background-image: url(pieces/force_dutch.png); background-size: 375px 70px; }
-.hq_br { background-image: url(pieces/hq_br.png); background-size: 70px 70px; }
-.hq_joint { background-image: url(pieces/hq_joint.png); background-size: 70px 70px; }
-.hq_jp { background-image: url(pieces/hq_jp.png); background-size: 135px 70px; }
-.hq_us { background-image: url(pieces/hq_us.png); background-size: 135px 70px; }
-.marine_jp { background-image: url(pieces/marine_jp.png); background-size: 170px 70px; }
-.marine_us { background-image: url(pieces/marine_us.png); background-size: 303px 70px; }
-.navy_br { background-image: url(pieces/navy_br.png); background-size: 272px 70px; }
-.navy_jp { background-image: url(pieces/navy_jp.png); background-size: 340px 70px; }
-.navy_us { background-image: url(pieces/navy_us.png); background-size: 478px 70px; }
 .d10 { background-image: url(pieces150/d10.png); background-size: 150px 15px; }
 
 /* PIECES */
