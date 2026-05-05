@@ -4762,7 +4762,7 @@ data.cards = [
 
 //Hex sides
 //N,NE,SE,S,SW,NW
-//WATER_: 1, GROUND: 2, ROAD: 4, UNPLAYABLE_WATER: 8, UNPLAYABLE_LAND: 16, BORDER : 32
+//WATER_: 1, GROUND: 2, ROAD: 4, UNPLAYABLE_WATER: 8, UNPLAYABLE_LAND: 16
 const JP_SUPPLIED_HEX = 1 << 15
 const JOINT_SUPPLIED_HEX = 1 << 17
 const US_SUPPLIED_HEX = 1 << 18
@@ -4900,7 +4900,7 @@ data.map = [
         port: true,
         resource: true,
         terrain: JUNGLE,
-        edges: [4, 4, 4, 1, 8, 8]
+        edges: [4, 4, 4, 17, 24, 8]
     },
     {
         id: 2106,
@@ -5044,7 +5044,7 @@ data.map = [
         region: "China",
         city: CHINESE_CITY,
         terrain: OPEN,
-        edges: [2, 0, 2, 1, 5, 2]
+        edges: [2, 0, 2, 17, 5, 2]
     },
     {
         id: 2509,
@@ -5054,7 +5054,7 @@ data.map = [
         region: "China",
         island: true,
         terrain: OPEN,
-        edges: [1, 1, 8, 8, 1, 1]
+        edges: [17, 1, 8, 8, 1, 1]
     },
     {
         id: 2609,
@@ -5214,7 +5214,7 @@ data.map = [
         port: true,
         region: "Korea",
         terrain: MIXED,
-        edges: [4, 1, 8, 1, 1, 3]
+        edges: [4, 1, 24, 1, 1, 3]
     },
     {id: 3206, region: "Korea", terrain: MIXED, edges: [1, 3, 3, 1, 1, 1]},
     {id: 3209, name: "Okinawa", airfield: true, port: true, island: true, region: "JMandates", terrain: MIXED},
@@ -5249,7 +5249,7 @@ data.map = [
     {id: 4916, name: "Mili", airfield: true, region: "Marshall", terrain: ATOLL},
     {id: 3800, region: "Sakhalin", terrain: MIXED, edges: [8, 8, 1, 3, 1, 8]},
     {id: 3801, region: "Sakhalin", terrain: MIXED, edges: [3, 8, 8, 3, 1, 1]},
-    {id: 3802, region: "Sakhalin", terrain: MIXED, edges: [3, 8, 8, 3, 1, 1]},
+    {id: 3802, region: "Sakhalin", terrain: MIXED, edges: [3, 8, 24, 3, 1, 1]},
     {id: 3803, region: "Sakhalin", terrain: MIXED, edges: [3, 1, 1, 1, 1, 1]},
     {id: 3703, region: "Japan", terrain: MIXED, edges: [1, 1, 3, 3, 1, 1]},
     {id: 3804, region: "Japan", terrain: MIXED, edges: [1, 1, 1, 3, 2, 3]},
@@ -5261,7 +5261,7 @@ data.map = [
         port: true,
         region: "Japan",
         terrain: MIXED,
-        edges: [3, 2, 1, 1, 1, 1]
+        edges: [3, 2, 17, 17, 1, 1]
     },
     {
         id: 3705,
@@ -5271,7 +5271,7 @@ data.map = [
         city: JAPANESE_CITY,
         region: "Japan",
         terrain: MIXED,
-        edges: [1, 1, 1, 3, 2, 8]
+        edges: [17, 1, 1, 3, 2, 8]
     },
     {
         id: 3706,
@@ -5311,7 +5311,7 @@ data.map = [
         port: true,
         region: "Japan",
         terrain: MIXED,
-        edges: [2, 1, 1, 1, 1, 1]
+        edges: [2, 1, 1, 1, 1, 17]
     },
     {
         id: 3407,
@@ -5321,7 +5321,7 @@ data.map = [
         city: JAPANESE_CITY,
         region: "Japan",
         terrain: MIXED,
-        edges: [8, 2, 1, 1, 1, 8]
+        edges: [24, 2, 17, 17, 17, 24]
     },
     {
         id: 3307,
@@ -5331,20 +5331,20 @@ data.map = [
         port: true,
         region: "Japan",
         terrain: MIXED,
-        edges: [1, 1, 8, 1, 1, 1]
+        edges: [1, 17, 8, 1, 1, 1]
     },
     {id: 2910, name: "Batan", region: "Philippines", terrain: MIXED, island: true},
     {id: 2911, airfield: true, region: "Philippines", terrain: MIXED, edges: [1, 1, 1, 3, 3, 1]},
     {id: 2812, airfield: true, region: "Philippines", terrain: OPEN, edges: [1, 3, 2, 3, 1, 1]},
     {id: 2912, region: "Philippines", terrain: MIXED, edges: [3, 1, 1, 2, 2, 2]},
-    {id: 2913, region: "Philippines", terrain: MIXED, edges: [2, 1, 8, 1, 8, 1]},
-    {id: 2814, name: "Panay", region: "Philippines", terrain: MIXED, island: true, edges: [1, 8, 1, 1, 1, 1]},
-    {id: 2914, name: "Cebu", region: "Philippines", terrain: MIXED, island: true, edges: [1, 8, 1, 8, 1, 1]},
+    {id: 2913, region: "Philippines", terrain: MIXED, edges: [2, 17, 24, 17, 16, 1]},
+    {id: 2814, name: "Panay", region: "Philippines", terrain: MIXED, island: true, edges: [1, 16, 1, 1, 1, 1]},
+    {id: 2914, name: "Cebu", region: "Philippines", terrain: MIXED, island: true, edges: [1, 8, 17, 24, 17, 1]},
     {id: 2713, region: "Philippines", terrain: MIXED, edges: [1, 1, 1, 2, 1, 1]},
-    {id: 2714, region: "Philippines", terrain: MIXED, edges: [2, 1, 1, 1, 1, 1]},
-    {id: 3015, region: "Philippines", terrain: MIXED, edges: [1, 1, 1, 3, 2, 1]},
+    {id: 2714, region: "Philippines", terrain: MIXED, edges: [2, 1, 1, 1, 1, 17]},
+    {id: 3015, region: "Philippines", terrain: MIXED, edges: [1, 1, 1, 3, 2, 17]},
     {id: 3016, region: "Philippines", terrain: MIXED, edges: [3, 1, 1, 1, 1, 3]},
-    {id: 2815, region: "Philippines", terrain: MIXED, edges: [1, 1, 2, 1, 1, 1]},
+    {id: 2815, region: "Philippines", terrain: MIXED, edges: [1, 17, 2, 1, 1, 1]},
     {
         id: 2813,
         name: "Manila",
@@ -5364,7 +5364,7 @@ data.map = [
         region: "Philippines",
         island: true,
         terrain: MIXED,
-        edges: [1, 1, 1, 1, 8, 8]
+        edges: [1, 1, 1, 1, 8, 24]
     },
     {
         id: 2915,
@@ -5374,10 +5374,10 @@ data.map = [
         port: true,
         region: "Philippines",
         terrain: MIXED,
-        edges: [8, 2, 3, 1, 8, 2]
+        edges: [24, 2, 3, 17, 8, 2]
     },
     {id: 2715, name: "Jolo", airfield: true, port: true, region: "Philippines", terrain: OPEN, island: true},
-    {id: 1712, region: "Sumatra", terrain: MIXED, edges: [8, 8, 2, 3, 1, 1]},
+    {id: 1712, region: "Sumatra", terrain: MIXED, edges: [24, 8, 2, 3, 1, 17]},
     {id: 1713, region: "Sumatra", terrain: MIXED, edges: [3, 2, 2, 3, 1, 1]},
     {
         id: 1813,
@@ -5406,7 +5406,7 @@ data.map = [
         terrain: JUNGLE,
         edges: [2, 1, 3, 2, 2, 2]
     },
-    {id: 2017, name: "Bangka", resource: true, region: "Sumatra", terrain: JUNGLE, edges: [1, 1, 1, 1, 3, 3]},
+    {id: 2017, name: "Bangka", resource: true, region: "Sumatra", terrain: JUNGLE, edges: [17, 1, 1, 1, 3, 3]},
     {
         id: 1917,
         name: "Teloekbetoeng",
@@ -5445,7 +5445,7 @@ data.map = [
     {id: 2416, region: "Borneo", terrain: MOUNTAIN},
     {id: 2418, region: "Borneo", terrain: MIXED, edges: [2, 3, 1, 1, 3, 2]},
     {id: 2515, region: "Borneo", terrain: MOUNTAIN, edges: [1, 2, 2, 2, 2, 3]},
-    {id: 2615, region: "Borneo", terrain: MIXED, edges: [1, 1, 1, 2, 2, 1]},
+    {id: 2615, region: "Borneo", terrain: MIXED, edges: [1, 1, 17, 2, 2, 1]},
     {id: 2516, region: "Borneo", terrain: JUNGLE, edges: [2, 3, 3, 2, 2, 2]},
     {id: 2617, region: "Borneo", terrain: JUNGLE, edges: [1, 1, 8, 1, 3, 3]},
     {
@@ -5468,7 +5468,7 @@ data.map = [
         resource: true,
         region: "Borneo",
         terrain: MIXED,
-        edges: [2, 1, 1, 1, 3, 2]
+        edges: [2, 17, 1, 1, 3, 2]
     },
     {
         id: 2517,
@@ -5490,11 +5490,11 @@ data.map = [
         terrain: MIXED,
         edges: [1, 1, 8, 1, 3, 1]
     },
-    {id: 2818, region: "Celebes", terrain: MIXED, edges: [8, 3, 1, 1, 1, 3]},
+    {id: 2818, region: "Celebes", terrain: MIXED, edges: [8, 3, 1, 1, 17, 3]},
     {id: 2717, region: "Celebes", terrain: MIXED, edges: [8, 1, 3, 8, 2, 8]},
     {id: 2618, region: "Celebes", terrain: MIXED, edges: [1, 2, 2, 2, 1, 1]},
-    {id: 2718, region: "Celebes", terrain: MIXED, edges: [8, 1, 1, 3, 2, 2]},
-    {id: 2619, region: "Celebes", terrain: MIXED, edges: [2, 2, 1, 3, 8, 8]},
+    {id: 2718, region: "Celebes", terrain: MIXED, edges: [8, 17, 1, 3, 18, 2]},
+    {id: 2619, region: "Celebes", terrain: MIXED, edges: [2, 18, 17, 3, 8, 8]},
     {
         id: 2719,
         name: "Kendari",
@@ -5503,7 +5503,7 @@ data.map = [
         city: CITY,
         region: "Celebes",
         terrain: MIXED,
-        edges: [3, 1, 1, 1, 1, 1]
+        edges: [3, 1, 1, 1, 1, 17]
     },
     {
         id: 2620,
@@ -5543,15 +5543,15 @@ data.map = [
         resource: true,
         region: "Java",
         terrain: MIXED,
-        edges: [1, 1, 1, 8, 8, 2]
+        edges: [17, 1, 1, 8, 8, 2]
     },
     {id: 1918, region: "Java", terrain: MIXED, edges: [1, 3, 3, 1, 1, 1]},
-    {id: 2119, region: "Java", terrain: MIXED, edges: [8, 8, 2, 1, 1, 3]},
+    {id: 2119, region: "Java", terrain: MIXED, edges: [8, 24, 2, 1, 1, 3]},
     {id: 2320, name: "Bali", airfield: true, region: "DEI", island: true, terrain: MIXED},
     {id: 3017, name: "Motorai", airfield: true, region: "DEI", island: true, terrain: OPEN},
-    {id: 2421, name: "Soembawa", region: "DEI", island: true, terrain: MIXED, edges: [8, 1, 1, 1, 1, 1]},
+    {id: 2421, name: "Soembawa", region: "DEI", island: true, terrain: MIXED, edges: [8, 17, 1, 1, 1, 1]},
     {id: 2521, name: "Soemba", region: "DEI", island: true, terrain: MIXED},
-    {id: 2621, name: "Flores", region: "DEI", island: true, terrain: MIXED, edges: [1, 1, 8, 8, 8, 1]},
+    {id: 2621, name: "Flores", region: "DEI", island: true, terrain: MIXED, edges: [1, 1, 24, 8, 8, 16]},
     {id: 2622, name: "Roti", region: "DEI", island: true, terrain: MIXED},
     {id: 2821, name: "Wetar", region: "DEI", island: true, terrain: MIXED},
     {
@@ -5562,20 +5562,20 @@ data.map = [
         port: true,
         region: "DEI",
         terrain: MIXED,
-        edges: [1, 1, 2, 8, 1, 8]
+        edges: [17, 17, 2, 8, 1, 24]
     },
-    {id: 2822, region: "DEI", island: true, terrain: MIXED, edges: [8, 1, 1, 1, 1, 2]},
+    {id: 2822, region: "DEI", island: true, terrain: MIXED, edges: [24, 17, 1, 1, 1, 2]},
     {id: 2921, name: "Moa", region: "DEI", island: true, terrain: MIXED},
     {id: 3021, name: "Babar", region: "DEI", island: true, terrain: MIXED},
     {id: 3121, name: "Tanimbar", region: "DEI", island: true, terrain: MIXED},
     {id: 3221, name: "Aroe", region: "DEI", island: true, terrain: MIXED},
-    {id: 3020, name: "Ceram", region: "DEI", island: true, terrain: MIXED, edges: [8, 8, 1, 1, 1, 1]},
+    {id: 3020, name: "Ceram", region: "DEI", island: true, terrain: MIXED, edges: [8, 8, 1, 1, 1, 17]},
     {id: 2919, name: "Amboina", airfield: true, region: "DEI", island: true, terrain: MIXED},
     {id: 2819, name: "Soela", region: "DEI", island: true, terrain: MIXED},
     {id: 2918, name: "Batjan", region: "DEI", island: true, terrain: MIXED},
     {id: 3019, name: "Obi", region: "DEI", island: true, terrain: MIXED},
     {id: 3118, name: "Waigeo", region: "DEI", island: true, terrain: MIXED},
-    {id: 3018, name: "Halmahera", region: "DEI", island: true, terrain: MIXED, edges: [1, 1, 1, 1, 8, 8]},
+    {id: 3018, name: "Halmahera", region: "DEI", island: true, terrain: MIXED, edges: [1, 1, 1, 17, 8, 8]},
     {id: 2027, region: "Australia", terrain: OPEN, edges: [1, 3, 2, 2, 0, 1], supply_source: JOINT_SUPPLIED_HEX},
     {id: 2028, region: "Australia", terrain: OPEN, edges: [2, 2, 0, 0, 0, 0], supply_source: JOINT_SUPPLIED_HEX},
     {id: 2126, region: "Australia", terrain: OPEN, edges: [1, 3, 2, 2, 3, 1]},
@@ -5598,7 +5598,7 @@ data.map = [
     },
     {id: 2427, region: "Australia", terrain: OPEN, edges: [2, 0, 0, 0, 2, 2], supply_source: JOINT_SUPPLIED_HEX},
     {id: 2425, region: "Australia", terrain: OPEN, edges: [1, 3, 2, 3, 1, 1]},
-    {id: 2524, region: "Australia", terrain: OPEN, edges: [1, 1, 1, 3, 3, 1]},
+    {id: 2524, region: "Australia", terrain: OPEN, edges: [1, 1, 17, 3, 3, 1]},
     {
         id: 2525,
         name: "Derby",
@@ -5610,11 +5610,11 @@ data.map = [
         edges: [3, 2, 2, 0, 2, 2],
         supply_source: JOINT_SUPPLIED_HEX
     },
-    {id: 2625, region: "Australia", terrain: JUNGLE, edges: [3, 2, 2, 2, 2, 3]},
+    {id: 2625, region: "Australia", terrain: JUNGLE, edges: [19, 2, 2, 2, 2, 19]},
     {id: 2626, region: "Australia", terrain: OPEN, edges: [2, 2, 0, 0, 0, 2], supply_source: JOINT_SUPPLIED_HEX},
-    {id: 2724, region: "Australia", terrain: JUNGLE, edges: [1, 2, 2, 2, 2, 1]},
+    {id: 2724, region: "Australia", terrain: JUNGLE, edges: [17, 2, 2, 2, 2, 17]},
     {id: 2725, region: "Australia", terrain: OPEN, edges: [2, 2, 2, 0, 2, 2], supply_source: JOINT_SUPPLIED_HEX},
-    {id: 2824, region: "Australia", terrain: JUNGLE, edges: [1, 1, 1, 3, 2, 1]},
+    {id: 2824, region: "Australia", terrain: JUNGLE, edges: [1, 1, 1, 3, 2, 17]},
     {
         id: 2825,
         name: "Wyndham",
@@ -5692,9 +5692,9 @@ data.map = [
         edges: [1, 1, 1, 0, 2, 5],
         supply_source: JOINT_SUPPLIED_HEX
     },
-    {id: 3119, name: "Sarong", airfield: true, region: "Guinea", terrain: JUNGLE, edges: [1, 2, 3, 1, 8, 1]},
+    {id: 3119, name: "Sarong", airfield: true, region: "Guinea", terrain: JUNGLE, edges: [1, 2, 19, 1, 8, 1]},
     {id: 3219, name: "Vogelkop", resource: true, region: "Guinea", terrain: MIXED, edges: [1, 1, 1, 2, 2, 1]},
-    {id: 3220, region: "Guinea", terrain: MIXED, edges: [2, 8, 3, 1, 1, 3]},
+    {id: 3220, region: "Guinea", terrain: MIXED, edges: [2, 8, 3, 1, 1, 19]},
     {
         id: 3319,
         name: "Biak",
@@ -5703,12 +5703,12 @@ data.map = [
         island: true,
         region: "Guinea",
         terrain: OPEN,
-        edges: [1, 1, 1, 8, 8, 1]
+        edges: [1, 1, 17, 24, 8, 1]
     },
     {id: 3320, region: "Guinea", terrain: JUNGLE, edges: [8, 2, 3, 1, 1, 3]},
     {id: 3420, region: "Guinea", terrain: JUNGLE, edges: [1, 3, 2, 2, 2, 3]},
     {id: 3421, region: "Guinea", terrain: MOUNTAIN, edges: [2, 2, 2, 2, 1, 3]},
-    {id: 3422, region: "Guinea", terrain: JUNGLE, edges: [2, 2, 3, 1, 1, 8]},
+    {id: 3422, region: "Guinea", terrain: JUNGLE, edges: [2, 2, 3, 1, 17, 8]},
     {id: 3519, region: "Guinea", terrain: MIXED, edges: [1, 1, 1, 3, 3, 1]},
     {
         id: 3520,
@@ -5808,7 +5808,7 @@ data.map = [
         terrain: MIXED,
         edges: [1, 1, 3, 1, 1, 1]
     },
-    {id: 4120, region: "AMandates", terrain: MIXED, edges: [1, 1, 1, 1, 8, 3]},
+    {id: 4120, region: "AMandates", terrain: MIXED, edges: [1, 1, 1, 17, 8, 3]},
     {
         id: 4021,
         name: "Rabaul",
@@ -5817,7 +5817,7 @@ data.map = [
         port: true,
         region: "AMandates",
         terrain: MIXED,
-        edges: [1, 8, 1, 2, 1, 1]
+        edges: [1, 8, 17, 2, 1, 1]
     },
     {
         id: 3921,
@@ -5828,7 +5828,7 @@ data.map = [
         terrain: MIXED,
         edges: [1, 1, 3, 1, 1, 1]
     },
-    {id: 4022, region: "AMandates", terrain: MIXED, edges: [2, 1, 1, 1, 1, 3]},
+    {id: 4022, region: "AMandates", terrain: MIXED, edges: [2, 17, 1, 1, 1, 3]},
     {id: 4121, name: "Green", airfield: true, region: "AMandates", terrain: MIXED, island: true},
     {id: 4221, name: "Baka", airfield: true, region: "AMandates", terrain: MIXED, island: true},
     {id: 4122, name: "Woodlark", airfield: true, region: "AMandates", terrain: MIXED, island: true},

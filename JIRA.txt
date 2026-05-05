@@ -1,5 +1,4 @@
 Todo list:
-* Add partially impassable hexsides to data.js
 * Unit sorting
 * India tracker (and check trackers)
 * Hide path option

@@ -396,6 +396,12 @@ for (let i = 0; i <= LAST_BOARD_HEX; ++i) {
         } else if (hex.island || hex.terrain === ATOLL || hex.terrain === OCEAN) {
             border = 1
         }
+        if (border & GROUND) {
+            border |= UNPLAYABLE_LAND
+        }
+        if (border & WATER) {
+            border |= UNPLAYABLE_WATER
+        }
         if (i % 29 >= 27) {
             hex.supply_source |= JOINT_SUPPLIED_HEX
         }
@@ -2101,9 +2107,8 @@ function get_activatable_units(hq, hq_supply_type) {
             }
             if (map_get(distance_map, nh, 100) > distance
                 && (
-                    (MD.edges_int & GROUND << 5 * j && !occupied_land && !solely_occupied_land(nh, 1 - faction)) ||
-                    (MD.edges_int & WATER << 5 * j && !non_neutral_zoi && !has_non_n_zoi(nh, 1 - faction)) ||
-                    MD.edges_int & UNPLAYABLE_WATER << 5 * j
+                    (MD.edges_int & UNPLAYABLE_LAND << 5 * j && !occupied_land && !solely_occupied_land(nh, 1 - faction)) ||
+                    (MD.edges_int & UNPLAYABLE_WATER << 5 * j && !non_neutral_zoi && !has_non_n_zoi(nh, 1 - faction))
                 )) {
                 map_set(distance_map, nh, distance)
                 G.supply_cache[nh] |= HEX_TEMP_FLAG3
