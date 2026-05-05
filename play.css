@@ -478,7 +478,7 @@ div[data-tooltip]:after {
 .big.unit_ix_31{ background-position-x:  -1350px;}
 .big.unit_ix_32{ background-position-x:  -1395px;}
 
-.piece.reduced, .icon.reduced {
+.reduced {
     background-position-y: -35px;
 }
 
@@ -515,7 +515,7 @@ div[data-tooltip]:after {
 .unit_ix_31{ background-position-x:  -1050px;}
 .unit_ix_32{ background-position-x:  -1085px;}
 
-.piece.reduced.big, .icon.reduced.big {
+.reduced.big, .reduced.big {
     background-position-y: -45px;
 }
 

@@ -11,3 +11,4 @@ Todo list:
 * Hex by hex move for naval and air?
 * ferry emergency
 * dacca reinf ships locked
+* imclicit declration for any card bonus

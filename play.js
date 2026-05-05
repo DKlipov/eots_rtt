@@ -789,11 +789,11 @@ function on_update() {
     G.offensive.battle_hexes.forEach(h => populate("s-loc", h, "battle", G.offensive.battle_names.indexOf(h)))
     G.offensive.landing_hexes.forEach(h => populate("s-loc", h, "landing", G.offensive.battle_names.indexOf(h)))
     var isr_marker = (v, i) => {
-        if (v === 1 && i === AP) {
+        if (v && i === AP) {
             return data.counters.rivalry_ap
-        } else if (v === 1 && i === JP) {
+        } else if (v && i === JP) {
             return data.counters.rivalry_jp
-        } else if (v === 0 && i === AP) {
+        } else if (i === AP) {
             return data.counters.agreement_ap
         } else {
             return data.counters.agreement_jp
