@@ -1047,7 +1047,7 @@ P.replacement_segment = {
             button("done")
         }
         var ru = L.replacable_units.filter(u => L.replacement_points[pieces[u].replacement] > 0)
-        if (L.divisions && ru.filter(u => pieces[u].class === "ground").length) {
+        if (L.divisions && L.replacable_units.filter(u => pieces[u].class === "ground").length) {
             action("divisions", 0)
             button("divisions_button")
         }
