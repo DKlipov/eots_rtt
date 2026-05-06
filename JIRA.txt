@@ -5,5 +5,12 @@ Todo list:
 * dacca reinf ships locked
 * imclicit declration for any card bonus
 * tooltips on mobile
+* update dices
+* load custom markers
+* Implementation notes
 * stack refactoring
+* verify with actual rules
 * big refactoring
+* fuzz-buzz testing
+
+Done
