@@ -6180,28 +6180,28 @@ data.events = {
         road: true,
         name: "Kwai river",
         counter: data.counters.kwai_river,
-        counter_place: 2109
+        keys: [2109, 2108],
     },
     JARHAT_ROAD: {
         id: 11,
         road: true,
         name: "Jarhat",
         counter: data.counters.road_jarhat,
-        counter_place: 2104
+        keys: [2104],
     },
     IMPHAL_ROAD: {
         id: 12,
         road: true,
         name: "Imphal",
         counter: data.counters.road_imphal,
-        counter_place: 2105
+        keys: [2105],
     },
     LEDO_ROAD: {
         id: 13,
         road: true,
         name: "Ledo",
         counter: data.counters.road_ledo,
-        counter_place: 2205
+        keys: [2205],
     },
     CHINA_OFFENSIVE: {
         id: 14,

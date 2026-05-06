@@ -825,7 +825,7 @@ function on_update() {
         populate_generic("s-loc", h, marker)
     })
     var base_road_counters = get_preference("noroad", false)
-    ROAD_EVENTS.filter(event => map_info.hex_check(hex_to_int(event.counter_place))).forEach(event => {
+    ROAD_EVENTS.filter(event => map_info.hex_check(hex_to_int(event.keys[0]))).forEach(event => {
         var thing = lookup_thing("road", event.id)
         var active = G.events[event.id]
         thing.element.classList.add("hide")
@@ -834,7 +834,7 @@ function on_update() {
         }
         if ((event === data.events.KWAI_RIVER_BRIDGE && active)
             || (!active && base_road_counters && event !== data.events.KWAI_RIVER_BRIDGE)) {
-            populate_generic("s-loc", hex_to_int(event.counter_place), event.counter)
+            populate_generic("s-loc", hex_to_int(event.keys[0]), event.counter)
         }
     })
     if (G.events[data.events.TOKYO_EXPRESS.id] > 0) {

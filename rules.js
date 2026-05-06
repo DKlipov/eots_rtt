@@ -688,7 +688,7 @@ function sent_to_europe(u) {
         var roll = random(10)
         clear_undo()
         result = roll <= modifier
-        log(`${piece_get_log_str(u)} sent to Europe roll: ${dice_get_log_str(roll)} ${result ? "<=" : ">"}${modifier}${G.inter_service[AP] ? " (ISR active)" : ""}.`)
+        log(`${piece_get_log_str(u)} sent to Europe roll: ${dice_get_log_str(roll)} ${result ? "<=" : ">"} ${modifier}${G.inter_service[AP] ? "(ISR active)" : ""}.`)
         if (result) {
             displace_to_turn(u, 3)
         }
