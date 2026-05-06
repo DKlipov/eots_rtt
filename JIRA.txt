@@ -1,6 +1,5 @@
 Todo list:
 * Pw magment page
-* Hex-to-hex distance calcualtion
 * ferry emergency
 * dacca reinf ships locked
 * imclicit declration for any card bonus
@@ -14,3 +13,7 @@ Todo list:
 * fuzz-buzz testing
 
 Done
+
+? Hex-to-hex distance calcualtion
+? Check supply menu
+? Burma scenario

@@ -14,7 +14,7 @@ const layout = {
         "track_game_turn": [54, 665, 70, 562],
         "track_political_will": [157, 712, 64, 517],
         "track_wie": [259, 707, 64, 517],
-        "track_strat_record": [343, 1158, 78, 468],
+        "track_strat_record": [348, 1158, 78, 468],
     },
     "southpac": {
         "box_delayed_reinf": [1140, 710, 116, 95],

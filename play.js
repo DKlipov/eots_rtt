@@ -793,7 +793,7 @@ function on_update() {
         }
     })
     clear_paths()
-    if(!get_preference("nopath", false)){
+    if (!get_preference("nopath", false)) {
         draw_paths()
     }
 
@@ -1128,6 +1128,8 @@ function toggle_dialog(id, response) {
         vp_dialog(name, response)
     } else if (name === "battle_info") {
         battle_info_dialog(name, response)
+    } else if (name === "pw_check") {
+        pw_dialog(name, response)
     }
 }
 
@@ -1239,6 +1241,78 @@ function show_card_list(id, response) {
     })
 }
 
+function pw_dialog(id, response) {
+    show_dialog(id, (body) => {
+        console.log(response)
+        let dl = document.createElement("dl")
+        append_header(`Current Political Will: ${G.political_will}.`, dl)
+        // dl.appendChild(print_pow())
+        append_header(`National status:`, dl)
+        for (var nation of response.nations) {
+            dl.appendChild(print_nation_status(nation))
+        }
+        body.appendChild(dl)
+    })
+}
+
+function print_pow() {
+    for (var key of Object.keys(data.nations)) {
+        if (data.nations[key].id === id) {
+            return data.nations[key]
+        }
+    }
+}
+
+function get_nation_by_id(id) {
+    for (var key of Object.keys(data.nations)) {
+        if (data.nations[key].id === id) {
+            return data.nations[key]
+        }
+    }
+}
+
+function print_nation_status(response) {
+    var nation = get_nation_by_id(response.id)
+    let main = document.createElement("div")
+    main.className = "nation_info"
+    main.appendChild(create_flag(response.control))
+    var pw_string = ` (${response.control === JP ? "-" : ""}${nation.pw} PW)`
+    main.innerHTML += `${nation.name}${nation.pw ? pw_string : ""}.`
+    if (response.status) {
+        append_header(response.status, main, "div")
+    }
+    var control = [[], []]
+    if (nation.keys) {
+        nation.keys.forEach(k => {
+            if (set_has(G.control, hex_to_int(k))) {
+                control[JP].push(hex_to_int(k))
+            } else {
+                control[AP].push(hex_to_int(k))
+            }
+            console.log(hex_to_int(k))
+        })
+        var key_header = `(${control[JP].length}/${control[AP].length})`
+        if (control[JP].length) {
+            key_header += " JP: "
+            key_header += control[JP].map(k => sub_hex(0, k)).join(", ")
+        }
+        if (control[AP].length && control[JP].length) {
+            key_header += ";   "
+        }
+        if (control[AP].length) {
+            key_header += " AP: "
+            key_header += control[AP].map(k => sub_hex(0, k)).join(", ")
+        }
+        var keys = document.createElement("div")
+        keys.innerHTML = key_header
+        main.appendChild(keys)
+    }
+    if (response.info) {
+        response.info.forEach(l => append_header(l, main))
+    }
+    return main
+}
+
 function vp_dialog(id, response) {
     show_dialog(id, (body) => {
         let dl = document.createElement("dl")
@@ -1259,8 +1333,8 @@ function vp_dialog(id, response) {
     })
 }
 
-function append_header(text, dl) {
-    let header = document.createElement("dt")
+function append_header(text, dl, el = "dt") {
+    let header = document.createElement(el)
     header.textContent = text
     dl.appendChild(header)
 }

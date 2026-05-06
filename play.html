@@ -39,6 +39,12 @@
     <div class="dialog_x" onclick="hide_dialog('vp_check')">&#x274c;</div>
 </div>
 
+<div id="pw_check" class="dialog">
+    <div class="dialog_header">Political Will</div>
+    <div class="dialog_body"></div>
+    <div class="dialog_x" onclick="hide_dialog('pw_check')">&#x274c;</div>
+</div>
+
 <div id="battle_info" class="dialog">
     <div class="dialog_header">Battle info</div>
     <div class="dialog_body"></div>
@@ -72,6 +78,8 @@
                     <div>Inspect Allied Cards</div>
                 <li onclick="send_query('vp_check')" id="vp_check_button">
                     <div>Inspect Victory Points</div>
+                <li onclick="send_query('pw_check')">
+                    <div>Inspect Political Will</div>
             </menu>
         </details>
     </div>

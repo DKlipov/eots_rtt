@@ -6069,7 +6069,7 @@ data.nations = {
     },
     INDIA: {
         id: 4,
-        name: "Indian revolts.",
+        name: "India",
         regions: ["India"],
         statuses: ["Stable", "Unrest", "Strikes", "Unstable", "Revolts"],
         pw: 2,
@@ -6087,7 +6087,7 @@ data.nations = {
     },
     AUSTRALIAN_MANDATES: {
         id: 6,
-        name: "Australia Mandates",
+        name: "Australian Mandates",
         regions: ["AMandates"],
         keys: [4021, 4423],
         ports: [4423, 4222, 4021, 4020, 3820]

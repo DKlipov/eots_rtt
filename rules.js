@@ -1873,33 +1873,45 @@ P.tp_units = {
     }
 }
 
+function get_china_offensive_modifiers() {
+    var result = {
+        log: [],
+        burma_road: 0,
+        air_support: 0,
+        divisions: G.china_divisions
+    }
+    result.burma_road = (2 - G.burma_road) * 4
+    result.log.push(`Japanese divisions ${G.china_divisions}.`)
+    result.log.push(`+${result.burma_road} (Burma road).`)
+
+    if (scenario_data().id === SOUTH_PACIFIC_SCENARIO) {
+        result.air_support++
+        result.log.push(`+1 ${piece_get_log_str(ap_air("14_lrb"))}.`)
+    } else {
+        for_each_unit_on_map((u, piece, location) => {
+            if (location === CHINA_BOX && (piece.type !== "lrb" || u === LRB_14) && !set_has(G.oos, u)) {
+                result.log.push(`+1 ${piece_get_log_str(u)}.`)
+                result.air_support++
+            }
+        })
+    }
+    return result
+}
+
 P.china_offensive = {
     prompt() {
         prompt(`Roll to China Offensive.`)
         button("roll")
     },
     roll() {
-        var burma_road = (2 - G.burma_road) * 4
-        log(`JP started China offensive.`)
-        log(`Japanese divisions ${G.china_divisions}.`)
-        log(`+${burma_road} (Burma road).`)
-        G.events[events.CHINA_OFFENSIVE.id] = G.turn
-        let result = random(10)
-        var air_support = 0
 
-        if (scenario_data().id === SOUTH_PACIFIC_SCENARIO) {
-            air_support++
-            log(`+1 ${piece_get_log_str(ap_air("14_lrb"))}.`)
-        } else {
-            for_each_unit_on_map((u, piece, location) => {
-                if (location === CHINA_BOX && (piece.type !== "lrb" || u === LRB_14) && !set_has(G.oos, u)) {
-                    log(`+1 ${piece_get_log_str(u)}.`)
-                    air_support++
-                }
-            })
-        }
-        var success = result <= (G.china_divisions - burma_road - air_support)
-        log(`${dice_get_log_str(result, burma_road + air_support)} <= ${G.china_divisions} (${success ? "SUCCESS" : "FAILED"})`)
+        log(`JP started China offensive.`)
+        let result = random(10)
+        G.events[events.CHINA_OFFENSIVE.id] = G.turn
+        var mods = get_china_offensive_modifiers()
+        mods.log.forEach(l => log(l))
+        var success = result <= (mods.divisions - mods.burma_road - mods.air_support)
+        log(`${dice_get_log_str(result, mods.burma_road + mods.air_support)} <= ${mods.divisions} (${success ? "SUCCESS" : "FAILED"})`)
         if (success) {
             update_china_status(1)
         } else {
@@ -8973,7 +8985,7 @@ P.build_road = {
         push_undo()
         var event = ROAD_EVENTS.filter(e => e.keys[0] === h)[0]
         check_event(event)
-        log(`${side_get_log_str(R)} build infrastructure ${event.name}.`)
+        log(`${side_get_log_str(R)} build infrastructure ${hex_get_log_str(event.keys[0])}.`)
         check_supply()
         end()
     },
@@ -10848,11 +10860,81 @@ function on_query(q, params, b) {
         return draw_list()
     } else if (q === "vp_check") {
         return vp_query()
+    } else if (q === "pw_check") {
+        return pw_query()
     }
 }
 
 function vp_query() {
     return get_victory()
+}
+
+const FLOAT_SURRENDER = [
+    nations.PHILIPPINES, nations.MALAYA, nations.DEI, nations.BURMA,
+    nations.AUSTRALIA, nations.NEW_GUINEA, nations.MARSHALL,
+]
+
+function pw_query() {
+    var result = {
+        nations: []
+    }
+    result.nations.push(get_china_info())
+    if (G.sid === SOUTH_PACIFIC_SCENARIO) {
+        result.nations.push(get_nation_info(nations.NEW_GUINEA))
+    } else {
+        result.nations.push(get_india_info())
+        FLOAT_SURRENDER.forEach(n => result.nations.push(get_nation_info(n)))
+    }
+    result.nations.push(get_nation_info(nations.AUSTRALIAN_MANDATES))
+    return result
+}
+
+function get_china_info() {
+    var id = nations.CHINA.id
+    var surrender = G.surrender[id] >= 5
+    var offensive = G.events[events.CHINA_OFFENSIVE.id]
+    var mods = get_china_offensive_modifiers()
+    var info = []
+    var draw = draw_list().hand
+    var count = [0, 0]
+    draw[JP].forEach(c => {
+        if (cards[c].china) {
+            count[JP]++
+        }
+    })
+    draw[AP].forEach(c => {
+        if (cards[c].china) {
+            count[AP]++
+        }
+    })
+    if (!surrender) {
+        info.push(`Offensive ${(G.turn - offensive > 1) ? "" : "not "}possible${offensive > 0 ? ". Last launched turn " + offensive : ""}.`)
+        mods.log.forEach(l => info.push(l))
+        info.push(`Not played JP cards to China government status: ${count[JP]}.`)
+        info.push(`Not played AP cards to China government status: ${count[AP]}.`)
+    }
+    return {
+        id, control: surrender ? JP : AP, info,
+        status: `(${G.surrender[id] + 1}/5) ${nations.CHINA.statuses[G.surrender[id]]}.`
+    }
+}
+
+function get_india_info() {
+    var nation = nations.INDIA
+    var id = nation.id
+    var name = nation.name
+    var surrender = G.surrender[id] >= 5
+    return {
+        id, control: surrender ? JP : AP,
+        status: `(${Math.min(G.surrender[id] + 1, 5)}/5) ${nations.INDIA.statuses[G.surrender[id]]}.`
+    }
+}
+
+function get_nation_info(nation) {
+    var id = nation.id
+    var name = nation.name
+    var surrender = G.surrender[id]
+    return {id, control: surrender ? JP : AP}
 }
 
 //could corrupt G, run only in safe context

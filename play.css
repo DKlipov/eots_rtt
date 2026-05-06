@@ -672,6 +672,8 @@ div[data-tooltip]:after {
 }
 
 .icon {
+    display: inline-block;
+    vertical-align: -12px;
     margin: 2px;
     background-repeat: no-repeat;
     border-radius: 5px;
@@ -682,4 +684,8 @@ div[data-tooltip]:after {
 .icon.big {
     width: 45px;
     height: 45px;
+}
+
+.nation_info > dt {
+    margin-left: 20px;
 }
