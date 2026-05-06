@@ -73,11 +73,7 @@ const JP_BOUNDARIES = [];
 set_add(JP_BOUNDARIES, hex_to_int(3606))
 set_add(JP_BOUNDARIES, hex_to_int(2109))
 
-const ROAD_EVENTS = Object.keys(data.events).filter(k => data.events[k].road).map(k => {
-    var event = data.events[k]
-    event.keys = event.keys.map(h => hex_to_int(h))
-    return event
-})
+const ROAD_EVENTS = Object.keys(data.events).filter(k => data.events[k].road).map(e => data.events[e])
 
 for (var key of Object.keys(data.counters)) {
     data.counters[key] = "marker " + data.counters[key]
@@ -86,6 +82,12 @@ for (var key of Object.keys(data.counters)) {
 for (var key of Object.keys(data.nations)) {
     if (data.nations[key].counter) {
         data.nations[key].counter = "marker " + data.nations[key].counter
+    }
+}
+
+for (var key of Object.keys(data.events)) {
+    if (data.events[key].counter) {
+        data.events[key].counter = "marker " + data.events[key].counter
     }
 }
 
@@ -430,6 +432,9 @@ let map_info = MAIN_BOARD_INFO;
 function on_init(scenario, game_options, static_view) {
     init_canvas(scenario)
 
+    init_preference_checkbox("noroad", false)
+    init_preference_checkbox("nopath", false)
+
     let map_elem = document.getElementById("mapwrap")
     switch (scenario) {
         case "South Pacific": {
@@ -465,6 +470,10 @@ function on_init(scenario, game_options, static_view) {
             map_elem.classList.add("main");
             define_board("#map", 2550, 1650, [12, 12, 12, 12])
             map_info = MAIN_BOARD_INFO
+            define_thing("road", data.events.JARHAT_ROAD.id).layout([578, 286, 60, 60], "road_jarhat hide marker control")
+            define_thing("road", data.events.IMPHAL_ROAD.id).layout([579, 330, 60, 60], "road_imphal hide marker control")
+            define_thing("road", data.events.LEDO_ROAD.id).layout([629, 300, 60, 60], "road_ledo hide marker control")
+            define_thing("road", data.events.KWAI_RIVER_BRIDGE.id).layout([557, 501, 50, 95], "road_kwai hide marker control")
         }
     }
 
@@ -784,7 +793,9 @@ function on_update() {
         }
     })
     clear_paths()
-    draw_paths()
+    if(!get_preference("nopath", false)){
+        draw_paths()
+    }
 
 
     // console.log(V)
@@ -813,9 +824,17 @@ function on_update() {
         }
         populate_generic("s-loc", h, marker)
     })
-    ROAD_EVENTS.filter(h => map_info.hex_check(hex_to_int(h))).forEach(event => {
-        if (!G.events[event.id]) {
-            event.keys.forEach(hex => populate_generic("s-loc", hex, "marker road"))
+    var base_road_counters = get_preference("noroad", false)
+    ROAD_EVENTS.filter(event => map_info.hex_check(hex_to_int(event.counter_place))).forEach(event => {
+        var thing = lookup_thing("road", event.id)
+        var active = G.events[event.id]
+        thing.element.classList.add("hide")
+        if (!active && !base_road_counters) {
+            thing.element.classList.remove("hide")
+        }
+        if ((event === data.events.KWAI_RIVER_BRIDGE && active)
+            || (!active && base_road_counters && event !== data.events.KWAI_RIVER_BRIDGE)) {
+            populate_generic("s-loc", hex_to_int(event.counter_place), event.counter)
         }
     })
     if (G.events[data.events.TOKYO_EXPRESS.id] > 0) {

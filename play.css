@@ -426,6 +426,10 @@ div[data-tooltip]:after {
     height: 45px;
 }
 
+.marker.road {
+    border: none;
+}
+
 .unit-tip {
     transition: left 200ms, top 200ms;
     background-repeat: no-repeat;

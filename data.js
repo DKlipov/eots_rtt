@@ -5958,13 +5958,13 @@ data.sp_map = [
 
 data.counters = {
     oos: "oos unit_status",
-    control_jp: "control_jp",
-    capture_jp: "capture_jp",
-    control_us: "control_us",
-    capture_us: "capture_us",
-    control_sov: "control_sov",
-    capture_sov: "capture_sov",
-    no_garrison: "no_garrison",
+    control_jp: "control_jp control",
+    capture_jp: "capture_jp control",
+    control_us: "control_us control",
+    capture_us: "capture_us control",
+    control_sov: "control_sov control",
+    capture_sov: "capture_sov control",
+    no_garrison: "no_garrison control",
     organic_small: "organic_small",
     aa_small: "aa_small",
     strat_small: "strat_small",
@@ -6179,25 +6179,29 @@ data.events = {
         id: 10,
         road: true,
         name: "Kwai river",
-        keys: [2108, 2109]
+        counter: data.counters.kwai_river,
+        counter_place: 2109
     },
     JARHAT_ROAD: {
         id: 11,
         road: true,
         name: "Jarhat",
-        keys: [2104]
+        counter: data.counters.road_jarhat,
+        counter_place: 2104
     },
     IMPHAL_ROAD: {
         id: 12,
         road: true,
         name: "Imphal",
-        keys: [2105]
+        counter: data.counters.road_imphal,
+        counter_place: 2105
     },
     LEDO_ROAD: {
         id: 13,
         road: true,
         name: "Ledo",
-        keys: [2205]
+        counter: data.counters.road_ledo,
+        counter_place: 2205
     },
     CHINA_OFFENSIVE: {
         id: 14,

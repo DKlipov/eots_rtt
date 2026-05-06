@@ -14,6 +14,10 @@
 .marker.strat_air_small { background-image: url(pieces150/strat_air_small.png); }
 .marker.barges_small { background-image: url(pieces150/barges_small.png); }
 .marker.oos_small { background-image: url(pieces150/oos_small.webp); }
+.road_ledo { background-image: url(pieces150/road_ledo.png); background-size: 50px 55px;background-repeat: no-repeat; }
+.road_imphal { background-image: url(pieces150/road_imphal.png);background-size: 50px 55px;background-repeat: no-repeat; }
+.road_jarhat { background-image: url(pieces150/road_jarhat.png); background-size: 55px 45px;background-repeat: no-repeat;}
+.road_kwai { background-image: url(pieces150/road_kwai.png); background-size: 50px 95px;background-repeat: no-repeat; }
 
 /*marker_stripes*/
 .big_markers_blue { background-image: url(pieces150/big_markers_blue.150.png); background-size: 225px 90px; }

@@ -1,6 +1,4 @@
 Todo list:
-* Red routes option
-* Hide path option
 * Pw magment page
 * Hex-to-hex distance calcualtion
 * ferry emergency
