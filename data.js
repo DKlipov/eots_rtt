@@ -6137,6 +6137,7 @@ data.events = {
     ALASKA_OCCUPATION: {
         id: 2,
         pw: -1,
+        name: "Alaska",
         cause: "alaska occupation",
         turns_to_control: 3,
         keys: [4600, 4700, 4800, 5000, 5100]
@@ -6144,6 +6145,7 @@ data.events = {
     HAWAII_OCCUPATION: {
         id: 3,
         pw: -1,
+        name: "Hawaii",
         cause: "hawaii occupation",
         turns_to_control: 2,
         keys: [5708, 5808, 5908, 5108]

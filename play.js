@@ -117,6 +117,10 @@ const BURMA_SCENARIO = 10
 
 const CAMPAIGN_SCENARIOS = [FULL_CAMPAIGN_SCENARIO, SHORT_CAMPAIGN_SCENARIO, EVEN_SHORT_CAMPAIGN_SCENARIO]
 
+const US_MARINE_UNIT = find_piece("army_ap_1_m")
+const US_BB_UNIT = find_piece("washington")
+const US_CV_UNIT = find_piece("essex")
+
 const UNIT_MOVEMENT_MARKERS = [
     {
         "name": "BARGES_MOVE",
@@ -1245,9 +1249,20 @@ function pw_dialog(id, response) {
     show_dialog(id, (body) => {
         console.log(response)
         let dl = document.createElement("dl")
-        append_header(`Current Political Will: ${G.political_will}.`, dl)
-        // dl.appendChild(print_pow())
-        append_header(`National status:`, dl)
+        var header = document.createElement("dt");
+        header.appendChild(create_icon(...data.counters.pw.split(" ")))
+        header.innerHTML += ` Current Political Will: ${G.political_will}.`
+        dl.appendChild(header)
+        dl.appendChild(print_pow())
+        dl.appendChild(print_casualties())
+        dl.appendChild(print_naval_situation())
+        if (G.sid !== SOUTH_PACIFIC_SCENARIO) {
+            dl.appendChild(print_resources())
+        }
+        // var nat_header = document.createElement("dt");
+        // nat_header.appendChild(create_icon(...(data.counters.china).split(" ")))
+        // nat_header.innerHTML += `National status:`
+        // dl.appendChild(nat_header)
         for (var nation of response.nations) {
             dl.appendChild(print_nation_status(nation))
         }
@@ -1256,11 +1271,74 @@ function pw_dialog(id, response) {
 }
 
 function print_pow() {
-    for (var key of Object.keys(data.nations)) {
-        if (data.nations[key].id === id) {
-            return data.nations[key]
+    let main = document.createElement("div")
+    if (G.pow <= 0) {
+        append_header(`No progress of war required for turn ${G.turn}.`, main)
+        return main
+    }
+    var current_pow = G.capture.filter(h => !set_has(G.control, h))
+    var completed = current_pow.length >= G.pow
+    main.appendChild(create_icon(...((completed ? "" : "gray ") + data.counters.pow_target).split(" ")))
+    main.innerHTML += ` Progress of war (${completed ? "Completed" : "-1 PW"}).`
+    let keys = document.createElement("div")
+    keys.innerHTML += `(${current_pow.length}/${G.pow}) `
+    keys.innerHTML += current_pow.map(k => sub_hex(0, k)).join(", ")
+    main.appendChild(keys)
+    return main
+}
+
+function print_resources() {
+    let main = document.createElement("div")
+    var completed = G.events[data.events.JAPAN_LACK_OF_RESOURCES.id]
+    var value = RESOURCE_HEX.filter(h => set_has(G.control, h)).length
+    main.appendChild(create_icon(...((completed ? "" : "gray ") + data.counters.resource_jp).split(" ")))
+    if (completed) {
+        main.innerHTML += ` JP control 3 or less resource hexes completed (-3 PW)."}`
+    } else {
+        RESOURCE_HEX.filter(h => set_has(G.control, h)).length
+        main.innerHTML += ` JP control ${value} > 3 resource hexes.`
+    }
+    return main
+}
+
+function print_casualties() {
+    let main = document.createElement("div")
+    var completed = G.events[data.events.US_CASUALTIES.id]
+    main.appendChild(create_icon(...((completed ? "gray " : "") + data.pieces[US_MARINE_UNIT].counter).split(" ")))
+    main.innerHTML += ` US Casualties ${completed ? "triggered (-1 PW)." : "not triggered."}`
+    return main
+}
+
+function print_naval_situation() {
+    var counter = [[], []]
+    for (var i = 1; i < data.pieces.length; i++) {
+        var piece = data.pieces[i]
+        if (piece.faction === AP && piece.service === "navy" && piece.class === "naval" && G.location[i] < LAST_BOARD_HEX) {
+            counter[0].push(i)
+            if (piece.br) {
+                counter[1].push(i)
+            }
         }
     }
+    let main = document.createElement("div")
+    main.appendChild(print_ship_counter(counter[0], data.pieces[US_BB_UNIT].counter, "Strategic naval situation - US naval units"))
+    main.appendChild(print_ship_counter(counter[1], data.pieces[US_CV_UNIT].counter, "Strategic naval situation - US carrier units"))
+    return main
+}
+
+function print_ship_counter(list, counter, text) {
+    var ship = document.createElement("div")
+    ship.appendChild(create_icon(...((list.length ? "" : "gray ") + counter).split(" ")))
+    var html_text = ` ${text}`
+    if (!list.length) {
+        html_text += " eliminated (-1 PW)."
+    } else if (list.length > 3) {
+        html_text += ` (${list.length} units).`
+    } else {
+        html_text += ` (${list.map(u => sub_piece(0, u)).join(", ")}).`
+    }
+    ship.innerHTML += html_text
+    return ship
 }
 
 function get_nation_by_id(id) {
@@ -1289,7 +1367,6 @@ function print_nation_status(response) {
             } else {
                 control[AP].push(hex_to_int(k))
             }
-            console.log(hex_to_int(k))
         })
         var key_header = `(${control[JP].length}/${control[AP].length})`
         if (control[JP].length) {
@@ -1347,6 +1424,13 @@ function create_flag(faction) {
         result.className = "control_jp"
     }
     result.classList.add("icon")
+    return result
+}
+
+function create_icon(...icon) {
+    var result = document.createElement("div")
+    result.classList.add("icon")
+    icon.forEach(c => result.classList.add(c))
     return result
 }
 

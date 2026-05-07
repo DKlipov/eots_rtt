@@ -672,6 +672,7 @@ div[data-tooltip]:after {
 }
 
 .icon {
+    position: relative;
     display: inline-block;
     vertical-align: -12px;
     margin: 2px;
