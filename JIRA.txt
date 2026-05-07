@@ -1,5 +1,4 @@
 Todo list:
-* imclicit declration for any card bonus
 * tooltips on mobile
 * update dices
 * load custom markers

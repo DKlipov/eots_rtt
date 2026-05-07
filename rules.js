@@ -5868,7 +5868,7 @@ P.emergency_move = {
         if (!L.unit_to_retreat.length) {
             end()
         } else {
-            log("Emergency move.")
+            log("Emergency move:")
         }
     },
     prompt() {
@@ -7572,18 +7572,22 @@ P.worker_strikes_unit = {
             }
             set_add(L.allowed_units, u)
         })
-        if (L.allowed_units.length <= 0) {
-            log(`No full strength Indian corps present.`)
-            end()
-        }
     },
     prompt() {
-        prompt(`Worker strikes. Choose unit.`)
+        prompt(`Worker strikes. Choose unit.${L.allowed_units.length <= 0 ? " (No full strength Indian corps present)." : ""}`)
+        if (L.allowed_units.length <= 0) {
+            button("skip")
+        }
         L.allowed_units.forEach(u => action_unit(u))
+    },
+    skip() {
+        push_undo()
+        log(`No full strength Indian corps present.`)
+        end()
     },
     unit(u) {
         push_undo()
-        log(`Worker strikes: ${piece_get_log_str(u)}`)
+        log(`Worker strikes: ${piece_get_log_str(u)}.`)
         damage_unit(u)
         end()
     }
@@ -7735,16 +7739,23 @@ cards[find_card(JP, 33)].event = function () {
 
 P.draw_from_discard = {
     _begin() {
+        L.skip = 0
         if (G.discard[R].length === 0 || G.discard[R].length === 1 && G.discard[R][0] === G.offensive.offensive_card) {
-            log(`Discard pile is empty, could not replace card.`)
-            end()
-        }
-        if (G.future_offensive[R] < 0 && G.hand[R].length === 0) {
-            log(`Have no card to discard, could not replace card.`)
-            end()
+            L.skip = 1
+        } else if (G.future_offensive[R] < 0 && G.hand[R].length === 0) {
+            L.skip = 2
         }
     },
     prompt() {
+        if (L.skip === 1) {
+            prompt(`Discard pile is empty, could not replace card.`)
+            button("skip")
+            return
+        } else if (L.skip === 2) {
+            prompt(`Have no card to discard, could not replace card.`)
+            button("skip")
+            return
+        }
         if (L.card) {
             prompt(`${offensive_card_header()} Choose card to draw.`)
             G.discard[R].forEach(c => action_card(c))
@@ -7758,7 +7769,8 @@ P.draw_from_discard = {
         }
     },
     skip() {
-        log(`${side_get_log_str(R)} choose to skip replace card.`)
+        push_undo()
+        log(`${side_get_log_str(R)} skip replace card option.`)
         end()
     },
     card(c) {
@@ -7978,13 +7990,14 @@ P.kamikaze_attack = {
                 set_add(L.allowed_units, u)
             }
         })
-        if (L.allowed_units.length <= 0) {
-            log(`No kamikaze attack possible.`)
-            end()
-        }
         L.stage = 1
     },
     prompt() {
+        if (L.allowed_units.length <= 0) {
+            prompt(`No kamikaze attack possible. No air units.`)
+            button("skip")
+            return
+        }
         if (L.stage === 1) {
             prompt(`Kamikaze attack. Choose air unit.`)
             L.allowed_units.forEach(u => action_unit(u))
@@ -8010,6 +8023,11 @@ P.kamikaze_attack = {
         if (L.allowed_units.length <= 0 || L.hits <= 0) {
             button("done")
         }
+    },
+    skip() {
+        push_undo()
+        log(`Kamikaze attack skipped.`)
+        end()
     },
     done() {
         push_undo()
@@ -8124,14 +8142,19 @@ P.paratroopers = {
                 set_add(L.allowed_hexes, h)
             })
         })
-        if (L.allowed_hexes.length <= 0) {
-            log(`No paratroopers landing possible.`)
-            end()
-        }
+
     },
     prompt() {
         prompt(`${offensive_card_header()} Choose paratroopers landing hex.`)
         L.allowed_hexes.forEach(u => action_hex(u))
+        if (L.allowed_hexes.length <= 0) {
+            button("skip")
+        }
+    },
+    skip() {
+        push_undo()
+        log("Paratroopers skipped.")
+        end()
     },
     action_hex(h) {
         push_undo()
@@ -8250,8 +8273,6 @@ P.attack_b29_base = {
         b29.filter(u => unit_on_board(u) && get_distance(G.location[u], TOKYO) <= 8 || G.location[u] === CHINA_BOX)
             .forEach(u => set_add(L.allowed_units, u))
         if (L.allowed_units.length <= 0) {
-            log(`No B29 base attacked.`)
-            end()
             return
         }
         log(`JP attack to B29 base:`)
@@ -8264,8 +8285,18 @@ P.attack_b29_base = {
         }
     },
     prompt() {
+        if (L.allowed_units.length <= 0) {
+            prompt(`No B29 base attacked.`)
+            button("skip")
+            return
+        }
         prompt(`Attack to B29 base. Choose unit.`)
         L.allowed_units.forEach(u => action_unit(u))
+    },
+    skip() {
+        push_undo()
+        log(`No B29 base attacked.`)
+        end()
     },
     unit(u) {
         push_undo()
@@ -8561,15 +8592,22 @@ P.place_abda = {
     _begin() {
         var dei = ["Java", "Borneo", "Sumatra", "Celebes"]
         L.allowed_hexes = get_unit_reinforcement_hexes(HQ_ABDA).filter(h => dei.includes(get_map_data(h).region))
-        if (L.allowed_hexes.length <= 0) {
-            log(`ABDA HQ could not be placed.`)
-            eliminate_permanently(HQ_ABDA)
-            end()
-        }
+
     },
     prompt() {
+        if (L.allowed_hexes.length <= 0) {
+            button("skip")
+            prompt(`ABDA HQ could not be placed.`)
+            return
+        }
         prompt(`${offensive_card_header()} Choose hex to place ${piece_get_log_str(HQ_ABDA)}.`)
         L.allowed_hexes.forEach(h => action_hex(h))
+    },
+    skip() {
+        push_undo()
+        log(`ABDA HQ could not be placed.`)
+        eliminate_permanently(HQ_ABDA)
+        end()
     },
     action_hex(h) {
         push_undo()
@@ -8714,18 +8752,24 @@ P.repair_avg = {
             || location_14 === ELIMINATED_BOX && L.allowed_hexes.length) {
             set_add(L.allowed_units, ap_air(14))
         }
-        if (L.allowed_units.length <= 0) {
-            log(`Bonus could not be used.`)
-            end()
-        }
     },
     prompt() {
+        if (L.allowed_units.length <= 0) {
+            button("skip")
+            prompt(`Bonus could not be used.`)
+            return
+        }
         prompt(`${offensive_card_header()} Choose unit.`)
         if (G.active_stack.length) {
             L.allowed_hexes.forEach(h => action_hex(h))
         } else {
             L.allowed_units.forEach(h => action_unit(h))
         }
+    },
+    skip() {
+        push_undo()
+        log(`Bonus could not be used.`)
+        end()
     },
     unit(u) {
         push_undo()
@@ -8845,18 +8889,18 @@ function cache_skip_bombing() {
 
 P.skip_bombing = {
     _begin() {
-        if (G.offensive.skip_bomb_able.length === 1) {
-            log("Skip bombing:")
-            damage_unit(G.offensive.skip_bomb_able[0])
-            end()
-            return
-        } else if (G.offensive.skip_bomb_able.length === 0) {
-            end()
-            return
+        if (G.offensive.skip_bomb_able.length <= 1) {
+            G.active = AP
+        } else {
+            G.active = JP
         }
-        G.active = JP
     },
     prompt() {
+        if (G.offensive.skip_bomb_able.length === 0) {
+            button("skip")
+            prompt(`${card_get_log_str(SKIP_BOMBING)}. Choose unit to assign hit. (No possible units).`)
+            return
+        }
         prompt(`${card_get_log_str(SKIP_BOMBING)}. Choose unit to assign hit.`)
         if (L.done) {
             button("done")
@@ -8869,6 +8913,12 @@ P.skip_bombing = {
         log("Skip bombing:")
         damage_unit(u)
         L.done = 1
+    },
+    skip() {
+        push_undo()
+        G.active = AP
+        log("Skip bombing: No unit damaged.")
+        end()
     },
     done() {
         push_undo()
@@ -8967,13 +9017,12 @@ cards[find_card(AP, 33)].before_activation = function () {
 }
 
 P.build_road = {
-    _begin() {
-        if (!get_event_infrastructure_actions().length) {
-            log("CBI could not be built.")
-            end()
-        }
-    },
     prompt() {
+        if (!get_event_infrastructure_actions().length) {
+            prompt("CBI could not be built.")
+            button("skip")
+            return
+        }
         prompt(`${offensive_card_header()} Choose hex to build CBI.`)
         get_event_infrastructure_actions().map(h => {
             if (h === "jarhat") {
@@ -9279,12 +9328,8 @@ P.turkey_shoot = {
                 set_add(L.allowed_units, u)
             }
         })
-        if (L.allowed_units.length <= 0) {
-            end()
-            return
-        } else {
-            G.active = AP
-        }
+        G.active = AP
+
     },
     prompt() {
         prompt(`The Great Marianas Turkey Shoot. Choose unit to hit.`)
@@ -9370,9 +9415,9 @@ cards[find_card(AP, 69)].before_commit_offensive = function () {
 
 P.airborne_landing = {
     _begin() {
+        L.allowed_hexes = []
         var unit = ap_army("11_d")
         if (set_has(G.offensive.active_units[AP], unit)) {
-            end()
             return
         }
         var air_location = G.location[unit]
@@ -9383,23 +9428,25 @@ P.airborne_landing = {
             }
         })
         if (range <= 0) {
-            end()
             return
         }
-        L.allowed_hexes = []
         for_each_hex_in_range(air_location, range, h => {
             if (!has_non_n_zoi(h, JP) && !is_faction_units(h, JP) && !is_faction_units(h, AP) && get_map_data(h).terrain > OCEAN) {
                 set_add(L.allowed_hexes, h)
             }
         })
-        if (L.allowed_hexes.length <= 0) {
-            end()
-            return
-        }
     },
     prompt() {
+        if (L.allowed_hexes.length <= 0) {
+            button("skip")
+        }
         prompt(`${offensive_card_header()} Choose hex to place ${piece_get_log_str(ap_army("11_d"))}.`)
         L.allowed_hexes.forEach(h => action_hex(h))
+    },
+    skip() {
+        push_undo()
+        log("Airborn landing skipped.")
+        end()
     },
     action_hex(h) {
         push_undo()
@@ -9420,19 +9467,26 @@ P.place_armor = {
         var regions = ["NIndia", "Burma", "India", "Ceylon"]
         L.allowed_hexes = get_unit_reinforcement_hexes(ARMOR_BRIGADE).filter(h => regions.includes(get_map_data(h).region))
         set_delete(G.reduced, ARMOR_BRIGADE)
-        if (L.allowed_hexes.length <= 0) {
-            log(`Could not place ${piece_get_log_str(ARMOR_BRIGADE)}.`)
-            eliminate_permanently(ARMOR_BRIGADE)
-            end()
-        }
+
     },
     prompt() {
+        if (L.allowed_hexes.length <= 0) {
+            button("eliminate")
+            prompt(`Could not place ${piece_get_log_str(ARMOR_BRIGADE)}.`)
+            return
+        }
         prompt(`${offensive_card_header()} Choose hex to place ${piece_get_log_str(ARMOR_BRIGADE)}.`)
         L.allowed_hexes.forEach(h => action_hex(h))
     },
     action_hex(h) {
         push_undo()
         set_location(ARMOR_BRIGADE, h)
+        end()
+    },
+    eliminate() {
+        push_undo()
+        log(`Could not place ${piece_get_log_str(ARMOR_BRIGADE)}.`)
+        eliminate_permanently(ARMOR_BRIGADE)
         end()
     }
 }
