@@ -1838,6 +1838,7 @@ P.return_hq = {
 P.tp_units = {
     prompt() {
         prompt(`Choose unit and hex.`)
+        fill_overstack()
         if (G.active_stack.length) {
             var piece = pieces[G.active_stack[0]]
             for (i = 0; i < LAST_BOARD_HEX; i++) {
@@ -1869,6 +1870,7 @@ P.tp_units = {
     },
     done() {
         G.active_stack = []
+        fill_overstack()
         end()
     }
 }
@@ -5817,7 +5819,7 @@ function get_emergency_retreat_hexes(unit) {
     var result = []
     for_each_hex_in_range(G.location[unit], range, h => {
         if (is_space_controlled(h, piece.faction) && (get_map_data(h).port && piece.class === "naval"
-            || get_map_data(h).airfield && piece.class === "air")) {
+            || get_map_data(h).airfield && piece.class === "air" && h !== AIR_FERRY)) {
             set_add(result, h)
         }
     })

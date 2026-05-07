@@ -4882,7 +4882,7 @@ data.map = [
     {id: 2005, name: "Dimasur", region: "NIndia", terrain: OPEN, city: CITY, edges: [2, 4, 2, 2, 4, 0]},
     {id: 2104, name: "Jarhat", region: "NIndia", airfield: true, city: CITY, terrain: OPEN, edges: [2, 2, 4, 4, 4, 2]},
     {id: 2105, name: "Imphal", region: "NIndia", city: CITY, terrain: MIXED, edges: [4, 2, 2, 4, 2, 2]},
-    {id: 2205, name: "Ledo", region: "NIndia", city: CITY, terrain: MIXED, edges: [2, 2, 4, 2, 2, 4]},
+    {id: 2205, name: "Ledo", region: "NIndia", city: CITY, airfield: true, terrain: MIXED, edges: [2, 2, 4, 2, 2, 4]},
     {id: 2004, terrain: MOUNTAIN, edges: [0, 2, 2, 2, 0, 0]},
     {id: 2103, terrain: MOUNTAIN, edges: [0, 0, 2, 2, 2, 0]},
     {id: 2204, terrain: MOUNTAIN, edges: [0, 2, 2, 2, 2, 2]},
