@@ -5019,11 +5019,14 @@ function fill_hit_able_units(faction) {
             total_lf += loss_factor
             has_full_size = 1
         }
-        var could_be_damaged = loss_factor <= hit_limit && (!piece.br || distant_hits || set_has(battle.distant_hits_list[faction], unit)
+        var could_be_damaged = (!piece.br || distant_hits || set_has(battle.distant_hits_list[faction], unit)
             || G.location[unit] === battle.battle_hex)
-        if (could_be_damaged && (critical || reduced_status === 0 || piece.one_step && battle.ground_stage)) {
+        if (!could_be_damaged) {
+            continue
+        }
+        if (loss_factor <= hit_limit && (critical || reduced_status === 0 || piece.one_step && battle.ground_stage)) {
             map_set(result, unit, loss_factor)
-        } else if (could_be_damaged) {
+        } else if (loss_factor <= hit_limit) {
             map_set(reduced, unit, loss_factor)
         } else if (critical && lower_lf_unit[0] === loss_factor) {
             lower_lf_unit.push(unit)
