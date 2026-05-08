@@ -1563,7 +1563,9 @@ function sub_hex(match, p1) {
 
 
 function on_click_hex_tip(z) {
-    scroll_into_view(get_hex_elem(z).element)
+    var el = get_hex_elem(z).element
+    scroll_into_view(el)
+    lookup_thing("action_hex", z).element.classList.toggle("tip", true)
 }
 
 function on_focus_hex_tip(z) {
@@ -1571,6 +1573,7 @@ function on_focus_hex_tip(z) {
 }
 
 function on_blur_hex_tip(z) {
+    lookup_thing("action_hex", z).element.classList.toggle("tip", false)
     get_hex_elem(z).element.classList.toggle("tip", false)
 }
 
