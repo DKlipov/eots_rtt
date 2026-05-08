@@ -1611,7 +1611,7 @@ function on_focus_card_tip(c) {
     world.tip.classList = `card card_${card.faction ? "ap" : "jp"}_${card.num}`
 }
 
-function on_blur_card_tip(c) {
+function on_blur_card_tip() {
     world.tip.hidden = true
     world.tip.classList = ''
 }

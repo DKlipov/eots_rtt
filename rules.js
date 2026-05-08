@@ -835,7 +835,12 @@ P.reinforcement_segment = {
             if (piece.reinforcement === G.turn && piece.start_reduced) {
                 set_add(G.reduced, u)
             }
-            if (is_reinforcement_denied(piece)) {
+            if (piece.service === "au" && is_event_active(events.AUSTRALIA_SURRENDER)) {
+                log(`Unit eliminated due to Australia surrender.`)
+                eliminate_permanently(u)
+                return;
+            } else if (piece.service === "ind" && G.surrender[nations.INDIA.id] >= 4) {
+                log(`Unit eliminated due to India surrender.`)
                 eliminate_permanently(u)
                 return;
             }
