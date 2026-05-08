@@ -440,7 +440,14 @@ function apply_south_pacific(hex) {
     if (sp_map_item && sp_map_item.edges) {
         hex.edges_int = 0
         for (let j = 0; j < 6; j++) {
-            hex.edges_int = hex.edges_int | (sp_map_item.edges[j] << 5 * j)
+            var edge = sp_map_item.edges[j];
+            if (edge & GROUND) {
+                edge |= UNPLAYABLE_LAND
+            }
+            if (edge & WATER) {
+                edge |= UNPLAYABLE_WATER
+            }
+            hex.edges_int = hex.edges_int | (edge << 5 * j)
         }
     }
     if (x === 20) {
@@ -2158,7 +2165,7 @@ function get_activatable_units(hq, hq_supply_type) {
             && (piece.class !== "ground" || !set_has(G.offensive.battle_hexes, loc))
             && !set_has(G.offensive.active_units[R], i)
             && (!set_has(G.oos, i) || L.card === GENERAL_ADACHI)
-            && (!reaction_movement || is_unit_reaction_able(i) && (!is_b29_bombed(piece) || is_faction_units(loc, JP)))
+            // && (!reaction_movement || is_unit_reaction_able(i) && (!is_b29_bombed(piece) || is_faction_units(loc, JP)))
         ) {
             set_add(result, i)
         }

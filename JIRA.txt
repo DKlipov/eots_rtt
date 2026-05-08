@@ -1,7 +1,6 @@
 Todo list:
 * update dices
 * load custom markers
-* Jp flags on SP map
 * Implementation notes
 * stack refactoring
 * verify with actual rules
