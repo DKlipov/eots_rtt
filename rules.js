@@ -2165,7 +2165,7 @@ function get_activatable_units(hq, hq_supply_type) {
             && (piece.class !== "ground" || !set_has(G.offensive.battle_hexes, loc))
             && !set_has(G.offensive.active_units[R], i)
             && (!set_has(G.oos, i) || L.card === GENERAL_ADACHI)
-            // && (!reaction_movement || is_unit_reaction_able(i) && (!is_b29_bombed(piece) || is_faction_units(loc, JP)))
+            && (!reaction_movement || is_unit_reaction_able(i) && (!is_b29_bombed(piece) || is_faction_units(loc, JP)))
         ) {
             set_add(result, i)
         }
