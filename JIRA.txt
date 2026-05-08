@@ -1,6 +1,4 @@
 Todo list:
-error in backtracing (and battle)
-advantage rework
 * tooltips on mobile
 * update dices
 * load custom markers

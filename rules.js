@@ -5332,7 +5332,7 @@ P.jp_cv_reassign = {
     prompt() {
         if (L.stage === 0) {
             prompt(`Japanese naval aircraft range advantage. Choose units to damage. Chosen: ${L.hits}`)
-            L.to_damage.forEach(u => action_unit(u))
+            L.to_damage.filter(u => L.to_repair.length > 2 || !map_has(L.to_repair, u)).forEach(u => action_unit(u))
             if (L.hits > 0) {
                 button("next")
             } else {
@@ -10792,7 +10792,7 @@ function on_view() {
         committed: G.offensive.committed,
         battle_names: G.offensive.battle_names,
         organic: G.offensive.organic,
-        damaged: G.offensive.battle && G.offensive.battle.damaged ? G.offensive.battle.damaged[R] : [],
+        damaged: G.offensive.battle && G.offensive.battle.damaged && G.offensive.battle.damaged[R] ? G.offensive.battle.damaged[R] : [],
     }
     V.garrison = []
     var div_count = get_garrison_count()
@@ -10999,6 +10999,7 @@ function get_nation_info(nation) {
 
 //could corrupt G, run only in safe context
 function battle_info_query(battle) {
+    G.log = []
     var result = {
         naval_cf: [],
         naval_distant_hits: [],
