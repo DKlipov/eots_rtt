@@ -230,10 +230,10 @@ class Thing {
 	tooltip_image(tip) {
 		var id = this.my_id
 		if (is_mobile()) {
-			this.element.addEventListener("contextmenu", function () {
+			this.element.addEventListener("touchstart", function () {
 				if (typeof tip === "function") tip(id, true)
 			})
-			this.element.addEventListener("mouseleave", function () {
+			this.element.addEventListener("touchend", function () {
 				if (typeof tip === "function") tip(id, false)
 			})
 		} else {
