@@ -365,11 +365,13 @@ function long_tap(callback){
 			callback()
 		}, 100);
     document.body.style.userSelect = "none";
+    document.body.style.webkitUserSelect = "none";
 }
 
 function long_tap_cancel(){
     clearTimeout(long_tap_timer)
     document.body.style.userSelect = null;
+    document.body.style.webkitUserSelect = null;
 }
 
 function lookup_thing(action, id) {
