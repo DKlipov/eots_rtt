@@ -231,19 +231,19 @@ class Thing {
 		var id = this.my_id
 		if (is_mobile()) {
 			this.element.addEventListener("touchstart", function () {
-				if (typeof tip === "function") tip(id, true)
+				if (typeof tip === "function") long_tap(()=>tip(id, true))
 			})
 			this.element.addEventListener("touchend", function () {
-				if (typeof tip === "function") tip(id, false)
+				if (typeof tip === "function") long_tap_cancel()
 			})
 		} else {
 			this.element.addEventListener("mouseenter", function () {
 				if (typeof tip === "function") tip(id, true)
 			})
-			this.element.addEventListener("mouseleave", function () {
-				if (typeof tip === "function") tip(id, false)
-			})
 		}
+        this.element.addEventListener("mouseleave", function () {
+            if (typeof tip === "function") tip(id, false)
+        })
 		return this
 	}
 
@@ -357,6 +357,17 @@ class Thing {
 		this.element.innerHTML = s
 		return this
 	}
+}
+
+var long_tap_timer
+function long_tap(callback){
+		long_tap_timer = setTimeout(() => {
+			callback()
+		}, 100);
+}
+
+function long_tap_cancel(){
+    clearTimeout(long_tap_timer)
 }
 
 function lookup_thing(action, id) {
