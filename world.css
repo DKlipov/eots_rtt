@@ -290,7 +290,7 @@ body.hide-pieces .marker:not(.control) { display: none }
 /* DICE ICONS */
 
 .dice_diamond {
-	height: 200px; /* adjust to control the size  */
+	/*height: 200px; !* adjust to control the size  *!*/
 	aspect-ratio: 1;
 	clip-path: polygon(50% 0,100% 50%,50% 100%,0 50%);
 	background: black;
