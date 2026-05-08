@@ -229,12 +229,21 @@ class Thing {
 
 	tooltip_image(tip) {
 		var id = this.my_id
-		this.element.addEventListener("mouseenter", function () {
-			if (typeof tip === "function") tip(id, true)
-		})
-		this.element.addEventListener("mouseleave", function () {
-			if (typeof tip === "function") tip(id, false)
-		})
+		if (is_mobile()) {
+			this.element.addEventListener("contextmenu", function () {
+				if (typeof tip === "function") tip(id, true)
+			})
+			this.element.addEventListener("mouseleave", function () {
+				if (typeof tip === "function") tip(id, false)
+			})
+		} else {
+			this.element.addEventListener("mouseenter", function () {
+				if (typeof tip === "function") tip(id, true)
+			})
+			this.element.addEventListener("mouseleave", function () {
+				if (typeof tip === "function") tip(id, false)
+			})
+		}
 		return this
 	}
 

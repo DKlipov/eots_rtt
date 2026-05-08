@@ -387,10 +387,6 @@ div[data-tooltip]:after {
 
 /* PIECES */
 
-.piece {
-    /*pointer-events: none;*/
-}
-
 
 .piece.action, .marker.action {
     pointer-events: auto;
@@ -405,11 +401,12 @@ div[data-tooltip]:after {
     /*box-sizing: border-box;*/
 }
 
-.unit, .marker {
+.piece {
     border: 1px solid black;
 }
 
 .unit, .marker {
+    border: 1px solid black;
     transition: left 200ms, top 200ms;
     position: absolute;
     /*background-size: auto 100%;*/

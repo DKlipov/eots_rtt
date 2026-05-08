@@ -1149,7 +1149,7 @@ function show_dialog(id, dialog_generator) {
 
 function hide_dialog(id) {
     document.getElementById(id).classList.remove("show")
-    _tip_blur_mobile_tip()
+    on_blur_unit_tip()
 }
 
 function toggle_dialog_collapse(id) {
@@ -1585,7 +1585,7 @@ function unit_tooltip_image(a, onoff) {
 }
 
 function on_focus_unit_tip(a) {
-    world.tip.hidden = is_mobile()
+    world.tip.hidden = false//is_mobile()
     const piece = data.pieces[a]
     // Show BOTH sides of the marker
     world.tip.innerHTML = `<div class="unit-tip piece ${piece.counter}"></div>`
@@ -1602,7 +1602,8 @@ function on_blur_unit_tip() {
 }
 
 function on_focus_card_tip(c) {
-    world.tip.hidden = is_mobile()
+    world.tip.hidden = false//is_mobile()
+    world.tip.innerHTML = ""
     const card = data.cards[c]
     world.tip.classList = `card card_${card.faction ? "ap" : "jp"}_${card.num}`
 }
