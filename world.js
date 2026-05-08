@@ -364,10 +364,12 @@ function long_tap(callback){
 		long_tap_timer = setTimeout(() => {
 			callback()
 		}, 100);
+    document.body.style.userSelect = "none";
 }
 
 function long_tap_cancel(){
     clearTimeout(long_tap_timer)
+    document.body.style.userSelect = null;
 }
 
 function lookup_thing(action, id) {
