@@ -1347,14 +1347,14 @@ P.offensive_phase = script(`
     while (G.hand[AP].length > 0 || G.hand[JP].length > 0) {
         if (G.hand[G.active].length > 0){
             call offensive_segment
-            eval {
-                commit_into_turn_draw()
-                G.active = 1 - G.offensive.attacker
-                reset_offensive()
-                G.offensive.attacker = G.active
-            }
         } else {
-            set G.active (1 - G.active)
+            log (side_get_log_str(G.offensive.attacker)+" have no cards in hand.")
+        }
+        eval {
+            commit_into_turn_draw()
+            G.active = 1 - G.offensive.attacker
+            reset_offensive()
+            G.offensive.attacker = G.active
         }
     }
     goto political_phase
@@ -2692,6 +2692,7 @@ P.move_offensive_units = {
         }
         move_units(G.active_stack, curr_path)
         L.move_type = ANY_MOVE
+        L.spec_move = 0
         check_supply()
         this.check_dist_attack(hex)
     },
