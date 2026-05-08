@@ -811,13 +811,13 @@ function on_update() {
     if (G.pow <= 0) {
         G.capture = []
     }
-    G.control.filter(h => map_info.hex_check(hex_to_int(h)) && !set_has(G.capture, h) && !set_has(JP_BOUNDARIES, h))
+    G.control.filter(h => map_info.hex_check(h) && !set_has(G.capture, h) && !set_has(JP_BOUNDARIES, h))
         .forEach(h => populate_generic("s-loc", h, data.counters.control_jp))
-    G.control.filter(h => map_info.hex_check(hex_to_int(h)) && set_has(G.garr_elim, h))
+    G.control.filter(h => map_info.hex_check(h) && set_has(G.garr_elim, h))
         .forEach(h => populate_generic("s-loc", h, data.counters.no_garrison))
-    JP_BOUNDARIES.filter(h => map_info.hex_check(hex_to_int(h)) && !set_has(G.capture, h) && !set_has(G.control, h) && h !== MANCHURIA_1 && h !== MANCHURIA_2)
+    JP_BOUNDARIES.filter(h => map_info.hex_check(h) && !set_has(G.capture, h) && !set_has(G.control, h) && h !== MANCHURIA_1 && h !== MANCHURIA_2)
         .forEach(h => populate_generic("s-loc", h, data.counters.control_us))
-    G.capture.filter(h => map_info.hex_check(hex_to_int(h))).forEach(h => {
+    G.capture.filter(h => map_info.hex_check(h)).forEach(h => {
         var marker
         if (h === MANCHURIA_1 || h === MANCHURIA_2) {
             marker = data.counters.capture_sov
