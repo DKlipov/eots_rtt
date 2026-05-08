@@ -289,6 +289,17 @@ body.hide-pieces .marker:not(.control) { display: none }
 
 /* DICE ICONS */
 
+.dice_diamond {
+	height: 200px; /* adjust to control the size  */
+	aspect-ratio: 1;
+	clip-path: polygon(50% 0,100% 50%,50% 100%,0 50%);
+	background: black;
+	color: white;
+	font-size: 15px;
+	/*border: solid;*/
+	/*border-color: #222222;*/
+}
+
 .dice {
 	display: inline-block;
 	background-image: url(pieces150/d10.png);

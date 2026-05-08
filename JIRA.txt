@@ -7,7 +7,6 @@ Todo list:
 * fuzz-buzz testing
 
 Done
-? update dices
 ? Hex-to-hex distance calcualtion
 ? Check supply menu
 ? Burma scenario
