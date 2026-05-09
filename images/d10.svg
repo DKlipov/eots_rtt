@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="120" height="12">
+    <defs>
+        <path id="d8" fill="#000" stroke-width="0.6" stroke-linejoin="bevel" stroke="#222" d="M 6,.5 11.5,6 6,11.5 .5,6 Z" />
+    </defs>
+    <use xlink:href="#d8" x="0" y="0" />
+    <use xlink:href="#d8" x="12" y="0" />
+    <use xlink:href="#d8" x="24" y="0" />
+    <use xlink:href="#d8" x="36" y="0" />
+    <use xlink:href="#d8" x="48" y="0" />
+    <use xlink:href="#d8" x="60" y="0" />
+    <use xlink:href="#d8" x="72" y="0" />
+    <use xlink:href="#d8" x="84" y="0" />
+    <use xlink:href="#d8" x="96" y="0" />
+    <use xlink:href="#d8" x="108" y="0" />
+    <g font-size="7" fill="#fff" font-family="B612 Mono" font-weight="bold" text-anchor="middle">
+        <text x="6" y="8.5">0</text>
+        <text x="18" y="8.5">1</text>
+        <text x="30" y="8.5">2</text>
+        <text x="42" y="8.5">3</text>
+        <text x="54" y="8.5">4</text>
+        <text x="66" y="8.5">5</text>
+        <text x="78" y="8.5">6</text>
+        <text x="90" y="8.5">7</text>
+        <text x="102" y="8.5">8</text>
+        <text x="114" y="8.5">9</text>
+    </g>
+</svg>

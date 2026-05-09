@@ -302,7 +302,7 @@ body.hide-pieces .marker:not(.control) { display: none }
 
 .dice {
 	display: inline-block;
-	background-image: url(pieces150/d10.png);
+	background-image: url(images/d10.svg);
 	background-size: 150px 15px;
 	background-repeat: no-repeat;
 	/*border: 1px solid black;*/
