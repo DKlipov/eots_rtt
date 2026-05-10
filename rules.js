@@ -10800,7 +10800,19 @@ function on_view() {
     V.passes = G.passes
     V.asp = G.asp
 
-    V.control = G.control
+    var control = []
+    for (var i = 0; i < map.length; i++) {
+        var hex = hex_to_int(map[i].id)
+        if (!is_controllable_hex(hex)) {
+            continue
+        }
+        if (set_has(G.control, hex)) {
+            control[hex] = JP
+        } else {
+            control[hex] = AP
+        }
+    }
+    V.control = control
     V.capture = G.capture
     V.oos = G.oos
     V.b29u = G.b29u

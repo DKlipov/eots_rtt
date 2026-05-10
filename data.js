@@ -5958,12 +5958,12 @@ data.sp_map = [
 
 data.counters = {
     oos: "oos unit_status",
-    control_jp: "control_jp control",
-    capture_jp: "capture_jp control",
-    control_us: "control_us control",
-    capture_us: "capture_us control",
-    control_sov: "control_sov control",
-    capture_sov: "capture_sov control",
+    control_jp: "small_markers_white unit_ix_2",
+    capture_jp: "small_markers_white unit_ix_2 gray",
+    control_us: "small_markers_white unit_ix_2 reduced",
+    capture_us: "small_markers_white unit_ix_2 reduced gray",
+    control_sov: "small_markers_white unit_ix_1 reduced",
+    capture_sov: "small_markers_white unit_ix_1 reduced gray",
     no_garrison: "no_garrison control",
     organic_small: "organic_small",
     aa_small: "aa_small",
@@ -6074,7 +6074,8 @@ data.nations = {
         statuses: ["Stable", "Unrest", "Strikes", "Unstable", "Revolts"],
         pw: 2,
         retreat_hexes: [1005, 1307, 1308, 1208],
-        keys: [1905, 2005, 2104, 2105, 2205]
+        keys: [1905, 2005, 2104, 2105, 2205],
+        no_full_control: true,
     },
     AUSTRALIA: {
         id: 5,
@@ -6107,22 +6108,26 @@ data.nations = {
     HAWAII: {
         id: 9,
         name: "Hawaii",
-        keys: [5708, 5808, 5908]
+        keys: [5708, 5808, 5908],
+        no_full_control: true,
     },
     ALASKA: {
         id: 10,
         name: "Alaska",
-        keys: [4600, 4700, 4800, 5000, 5100]
+        keys: [4600, 4700, 4800, 5000, 5100],
+        no_full_control: true,
     },
     JAPAN: {
         id: 11,
         keys: [3407, 3506, 3507, 3607, 3706, 3705, 3606],
+        no_full_control: true,
     },
     CHINA: {
         id: 12,
         pw: 2,
         statuses: ["Stable Front", "Unstable Front", "Major Breakthrough", "Threat to Chunking", "Government Collapsed"],
         name: "China",
+        no_full_control: true,
     },
 }
 

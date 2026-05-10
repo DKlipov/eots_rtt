@@ -65,7 +65,7 @@ const CANVAS = document.getElementById("canvas")
 const CANVAS_CTX = document.getElementById("canvas").getContext("2d")
 const RESOURCE_HEX = [...Array(data.map.length).keys()].filter(h => data.map[h].resource).map(h => hex_to_int(data.map[h].id))
 
-const JP_REGIONS = ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Siam", "Caroline", "Marshall", "Japan"]
+const JP_REGIONS = ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Siam", "Caroline", "Japan"]
 const JP_BOUNDARIES = [];
 
 [...Array(data.map.length).keys()].map(h => data.map[h]).filter(hex => (hex.airfield || hex.port || hex.port || hex.city) && JP_REGIONS.includes(hex.region))
@@ -75,6 +75,9 @@ set_add(JP_BOUNDARIES, hex_to_int(2109))
 
 const ROAD_EVENTS = Object.keys(data.events).filter(k => data.events[k].road).map(e => data.events[e])
 
+const REGIONS_BY_NATION = {}
+const HEX_BY_NATION = []
+
 for (var key of Object.keys(data.counters)) {
     data.counters[key] = "marker " + data.counters[key]
 }
@@ -83,11 +86,29 @@ for (var key of Object.keys(data.nations)) {
     if (data.nations[key].counter) {
         data.nations[key].counter = "marker " + data.nations[key].counter
     }
+    if (!data.nations[key].no_full_control && data.nations[key].regions) {
+        for (var reg of data.nations[key].regions) {
+            REGIONS_BY_NATION[reg] = data.nations[key]
+        }
+    }
 }
 
 for (var key of Object.keys(data.events)) {
     if (data.events[key].counter) {
         data.events[key].counter = "marker " + data.events[key].counter
+    }
+}
+
+for (var i = 0; i < data.map.length; i++) {
+    var hex = hex_to_int(data.map[i].id)
+    var region = data.map[i].region
+    var nation = REGIONS_BY_NATION[region]
+    if (nation) {
+        HEX_BY_NATION[hex] = nation.id
+    } else if (JP_REGIONS.includes(region)) {
+        HEX_BY_NATION[hex] = -1
+    } else {
+        HEX_BY_NATION[hex] = -2
     }
 }
 
@@ -171,7 +192,7 @@ const TRACK_MARKERS = [
     {
         counter: data.counters.resource_jp,
         alt_counter: data.counters.resource_jp_1,
-        value: G => RESOURCE_HEX.filter(h => set_has(G.control, h)).length
+        value: G => RESOURCE_HEX.filter(h => G.control[h] === JP).length
     },
     {
         counter: data.counters.naval_repl,
@@ -287,7 +308,7 @@ const TURN_MARKERS = [
 ]
 
 function current_pow(G) {
-    return G.capture.filter(h => !set_has(G.control, h)).length
+    return G.capture.filter(h => G.control[h] === AP).length
 }
 
 function clear_paths() {
@@ -453,6 +474,7 @@ function on_init(scenario, game_options, static_view) {
 
     init_preference_checkbox("noroad", false)
     init_preference_checkbox("nopath", false)
+    init_preference_checkbox("fullcontrol", false)
 
     let map_elem = document.getElementById("mapwrap")
     switch (scenario) {
@@ -804,6 +826,26 @@ function place_unit(u, location) {
     }
 }
 
+function get_control_marker(h) {
+    var capture = set_has(G.capture, h)
+    if (capture && G.control[h] === JP && set_has(G.garr_elim, h)) {
+        return data.counters.no_garrison
+    } else if (capture && G.control[h] === JP) {
+        return data.counters.capture_jp
+    } else if (capture && (h === MANCHURIA_1 || h === MANCHURIA_2)) {
+        return data.counters.capture_sov
+    } else if (capture && G.control[h] === AP) {
+        return data.counters.capture_us
+    }
+    if (G.control[h] === JP) {
+        return data.counters.control_jp
+    } else if (h === MANCHURIA_1 || h === MANCHURIA_2) {
+        return data.counters.control_sov
+    } else {
+        return data.counters.control_us
+    }
+}
+
 function on_update() {
 
     begin_update()
@@ -831,23 +873,17 @@ function on_update() {
     if (G.pow <= 0) {
         G.capture = []
     }
-    G.control.filter(h => map_info.hex_check(h) && !set_has(G.capture, h) && !set_has(JP_BOUNDARIES, h))
-        .forEach(h => populate_generic("s-loc", h, data.counters.control_jp))
-    G.control.filter(h => map_info.hex_check(h) && set_has(G.garr_elim, h))
-        .forEach(h => populate_generic("s-loc", h, data.counters.no_garrison))
-    JP_BOUNDARIES.filter(h => map_info.hex_check(h) && !set_has(G.capture, h) && !set_has(G.control, h) && h !== MANCHURIA_1 && h !== MANCHURIA_2)
-        .forEach(h => populate_generic("s-loc", h, data.counters.control_us))
-    G.capture.filter(h => map_info.hex_check(h)).forEach(h => {
-        var marker
-        if (h === MANCHURIA_1 || h === MANCHURIA_2) {
-            marker = data.counters.capture_sov
-        } else if (set_has(G.control, h)) {
-            marker = data.counters.capture_jp
-        } else {
-            marker = data.counters.capture_us
+    var all_control = get_preference("fullcontrol", false)
+    for (var i = 0; i < G.control.length; i++) {
+        var hn = HEX_BY_NATION[i]
+        var cont = G.control[i]
+        if (cont !== null && (all_control
+            || hn >= 0 && (G.surrender[HEX_BY_NATION[i]] > 0) == cont
+            || hn === -1 && cont === AP
+            || hn === -2 && cont === JP)) {
+            populate_generic("s-loc", i, get_control_marker(i))
         }
-        populate_generic("s-loc", h, marker)
-    })
+    }
     var base_road_counters = get_preference("noroad", false)
     ROAD_EVENTS.filter(event => map_info.hex_check(hex_to_int(event.keys[0]))).forEach(event => {
         var thing = lookup_thing("road", event.id)
@@ -881,7 +917,7 @@ function on_update() {
         }
     }
     if (G.pow > 0) {
-        G.capture.filter(h => !set_has(G.control, h))
+        G.capture.filter(h => G.control[h] === AP)
             .forEach(h => populate_generic("s-loc", h, data.counters.pow))
     }
     var oos_hex_set = []
@@ -1306,7 +1342,7 @@ function print_pow() {
         append_header(`No progress of war required for turn ${G.turn}.`, main)
         return main
     }
-    var current_pow = G.capture.filter(h => !set_has(G.control, h))
+    var current_pow = G.capture.filter(h => G.control[h] === AP)
     var completed = current_pow.length >= G.pow
     main.appendChild(create_icon(...((completed ? "" : "gray ") + data.counters.pow_target).split(" ")))
     main.innerHTML += ` Progress of war (${completed ? "Completed" : "-1 PW"}).`
@@ -1320,12 +1356,12 @@ function print_pow() {
 function print_resources() {
     let main = document.createElement("div")
     var completed = G.events[data.events.JAPAN_LACK_OF_RESOURCES.id]
-    var value = RESOURCE_HEX.filter(h => set_has(G.control, h)).length
+    var value = RESOURCE_HEX.filter(h => G.control[h] === JP).length
     main.appendChild(create_icon(...((completed ? "" : "gray ") + data.counters.resource_jp).split(" ")))
     if (completed) {
         main.innerHTML += ` JP control 3 or less resource hexes completed (-3 PW)."}`
     } else {
-        RESOURCE_HEX.filter(h => set_has(G.control, h)).length
+        RESOURCE_HEX.filter(h => G.control[h] === JP).length
         main.innerHTML += ` JP control ${value} > 3 resource hexes.`
     }
     return main
@@ -1392,7 +1428,7 @@ function print_nation_status(response) {
     var control = [[], []]
     if (nation.keys) {
         nation.keys.forEach(k => {
-            if (set_has(G.control, hex_to_int(k))) {
+            if (G.control[hex_to_int(k)] === JP) {
                 control[JP].push(hex_to_int(k))
             } else {
                 control[AP].push(hex_to_int(k))
@@ -1449,9 +1485,9 @@ function append_header(text, dl, el = "dt") {
 function create_flag(faction) {
     var result = document.createElement("div")
     if (faction) {
-        result.className = "control_us"
+        result.className = data.counters.control_us
     } else {
-        result.className = "control_jp"
+        result.className = data.counters.control_jp
     }
     result.classList.add("icon")
     return result
