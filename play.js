@@ -877,7 +877,7 @@ function on_update() {
     for (var i = 0; i < G.control.length; i++) {
         var hn = HEX_BY_NATION[i]
         var cont = G.control[i]
-        if (cont !== null && (all_control
+        if (map_info.hex_check(i) && cont !== null && (all_control
             || hn >= 0 && (G.surrender[HEX_BY_NATION[i]] > 0) == cont
             || hn === -1 && cont === AP
             || hn === -2 && cont === JP)) {
