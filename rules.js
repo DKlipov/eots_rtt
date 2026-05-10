@@ -1495,7 +1495,8 @@ function get_allowed_actions(num) {
     if (num !== SANDCRAB || !result.includes("event")) {
         result.push("ops")
         result.push("displace_hq")
-        if (HQ_LIST.filter(u => G.location[u] > TURN_BOX && pieces[u].faction === R).length) {
+        if (HQ_LIST.filter(u => G.location[u] > TURN_BOX && pieces[u].faction === R).length
+            && (R !== JP || G.sid !== SOUTH_PACIFIC_SCENARIO)) {
             result.push("return_hq")
         }
         if (card.ops >= 3) {
@@ -6220,10 +6221,15 @@ function displace_to_turn(unit, turns, not_delayed) {
         eliminate(unit)
         return
     }
-    log(`${piece_get_log_str(unit)} displaced to turn box ${G.turn + turns}.`)
-    set_location(unit, TURN_BOX + G.turn + turns)
-    if (not_delayed) {
-        set_add(G.not_delayed, unit)
+    if (G.turn + turns > 12 || G.sid === SOUTH_PACIFIC_SCENARIO && G.turn + turns > 6) {
+        log(`${piece_get_log_str(unit)} should be displaced to turn box ${G.turn + turns} but eliminated instead.`)
+        set_location(unit, ELIMINATED_BOX)
+    } else {
+        log(`${piece_get_log_str(unit)} displaced to turn box ${G.turn + turns}.`)
+        set_location(unit, TURN_BOX + G.turn + turns)
+        if (not_delayed) {
+            set_add(G.not_delayed, unit)
+        }
     }
 }
 
@@ -9301,7 +9307,7 @@ P.place_14_air = {
     prompt() {
         prompt(`${offensive_card_header()} Choose hex to place ${piece_get_log_str(AP_AIR_14)}.`)
         L.allowed_hexes.forEach(h => action_hex(h))
-        if(L.allowed_hexes.length===0){
+        if (L.allowed_hexes.length === 0) {
             button("eliminate")
         }
     },
@@ -9311,7 +9317,7 @@ P.place_14_air = {
         check_supply()
         end()
     },
-    eliminate(){
+    eliminate() {
         push_undo()
         log(`No valid hex to place.`)
         eliminate_permanently(AP_AIR_14)

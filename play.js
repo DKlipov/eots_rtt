@@ -745,10 +745,11 @@ function place_unit(u, location) {
     var slocs = world.things["s-loc"]
     var turn = world.things["turn"]
     if (location > TURN_BOX && location <= (TURN_BOX + 12)) {
-        if(!turn[location - TURN_BOX]){
-            return;
+        if (!turn[location - TURN_BOX]) {
+            unit = populate("s-loc", ELIMINATED_BOX, "unit", u)
+        } else {
+            unit = populate("turn", location - TURN_BOX, "unit", u)
         }
-        unit = populate("turn", location - TURN_BOX, "unit", u)
         unit.classList.toggle("reduced", (set_has(G.reduced, u) && !one_step))
         unit.classList.remove("activated")
         unit.classList.remove("selected")
