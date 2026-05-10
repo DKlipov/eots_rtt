@@ -399,7 +399,7 @@ const BURMA_BOARD_INFO = {
 const SOUTH_PAC_BOARD_INFO = {
     "LAST_BOARD_HEX": 5027,
     "COLUMN_HEX_NB": 12,
-    "ROW_HEX_NB": 20,
+    "ROW_HEX_NB": 21,
     "grid_x_offset": 20,
     "grid_y_offset": 16,
     "display_x_offset": 89.375,
@@ -417,6 +417,10 @@ const SOUTH_PAC_BOARD_INFO = {
     "hex_check": (i) => {
         let x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
         let y = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
+
+        if (SP_BORDER[x] && y < SP_BORDER[x]) {
+            return false
+        }
         if (x == 24 && y == 16) {
             return true;
         } else if ((x % 2 == 0) && y == 16) {
@@ -432,6 +436,17 @@ let ALL_BOARD_HEXES = []
 let SID = FULL_CAMPAIGN_SCENARIO;
 let map_layout = layout.mainmap;
 let map_info = MAIN_BOARD_INFO;
+
+
+var SP_BORDER = []
+for (var i = 0; i < data.sp_map.length; i++) {
+    var hex = hex_to_int(data.sp_map[i].id)
+    let x = Math.floor(hex / 29)
+    let y = hex % 29
+    if (data.sp_map[i].top) {
+        SP_BORDER[x] = y
+    }
+}
 
 function on_init(scenario, game_options, static_view) {
     init_canvas(scenario)
