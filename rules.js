@@ -1811,6 +1811,8 @@ P.displace_hq = {
 
 P.return_hq = {
     prompt() {
+        mark_supply_eligable_ports(G.active)
+        mark_supplied_hexes(G.active)
         if (!G.active_stack.length) {
             prompt(`Choose HQ return.`)
             HQ_LIST.forEach(u => {
@@ -2632,6 +2634,7 @@ P.move_offensive_units = {
         push_undo()
         set_mt(ANY_MOVE)
         L.allowed_hexes = []
+        L.spec_move = 0
         call("ground_move")
     },
     avoid_zoi() {
@@ -8475,7 +8478,8 @@ cards[find_card(JP, 78)].event = function () {
 
 P.event_unit = {
     _begin() {
-
+        mark_supply_eligable_ports(G.active)
+        mark_supplied_hexes(G.active)
     },
     prompt() {
         prompt(`${offensive_card_header()} Choose hex to place ${piece_get_log_str(L.unit)}.`)
@@ -8603,6 +8607,8 @@ cards[find_card(AP, 4)].event = function () {
 
 P.place_abda = {
     _begin() {
+        mark_supply_eligable_ports(G.active)
+        mark_supplied_hexes(G.active)
         var dei = ["Java", "Borneo", "Sumatra", "Celebes"]
         L.allowed_hexes = get_unit_reinforcement_hexes(HQ_ABDA).filter(h => dei.includes(get_map_data(h).region))
 
@@ -8753,6 +8759,8 @@ cards[find_card(AP, 17)].event = function () {
 
 P.repair_avg = {
     _begin() {
+        mark_supply_eligable_ports(G.active)
+        mark_supplied_hexes(G.active)
         L.allowed_units = []
         var regions = ["NIndia", "Burma"]
         L.allowed_hexes = get_unit_reinforcement_hexes(ap_air(14)).filter(h => regions.includes(get_map_data(h).region))
@@ -9282,6 +9290,8 @@ cards[find_card(AP, 51)].before_activation = function () {
 
 P.place_14_air = {
     _begin() {
+        mark_supply_eligable_ports(G.active)
+        mark_supplied_hexes(G.active)
         L.allowed_hexes = get_unit_reinforcement_hexes(AP_AIR_14).filter(h => h === CHINA_BOX || get_map_data(h).region === "NIndia")
         if (!L.allowed_hexes.length) {
             L.allowed_hexes = get_unit_reinforcement_hexes(AP_AIR_14)
@@ -9291,11 +9301,20 @@ P.place_14_air = {
     prompt() {
         prompt(`${offensive_card_header()} Choose hex to place ${piece_get_log_str(AP_AIR_14)}.`)
         L.allowed_hexes.forEach(h => action_hex(h))
+        if(L.allowed_hexes.length===0){
+            button("eliminate")
+        }
     },
     action_hex(h) {
         push_undo()
         set_location(AP_AIR_14, h)
         check_supply()
+        end()
+    },
+    eliminate(){
+        push_undo()
+        log(`No valid hex to place.`)
+        eliminate_permanently(AP_AIR_14)
         end()
     }
 }
@@ -9477,6 +9496,8 @@ cards[find_card(AP, 70)].before_activation = function () {
 
 P.place_armor = {
     _begin() {
+        mark_supply_eligable_ports(G.active)
+        mark_supplied_hexes(G.active)
         var regions = ["NIndia", "Burma", "India", "Ceylon"]
         L.allowed_hexes = get_unit_reinforcement_hexes(ARMOR_BRIGADE).filter(h => regions.includes(get_map_data(h).region))
         set_delete(G.reduced, ARMOR_BRIGADE)
