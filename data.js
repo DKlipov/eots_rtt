@@ -4400,6 +4400,7 @@ data.cards = [
         "type": POLITICAL,
         "oc": 5,
         "remove": true,
+        "cause": "Minor axis victory",
         "wie": [2, 1],
         "name": "War in europe",
     },

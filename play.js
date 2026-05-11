@@ -65,6 +65,7 @@ const CANVAS = document.getElementById("canvas")
 const CANVAS_CTX = document.getElementById("canvas").getContext("2d")
 const RESOURCE_HEX = [...Array(data.map.length).keys()].filter(h => data.map[h].resource).map(h => hex_to_int(data.map[h].id))
 
+const BR_REGIONS = ["India", "Ceylon", "NIndia", "Burma", "Siam", "Malaya", "Sumatra", "Indochina"]
 const JP_REGIONS = ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Siam", "Caroline", "Japan"]
 const JP_BOUNDARIES = [];
 
@@ -1573,7 +1574,7 @@ function format_card_info(c) {
 function sub_card(match, p1) {
     const c = p1 | 0
     const cn = "card-tip"
-    return `<span class="${cn}" onmouseenter="on_focus_card_tip(${c})" onmouseleave="on_blur_card_tip()">${data.cards[c].name}</span>`
+    return `<span class="${cn}" onmouseenter="on_focus_card_tip(${c})" onclick="on_focus_card_tip(${c})" onmouseleave="on_blur_card_tip()">${data.cards[c].name}</span>`
 }
 
 
@@ -1679,5 +1680,6 @@ function on_focus_card_tip(c) {
 
 function on_blur_card_tip() {
     world.tip.hidden = true
+    world.tip.innerHTML = ""
     world.tip.classList = ''
 }
