@@ -81,7 +81,7 @@ body.hide-pieces .marker:not(.control) { display: none }
 /* TIP (ENGLARGED COMPONENT VIEW) */
 
 #tip {
-	pointer-events: none;
+	pointer-events: auto;
 	position: fixed;
 	z-index: 1000;
 	right: 240px;

@@ -286,12 +286,12 @@ body.Allies #jp_hand {
 /* #mobile_tip - special tooltip only used for cards, and only on mobile */
 
 /* data-tooltip - behaves like title attribute attached to element */
-#tip {
-    pointer-events: none;
-    position: fixed;
-    z-index: 1000;
-    margin: 6px;
-}
+/*#tip {*/
+/*    pointer-events: none;*/
+/*    position: fixed;*/
+/*    z-index: 1000;*/
+/*    margin: 6px;*/
+/*}*/
 
 .zoomed {
     transform: scale(2);
