@@ -477,6 +477,9 @@ function on_init(scenario, game_options, static_view) {
     init_preference_checkbox("nopath", false)
     init_preference_checkbox("fullcontrol", false)
 
+    world.tip.addEventListener("touchstart", function () {
+        on_blur_card_tip()
+    })
     let map_elem = document.getElementById("mapwrap")
     switch (scenario) {
         case "South Pacific": {
@@ -1079,26 +1082,26 @@ function apply_conflict_marker(marker, hex) {
 }
 
 const ICONS = {
-    B0: '<span class="dice d0"></span>',
-    B1: '<span class="dice d1"></span>',
-    B2: '<span class="dice d2"></span>',
-    B3: '<span class="dice d3"></span>',
-    B4: '<span class="dice d4"></span>',
-    B5: '<span class="dice d5"></span>',
-    B6: '<span class="dice d6"></span>',
-    B7: '<span class="dice d7"></span>',
-    B8: '<span class="dice d8"></span>',
-    B9: '<span class="dice d9"></span>',
-    // B0: '<span class="dice_diamond"> 0 </span>',
-    // B1: '<span class="dice_diamond"> 1 </span>',
-    // B2: '<span class="dice_diamond"> 2 </span>',
-    // B3: '<span class="dice_diamond"> 3 </span>',
-    // B4: '<span class="dice_diamond"> 4 </span>',
-    // B5: '<span class="dice_diamond"> 5 </span>',
-    // B6: '<span class="dice_diamond"> 6 </span>',
-    // B7: '<span class="dice_diamond"> 7 </span>',
-    // B8: '<span class="dice_diamond"> 8 </span>',
-    // B9: '<span class="dice_diamond"> 9 </span>',
+    B0: '<span class="dice B d0"></span>',
+    B1: '<span class="dice B d1"></span>',
+    B2: '<span class="dice B d2"></span>',
+    B3: '<span class="dice B d3"></span>',
+    B4: '<span class="dice B d4"></span>',
+    B5: '<span class="dice B d5"></span>',
+    B6: '<span class="dice B d6"></span>',
+    B7: '<span class="dice B d7"></span>',
+    B8: '<span class="dice B d8"></span>',
+    B9: '<span class="dice B d9"></span>',
+    R0: '<span class="dice B d0"></span>',
+    R1: '<span class="dice R d1"></span>',
+    R2: '<span class="dice R d2"></span>',
+    R3: '<span class="dice R d3"></span>',
+    R4: '<span class="dice R d4"></span>',
+    R5: '<span class="dice R d5"></span>',
+    R6: '<span class="dice R d6"></span>',
+    R7: '<span class="dice R d7"></span>',
+    R8: '<span class="dice R d8"></span>',
+    R9: '<span class="dice R d9"></span>',
     W0: '<span class="die white d0"></span>',
     W1: '<span class="die white d1"></span>',
     W2: '<span class="die white d2"></span>',
@@ -1106,13 +1109,13 @@ const ICONS = {
     W4: '<span class="die white d4"></span>',
     W5: '<span class="die white d5"></span>',
     W6: '<span class="die white d6"></span>',
-    R0: '<span class="die red d0"></span>',
-    R1: '<span class="die red d1"></span>',
-    R2: '<span class="die red d2"></span>',
-    R3: '<span class="die red d3"></span>',
-    R4: '<span class="die red d4"></span>',
-    R5: '<span class="die red d5"></span>',
-    R6: '<span class="die red d6"></span>',
+    // R0: '<span class="die red d0"></span>',
+    // R1: '<span class="die red d1"></span>',
+    // R2: '<span class="die red d2"></span>',
+    // R3: '<span class="die red d3"></span>',
+    // R4: '<span class="die red d4"></span>',
+    // R5: '<span class="die red d5"></span>',
+    // R6: '<span class="die red d6"></span>',
 }
 
 function escape_text(text) {

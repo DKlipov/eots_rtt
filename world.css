@@ -302,7 +302,7 @@ body.hide-pieces .marker:not(.control) { display: none }
 
 .dice {
 	display: inline-block;
-	background-image: url(images/d10.svg);
+
 	background-size: 150px 15px;
 	background-repeat: no-repeat;
 	/*border: 1px solid black;*/
@@ -320,13 +320,13 @@ body.hide-pieces .marker:not(.control) { display: none }
 	height: 16px;
 }
 
-.dice.W {
-	background-image: url(/images/die_black_pips.svg);
+.dice.R {
+	background-image: url(images/d10r.svg);
 	/*background-color: #fff;*/
 }
 
 .dice.B {
-	background-image: url(/images/die_white_pips.svg);
+	background-image: url(images/d10b.svg);
 	/*background-color: #444;*/
 }
 

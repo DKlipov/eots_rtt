@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="120" height="12">
     <defs>
-        <path id="d8" fill="#000" stroke-width="0.6" stroke-linejoin="bevel" stroke="#222" d="M 6,.5 11.5,6 6,11.5 .5,6 Z" />
+        <path id="d8" fill="#B6050F" stroke-width="0.6" stroke-linejoin="bevel" stroke="#710009" d="M 6,.5 11.5,6 6,11.5 .5,6 Z" />
     </defs>
     <use xlink:href="#d8" x="0" y="0" />
     <use xlink:href="#d8" x="12" y="0" />

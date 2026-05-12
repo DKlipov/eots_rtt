@@ -33,7 +33,7 @@
 .small_markers_black { background-image: url(pieces150/small_units_black.150.png); background-size: 280px 70px; }
 .small_markers_brown { background-image: url(pieces150/small_units_brown.150.png); background-size: 140px 70px; }
 .small_markers_yellow { background-image: url(pieces150/small_markers_yellow.150.png); background-size: 420px 70px; }
-.d10 { background-image: url(images/d10.svg); background-size: 300px 30px; }
+
 
 /* PIECES */
 .big_units_blue { background-image: url(pieces150/big_units_blue.150.png); background-size: 1440px 90px; }

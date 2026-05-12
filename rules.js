@@ -695,7 +695,7 @@ function sent_to_europe(u) {
         var roll = random(10)
         clear_undo()
         result = roll <= modifier
-        log(`${piece_get_log_str(u)} sent to Europe roll: ${dice_get_log_str(roll)} ${result ? "<=" : ">"} ${modifier}${G.inter_service[AP] ? "(ISR active)" : ""}.`)
+        log(`${piece_get_log_str(u)} sent to Europe: ${dice_get_log_str(roll, 0, AP)} ${result ? "<=" : ">"} ${modifier}${G.inter_service[AP] ? "(ISR active)" : ""}.`)
         if (result) {
             displace_to_turn(u, 3)
         }
@@ -1148,7 +1148,7 @@ P.submarine_warfare = {
             log(`+${escort} JP Escort.`)
         }
         var success = (result + modifiers - G.turn) <= 0
-        log(`${dice_get_log_str(result, modifiers)} <= ${G.turn} ${success ? "(SUCCESS)" : "(FAILED)"}.`)
+        log(`${dice_get_log_str(result, modifiers, AP)} <= ${G.turn} ${success ? "(SUCCESS)" : "(FAILED)"}.`)
         if (success) {
             change_asp(JP, -1)
             G.strategic_warfare++
@@ -1233,7 +1233,7 @@ function bombing(u, close_air_base) {
         log(`+1 High altitude interceptors.`)
         modifier++
     }
-    log(`${dice_get_log_str(result, modifier)} < ${success_rate} (${success ? "SUCCESS" : "FAILED"}).`)
+    log(`${dice_get_log_str(result, modifier, AP)} < ${success_rate} (${success ? "SUCCESS" : "FAILED"}).`)
     if (damaged) {
         damage_unit(u)
     }
@@ -1928,7 +1928,7 @@ P.china_offensive = {
         var mods = get_china_offensive_modifiers()
         mods.log.forEach(l => log(l))
         var success = result <= (mods.divisions - mods.burma_road - mods.air_support)
-        log(`${dice_get_log_str(result, mods.burma_road + mods.air_support)} <= ${mods.divisions} (${success ? "SUCCESS" : "FAILED"})`)
+        log(`${dice_get_log_str(result, mods.burma_road + mods.air_support, JP)} <= ${mods.divisions} (${success ? "SUCCESS" : "FAILED"})`)
         if (success) {
             update_china_status(1)
         } else {
@@ -4695,7 +4695,7 @@ function roll_intelligence_dice() {
     }
     let result = random(10)
     const success = result !== 9 && result + modifier <= card_value
-    log(`${dice_get_log_str(result, modifier)} <= ${Math.min(card_value, 8)} (${success ? "SUCCESS" : "FAILED"}).`)
+    log(`${dice_get_log_str(result, modifier, 1 - G.offensive.attacker)} <= ${Math.min(card_value, 8)} (${success ? "SUCCESS" : "FAILED"}).`)
     clear_undo()
     return success
 }
@@ -4816,7 +4816,7 @@ P.cancel_offensive = {
         G.offensive.cancelled = offensive
         G.active = JP
         play_event(reaction_card)
-        log(`${card_get_log_str(reaction_card)} played.`)
+        // log(`${card_get_log_str(reaction_card)} played.`)
         log(`Offensive cancelled, ${card_get_log_str(offensive_card)} discarded.`)
         goto("end_action")
         call("default_event")
@@ -5209,7 +5209,7 @@ P.execute_attack = function () {
     if ((roll === 9 || battle.roll_modifiers + roll >= 9 && G.offensive.active_cards.includes(ROCHEFORT)) && !battle.ground_stage) {
         battle.critical[faction] = true
     }
-    log(`${dice_get_log_str(roll, battle.roll_modifiers)} (${table(modififed_roll)}) x ${battle.strength[faction]} = ${battle.hits[faction]}${battle.critical[faction] ? " (critical!)" : ""}.`)
+    log(`${dice_get_log_str(roll, battle.roll_modifiers, faction)} (${table(modififed_roll)}) x ${battle.strength[faction]} = ${battle.hits[faction]}${battle.critical[faction] ? " (critical!)" : ""}.`)
     fill_hit_able_units(faction)
     end()
 }
@@ -7102,7 +7102,7 @@ function victory_south_pacific() {
 
     if (G.political_will < 4) {
         result.vp += 4 - G.political_will
-        result.text.push(`+${G.political_will - 4} VP - Political will.`)
+        result.text.push(`+${4 - G.political_will} VP - Political will.`)
     } else {
         result.text.push(`0 VP - Political will >= 4.`)
     }
@@ -8548,13 +8548,13 @@ P.submarine_attack = {
         var roll = random(10)
         L.hits = 0
         if (roll <= L.success) {
-            log(`${roll} - Loss one naval step.`)
+            log(`${dice_get_log_str(roll, 0, cards[L.card].faction)} - Loss one naval step.`)
             L.hits = 1
         } else if (L.critical && roll <= L.critical) {
-            log(`${roll} - Loss two naval steps.`)
+            log(`${dice_get_log_str(roll, 0, cards[L.card].faction)} - Loss two naval steps.`)
             L.hits = 2
         } else {
-            log(`${roll} - No effect.`)
+            log(`${dice_get_log_str(roll, 0, cards[L.card].faction)} - No effect.`)
         }
         L.allowed_units = []
         G.offensive.active_units[1 - cards[L.card].faction].forEach(u => {
@@ -10943,8 +10943,8 @@ function piece_get_log_str(p) {
     return `P${p}`
 }
 
-function dice_get_log_str(p, modifiers) {
-    return `B${p} ${modifiers > 0 ? "+" : ""}${modifiers ? modifiers : ""}`
+function dice_get_log_str(p, modifiers, faction = G.active) {
+    return `${faction === AP ? "B" : "R"}${p} ${modifiers > 0 ? "+" : ""}${modifiers ? modifiers : ""}`
 }
 
 function side_get_log_str(side) {
