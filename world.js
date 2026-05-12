@@ -363,7 +363,7 @@ var long_tap_timer
 function long_tap(callback){
 		long_tap_timer = setTimeout(() => {
 			callback()
-		}, 100);
+		}, 200);
     document.body.style.userSelect = "none";
     document.body.style.webkitUserSelect = "none";
 }

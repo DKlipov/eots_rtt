@@ -289,17 +289,6 @@ body.hide-pieces .marker:not(.control) { display: none }
 
 /* DICE ICONS */
 
-.dice_diamond {
-	/*height: 200px; !* adjust to control the size  *!*/
-	aspect-ratio: 1;
-	clip-path: polygon(50% 0,100% 50%,50% 100%,0 50%);
-	background: black;
-	color: white;
-	font-size: 15px;
-	/*border: solid;*/
-	/*border-color: #222222;*/
-}
-
 .dice {
 	display: inline-block;
 
@@ -309,9 +298,11 @@ body.hide-pieces .marker:not(.control) { display: none }
 }
 
 #log .dice {
-	vertical-align: -4px;
+	vertical-align: -8px;
 	width: 15px;
 	height: 15px;
+	transform: scale(1.5);
+	margin: 5px;
 }
 
 #prompt .dice {

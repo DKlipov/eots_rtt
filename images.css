@@ -1,13 +1,9 @@
 /*MARKERS*/
 /*special markers*/
 .marker.oos { background-image: url(pieces150/ap_oos.webp);  }
-.control_jp { background-image: url(pieces150/control_jp.png); border: none; }
-.marker.capture_jp { background-image: url(pieces150/capture_jp.png); border: none; }
-.control_us { background-image: url(pieces150/control_us.png); border: none; }
-.marker.capture_us { background-image: url(pieces150/capture_us.png);  border: none;}
-.marker.control_sov { background-image: url(pieces150/control_sov.png); border: none; }
-.marker.capture_sov { background-image: url(pieces150/capture_sov.png);  border: none;}
 .marker.no_garrison { background-image: url(pieces150/no_garrison.png);  }
+.garrison_jp { background-image: url(pieces150/garrison_jp.png);  }
+.garrison_cn { background-image: url(pieces150/garrison_cn.png);  }
 .marker.organic_small { background-image: url(pieces150/organic_small.png); }
 .marker.aa_small { background-image: url(pieces150/aa_small.png); }
 .marker.strat_small { background-image: url(pieces150/strat_small.png); }

@@ -326,6 +326,9 @@ function get_element_weight(e) {
     var value = 0;
     var unit = e.thing.my_id
     var piece = data.pieces[unit]
+    if(piece.garrison){
+        return 0;
+    }
     if (piece.faction === G.offensive.attacker) {
         value += 32000
     }
@@ -833,16 +836,9 @@ function place_unit(u, location) {
 
 function get_control_marker(h) {
     var capture = set_has(G.capture, h)
-    if (capture && G.control[h] === JP && set_has(G.garr_elim, h)) {
-        return data.counters.no_garrison
-    } else if (capture && G.control[h] === JP) {
+    if (capture && G.control[h] === JP) {
         return data.counters.capture_jp
-    } else if (capture && (h === MANCHURIA_1 || h === MANCHURIA_2)) {
-        return data.counters.capture_sov
-    } else if (capture && G.control[h] === AP) {
-        return data.counters.capture_us
-    }
-    if (G.control[h] === JP) {
+    } else if (G.control[h] === JP) {
         return data.counters.control_jp
     } else if (h === MANCHURIA_1 || h === MANCHURIA_2) {
         return data.counters.control_sov
@@ -1034,7 +1030,7 @@ function on_update() {
     action_button("stop", "Stop")
     action_button("displace", "Displace")
     action_button("amphibious", "Amphibious")
-    action_button("divisions_button", "Reduce divisions track.")
+    action_button("divisions_button", "Reduce divisions track")
 
 
     action_button("displace_hq", "HQ Withdrawal")

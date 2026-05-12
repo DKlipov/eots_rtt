@@ -2361,9 +2361,12 @@ function offensive_card_header() {
 
 function is_controllable_hex(hex) {
     var sid = scenario_data().id
-    return get_map_data(hex).named || hex === WEST_HONSHU || hex === KWAI_BRIDGE || hex === KWAI_BRIDGE_1 || hex === CHINA_BOX
+    return get_map_data(hex).named || hex === WEST_HONSHU
+        || hex === KWAI_BRIDGE && !is_event_active(events.KWAI_RIVER_BRIDGE)
+        || hex === KWAI_BRIDGE_1 && !is_event_active(events.KWAI_RIVER_BRIDGE)
+        || hex === CHINA_BOX
         || hex === ATTU && sid === YEAR_1942_SCENARIO
-        || get_map_data(hex).region === "AMandates" && (sid === YEAR_1943_SCENARIO || sid === YEAR_1942_1943_SCENARIO)
+        || get_map_data(hex).region === "AMandates" && (sid === YEAR_1943_SCENARIO || sid === YEAR_1942_1943_SCENARIO) && G.surrender[nations.AUSTRALIAN_MANDATES.id]
 }
 
 //setup only, reduced checks and logging
@@ -5252,7 +5255,7 @@ P.assign_hits = script(`
       `)
 
 function battle_header() {
-    return `${G.offensive.battle.ground_stage ? "Ground" : "naval"} battle ${hex_get_log_str(G.offensive.battle.battle_hex)}.`
+    return `${G.offensive.battle.ground_stage ? "Ground" : "Naval"} combat ${hex_get_log_str(G.offensive.battle.battle_hex)}.`
 }
 
 P.apply_hits = {
@@ -9339,11 +9342,12 @@ P.turkey_shoot = {
     },
     prompt() {
         prompt(`The Great Marianas Turkey Shoot. Choose unit to hit.`)
-        if (L.done) {
+        if (L.done || L.allowed_units.length===0) {
             button("done")
         } else {
             L.allowed_units.forEach(u => action_unit(u))
         }
+
     },
     unit(u) {
         push_undo()
@@ -10340,7 +10344,7 @@ function setup_scenario_1944() {
     setup_jp_unit(ap_air("2_maw"), 4222)
     setup_jp_unit(ap_air("13"), 4322)
     setup_jp_unit(ap_air("13_lrb"), 4322)
-    setup_jp_unit(ap_army("3_nz"), 4222)
+    setup_jp_unit(ap_army("3_nz"), 4322)
     setup_jp_unit(ap_army("sf"), 4423)
     setup_jp_unit(ap_army("6_m"), 4826)
     setup_jp_unit(find_piece("cowpens"), 4826)
