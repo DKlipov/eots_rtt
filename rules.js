@@ -354,7 +354,7 @@ const SP_TONNELLING = [hex_to_int(4825), 21, hex_to_int(4826), 22, hex_to_int(48
 const S_P_TONNELLING_SET = [hex_to_int(4825), hex_to_int(4826), hex_to_int(4828), hex_to_int(4926), OAHU]
 const OAHU_NEAR = S_P_TONNELLING_SET.filter(h => h !== OAHU).map((h, i) => TUNNEL_BOX + 100 * i + map_get(SP_TONNELLING, h))
 const NON_PLAYABLE_HEX = {id: 0, terrain: OCEAN, region: "Ocean", edges_int: 0}
-const TUNNEL_HEX = {id: 0, terrain: OCEAN, region: "Ocean", edges_int: 1}
+const TUNNEL_HEX = {id: 0, terrain: OCEAN, region: "Ocean", edges_int: UNPLAYABLE_WATER | WATER}
 const MAP_DATA = []
 const S_P_MAP_DATA = []
 const AIRFIELD_LINKS = []
@@ -4028,7 +4028,7 @@ function compute_air_move_hexes() {
     if (move_data.move_type & STRAT_MOVE) {
         move_type |= STRAT_MOVE
     }
-    if(L.move_type === STRAT_MOVE){
+    if (L.move_type === STRAT_MOVE) {
         check_supply()
     }
     var avoid_zoi_flag = L.move_type === AVOID_ZOI || move_data.move_type & STRAT_MOVE
@@ -7491,7 +7491,7 @@ cards[find_card(JP, 16)].before_unit_activation = function () {
 }
 
 cards[find_card(JP, 17)].before_unit_activation = function () {
-    filter_activation_units((u, piece) => piece.class !== "ground", JP)
+    filter_activation_units((u, piece) => piece.class !== "ground" && (piece.class !== "naval" || !piece.br), JP)
 }
 
 cards[find_card(JP, 17)].after_unit_activation = function (u) {
@@ -8885,7 +8885,7 @@ function cache_skip_bombing() {
     clear_supply_cache(CLEAN_ATTACK_ZONE_MASK)
     for_each_unit_on_map((u, piece, location) => {
         if (is_us_unit(piece) && piece.br && piece.class === "air" && piece.type !== "lrb") {
-            for_each_hex_in_range(location, piece.ebr, h => {
+            for_each_hex_in_range(location, piece.parenthetical ? piece.br : piece.ebr, h => {
                 G.supply_cache[h] |= HEX_TEMP_FLAG1
             })
         }
