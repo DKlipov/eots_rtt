@@ -2798,10 +2798,6 @@ P.ground_move = {
 
 
 function set_mt(mt) {
-    if (mt === STRAT_MOVE || L.move_type === STRAT_MOVE) {
-        L.move_type = mt
-        check_supply()
-    }
     L.move_type = mt
     update_move_hex()
 }
@@ -3044,7 +3040,7 @@ function mark_unit(i, piece) {
         G.supply_cache[location] = G.supply_cache[location] | (JP_AIR_UNITS << piece.faction)
     } else if (piece.class === "hq") {
         G.supply_cache[location] = G.supply_cache[location] | (JP_HQ_UNITS << piece.faction)
-    } else if (piece.class === "ground" && (!L || L.move_type !== STRAT_MOVE || !set_has(G.active_stack, i))) {
+    } else if (piece.class === "ground") {
         G.supply_cache[location] = G.supply_cache[location] | (JP_GROUND_UNITS << piece.faction)
     } else if (piece.class === "naval") {
         G.supply_cache[location] = G.supply_cache[location] | (JP_NAVAL_UNITS << piece.faction)
@@ -4032,8 +4028,14 @@ function compute_air_move_hexes() {
     if (move_data.move_type & STRAT_MOVE) {
         move_type |= STRAT_MOVE
     }
+    if(L.move_type === STRAT_MOVE){
+        check_supply()
+    }
     var avoid_zoi_flag = L.move_type === AVOID_ZOI || move_data.move_type & STRAT_MOVE
-    if (L.move_type === AVOID_ZOI && has_non_n_zoi(location, 1 - R)) {
+    if ((L.move_type === STRAT_MOVE) && has_non_n_zoi(location, 1 - R)) {
+        return []
+    }
+    if ((L.move_type === AVOID_ZOI) && has_zoi(location, 1 - R)) {
         return []
     }
     const distance_map = [move_data.location, [0, 1, move_data.location]]
@@ -4106,9 +4108,11 @@ function compute_air_move_hexes() {
 
 function compute_ground_naval_move_hexes() {
     let location = L.move_data.location
+    let move_data = L.move_data
     // to check when depart ground unit could change zoi
     var supply = G.supply_cache
     var oos = G.oos
+    var enemy_non_n_zoi = move_data.is_ground_present && !move_data.battle_range && has_non_n_zoi(location, 1 - R) && G.offensive.stage !== POST_BATTLE_STAGE
     if (L.move_data.is_ground_present && !L.move_data.battle_range) {
         var ground_unit_stay = 0
         for_each_unit_on_map((u, piece, loc) => {
@@ -4123,9 +4127,9 @@ function compute_ground_naval_move_hexes() {
         }
     }
     L.allowed_hexes = []
-    let move_data = L.move_data
+
     var mt = 0
-    if (L.move_data.move_type & NAVAL_MOVE) {
+    if (L.move_data.move_type & NAVAL_MOVE && !enemy_non_n_zoi) {
         var zoi_mask = 0
         if (move_data.is_ground_present && !move_data.is_naval_present) {
             zoi_mask = zoi_mask | JP_NAVAL_UNITS << (1 - R)
@@ -4183,8 +4187,26 @@ function compute_ground_move_hexes() {
 
 function compute_ground_naval_strat_move() {
     let location = L.move_data.location
-    L.allowed_hexes = []
     let move_data = L.move_data
+    L.allowed_hexes = []
+    if (has_non_n_zoi(location, 1 - R)) {
+        return
+    }
+    // to check when depart ground unit could change zoi
+    var ground_unit_stay = 0
+    for_each_unit_on_map((u, piece, loc) => {
+        if (loc === location && piece.class !== "naval" && piece.faction === G.active && !set_has(G.active_stack, u)) {
+            ground_unit_stay++
+        }
+    })
+    if (!ground_unit_stay || move_data.battle_range) {
+        G.active_stack.forEach(u => G.location[u] = ELIMINATED_BOX)
+        check_supply()
+        G.active_stack.forEach(u => G.location[u] = location)
+    }
+    if (move_data.battle_range && has_non_n_zoi(location, 1 - R)) {
+        return
+    }
     const queue = [location]
     const distance_map = [location, [0, location]]
     for (var i = 0; i < queue.length; i++) {
@@ -4464,7 +4486,7 @@ function get_naval_move(zoi_mask) {
     const non_cv_ground_unit = move_data.is_ground_present && !move_data.battle_range
     var pbm = G.offensive.stage === POST_BATTLE_STAGE
 
-    if (G.supply_cache[location] & zoi_mask || non_cv_ground_unit && has_non_n_zoi(location, 1 - R) && !pbm
+    if (G.supply_cache[location] & zoi_mask
         || G.offensive.stage === ATTACK_STAGE && move_data.is_ground_present && move_data.is_naval_present && !(move_data.move_type & AMPH_MOVE)) {
         return []
     }
@@ -9341,7 +9363,7 @@ P.turkey_shoot = {
     },
     prompt() {
         prompt(`The Great Marianas Turkey Shoot. Choose unit to hit.`)
-        if (L.done || L.allowed_units.length===0) {
+        if (L.done || L.allowed_units.length === 0) {
             button("done")
         } else {
             L.allowed_units.forEach(u => action_unit(u))
