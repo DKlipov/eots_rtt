@@ -1635,8 +1635,9 @@ P.offensive_segment = {
             let card = hand[i]
             action_card(card)
         }
-        button("control")
+        button("check_s")
         if (G.debug) {
+            button("control")
             button("isr")
             button("tp")
             button("check_s")
@@ -2450,8 +2451,6 @@ function update_move_hex() {
     }
 
     L.move_data = get_move_data()
-    console.log(L.move_data.battle_range)
-    console.log(L.move_data.extended_battle_range)
 
     if (G.offensive.stage === POST_BATTLE_MOVE && L.move_type === BARGES_MOVE) {
         return compute_barges_pbm()

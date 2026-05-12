@@ -326,7 +326,7 @@ function get_element_weight(e) {
     var value = 0;
     var unit = e.thing.my_id
     var piece = data.pieces[unit]
-    if(piece.garrison){
+    if (piece.garrison) {
         return 0;
     }
     if (piece.faction === G.offensive.attacker) {
@@ -885,6 +885,7 @@ function on_update() {
             populate_generic("s-loc", i, get_control_marker(i))
         }
     }
+    G.garr_elim.forEach(h => populate_generic("s-loc", h, data.counters.no_garrison))
     var base_road_counters = get_preference("noroad", false)
     ROAD_EVENTS.filter(event => map_info.hex_check(hex_to_int(event.keys[0]))).forEach(event => {
         var thing = lookup_thing("road", event.id)
@@ -1551,7 +1552,7 @@ function create_battle_box(faction, cf, rm, units, log) {
     }
     result.className = "battle_box"
     result.appendChild(create_flag(faction))
-    append_header(`${cf}  ${rm > 0 ? "+" : ""}${rm ? rm : ""}`, result)
+    append_header(`CF: ${cf}  ${rm > 0 ? "+" : ""}${rm ? rm+" DRM" : ""}`, result)
     units.sort((a, b) => G.location[a] - G.location[b])
     var prev = null
     for (var i of units) {
@@ -1562,7 +1563,8 @@ function create_battle_box(faction, cf, rm, units, log) {
             text.innerHTML = sub_hex(null, loc)
             result.appendChild(text)
         }
-        populate_generic_to_parent(result, "icon " + data.pieces[i].counter + (set_has(G.reduced, i) ? " reduced" : ""))
+        var piece = data.pieces[i]
+        populate_generic_to_parent(result, "icon piece " + piece.counter + (set_has(G.reduced, i) && !(piece.notreplaceable && piece.start_reduced) ? " reduced" : ""))
     }
     if (log.length) {
         append_header("Modifiers:", result)

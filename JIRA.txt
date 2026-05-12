@@ -1,8 +1,7 @@
 Todo list:
-* load custom markers
-* Implementation notes
-* stack refactoring
 * verify with actual rules
+* stack refactoring
+* Implementation notes
 * big refactoring
 * fuzz-buzz testing
 
