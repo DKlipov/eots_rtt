@@ -1187,6 +1187,11 @@ P.strategic_bombing = {
         }
     },
     prompt() {
+        if (L.done) {
+            prompt("No strategic bombing this turn.")
+            button("done")
+            return
+        }
         prompt("Choose units to strategic bombing.")
         if (G.active_stack.length > 0) {
             button("roll")
@@ -1206,6 +1211,10 @@ P.strategic_bombing = {
         this.roll()
     },
     skip() {
+        push_undo()
+        L.done = 1
+    },
+    done() {
         log(`No units committed to strategic bombing.`)
         G.events[events.STRAT_BOMBING_CAMPAIGN.id] = 0
         end()
@@ -6262,8 +6271,12 @@ function displace_to_turn(unit, turns, not_delayed) {
         return
     }
     if (G.turn + turns > 12 || G.sid === SOUTH_PACIFIC_SCENARIO && G.turn + turns > 6) {
-        log(`${piece_get_log_str(unit)} should be displaced to turn box ${G.turn + turns} but eliminated instead.`)
-        set_location(unit, ELIMINATED_BOX)
+        log(`${piece_get_log_str(unit)} should be displaced to turn box ${G.turn + turns} but permanently eliminated instead.`)
+        if (pieces[unit].class === "hq") {
+            set_location(unit, TURN_BOX + 13)
+        } else {
+            set_location(unit, PERM_ELIMINATED)
+        }
     } else {
         log(`${piece_get_log_str(unit)} displaced to turn box ${G.turn + turns}.`)
         set_location(unit, TURN_BOX + G.turn + turns)
@@ -8145,17 +8158,20 @@ P.paratroopers = {
             }
         })
         L.allowed_hexes = []
+        G.active_stack = [jp_army(38)]//hack to force ground_move_denied check
         G.offensive.active_units[JP].forEach(u => {
             if (pieces[u].class !== "air") {
                 return
             }
             for_each_hex_in_range(G.location[u], pieces[u].ebr, h => {
-                if (set_has(occupied_hexes, h) || has_non_n_zoi(h, AP) || is_space_controlled(h, JP) || (!is_controllable_hex(h) && !set_has(duth_hexes, h))) {
+                if (set_has(occupied_hexes, h) || has_non_n_zoi(h, AP) || is_space_controlled(h, JP) || (!is_controllable_hex(h) && !set_has(duth_hexes, h))
+                    || ground_move_denied(h)) {
                     return
                 }
                 set_add(L.allowed_hexes, h)
             })
         })
+        G.active_stack = []
 
     },
     prompt() {

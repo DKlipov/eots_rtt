@@ -789,7 +789,7 @@ function place_unit(u, location) {
     var one_step = piece.notreplaceable && piece.start_reduced
     var slocs = world.things["s-loc"]
     var turn = world.things["turn"]
-    if (location > TURN_BOX && location <= (TURN_BOX + 12)) {
+    if (location > TURN_BOX) {
         if (!turn[location - TURN_BOX]) {
             unit = populate("s-loc", ELIMINATED_BOX, "unit", u)
         } else {
@@ -849,8 +849,9 @@ function get_control_marker(h) {
 
 function update_role_info() {
     for (let who = JP; who <= AP; who++) {
-        roles[who].stat.innerHTML = `${G.hand[who].length} cards${G.events[data.events.FUTURE_OFFENSIVE_JP.id + who] > 0 ? " + FO" : ""}`
-        if(!G.hand[who].length){
+        var hand_size = Number.isInteger(G.hand[who]) ? G.hand[who] : G.hand[who].length
+        roles[who].stat.innerHTML = `${hand_size} cards${G.events[data.events.FUTURE_OFFENSIVE_JP.id + who] > 0 ? " + FO" : ""}${G.passes[who]?", "+G.passes[who]+" passes":""}`
+        if (!hand_size) {
             roles[who].stat.innerHTML = `Pass`
         }
     }

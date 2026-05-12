@@ -5974,7 +5974,7 @@ data.counters = {
     oos_small: "oos_small",
     pow: "small_markers_dkblue unit_ix_2",
     pow_target: "small_markers_dkblue unit_ix_4",
-    strat_bombing: "small_markers_black unit_ix_3",
+    strat_bombing: "strat_air_small",
     agreement_jp: "small_markers_yellow unit_ix_2 reduced",
     agreement_ap: "small_markers_green unit_ix_3 reduced",
     rivalry_ap: "small_markers_green unit_ix_3",
