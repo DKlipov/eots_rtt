@@ -5826,6 +5826,7 @@ P.retreat = {
             eliminate(G.active_stack[0])
         } else {
             set_location(G.active_stack[0], hex)
+            capture_hex(hex, pieces[G.active_stack[0]].faction)
         }
         G.active_stack = []
     },
