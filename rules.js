@@ -1635,12 +1635,13 @@ P.offensive_segment = {
             let card = hand[i]
             action_card(card)
         }
+        button("control")
         if (G.debug) {
             button("isr")
             button("tp")
             button("check_s")
             button("ns")
-            button("control")
+
             button("eliminate")
             button("deploy_b29")
             button("draw")
@@ -2446,6 +2447,8 @@ function update_move_hex() {
     }
 
     L.move_data = get_move_data()
+    console.log(L.move_data.battle_range)
+    console.log(L.move_data.extended_battle_range)
 
     if (G.offensive.stage === POST_BATTLE_MOVE && L.move_type === BARGES_MOVE) {
         return compute_barges_pbm()
@@ -3710,7 +3713,7 @@ function check_supply() {
 
 function extended_pbm_possible() {
     var u = G.active_stack[0]
-    return !set_has(G.offensive.committed, u) && !set_has(G.offensive.battle_hexes, G.location[u])
+    return !map_has(G.offensive.committed, u) && !set_has(G.offensive.all_bh, G.location[u])
 }
 
 function get_move_data() {
@@ -5387,7 +5390,12 @@ P.jp_cv_reassign = {
                 map_delete(L.to_repair, u)
                 log(`${piece_get_log_str(u)} flipped to full size.`)
             } else {
-                set_location(u, G.offensive.battle.battle_hex)
+                var location = G.offensive.battle.battle_hex
+                var path = map_get(G.offensive.paths, u)
+                if (path) {
+                    location = path[path.length - 1]
+                }
+                set_location(u, location)
                 set_add(G.reduced, u)
                 G.active_stack = []
                 if (map_get(L.to_repair, u, 3) === 3) {
@@ -6049,8 +6057,10 @@ P.political_phase = script(`
     call india_surrender
     set G.active JP
     call emergency_move
+    call check_overstacking
     set G.active AP
     call emergency_move
+    call check_overstacking
     call political_will_segment
     goto attrition_phase
 `)
@@ -6061,6 +6071,12 @@ P.national_status_segment = function () {
         set_control_over_nation(nations.NEW_GUINEA, false)
     }
     if (scenario_data().id === SOUTH_PACIFIC_SCENARIO) {
+        var surr = G.surrender[nations.AUSTRALIAN_MANDATES.id]
+        if (nations.AUSTRALIAN_MANDATES.ports
+            .filter(h => is_space_controlled(hex_to_int(h), surr ? JP : AP)).length === 0) {
+            G.surrender[nations.AUSTRALIAN_MANDATES.id] = (surr) ? 0 : G.turn
+            log(`${nations.AUSTRALIAN_MANDATES.name} controlled ${surr ? "AP" : "JP"}.`)
+        }
         end()
         return;
     }
@@ -10010,6 +10026,7 @@ P.scenario_1942 = script(`
     eval {
         emergency_move_1942()
     }
+    call check_overstacking
     call arcadia
     set G.active JP
     call japan_init_1942
