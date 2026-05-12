@@ -601,7 +601,7 @@ div[data-tooltip]:after {
 }
 
 .piece.tip { /* highlight the piece itself */
-    border: 4px dashed lime;
+    border: 4px solid lime;
     z-index: 100;
 }
 

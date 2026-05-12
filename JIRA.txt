@@ -7,7 +7,6 @@ Todo list:
 * fuzz-buzz testing
 
 Bugs
-* Parhetless pbm with full range
 
 Done
 ? Hex-to-hex distance calcualtion

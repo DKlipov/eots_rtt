@@ -1456,18 +1456,25 @@ function print_nation_status(response) {
         main.appendChild(keys)
     }
     if (response.info) {
-        response.info.forEach(l => append_header(l, main))
+        response.info.forEach(l => append_header(escape_text(l), main))
     }
+    return main
+}
+
+function print_winner(side, text) {
+    let main = document.createElement("div")
+    main.appendChild(create_flag(side))
+    main.innerHTML += " " + text
     return main
 }
 
 function vp_dialog(id, response) {
     show_dialog(id, (body) => {
         let dl = document.createElement("dl")
-        let append_header = (text) => {
-            let header = document.createElement("dt")
-            header.textContent = text
-            dl.appendChild(header)
+        if (response.won_side === "Japan") {
+            dl.appendChild(print_winner(JP, `${response.won_text}. Total VP: ${response.vp}.`))
+        } else {
+            dl.appendChild(print_winner(AP, `${response.won_text}. Total VP: ${response.vp}.`))
         }
         if (response.text.length === 0) {
             response.text.push(response.won_text)
@@ -1477,13 +1484,19 @@ function vp_dialog(id, response) {
             header.innerHTML = text.replace(/H(\d+)/g, sub_hex)
             dl.appendChild(header)
         })
+        append_header("", dl, "br")
+        append_header("Summary:", dl)
+        append_header("2 VP or less - Allied Decisive Victory.", dl)
+        append_header("3-5 VP Allied Tactical Victory.", dl)
+        append_header("6-9 VP Japanese Tactical Victory.", dl)
+        append_header("10 VP Japanese Decisive Victory.", dl)
         body.appendChild(dl)
     })
 }
 
 function append_header(text, dl, el = "dt") {
     let header = document.createElement(el)
-    header.textContent = text
+    header.innerHTML = text
     dl.appendChild(header)
 }
 
@@ -1629,18 +1642,14 @@ function get_hex_name(h) {
 function sub_hex(match, p1) {
     const hex_id = p1 | 0
     const name = get_hex_name(hex_id)
-    return `<span class="hex-tip" onclick="on_click_hex_tip(${hex_id})" onmouseenter="on_focus_hex_tip(${hex_id})" onmouseleave="on_blur_hex_tip(${hex_id})">${name}</span>`
+    return `<span class="hex-tip" onclick="on_focus_hex_tip(${hex_id})" onmouseenter="on_focus_hex_tip(${hex_id})" onmouseleave="on_blur_hex_tip(${hex_id})">${name}</span>`
 }
 
 
-function on_click_hex_tip(z) {
+function on_focus_hex_tip(z) {
     var el = get_hex_elem(z).element
     scroll_into_view(el)
     lookup_thing("action_hex", z).element.classList.toggle("tip", true)
-}
-
-function on_focus_hex_tip(z) {
-    get_hex_elem(z).element.classList.toggle("tip", true)
 }
 
 function on_blur_hex_tip(z) {

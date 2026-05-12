@@ -6646,6 +6646,19 @@ function get_victory() {
     }
     G.control = adjusted_control
     var vp = data.victory()
+    if (!vp.won_side && vp.vp <= 2) {
+        vp.won_side = "Allies"
+        vp.won_text = `Allied Decisive Victory`
+    } else if (!vp.won_side && vp.vp <= 5) {
+        vp.won_side = "Allies"
+        vp.won_text = `Allied Tactical Victory`
+    } else if (!vp.won_side && vp.vp <= 9) {
+        vp.won_side = "Japan"
+        vp.won_text = `Japanese Tactical Victory`
+    } else if (!vp.won_side) {
+        vp.won_side = "Japan"
+        vp.won_text = `Japanese Decisive Victory`
+    }
     G.control = G.original_control
     delete G.original_control
     return vp
@@ -6658,6 +6671,7 @@ function victory_check() {
     var vp = get_victory()
     if (scenario_data().last_turn <= G.turn) {
         vp.text.forEach(t => log(t))
+        log(`Total VP: ${vp.vp}.`)
         finish(vp.won_side, vp.won_text)
     }
 }
@@ -6737,21 +6751,6 @@ function victory_1942() {
     binary_vp(result, get_jp_resources() <= 12, -3,
         `Japan control 12 resource hexes or less`,
         "Japan control more 12 resource hexes", RESOURCE_HEX)
-    result.text.push(`2 VP or less - Allied Decisive Victory, 3-5 VP Allied Tactical Victory, 6-9 VP Japanese Tactical Victory, 10 VP Japanese Decisive Victory.`)
-    result.text.push(`Total VP: ${result.vp}`)
-    if (result.vp <= 2) {
-        result.won_side = "Allies"
-        result.won_text = `${result.vp} - Allied Decisive Victory`
-    } else if (result.vp <= 5) {
-        result.won_side = "Allies"
-        result.won_text = `${result.vp} - Allied Tactical Victory`
-    } else if (result.vp <= 9) {
-        result.won_side = "Japan"
-        result.won_text = `${result.vp} - Japanese Tactical Victory`
-    } else {
-        result.won_side = "Japan"
-        result.won_text = `${result.vp} - Japanese Decisive Victory`
-    }
     if (get_jp_resources() < 12) {
         result.won_side = "Allies"
         result.won_text = "Japan captured less than 12 resource hexes"
@@ -6907,22 +6906,6 @@ function victory_1943() {
         tokyo_ports_list)
     adjust_vp(result, 14 - get_jp_resources(), "AP controlled resource hexes",
         RESOURCE_HEX)
-
-    result.text.push(`2 VP or less - Allied Decisive Victory, 3-5 VP Allied Tactical Victory, 6-9 VP Japanese Tactical Victory, 10 VP Japanese Decisive Victory.`)
-    result.text.push(`Total VP: ${result.vp}`)
-    if (result.vp <= 2) {
-        result.won_side = "Allies"
-        result.won_text = `${result.vp} - Allied Decisive Victory`
-    } else if (result.vp <= 5) {
-        result.won_side = "Allies"
-        result.won_text = `${result.vp} - Allied Tactical Victory`
-    } else if (result.vp <= 9) {
-        result.won_side = "Japan"
-        result.won_text = `${result.vp} - Japanese Tactical Victory`
-    } else {
-        result.won_side = "Japan"
-        result.won_text = `${result.vp} - Japanese Decisive Victory`
-    }
     return result
 }
 
@@ -7011,22 +6994,6 @@ function victory_1944() {
     binary_vp(result, tokyo_ports <= 0, 5, `AP do not control a port that is 8 or less hexes from Tokyo`,
         `AP control a port that is 8 or less hexes from Tokyo`,
         tokyo_ports_list)
-
-    result.text.push(`2 VP or less - Allied Decisive Victory, 3-5 VP Allied Tactical Victory, 6-9 VP Japanese Tactical Victory, 10 VP Japanese Decisive Victory.`)
-    result.text.push(`Total VP: ${result.vp}`)
-    if (result.vp <= 2) {
-        result.won_side = "Allies"
-        result.won_text = `${result.vp} - Allied Decisive Victory`
-    } else if (result.vp <= 5) {
-        result.won_side = "Allies"
-        result.won_text = `${result.vp} - Allied Tactical Victory`
-    } else if (result.vp <= 9) {
-        result.won_side = "Japan"
-        result.won_text = `${result.vp} - Japanese Tactical Victory`
-    } else {
-        result.won_side = "Japan"
-        result.won_text = `${result.vp} - Japanese Decisive Victory`
-    }
     return result
 }
 
@@ -7165,21 +7132,6 @@ function victory_south_pacific() {
     var aus = G.control.map(h => get_map_data(h)).filter(md => md.region === "Australia" && md.port).length
     binary_vp(result, aus, 1, "JP control of Australia mainland port",
         "Non JP control of any Australia mainland port", G.original_control.filter(h => get_map_data(h).region === "Australia" && get_map_data(h).port))
-    result.text.push(`2 VP or less - Allied Decisive Victory, 3-5 VP Allied Tactical Victory, 6-9 VP Japanese Tactical Victory, 10 VP Japanese Decisive Victory.`)
-    if (result.vp <= 2) {
-        result.won_side = "Allies"
-        result.won_text = `${result.vp} - Allied Decisive Victory`
-    } else if (result.vp <= 5) {
-        result.won_side = "Allies"
-        result.won_text = `${result.vp} - Allied Tactical Victory`
-    } else if (result.vp <= 9) {
-        result.won_side = "Japan"
-        result.won_text = `${result.vp} - Japanese Tactical Victory`
-    } else {
-        result.won_side = "Japan"
-        result.won_text = `${result.vp} - Japanese Decisive Victory`
-    }
-    result.text.push(`Total VP: ${result.vp}.`)
     return result
 }
 
