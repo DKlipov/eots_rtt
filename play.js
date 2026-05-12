@@ -847,9 +847,19 @@ function get_control_marker(h) {
     }
 }
 
+function update_role_info() {
+    for (let who = JP; who <= AP; who++) {
+        roles[who].stat.innerHTML = `${G.hand[who].length} cards${G.events[data.events.FUTURE_OFFENSIVE_JP.id + who] > 0 ? " + FO" : ""}`
+        if(!G.hand[who].length){
+            roles[who].stat.innerHTML = `Pass`
+        }
+    }
+}
+
 function on_update() {
 
     begin_update()
+    update_role_info()
 
     console.log(G)
     map_for_each(G.offensive.damaged, (u, s) => {
@@ -1552,7 +1562,7 @@ function create_battle_box(faction, cf, rm, units, log) {
     }
     result.className = "battle_box"
     result.appendChild(create_flag(faction))
-    append_header(`CF: ${cf}  ${rm > 0 ? "+" : ""}${rm ? rm+" DRM" : ""}`, result)
+    append_header(`CF: ${cf}  ${rm > 0 ? "+" : ""}${rm ? rm + " DRM" : ""}`, result)
     units.sort((a, b) => G.location[a] - G.location[b])
     var prev = null
     for (var i of units) {
