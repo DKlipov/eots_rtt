@@ -1916,7 +1916,7 @@ function get_china_offensive_modifiers() {
         result.air_support++
         result.log.push(`+1 ${piece_get_log_str(ap_air("14_lrb"))}.`)
     } else {
-        for_each_unit_on_map((u, piece, location) => {
+        for_each_unit((u, piece, location) => {
             if (location === CHINA_BOX && (piece.type !== "lrb" || u === LRB_14) && !set_has(G.oos, u)) {
                 result.log.push(`+1 ${piece_get_log_str(u)}.`)
                 result.air_support++
@@ -6465,6 +6465,16 @@ function set_control_over_nation(nation, only_ground = true) {
     }
 }
 
+function reset_events() {
+    Object.keys(events).forEach(k => {
+        var event = events[k]
+        if (event.once_per_turn) {
+            G.events[event.id] = 0
+        }
+    })
+    check_supply()
+}
+
 
 P.political_will_segment = function () {
     if (!events.ALLIED_NATIONS_SURRENDERS.nations.filter(n => !G.surrender[n]).length &&
@@ -6476,13 +6486,6 @@ P.political_will_segment = function () {
     check_jp_resources_event()
     check_naval_situation()
     check_progress_of_war()
-    Object.keys(events).forEach(k => {
-        var event = events[k]
-        if (event.once_per_turn) {
-            G.events[event.id] = 0
-        }
-    })
-    check_supply()
     end()
 }
 
@@ -6643,6 +6646,7 @@ P.end_of_turn_phase = script(`
     log ("Turn " + G.turn + ". End of turn phase.")
     eval {
         victory_check()
+        reset_events()
     }
     incr G.turn
     set G.asp[JP][1] 0

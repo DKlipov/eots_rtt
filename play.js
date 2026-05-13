@@ -850,7 +850,8 @@ function get_control_marker(h) {
 function update_role_info() {
     for (let who = JP; who <= AP; who++) {
         var hand_size = Number.isInteger(G.hand[who]) ? G.hand[who] : G.hand[who].length
-        roles[who].stat.innerHTML = `${hand_size} cards${G.events[data.events.FUTURE_OFFENSIVE_JP.id + who] > 0 ? " + FO" : ""}${G.passes[who]?", "+G.passes[who]+" passes":""}`
+        var fo = G.events[data.events.FUTURE_OFFENSIVE_JP.id + who]
+        roles[who].stat.innerHTML = `${hand_size} cards${fo && fo < G.turn ? " + FO" : ""}${G.passes[who] ? ", " + G.passes[who] + " passes" : ""}`
         if (!hand_size) {
             roles[who].stat.innerHTML = `Pass`
         }
