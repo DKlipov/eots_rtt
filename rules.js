@@ -2251,15 +2251,20 @@ function is_air_reaction_able(u) {
     if (piece.class !== "air" || !piece.br) {
         return false
     }
+    var range = piece.parenthetical ? piece.br : piece.ebr
     const location = G.location[u]
     const cached = map_get(L.air_reaction_hex_map, location)
-    if (cached === 1) {
+    if (cached && cached <= range) {
         return true
     } else if (cached === 0) {
         return false
     }
+    if (target_in_battle_range(range, location, G.offensive.battle_hexes)) {
+        map_set(L.air_reaction_hex_map, location, range)
+        return true
+    }
     var selected = [location]
-    var range = piece.parenthetical ? piece.br : piece.ebr
+
     var leg_limit = G.offensive.air_move_distance
     let queue = [location]
     let leg_distance = 1
@@ -2277,7 +2282,7 @@ function is_air_reaction_able(u) {
             set_add(selected, nh)
             if (nh !== AIR_FERRY && !is_faction_units(nh, 1 - R) && !set_has(G.offensive.battle_hexes, nh) &&
                 target_in_battle_range(range, nh, G.offensive.battle_hexes)) {
-                map_set(L.air_reaction_hex_map, location, 1)
+                map_set(L.air_reaction_hex_map, location, range)
                 return true
             }
             if (leg_distance < leg_limit) {
@@ -3713,6 +3718,8 @@ function check_supply() {
         var mask = G.supply_cache[TRUK] & JP_UNITS
         G.supply_cache[TRUK] ^= (mask)
     }
+    mark_supply_eligable_ports(AP)
+    mark_supply_eligable_ports(JP)
     if (G.debug) {
         log(`Check supply. Check iteration ${i}. ${Date.now() - cur_time} ms spent.`)
     }
