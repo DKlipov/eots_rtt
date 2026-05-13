@@ -862,6 +862,7 @@ P.reinforcement_segment = {
         }
         update_reinf_active()
     },
+    inactive: "place reinforcements",
     prompt() {
         if (G.active_stack.length) {
             L.allowed_hexes.forEach(hex => action_hex(hex))
@@ -1048,6 +1049,7 @@ P.replacement_segment = {
         })
         trigger_event("before_replacement")
     },
+    inactive: "use replacements",
     prompt() {
         var not_used_unground = L.divisions_used <= 0 || L.replacement_points.GROUND <= 0
         if (G.active_stack.length > 0) {
@@ -1130,6 +1132,7 @@ P.submarine_warfare = {
     _begin() {
         G.active = AP
     },
+    inactive: "roll for a submarine warfare",
     prompt() {
         prompt("Roll for a submarine warfare.")
         button("roll")
@@ -1186,6 +1189,7 @@ P.strategic_bombing = {
             end()
         }
     },
+    inactive: "roll to strategic bombing",
     prompt() {
         if (L.done) {
             prompt("No strategic bombing this turn.")
@@ -1409,6 +1413,7 @@ P.future_offensive = {
             L.pass = true
         }
     },
+    inactive: "play future offensive card",
     prompt() {
         prompt("Play future offensive card or pass.")
         if (L.pass) {
@@ -1634,6 +1639,7 @@ P.offensive_segment = {
             G.offensive.weather_rollback = copy_state()
         }
     },
+    inactive: "select card to play",
     prompt() {
         prompt("Turn " + G.turn + " Select card to play.")
         if (G.passes[R] > 0) {
@@ -1732,6 +1738,7 @@ P.offensive_segment = {
 }
 
 P.offensive_segment_card_action = {
+    inactive: "select action",
     prompt() {
         prompt(`${card_get_log_str(L.c)} : Select action.`)
         get_allowed_actions(L.c).forEach(a => button(a))
@@ -1805,6 +1812,7 @@ P.offensive_segment_card_action = {
 
 
 P.displace_hq = {
+    inactive: "choose hq",
     prompt() {
         prompt(`Choose HQ to displace.`)
         HQ_LIST.forEach(u => {
@@ -1822,6 +1830,7 @@ P.displace_hq = {
 }
 
 P.return_hq = {
+    inactive: "choose hq",
     prompt() {
         mark_supply_eligable_ports(G.active)
         mark_supplied_hexes(G.active)
@@ -1927,6 +1936,7 @@ function get_china_offensive_modifiers() {
 }
 
 P.china_offensive = {
+    inactive: "commit China Offensive",
     prompt() {
         prompt(`Roll to China Offensive.`)
         button("roll")
@@ -1983,6 +1993,7 @@ P.choose_hq = {
             log(`No hq could be selected.`)
         }
     },
+    inactive: "choose hq",
     prompt() {
         prompt(`${offensive_card_header()} Choose HQ.`)
         L.possible_units.forEach(u => action_unit(u))
@@ -2330,6 +2341,7 @@ P.activate_units = {
             end()
         }
     },
+    inactive: "activate units",
     prompt() {
         prompt(`${offensive_card_header()} Activate units ${G.offensive.logistic} + ${L.hq_bonus} / ${G.offensive.active_units[R].length}.`)
         L.possible_units.forEach(u => action_unit(u))
@@ -2509,6 +2521,7 @@ function create_battle_hex(hex) {
 }
 
 P.confirm_bh = {
+    inactive: "declare battle hex",
     prompt() {
         var hex = G.offensive.battle_names[G.offensive.battle_names.length - 1]
         prompt(`New battle hex declared ${String.fromCharCode(65 + G.offensive.battle_names.length - 1)} (${hex_get_log_str(hex)}).`)
@@ -2551,6 +2564,7 @@ P.move_offensive_units = {
             end()
         }
     },
+    inactive: "move units",
     prompt() {
         prompt(`${offensive_card_header()} Move activated units.`)
         if (L.spec_move) {
@@ -2780,6 +2794,7 @@ P.ground_move = {
         check_supply()
         compute_ground_move_hexes()
     },
+    inactive: "move units",
     prompt() {
         prompt(`${offensive_card_header()} Move activated units.`)
         if (G.offensive.stage !== REACTION_STAGE || set_has(G.offensive.battle_hexes, G.location[G.active_stack[0]])) {
@@ -2853,6 +2868,7 @@ P.choose_attack_hex = {
             end()
         }
     },
+    inactive: "commit units to attack",
     prompt() {
         prompt(`${offensive_card_header()} Commit units to battle.`)
         if (could_stack_stop_here() && G.offensive.stage === ATTACK_STAGE) {
@@ -3615,6 +3631,7 @@ P.check_overstacking = {
             log(`${side_get_log_str(G.active)} overstacking losses.`)
         }
     },
+    inactive: "displace overstacked units",
     prompt() {
         prompt(`Remove overstacked units.`)
         L.allowed_units.forEach(u => action_unit(u))
@@ -4290,6 +4307,7 @@ P.ground_disengagement = {
             end()
         }
     },
+    inactive: "choose disengagement",
     prompt() {
         if (G.active_stack.length === 0) {
             prompt(`Choose unit for disengagement.`)
@@ -4630,6 +4648,7 @@ P.declare_battle_hexes = {
             end()
         }
     },
+    inactive: "declare battle hexes",
     prompt() {
         if (G.active_stack.length === 0 && L.possible_units.length === 0) {
             prompt(`${offensive_card_header()} Confirm declared battle hexes.`)
@@ -4681,6 +4700,7 @@ P.commit_offensive = {
         }
         L.verify_error = trigger_event("before_commit_offensive")
     },
+    inactive: "commit offensive",
     prompt() {
         var action = "offensive"
         if (G.offensive.stage === REACTION_STAGE) {
@@ -4715,6 +4735,7 @@ P.end_action = {
     _begin() {
         G.active = G.offensive.attacker
     },
+    inactive: "end action",
     prompt() {
         prompt(`End action.`)
         button("done")
@@ -4767,8 +4788,9 @@ P.special_reaction = {
             end()
         }
     },
+    inactive: "commit special reaction",
     prompt() {
-        prompt(`${offensive_card_header()} Do a special reaction.`)
+        prompt(`${offensive_card_header()} Commit a special reaction.`)
         button("pass")
         L.possible_hexes.forEach(h => action_hex(h))
     },
@@ -4826,6 +4848,7 @@ P.cancel_offensive = {
             return
         }
     },
+    inactive: "offensive reaction",
     prompt() {
         prompt(`${offensive_card_header()} Cancel offensive.`)
         if (L.reactions_card > 0) {
@@ -4875,6 +4898,7 @@ P.define_intelligence_condition = {
         L.card = false
         G.offensive.logistic = cards[G.offensive.offensive_card].ops
     },
+    inactive: "offensive reaction",
     prompt() {
         prompt(`${offensive_card_header()} Change intelligence condition.`)
         if (G.offensive.type === EC && cards[G.offensive.offensive_card].intelligence && !L.card && !L.rolled) {
@@ -4940,6 +4964,7 @@ P.attack_reaction_cards = {
             end()
         }
     },
+    inactive: "offensive reaction",
     prompt() {
         var played_cards = G.offensive.active_cards.filter(c => cards[c].faction === R).length
         prompt(`${offensive_card_header()} Play reaction cards.${played_cards >= 3 ? " (No more than 3 reaction cards allowed)." : ""}`)
@@ -4978,6 +5003,7 @@ P.apply_attack_reaction = {
             return
         }
     },
+    inactive: "apply reaction cards",
     prompt() {
         prompt(`${offensive_card_header()} Apply reaction cards.`)
         L.allowed_cards.forEach(c => action_card(c))
@@ -5265,6 +5291,7 @@ P.choose_battle = {
         G.offensive.battle = {}
         G.active = G.offensive.attacker
     },
+    inactive: "choose battle hex",
     prompt() {
         prompt(`Choose battle hex.`)
         G.offensive.battle_hexes.forEach(b => {
@@ -5285,7 +5312,7 @@ P.assign_hits = script(`
       if (G.offensive.battle.ground_disperced) {
         call ground_bombardment
       }
-      if (G.offensive.battle.at_crit_only) {
+      if (G.offensive.battle.at_crit_only && G.offensive.battle.hit_able_units[G.offensive.attacker].length > 2) {
         call assign_crit
       }
       call apply_hits
@@ -5314,6 +5341,7 @@ P.apply_hits = {
         L.dmg_list = [[], []]
         L.done = [!battle.hit_able_units[0].length, !battle.hit_able_units[1].length]
     },
+    inactive: "apply hits",
     prompt() {
         map_for_each(G.offensive.battle.hit_able_units[R], u => action_unit(u))
         button("undo", L.dmg_list[R].length)
@@ -5391,6 +5419,7 @@ P.jp_cv_reassign = {
             L.hits = 0
         }
     },
+    inactive: "use range advantage",
     prompt() {
         if (L.stage === 0) {
             prompt(`Japanese naval aircraft range advantage. Choose units to damage. Chosen: ${L.hits}`)
@@ -5472,6 +5501,7 @@ P.ground_bombardment = {
             end()
         }
     },
+    inactive: "assign hits (the Reaction player chooses which reduced unit will be the last ground step)",
     prompt() {
         L.allowed_units.filter(u => !pieces[u].garrison || !L.garrison_present).forEach(u => action_unit(u))
         prompt(`Choose one survived ground step.`)
@@ -5500,8 +5530,9 @@ P.assign_crit = {
     _begin() {
         G.active = (1 - G.offensive.attacker)
     },
+    inactive: "choose unit reduced by critical hit (in case of ties, Reaction players choice)",
     prompt() {
-        G.offensive.battle.hit_able_units[1 - G.active].forEach(u => action_unit(u))
+        map_for_each(G.offensive.battle.hit_able_units[G.offensive.attacker], u => action_unit(u))
         prompt(`Choose one step applied by critical hit.`)
         if (!G.offensive.battle.hit_able_units[1 - G.active].length) {
             button("done")
@@ -5510,7 +5541,7 @@ P.assign_crit = {
     unit(unit) {
         push_undo()
         damage_unit(unit)
-        G.offensive.battle.hit_able_units[1 - G.active] = []
+        G.offensive.battle.hit_able_units[G.offensive.attacker] = []
     },
     done() {
         push_undo()
@@ -5588,6 +5619,7 @@ P.broken_aa = {
         battle.amph_ground.forEach(u => set_delete(battle.ground[G.offensive.attacker], u))
         log("Amphibious Assault failed due to lack of naval escort.")
     },
+    inactive: "amphibiously assaulting units are turned back",
     prompt() {
         L.allowed_units.forEach(u => action_unit(u))
         prompt(`Amphibious Assault failed. Apply losses.`)
@@ -5622,6 +5654,7 @@ P.broken_organic = {
         }
         log(`Losses due to lost organic transport unit:`)
     },
+    inactive: "organic transport units eliminated",
     prompt() {
         L.allowed_units.forEach(u => action_unit(u))
         prompt(`Remove units that lost organic transport.`)
@@ -5808,6 +5841,7 @@ P.retreat = {
             log(`Retreat:`)
         }
     },
+    inactive: "retreat",
     prompt() {
         if (G.active_stack.length) {
             prompt(`Choose space to retreat.`)
@@ -5940,6 +5974,7 @@ P.emergency_move = {
             log("Emergency move:")
         }
     },
+    inactive: "execute emergency move",
     prompt() {
         if (G.active_stack.length) {
             prompt(`Choose space to move.`)
@@ -6371,6 +6406,7 @@ P.india_surrender = {
             this.update_control()
         }
     },
+    inactive: "execute India surrender sequence",
     prompt() {
         if (G.active_stack.length) {
             prompt(`Choose space to move.`)
@@ -6602,6 +6638,7 @@ P.attrition = {
             end()
         }
     },
+    inactive: "apply attrition losses",
     prompt() {
         prompt(`Apply attrition for not-supplied units`)
         if (!L.unit_to_attrition.length) {
@@ -7341,6 +7378,7 @@ P.coastal_artillery = {
             end()
         }
     },
+    inactive: "apply coastal artillery damage",
     prompt() {
         prompt(`${offensive_card_header()} Manila and Singapore coastal artillery and mines takes damage. Reduce naval units.`)
         L.allowed_units.forEach(u => action_unit(u))
@@ -7385,6 +7423,7 @@ P.conquest_of_se_asia_reaction = {
             end()
         }
     },
+    inactive: "offensive reaction",
     prompt() {
         if (G.active_stack.length <= 0) {
             prompt(`${offensive_card_header()} Choose unit to reaction.`)
@@ -7581,6 +7620,7 @@ P.naval_battle_guadalcanal = {
         })
         L.allowed_units = L.allowed_units.filter(u => !set_has(ap_bb_hex, G.location[u]) && set_has(jp_bb_hex, G.location[u]))
     },
+    inactive: "airfield bombardment",
     prompt() {
         prompt(`${offensive_card_header()} Choose airfield bombardment target.`)
         L.allowed_units.forEach(u => action_unit(u))
@@ -7615,6 +7655,7 @@ P.worker_strikes_unit = {
             set_add(L.allowed_units, u)
         })
     },
+    inactive: "apply card effect",
     prompt() {
         prompt(`Worker strikes. Choose unit.${L.allowed_units.length <= 0 ? " (No full strength Indian corps present)." : ""}`)
         if (L.allowed_units.length <= 0) {
@@ -7704,8 +7745,9 @@ cards[find_card(JP, 28)].before_activation = function () {
 P.tokyo_express = {
     _begin() {
     },
+    inactive: "place Tokyo Express marker",
     prompt() {
-        prompt(`${offensive_card_header()} Place Tokyo express marker.`)
+        prompt(`${offensive_card_header()} Place Tokyo Express marker.`)
         for_each_unit_on_map((u, piece, location) => {
             if (piece.class === "hq" && piece.faction === JP && !set_has(G.oos, u)) {
                 for_each_hex_in_range(location, piece.cr, h => {
@@ -7788,6 +7830,7 @@ P.draw_from_discard = {
             L.skip = 2
         }
     },
+    inactive: "choose card to draw from discard",
     prompt() {
         if (L.skip === 1) {
             prompt(`Discard pile is empty, could not replace card.`)
@@ -7850,6 +7893,7 @@ P.guadalcanal_evacuation = {
         L.allowed_units = []
         L.stage = 1
     },
+    inactive: "apply card effect",
     prompt() {
         if (L.stage === 1) {
             prompt(`${offensive_card_header()} Choose coastal hex.`)
@@ -8031,6 +8075,7 @@ P.kamikaze_attack = {
         })
         L.stage = 1
     },
+    inactive: "commit kamikaze attack",
     prompt() {
         if (L.allowed_units.length <= 0) {
             prompt(`No kamikaze attack possible. No air units.`)
@@ -8186,6 +8231,7 @@ P.paratroopers = {
         G.active_stack = []
 
     },
+    inactive: "choose paratroopers landing hex",
     prompt() {
         prompt(`${offensive_card_header()} Choose paratroopers landing hex.`)
         L.allowed_hexes.forEach(u => action_hex(u))
@@ -8228,6 +8274,7 @@ P.halsey_typhoon = {
             end()
         }
     },
+    inactive: "apply card effect",
     prompt() {
         prompt(`${offensive_card_header()} Choose unit.`)
         L.allowed_units.forEach(u => action_unit(u))
@@ -8257,6 +8304,7 @@ P.yamato_loss = {
             end()
         }
     },
+    inactive: "apply card effect",
     prompt() {
         prompt(`Yamato run. Reduce one step.`)
         action_unit(find_piece("yamato"))
@@ -8326,6 +8374,7 @@ P.attack_b29_base = {
             end()
         }
     },
+    inactive: "apply card effect",
     prompt() {
         if (L.allowed_units.length <= 0) {
             prompt(`No B29 base attacked.`)
@@ -8455,6 +8504,7 @@ P.fuel_shortage = {
         L.limit = 4
         L.stage = 0
     },
+    inactive: "apply card effect",
     prompt() {
         prompt(`${offensive_card_header()} Move units. Ship could be selected: ${L.limit}.`)
         L.allowed_units.forEach(u => action_unit(u))
@@ -8507,6 +8557,7 @@ P.event_unit = {
         mark_supply_eligable_ports(G.active)
         mark_supplied_hexes(G.active)
     },
+    inactive: "place unit",
     prompt() {
         prompt(`${offensive_card_header()} Choose hex to place ${piece_get_log_str(L.unit)}.`)
         get_unit_reinforcement_hexes(L.unit).forEach(h => action_hex(h))
@@ -8591,6 +8642,7 @@ P.submarine_attack = {
             end()
         }
     },
+    inactive: "apply card effect",
     prompt() {
         prompt(`Submarine attack. Apply hits: ${L.hits}.`)
         L.allowed_units.forEach(u => action_unit(u))
@@ -8639,6 +8691,7 @@ P.place_abda = {
         L.allowed_hexes = get_unit_reinforcement_hexes(HQ_ABDA).filter(h => dei.includes(get_map_data(h).region))
 
     },
+    inactive: "place HQ",
     prompt() {
         if (L.allowed_hexes.length <= 0) {
             button("skip")
@@ -8762,6 +8815,7 @@ P.us_raiders = {
             }
         })
     },
+    inactive: "apply card effect",
     prompt() {
         prompt(`${offensive_card_header()} Choose unit.${L.allowed_units.length ? "" : "(Not possible)."}`)
         L.allowed_units.forEach(h => action_unit(h))
@@ -8800,6 +8854,7 @@ P.repair_avg = {
             set_add(L.allowed_units, ap_air(14))
         }
     },
+    inactive: "apply card effect",
     prompt() {
         if (L.allowed_units.length <= 0) {
             button("skip")
@@ -8882,6 +8937,7 @@ P.wingate = {
             }
         })
     },
+    inactive: "apply card effect",
     prompt() {
         prompt(`${offensive_card_header()} Choose unit.`)
         map_for_each(L.allowed_units, k => action_unit(k))
@@ -8942,6 +8998,7 @@ P.skip_bombing = {
             G.active = JP
         }
     },
+    inactive: "apply card effect",
     prompt() {
         if (G.offensive.skip_bomb_able.length === 0) {
             button("skip")
@@ -9064,6 +9121,7 @@ cards[find_card(AP, 33)].before_activation = function () {
 }
 
 P.build_road = {
+    inactive: "choose hex to build CBI",
     prompt() {
         if (!get_event_infrastructure_actions().length) {
             prompt("CBI could not be built.")
@@ -9324,6 +9382,7 @@ P.place_14_air = {
         }
         set_delete(G.reduced, AP_AIR_14)
     },
+    inactive: "place unit",
     prompt() {
         prompt(`${offensive_card_header()} Choose hex to place ${piece_get_log_str(AP_AIR_14)}.`)
         L.allowed_hexes.forEach(h => action_hex(h))
@@ -9389,6 +9448,7 @@ P.turkey_shoot = {
         G.active = AP
 
     },
+    inactive: "apply card effect",
     prompt() {
         prompt(`The Great Marianas Turkey Shoot. Choose unit to hit.`)
         if (L.done || L.allowed_units.length === 0) {
@@ -9495,6 +9555,7 @@ P.airborne_landing = {
             }
         })
     },
+    inactive: "apply card effect",
     prompt() {
         if (L.allowed_hexes.length <= 0) {
             button("skip")
@@ -9530,6 +9591,7 @@ P.place_armor = {
         set_delete(G.reduced, ARMOR_BRIGADE)
 
     },
+    inactive: "place unit",
     prompt() {
         if (L.allowed_hexes.length <= 0) {
             button("eliminate")
@@ -9820,6 +9882,7 @@ P.scenario_1941 = script(`
 P.operation_z = {
     _begin() {
     },
+    inactive: "start a war",
     prompt() {
         if (G.hand[JP].length === 2) {
             prompt(`Play Operation Z.`)
@@ -9859,6 +9922,7 @@ P.operation_z_pbm = {
         L.allowed_hexes = []
         update_move_hex()
     },
+    inactive: "return units",
     prompt() {
         prompt(`${offensive_card_header()} Choose hex for post battle movement.`)
         L.allowed_hexes.forEach(h => action_hex(h))
@@ -9904,6 +9968,7 @@ P.operation_no_1 = {
     _begin() {
 
     },
+    inactive: "start offensive",
     prompt() {
         prompt(`Play Operation No. 1.`)
         action_card(find_card(JP, 2))
@@ -10042,6 +10107,7 @@ P.arcadia = {
     _begin() {
         draw_specific_card(find_card(AP, 4))
     },
+    inactive: "apply card effect",
     prompt() {
         if (G.hand[AP].length === 1) {
             prompt(`Hold arcadia or discard and replace with random card.`)
@@ -10103,6 +10169,7 @@ P.japan_init_1942 = {
             end()
         }
     },
+    inactive: "choose card",
     prompt() {
         prompt(`Discard one card to draw JP 47: VADM Kondo or pass.`)
         if (G.hand[JP].includes(find_card(JP, 47))) {
