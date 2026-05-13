@@ -1529,7 +1529,7 @@ function military_card(c) {
     activate_card(c)
     G.offensive.type = EC
     var card = cards[c]
-    if (card.logistic) {
+    if (Number.isInteger(card.logistic)) {
         G.offensive.logistic = cards[c].logistic
     }
     if (card.intelligence) {
@@ -4934,8 +4934,11 @@ P.attack_reaction_cards = {
         }
     },
     prompt() {
-        prompt(`${offensive_card_header()} Play reaction cards.`)
-        get_hand(R).filter(c => cards[c].type === REACTION && cards[c].can_play()).forEach(c => action_card(c))
+        var played_cards = G.offensive.active_cards.filter(c => cards[c].faction === R).length
+        prompt(`${offensive_card_header()} Play reaction cards.${played_cards >= 3 ? " (No more than 3 reaction cards allowed)." : ""}`)
+        if (played_cards < 3) {
+            get_hand(R).filter(c => cards[c].type === REACTION && cards[c].can_play()).forEach(c => action_card(c))
+        }
         button("done")
     },
     done() {
