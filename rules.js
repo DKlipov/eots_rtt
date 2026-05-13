@@ -7784,7 +7784,7 @@ P.draw_from_discard = {
         L.skip = 0
         if (G.discard[R].length === 0 || G.discard[R].length === 1 && G.discard[R][0] === G.offensive.offensive_card) {
             L.skip = 1
-        } else if (G.future_offensive[R] < 0 && G.hand[R].length === 0) {
+        } else if (G.hand[R].length === 0) {
             L.skip = 2
         }
     },
@@ -7803,9 +7803,6 @@ P.draw_from_discard = {
             G.discard[R].forEach(c => action_card(c))
         } else {
             prompt(`${offensive_card_header()} Choose card to discard.`)
-            if (G.future_offensive[R] > 0) {
-                action_card(G.future_offensive[R])
-            }
             G.hand[R].forEach(c => action_card(c))
             button("skip")
         }
