@@ -9,6 +9,8 @@ exports.default_scenario = "South Pacific"
 const JP = 0
 const AP = 1
 
+const SEASONS = ["Jan-Apr", "May-Aug", "Sep-Dec"]
+
 //cards
 const EC = 0 //Event card
 const OC = 1 //Offensive card
@@ -613,21 +615,24 @@ function setup_original_control() {
 /* SEQUENCE OF PLAY */
 
 P.strategic_phase = script(`
-    log ("Turn " + G.turn + ". Strategic phase.")
+    log ("!Turn " + G.turn + " - " + get_year_season() + " " + get_year())
+    log ("@Turn " + G.turn + ". Strategic phase.")
     eval {
         check_jp_resources_event()
     }
     set G.active AP 
+    log ("#AAP Reinforcement segment")
     call reinforcement_segment
+    log ("#JJP Reinforcement segment")
     set G.active JP 
     call reinforcement_segment
-    log ("AP replacement segment.")
+    log ("#AAP Replacement segment")
     set G.active AP 
     call replacement_segment {scheduled_points: 1}
-    log ("JP replacement segment.")
+    log ("#JJP Replacement segment")
     set G.active JP
     call replacement_segment {scheduled_points: 1}
-    log ("Strategic warfare segment.")
+    log ("#AStrategic warfare segment")
     call submarine_warfare
     call strategic_bombing
     if (G.turn === 2){
@@ -808,9 +813,7 @@ function update_reinf_active() {
 
 P.reinforcement_segment = {
     _begin() {
-        mark_supply_eligable_ports(G.active)
         mark_supplied_hexes(G.active)
-        log(`${side_get_log_str(G.active)} reinforcement segment.`)
         if (G.wie <= 7 && G.active === AP) {
             change_asp(AP, 1)
         } else if (G.active === AP) {
@@ -1370,6 +1373,7 @@ P.offensive_phase = script(`
         G.offensive.attacker = G.active
     }
     while (G.hand[AP].length > 0 || G.hand[JP].length > 0) {
+        log ("#"+G.offensive.attacker===JP?"JJP":"AAP"+" Action")
         if (G.hand[G.active].length > 0){
             call offensive_segment
         } else {
@@ -1825,7 +1829,9 @@ P.displace_hq = {
         push_undo()
         eliminate(u)
         check_supply()
-        goto("end_action")
+        if (!check_sudden_death()) {
+            goto("end_action")
+        }
     },
 }
 
@@ -5303,7 +5309,7 @@ P.choose_battle = {
         G.offensive.battle = {
             battle_hex: hex,
         }
-        log(`Battle hex ${String.fromCharCode(65 + G.offensive.battle_names.indexOf(hex))} (${hex_get_log_str(hex)}) chosen for battle.`)
+        log(`%${G.offensive.attacker===JP?"J":"A"}Battle hex ${String.fromCharCode(65 + G.offensive.battle_names.indexOf(hex))} (${hex_get_log_str(hex)})`)
         end()
     },
 }
@@ -5492,7 +5498,6 @@ P.jp_cv_reassign = {
 
 P.ground_bombardment = {
     _begin() {
-        G.active = (1 - G.offensive.attacker)
         var battle = G.offensive.battle
         battle.hit_able_units = [[], []]
         L.allowed_units = battle.ground[G.active].filter(u => unit_on_board(u))
@@ -5500,6 +5505,7 @@ P.ground_bombardment = {
         if (L.allowed_units.length === 1 && set_has(G.reduced, L.allowed_units[0])) {
             end()
         }
+        G.active = (1 - G.offensive.attacker)
     },
     inactive: "assign hits (the Reaction player chooses which reduced unit will be the last ground step)",
     prompt() {
@@ -6127,6 +6133,7 @@ P.battle_sequence = script(`
       call retreat
       set G.offensive.battle {}
     }
+    log ("%E")
 `)
 
 P.political_phase = script(`
@@ -9727,6 +9734,11 @@ function get_year() {
     return (t - (t % 3)) / 3 + 1941
 }
 
+function get_year_season() {
+    var d = (G.turn + 1) % 3
+    return SEASONS[d]
+}
+
 P.default_event = script(`
     eval {
         if (cards[G.offensive.offensive_card].isr_rivalry) {
@@ -9837,10 +9849,13 @@ function setup_scenario_1941(options) {
     draw_specific_card(find_card(JP, 2))
     check_supply()
     fill_overstack()
+    log("!Empire of the Sun. The Pacific War 1941-1945")
     call("scenario_1941")
 }
 
 P.scenario_1941 = script(`
+    log ("@Turn 1 - December 7, 1941")
+    log ("#JJP Action. Operation Z")
     set G.active JP
     call operation_z
     eval {
@@ -9848,23 +9863,23 @@ P.scenario_1941 = script(`
         reset_offensive()
         G.offensive.attacker = JP
     }
+    log ("#JJP Action. Operation No. 1")
     call operation_no_1
     call activate_units
     call move_offensive_units
     call declare_battle_hexes
     call commit_offensive
-    log ("Offensive reaction.")
+    log ("$Offensive reaction")
     set G.active AP
     call ground_disengagement
     call conquest_of_se_asia_reaction
     set G.offensive.stage BATTLE_STAGE
-    log ("Resolve battles.")
+    log ("$Resolve battles")
     set G.active G.offensive.attacker
     call battle_sequence
     eval {
         capture_landing_hexes()
     }
-    log ("Post battle movement.")
     set G.offensive.stage POST_BATTLE_STAGE
     set G.active G.offensive.attacker
     call move_offensive_units
@@ -9941,14 +9956,16 @@ P.operation_z_pbm = {
 
 P.operation_z_battle = script(`
       call choose_battle
+      log ("%JAttack on H" + OAHU)
       call prepare_battle
       set G.offensive.battle.ground_stage 0
       call execute_attack {active: JP}
       call assign_hits
+      log ("%E")
       eval {
         change_political_will(8, "Operation Z")
       }
-      log ("Post battle movement.")
+      log ("$Post battle movement")
       set G.offensive.stage POST_BATTLE_STAGE
       eval {
         set_location(find_piece("lexington"), OAHU)
@@ -10088,6 +10105,8 @@ function setup_scenario_1942(options) {
     G.china_divisions = 11
     check_supply()
     fill_overstack()
+    log("!Empire of the Sun")
+    log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
     call("scenario_1942")
 }
 
@@ -10412,6 +10431,8 @@ function setup_scenario_1943() {
     }
     check_supply()
     fill_overstack()
+    log("!Empire of the Sun")
+    log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
     call("offensive_phase")
 }
 
@@ -10596,6 +10617,8 @@ function setup_scenario_1944() {
     }
     check_supply()
     fill_overstack()
+    log("!Empire of the Sun")
+    log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
     call("offensive_phase")
 }
 
@@ -10727,6 +10750,8 @@ function setup_scenario_south_pacific() {
 
     check_supply()
     fill_overstack()
+    log("!Empire of the Sun. South Pacific")
+    log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
     call("offensive_phase")
 }
 

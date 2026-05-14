@@ -1,5 +1,5 @@
 Todo list:
-* verify with actual rules
+* beautify logs
 * stack refactoring
 * Implementation notes
 * big refactoring
@@ -8,6 +8,7 @@ Todo list:
 Bugs
 
 Done
-? Hex-to-hex distance calcualtion
+? Hex-to-hex distance calculation
 ? Check supply menu
 ? Burma scenario
+? eliminated units display

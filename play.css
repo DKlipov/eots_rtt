@@ -6,23 +6,36 @@ header {
     background-color: tan
 }
 
+
+.gray {
+    filter: grayscale(100%);
+}
+
 /* LOG */
 
 #log {
     background-color: floralwhite;
 }
 
-#log .h1 {
+#log .h1, #log .h2, #log .h3 {
     background-color: tan;
-}
-
-#log .h1, #log .h2 {
     padding: 2px 8px;
     border-top: 1px solid black;
     border-bottom: 1px solid black;
     margin: 8px 0;
     text-align: center;
 }
+
+#log .h3 {
+    background-color: lightgray;
+}
+
+#log .group { margin: 0 8px }
+#log .group.h4 { text-align: center; padding: 0px; }
+#log .group.h4.jp { background-color: hsl(0, 20%, 80%); }
+#log .group.h4.ap { background-color: hsl(214, 30%, 80%); }
+#log .group.jp { background-color: hsl(0, 20%, 90%) }
+#log .group.ap { background-color: hsl(214, 30%, 90%) }
 
 #log > .q {
     padding-left: 20px;
@@ -33,6 +46,35 @@ header {
 #log > .i {
     padding-left: 20px;
 }
+
+#log .jp {
+    background-color: lightpink;
+}
+
+#log .ap {
+    background-color: lightblue;
+}
+
+#log > div { padding-left: 20px; text-indent: -12px; }
+#log .h1 { font-weight: bold; padding-top:2px; padding-bottom:2px; text-align: center; }
+#log .h2 { padding-top:2px; padding-bottom:2px; text-align: center; }
+#log .h3 { padding-top:1px; padding-bottom:1px; text-align: center; }
+
+#log .group { margin: 0 8px }
+#log .group.h4 { text-align: center; padding: 0px; }
+#log .group.h4.ap { background-color: hsl(0, 20%, 80%); }
+#log .group.h4.cp { background-color: hsl(214, 30%, 80%); }
+#log .group.ap { background-color: hsl(0, 20%, 90%) }
+#log .group.cp { background-color: hsl(214, 30%, 90%) }
+
+#log div.i { padding-left: 32px; text-indent: -12px; }
+#log div.ii { padding-left: 44px; text-indent: -12px; }
+
+#log div.bold { font-weight: bold }
+#log div.italic { font-style: italic }
+
+#log .apvp { color: brown; }
+#log .cpvp { color: blue; }
 
 #log .card-tip {
     cursor: pointer;
@@ -56,35 +98,6 @@ header {
     background-repeat: no-repeat;
 }
 
-#log .white {
-    background-image: url(/images/die_black_pips.svg);
-    background-color: #fff;
-    border: 1px solid #444;
-}
-
-#log .black {
-    background-image: url(/images/die_white_pips.svg);
-    background-color: #666;
-    border: 1px solid #222;
-}
-
-#log .red {
-    background-image: url(/images/die_white_pips.svg);
-    background-color: #c22;
-    border: 1px solid #222;
-}
-
-#log .fm, #log .gm {
-    text-align: right;
-    margin-top: -18px;
-    float: right;
-    padding: 0 4px;
-    text-indent: 0;
-}
-
-.gray {
-    filter: grayscale(100%);
-}
 
 #chat_text .Japan {
     background-color: lightpink
@@ -108,14 +121,6 @@ body.Allies header.your_turn {
 
 #role_Allies {
     background-color: lightsteelblue;
-}
-
-#log .jp {
-    background-color: lightpink;
-}
-
-#log .ap {
-    background-color: lightblue;
 }
 
 .card-tip {

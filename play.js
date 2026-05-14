@@ -1158,11 +1158,36 @@ function on_log(text) {
     var p = document.createElement("div")
 
     switch (text[0]) {
+        case "!":
+            var m = text.substring(1)
+            p.classList.add("h1")
+            text = m
+            break
+        case "@":
+            var m = text.substring(1)
+            p.classList.add("h2")
+            text = m
+            break
+        case "$":
+            var m = text.substring(1)
+            p.classList.add("h3")
+            text = m
+            break
+        case "#":
+            var m = text.substring(2)
+            p.classList.add("h3")
+            p.classList.add(text[1] === "J" ? "jp" : "ap")
+            text = m
+            break
         case "%":
             var m = text.substring(2)
-            p.classList.add(text[1] === "F" ? "fm" : "gm")
-            if (Number(m) < 4)
-                p.classList.add("dark")
+            if (text[1] === "E") {
+                world.log_boxes = []
+                return p
+            }
+            p.classList.add("h4")
+            p.classList.add(text[1] === "J" ? "jp" : "ap")
+            world.log_boxes.push(text[1] === "J" ? "jp" : "ap")
             text = m
             break
         case "Q":
@@ -1188,7 +1213,10 @@ function on_log(text) {
             }
             break
     }
-
+    if (world.log_boxes.length) {
+        p.classList.add("group")
+        p.classList.add(world.log_boxes[0])
+    }
     p.innerHTML = escape_text(text)
 
     return p
