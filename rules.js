@@ -8327,7 +8327,7 @@ cards[find_card(JP, 65)].before_unit_activation = function () {
 }
 
 cards[find_card(JP, 65)].before_commit_offensive = function () {
-    if (G.offensive.stage === POST_BATTLE_STAGE) {
+    if (G.offensive.stage === POST_BATTLE_STAGE && G.active === JP) {
         call("yamato_loss")
     }
 }
