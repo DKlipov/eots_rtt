@@ -862,6 +862,7 @@ function on_update() {
 
     begin_update()
     update_role_info()
+    world.log_boxes = []
 
     console.log(G)
     map_for_each(G.offensive.damaged, (u, s) => {
@@ -1139,6 +1140,7 @@ function escape_text(text) {
     text = text.replace(/>/g, "&gt;")
     text = text.replace(/\[/g, "<")
     text = text.replace(/\]/g, ">")
+    text = text.replace(/\^(.*?)\^/g, escaped_list)
     text = text.replace(/([ +-]1) action points/g, "$1 action point")
     text = text.replace(/([ +-]1) trenches/g, "$1 trench")
     text = text.replace(/([ +-]1) units/g, "$1 unit")
@@ -1176,7 +1178,18 @@ function on_log(text) {
         case "#":
             var m = text.substring(2)
             p.classList.add("h3")
-            p.classList.add(text[1] === "J" ? "jp" : "ap")
+            var code = text[1]
+            var color = null
+            if (code === "J") {
+                color = "jp"
+            } else if (code === "A") {
+                color = "ap"
+            } else if (code === "I") {
+                color = "int"
+            }
+            if (color) {
+                p.classList.add(color)
+            }
             text = m
             break
         case "%":
@@ -1674,6 +1687,25 @@ function get_hex_name(h) {
     }
 
     return `hex ${hex}`
+
+}
+
+function expand_list(parent) {
+    parent.children[0].hidden = true
+    parent.children[1].hidden = false
+}
+
+function escaped_list(match, p1) {
+    var ind = p1.indexOf("|")
+    var header = escape_text(p1.substring(0, ind))
+    const text = escape_text(p1.substring(ind + 1))
+    var array = text.split(", ").length
+    var id = "list" + world.list_id++
+    if (array <= 3) {
+        return `<span>${text}</span>`
+    } else {
+        return `<span id="${id}"><span class="list-tip" onclick="expand_list(${id})" >${header}</span><span hidden>${text}</span></span>`
+    }
 
 }
 

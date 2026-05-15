@@ -55,6 +55,10 @@ header {
     background-color: lightblue;
 }
 
+#log .int {
+    background-color: lightgreen;
+}
+
 #log > div { padding-left: 20px; text-indent: -12px; }
 #log .h1 { font-weight: bold; padding-top:2px; padding-bottom:2px; text-align: center; }
 #log .h2 { padding-top:2px; padding-bottom:2px; text-align: center; }
@@ -601,6 +605,11 @@ div[data-tooltip]:after {
 }
 
 .piece-tip { /* for text in log and dialogs */
+    cursor: pointer;
+    font-style: italic
+}
+
+.list-tip { /* for text in log and dialogs */
     cursor: pointer;
     font-style: italic
 }

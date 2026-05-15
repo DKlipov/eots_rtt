@@ -1561,17 +1561,17 @@ function play_reaction(c) {
     play_event(c)
     if (cards[c].intelligence && G.offensive.intelligence !== AMBUSH && G.offensive.intelligence !== cards[c].intelligence) {
         G.offensive.intelligence = cards[c].intelligence
-        log(`Intelligence condition changed to ${get_named_intelligence(G.offensive.intelligence)}.`)
+        log(`#IIntelligence condition changed to ${get_named_intelligence(G.offensive.intelligence)}`)
     }
 }
 
 function get_named_intelligence(int) {
     if (int === SURPRISE) {
-        return "surprise"
+        return "Surprise"
     } else if (int === AMBUSH) {
-        return "ambush"
+        return "Ambush"
     } else {
-        return "intercept"
+        return "Intercept"
     }
 }
 
@@ -2326,6 +2326,17 @@ function get_kwai_modifier(hq) {
     }
 }
 
+function log_units_activated() {
+    var faction = G.active
+    var activated = G.offensive.active_units[R].length
+    var limit = G.offensive.logistic + L.hq_bonus
+    if (activated) {
+        log(`Activated ^${activated} units|${G.offensive.active_units[R].map(u => piece_get_log_str(u)).join(", ")}^, ${limit} limit.`)
+    } else {
+        log(`No units activated, ${limit} limit ,${L.possible_units.length} possible.`)
+    }
+}
+
 P.activate_units = {
     _begin() {
         if (R === G.offensive.attacker && G.offensive.type === EC && cards[G.offensive.offensive_card].hq) {
@@ -2344,6 +2355,7 @@ P.activate_units = {
         L.kwai = get_kwai_modifier(pieces[hq])
         trigger_event("before_unit_activation")
         if (!L.possible_units.length) {
+            log_units_activated()
             end()
         }
     },
@@ -2379,11 +2391,13 @@ P.activate_units = {
             }
         }
         if (G.offensive.active_units[R].length >= (G.offensive.logistic + L.hq_bonus) || L.possible_units.length <= 0) {
+            log_units_activated()
             end()
         }
     },
     done() {
         push_undo()
+        log_units_activated()
         end()
     },
 }
@@ -2926,7 +2940,9 @@ function move_units(units, path) {
     units.forEach(u => {
         map_set(G.offensive.paths, u, full_path.slice())
     })
+    var units_list = list_get_log_str(`${piece_get_log_str(units[0])} with ${units.length - 1} units`, units.map(u => piece_get_log_str(u)))
     if (path.length === 3) {
+        console.log(`${units_list} skipped move.`)
         return
     }
     var i = 3
@@ -2937,8 +2953,16 @@ function move_units(units, path) {
     var zoi_generator_flag = G.active_stack.filter(u => pieces[u].zoi_generator).length
         || (path[0] & GROUND_MOVE) && G.active_stack.filter(u => pieces[u].class === "ground").length
     var enemy_faction = 1 - pieces[G.active_stack[0]].faction
+    var point_to_point = []
+    var last = null
     for (; i < path.length; i++) {
         var hex = path[i]
+        if (last !== hex) {
+            point_to_point.push(hex_get_log_str(hex))
+        } else if (last) {
+            point_to_point[point_to_point.length - 1] = "rebase " + hex_get_log_str(hex)
+        }
+        last = hex
         if (zoi_flag && zoi_generator_flag && (G.supply_cache[hex] & (POSSIBLE_ZOI << enemy_faction))) {
             units.forEach(u => set_location(u, hex, 1))
             check_supply()
@@ -2953,7 +2977,8 @@ function move_units(units, path) {
         }
     }
     var destination = path[path.length - 1]
-    units.forEach(u => set_location(u, destination))
+    units.forEach(u => set_location(u, destination, true))
+    log(`${units_list} moved to ${list_get_log_str(hex_get_log_str(destination), point_to_point)}`)
 }
 
 function for_each_hex_in_range(hex, range, lambda) {
@@ -4954,7 +4979,7 @@ P.define_intelligence_condition = {
         var success = roll_intelligence_dice()
         if (success) {
             G.offensive.intelligence = INTERCEPT
-            log(`Intelligence condition changed to ${get_named_intelligence(G.offensive.intelligence)}.`)
+            log(`#IIntelligence condition changed to ${get_named_intelligence(G.offensive.intelligence)}.`)
         }
         L.rolled = 1
         if (success || !get_hand(R).includes(JN_25_SPECIAL)) {
@@ -5309,7 +5334,7 @@ P.choose_battle = {
         G.offensive.battle = {
             battle_hex: hex,
         }
-        log(`%${G.offensive.attacker===JP?"J":"A"}Battle hex ${String.fromCharCode(65 + G.offensive.battle_names.indexOf(hex))} (${hex_get_log_str(hex)})`)
+        log(`%${G.offensive.attacker === JP ? "J" : "A"}Battle hex ${String.fromCharCode(65 + G.offensive.battle_names.indexOf(hex))} (${hex_get_log_str(hex)})`)
         end()
     },
 }
@@ -5561,14 +5586,19 @@ function is_cv_unit(piece) {
 
 function apply_loss() {
     var battle = G.offensive.battle
+    var dmg_map = []
+    map_for_each(L.dmg_list[0], (u, l) => map_set(dmg_map, u, l))
+    map_for_each(L.dmg_list[1], (u, l) => map_set(dmg_map, u, l))
     var d = battle.damaged[0].concat(battle.damaged[1])
     for (var i = 1; i < d.length; i += 2) {
         var unit = d[i - 1]
+        var step = (d[i] === 4) ? 2 : 1
         if (d[i] > 2) {
-            eliminate(unit)
+            eliminate(unit, true)
         } else {
-            reduce_unit(unit)
+            reduce_unit(unit, true)
         }
+        log(`${piece_get_log_str(unit)} ${d[i] > 2 ? "eliminated" : "reduced"} (${step} x ${map_get(dmg_map, unit, 0)}).`)
         var piece = pieces[unit]
         if (piece.faction === JP && is_cv_unit(piece)) {
             battle.jp_cv_damaged = 1
@@ -6103,20 +6133,17 @@ P.battle_sequence = script(`
       set G.offensive.battle.ground_stage 0
       call broken_aa
       if (G.offensive.intelligence === INTERCEPT) {
-        log ("Intelligence condition INTERCEPT")
         call execute_attack {active: G.offensive.attacker}
         call execute_attack {active: 1 - G.offensive.attacker}
         call assign_hits
       } 
       if (G.offensive.intelligence === AMBUSH) {
-        log ("Intelligence condition AMBUSH")
         call execute_attack {active: 1 - G.offensive.attacker}
         call assign_hits
         call execute_attack {active: G.offensive.attacker}
         call assign_hits
       } 
       if (G.offensive.intelligence === SURPRISE) {
-        log ("Intelligence condition SURPRISE")
         call execute_attack {active: G.offensive.attacker}
         call assign_hits
         call execute_attack {active: 1 - G.offensive.attacker}
@@ -6132,8 +6159,8 @@ P.battle_sequence = script(`
       call apply_ground_winner
       call retreat
       set G.offensive.battle {}
+      log ("%E")
     }
-    log ("%E")
 `)
 
 P.political_phase = script(`
@@ -9804,7 +9831,7 @@ function eliminate_permanently(unit) {
     set_delete(G.oos, unit)
 }
 
-function eliminate(unit) {
+function eliminate(unit, no_log = false) {
     var piece = pieces[unit]
     var size = get_overstack_size(unit)
     var location = G.location[unit]
@@ -9815,7 +9842,9 @@ function eliminate(unit) {
         displace_to_turn(unit, 1)
         return
     }
-    log(`${piece_get_log_str(unit)} eliminated.`)
+    if (!no_log) {
+        log(`${piece_get_log_str(unit)} eliminated.`)
+    }
     G.location[unit] = ELIMINATED_BOX
     set_delete(G.reduced, unit)
     set_delete(G.oos, unit)
@@ -9829,8 +9858,10 @@ function damage_unit(unit) {
     }
 }
 
-function reduce_unit(unit) {
-    log(`${piece_get_log_str(unit)} reduced.`)
+function reduce_unit(unit, no_log = false) {
+    if (!no_log) {
+        log(`${piece_get_log_str(unit)} reduced.`)
+    }
     set_add(G.reduced, unit)
 }
 
@@ -9869,12 +9900,13 @@ P.scenario_1941 = script(`
     call move_offensive_units
     call declare_battle_hexes
     call commit_offensive
-    log ("$Offensive reaction")
+    log ("#GOffensive reaction")
     set G.active AP
     call ground_disengagement
     call conquest_of_se_asia_reaction
     set G.offensive.stage BATTLE_STAGE
-    log ("$Resolve battles")
+    log ("#GResolve battles")
+    log ("#IIntelligence condition: "+get_named_intelligence(G.offensive.intelligence))
     set G.active G.offensive.attacker
     call battle_sequence
     eval {
@@ -9917,13 +9949,14 @@ P.operation_z = {
         set_add(G.offensive.active_units[JP], find_piece("soryu"))
         set_add(G.offensive.active_units[JP], find_piece("shokaku"))
         set_add(G.offensive.active_units[JP], find_piece("hiei"))
-        G.offensive.active_units[JP].forEach(u => log(`${piece_get_log_str(u)} activated.`))
+        log(`${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(u => piece_get_log_str(u)))} activated.`)
     },
     action_hex(h) {
         push_undo()
         G.offensive.active_units[JP].forEach(u => {
-            set_location(u, h)
+            set_location(u, h, true)
         })
+        log(`${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(u => piece_get_log_str(u)))} moved to ${hex_get_log_str(h)}.`)
         create_battle_hex(OAHU)
         G.offensive.active_units[JP].forEach(u => commit_to_attack(u, OAHU))
         check_supply()
@@ -9945,9 +9978,10 @@ P.operation_z_pbm = {
     action_hex(h) {
         push_undo()
         G.active_stack.forEach(u => {
-            set_location(u, h)
+            set_location(u, h, true)
             map_set(G.offensive.paths, u, map_get(L.allowed_hexes, h))
         })
+        log(`${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(u => piece_get_log_str(u)))} moved to ${hex_get_log_str(h)}.`)
         G.active_stack = []
         check_supply()
         end()
@@ -9956,7 +9990,6 @@ P.operation_z_pbm = {
 
 P.operation_z_battle = script(`
       call choose_battle
-      log ("%JAttack on H" + OAHU)
       call prepare_battle
       set G.offensive.battle.ground_stage 0
       call execute_attack {active: JP}
@@ -9965,11 +9998,12 @@ P.operation_z_battle = script(`
       eval {
         change_political_will(8, "Operation Z")
       }
-      log ("$Post battle movement")
+      log ("#GPost battle movement")
       set G.offensive.stage POST_BATTLE_STAGE
       eval {
-        set_location(find_piece("lexington"), OAHU)
-        set_location(find_piece("enterprise"), OAHU)
+        set_location(find_piece("lexington"), OAHU, true)
+        set_location(find_piece("enterprise"), OAHU, true)
+        log (piece_get_log_str(find_piece("lexington"))+", "+piece_get_log_str(find_piece("enterprise"))+" moved to "+hex_get_log_str(OAHU)+".")
       }
       set G.active JP
       call operation_z_pbm
@@ -11063,6 +11097,10 @@ function dice_get_log_str(p, modifiers, faction = G.active) {
 
 function side_get_log_str(side) {
     return `${side === AP ? "AP" : "JP"}`
+}
+
+function list_get_log_str(header, items) {
+    return `^${header}|${items.join(", ")}^`
 }
 
 /* FRAMEWORK */

@@ -100,6 +100,7 @@ const world = {
 	text_list: [],
 	log_boxes: [],
 	window_list: [],
+	list_id: 0,
 	focus: null,
 	mouse_focus: false,
 	last_focus: null,
