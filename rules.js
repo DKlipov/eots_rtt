@@ -1646,9 +1646,9 @@ P.offensive_segment = {
     inactive: "select card to play",
     prompt() {
         prompt("Turn " + G.turn + " Select card to play.")
-        if (G.passes[R] > 0) {
+        // if (G.passes[R] > 0) {
             button("pass")
-        }
+        // }
         var hand = get_hand(R)
         for (let i = 0; i < hand.length; i++) {
             let card = hand[i]
@@ -2942,7 +2942,7 @@ function move_units(units, path) {
     })
     var units_list = list_get_log_str(`${piece_get_log_str(units[0])} with ${units.length - 1} units`, units.map(u => piece_get_log_str(u)))
     if (path.length === 3) {
-        console.log(`${units_list} skipped move.`)
+        log(`${units_list} skipped move.`)
         return
     }
     var i = 3
