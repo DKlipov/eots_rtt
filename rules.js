@@ -1373,7 +1373,7 @@ P.offensive_phase = script(`
         G.offensive.attacker = G.active
     }
     while (G.hand[AP].length > 0 || G.hand[JP].length > 0) {
-        log ("#"+G.offensive.attacker===JP?"JJP":"AAP"+" Action")
+        log ("#"+(G.offensive.attacker===JP?"JJP":"AAP")+" Action")
         if (G.hand[G.active].length > 0){
             call offensive_segment
         } else {
@@ -2568,9 +2568,6 @@ P.move_offensive_units = {
         L.movable_units = []
         L.allowed_hexes = []
         L.move_cache = []
-        if (G.offensive.stage === POST_BATTLE_STAGE) {
-            log(`Post battle movement ${side_get_log_str(G.active)}`)
-        }
         G.offensive.active_units[G.active].filter(u => {
             if (!unit_on_board(u) && G.location[u] !== CHINA_BOX
                 || G.offensive.stage === POST_BATTLE_STAGE && (pieces[u].class === "ground" && !set_has(G.offensive.ground_pbm, u) || map_get(G.offensive.paths, u, [0])[0] & STRAT_MOVE)
@@ -2968,7 +2965,7 @@ function move_units(units, path) {
             check_supply()
         }
         if (zoi_flag && has_zoi(hex, 1 - R)) {
-            log("Reaction zoi violated! -2 to reaction intelligence rolls.")
+            log("#IReaction zoi violated! -2 to reaction intelligence rolls.")
             G.offensive.zoi_intelligence_modifier = 1
             zoi_flag = 0
         }
@@ -3659,7 +3656,7 @@ P.check_overstacking = {
             end()
             return
         } else {
-            log(`${side_get_log_str(G.active)} overstacking losses.`)
+            log(`#G${side_get_log_str(G.active)} overstacking losses.`)
         }
     },
     inactive: "displace overstacked units",
@@ -4990,7 +4987,7 @@ P.define_intelligence_condition = {
 
 P.attack_reaction_cards = {
     _begin() {
-        log("Offensive reaction cards.")
+        log("#GOffensive reaction cards.")
         if (get_hand(G.active).filter(c => cards[c].type === REACTION && cards[c].can_play()).length <= 0) {
             end()
         }
@@ -5331,10 +5328,10 @@ P.choose_battle = {
     },
     action_hex(hex) {
         set_delete(G.offensive.battle_hexes, hex)
+        log(`%${G.offensive.attacker === JP ? "J" : "A"}Battle hex ${String.fromCharCode(65 + G.offensive.battle_names.indexOf(hex))} (${hex_get_log_str(hex)})`)
         G.offensive.battle = {
             battle_hex: hex,
         }
-        log(`%${G.offensive.attacker === JP ? "J" : "A"}Battle hex ${String.fromCharCode(65 + G.offensive.battle_names.indexOf(hex))} (${hex_get_log_str(hex)})`)
         end()
     },
 }
@@ -6076,7 +6073,7 @@ P.offensive_sequence = script(`
     eval {
         trigger_event("before_reaction")
     }
-    log ("Offensive reaction.")
+    log ("#GOffensive reaction")
     call ground_disengagement
     call special_reaction
     set G.offensive.all_bh G.offensive.battle_hexes.slice()
@@ -6096,7 +6093,7 @@ P.offensive_sequence = script(`
     if (G.offensive.active_hq[G.active]) {
         call commit_offensive
     }
-    log ("Resolve battles.")
+    log ("#GResolve battles")
     set G.active G.offensive.attacker
     call battle_sequence
     eval {
@@ -6105,7 +6102,7 @@ P.offensive_sequence = script(`
     eval {
         trigger_event("before_pbm")
     }
-    log ("Post battle movement.")
+    log ("#GPost battle movement")
     set G.offensive.stage POST_BATTLE_STAGE
     set G.active 1-G.offensive.attacker
     call apply_attack_reaction
@@ -6159,7 +6156,7 @@ P.battle_sequence = script(`
       call apply_ground_winner
       call retreat
       set G.offensive.battle {}
-      log ("%E")
+      log ("")
     }
 `)
 
@@ -9994,7 +9991,7 @@ P.operation_z_battle = script(`
       set G.offensive.battle.ground_stage 0
       call execute_attack {active: JP}
       call assign_hits
-      log ("%E")
+      set G.offensive.battle {}
       eval {
         change_political_will(8, "Operation Z")
       }
@@ -11267,6 +11264,9 @@ function log(s) {
         if (G.log.length > 0 && G.log[G.log.length - 1] !== "")
             G.log.push("")
     } else {
+        if (G.offensive.battle.battle_hex) {
+            s = `&${G.offensive.attacker===JP?"J":"A"}${s}`
+        }
         G.log.push(s)
     }
 }

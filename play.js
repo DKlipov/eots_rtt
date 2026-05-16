@@ -1194,13 +1194,15 @@ function on_log(text) {
             break
         case "%":
             var m = text.substring(2)
-            if (text[1] === "E") {
-                world.log_boxes = []
-                return p
-            }
             p.classList.add("h4")
+            p.classList.add("group")
             p.classList.add(text[1] === "J" ? "jp" : "ap")
-            world.log_boxes.push(text[1] === "J" ? "jp" : "ap")
+            text = m
+            break
+        case "&":
+            var m = text.substring(2)
+            p.classList.add("group")
+            p.classList.add(text[1] === "J" ? "jp" : "ap")
             text = m
             break
         case "Q":
@@ -1225,10 +1227,6 @@ function on_log(text) {
                 text = "German Round " + (round >> 1)
             }
             break
-    }
-    if (world.log_boxes.length) {
-        p.classList.add("group")
-        p.classList.add(world.log_boxes[0])
     }
     p.innerHTML = escape_text(text)
 
