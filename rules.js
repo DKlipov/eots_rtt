@@ -6004,7 +6004,7 @@ P.emergency_move = {
         if (!L.unit_to_retreat.length) {
             end()
         } else {
-            log("Emergency move:")
+            log("#GEmergency move:")
         }
     },
     inactive: "execute emergency move",
