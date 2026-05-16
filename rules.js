@@ -1646,9 +1646,9 @@ P.offensive_segment = {
     inactive: "select card to play",
     prompt() {
         prompt("Turn " + G.turn + " Select card to play.")
-        // if (G.passes[R] > 0) {
+        if (G.passes[R] > 0) {
             button("pass")
-        // }
+        }
         var hand = get_hand(R)
         for (let i = 0; i < hand.length; i++) {
             let card = hand[i]
