@@ -1816,7 +1816,7 @@ P.offensive_segment_card_action = {
 
 
 P.displace_hq = {
-    inactive: "choose hq",
+    inactive: "choose HQ",
     prompt() {
         prompt(`Choose HQ to displace.`)
         HQ_LIST.forEach(u => {
@@ -1836,7 +1836,7 @@ P.displace_hq = {
 }
 
 P.return_hq = {
-    inactive: "choose hq",
+    inactive: "choose HQ",
     prompt() {
         mark_supply_eligable_ports(G.active)
         mark_supplied_hexes(G.active)
@@ -1982,7 +1982,11 @@ P.choose_hq = {
         if (L.card && cards[L.card].hq) {
             hq_list = cards[L.card].hq
         }
-        for_each_unit_on_map((u, piece) => {
+        HQ_LIST.forEach((u) => {
+            var piece = pieces[u]
+            if (G.location[u] > LAST_BOARD_HEX) {
+                return
+            }
             if (piece.faction === R && piece.class === "hq" &&
                 (!set_has(G.oos, u) || L.card === GENERAL_ADACHI)
                 && (R === G.offensive.attacker
@@ -1999,7 +2003,7 @@ P.choose_hq = {
             log(`No hq could be selected.`)
         }
     },
-    inactive: "choose hq",
+    inactive: "choose HQ",
     prompt() {
         prompt(`${offensive_card_header()} Choose HQ.`)
         L.possible_units.forEach(u => action_unit(u))
@@ -4806,7 +4810,9 @@ P.special_reaction = {
                 return false
             }
             for (var i = 1; i < hq_list.length; i += 2) {
-                if (get_distance(h, hq_list[i - 1]) <= hq_list[i]) {
+                if (get_distance(h, hq_list[i - 1]) <= hq_list[i]
+                    && (G.sid !== SOUTH_PACIFIC_SCENARIO || hq_list[i] !== 25 || get_map_data(h).region === "Hebrides")//hack for cpac in south pacific map
+                ) {
                     return true
                 }
             }
@@ -9752,6 +9758,12 @@ SCENARIO_DATA[SOUTH_PACIFIC_SCENARIO].before_unit_activation = function () {
     }
 }
 
+SCENARIO_DATA[SOUTH_PACIFIC_SCENARIO].before_choose_hq = function () {
+    if (G.offensive.attacker === JP && G.offensive.battle_hexes.filter(h => get_map_data(h).region === "Hebrides").length <= 0) {
+        array_delete_item(L.possible_units, HQ_CENTRAL_PACIFIC)
+    }
+}
+
 
 function get_year() {
     var t = G.turn + 1
@@ -11265,7 +11277,7 @@ function log(s) {
             G.log.push("")
     } else {
         if (G.offensive.battle.battle_hex) {
-            s = `&${G.offensive.attacker===JP?"J":"A"}${s}`
+            s = `&${G.offensive.attacker === JP ? "J" : "A"}${s}`
         }
         G.log.push(s)
     }
