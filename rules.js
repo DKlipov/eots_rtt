@@ -6663,7 +6663,9 @@ P.attrition = {
                 } else if (location !== CHINA_BOX) {
                     for (var i = 0; i < hq_list.length; i++) {
                         var hq = hq_list[i]
-                        if (get_distance(location, G.location[hq]) <= pieces[hq].cr) {
+                        if (get_distance(location, G.location[hq]) <= pieces[hq].cr
+                            && (G.sid !== SOUTH_PACIFIC_SCENARIO || hq !== HQ_CENTRAL_PACIFIC || get_map_data(location).region === "Hebrides")//hack for cpac in south pacific map
+                        ) {
                             return
                         }
                     }
