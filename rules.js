@@ -749,12 +749,14 @@ function get_hq_reinforcement_hexes() {
     let queue = []
     const overland_set = []
     const oversea_set = []
+    var hqs = []
+    HQ_LIST.forEach(u => set_add(hqs, G.location[u]))
     for (var i = 0; i < LAST_BOARD_HEX; i++) {
         if (get_map_data(i).supply_source & supply) {
             queue.push(i)
             set_add(overland_set, i)
             set_add(oversea_set, i)
-            if (get_map_data(i).port && is_space_controlled(i, faction) && !(G.overstack[i] & 1)) {
+            if (get_map_data(i).port && is_space_controlled(i, faction) && !set_has(hqs, i)) {
                 set_add(result, i)
             }
         }
@@ -788,7 +790,7 @@ function get_hq_reinforcement_hexes() {
             if (reachable) {
                 queue.push(nh)
             }
-            if (reachable && get_map_data(nh).port && is_space_controlled(nh, faction) && !(G.overstack[nh] & 1)) {
+            if (reachable && get_map_data(nh).port && is_space_controlled(nh, faction) && !set_has(hqs, nh)) {
                 set_add(result, nh)
             }
         }
@@ -1882,7 +1884,6 @@ P.return_hq = {
 P.tp_units = {
     prompt() {
         prompt(`Choose unit and hex.`)
-        fill_overstack()
         if (G.active_stack.length) {
             var piece = pieces[G.active_stack[0]]
             for (i = 0; i < LAST_BOARD_HEX; i++) {
@@ -1914,7 +1915,6 @@ P.tp_units = {
     },
     done() {
         G.active_stack = []
-        fill_overstack()
         end()
     }
 }
@@ -3594,7 +3594,8 @@ function check_burma_road() {
 }
 
 function is_overstack(hex, unit, multip = 1) {
-    var overstack = G.overstack[hex]
+    fill_overstack(G.active)
+    var overstack = L.overstack[hex]
     var piece = pieces[unit]
     var multiplier = ((G.location[unit] === hex || G.location[piece.pair] === hex) ? 0 : 1) * multip
     if (hex === CHINA_BOX && piece.b29) {
@@ -3626,51 +3627,57 @@ function get_overstack_size(unit) {
     }
 }
 
+function init_overstack_check() {
+    fill_overstack(G.active)
+    L.allowed_units = []
+    L.ground_units = []
+    var overstack_naval = []
+    var overstack_land = []
+    for (var i = 0; i < LAST_BOARD_HEX; i++) {
+        if ((L.overstack[i] % (1 << 7)) > 7) {
+            set_add(overstack_land, i)
+        }
+        if ((L.overstack[i] >> 7) > 6) {
+            set_add(overstack_naval, i)
+        }
+    }
+    if (!overstack_naval.length && !overstack_land.length) {
+        return true
+    }
+    var air_hex = []
+    for_each_unit_on_map((u, piece, location) => {
+        if (piece.faction !== G.active) {
+            return false
+        }
+        if (piece.class === "naval" && set_has(overstack_naval, location)) {
+            set_add(L.allowed_units, u)
+        } else if (piece.class === "ground" && set_has(overstack_land, location)) {
+            set_add(L.ground_units, u)
+        } else if (piece.class === "air" && set_has(overstack_land, location)) {
+            set_add(L.allowed_units, u)
+            set_add(air_hex, location)
+        }
+    })
+    L.ground_units.forEach(u => {
+        if (pieces[u].faction !== G.active) {
+            return false
+        }
+        if (!set_has(air_hex, G.location[u])) {
+            set_add(L.allowed_units, u)
+        }
+    })
+    if (L.allowed_units.length === 0) {
+        return true
+    } else {
+        log(`#G${side_get_log_str(G.active)} overstacking losses.`)
+    }
+    return false
+}
+
 P.check_overstacking = {
     _begin() {
-        L.allowed_units = []
-        L.ground_units = []
-        var overstack_naval = []
-        var overstack_land = []
-        for (var i = 0; i < LAST_BOARD_HEX; i++) {
-            if ((G.overstack[i] % (1 << 7)) > 7) {
-                set_add(overstack_land, i)
-            }
-            if ((G.overstack[i] >> 7) > 6) {
-                set_add(overstack_naval, i)
-            }
-        }
-        if (!overstack_naval.length && !overstack_land.length) {
+        if (init_overstack_check()) {
             end()
-            return
-        }
-        var air_hex = []
-        for_each_unit_on_map((u, piece, location) => {
-            if (piece.faction !== G.active) {
-                return
-            }
-            if (piece.class === "naval" && set_has(overstack_naval, location)) {
-                set_add(L.allowed_units, u)
-            } else if (piece.class === "ground" && set_has(overstack_land, location)) {
-                set_add(L.ground_units, u)
-            } else if (piece.class === "air" && set_has(overstack_land, location)) {
-                set_add(L.allowed_units, u)
-                set_add(air_hex, location)
-            }
-        })
-        L.ground_units.forEach(u => {
-            if (pieces[u].faction !== G.active) {
-                return
-            }
-            if (!set_has(air_hex, G.location[u])) {
-                set_add(L.allowed_units, u)
-            }
-        })
-        if (L.allowed_units.length === 0) {
-            end()
-            return
-        } else {
-            log(`#G${side_get_log_str(G.active)} overstacking losses.`)
         }
     },
     inactive: "displace overstacked units",
@@ -3714,6 +3721,27 @@ P.check_overstacking = {
     }
 }
 
+P.commit_overstacking = {
+    _begin() {
+        if(init_overstack_check()){
+            end()
+            return
+        }
+        L.hexes = []
+        L.allowed_units.forEach(u => set_add(L.hexes, G.location[u]))
+        L.violations = {overstack: L.hexes}
+    },
+    inactive: "check overstacked units",
+    prompt() {
+        prompt(`Review overstacked units. Hexes: ${L.hexes.map(h => hex_get_log_str(h)).join(", ")}.`)
+        button("done")
+    },
+    done() {
+        push_undo()
+        end()
+    },
+}
+
 function set_location(unit, location, no_logs) {
     if (!no_logs && (location <= LAST_BOARD_HEX || location === CHINA_BOX)) {
         log(`${piece_get_log_str(unit)} moved to ${hex_get_log_str(location)}.`)
@@ -3721,28 +3749,36 @@ function set_location(unit, location, no_logs) {
     var prev_location = G.location[unit]
     var pair_location = G.location[pieces[unit].pair]
     var size = get_overstack_size(unit)
-    if ((prev_location <= LAST_BOARD_HEX || prev_location === CHINA_BOX) && pair_location !== prev_location) {
-        G.overstack[prev_location] -= size
+    if (L.overstack && (prev_location <= LAST_BOARD_HEX || prev_location === CHINA_BOX) && pair_location !== prev_location) {
+        L.overstack[prev_location] -= size
     }
-    if ((location <= LAST_BOARD_HEX || location === CHINA_BOX) && pair_location !== location) {
-        G.overstack[location] += size
+    if (L.overstack && (location <= LAST_BOARD_HEX || location === CHINA_BOX) && pair_location !== location) {
+        L.overstack[location] += size
     }
     G.location[unit] = location
 }
 
-function fill_overstack() {
-    for (var i = 0; i <= LAST_BOARD_HEX; i++) {
-        G.overstack[i] = 0
+function fill_overstack(faction) {
+    if (L.overstack && L.overstack[0] === faction) {
+        return
     }
-    G.overstack[CHINA_BOX] = 2
+    L.overstack = []
+    L.overstack[0] = faction
+    for (var i = 0; i <= LAST_BOARD_HEX; i++) {
+        L.overstack[i] = 0
+    }
+    L.overstack[CHINA_BOX] = 2
     for_each_unit((u, piece, location) => {
+        if (piece.faction !== faction) {
+            return
+        }
         var pair_location = G.location[pieces[u].pair]
         if (location <= LAST_BOARD_HEX && piece.class === "hq") {
-            G.overstack[location] |= 1
+            L.overstack[location] |= 1
         } else if (location <= LAST_BOARD_HEX && piece.class === "naval") {
-            G.overstack[location] += (1 << 7)
+            L.overstack[location] += (1 << 7)
         } else if ((location <= LAST_BOARD_HEX || location === CHINA_BOX) && (piece.type !== "lrb" || pair_location !== location)) {
-            G.overstack[location] += (1 << 1)
+            L.overstack[location] += (1 << 1)
         }
     })
 }
@@ -4012,58 +4048,14 @@ function compute_air_commit_hexes() {
     L.allowed_hexes = result
 }
 
-function fast_compute_air_move_hexes() {
-    var move_data = L.move_data
-    var location = move_data.location
-    let leg_distance = 1
-    let distance_incr_i = 0
-    var move_type = ANY_MOVE
-    if (move_data.move_type & AIR_EXTENDED_MOVE) {
-        move_type |= AIR_EXTENDED_MOVE
-    }
-    const selected = [move_data.location, [move_type, leg_distance, move_data.location]]
-    let queue = [move_data.location]
-    var bh = G.offensive.battle_hexes.slice()
-    if (set_has(G.offensive.battle_hexes, location) && G.offensive.stage === REACTION_STAGE) {
-        bh = [location]
-    }
-    for (var i = 0; i < queue.length; i++) {
-        let item = queue[i]
-        let nh_list = map_get(AIRFIELD_LINKS, item)
-        let j = 1;
-        while (j < nh_list.length && nh_list[j] <= move_data.extended_battle_range) {
-            let nh = nh_list[j - 1]
-            if (map_has(selected, nh) || !is_space_controlled(nh, R) || nh === AIR_FERRY && is_faction_units(AIR_FERRY, JP)) {
-                j += 2
-                continue
-            }
-            var path_array = map_get(selected, item)
-            path_array = path_array.slice()
-            path_array.push(nh)
-            path_array.push(nh)
-            map_set(selected, nh, path_array)
-            if (leg_distance < move_data.air_move_legs) {
-                queue.push(nh)
-            }
-        }
-        if (i >= distance_incr_i) {
-            leg_distance++
-            distance_incr_i = queue.length - 1
-        }
-    }
-    L.allowed_hexes = []
-    map_for_each(selected, (nh, v) => {
-        if (nh !== AIR_FERRY && (!is_faction_ground_units(nh, 1 - R) && !set_has(G.offensive.battle_hexes, nh) || G.offensive.stage === POST_BATTLE_STAGE)
-            && (target_in_battle_range(move_data.extended_battle_range, nh, bh) || G.offensive.stage !== REACTION_STAGE)) {
-            map_set(L.allowed_hexes, nh, v)
-        }
-    })
-    map_delete(L.allowed_hexes, move_data.location)
-    check_china_box_restriction()
-}
-
 function check_china_box_restriction() {
-    if (G.overstack[CHINA_BOX] >= 6 || pieces[G.active_stack[0]].b29 && (G.location[B_29_1] === CHINA_BOX || G.location[B_29_2] === CHINA_BOX)) {
+    var count = 0
+    for (var i = 0; i < pieces.length; i++) {
+        if (G.location[i] === CHINA_BOX) {
+            count++
+        }
+    }
+    if (count >= 2 || pieces[G.active_stack[0]].b29 && (G.location[B_29_1] === CHINA_BOX || G.location[B_29_2] === CHINA_BOX)) {
         map_delete(L.allowed_hexes, CHINA_BOX)
     }
 }
@@ -6134,7 +6126,7 @@ P.offensive_sequence = script(`
     if (G.offensive.intelligence !== SURPRISE) {
         call move_offensive_units
         set G.offensive.active_units[1-G.offensive.attacker] []
-        call check_overstacking
+        call commit_overstacking
         call commit_offensive
     }
     set G.active G.offensive.attacker
@@ -8518,7 +8510,7 @@ function check_fuel_shortage_data() {
         var hq = (G.active_stack.includes(HQ_YAMAMOTO) || G.active_stack.includes(HQ_OZAWA)) + 0
         var ships_count = G.active_stack.length - hq
         L.ports.forEach(h => {
-            var over = G.overstack[h]
+            var over = L.overstack[h]
             var hex_ship_count = over >> 7
             if (G.supply_cache[h] & HEX_TEMP_FLAG1
                 && (!hq || (over & 1) === 0)
@@ -8538,6 +8530,7 @@ function check_fuel_shortage_data() {
 
 P.fuel_shortage = {
     _begin() {
+        fill_overstack(JP)
         L.move_type = STRAT_MOVE
         L.allowed_units = []
         L.allowed_hexes = []
@@ -8577,7 +8570,7 @@ P.fuel_shortage = {
     },
     action_hex(hex) {
         push_undo()
-        var over = G.overstack[hex]
+        var over = L.overstack[hex]
         if (over & 1) {
             set_add(L.moved, HQ_YAMAMOTO)
             set_add(L.moved, HQ_OZAWA)
@@ -9865,8 +9858,8 @@ function eliminate(unit, no_log = false) {
     var piece = pieces[unit]
     var size = get_overstack_size(unit)
     var location = G.location[unit]
-    if (location <= LAST_BOARD_HEX || location === CHINA_BOX) {
-        G.overstack[location] -= size
+    if (L.overstack && (location <= LAST_BOARD_HEX || location === CHINA_BOX)) {
+        L.overstack[location] -= size
     }
     if (piece.class === "hq" && !piece.notreplaceable) {
         displace_to_turn(unit, 1)
@@ -9909,7 +9902,6 @@ function setup_scenario_1941(options) {
     draw_specific_card(find_card(JP, 1))
     draw_specific_card(find_card(JP, 2))
     check_supply()
-    fill_overstack()
     log("!Empire of the Sun. The Pacific War 1941-1945")
     call("scenario_1941")
 }
@@ -10168,7 +10160,6 @@ function setup_scenario_1942(options) {
     G.political_will = 8
     G.china_divisions = 11
     check_supply()
-    fill_overstack()
     log("!Empire of the Sun")
     log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
     call("scenario_1942")
@@ -10494,7 +10485,6 @@ function setup_scenario_1943() {
         draw_card(AP)
     }
     check_supply()
-    fill_overstack()
     log("!Empire of the Sun")
     log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
     call("offensive_phase")
@@ -10680,7 +10670,6 @@ function setup_scenario_1944() {
         draw_card(AP)
     }
     check_supply()
-    fill_overstack()
     log("!Empire of the Sun")
     log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
     call("offensive_phase")
@@ -10813,7 +10802,6 @@ function setup_scenario_south_pacific() {
     G.china_divisions = 9
 
     check_supply()
-    fill_overstack()
     log("!Empire of the Sun. South Pacific")
     log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
     call("offensive_phase")
@@ -10922,7 +10910,6 @@ function on_setup(scenario, options) {
     G.surrender[nations.MARSHALL.id] = true //only nation under JP control
     G.b29u = 0
     G.supply_cache = []
-    G.overstack = []
     G.pow = 0
     G.captured_once = []
 
@@ -10977,6 +10964,7 @@ function on_view() {
     V.wie = G.wie
     V.passes = G.passes
     V.asp = G.asp
+    V.violations = L.violations
 
     var control = []
     for (var i = 0; i < map.length; i++) {

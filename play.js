@@ -958,6 +958,8 @@ function on_update() {
         // // update_keyword("zoi_hex", hex, "ap", (zoi_state & 2) === 2)
     }
 
+    print_violations()
+
     update_hand(AP)
     update_hand(JP)
     if (G.offensive.active_cards.length > 0) {
@@ -1086,6 +1088,18 @@ function on_update() {
 
     action_button("undo", "Undo")
     end_update()
+}
+
+function print_violations() {
+    if (world.violations && world.violations.overstack) {
+        world.violations.overstack.forEach(h => lookup_thing("action_hex", h).element.classList.toggle("violation", false))
+        world.violations = {}
+    }
+    if (!G.violations || !G.violations.overstack) {
+        return
+    }
+    G.violations.overstack.forEach(h => lookup_thing("action_hex", h).element.classList.toggle("violation", true))
+    world.violations = G.violations
 }
 
 function apply_conflict_marker(marker, hex) {
@@ -1681,9 +1695,7 @@ function get_hex_name(h) {
             return hex_data.name
         }
     }
-
     return `hex ${hex}`
-
 }
 
 function expand_list(parent) {

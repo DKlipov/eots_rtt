@@ -1,5 +1,4 @@
 Todo list:
-* Overstacking befor emergency
 * Update move logs
 * Update activation and movement model (according tors suggestion)
 * big refactoring

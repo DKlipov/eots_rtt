@@ -99,6 +99,7 @@ const world = {
 	keyword_list: [],
 	text_list: [],
 	log_boxes: [],
+	violations: [],
 	window_list: [],
 	list_id: 0,
 	focus: null,
