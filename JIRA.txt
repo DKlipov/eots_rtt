@@ -1,6 +1,5 @@
 Todo list:
 * Overstacking befor emergency
-* Nz flipped under independence campaign
 * Update move logs
 * Update activation and movement model (according tors suggestion)
 * big refactoring

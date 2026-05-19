@@ -799,7 +799,7 @@ function get_hq_reinforcement_hexes() {
 function is_reinforcement_denied(piece) {
     return (piece.service === "au" && is_event_active(events.AUSTRALIA_SURRENDER) && !set_has(G.reduced, piece.u))
         || (piece.service === "ind" && G.surrender[nations.INDIA.id] >= 4)
-        || (is_event_active(events.INDEPENDENCE_CAMPAIGN) && piece.class === "ground" &&
+        || (L.INDEPENDENCE_CAMPAIGN = 1 && piece.class === "ground" &&
             (piece.service === "ind" || piece.service === "au" || piece.service === "br"));
 }
 
@@ -978,6 +978,7 @@ function get_replacement_points() {
         result.GROUND = Math.max(0, result.GROUND - is_event_active(events.INDEPENDENCE_CAMPAIGN))
         log(`-${is_event_active(events.INDEPENDENCE_CAMPAIGN)} AP ground replacement, Indian independence campaign (no commonwealth units could be replaced).`)
         G.events[events.INDEPENDENCE_CAMPAIGN.id] = 0
+        L.INDEPENDENCE_CAMPAIGN = 1
     }
     return result
 }
