@@ -1621,9 +1621,7 @@ function create_battle_box(faction, cf, rm, units, log) {
         append_header("Modifiers:", result)
     }
     log.forEach(text => {
-        let header = document.createElement("div")
-        header.innerHTML = text.replace(/H(\d+)/g, sub_hex)
-        result.appendChild(header)
+        result.appendChild(on_log(text))
     })
     return result
 }

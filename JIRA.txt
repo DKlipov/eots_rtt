@@ -1,9 +1,13 @@
 Todo list:
-* beautify logs
-* stack refactoring
-* Implementation notes
+* Overstacking befor emergency
+* Nz flipped under independence campaign
+* Update move logs
+* Update activation and movement model (according tors suggestion)
 * big refactoring
 * fuzz-buzz testing
+* Implementation notes
+* stack refactoring
+* Mobile resizing lags & bugs
 
 Bugs
 

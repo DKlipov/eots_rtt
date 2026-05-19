@@ -1046,7 +1046,9 @@ P.replacement_segment = {
                 && !piece.notreplaceable
                 && !is_reinforcement_denied(piece)
                 && !set_has(G.oos, u)
-                && (location === ELIMINATED_BOX || set_has(G.reduced, u) && (location === CHINA_BOX || location < LAST_BOARD_HEX))) {
+                && (location === ELIMINATED_BOX || set_has(G.reduced, u) && (location === CHINA_BOX || location < LAST_BOARD_HEX))
+                && (location !== ELIMINATED_BOX || piece.service !== "ch" || G.burma_road < 2)
+            ) {
                 set_add(L.replacable_units, u)
             }
         })
@@ -2878,6 +2880,9 @@ P.choose_attack_hex = {
                     set_add(L.allowed_hexes, bh)
                 }
             })
+            if (L.move_data.is_ground_present) {
+                L.allowed_hexes = []
+            }
         } else {
             compute_air_commit_hexes()
         }
@@ -2891,7 +2896,12 @@ P.choose_attack_hex = {
     },
     inactive: "commit units to attack",
     prompt() {
-        prompt(`${offensive_card_header()} Commit units to battle.`)
+        if (!L.move_data.battle_range) {
+            prompt(`${offensive_card_header()} Commit units to escort. (No combat factor will be used!).`)
+        } else {
+            prompt(`${offensive_card_header()} Commit units to battle.`)
+        }
+
         if (could_stack_stop_here() && G.offensive.stage === ATTACK_STAGE) {
             button("pass")
         }
@@ -2925,7 +2935,6 @@ P.choose_attack_hex = {
         end()
     },
     action_hex(hex) {
-        push_undo()
         log(`Units ${G.active_stack.map(u => piece_get_log_str(u)).join(", ")} committed to attack to ${hex_get_log_str(hex)}.`)
         this.attack_hex(hex)
     },
@@ -4093,6 +4102,9 @@ function compute_air_move_hexes() {
     if (move_data.move_type & STRAT_MOVE) {
         move_type |= STRAT_MOVE
     }
+    if (move_data.move_type & AIR_EXTENDED_MOVE) {
+        move_type |= AIR_EXTENDED_MOVE
+    }
     if (L.move_type === STRAT_MOVE) {
         check_supply()
     }
@@ -5160,6 +5172,16 @@ function fill_hit_able_units(faction) {
     if (!result.length && reduced.length && !has_full_size) {
         result = reduced
     }
+    if (ground_bomb && hit_limit >= total_lf) {
+        battle.ground_disperced = 1
+    } else if (result.length <= 0 && critical && lower_lf_unit[0] >= 0 && !battle.damaged[faction].length) {
+        for (var i = 1; i < lower_lf_unit.length; i++) {
+            map_set(result, lower_lf_unit[i], hit_limit)
+        }
+        if (faction === G.offensive.attacker) {
+            battle.at_crit_only = 1
+        }
+    }
     if (ground_bomb && get_map_data(battle.battle_hex).city > CITY) {
         var garrisons = []
         map_for_each(result, u => {
@@ -5169,16 +5191,6 @@ function fill_hit_able_units(faction) {
         })
         if (result.length > garrisons.length * 2) {
             garrisons.forEach(u => map_delete(result, u))
-        }
-    }
-    if (ground_bomb && hit_limit >= total_lf) {
-        battle.ground_disperced = 1
-    } else if (result.length <= 0 && critical && lower_lf_unit[0] >= 0 && !battle.damaged[faction].length) {
-        for (var i = 1; i < lower_lf_unit.length; i++) {
-            map_set(result, lower_lf_unit[i], hit_limit)
-        }
-        if (faction === G.offensive.attacker) {
-            battle.at_crit_only = 1
         }
     }
 
@@ -5526,6 +5538,7 @@ P.jp_cv_reassign = {
 
 P.ground_bombardment = {
     _begin() {
+        G.active = (1 - G.offensive.attacker)
         var battle = G.offensive.battle
         battle.hit_able_units = [[], []]
         L.allowed_units = battle.ground[G.active].filter(u => unit_on_board(u))
@@ -5533,11 +5546,16 @@ P.ground_bombardment = {
         if (L.allowed_units.length === 1 && set_has(G.reduced, L.allowed_units[0])) {
             end()
         }
-        G.active = (1 - G.offensive.attacker)
     },
     inactive: "assign hits (the Reaction player chooses which reduced unit will be the last ground step)",
     prompt() {
-        L.allowed_units.filter(u => !pieces[u].garrison || !L.garrison_present).forEach(u => action_unit(u))
+        var no_gar = L.allowed_units.filter(u => !pieces[u].garrison)
+        if (no_gar.length) {
+            no_gar.forEach(u => action_unit(u))
+        } else {
+            L.allowed_units.forEach(u => action_unit(u))
+        }
+
         prompt(`Choose one survived ground step.`)
         if (!L.allowed_units.length) {
             button("done")
