@@ -403,7 +403,6 @@ div[data-tooltip]:after {
 .piece.action, .marker.action {
     pointer-events: auto;
     border-color: yellow;
-!important;
     box-shadow: 0 0 2px black, inset 0 0 2px black;
     border-width: 4px;
     /*box-shadow: 0 0 0 3px lime; border-color: #000;*/

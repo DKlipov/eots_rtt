@@ -2049,13 +2049,22 @@ function get_distance(first_hex, second_hex) {
     return rx + ry - (rx >> 1)
 }
 
-function apply_inter_service(u) {
-    const piece = pieces[u]
-    if (!G.inter_service[R] || (piece.service !== "army" && piece.service !== "navy")) {
+function apply_inter_service() {
+    if (!G.inter_service[R]) {
         return
     }
-    const rival_service = piece.service === "army" ? "navy" : "army"
-    L.possible_units.filter(i => pieces[i].service === rival_service).forEach(i => set_delete(L.possible_units, i))
+    var service = null
+    G.offensive.active_units[R].forEach(u => {
+        var piece = pieces[u]
+        if (piece.service === "army" || piece.service === "navy") {
+            service = piece.service
+        }
+    })
+    if (!service) {
+        return;
+    }
+    const rival_service = service === "army" ? "navy" : "army"
+    L.allowed_units = L.allowed_units.filter(i => pieces[i].service !== rival_service)
 }
 
 function solely_occupied_land(hex, faction) {
@@ -2351,11 +2360,11 @@ P.activate_units = {
         } else if (R !== G.offensive.attacker && G.offensive.counter_offensive_card > 0 && cards[G.offensive.counter_offensive_card].hq) {
             L.card = G.offensive.counter_offensive_card
         }
-        L.hq_bonus = pieces[G.offensive.active_hq[G.active]].cm
+
         var hq = G.offensive.active_hq[G.active]
         var piece = pieces[hq]
         if ((piece.service === "joint" || piece.service === "us") && !check_hq_in_supply(hq, piece, US_SUPPLIED_HEX)) {
-            L.hq_bonus -= 1
+            L.joint_disadvantage = 1
             log("-1 activation (US Line of Communication).")
         }
         L.possible_units = get_activatable_units(hq, pieces[hq].supply)
@@ -2365,45 +2374,42 @@ P.activate_units = {
             log_units_activated()
             end()
         }
+        this.update_possible_units()
     },
     inactive: "activate units",
     prompt() {
         prompt(`${offensive_card_header()} Activate units ${G.offensive.logistic} + ${L.hq_bonus} / ${G.offensive.active_units[R].length}.`)
-        L.possible_units.forEach(u => action_unit(u))
-        button("done")
+        L.allowed_units.forEach(u => action_unit(u))
+        G.offensive.active_units[R].forEach(u => unselect_unit(u))
+        if (G.offensive.active_units[R].length <= (G.offensive.logistic + L.hq_bonus)) {
+            button("done")
+        }
+    },
+    update_possible_units() {
+        L.allowed_units = L.possible_units.filter(u => !set_has(G.offensive.active_units[R], u))
+        L.hq_bonus = pieces[G.offensive.active_hq[G.active]].cm
+        if (L.joint_disadvantage) {
+            L.hq_bonus -= 1
+        }
+        if (L.kwai && G.offensive.active_units[R].filter(u => KWAI_HQ_MOD.includes(get_map_data(G.location[u]).region)).length) {
+            L.hq_bonus += L.kwai
+        }
+        apply_inter_service()
+        trigger_event("after_unit_activation")
     },
     unit(u) {
-        push_undo()
-        if (L.kwai && KWAI_HQ_MOD.includes(get_map_data(G.location[u]).region)) {
-            log(`${L.kwai > 0 ? "+" : ""}${L.kwai} activation (Bridge over the River Kwai).`)
-            L.hq_bonus += L.kwai
-            L.kwai = 0
+        if (set_has(G.offensive.active_units[R], u)) {
+            set_delete(G.offensive.active_units[R], u)
+        } else {
+            set_add(G.offensive.active_units[R], u)
         }
-        set_add(G.offensive.active_units[R], u)
-        set_delete(L.possible_units, u)
-        apply_inter_service(u)
-        if (set_has(L.asp_ground_units, u)) {
-            L.asp_ground_units.forEach(gu => set_delete(L.possible_units, gu))
-            L.asp_ground_units = []
-        }
-        trigger_event("after_unit_activation", u)
-        if (L.kwai < 0 && G.offensive.logistic + L.hq_bonus <= G.offensive.active_units[R].length + 1) {
-            L.possible_units = L.possible_units.filter(u => !KWAI_HQ_MOD.includes(get_map_data(G.location[u]).region))
-        } else if (L.kwai > 0 && G.offensive.logistic + L.hq_bonus === G.offensive.active_units[R].length) {
-            L.possible_units = L.possible_units.filter(u => KWAI_HQ_MOD.includes(get_map_data(G.location[u]).region))
-            if (L.possible_units.length) {
-                log(`+1 activation (Bridge over the River Kwai).`)
-                L.hq_bonus += L.kwai
-                L.kwai = 0
-            }
-        }
-        if (G.offensive.active_units[R].length >= (G.offensive.logistic + L.hq_bonus) || L.possible_units.length <= 0) {
-            log_units_activated()
-            end()
-        }
+        this.update_possible_units()
     },
     done() {
         push_undo()
+        if (L.kwai && G.offensive.active_units[R].filter(u => KWAI_HQ_MOD.includes(get_map_data(G.location[u]).region)).length) {
+            log(`${L.kwai > 0 ? "+" : ""}${L.kwai} activation (Bridge over the River Kwai).`)
+        }
         log_units_activated()
         end()
     },
@@ -3723,7 +3729,7 @@ P.check_overstacking = {
 
 P.commit_overstacking = {
     _begin() {
-        if(init_overstack_check()){
+        if (init_overstack_check()) {
             end()
             return
         }
@@ -7325,10 +7331,11 @@ function trigger_event(stage, arg) {
 
 function only_one_ground_unit(card) {
     var faction = cards[card].faction
-    cards[card].after_unit_activation = function (u) {
-        if (pieces[u].class === "ground") {
-            filter_activation_units((u, piece) => piece.class !== "ground", faction)
+    cards[card].after_unit_activation = function () {
+        if (G.active !== faction || G.offensive.active_units[R].filter(u => pieces[u].class === "ground").length <= 0) {
+            return
         }
+        L.allowed_units = L.allowed_units.filter(u => pieces[u].class !== "ground")
     }
 }
 
@@ -7612,8 +7619,16 @@ cards[find_card(JP, 17)].before_unit_activation = function () {
 }
 
 cards[find_card(JP, 17)].after_unit_activation = function (u) {
-    var p_class = pieces[u].class
-    filter_activation_units((u, piece) => piece.class === p_class, JP)
+    if (G.active !== JP) {
+        return
+    }
+    var service = null
+    G.offensive.active_units[R].forEach(u => service = pieces[u].class)
+
+    L.allowed_units = L.allowed_units.filter(u => {
+        var p_service = pieces[u].class
+        return (service === null || p_service === service) && p_service !== "ground"
+    })
 }
 
 cards[find_card(JP, 17)].before_battle_roll = function (faction) {
@@ -8398,9 +8413,7 @@ cards[find_card(JP, 76)].before_unit_activation = function () {
     filter_activation_units((u, piece) => piece.class !== "ground" || piece.size === 1, JP)
 }
 
-cards[find_card(JP, 76)].after_unit_activation = function (u) {
-    filter_activation_units((u, piece) => piece.class !== "ground", JP)
-}
+only_one_ground_unit(find_card(JP, 76))
 
 cards[find_card(JP, 76)].before_activation = function () {
     call("attack_b29_base")
@@ -8831,11 +8844,7 @@ cards[find_card(AP, 10)].event = function () {
     call("draw_from_discard")
 }
 
-cards[find_card(AP, 13)].after_unit_activation = function (u) {
-    if (pieces[u].class === "ground") {
-        filter_activation_units((u, piece) => piece.class !== "ground", AP)
-    }
-}
+only_one_ground_unit(find_card(AP, 13))
 
 cards[find_card(AP, 15)].event = function () {
     call("replacement_segment", {replacement_points: {NAVAL: 2}})
@@ -9257,11 +9266,7 @@ cards[find_card(AP, 36)].before_battle_roll = function (faction) {
     }
 }
 
-cards[find_card(AP, 37)].after_unit_activation = function (u) {
-    if (pieces[u].class === "ground") {
-        filter_activation_units((u, piece) => piece.class !== "ground", AP)
-    }
-}
+only_one_ground_unit(find_card(AP, 37))
 
 cards[find_card(AP, 37)].before_battle_roll = function (faction) {
     if (faction === JP || !G.offensive.battle.ground_stage) {
@@ -9305,23 +9310,6 @@ cards[find_card(AP, 38)].before_unit_activation = function () {
     filter_activation_units((u, piece) => piece.class !== "naval", AP)
 }
 
-cards[find_card(AP, 38)].after_unit_activation = function () {
-    if (R !== AP) {
-        return
-    }
-    var cn_active = false
-    G.offensive.active_units[AP].forEach(u => {
-        if (pieces[u].service === "ch") {
-            cn_active = true
-        }
-    })
-    var cn_could_active = G.offensive.tarzan
-    if (G.offensive.active_units[AP].length + 1 >= (G.offensive.logistic + L.hq_bonus)
-        && !cn_active && cn_could_active) {
-        filter_activation_units((u, piece) => piece.service === "ch", AP)
-    }
-}
-
 cards[find_card(AP, 38)].before_commit_offensive = function () {
     if (G.offensive.stage !== ATTACK_STAGE || !G.offensive.tarzan) {
         return
@@ -9349,39 +9337,6 @@ cards[find_card(AP, 39)].before_replacement = function () {
 
 cards[find_card(AP, 44)].before_unit_activation = cards[find_card(AP, 35)].before_unit_activation
 
-cards[find_card(AP, 46)].before_unit_activation = function () {
-    if (R === JP || !G.inter_service[AP]) {
-        return
-    }
-    L.pool = L.possible_units.slice()
-}
-
-cards[find_card(AP, 46)].after_unit_activation = function () {
-    if (R === JP || !L.pool) {
-        return
-    }
-    var army = 0
-    var naval = 0
-    G.offensive.active_units[AP].forEach(au => {
-        var au_piece = pieces[au]
-        if (au_piece.service === "army") {
-            army++
-        } else if (au_piece.br || au_piece.class !== "naval") {
-            naval += 2
-        } else if (au_piece.class === "naval") {
-            naval++
-        }
-    })
-    L.possible_units = L.pool.filter(u => {
-            var piece = pieces[u]
-            return !set_has(G.offensive.active_units[AP], u) &&
-                (piece.service === "army" && (army > 0 || naval <= 1)
-                    || piece.service === "navy" && (army <= 0 || naval > 1 || naval === 0 && !piece.br && piece.class === "naval")
-                )
-        }
-    )
-}
-
 cards[find_card(AP, 48)].before_activation = function () {
     call("replacement_segment", {replacement_points: {CHINESE: 1}})
 }
@@ -9398,23 +9353,36 @@ cards[find_card(AP, 48)].after_unit_activation = function (u) {
     if (R === JP) {
         return
     }
-    var unactivated_china = L.possible_units.filter(u => pieces[u].service === "ch")
-    if (pieces[u].service === "ch") {
-        L.hq_bonus++
-    } else if (G.offensive.active_units[R].length >= (G.offensive.logistic + L.hq_bonus) && unactivated_china.length) {
-        L.possible_units = unactivated_china
-        L.hq_bonus++
-    }
+    L.hq_bonus += G.offensive.active_units[R].filter(u => pieces[u].service === "ch").length
 }
 
-cards[find_card(AP, 50)].before_unit_activation = function () {
+cards[find_card(AP, 50)].after_unit_activation = function () {
     if (R === JP || !G.inter_service[AP] || G.offensive.active_hq[AP] !== HQ_SOUTH_WEST) {
         return
     }
-    L.pool = L.possible_units.slice()
+    var army = 0
+    var naval = 0
+    G.offensive.active_units[AP].forEach(au => {
+        var au_piece = pieces[au]
+        if (au_piece.service === "army") {
+            army++
+        } else if (au_piece.br || au_piece.class !== "naval") {
+            naval += 2
+        } else if (au_piece.class === "naval") {
+            naval++
+        }
+    })
+    L.allowed_units = L.possible_units.filter(u => {
+            var piece = pieces[u]
+            return !set_has(G.offensive.active_units[AP], u) &&
+                (piece.service === "army" && (army > 0 || naval <= 1)
+                    || piece.service === "navy" && (army <= 0 || naval > 1 || naval === 0 && !piece.br && piece.class === "naval")
+                )
+        }
+    )
 }
 
-cards[find_card(AP, 50)].after_unit_activation = cards[find_card(AP, 46)].after_unit_activation
+cards[find_card(AP, 46)].after_unit_activation = cards[find_card(AP, 50)].after_unit_activation
 
 cards[find_card(AP, 51)].before_activation = function () {
     if (unit_on_board(ap_air("avg"))) {
@@ -11043,6 +11011,10 @@ function action_card(c) {
 
 function action_unit(p) {
     action("unit", p)
+}
+
+function unselect_unit(p) {
+    action("unselect", p)
 }
 
 function action_hex(p) {

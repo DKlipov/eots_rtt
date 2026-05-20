@@ -1,7 +1,10 @@
 Todo list:
-* Update move logs
 * Update activation and movement model (according tors suggestion)
+* bad ground victory
+* disable zoi button
+* battle hex j bad loss logging (1941)
 * big refactoring
+* Update move logs
 * fuzz-buzz testing
 * Implementation notes
 * stack refactoring
@@ -13,4 +16,4 @@ Done
 ? Hex-to-hex distance calculation
 ? Check supply menu
 ? Burma scenario
-? eliminated units display
+? Eliminated units display

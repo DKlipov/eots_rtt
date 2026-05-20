@@ -347,9 +347,9 @@ function get_element_weight(e) {
     } else if (piece.class === "air") {
         value += 9000;
     }
-    if (set_has(G.offensive.active_units[piece.faction], unit)) {
-        value += 512
-    }
+    // if (set_has(G.offensive.active_units[piece.faction], unit)) {
+    //     value += 512
+    // }
     if (set_has(G.reduced, unit)) {
         value += 256
     }
@@ -931,6 +931,18 @@ function on_update() {
             place_unit(i, G.location[i])
         }
     }
+    if (G.actions && G.actions.unselect && !G.actions.unit) {
+        G.actions.unit = []
+    }
+    if (G.actions && G.actions.unselect) {
+        G.actions.unselect.forEach(a => set_add(G.actions.unit, a))
+    }
+    for (var thing of world.things["unit"]) {
+        if (thing) {
+            thing.element.classList.toggle("unselect", !!(G.actions && G.actions.unselect && set_has(G.actions.unselect, thing.my_id)))
+        }
+    }
+
     if (G.pow > 0) {
         G.capture.filter(h => G.control[h] === AP)
             .forEach(h => populate_generic("s-loc", h, data.counters.pow))
@@ -1380,7 +1392,6 @@ function show_card_list(id, response) {
 
 function pw_dialog(id, response) {
     show_dialog(id, (body) => {
-        console.log(response)
         let dl = document.createElement("dl")
         var header = document.createElement("dt");
         header.appendChild(create_icon(...data.counters.pw.split(" ")))
@@ -1392,10 +1403,6 @@ function pw_dialog(id, response) {
         if (G.sid !== SOUTH_PACIFIC_SCENARIO) {
             dl.appendChild(print_resources())
         }
-        // var nat_header = document.createElement("dt");
-        // nat_header.appendChild(create_icon(...(data.counters.china).split(" ")))
-        // nat_header.innerHTML += `National status:`
-        // dl.appendChild(nat_header)
         for (var nation of response.nations) {
             dl.appendChild(print_nation_status(nation))
         }
