@@ -8993,6 +8993,7 @@ cards[find_card(AP, 20)].before_activation = function () {
     if (unit_on_board(HQ_SOUTH_GHORMLEY)) {
         set_location(HQ_SOUTH_HELSEY, G.location[HQ_SOUTH_GHORMLEY])
         eliminate_permanently(HQ_SOUTH_GHORMLEY)
+        check_supply()
     } else {
         eliminate_permanently(HQ_SOUTH_GHORMLEY)
         call("event_unit", {unit: HQ_SOUTH_HELSEY})
