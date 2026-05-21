@@ -1776,7 +1776,7 @@ P.offensive_segment_card_action = {
         push_undo()
         activate_card(L.c)
         log(`${side_get_log_str(R)} played ${card_get_log_str(L.c)} to resolve ISR.`)
-        set_inter_service(cards[c].faction, 0)
+        set_inter_service(cards[L.c].faction, 0)
         goto("end_action")
     },
     jarhat() {
