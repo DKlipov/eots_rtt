@@ -998,11 +998,6 @@ function get_S_P_replacement_points() {
     result.NAVAL = 1
     result.GROUND = 1
     result.AIR = 4
-    if (is_event_active(events.INDEPENDENCE_CAMPAIGN)) {
-        result.GROUND = Math.max(0, result.GROUND - is_event_active(events.INDEPENDENCE_CAMPAIGN))
-        log(`-${is_event_active(events.INDEPENDENCE_CAMPAIGN)} AP ground replacement, Indian independence campaign (no commonwealth units could be replaced).`)
-        G.events[events.INDEPENDENCE_CAMPAIGN.id] = 0
-    }
     return result
 }
 
@@ -2378,10 +2373,11 @@ P.activate_units = {
     },
     inactive: "activate units",
     prompt() {
-        prompt(`${offensive_card_header()} Activate units ${G.offensive.logistic} + ${L.hq_bonus} / ${G.offensive.active_units[R].length}.`)
+        var too_much = G.offensive.active_units[R].length > (G.offensive.logistic + L.hq_bonus)
+        prompt(`${offensive_card_header()} Activate units: ${G.offensive.active_units[R].length} of  ${G.offensive.logistic + L.hq_bonus} (${too_much ? "Too many units selected" : G.offensive.logistic + " + " + L.hq_bonus}).`)
         L.allowed_units.forEach(u => action_unit(u))
         G.offensive.active_units[R].forEach(u => unselect_unit(u))
-        if (G.offensive.active_units[R].length <= (G.offensive.logistic + L.hq_bonus)) {
+        if (!too_much) {
             button("done")
         }
     },
@@ -2416,7 +2412,7 @@ P.activate_units = {
 }
 
 function offensive_card_header() {
-    return `${G.offensive.type === EC ? "EC" : "OC"}: ${card_get_log_str(G.offensive.active_cards[0])}.`
+    return `${G.offensive.type === EC ? "EC" : "OC"}: ${cards[G.offensive.active_cards[0]].ops} ops.`
 }
 
 function is_controllable_hex(hex) {
@@ -2506,6 +2502,7 @@ function could_air_stop_here() {
 
 function update_move_hex() {
     if (G.active_stack.length === 0) {
+        L.allowed_hexes = []
         return
     }
 
@@ -2574,6 +2571,35 @@ function create_landing_hex(hex) {
     set_add(G.offensive.landing_hexes, hex)
 }
 
+function get_move_buttons() {
+    var result = []
+    var eliminate_p = G.offensive.stage === POST_BATTLE_STAGE && L.allowed_hexes.length === 0 && G.active_stack.length === 1
+    var no_move_p = G.offensive.stage !== REACTION_STAGE && could_stack_stop_here() || could_air_stop_here()
+    if (G.offensive.stage === ATTACK_STAGE && pieces[G.active_stack[0]].parenthetical && L.move_type === ANY_MOVE) {
+        result.push("extended_air")
+    }
+    if (G.offensive.stage === ATTACK_STAGE && !G.offensive.zoi_intelligence_modifier && L.move_type === ANY_MOVE) {
+        result.push("avoid_zoi")
+    }
+    if (G.offensive.stage === ATTACK_STAGE && L.move_data.sm_possible && L.move_type === ANY_MOVE) {
+        result.push("strat_move")
+    }
+    if (G.offensive.stage === ATTACK_STAGE && L.move_data.move_type & GROUND_MOVE && L.move_type === ANY_MOVE) {
+        result.push("ground_move")
+    }
+    if ((no_move_p) && !L.spec_move) {
+        result.push("no_move")
+    }
+    if (G.offensive.stage === ATTACK_STAGE && G.offensive.barges && !L.spec_move) {
+        result.push("barges", L.move_type !== BARGES_MOVE && G.offensive.barges > 1 && G.active_stack.filter(u => pieces[u].class === "ground").length === 1)
+    }
+
+    if (!no_move_p && eliminate_p) {
+        result.push("eliminate")
+    }
+    return result
+}
+
 P.move_offensive_units = {
     _begin() {
         L.move_data = {}
@@ -2592,24 +2618,14 @@ P.move_offensive_units = {
         if (L.movable_units.length <= 0) {
             log(`No movable units ${side_get_log_str(G.active)}`)
             end()
+            return
         }
     },
     inactive: "move units",
     prompt() {
         prompt(`${offensive_card_header()} Move activated units.`)
         if (L.spec_move) {
-            if (G.offensive.stage === ATTACK_STAGE && pieces[G.active_stack[0]].parenthetical && L.move_type === ANY_MOVE) {
-                button("extended_air")
-            }
-            if (G.offensive.stage === ATTACK_STAGE && !G.offensive.zoi_intelligence_modifier && L.move_type === ANY_MOVE) {
-                button("avoid_zoi")
-            }
-            if (G.offensive.stage === ATTACK_STAGE && L.move_data.sm_possible && L.move_type === ANY_MOVE) {
-                button("strat_move")
-            }
-            if (G.offensive.stage === ATTACK_STAGE && L.move_data.move_type & GROUND_MOVE && L.move_type === ANY_MOVE) {
-                button("ground_move")
-            }
+
         } else if (G.offensive.stage === ATTACK_STAGE
             || G.offensive.stage === POST_BATTLE_STAGE && !G.active_stack.length && L.movable_units.filter(u => !could_unit_stop_here(u)).length === 0) {
             button("done")
@@ -2618,19 +2634,11 @@ P.move_offensive_units = {
         if (G.active_stack.length === 0) {
             L.movable_units.forEach(u => action_unit(u))
         } else {
-            var no_move_p = G.offensive.stage !== REACTION_STAGE && could_stack_stop_here() || could_air_stop_here()
-            var eliminate_p = G.offensive.stage === POST_BATTLE_STAGE && L.allowed_hexes.length === 0 && G.active_stack.length === 1
-            if ((no_move_p) && !L.spec_move) {
-                button("no_move")
-            }
-            if (!no_move_p && eliminate_p) {
-                button("eliminate")
-            }
-            if (!eliminate_p && !L.spec_move) {
+            var buttons = get_move_buttons()
+            if (buttons.length > 2 && !L.spec_move) {
                 button("move")
-            }
-            if (G.offensive.stage === ATTACK_STAGE && G.offensive.barges && !L.spec_move) {
-                button("barges", L.move_type !== BARGES_MOVE && G.offensive.barges > 1 && G.active_stack.filter(u => pieces[u].class === "ground").length === 1)
+            } else if (buttons.length) {
+                buttons.forEach(b => button(b))
             }
             if (G.offensive.stage === ATTACK_STAGE && pieces[G.active_stack[0]].class === "air") {
                 action_box(TURN_BOX + G.turn + 1)
@@ -2639,20 +2647,21 @@ P.move_offensive_units = {
                 button("no_organic")
             }
             let loc = G.location[G.active_stack[0]]
-            L.movable_units.filter(u => loc === G.location[u]
-                && !L.move_data.is_air_present
-                && pieces[u].class !== "air"
-                && L.move_type !== BARGES_MOVE
-                && !set_has(G.active_stack, u))
-                .forEach(u => action_unit(u))
-
+            if (L.move_type === ANY_MOVE) {
+                L.movable_units.filter(u => loc === G.location[u]
+                    && !L.move_data.is_air_present
+                    && pieces[u].class !== "air"
+                    && L.move_type !== BARGES_MOVE
+                    && !set_has(G.active_stack, u))
+                    .forEach(u => action_unit(u))
+                G.active_stack.forEach(u => unselect_unit(u))
+            }
         }
         for (let i = 0; i < L.allowed_hexes.length; i += 2) {
             action_hex(L.allowed_hexes[i])
         }
     },
     move() {
-        push_undo()
         L.spec_move = 1
     },
     _resume() {
@@ -2662,10 +2671,8 @@ P.move_offensive_units = {
         }
     },
     no_organic() {
-        push_undo()
         var a = G.offensive.organic.pop()
         var b = G.offensive.organic.pop()
-        log(`Organic transport for ${piece_get_log_str(b)} - ${piece_get_log_str(a)} rejected.`)
         update_move_hex()
     },
     eliminate() {
@@ -2683,34 +2690,43 @@ P.move_offensive_units = {
         }
     },
     extended_air() {
-        push_undo()
         set_mt(AIR_EXTENDED_MOVE)
     },
     barges() {
-        push_undo()
         set_mt(BARGES_MOVE)
     },
     strat_move() {
-        push_undo()
         set_mt(STRAT_MOVE)
     },
     ground_move() {
-        push_undo()
         set_mt(ANY_MOVE)
         L.allowed_hexes = []
         L.spec_move = 0
         call("ground_move")
     },
     avoid_zoi() {
-        push_undo()
         set_mt(AVOID_ZOI)
     },
     unit(u) {
-        if (!G.offensive.organic) {
-            G.offensive.organic = []
-        }
-        push_undo()
         var piece = pieces[u]
+        if (set_has(G.active_stack, u)) {
+            if (piece.organic && G.offensive.organic.includes(u)) {
+                var ind = G.offensive.organic.indexOf(u)
+                if (piece.class === "ground") {
+                    ind -= 1
+                }
+                array_delete(G.offensive.organic, ind + 1)
+                array_delete(G.offensive.organic, ind)
+            }
+            set_delete(G.active_stack, u)
+            set_add(L.movable_units, u)
+            update_move_hex()
+            return
+        }
+        if (G.active_stack.length === 0) {
+            push_undo()
+        }
+
         if (piece.organic) {
             var pairs = G.active_stack.filter(au => pieces[au].organic && pieces[au].class !== piece.class && !G.offensive.organic.includes(au))
             var a = -1;
@@ -2726,7 +2742,6 @@ P.move_offensive_units = {
             if (a >= 0) {
                 G.offensive.organic.push(a)
                 G.offensive.organic.push(b)
-                log(`Organic transport used. ${piece_get_log_str(a)} carry ${piece_get_log_str(b)}`)
             }
         }
         set_add(G.active_stack, u)
@@ -2747,10 +2762,17 @@ P.move_offensive_units = {
         }
     },
     action_hex(hex) {
-        push_undo()
         if (L.move_type === BARGES_MOVE) {
             G.offensive.barges = 1
             log(`Barges ability used.`)
+        }
+        if (G.offensive.organic.length && G.active_stack.filter(u => G.offensive.organic.includes(u)).length) {
+            G.active_stack.forEach(u => {
+                var index = G.offensive.organic.indexOf(u)
+                if (index >= 0 && pieces[u].class === "naval") {
+                    log(`Organic transport used. ${piece_get_log_str(G.offensive.organic[index])} carry ${piece_get_log_str(G.offensive.organic[index + 1])}`)
+                }
+            })
         }
         var curr_path = map_get(L.allowed_hexes, hex)
         if (is_faction_units(hex, 1 - R) && G.active === G.offensive.attacker && G.offensive.stage === ATTACK_STAGE) {

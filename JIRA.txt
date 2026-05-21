@@ -9,6 +9,7 @@ Todo list:
 * Implementation notes
 * stack refactoring
 * Mobile resizing lags & bugs
+* B29 raid buggied
 
 Bugs
 
