@@ -2412,7 +2412,7 @@ P.activate_units = {
 }
 
 function offensive_card_header() {
-    return `${G.offensive.type === EC ? "EC" : "OC"}: ${cards[G.offensive.active_cards[0]].ops} ops.`
+    return `${G.offensive.type === EC ? "EC" : "OC"}: ${cards[G.offensive.active_cards[0]].ops} Ops.`
 }
 
 function is_controllable_hex(hex) {
@@ -2571,6 +2571,8 @@ function create_landing_hex(hex) {
     set_add(G.offensive.landing_hexes, hex)
 }
 
+const ALWAYS_SHOW_BUTTONS = ["no_move", "eliminate"]
+
 function get_move_buttons() {
     var result = []
     var eliminate_p = G.offensive.stage === POST_BATTLE_STAGE && L.allowed_hexes.length === 0 && G.active_stack.length === 1
@@ -2587,10 +2589,10 @@ function get_move_buttons() {
     if (G.offensive.stage === ATTACK_STAGE && L.move_data.move_type & GROUND_MOVE && L.move_type === ANY_MOVE) {
         result.push("ground_move")
     }
-    if ((no_move_p) && !L.spec_move) {
+    if ((no_move_p)) {
         result.push("no_move")
     }
-    if (G.offensive.stage === ATTACK_STAGE && G.offensive.barges && !L.spec_move) {
+    if (G.offensive.stage === ATTACK_STAGE && G.offensive.barges) {
         result.push("barges", L.move_type !== BARGES_MOVE && G.offensive.barges > 1 && G.active_stack.filter(u => pieces[u].class === "ground").length === 1)
     }
 
@@ -2640,6 +2642,7 @@ P.move_offensive_units = {
             } else if (buttons.length) {
                 buttons.forEach(b => button(b))
             }
+            buttons.filter(b => ALWAYS_SHOW_BUTTONS.includes(b)).forEach(b => button(b))
             if (G.offensive.stage === ATTACK_STAGE && pieces[G.active_stack[0]].class === "air") {
                 action_box(TURN_BOX + G.turn + 1)
             }
