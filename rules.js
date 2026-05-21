@@ -5770,7 +5770,10 @@ P.apply_ground_winner = function () {
         return
     }
     var attacker_win = get_hits_count(battle.damaged[G.offensive.attacker]) > get_hits_count(battle.damaged[1 - G.offensive.attacker]) ||
-        battle.ground[G.offensive.attacker].filter(unit_on_board).length && !battle.ground[1 - G.offensive.attacker].filter(unit_on_board).length
+        !battle.ground[1 - G.offensive.attacker].filter(unit_on_board).length
+    if (!battle.ground[G.offensive.attacker].filter(unit_on_board).length) {
+        attacker_win = 0
+    }
     log(`${attacker_win ? "Attacker" : "Defender"} win in ground combat ${hex_get_log_str(battle.battle_hex)}.`)
     battle.winner = (attacker_win == G.offensive.attacker) + 0
     if (attacker_win) {
