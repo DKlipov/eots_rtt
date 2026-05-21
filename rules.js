@@ -801,7 +801,7 @@ function get_hq_reinforcement_hexes() {
 function is_reinforcement_denied(piece) {
     return (piece.service === "au" && is_event_active(events.AUSTRALIA_SURRENDER) && !set_has(G.reduced, piece.u))
         || (piece.service === "ind" && G.surrender[nations.INDIA.id] >= 4)
-        || (L.INDEPENDENCE_CAMPAIGN = 1 && piece.class === "ground" &&
+        || (L.INDEPENDENCE_CAMPAIGN && piece.class === "ground" &&
             (piece.service === "ind" || piece.service === "au" || piece.service === "br"));
 }
 
