@@ -6039,6 +6039,7 @@ function check_sudden_death() {
 
 P.emergency_move = {
     _begin() {
+        var hq_disp = 0
         L.hex_to_retreat = []
         L.unit_to_retreat = L.unit_to_retreat ? L.unit_to_retreat : []
         for_each_unit_on_map((u, piece, location) => {
@@ -6049,6 +6050,7 @@ P.emergency_move = {
             }
             if (piece.class === "hq") {
                 eliminate(u)
+                hq_disp++
             } else {
                 set_add(L.unit_to_retreat, u)
             }
@@ -6056,7 +6058,11 @@ P.emergency_move = {
         if (scenario_data().id === SOUTH_PACIFIC_SCENARIO && check_sudden_death()) {
             return
         }
+
         if (!L.unit_to_retreat.length) {
+            if (hq_disp) {
+                check_supply()
+            }
             end()
         } else {
             log("#GEmergency move:")
@@ -7508,9 +7514,6 @@ P.conquest_of_se_asia_reaction = {
                 set_add(L.allowed_units, u)
             }
         })
-        if (L.allowed_units.length === 0) {
-            end()
-        }
     },
     inactive: "offensive reaction",
     prompt() {
