@@ -2489,6 +2489,9 @@ function could_stack_stop_here() {
         return false
     }
     var location = G.location[G.active_stack[0]]
+    if (!L.move_data.battle_range && G.offensive.stage === REACTION_STAGE) {
+        return set_has(G.offensive.battle_hexes, location)
+    }
     return set_has(G.offensive.battle_hexes, location) || set_has(G.offensive.landing_hexes, location) || is_space_controlled(location, R) && get_map_data(location).port
 }
 
@@ -2576,7 +2579,7 @@ const ALWAYS_SHOW_BUTTONS = ["no_move", "eliminate"]
 function get_move_buttons() {
     var result = []
     var eliminate_p = G.offensive.stage === POST_BATTLE_STAGE && L.allowed_hexes.length === 0 && G.active_stack.length === 1
-    var no_move_p = G.offensive.stage !== REACTION_STAGE && could_stack_stop_here() || could_air_stop_here()
+    var no_move_p = could_stack_stop_here() || could_air_stop_here()
     if (G.offensive.stage === ATTACK_STAGE && pieces[G.active_stack[0]].parenthetical && L.move_type === ANY_MOVE) {
         result.push("extended_air")
     }
@@ -2928,13 +2931,15 @@ P.choose_attack_hex = {
     },
     inactive: "commit units to attack",
     prompt() {
+        var could_pass = could_stack_stop_here() && G.offensive.stage === ATTACK_STAGE
         if (!L.move_data.battle_range) {
             prompt(`${offensive_card_header()} Commit units to escort. (No combat factor will be used!).`)
         } else {
-            prompt(`${offensive_card_header()} Commit units to battle.`)
+            prompt(`${offensive_card_header()} Commit units to battle.${(!could_pass && G.offensive.stage === REACTION_STAGE && L.allowed_hexes.length === 0
+            ) ? " (Reaction units must be committed to battle)." : ""}`)
         }
 
-        if (could_stack_stop_here() && G.offensive.stage === ATTACK_STAGE) {
+        if (could_pass) {
             button("pass")
         }
         for (let i = 0; i < L.allowed_hexes.length; i += 1) {
