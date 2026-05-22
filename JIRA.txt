@@ -2,6 +2,7 @@ Todo list:
 * big refactoring
 * Update move logs
 * B29 raid buggied
+* expand political will (hawii, alaska, jp surrender conditions)
 * jp resource victory condition buggied
 * fuzz-buzz testing
 * Implementation notes

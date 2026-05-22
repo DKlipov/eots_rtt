@@ -687,23 +687,30 @@ function try_delay_reinforcement(u, piece, location) {
     var result = G.wie > 2 || piece.service === "army" && G.inter_service[AP] || (is_event_active(events.PANAMA_CANAL) === G.turn - 1)
     if (result) {
         set_location(u, DELAYED_BOX)
-        sent_to_europe(u)
+        if (could_sent_to_europe(u)) {
+            set_add(L.europe, u)
+        }
     }
     return result
 }
 
-function sent_to_europe(u) {
+function could_sent_to_europe(u) {
     var piece = pieces[u]
+    return (piece.faction === AP && G.wie >= 3 && (piece.service === "army" || piece.type === "cve"))
+}
+
+function sent_to_europe(u) {
     var result = false
-    if (piece.faction === AP && G.wie >= 3 && (piece.service === "army" || piece.type === "cve")) {
-        var modifier = wie_roll_result() + G.inter_service[AP]
-        var roll = random(10)
-        clear_undo()
-        result = roll <= modifier
-        log(`${piece_get_log_str(u)} sent to Europe: ${dice_get_log_str(roll, 0, AP)} ${result ? "<=" : ">"} ${modifier}${G.inter_service[AP] ? "(ISR active)" : ""}.`)
-        if (result) {
-            displace_to_turn(u, 3)
-        }
+    if (!could_sent_to_europe(u)) {
+        return result
+    }
+    var modifier = wie_roll_result() + G.inter_service[AP]
+    var roll = random(10)
+    clear_undo()
+    result = roll <= modifier
+    log(`${piece_get_log_str(u)}: ${dice_get_log_str(roll, 0, AP)} ${result ? "<=" : ">"} ${modifier}${G.inter_service[AP] ? "(ISR active)" : ""}.`)
+    if (result) {
+        displace_to_turn(u, 3)
     }
     return result
 }
@@ -821,11 +828,13 @@ P.reinforcement_segment = {
         } else if (G.active === AP) {
             log(`War in europe prevent from AP amphibious shipping reinforcement.`)
         }
-        if (G.active === AP && (is_event_active(events.PANAMA_CANAL) === G.turn - 1)) {
+        if (G.active === AP && (is_event_active(events.PANAMA_CANAL) === G.turn - 1) && G.wie < 3) {
             log(`AP reinforcements delayed due to Panama canal attack.`)
         }
         L.hq_reinforcement = []
         L.unit_reinforcement = []
+        L.europe = []
+        L.europe1 = []
         var reinforcement_hex = G.active === AP ? AP_REINF : JP_REINF
         var delayed_units = false
         for_each_unit((u, piece, location) => {
@@ -869,6 +878,11 @@ P.reinforcement_segment = {
     },
     inactive: "place reinforcements",
     prompt() {
+        if (L.europe.length) {
+            prompt(`Roll to sent to Europe. ${L.europe.length} units eligible.`)
+            button("roll")
+            return
+        }
         if (G.active_stack.length) {
             L.allowed_hexes.forEach(hex => action_hex(hex))
             if (L.allowed_hexes.length === 0) {
@@ -882,6 +896,10 @@ P.reinforcement_segment = {
             }
             //debug
             button("auto")
+        } else if (L.europe1.length > 0) {
+            prompt(`Roll to sent delayed units to Europe. ${L.europe1.length} units eligible.`)
+            button("roll")
+            return
         } else {
             prompt(`Place reinforcements. (Done).`)
         }
@@ -904,6 +922,16 @@ P.reinforcement_segment = {
             button("done")
         }
     },
+    roll() {
+        log(`Sent to Europe roll:`)
+        if (L.europe1.length) {
+            L.europe = L.europe1
+        }
+        L.europe.forEach(u => sent_to_europe(u))
+        L.europe = []
+        L.europe1 = []
+        clear_undo()
+    },
     auto() {
         while (L.unit_reinforcement.length) {
             if (L.allowed_hexes.length) {
@@ -922,7 +950,8 @@ P.reinforcement_segment = {
     action_hex(hex) {
         push_undo()
         set_delete(L.unit_reinforcement, G.active_stack[0])
-        set_location(G.active_stack[0], hex)
+        set_location(G.active_stack[0], hex, true)
+        log(`${piece_get_log_str(G.active_stack[0])} placed to ${hex_get_log_str(hex)}.`)
         if (pieces[G.active_stack[0]].class === "hq") {
             set_delete(L.allowed_hexes, hex)
             G.supply_cache[hex] |= pieces[G.active_stack[0]].supply
@@ -932,8 +961,9 @@ P.reinforcement_segment = {
     delay() {
         push_undo()
         set_location(G.active_stack[0], DELAYED_BOX)
-        if (!sent_to_europe(G.active_stack[0])) {
-            log(`${piece_get_log_str(G.active_stack[0])} voluntary delayed to next turn.`)
+        log(`${piece_get_log_str(G.active_stack[0])} voluntary delayed to next turn.`)
+        if (could_sent_to_europe(G.active_stack[0])) {
+            set_add(L.europe1, G.active_stack[0])
         }
         set_delete(L.unit_reinforcement, G.active_stack[0])
         update_reinf_active()
@@ -2374,7 +2404,14 @@ P.activate_units = {
     inactive: "activate units",
     prompt() {
         var too_much = G.offensive.active_units[R].length > (G.offensive.logistic + L.hq_bonus)
-        prompt(`${offensive_card_header()} Activate units: ${G.offensive.active_units[R].length} of  ${G.offensive.logistic + L.hq_bonus} (${too_much ? "Too many units selected" : G.offensive.logistic + " + " + L.hq_bonus}).`)
+        var hint = `${G.offensive.logistic} + ${L.hq_bonus}`
+        if (too_much) {
+            hint = "Too many units selected"
+        }
+        if(G.offensive.active_units[R].length === (G.offensive.logistic + L.hq_bonus)){
+            hint = "Done"
+        }
+        prompt(`${offensive_card_header()} Activate units: ${G.offensive.active_units[R].length} of  ${G.offensive.logistic + L.hq_bonus} (${hint}).`)
         L.allowed_units.forEach(u => action_unit(u))
         G.offensive.active_units[R].forEach(u => unselect_unit(u))
         if (!too_much) {
