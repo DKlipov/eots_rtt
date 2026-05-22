@@ -479,6 +479,7 @@ function on_init(scenario, game_options, static_view) {
     init_preference_checkbox("noroad", false)
     init_preference_checkbox("nopath", false)
     init_preference_checkbox("fullcontrol", false)
+    init_preference_checkbox("hidezoi", false)
 
     world.tip.addEventListener("touchstart", function () {
         on_blur_card_tip()
@@ -956,19 +957,16 @@ function on_update() {
         }
     }
 
-    //show zoi
-    for (var hex of ALL_BOARD_HEXES) {
-        const zoi_state = G.supply_cache[hex]
-        update_keyword("zoi_hex", hex, "lrb", (zoi_state & 7) === 3)
-        update_keyword("zoi_hex", hex, "contested", (zoi_state & 3) === 3)
-        update_keyword("zoi_hex", hex, "jp", (zoi_state & 1) === 1)
-        update_keyword("zoi_hex", hex, "ap", (zoi_state & 2) === 2)
-        //
-        // // update_keyword("zoi_hex", hex, "lrb", (zoi_state & 7) === 3)
-        // // update_keyword("zoi_hex", hex, "contested", (zoi_state & 3) === 3)
-        // update_keyword("zoi_hex", hex, "jp", (zoi_state & (1 << 19)))
-        // // update_keyword("zoi_hex", hex, "ap", (zoi_state & 2) === 2)
+    if (!get_preference("hidezoi", false)) {
+        for (var hex of ALL_BOARD_HEXES) {
+            const zoi_state = G.supply_cache[hex]
+            update_keyword("zoi_hex", hex, "lrb", (zoi_state & 7) === 3)
+            update_keyword("zoi_hex", hex, "contested", (zoi_state & 3) === 3)
+            update_keyword("zoi_hex", hex, "jp", (zoi_state & 1) === 1)
+            update_keyword("zoi_hex", hex, "ap", (zoi_state & 2) === 2)
+        }
     }
+
 
     print_violations()
 
