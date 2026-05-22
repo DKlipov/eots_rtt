@@ -5483,7 +5483,7 @@ P.jp_cv_reassign = {
         })
         L.to_damage = G.offensive.battle.air_naval[JP].filter(u => is_cv_unit(pieces[u]) && unit_on_board(u))
         if (L.to_repair.length === 0 || L.to_damage.length === 0 || G.offensive.battle.critical[AP] ||
-            L.to_damage.length === 1 && L.to_repair.length === 1 && L.to_repair[0] === L.to_damage[0]) {
+            L.to_damage.length === 1 && L.to_repair.length === 2 && L.to_repair[0] === L.to_damage[0]) {
             end()
             return;
         } else {
@@ -5638,7 +5638,13 @@ function apply_loss() {
     var dmg_map = []
     map_for_each(L.dmg_list[0], (u, l) => map_set(dmg_map, u, l))
     map_for_each(L.dmg_list[1], (u, l) => map_set(dmg_map, u, l))
-    var d = battle.damaged[0].concat(battle.damaged[1])
+    var d = []
+    if (L.dmg_list[0].length) {
+        d = battle.damaged[0]
+    }
+    if (L.dmg_list[1].length) {
+        d = d.concat(battle.damaged[1])
+    }
     for (var i = 1; i < d.length; i += 2) {
         var unit = d[i - 1]
         var step = (d[i] === 4) ? 2 : 1
@@ -5647,7 +5653,8 @@ function apply_loss() {
         } else {
             reduce_unit(unit, true)
         }
-        log(`${piece_get_log_str(unit)} ${d[i] > 2 ? "eliminated" : "reduced"} (${step} x ${map_get(dmg_map, unit, 0)}).`)
+        var dmg = map_get(dmg_map, unit, 0)
+        log(`${piece_get_log_str(unit)} ${d[i] > 2 ? "eliminated" : "reduced"} (${step}${dmg ? " x " + dmg : " step"}).`)
         var piece = pieces[unit]
         if (piece.faction === JP && is_cv_unit(piece)) {
             battle.jp_cv_damaged = 1

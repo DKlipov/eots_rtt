@@ -1,4 +1,5 @@
 Todo list:
+* too many japanese CV advantage
 * disable zoi button
 * battle hex j bad loss logging (1941)
 * big refactoring
@@ -10,7 +11,6 @@ Todo list:
 * B29 raid buggied
 * check supply after displace
 * jp resource victory condition buggied
-* too many japanese CV advantage
 
 Bugs
 
