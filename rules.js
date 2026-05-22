@@ -1143,7 +1143,7 @@ P.submarine_warfare = {
     roll() {
         var result = random(10)
         var modifiers = 0
-        log(`AP submarine warfare.`)
+        log(`AP submarine warfare:`)
         if (G.turn <= 4) {
             modifiers += 1
             log(`+1 Defective torpedoes (1942).`)
@@ -1364,7 +1364,7 @@ function S_P_deal_cards() {
 }
 
 P.offensive_phase = script(`
-    log ("Turn "+ G.turn+". Offensives phase.")
+    log ("@Turn "+ G.turn+". Offensives phase.")
     call initiative_segment
     eval {
         commit_into_turn_draw()
@@ -2621,7 +2621,6 @@ P.move_offensive_units = {
             return true
         }).forEach(u => set_add(L.movable_units, u))
         if (L.movable_units.length <= 0) {
-            log(`No movable units ${side_get_log_str(G.active)}`)
             end()
             return
         }
@@ -6217,7 +6216,7 @@ P.battle_sequence = script(`
 `)
 
 P.political_phase = script(`
-    log ("Turn "+G.turn+". Political phase.")
+    log ("@Turn "+G.turn+". Political phase.")
   
     call national_status_segment
     call india_surrender
@@ -6232,7 +6231,7 @@ P.political_phase = script(`
 `)
 
 P.national_status_segment = function () {
-    log(`Turn ${G.turn}. National status segment.`)
+    log(`@Turn ${G.turn}. National status segment.`)
     if (check_nation_surrender(nations.NEW_GUINEA)) {
         set_control_over_nation(nations.NEW_GUINEA, false)
     }
@@ -6754,7 +6753,7 @@ P.attrition_phase = script(`
     if (G.turn ===1) {
         goto end_of_turn_phase
     }
-    log ("Turn "+G.turn+". Attrition phase.")
+    log ("@Turn "+G.turn+". Attrition phase.")
     set G.active JP
     call attrition
     set G.active AP
@@ -6779,7 +6778,7 @@ function reshuffle() {
 }
 
 P.end_of_turn_phase = script(`
-    log ("Turn " + G.turn + ". End of turn phase.")
+    log ("@Turn " + G.turn + ". End of turn phase.")
     eval {
         victory_check()
         reset_events()
