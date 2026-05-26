@@ -3108,7 +3108,7 @@ function for_each_hex_in_range(hex, range, lambda) {
         limit = (range - d2) / 2 + d * d2 + Math.floor((range - Math.abs(j)) / 2)
         current = (x + j) * 29 + y
         i = 0
-        while ((current - d) % 29 < 28 && i < limit) {
+        while ((current) % 29 < 28 && i < limit) {
             current += 1
             lambda(current)
             i++
@@ -8183,11 +8183,9 @@ cards[TOJO_RESIGNS].event = function () {
 }
 
 cards[find_card(JP, 44)].before_activation = function () {
-    G.jp_asp = []
-    G.jp_asp[0] = 2 + Math.max(0, G.asp[JP][1] - G.asp[JP][0])
-    G.jp_asp[1] = G.asp[JP][1]
+    G.jp_asp = G.asp[JP][1]
     log('JP gain 2 temporary ASPs.')
-    G.asp[JP][0] += G.jp_asp[0]
+    G.asp[JP][0] += 2
     call("tokyo_express")
 }
 
@@ -8195,8 +8193,8 @@ cards[find_card(JP, 44)].before_commit_offensive = function () {
     if (G.offensive.stage !== ATTACK_STAGE) {
         return
     }
-    G.asp[JP][0] -= G.jp_asp[0]
-    G.asp[JP][1] -= Math.min(G.asp[JP][1] - G.jp_asp[1], 2)
+    G.asp[JP][0] -= 2
+    G.asp[JP][1] -= Math.min(G.asp[JP][1] - G.jp_asp, 2)
     delete G['jp_asp']
 }
 
@@ -8925,24 +8923,22 @@ cards[find_card(AP, 8)].can_play = function () {
 }
 
 cards[find_card(AP, 9)].before_activation = function () {
-    G.temp_asp = []
-    G.temp_asp[0] = 2 + Math.max(0, G.asp[AP][1] - G.asp[AP][0])
-    G.temp_asp[1] = G.asp[AP][1]
+    G.temp_asp = G.asp[AP][1]
     log('AP gain 4 temporary ASPs.')
-    G.asp[AP][0] += G.temp_asp[0]
+    G.asp[AP][0] += 4
 }
 
 cards[find_card(AP, 9)].before_commit_offensive = function () {
     if (G.offensive.stage !== ATTACK_STAGE) {
         return
     }
-    G.asp[AP][0] -= G.temp_asp[0]
-    G.asp[AP][1] -= Math.min(G.asp[AP][1] - G.temp_asp[1], 4)
+    G.asp[AP][0] -= 4
+    G.asp[AP][1] -= Math.min(G.asp[AP][1] - G.temp_asp, 4)
     delete G['temp_asp']
     var jp_battles = G.offensive.battle_hexes.filter(h => get_map_data(h).region === "Japan")
     var required_battles = false
     G.offensive.active_units[AP].forEach(u => {
-        if (set_has(jp_battles, G.location[u]) && pieces[u].class === "ground") {
+        if (set_has(jp_battles, G.location[u]) && pieces[u].class === "ground" && is_faction_ground_units(G.location[u], JP)) {
             required_battles = true
         }
     })

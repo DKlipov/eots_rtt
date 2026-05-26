@@ -8,8 +8,6 @@ Todo list:
 * Implementation notes
 * stack refactoring
 * Mobile resizing lags & bugs
-* olympic & coronet check condition
-* olympic and coronet check oahu attack
 * savo island special warning
 * accumulate surrender pw and check pw do not below zero
 * organic pbm buggied
