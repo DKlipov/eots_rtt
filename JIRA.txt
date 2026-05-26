@@ -1,17 +1,16 @@
 Todo list:
-* big refactoring
-* Update move logs
+* savo island special warning
+* us surrender win condition more text
+* sp PW check
 * B29 raid buggied
 * expand political will (hawii, alaska, jp surrender conditions)
 * jp resource victory condition buggied
+* big refactoring
+* Update move logs
 * fuzz-buzz testing
 * Implementation notes
 * stack refactoring
 * Mobile resizing lags & bugs
-* savo island special warning
-* accumulate surrender pw and check pw do not below zero
-* organic pbm buggied
-* us surrender win condition more text
 
 Bugs
 

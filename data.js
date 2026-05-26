@@ -6104,7 +6104,7 @@ data.nations = {
     },
     MARSHALL: {
         id: 8,
-        name: "Marshall islands",
+        name: "Marshall Islands",
         regions: ["Marshall"],
         keys: [4415, 4715]
     },

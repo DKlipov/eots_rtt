@@ -2648,6 +2648,9 @@ P.move_offensive_units = {
         L.move_type = ANY_MOVE
         L.movable_units = []
         L.allowed_hexes = []
+        if (G.offensive.stage === POST_BATTLE_STAGE) {
+            G.offensive.organic = []
+        }
         L.move_cache = []
         G.offensive.active_units[G.active].filter(u => {
             if (!unit_on_board(u) && G.location[u] !== CHINA_BOX
@@ -2758,7 +2761,7 @@ P.move_offensive_units = {
     unit(u) {
         var piece = pieces[u]
         if (set_has(G.active_stack, u)) {
-            if (piece.organic && G.offensive.organic.includes(u)) {
+            if (piece.organic && G.offensive.organic.includes(u) && G.offensive.stage !== POST_BATTLE_STAGE) {
                 var ind = G.offensive.organic.indexOf(u)
                 if (piece.class === "ground") {
                     ind -= 1
@@ -6303,6 +6306,7 @@ P.political_phase = script(`
 
 P.national_status_segment = function () {
     log(`@Turn ${G.turn}. National status segment.`)
+    L.pw = G.political_will
     if (check_nation_surrender(nations.NEW_GUINEA)) {
         set_control_over_nation(nations.NEW_GUINEA, false)
     }
@@ -6349,6 +6353,9 @@ P.national_status_segment = function () {
     }
     if (check_nation_controlled(nations.INDIA, JP)) {
         degrade_india(true)
+        if (G.surrender[nations.INDIA.id] === 4) {
+            change_political_will(-nations.INDIA.pw, nations.INDIA.name)
+        }
     } else {
         india_stable()
     }
@@ -6370,6 +6377,7 @@ P.national_status_segment = function () {
         check_event(events.MARSHALL_CAPTURED)
         log("AP captured Marshall islands.")
     }
+    G.political_will = L.pw
     if (check_nation_controlled(nations.JAPAN, AP)) {
         finish("Allies", "Japanese Empire surrenders by Allied invasion")
         return
@@ -6510,6 +6518,7 @@ function china_surrender() {
 function change_political_will(diff, cause) {
     G.political_will = Math.max(G.political_will + diff, 0)
     G.political_will = Math.min(G.political_will, 10)
+    L.pw += diff
     log(`Political will changed to ${G.political_will} (${diff}) ${cause}.`)
 }
 
@@ -6556,7 +6565,6 @@ P.india_surrender = {
                 eliminate_permanently(u)
             }
         })
-        change_political_will(-nations.INDIA.pw, nations.INDIA.name)
         check_supply()
         G.surrender[nations.INDIA.id] = 5
         if (!L.unit_to_retreat.length) {
