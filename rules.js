@@ -3342,7 +3342,7 @@ function supply_source_in_range(location, faction) {
                 continue
             }
 
-            var distance = base_distance + get_ground_mp_cost(item, nh, j, faction)
+            var distance = base_distance + get_ground_mp_cost(nh, item, (j + 3) % 6, faction)
             const occupied_land = G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
             if (distance > SUPPLY_PORT_RANGE || occupied_land || distance >= map_get(distance_map, nh, [100])) {
                 continue
@@ -8810,6 +8810,9 @@ P.submarine_attack = {
     prompt() {
         prompt(`Submarine attack. Apply hits: ${L.hits}.`)
         L.allowed_units.forEach(u => action_unit(u))
+        if (L.allowed_units.length === 0) {
+            button("done")
+        }
     },
     unit(u) {
         push_undo()
@@ -8820,9 +8823,17 @@ P.submarine_attack = {
         }
         L.hits -= 1
         if (L.allowed_units.length <= 0 || L.hits <= 0) {
-            G.active = cards[L.card].faction
-            end()
+            if (G.active === cards[L.card].faction) {
+                end()
+                return
+            } else {
+                L.allowed_units = []
+            }
         }
+    },
+    done() {
+        G.active = cards[L.card].faction
+        end()
     }
 }
 
@@ -9614,7 +9625,7 @@ cards[find_card(AP, 60)].event = function () {
 cards[DARTER_DACE].can_play = () => has_active_naval_units(JP)
 
 cards[DARTER_DACE].before_battles = function () {
-    call("submarine_attack", {success: 14, critical: 17, card: DARTER_DACE})
+    call("submarine_attack", {success: 4, critical: 7, card: DARTER_DACE})
 }
 
 cards[KING_II].before_commit_offensive = function () {

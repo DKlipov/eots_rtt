@@ -8,8 +8,6 @@ Todo list:
 * Implementation notes
 * stack refactoring
 * Mobile resizing lags & bugs
-* darter dice 6 - one naval step
-* reverse supply check
 * olympic & coronet check condition
 * olympic and coronet check oahu attack
 * savo island special warning
