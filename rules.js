@@ -6096,10 +6096,10 @@ function check_sudden_death() {
         }
     })
     if (check[JP] <= 0) {
-        finish("Allies", "All Japanese HQ displaced.")
+        finish("Allies", "Allies Victory - All Japanese HQ displaced.")
         return true
     } else if (check[AP] <= 0) {
-        finish("Japan", "All Allies HQ displaced.")
+        finish("Japan", "Japanese Victory - All Allies HQ displaced.")
         return true
     }
     return false
@@ -6379,13 +6379,13 @@ P.national_status_segment = function () {
     }
     G.political_will = L.pw
     if (check_nation_controlled(nations.JAPAN, AP)) {
-        finish("Allies", "Japanese Empire surrenders by Allied invasion")
+        finish("Allies", "Allies Victory - Japanese mainland islands captured")
         return
     }
     if (check_japan_resource_trace()) {
         G.events[events.JAPAN_TRACE_RESOURCES.id] = 0
     } else if (is_event_active(events.JAPAN_TRACE_RESOURCES) && is_event_active(events.JAPAN_TRACE_RESOURCES) <= G.turn - 2) {
-        finish("Allies", "Japanese Empire surrenders by lack of resources")
+        finish("Allies", "Allies Victory by blockade")
         return
     } else {
         check_event(events.JAPAN_TRACE_RESOURCES)
@@ -6922,7 +6922,7 @@ function get_victory() {
 
 function victory_check() {
     if (G.political_will <= 0) {
-        finish("Japan", "US surrenders")
+        finish("Japan", "Japanese Victory by Treaty Negotiations")
     }
     var vp = get_victory()
     if (scenario_data().last_turn <= G.turn) {
@@ -8534,7 +8534,7 @@ P.attack_b29_base = {
         if (L.allowed_units.length <= 0) {
             return
         }
-        log(`JP attack to B29 base:`)
+        log(`JP attack to B-29 base:`)
         var roll = random(10)
         L.hits = roll <= 4
         log(`${roll} - ${L.hits ? "success" : "No effect"}`)
@@ -8546,16 +8546,15 @@ P.attack_b29_base = {
     inactive: "apply card effect",
     prompt() {
         if (L.allowed_units.length <= 0) {
-            prompt(`No B29 base attacked.`)
+            prompt(`No B-29 base attacked.`)
             button("skip")
             return
         }
-        prompt(`Attack to B29 base. Choose unit.`)
+        prompt(`Attack to B-29 base. Choose unit.`)
         L.allowed_units.forEach(u => action_unit(u))
     },
     skip() {
         push_undo()
-        log(`No B29 base attacked.`)
         end()
     },
     unit(u) {
