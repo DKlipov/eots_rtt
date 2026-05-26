@@ -6,7 +6,7 @@ body.hide-markers .marker { display: none }
 body.hide-pieces .space { display: none }
 body.hide-markers .zoi_hex { display: none }
 body.hide-pieces .piece { display: none }
-body.hide-pieces .marker:not(.control) { display: none }
+body.hide-pieces .marker:not(.small_markers_white) { display: none }
 
 .panel-body > * {
 	position: relative;

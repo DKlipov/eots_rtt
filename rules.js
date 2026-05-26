@@ -4537,10 +4537,10 @@ function should_ground_move_stop(hex, faction) {
 }
 
 function ground_move_denied(hex) {
-    if (hex === HARBIN || hex === MUKDEN) {
+    var region = get_map_data(hex).region
+    if (region === "Manchuria") {
         return true
     }
-    var region = get_map_data(hex).region
     if (region === "IChina") {
         return G.active_stack.filter(u => pieces[u].service !== "ch").length
     }

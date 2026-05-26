@@ -899,7 +899,7 @@ function on_update() {
             populate_generic("s-loc", i, get_control_marker(i))
         }
     }
-    G.garr_elim.forEach(h => populate_generic("s-loc", h, data.counters.no_garrison))
+    G.garr_elim.filter(h => set_has(G.control, h)).forEach(h => populate_generic("s-loc", h, data.counters.no_garrison))
     var base_road_counters = get_preference("noroad", false)
     ROAD_EVENTS.filter(event => map_info.hex_check(hex_to_int(event.keys[0]))).forEach(event => {
         var thing = lookup_thing("road", event.id)
