@@ -5868,6 +5868,9 @@ function check_us_casualties() {
     }).length
     if (!survived_attacker_ground && div_corp_size_unit) {
         check_event(events.US_CASUALTIES)
+        if (G.sid === SOUTH_PACIFIC_SCENARIO) {
+            G.events[events.US_CASUALTIES.id] = 0
+        }
     }
 }
 
@@ -6723,10 +6726,10 @@ function check_naval_situation() {
             }
         }
     })
-    if (!us_ship_count && G.sid !== SOUTH_PACIFIC_SCENARIO) {
+    if (!us_ship_count) {
         change_political_will(-1, "no US naval units")
     }
-    if (!us_cv_count) {
+    if (!us_cv_count && G.sid !== SOUTH_PACIFIC_SCENARIO) {
         change_political_will(-1, "no US CV units")
     }
 }

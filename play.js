@@ -1396,9 +1396,9 @@ function pw_dialog(id, response) {
         header.innerHTML += ` Current Political Will: ${G.political_will}.`
         dl.appendChild(header)
         dl.appendChild(print_pow())
-        dl.appendChild(print_casualties())
         dl.appendChild(print_naval_situation())
         if (G.sid !== SOUTH_PACIFIC_SCENARIO) {
+            dl.appendChild(print_casualties())
             dl.appendChild(print_resources())
             dl.appendChild(print_occupation(data.events.ALASKA_OCCUPATION))
             dl.appendChild(print_occupation(data.events.HAWAII_OCCUPATION))
@@ -1461,10 +1461,11 @@ function print_naval_situation() {
         }
     }
     let main = document.createElement("div")
+
+    main.appendChild(print_ship_counter(counter[0], data.pieces[US_BB_UNIT].counter, "Strategic naval situation - US naval units"))
     if (G.sid !== SOUTH_PACIFIC_SCENARIO) {
-        main.appendChild(print_ship_counter(counter[0], data.pieces[US_BB_UNIT].counter, "Strategic naval situation - US naval units"))
+        main.appendChild(print_ship_counter(counter[1], data.pieces[US_CV_UNIT].counter, "Strategic naval situation - US carrier units"))
     }
-    main.appendChild(print_ship_counter(counter[1], data.pieces[US_CV_UNIT].counter, "Strategic naval situation - US carrier units"))
     return main
 }
 

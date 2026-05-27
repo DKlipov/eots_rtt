@@ -1,5 +1,4 @@
 Todo list:
-* sp PW check
 * big refactoring
 * fuzz-buzz testing
 * Implementation notes
