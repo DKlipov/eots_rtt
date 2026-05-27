@@ -5181,7 +5181,7 @@ data.map = [
         name: "Harbin",
         // airfield: true,
         resource: true,
-        city: CITY,
+        city: CHINESE_CITY,
         region: "Manchuria",
         terrain: OPEN,
         edges: [0, 2, 2, 2, 4, 0]
@@ -5191,7 +5191,7 @@ data.map = [
         name: "Mukden",
         // airfield: true,
         resource: true,
-        city: CITY,
+        city: CHINESE_CITY,
         region: "Manchuria",
         terrain: OPEN,
         edges: [4, 2, 2, 4, 4, 2]

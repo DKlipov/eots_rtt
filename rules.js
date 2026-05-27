@@ -3055,9 +3055,6 @@ function move_units(units, path) {
     }
     var i = 3
     var zoi_flag = !G.offensive.zoi_intelligence_modifier && G.offensive.stage === ATTACK_STAGE
-    if (!zoi_flag && !(path[0] & GROUND_MOVE)) {
-        i = path.length
-    }
     var zoi_generator_flag = G.active_stack.filter(u => pieces[u].zoi_generator).length
         || (path[0] & GROUND_MOVE) && G.active_stack.filter(u => pieces[u].class === "ground").length
     var enemy_faction = 1 - pieces[G.active_stack[0]].faction

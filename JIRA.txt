@@ -1,7 +1,6 @@
 Todo list:
 * sp PW check
 * big refactoring
-* Update move logs
 * fuzz-buzz testing
 * Implementation notes
 * stack refactoring
