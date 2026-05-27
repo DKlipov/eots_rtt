@@ -6122,6 +6122,7 @@ data.nations = {
     },
     JAPAN: {
         id: 11,
+        name: "Japanese Empire",
         keys: [3407, 3506, 3507, 3607, 3706, 3705, 3606],
         no_full_control: true,
     },
@@ -6145,6 +6146,7 @@ data.events = {
     ALASKA_OCCUPATION: {
         id: 2,
         pw: -1,
+        counter: data.counters.alaska,
         name: "Alaska",
         cause: "alaska occupation",
         turns_to_control: 3,
@@ -6153,6 +6155,7 @@ data.events = {
     HAWAII_OCCUPATION: {
         id: 3,
         pw: -1,
+        counter: data.counters.hawaii,
         name: "Hawaii",
         cause: "hawaii occupation",
         turns_to_control: 2,

@@ -153,6 +153,8 @@ const YEAR_1943_SCENARIO = 6
 const EVEN_SHORT_CAMPAIGN_SCENARIO = 8
 const BURMA_SCENARIO = 10
 
+const CAMPAIGN_SCENARIOS = [FULL_CAMPAIGN_SCENARIO, SHORT_CAMPAIGN_SCENARIO, EVEN_SHORT_CAMPAIGN_SCENARIO]
+
 const S_P_DECK = S_P_deck()
 
 const SCENARIO_DATA = [
@@ -6432,7 +6434,7 @@ function check_japan_resource_trace() {
                 set_add(oversea_set, nh)
             }
             if (reachable) {
-                if (get_map_data(nh).resource) {
+                if (get_map_data(nh).resource && is_space_controlled(nh, JP)) {
                     return true
                 }
                 queue.push(nh)
@@ -11244,16 +11246,17 @@ const FLOAT_SURRENDER = [
 
 function pw_query() {
     var result = {
-        nations: []
+        nations: [],
     }
     result.nations.push(get_china_info())
+    result.nations.push(get_nation_info(nations.AUSTRALIAN_MANDATES))
     if (G.sid === SOUTH_PACIFIC_SCENARIO) {
         result.nations.push(get_nation_info(nations.NEW_GUINEA))
     } else {
         result.nations.push(get_india_info())
         FLOAT_SURRENDER.forEach(n => result.nations.push(get_nation_info(n)))
+        result.nations.push(get_japan_info())
     }
-    result.nations.push(get_nation_info(nations.AUSTRALIAN_MANDATES))
     return result
 }
 
@@ -11298,9 +11301,30 @@ function get_india_info() {
     }
 }
 
+function get_japan_info() {
+    var info = get_nation_info(nations.JAPAN)
+    var resource_trace = check_japan_resource_trace()
+    info.info = []
+    var resorce_event = is_event_active(events.JAPAN_TRACE_RESOURCES)
+    resorce_event = resorce_event > 0 ? G.turn - resorce_event + 1 : 0
+    var resorce_info = ` (${resorce_event}/3 turns)`
+    if (!resorce_event && resource_trace) {
+        resorce_info = ""
+    }
+    info.info.push(`Could ${resource_trace ? "" : "NOT "}trace path to Resource hex${resorce_info}.`)
+    var b29_in_range = get_distance(TOKYO, G.location[B_29_1]) <= 8 || get_distance(TOKYO, G.location[B_29_2]) <= 8
+    var resource_count = get_jp_resources()
+    var campaign = is_event_active(events.STRAT_BOMBING_CAMPAIGN) ? (G.turn - is_event_active(events.STRAT_BOMBING_CAMPAIGN) + 1) : 0
+    if (CAMPAIGN_SCENARIOS.includes(G.sid)) {
+        info.info.push(`Strategical Bombing Campaign: ${campaign}/4 turns.`)
+        info.info.push(b29_in_range ? "B-29 is in range of Tokyo." : "B-29 is not in range of Tokyo.")
+        info.info.push(`JP control ${resource_count} ${resource_count <= 1 ? "<=" : ">"} 1 resource spaces.`)
+    }
+    return info
+}
+
 function get_nation_info(nation) {
     var id = nation.id
-    var name = nation.name
     var surrender = G.surrender[id]
     return {id, control: surrender ? JP : AP}
 }

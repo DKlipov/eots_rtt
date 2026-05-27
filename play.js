@@ -1400,6 +1400,8 @@ function pw_dialog(id, response) {
         dl.appendChild(print_naval_situation())
         if (G.sid !== SOUTH_PACIFIC_SCENARIO) {
             dl.appendChild(print_resources())
+            dl.appendChild(print_occupation(data.events.ALASKA_OCCUPATION))
+            dl.appendChild(print_occupation(data.events.HAWAII_OCCUPATION))
         }
         for (var nation of response.nations) {
             dl.appendChild(print_nation_status(nation))
@@ -1431,7 +1433,7 @@ function print_resources() {
     var value = RESOURCE_HEX.filter(h => G.control[h] === JP).length
     main.appendChild(create_icon(...((completed ? "" : "gray ") + data.counters.resource_jp).split(" ")))
     if (completed) {
-        main.innerHTML += ` JP control 3 or less resource hexes completed (-3 PW)."}`
+        main.innerHTML += ` JP control 3 or less resource hexes completed (-3 PW).`
     } else {
         RESOURCE_HEX.filter(h => G.control[h] === JP).length
         main.innerHTML += ` JP control ${value} > 3 resource hexes.`
@@ -1481,16 +1483,16 @@ function print_ship_counter(list, counter, text) {
     return ship
 }
 
-function get_nation_by_id(id) {
-    for (var key of Object.keys(data.nations)) {
-        if (data.nations[key].id === id) {
-            return data.nations[key]
+function get_nation_by_id(object, id) {
+    for (var key of Object.keys(object)) {
+        if (object[key].id === id) {
+            return object[key]
         }
     }
 }
 
 function print_nation_status(response) {
-    var nation = get_nation_by_id(response.id)
+    var nation = get_nation_by_id(data.nations, response.id)
     let main = document.createElement("div")
     main.className = "nation_info"
     main.appendChild(create_flag(response.control))
@@ -1520,6 +1522,35 @@ function print_nation_status(response) {
             key_header += " AP: "
             key_header += control[AP].map(k => sub_hex(0, k)).join(", ")
         }
+        var keys = document.createElement("div")
+        keys.innerHTML = key_header
+        main.appendChild(keys)
+    }
+    if (response.info) {
+        response.info.forEach(l => append_header(escape_text(l), main))
+    }
+    return main
+}
+
+function print_occupation(response) {
+    var nation = get_nation_by_id(data.events, response.id)
+    let main = document.createElement("div")
+    main.className = "nation_info"
+    var status = G.events[response.id]
+    console.log(nation.counter + (status ? " gray" : ""))
+    main.appendChild(create_icon(...nation.counter.split(" "), (status ? "marker" : "gray")))
+    var pw_string = ` (${nation.pw} PW)`
+    main.innerHTML += `${nation.name}${nation.pw ? pw_string : ""}.`
+    if (G.turn - status >= nation.turns_to_control) {
+        return main
+    }
+    if (status) {
+        append_header(`Turns: ${G.turn - status + 1}/${nation.turns_to_control}`, main, "div")
+    }
+    var control = [[], []]
+    if (nation.keys) {
+        var key_header = `Keys: `
+        key_header += nation.keys.map(k => sub_hex(0, hex_to_int(k))).join(", ")
         var keys = document.createElement("div")
         keys.innerHTML = key_header
         main.appendChild(keys)
@@ -1699,10 +1730,10 @@ function get_hex_name(h) {
     if (hex_id != -1) {
         const hex_data = data.map[hex_id]
         if (hex_data.name) {
-            return hex_data.name
+            return `${hex_data.name} (${hex})`
         }
     }
-    return `hex ${hex}`
+    return `${hex}`
 }
 
 function expand_list(parent) {

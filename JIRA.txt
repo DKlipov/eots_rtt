@@ -1,6 +1,4 @@
 Todo list:
-* expand political will (hawii, alaska, jp surrender conditions)
-* jp resource victory condition buggied
 * sp PW check
 * big refactoring
 * Update move logs
