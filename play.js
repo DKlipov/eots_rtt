@@ -197,11 +197,11 @@ const TRACK_MARKERS = [
     },
     {
         counter: data.counters.naval_repl,
-        value: G => G.reinforcements.NAVAL
+        value: G => G.reinforcements[0]
     },
     {
         counter: data.counters.air_repl,
-        value: G => G.reinforcements.AIR
+        value: G => G.reinforcements[1]
     },
     {
         counter: data.counters.drawn_jp,

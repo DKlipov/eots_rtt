@@ -15,6 +15,13 @@ const SEASONS = ["Jan-Apr", "May-Aug", "Sep-Dec"]
 const EC = 0 //Event card
 const OC = 1 //Offensive card
 
+//replacements
+const NAVAl_REP = 0
+const AIR_REP = 1
+const GROUND_REP = 2
+const CHINESE_REP = 3
+const COMMONWEALTH_REP = 4
+
 //card types
 const POLITICAL = 1
 const RESOURCE = 2
@@ -508,15 +515,15 @@ function get_unit_replacement_type(piece) {
         return null
     }
     if (piece.service === "ch") {
-        return "CHINESE"
+        return CHINESE_REP
     } else if (piece.class === "naval" && (piece.service === "au" || piece.service === "br")) {
-        return "COMMONWEALTH"
+        return COMMONWEALTH_REP
     } else if (piece.class === "air") {
-        return "AIR"
+        return AIR_REP
     } else if (piece.class === "ground") {
-        return "GROUND"
+        return GROUND_REP
     }
-    return "NAVAL"
+    return NAVAl_REP
 }
 
 function is_commonwelth(piece) {
@@ -979,37 +986,37 @@ P.reinforcement_segment = {
 
 
 function get_replacement_points() {
-    var result = {}
+    var result = []
     L.replacement_points = result
     if (G.active === JP) {
         G.reinforcements.NAVAL += ([3, 4, 11].includes(G.turn) ? 1 : 0)
-        result.NAVAL = G.reinforcements.NAVAL
-        result.AIR = G.reinforcements.AIR
+        result[NAVAl_REP] = G.reinforcements[NAVAl_REP]
+        result[AIR_REP] = G.reinforcements[AIR_REP]
         L.divisions = Math.min(2, G.china_divisions)
         return result
     }
     L.divisions = undefined
     if (G.turn % 2 === 0) {
-        result.NAVAL = 1
+        result[NAVAl_REP] = 1
     }
     if (is_space_controlled(OAHU, AP)) {
-        if (result.NAVAL) {
-            result.NAVAL++
+        if (result[NAVAl_REP]) {
+            result[NAVAl_REP]++
         } else {
-            result.NAVAL = 1
+            result[NAVAl_REP] = 1
         }
         log(`+1 US Naval Replacement Point (AP controlled Oahu).`)
     }
     if ([6, 9, 12].includes(G.turn) && COM_REPLACEMENT_POINTS.filter(h => is_space_controlled(h, AP)).length) {
-        result.COMMONWEALTH = 1
+        result[COMMONWEALTH_REP] = 1
     }
-    result.GROUND = 2
-    result.AIR = 5
+    result[GROUND_REP] = 2
+    result[AIR_REP] = 5
     if (G.turn >= 3 && G.turn % 2 === 1) {
-        result.CHINESE = 1
+        result[CHINESE_REP] = 1
     }
     if (is_event_active(events.INDEPENDENCE_CAMPAIGN)) {
-        result.GROUND = Math.max(0, result.GROUND - is_event_active(events.INDEPENDENCE_CAMPAIGN))
+        result[GROUND_REP] = Math.max(0, result[GROUND_REP] - is_event_active(events.INDEPENDENCE_CAMPAIGN))
         log(`-${is_event_active(events.INDEPENDENCE_CAMPAIGN)} AP ground replacement, Indian independence campaign (no commonwealth units could be replaced).`)
         G.events[events.INDEPENDENCE_CAMPAIGN.id] = 0
         L.INDEPENDENCE_CAMPAIGN = 1
@@ -1018,38 +1025,38 @@ function get_replacement_points() {
 }
 
 function get_S_P_replacement_points() {
-    var result = {}
+    var result = []
     L.replacement_points = result
     if (G.active === JP) {
-        result.NAVAL = G.reinforcements.NAVAL
-        result.AIR = G.reinforcements.AIR
+        result[NAVAl_REP] = G.reinforcements[NAVAl_REP]
+        result[AIR_REP] = G.reinforcements[AIR_REP]
         L.divisions = Math.min(1, G.china_divisions)
         return result
     }
     L.divisions = undefined
-    result.NAVAL = 1
-    result.GROUND = 1
-    result.AIR = 4
+    result[NAVAl_REP] = 1
+    result[GROUND_REP] = 1
+    result[AIR_REP] = 4
     return result
 }
 
 function print_reinforcements() {
     var reinf = L.replacement_points
     var string = ""
-    if (reinf.NAVAL !== undefined) {
-        string += `${G.active === AP ? "US Naval" : "Naval"}: ${reinf.NAVAL}`
+    if (reinf[NAVAl_REP] !== undefined) {
+        string += `${G.active === AP ? "US Naval" : "Naval"}: ${reinf[NAVAl_REP]}`
     }
-    if (reinf.COMMONWEALTH !== undefined) {
+    if (reinf[COMMONWEALTH_REP] !== undefined) {
         string += ", Commonwealth: " + reinf.COMMONWEALTH
     }
-    if (reinf.AIR !== undefined) {
-        string += `, Air: ${reinf.AIR}`
+    if (reinf[AIR_REP] !== undefined) {
+        string += `, Air: ${reinf[AIR_REP]}`
     }
-    if (reinf.GROUND !== undefined) {
-        string += `, Ground: ${reinf.GROUND}`
+    if (reinf[GROUND_REP] !== undefined) {
+        string += `, Ground: ${reinf[GROUND_REP]}`
     }
-    if (reinf.CHINESE !== undefined) {
-        string += `, China: ${reinf.CHINESE}`
+    if (reinf[CHINESE_REP] !== undefined) {
+        string += `, China: ${reinf[CHINESE_REP]}`
     }
     if (L.divisions >= 0) {
         string += ", Divisions from China: " + L.divisions
@@ -1062,6 +1069,19 @@ function print_reinforcements() {
 
 P.replacement_segment = {
     _begin() {
+        //debug
+        if (!Array.isArray(G.reinforcements)) {
+            var ar = []
+            ar[AIR_REP] = G.reinforcements.AIR
+            ar[NAVAl_REP] = G.reinforcements.NAVAL
+            G.reinforcements = ar
+        }
+        if (G.active === JP && L.replacement_points && L.replacement_points[NAVAl_REP]) {
+            G.reinforcements[NAVAl_REP] += L.replacement_points[NAVAl_REP]
+        }
+        if (G.active === JP && L.replacement_points && L.replacement_points[AIR_REP]) {
+            G.reinforcements[AIR_REP] += L.replacement_points[AIR_REP]
+        }
         check_supply()
         mark_supply_eligable_ports(G.active)
         mark_supplied_hexes(G.active)
@@ -1086,7 +1106,7 @@ P.replacement_segment = {
     },
     inactive: "use replacements",
     prompt() {
-        var not_used_unground = L.divisions_used <= 0 || L.replacement_points.GROUND <= 0
+        var not_used_unground = L.divisions_used <= 0 || L.replacement_points[GROUND_REP] <= 0
         if (G.active_stack.length > 0) {
             prompt(`Choose hex to place ${piece_get_log_str(G.active_stack[0])}${not_used_unground ? "" : "(Ground replacements should be spent)"}.`)
             L.allowed_hexes.forEach(h => action_hex(h))
@@ -1113,10 +1133,10 @@ P.replacement_segment = {
         G.china_divisions -= 1
         L.divisions_used++
         log(`JP divisions in China reduced to ${G.china_divisions}.`)
-        if (L.replacement_points.GROUND) {
-            L.replacement_points.GROUND++
+        if (L.replacement_points[GROUND_REP]) {
+            L.replacement_points[GROUND_REP]++
         } else {
-            L.replacement_points.GROUND = 1
+            L.replacement_points[GROUND_REP] = 1
         }
     },
     action_hex(hex) {
@@ -1140,7 +1160,7 @@ P.replacement_segment = {
             trigger_event("before_place_replacement")
         }
         L.replacement_points[pieces[u].replacement] -= 1
-        if (G.active === JP && (pieces[u].replacement === "AIR" || pieces[u].replacement === "NAVAL")) {
+        if (G.active === JP && (pieces[u].replacement === AIR_REP || pieces[u].replacement === NAVAl_REP)) {
             G.reinforcements[pieces[u].replacement] -= 1
         }
     },
@@ -7639,8 +7659,7 @@ cards[JN_25_SPECIAL].can_play = function () {
 }
 
 cards[find_card(JP, 5)].event = function () {
-    G.reinforcements.AIR += 2
-    call("replacement_segment", {replacement_points: {AIR: 2}})
+    call("replacement_segment", {replacement_points: [undefined, 2]})
 }
 
 cards[find_card(JP, 6)].can_play = function () {
@@ -7963,8 +7982,7 @@ cards[find_card(JP, 29)].before_battle_roll = function (faction) {
 }
 
 cards[find_card(JP, 30)].event = function () {
-    G.reinforcements.AIR += 3
-    call("replacement_segment", {replacement_points: {AIR: 3}})
+    call("replacement_segment", {replacement_points: [undefined, 3]})
 }
 
 cards[find_card(JP, 31)].event = function () {
@@ -8172,7 +8190,7 @@ cards[find_card(JP, 37)].before_activation = function () {
 cards[find_card(JP, 38)].before_activation = cards[find_card(JP, 37)].before_activation
 
 cards[find_card(JP, 39)].event = function () {
-    call("replacement_segment", {replacement_points: {GROUND: 2}})
+    call("replacement_segment", {replacement_points: [undefined, undefined, 2]})
 }
 
 cards[find_card(JP, 39)].before_replacement = function () {
@@ -8495,13 +8513,11 @@ cards[find_card(JP, 68)].event = cards[find_card(JP, 33)].event
 
 cards[find_card(JP, 71)].event = function () {
     check_event(events.INTERCEPTORS)
-    G.reinforcements.AIR += 2
-    call("replacement_segment", {replacement_points: {AIR: 2}})
+    call("replacement_segment", {replacement_points: [undefined, 2]})
 }
 
 cards[find_card(JP, 72)].event = function () {
-    G.reinforcements.NAVAL += 3
-    call("replacement_segment", {replacement_points: {NAVAL: 3}})
+    call("replacement_segment", {replacement_points: [3]})
 }
 
 cards[find_card(JP, 73)].before_activation = function () {
@@ -8850,7 +8866,7 @@ cards[find_card(AP, 1)].can_play = function () {
 }
 
 cards[find_card(AP, 3)].event = function () {
-    call("replacement_segment", {replacement_points: {GROUND: 2}})
+    call("replacement_segment", {replacement_points: [undefined, undefined, 2]})
 }
 
 cards[find_card(AP, 3)].before_replacement = function () {
@@ -8963,7 +8979,7 @@ cards[find_card(AP, 10)].event = function () {
 only_one_ground_unit(find_card(AP, 13))
 
 cards[find_card(AP, 15)].event = function () {
-    call("replacement_segment", {replacement_points: {NAVAL: 2}})
+    call("replacement_segment", {replacement_points: [2]})
 }
 
 cards[find_card(AP, 16)].event = function () {
@@ -9444,7 +9460,7 @@ cards[find_card(AP, 38)].before_commit_offensive = function () {
 
 cards[find_card(AP, 39)].event = function () {
     set_inter_service(AP, 0)
-    call("replacement_segment", {replacement_points: {AIR: 1, CHINESE: 3}})
+    call("replacement_segment", {replacement_points: [undefined, 1, undefined, 3]})
     call("build_road")
 }
 
@@ -9455,7 +9471,7 @@ cards[find_card(AP, 39)].before_replacement = function () {
 cards[find_card(AP, 44)].before_unit_activation = cards[find_card(AP, 35)].before_unit_activation
 
 cards[find_card(AP, 48)].before_activation = function () {
-    call("replacement_segment", {replacement_points: {CHINESE: 1}})
+    call("replacement_segment", {replacement_points: [undefined, undefined, undefined, 1]})
 }
 
 cards[find_card(AP, 48)].before_replacement = function () {
@@ -10982,7 +10998,7 @@ function on_setup(scenario, options) {
     G.location = []
     G.reduced = []
     G.oos = []
-    G.reinforcements = {NAVAL: 0, AIR: 0}
+    G.reinforcements = [0, 0]
     G.strategic_warfare = 0
     G.control = []
     G.capture = []
