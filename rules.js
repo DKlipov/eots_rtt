@@ -1187,9 +1187,9 @@ P.submarine_warfare = {
     _begin() {
         G.active = AP
     },
-    inactive: "roll for a submarine warfare",
+    inactive: "roll for submarine warfare",
     prompt() {
-        prompt("Roll for a submarine warfare.")
+        prompt("Roll for submarine warfare.")
         button("roll")
     },
     roll() {
@@ -1659,10 +1659,6 @@ function activate_card(c) {
         G.offensive.barges = 2
     }
     G.offensive.naval_move_distance = (cards[c].ops * 5)
-    //todo debug
-    if (G.debug) {
-        // G.offensive.naval_move_distance = 30
-    }
     G.offensive.ground_move_distance = (cards[c].ops * 2)
     G.offensive.air_move_distance = (cards[c].ops)
     G.offensive.logistic = cards[c].ops
@@ -1706,8 +1702,8 @@ P.offensive_segment = {
             let card = hand[i]
             action_card(card)
         }
-        button("check_s")
         if (G.debug) {
+            button("check_s")
             button("control")
             button("isr")
             button("tp")
@@ -1715,7 +1711,6 @@ P.offensive_segment = {
             button("ns")
 
             button("eliminate")
-            button("deploy_b29")
             button("draw")
         }
         if (L.debug) {
@@ -1796,7 +1791,7 @@ P.offensive_segment = {
 P.offensive_segment_card_action = {
     inactive: "select action",
     prompt() {
-        prompt(`${card_get_log_str(L.c)} : Select action.`)
+        prompt(`${card_get_log_str(L.c)}: Select action.`)
         get_allowed_actions(L.c).forEach(a => button(a))
     },
     ops() {
@@ -2574,8 +2569,6 @@ function update_move_hex() {
         return compute_barges_pbm()
     } else if (L.move_data.is_air_present) {
         compute_air_move_hexes()
-    } else if (L.move_data.is_air_present) {
-        // fast_compute_air_move_hexes()
     } else if (L.move_data.move_type & STRAT_MOVE) {
         compute_ground_naval_strat_move()
     } else {
@@ -2727,9 +2720,8 @@ P.move_offensive_units = {
         for (let i = 0; i < L.allowed_hexes.length; i += 2) {
             action_hex(L.allowed_hexes[i])
         }
-        if (L.move_data.is_air_present) {
+        if (L.move_data.is_air_present && !set_has(G.offensive.battle_hexes, L.location)) {
             get_air_attack_hex().forEach(h => {
-                // map_set(L.allowed_hexes, h, ATTACK_STAGE)
                 action_hex(h)
             })
         }
@@ -2744,8 +2736,8 @@ P.move_offensive_units = {
         }
     },
     no_organic() {
-        var a = G.offensive.organic.pop()
-        var b = G.offensive.organic.pop()
+        G.offensive.organic.pop()
+        G.offensive.organic.pop()
         update_move_hex()
     },
     eliminate() {
@@ -2855,6 +2847,9 @@ P.move_offensive_units = {
             L.move_data = {}
             L.move_type = ANY_MOVE
             L.spec_move = 0
+            if (L.movable_units.length <= 0) {
+                end()
+            }
             return
         }
         if (is_faction_units(hex, 1 - R) && G.active === G.offensive.attacker && G.offensive.stage === ATTACK_STAGE) {
@@ -2962,15 +2957,6 @@ P.ground_move = {
 function set_mt(mt) {
     L.move_type = mt
     update_move_hex()
-}
-
-function reset_move_type() {
-    if (G.offensive.zoi_intelligence_modifier && L.move_type === AVOID_ZOI) {
-        set_mt(ANY_MOVE)
-    }
-    if (L.move_type === AIR_EXTENDED_MOVE || L.move_type === STRAT_MOVE || L.move_type === BARGES_MOVE) {
-        set_mt(ANY_MOVE)
-    }
 }
 
 function get_air_attack_hex() {
@@ -3188,7 +3174,7 @@ function for_each_unit(apply) {
     for (let i = 1; i < pieces.length; i++) {
         var piece = pieces[i]
         var location = G.location[i]
-        var returned = apply(i, piece, location)
+        apply(i, piece, location)
     }
 }
 
@@ -3199,7 +3185,7 @@ function for_each_unit_on_map(apply) {
         if (location > LAST_BOARD_HEX) {
             continue
         }
-        var returned = apply(i, piece, location)
+        apply(i, piece, location)
     }
 }
 
@@ -4253,7 +4239,8 @@ function compute_air_move_hexes() {
             var cached = map_get(distance_map, nh, [9])[0]
             if (avoid_zoi_flag && has_non_n_zoi(nh, 1 - R)
                 || distance % 10 > L.move_data.extended_battle_range
-                || (distance >= cached && distance % 10 >= cached % 10)) {
+                || (distance >= cached && distance % 10 >= cached % 10)
+                || G.offensive.stage === REACTION_STAGE && set_has(G.offensive.battle_hexes, nh)) {
                 continue
             }
             if (distance % 10 < L.move_data.extended_battle_range) {
@@ -4294,7 +4281,7 @@ function compute_air_move_hexes() {
 function compute_ground_naval_move_hexes() {
     let location = L.move_data.location
     let move_data = L.move_data
-    // to check when depart ground unit could change zoi
+    // to check when depart of ground unit could change zoi
     var supply = G.supply_cache
     var oos = G.oos
     var enemy_non_n_zoi = move_data.is_ground_present && !move_data.battle_range && has_non_n_zoi(location, 1 - R) && G.offensive.stage !== POST_BATTLE_STAGE
@@ -4377,7 +4364,7 @@ function compute_ground_naval_strat_move() {
     if (has_non_n_zoi(location, 1 - R)) {
         return
     }
-    // to check when depart ground unit could change zoi
+    // to check when depart of ground unit could change zoi
     var ground_unit_stay = 0
     for_each_unit_on_map((u, piece, loc) => {
         if (loc === location && piece.class !== "naval" && piece.faction === G.active && !set_has(G.active_stack, u)) {
@@ -5036,7 +5023,6 @@ P.cancel_offensive = {
         G.offensive.cancelled = offensive
         G.active = JP
         play_event(reaction_card)
-        // log(`${card_get_log_str(reaction_card)} played.`)
         log(`Offensive cancelled, ${card_get_log_str(offensive_card)} discarded.`)
         goto("end_action")
         call("default_event")
@@ -9987,13 +9973,6 @@ function reduce_unit(unit, no_log = false) {
         log(`${piece_get_log_str(unit)} reduced.`)
     }
     set_add(G.reduced, unit)
-}
-
-function draw_all_cards() {
-    G.hand = [[], []]
-    for (let i = 1; i < cards.length; i++) {
-        G.hand[cards[i].faction].push(i)
-    }
 }
 
 function setup_scenario_1941(options) {

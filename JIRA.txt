@@ -1,4 +1,7 @@
 Todo list:
+1942 no move error
+no stop at BH
+no change battle reaction air
 * big refactoring
 * fuzz-buzz testing
 * Implementation notes
