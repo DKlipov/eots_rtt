@@ -2720,7 +2720,7 @@ P.move_offensive_units = {
         for (let i = 0; i < L.allowed_hexes.length; i += 2) {
             action_hex(L.allowed_hexes[i])
         }
-        if (L.move_data.is_air_present && !set_has(G.offensive.battle_hexes, L.location)) {
+        if (L.move_data.is_air_present && !set_has(G.offensive.battle_hexes, L.move_data.location)) {
             get_air_attack_hex().forEach(h => {
                 action_hex(h)
             })
@@ -6179,6 +6179,11 @@ P.emergency_move = {
     action_hex(hex) {
         push_undo()
         set_location(G.active_stack[0], hex)
+        G.active_stack = []
+        check_supply()
+    },
+    no_move() {
+        push_undo()
         G.active_stack = []
         check_supply()
     },
@@ -10365,9 +10370,9 @@ function setup_scenario_1943() {
     //ap setup
     for (var i = 1; i < pieces.length; i++) {
         var piece = pieces[i]
-        if (piece.faction === AP && piece.start && piece.notreplaceable) {
+        if (piece.faction === AP && (piece.start || piece.reinforcement < 5)) {
             G.location[i] = ELIMINATED_BOX
-            if (piece.class === "hq") {
+            if (piece.class === "hq" || piece.notreplaceable) {
                 G.location[i] = PERM_ELIMINATED
             }
         }
@@ -10386,7 +10391,6 @@ function setup_scenario_1943() {
     }
     G.location[find_piece("wasp")] = ELIMINATED_BOX
     G.location[find_piece("northampton")] = ELIMINATED_BOX
-    G.location[HQ_SOUTH_GHORMLEY] = ELIMINATED_BOX
     G.location[find_piece("indomitable")] = hex_to_int(1005)
     G.location[find_piece("warspite")] = hex_to_int(1005)
     G.location[find_piece("london")] = hex_to_int(1005)
@@ -10406,6 +10410,7 @@ function setup_scenario_1943() {
     set_add(G.reduced, ap_army("6_cn"))
     set_add(G.reduced, ap_army("66_cn"))
     G.location[ap_army("1_m")] = hex_to_int(3626)
+    G.location[ap_army("1_au")] = hex_to_int(3023)
     G.location[ap_air("5")] = hex_to_int(3626)
     G.location[ap_air("5_lrb")] = hex_to_int(3626)
     G.location[HQ_SOUTH_WEST] = hex_to_int(3727)
@@ -10440,7 +10445,7 @@ function setup_scenario_1943() {
     G.location[ap_air("7")] = hex_to_int(5808)
     G.location[ap_army("10")] = hex_to_int(5808)
     G.location[ap_army("mb")] = hex_to_int(5808)
-    G.location[find_piece("missouri")] = hex_to_int(5808)
+    G.location[find_piece("mississippi")] = hex_to_int(5808)
 
 
     //jp setup
@@ -10573,10 +10578,12 @@ function setup_scenario_1943() {
 function setup_scenario_1944() {
     G.reduced = []
     //ap setup
-    for_each_unit_on_map((u, piece) => {
-        G.location[u] = ELIMINATED_BOX
-        if (piece.class === "hq") {
-            G.location[u] = PERM_ELIMINATED
+    for_each_unit((u, piece) => {
+        if (piece.start || piece.reinforcement <= 8) {
+            G.location[u] = ELIMINATED_BOX
+            if (piece.class === "hq" || piece.start) {
+                G.location[u] = PERM_ELIMINATED
+            }
         }
     })
     G.location[find_piece("indomitable")] = hex_to_int(1005)
@@ -10642,7 +10649,7 @@ function setup_scenario_1944() {
     setup_jp_unit(ap_army(10), 5808)
     setup_jp_unit(ap_army(24), 5808)
     setup_jp_unit(ap_army("mb"), 5808)
-    setup_jp_unit(find_piece("missouri"), 5808)
+    setup_jp_unit(find_piece("mississippi"), 5808)
     setup_jp_unit(find_piece("jacinto"), 5808)
     setup_jp_unit(find_piece("mass"), 5808)
     setup_jp_unit(find_piece("franklin"), 5808)

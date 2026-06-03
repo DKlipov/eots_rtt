@@ -1106,7 +1106,7 @@ data.pieces = [
         "lf": 8,
         "br": 3,
         "rcf": 6,
-        "reinforcement": 2,
+        "reinforcement": 3,
         "rptype": "jp_navy",
     },
     {
@@ -1788,9 +1788,9 @@ data.pieces = [
         "b29": 4,
     },
     {
-        id: "missouri",
+        id: "mississippi",
         "faction": AP,
-        "name": "Missouri",
+        "name": "Mississippi",
         "counter": "big_units_blue big unit_ix_6",
         "class": "naval",
         "type": "bb",
