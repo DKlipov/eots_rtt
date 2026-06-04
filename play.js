@@ -5,6 +5,7 @@ const LAST_BOARD_HEX = 1478
 const ELIMINATED_BOX = 1482
 const DELAYED_BOX = 1483
 const CHINA_BOX = 1484
+const PERM_ELIMINATED = 1485
 const AP_REINF = 1486
 const JP_REINF = 1487
 const TURN_BOX = 1490
@@ -1277,6 +1278,8 @@ function toggle_dialog(id, response) {
         battle_info_dialog(name, response)
     } else if (name === "pw_check") {
         pw_dialog(name, response)
+    }else if (name === "elim_check") {
+        elim_dialog(name, response)
     }
 }
 
@@ -1407,6 +1410,27 @@ function pw_dialog(id, response) {
             dl.appendChild(print_nation_status(nation))
         }
         body.appendChild(dl)
+    })
+}
+
+function elim_dialog(name, response){
+    show_dialog(name, (body) => {
+        for (let i = 1; i < data.pieces.length; i++) {
+            if (G.location[i] == ELIMINATED_BOX){
+                let piece = data.pieces[i]
+                if(piece.faction === AP){
+                    let p = document.createElement("div")
+                    p.classList.add(...piece.counter.split(' '))
+                    p.classList.add("unit", "piece")
+                    body.appendChild(p)
+                }else{
+
+                }
+
+            }
+    
+        }
+        //TODO PERM ELIMINATED ?
     })
 }
 

@@ -11234,6 +11234,8 @@ function on_query(q, params, b) {
         return vp_query()
     } else if (q === "pw_check") {
         return pw_query()
+    } else if (q === "elim_check") {
+        return elim_query()
     }
 }
 
@@ -11259,6 +11261,16 @@ function pw_query() {
         FLOAT_SURRENDER.forEach(n => result.nations.push(get_nation_info(n)))
         result.nations.push(get_japan_info())
     }
+    return result
+}
+
+function elim_query(){
+    let result = {
+        jp:[],
+        ap:[]
+    }
+    
+
     return result
 }
 

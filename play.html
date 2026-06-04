@@ -39,6 +39,12 @@
     <div class="dialog_x" onclick="hide_dialog('vp_check')">&#x274c;</div>
 </div>
 
+<div id="elim_check" class="dialog">
+    <div class="dialog_header">Eliminated Units</div>
+    <div class="dialog_body"></div>
+    <div class="dialog_x" onclick="hide_dialog('elim_check')">&#x274c;</div>
+</div>
+
 <div id="pw_check" class="dialog">
     <div class="dialog_header">Political Will</div>
     <div class="dialog_body"></div>
@@ -82,6 +88,8 @@
                     <div>Inspect Political Will</div>
                 <li onclick="send_query('vp_check')" id="vp_check_button">
                     <div>Inspect Victory Points</div>
+                <li onclick="send_query('elim_check')" id="elim_check_button">
+                    <div>Inspect Eliminated Units</div>
             </menu>
         </details>
     </div>
