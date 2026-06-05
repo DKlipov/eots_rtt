@@ -1,7 +1,6 @@
 Todo list:
-* Alaska fix
 aa to friends with esorting
-furute offensive logging\
+furute offensive logging
 less annoying piece tooltip
 * big refactoring
 * fuzz-buzz testing

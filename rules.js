@@ -5008,7 +5008,7 @@ P.cancel_offensive = {
             button("done")
             return
         }
-        G.hand[R].filter(c => cards[c].type === CANCEL && cards[c].can_play()).forEach(c => action_card(c))
+        get_hand(R).filter(c => cards[c].type === CANCEL && cards[c].can_play()).forEach(c => action_card(c))
         button("skip")
     },
     skip() {
@@ -5066,7 +5066,7 @@ P.define_intelligence_condition = {
                 return (card.type === INTELLIGENCE || card.type === COUNTER_OFFENSIVE && G.offensive.counter_offensive_card <= 0)
                     && card.can_play()
             }).forEach(c => action_card(c))
-        } else if (G.hand[R].includes(JN_25_SPECIAL)) {
+        } else if (get_hand(R).includes(JN_25_SPECIAL)) {
             action_card(JN_25_SPECIAL)
         }
         if (L.rolled || L.card) {
@@ -10601,7 +10601,7 @@ function setup_scenario_1943() {
     G.china_divisions = 7
     G.burma_road = 1
     G.surrender[nations.CHINA.id] = 2
-    G.reinforcements = {NAVAL: 1, AIR: 2}
+    G.reinforcements = [1, 2]
     G.wie = 4
     G.inter_service = [1, 1]
     G.events[events.HUMP.id] = 1
