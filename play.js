@@ -813,12 +813,14 @@ function place_unit(u, location) {
         unit.innerHTML = '';
         var battle = map_get(G.offensive.committed, u)
         var path = map_get(G.offensive.paths, u, [0])[0]
+        unit.classList.remove("gray")
         if (battle && set_has(G.offensive.battle_hexes, battle)) {
             apply_conflict_marker(populate_generic_to_parent(unit, "marker conflict battle"), battle)
         } else if (battle && set_has(G.offensive.landing_hexes, battle)) {
             apply_conflict_marker(populate_generic_to_parent(unit, "marker conflict landing"), battle)
-        } else if (battle && piece.parenthetical) {
-            apply_conflict_marker(populate_generic_to_parent(unit, "marker conflict battle gray"), battle)
+        } else if (battle && (piece.parenthetical || piece.class === "ground")) {
+            // apply_conflict_marker(populate_generic_to_parent(unit, "marker conflict battle gray"), battle)
+            unit.classList.add("gray")
         } else if (piece.organic && !(path & STRAT_MOVE) && G.offensive.organic.includes(u)) {
             populate_generic_to_parent(unit, data.counters.organic_small)
         } else if (set_has(G.oos, u)) {

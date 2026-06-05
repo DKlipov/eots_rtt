@@ -5905,12 +5905,6 @@ function prepare_battle() {
         damaged: [[], []],
     }
     var battle = G.offensive.battle
-    map_for_each(G.offensive.committed, (u, h) => {
-        const piece = pieces[u]
-        if (unit_on_board(u) && h === hex) {
-            set_add(battle.air_naval[piece.faction], u)
-        }
-    })
     var attacker = G.offensive.attacker
     for_each_unit_on_map((u, piece) => {
         var location = G.location[u]
@@ -5921,6 +5915,15 @@ function prepare_battle() {
             if (attacker === piece.faction && map_get(G.offensive.paths, u)[0] & AMPH_MOVE) {
                 set_add(battle.amph_ground, u)
             }
+        }
+    })
+    map_for_each(G.offensive.committed, (u, h) => {
+        const piece = pieces[u]
+        if (unit_on_board(u) && h === hex) {
+            set_add(battle.air_naval[piece.faction], u)
+        } else {
+            set_delete(battle.air_naval[piece.faction], u)
+            set_delete(battle.ground[piece.faction], u)
         }
     })
     if (is_space_controlled(hex, JP) && get_map_data(hex).city === JAPANESE_CITY) {
@@ -6042,6 +6045,9 @@ P.retreat = {
         } else {
             set_location(G.active_stack[0], hex)
             capture_hex(hex, pieces[G.active_stack[0]].faction)
+            if (set_has(G.offensive.battle_hexes, hex)) {
+                map_set(G.offensive.committed, G.active_stack[0], G.offensive.battle.battle_hex)
+            }
         }
         G.active_stack = []
     },
@@ -6078,7 +6084,8 @@ function select_retreat_hex() {
     for (var i = 0; i < nh.length; i++) {
         var h = nh[i]
         if (h < 0 || h > LAST_BOARD_HEX || set_has(just_entered, h) || is_overstack(h, G.active_stack[0])
-            || is_faction_units(h, G.offensive.attacker) || get_ground_move_cost(G.offensive.battle.battle_hex, h, i, JP) >= 100) {
+            || is_faction_units(h, G.offensive.attacker) || get_ground_move_cost(G.offensive.battle.battle_hex, h, i, JP) >= 100
+            || ground_move_denied(h)) {
             continue
         } else {
             set_add(able, h)
