@@ -813,14 +813,14 @@ function place_unit(u, location) {
         unit.innerHTML = '';
         var battle = map_get(G.offensive.committed, u)
         var path = map_get(G.offensive.paths, u, [0])[0]
-        unit.classList.remove("gray")
+        // unit.classList.remove("gray")
         if (battle && set_has(G.offensive.battle_hexes, battle)) {
             apply_conflict_marker(populate_generic_to_parent(unit, "marker conflict battle"), battle)
         } else if (battle && set_has(G.offensive.landing_hexes, battle)) {
             apply_conflict_marker(populate_generic_to_parent(unit, "marker conflict landing"), battle)
         } else if (battle && (piece.parenthetical || piece.class === "ground")) {
-            // apply_conflict_marker(populate_generic_to_parent(unit, "marker conflict battle gray"), battle)
-            unit.classList.add("gray")
+            apply_conflict_marker(populate_generic_to_parent(unit, "marker conflict battle gray"), battle)
+            // unit.classList.add("gray")
         } else if (piece.organic && !(path & STRAT_MOVE) && G.offensive.organic.includes(u)) {
             populate_generic_to_parent(unit, data.counters.organic_small)
         } else if (set_has(G.oos, u)) {
@@ -1054,13 +1054,12 @@ function on_update() {
     action_button("event", "Play Event")
     action_button("ops", "Play for Operations")
     action_button("hold", "Hold")
-    action_button("move", "Move")
+    action_button("move", "Advanced move")
     action_button("no_move", "No move")
     action_button("done", "Done")
     action_button("eliminate", "Eliminate")
     action_button("stop", "Stop")
     action_button("displace", "Displace")
-    action_button("amphibious", "Amphibious")
     action_button("divisions_button", "Reduce divisions track")
 
 
@@ -1084,12 +1083,11 @@ function on_update() {
     action_button("delay", "Delay")
     action_button("no_organic", "Disable organic")
     action_button("avoid_zoi", "Avoid ZOI")
-    action_button("strat_move", "Strategic move")
-    action_button("ground_move", "Ground move")
-    action_button("regular_movement", "Regular movement")
-    action_button("extended_air", "Use extended range")
-    action_button("barges", "Use barges")
-    action_button("no_disen", "Skip ground disengagement")
+    action_button("strat_move", "Strategic")
+    action_button("amphibious", "Amphibious")
+    action_button("ground_move", "Ground")
+    action_button("extended_air", "Extended range")
+    action_button("barges", "Barges")
 
     //debug
     action_button("isr", "Flip isr(dbg)")
@@ -1543,7 +1541,6 @@ function print_occupation(response) {
     let main = document.createElement("div")
     main.className = "nation_info"
     var status = G.events[response.id]
-    console.log(nation.counter + (status ? " gray" : ""))
     main.appendChild(create_icon(...nation.counter.split(" "), (status ? "marker" : "gray")))
     var pw_string = ` (${nation.pw} PW)`
     main.innerHTML += `${nation.name}${nation.pw ? pw_string : ""}.`
