@@ -1240,20 +1240,6 @@ function on_log(text) {
             p.className = "i"
             text = text.substring(1)
             break
-        case "#":
-            p.className = "h1"
-            text = text.substring(1)
-            break
-        case "=":
-            var round = Number(text.substring(1))
-            if (round & 1) {
-                p.className = "h2 french"
-                text = "French Round " + (round >> 1)
-            } else {
-                p.className = "h2 german"
-                text = "German Round " + (round >> 1)
-            }
-            break
     }
     p.innerHTML = escape_text(text)
 
@@ -1742,6 +1728,7 @@ function get_hex_name(h) {
 function expand_list(parent) {
     parent.children[0].hidden = true
     parent.children[1].hidden = false
+    event.stopPropagation()
 }
 
 function escaped_list(match, p1) {
