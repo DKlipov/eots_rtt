@@ -2191,7 +2191,7 @@ function get_reaction_able_units() {
     for_each_unit_on_map((u, piece) => {
         if (piece.faction === R && piece.class === "ground" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG3) {
             set_add(L.reaction_able_units, u)
-        } else if (piece.faction === R && piece.class === "ground" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG2 && has_asp) {
+        } else if (piece.faction === R && piece.class === "ground" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG2 && (has_asp || piece.organic)) {
             set_add(L.asp_ground_units, u)
         } else if (piece.faction === R && piece.class === "naval" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG1) {
             set_add(L.reaction_able_units, u)
@@ -2981,6 +2981,7 @@ function get_air_attack_hex() {
     } else {
         return compute_air_commit_hexes()
     }
+    return result
 }
 
 P.choose_attack_hex = {
@@ -3675,12 +3676,13 @@ function check_burma_road() {
     for (i = 0; i < queue.length; i++) {
         let item = queue[i]
         let nh_list = get_near_hexes(item)
+        var MD = get_map_data(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
             if (nh <= 0) {
                 continue
             }
-            if (map_has(distance_map, nh) || has_non_n_zoi(nh, JP)) {
+            if (!(MD.edges_int & WATER << 5 * j) || map_has(distance_map, nh) || has_non_n_zoi(nh, JP)) {
                 continue
             }
             map_set(distance_map, nh, 1)
@@ -4714,7 +4716,7 @@ function get_naval_move(zoi_mask) {
     let result = []
     map_for_each(distance_map, (nh, v) => {
         var naval_attack = is_amph_attack_possible(nh) && (!us_army_unit_active || set_has(marine_landed_islands, nh) || !get_map_data(nh).island || G.offensive.stage === REACTION_STAGE)
-        var port_transport = (get_map_data(nh).port && is_space_controlled(nh, R) && (!move_data.is_ground_present || !move_data.is_naval_present))
+        var port_transport = (get_map_data(nh).port && is_space_controlled(nh, R) && (!move_data.is_ground_present || !move_data.is_naval_present || G.offensive.stage === POST_BATTLE_STAGE))
         var aa_landing = move_data.move_type & AMPH_MOVE
             && is_hex_asp_capable(nh)
             && (!move_data.is_naval_present || move_data.move_type & ORGANIC_ONLY)

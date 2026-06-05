@@ -1,4 +1,8 @@
 Todo list:
+?retreat for china
+aa to friends with esorting
+less annoying piece tooltip
+furute offensive logging
 * Alaska fix
 * big refactoring
 * fuzz-buzz testing
