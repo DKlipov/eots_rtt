@@ -1049,7 +1049,7 @@ function print_reinforcements() {
         string += `${G.active === AP ? "US Naval" : "Naval"}: ${reinf[NAVAl_REP]}`
     }
     if (reinf[COMMONWEALTH_REP] !== undefined) {
-        string += ", Commonwealth: " + reinf.COMMONWEALTH
+        string += `, Commonwealth: ${reinf[COMMONWEALTH_REP]}`
     }
     if (reinf[AIR_REP] !== undefined) {
         string += `, Air: ${reinf[AIR_REP]}`
@@ -1434,7 +1434,7 @@ P.offensive_phase = script(`
             log (side_get_log_str(G.offensive.attacker)+" have no cards in hand.")
         }
         eval {
-            commit_into_turn_draw()
+            end_of_offensive_check()
             G.active = 1 - G.offensive.attacker
             reset_offensive()
             G.offensive.attacker = G.active
@@ -1442,6 +1442,12 @@ P.offensive_phase = script(`
     }
     goto political_phase
 `)
+
+function end_of_offensive_check() {
+    commit_into_turn_draw()
+    check_hawaii_occupation()
+    check_alaska_occupation()
+}
 
 P.initiative_segment = script(`
     eval {
@@ -6719,8 +6725,8 @@ P.political_will_segment = function () {
         G.surrender[nations.INDIA.id] >= 4 && G.surrender[nations.CHINA.id] >= 5) {
         check_event(events.ALLIED_NATIONS_SURRENDERS)
     }
-    check_occupation(events.ALASKA_OCCUPATION)
-    check_occupation(events.HAWAII_OCCUPATION)
+    check_hawaii_occupation(true)
+    check_alaska_occupation(true)
     check_jp_resources_event()
     check_naval_situation()
     check_progress_of_war()
@@ -6780,18 +6786,53 @@ function check_event(event) {
     return true
 }
 
-function check_occupation(event) {
+function check_hawaii_occupation(apply_pw = false) {
+    var event = events.HAWAII_OCCUPATION
     var result = event.keys.filter(k => is_faction_units(hex_to_int(k), JP)).length
     var map_value = G.events[event.id]
     var occupied_for = (G.turn - map_value) + 1
     if (!result && map_value > 0 && occupied_for <= event.turns_to_control) {
         G.events[event.id] = 0
         log(`Timer to ${event.cause} reset.`)
-    } else if (result && map_value && occupied_for === event.turns_to_control) {
+    } else if (apply_pw && result && map_value && occupied_for === event.turns_to_control) {
         change_political_will(event.pw, event.cause)
     } else if (result && map_value <= 0) {
         G.events[event.id] = G.turn
         log(`Started ${event.cause}.`)
+    }
+}
+
+function check_alaska_occupation(apply_pw = false) {
+    var event = events.ALASKA_OCCUPATION
+    var event_hexes = events.ALASKA_OCCUPATION_HEXES
+    var occupied_for = (G.turn - G.events[event.id]) + 1
+    if (G.events[event.id] && occupied_for > event.turns_to_control) {
+        return
+    }
+    var result = event.keys.map(k => is_faction_units(hex_to_int(k), JP) ? 1 : 0)
+    var map_value = G.events[event_hexes.id]
+    var occupation_map = 0
+    var min = 0
+    for (var i = event.keys.length - 1; i >= 0; i -= 1) {
+        var current = (map_value >> (i * 4)) % 16
+        var md = get_map_data(hex_to_int(event.keys[i]))
+        if (current && !result[i]) {
+            log(`Occupation of ${md.name} stopped.`)
+            current = 0
+        } else if (!current && result[i]) {
+            log(`Occupation of ${md.name} started.`)
+            current = G.turn
+        }
+        occupation_map = (occupation_map << 4) + current
+        if (current && current < min || min === 0) {
+            min = current
+        }
+    }
+    G.events[event_hexes.id] = occupation_map
+    G.events[event.id] = min
+    occupied_for = (G.turn - min) + 1
+    if (apply_pw && result && min && occupied_for === event.turns_to_control) {
+        change_political_will(event.pw, event.cause)
     }
 }
 
@@ -10568,6 +10609,7 @@ function setup_scenario_1943() {
     G.events[events.BARGES.id] = 1
     G.events[events.KWAI_RIVER_BRIDGE.id] = 2
     G.events[events.ALASKA_OCCUPATION.id] = 3
+    G.events[events.ALASKA_OCCUPATION_HEXES.id] = 3
 
     future_offencive_card(find_card(AP, 29), 3)
     future_offencive_card(find_card(JP, 26), 3)

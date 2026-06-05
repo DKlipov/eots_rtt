@@ -1547,7 +1547,7 @@ function print_occupation(response) {
     main.appendChild(create_icon(...nation.counter.split(" "), (status ? "marker" : "gray")))
     var pw_string = ` (${nation.pw} PW)`
     main.innerHTML += `${nation.name}${nation.pw ? pw_string : ""}.`
-    if (G.turn - status >= nation.turns_to_control) {
+    if (status && G.turn - status >= nation.turns_to_control) {
         return main
     }
     if (status) {

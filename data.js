@@ -6148,7 +6148,7 @@ data.events = {
         pw: -1,
         counter: data.counters.alaska,
         name: "Alaska",
-        cause: "alaska occupation",
+        cause: "Alaska occupation",
         turns_to_control: 3,
         keys: [4600, 4700, 4800, 5000, 5100]
     },
@@ -6157,7 +6157,7 @@ data.events = {
         pw: -1,
         counter: data.counters.hawaii,
         name: "Hawaii",
-        cause: "hawaii occupation",
+        cause: "Hawaii occupation",
         turns_to_control: 2,
         keys: [5708, 5808, 5908, 5108]
     },
@@ -6266,6 +6266,9 @@ data.events = {
     },
     MARSHALL_CAPTURED: {
         id: 29,
+    },
+    ALASKA_OCCUPATION_HEXES: {
+        id: 30
     },
 }
 
