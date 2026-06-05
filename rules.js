@@ -1473,7 +1473,7 @@ P.future_offensive = {
             end()
             return
         }
-        log ("#"+(G.active===JP?"JJP":"AAP")+" Future Offensive")
+        log("#" + (G.active === JP ? "JJP" : "AAP") + " Future Offensive")
         var card = cards[G.future_offensive[G.active] > 0 ? G.future_offensive[G.active] : 0]
         if (card.type !== MILITARY || !event_hq_check(card)) {
             L.pass = true
@@ -2879,7 +2879,7 @@ P.move_offensive_units = {
 
             G.offensive.r_asp = 1
         } else if (curr_path[0] & AMPH_MOVE &&
-            (!get_map_data(hex).port || !is_space_controlled(hex, R) || is_faction_units(hex, 1 - R) || (L.move_type & AMPH_MOVE))) {
+            (!get_map_data(hex).port || !is_space_controlled(hex, R) || is_faction_units(hex, 1 - R) || (L.move_type === AMPH_MOVE))) {
             G.asp[R][1] += L.move_data.asp_points
             log(`${side_get_log_str(G.active)} ASP used ${L.move_data.asp_points} (${G.asp[R][1]}).`)
             if (G.offensive.stage === REACTION_STAGE) {
@@ -4350,7 +4350,7 @@ function compute_ground_naval_move_hexes() {
             map_set(L.allowed_hexes, k, v)
         })
     }
-    if ((L.move_data.move_type & GROUND_MOVE) && (!L.move_type & AMPH_MOVE)) {
+    if ((L.move_data.move_type & GROUND_MOVE) && (L.move_type !== AMPH_MOVE)) {
         compute_ground_move_hexes()
     }
     if (G.offensive.stage !== POST_BATTLE_STAGE) {
@@ -4732,7 +4732,7 @@ function get_naval_move(zoi_mask) {
     let result = []
     map_for_each(distance_map, (nh, v) => {
         var naval_attack = is_amph_attack_possible(nh) && (!us_army_unit_active || set_has(marine_landed_islands, nh) || !get_map_data(nh).island || G.offensive.stage === REACTION_STAGE)
-        var port_transport = (get_map_data(nh).port && is_space_controlled(nh, R) && (!move_data.is_ground_present || !move_data.is_naval_present || G.offensive.stage === POST_BATTLE_STAGE || (L.move_type & AMPH_MOVE)))
+        var port_transport = (get_map_data(nh).port && is_space_controlled(nh, R) && (!move_data.is_ground_present || !move_data.is_naval_present || G.offensive.stage === POST_BATTLE_STAGE || (L.move_type === AMPH_MOVE)))
         var aa_landing = move_data.move_type & AMPH_MOVE
             && is_hex_asp_capable(nh)
             && (!move_data.is_naval_present || move_data.move_type & ORGANIC_ONLY)
