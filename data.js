@@ -6129,7 +6129,7 @@ data.nations = {
     CHINA: {
         id: 12,
         pw: 2,
-        statuses: ["Stable Front", "Unstable Front", "Major Breakthrough", "Threat to Chunking", "Government Collapsed"],
+        statuses: ["Stable Front", "Unstable Front", "Major Breakthrough", "Threat to Chunking", "Chunking Falls", "Government Collapsed"],
         name: "China",
         no_full_control: true,
     },

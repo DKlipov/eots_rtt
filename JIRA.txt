@@ -1,5 +1,5 @@
 Todo list:
-1942 no move error
+* Alaska fix
 * big refactoring
 * fuzz-buzz testing
 * Implementation notes

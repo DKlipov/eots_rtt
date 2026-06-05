@@ -437,6 +437,8 @@ for (let i = 0; i <= LAST_BOARD_HEX; ++i) {
 }
 S_P_MAP_DATA[OAHU] = Object.assign({}, MAP_DATA[OAHU])
 S_P_MAP_DATA[OAHU].supply_source = JOINT_SUPPLIED_HEX | US_SUPPLIED_HEX
+S_P_MAP_DATA[hex_to_int(4819)] = Object.assign({}, MAP_DATA[hex_to_int(4819)])
+S_P_MAP_DATA[hex_to_int(4819)].terrain = OCEAN
 S_P_TONNELLING_SET.filter(h => h !== OAHU).forEach(h => S_P_MAP_DATA[h].edges_int += (WATER << 30))
 
 function apply_south_pacific(hex) {
@@ -4603,7 +4605,9 @@ function mark_attack_zone(location, battle_range) {
     G.supply_cache[location] = G.supply_cache[location] | HEX_TEMP_FLAG2 | HEX_TEMP_FLAG1
     if (!L.move_data.is_ground_present) {
         for_each_hex_in_range(location, battle_range, h => {
-            G.supply_cache[h] = G.supply_cache[h] | HEX_TEMP_FLAG1
+            if (!is_faction_units(h, 1 - G.active)) {
+                G.supply_cache[h] = G.supply_cache[h] | HEX_TEMP_FLAG1
+            }
         })
     }
 }
@@ -5635,7 +5639,8 @@ P.ground_bombardment = {
         G.active = (1 - G.offensive.attacker)
         var battle = G.offensive.battle
         battle.hit_able_units = [[], []]
-        L.allowed_units = battle.ground[G.active].filter(u => unit_on_board(u))
+        var faction = battle.air_naval[G.offensive.attacker].length ? (1 - G.offensive.attacker) : G.offensive.attacker
+        L.allowed_units = battle.ground[faction].filter(u => unit_on_board(u))
         L.garrison_present = L.allowed_units.filter(u => pieces[u].garrison).length
         if (L.allowed_units.length === 1 && set_has(G.reduced, L.allowed_units[0])) {
             end()
@@ -7490,6 +7495,10 @@ cards[find_card(JP, 2)].before_unit_activation = function () {
             mark_hexes_in_move_range(h, 5)
         }
     })
+}
+
+cards[find_card(JP, 2)].after_unit_activation = function () {
+    L.hq_bonus = 6
 }
 
 function mark_hexes_in_move_range(hex, range) {
@@ -10883,7 +10892,7 @@ function setup_scenario_south_pacific() {
     G.asp[AP] = [2, 0]
     G.wie = 2
     G.pow = 1
-    G.reinforcements = {NAVAL: 2, AIR: 2}
+    G.reinforcements = [2, 2]
     G.surrender[nations.CHINA.id] = 2
     G.inter_service = [1, 1]
     G.china_divisions = 9

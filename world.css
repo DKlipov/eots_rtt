@@ -331,3 +331,5 @@ body.hide-pieces .marker:not(.small_markers_white) { display: none }
 .dice.d7 { background-position: -105px 0; }
 .dice.d8 { background-position: -120px 0; }
 .dice.d9 { background-position: -135px 0; }
+
+.disabled {pointer-events: none}
