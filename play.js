@@ -1414,22 +1414,43 @@ function pw_dialog(id, response) {
 }
 
 function elim_dialog(name, response){
+    let append_header = (text) => {
+            let header = document.createElement("dt")
+            header.textContent = text
+            dl.appendChild(header)
+    }
     show_dialog(name, (body) => {
+        let create_player_section = (text) => {
+            let sec = document.createElement("div")
+            let header = document.createElement("dt")
+            header.textContent = text+" Eliminated Units:"
+            sec.appendChild(header)
+            let container = document.createElement("div")
+            container.classList.add("unit-grid")
+            sec.appendChild(container)
+            body.appendChild(sec)
+            return container
+        }
+
+        let ap_elim = create_player_section("Allied")
+        let jp_elim = create_player_section("Japanese")
+
         for (let i = 1; i < data.pieces.length; i++) {
             if (G.location[i] == ELIMINATED_BOX){
                 let piece = data.pieces[i]
+                let p = document.createElement("div")
+                p.classList.add(...piece.counter.split(' '))
+                p.classList.add("d-piece", "unit", "piece")
                 if(piece.faction === AP){
-                    let p = document.createElement("div")
-                    p.classList.add(...piece.counter.split(' '))
-                    p.classList.add("unit", "piece")
-                    body.appendChild(p)
+                    ap_elim.appendChild(p)
                 }else{
-
+                    jp_elim.appendChild(p)
                 }
-
+                
             }
     
         }
+
         //TODO PERM ELIMINATED ?
     })
 }
