@@ -5381,7 +5381,7 @@ function get_naval_roll_modifiers(faction) {
         result += 3
         log(`+3 Surprise attack.`)
     }
-    var ap_air_superiority = faction === AP && battle.air_naval[AP].filter(u => unit_on_board(u) && pieces[u].br).length > 0
+    var ap_air_superiority = faction === AP && battle.air_naval[AP].filter(u => unit_on_board(u) && pieces[u].br && is_us_unit(pieces[u])).length > 0
     if (ap_air_superiority && G.turn >= 8) {
         result += 3
         log(`+3 AP air superiority (1944-1945).`)

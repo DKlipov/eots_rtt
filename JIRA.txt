@@ -1,4 +1,5 @@
 Todo list:
+br planes should not give +1/3 drm
 * less annoying piece tooltip
 * big refactoring
 * fuzz-buzz testing
