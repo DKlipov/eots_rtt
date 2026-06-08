@@ -1413,6 +1413,31 @@ function pw_dialog(id, response) {
     })
 }
 
+function create_unit_display(data_id){
+    const piece = data.pieces[data_id]
+    let p = document.createElement("div")
+    p.classList.add(...piece.counter.split(' '))
+    p.classList.add("d-piece", "unit", "piece")
+    //adapted the world.js tooltip_image to work here,
+    //would be better if we had a way to reuse the world framework element 
+    if (is_mobile()) {
+        p.addEventListener("touchstart", function () {
+            long_tap(()=>unit_tooltip_image(data_id, true))
+        })
+        p.addEventListener("touchend", function () {
+            long_tap_cancel()
+        })
+    } else {
+        p.addEventListener("mouseenter", function () {
+            unit_tooltip_image(data_id, true)
+        })
+    }
+    p.addEventListener("mouseleave", function () {
+        unit_tooltip_image(data_id, false)
+    })
+    return p
+}
+
 function elim_dialog(name, response){
     let append_header = (text) => {
             let header = document.createElement("dt")
@@ -1456,9 +1481,7 @@ function elim_dialog(name, response){
         for (let i = 1; i < data.pieces.length; i++) {
             if (G.location[i] == ELIMINATED_BOX || G.location[i] == PERM_ELIMINATED){
                 const piece = data.pieces[i]
-                let p = document.createElement("div")
-                p.classList.add(...piece.counter.split(' '))
-                p.classList.add("d-piece", "unit", "piece")
+                let p = create_unit_display(i)
                 let elim_cont = piece.faction === AP ? ap_elim : jp_elim;
                 const small_offset = piece.counter.includes("big") ? 0:1;
                 if(data.pieces[i].notreplaceable || G.location[i] == PERM_ELIMINATED){
