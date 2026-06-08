@@ -4243,6 +4243,7 @@ function compute_air_move_hexes() {
             break
         }
         let item = queue[i]
+        var MD = get_map_data(item)
         let base_path = map_get(distance_map, item)
         var china_result = process_china_box_move(item, base_path, move_type)
         let nh_list = get_near_hexes(item)
@@ -4261,7 +4262,8 @@ function compute_air_move_hexes() {
             if (avoid_zoi_flag && has_non_n_zoi(nh, 1 - R)
                 || distance % 10 > L.move_data.extended_battle_range
                 || (distance >= cached && distance % 10 >= cached % 10)
-                || G.offensive.stage === REACTION_STAGE && set_has(G.offensive.battle_hexes, nh)) {
+                || G.offensive.stage === REACTION_STAGE && set_has(G.offensive.battle_hexes, nh)
+                || ((MD.edges_int >> 5 * j) % 32) <= 0) {
                 continue
             }
             if (distance % 10 < L.move_data.extended_battle_range) {
