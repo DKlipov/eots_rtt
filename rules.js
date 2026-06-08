@@ -3913,6 +3913,7 @@ function check_supply() {
             G.supply_cache[h] = G.supply_cache[h] | JP_GROUND_UNITS
         }
     })
+    for_each_hex_in_range(KUNMING, 1, h => G.supply_cache[h] = G.supply_cache[h] | AP_GROUND_UNITS)
     check_infrastructure()
     var oos_units = [[], []]
     G.oos = []

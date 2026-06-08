@@ -1,5 +1,6 @@
 Todo list:
-br planes should not give +1/3 drm
+rolback alaska
+investigate gigili supply
 * less annoying piece tooltip
 * big refactoring
 * fuzz-buzz testing
