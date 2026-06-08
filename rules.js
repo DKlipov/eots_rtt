@@ -11265,13 +11265,9 @@ function pw_query() {
 }
 
 function elim_query(){
-    let result = {
-        jp:[],
-        ap:[]
-    }
-    
-
-    return result
+    // all informations are already transmitted to the play.js side by the G sync
+    // so we do nothing here
+    return []
 }
 
 function get_china_info() {
