@@ -6104,7 +6104,7 @@ function select_retreat_hex() {
         var h = nh[i]
         if (h < 0 || h > LAST_BOARD_HEX || set_has(just_entered, h) || is_overstack(h, G.active_stack[0])
             || is_faction_units(h, G.offensive.attacker) || get_ground_move_cost(G.offensive.battle.battle_hex, h, i, JP) >= 100
-            || ground_move_denied(h)) {
+            || ground_move_denied(h) || set_has(G.offensive.battle_hexes, h)) {
             continue
         } else {
             set_add(able, h)
