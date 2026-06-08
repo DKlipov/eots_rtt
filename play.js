@@ -1420,38 +1420,52 @@ function elim_dialog(name, response){
             dl.appendChild(header)
     }
     show_dialog(name, (body) => {
+
+        let create_sub_container = (parent, text) =>{
+            let sub_cont = document.createElement("div")
+            let header = document.createElement("dt")
+            header.textContent = text
+            parent.appendChild(header)
+            sub_cont.classList.add("unit-grid")
+            parent.appendChild(sub_cont)
+            return sub_cont
+        }
+
         let create_player_section = (text) => {
             let sec = document.createElement("div")
             let header = document.createElement("dt")
             header.textContent = text+" Eliminated Units:"
             sec.appendChild(header)
-            let container = document.createElement("div")
-            container.classList.add("unit-grid")
-            sec.appendChild(container)
+
+            let repl_container = create_sub_container(sec, "Replaceable:")
+            let perm_container = create_sub_container(sec, "Permanently Eliminated:")
+
             body.appendChild(sec)
-            return container
+            return [repl_container, perm_container]
         }
+
+        const REPL = 0;
+        const PERM = 1;
 
         let ap_elim = create_player_section("Allied")
         let jp_elim = create_player_section("Japanese")
 
         for (let i = 1; i < data.pieces.length; i++) {
-            if (G.location[i] == ELIMINATED_BOX){
+            if (G.location[i] == ELIMINATED_BOX || G.location[i] == PERM_ELIMINATED){
                 let piece = data.pieces[i]
                 let p = document.createElement("div")
                 p.classList.add(...piece.counter.split(' '))
                 p.classList.add("d-piece", "unit", "piece")
-                if(piece.faction === AP){
-                    ap_elim.appendChild(p)
+                let elim_cont = piece.faction === AP ? ap_elim : jp_elim;
+                if(data.pieces[i].notreplaceable || G.location[i] == PERM_ELIMINATED){
+                    elim_cont[PERM].appendChild(p)
                 }else{
-                    jp_elim.appendChild(p)
+                    elim_cont[REPL].appendChild(p)
                 }
                 
             }
     
         }
-
-        //TODO PERM ELIMINATED ?
     })
 }
 
