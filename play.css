@@ -712,3 +712,8 @@ div[data-tooltip]:after {
 	display: grid;
 	grid-template-columns: 50px 50px 50px 50px 50px;
 }
+
+.big-unit-grid{
+	display: grid;
+	grid-template-columns: 50px 50px 50px 50px 50px;
+}

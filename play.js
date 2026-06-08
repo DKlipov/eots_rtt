@@ -1422,13 +1422,16 @@ function elim_dialog(name, response){
     show_dialog(name, (body) => {
 
         let create_sub_container = (parent, text) =>{
-            let sub_cont = document.createElement("div")
+            let small_sub_cont = document.createElement("div")
+            let big_sub_cont = document.createElement("div")
             let header = document.createElement("dt")
             header.textContent = text
             parent.appendChild(header)
-            sub_cont.classList.add("unit-grid")
-            parent.appendChild(sub_cont)
-            return sub_cont
+            small_sub_cont.classList.add("unit-grid")
+            parent.appendChild(small_sub_cont)
+            big_sub_cont.classList.add("big-unit-grid")
+            parent.appendChild(big_sub_cont)
+            return [big_sub_cont, small_sub_cont]
         }
 
         let create_player_section = (text) => {
@@ -1437,32 +1440,32 @@ function elim_dialog(name, response){
             header.textContent = text+" Eliminated Units:"
             sec.appendChild(header)
 
-            let repl_container = create_sub_container(sec, "Replaceable:")
-            let perm_container = create_sub_container(sec, "Permanently Eliminated:")
+            let [b_repl, s_repl] = create_sub_container(sec, "Replaceable:")
+            let [b_perm, s_perm] = create_sub_container(sec, "Permanently Eliminated:")
 
             body.appendChild(sec)
-            return [repl_container, perm_container]
+            return [b_repl, s_repl, b_perm, s_perm]
         }
 
-        const REPL = 0;
-        const PERM = 1;
+        const B_REPL = 0;
+        const B_PERM = 2;
 
         let ap_elim = create_player_section("Allied")
         let jp_elim = create_player_section("Japanese")
 
         for (let i = 1; i < data.pieces.length; i++) {
             if (G.location[i] == ELIMINATED_BOX || G.location[i] == PERM_ELIMINATED){
-                let piece = data.pieces[i]
+                const piece = data.pieces[i]
                 let p = document.createElement("div")
                 p.classList.add(...piece.counter.split(' '))
                 p.classList.add("d-piece", "unit", "piece")
                 let elim_cont = piece.faction === AP ? ap_elim : jp_elim;
+                const small_offset = piece.counter.includes("big") ? 0:1;
                 if(data.pieces[i].notreplaceable || G.location[i] == PERM_ELIMINATED){
-                    elim_cont[PERM].appendChild(p)
+                    elim_cont[B_PERM + small_offset ].appendChild(p)
                 }else{
-                    elim_cont[REPL].appendChild(p)
-                }
-                
+                    elim_cont[B_REPL + small_offset].appendChild(p)
+                }  
             }
     
         }
