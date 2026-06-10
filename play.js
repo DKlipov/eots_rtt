@@ -700,6 +700,10 @@ function int_to_hex(i) {
 }
 
 function hex_center(i) {
+    if (i === CHINA_BOX) {
+        var box = map_layout.box_air_unit_in_china
+        return center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
+    }
     let row = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
     let column = (Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB))
     return [

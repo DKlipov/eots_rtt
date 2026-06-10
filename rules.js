@@ -382,8 +382,6 @@ for (var i = 0; i < sp_map.length; i++) {
     }
 }
 
-MAP_DATA[CHINA_BOX] = {id: int_to_hex(CHINA_BOX), terrain: OCEAN, region: "Ocean", airfield: true}
-
 for (let i = 0; i <= LAST_BOARD_HEX; ++i) {
     let hex = MAP_DATA[i]
     if (!hex) {
@@ -434,6 +432,13 @@ for (let i = 0; i <= LAST_BOARD_HEX; ++i) {
         hex.supply_source |= JOINT_SUPPLIED_HEX
     }
     apply_south_pacific(Object.assign({}, hex))
+}
+MAP_DATA[CHINA_BOX] = {
+    id: int_to_hex(CHINA_BOX),
+    terrain: OCEAN,
+    region: "Ocean",
+    airfield: true,
+    edges_int: MAP_DATA[OAHU].edges_int
 }
 S_P_MAP_DATA[OAHU] = Object.assign({}, MAP_DATA[OAHU])
 S_P_MAP_DATA[OAHU].supply_source = JOINT_SUPPLIED_HEX | US_SUPPLIED_HEX
@@ -1085,7 +1090,6 @@ P.replacement_segment = {
             G.reinforcements[AIR_REP] += L.replacement_points[AIR_REP]
         }
         check_supply()
-        mark_supply_eligable_ports(G.active)
         mark_supplied_hexes(G.active)
         if (L.scheduled_points) {
             scenario_data().replacement_points()
@@ -1281,7 +1285,6 @@ P.strategic_bombing = {
         end()
     },
     roll() {
-        mark_supply_eligable_ports(AP)
         var close_air_base = TOKYO_AIR_BASES.filter(h => !set_has(G.control, h) && (G.supply_cache[h] & AP_SUPPLY_AIRFIELD)).length > 0
         if (!G.active_stack.map(u => bombing(u, close_air_base)).reduce((a, b) => a || b, false)) {
             G.events[events.STRAT_BOMBING_CAMPAIGN.id] = 0
@@ -1896,7 +1899,6 @@ P.displace_hq = {
 P.return_hq = {
     inactive: "choose HQ",
     prompt() {
-        mark_supply_eligable_ports(G.active)
         mark_supplied_hexes(G.active)
         if (!G.active_stack.length) {
             prompt(`Choose HQ return.`)
@@ -2764,6 +2766,9 @@ P.move_offensive_units = {
         G.active_stack.forEach(u => displace_to_turn(u, 1, true))
         G.active_stack = []
         L.allowed_hexes = []
+        L.move_data = {}
+        L.move_type = ANY_MOVE
+        L.spec_move = 0
         if (L.movable_units.length <= 0) {
             end()
         }
@@ -3601,7 +3606,6 @@ function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
         return true
     }
     for_each_unit_on_map((i, p) => both_sides_zoi || p.faction === faction ? set_zoi(i, p, oos_units) : null)
-    mark_supply_eligable_ports(faction)
     var size = oos_units[faction].filter(u => pieces[u].zoi_generator).length
     oos_units[faction] = []
     HQ_LIST.forEach(hq => {
@@ -8804,7 +8808,6 @@ cards[find_card(JP, 78)].event = function () {
 
 P.event_unit = {
     _begin() {
-        mark_supply_eligable_ports(G.active)
         mark_supplied_hexes(G.active)
     },
     inactive: "place unit",
@@ -8946,7 +8949,6 @@ cards[find_card(AP, 4)].event = function () {
 
 P.place_abda = {
     _begin() {
-        mark_supply_eligable_ports(G.active)
         mark_supplied_hexes(G.active)
         var dei = ["Java", "Borneo", "Sumatra", "Celebes"]
         L.allowed_hexes = get_unit_reinforcement_hexes(HQ_ABDA).filter(h => dei.includes(get_map_data(h).region))
@@ -9094,7 +9096,6 @@ cards[find_card(AP, 17)].event = function () {
 
 P.repair_avg = {
     _begin() {
-        mark_supply_eligable_ports(G.active)
         mark_supplied_hexes(G.active)
         L.allowed_units = []
         var regions = ["NIndia", "Burma"]
@@ -9589,7 +9590,6 @@ cards[find_card(AP, 51)].before_activation = function () {
 
 P.place_14_air = {
     _begin() {
-        mark_supply_eligable_ports(G.active)
         mark_supplied_hexes(G.active)
         L.allowed_hexes = get_unit_reinforcement_hexes(AP_AIR_14).filter(h => h === CHINA_BOX || get_map_data(h).region === "NIndia")
         if (!L.allowed_hexes.length) {
@@ -9799,7 +9799,6 @@ cards[find_card(AP, 70)].before_activation = function () {
 
 P.place_armor = {
     _begin() {
-        mark_supply_eligable_ports(G.active)
         mark_supplied_hexes(G.active)
         var regions = ["NIndia", "Burma", "India", "Ceylon"]
         L.allowed_hexes = get_unit_reinforcement_hexes(ARMOR_BRIGADE).filter(h => regions.includes(get_map_data(h).region))
