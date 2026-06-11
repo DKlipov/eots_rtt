@@ -5037,7 +5037,7 @@ P.cancel_offensive = {
     },
     card(c) {
         push_undo()
-        log ("#GCancel offensive")
+        log("#GCancel offensive")
         if (G.active === AP) {
             end()
             play_event(c)
@@ -8696,7 +8696,9 @@ function check_fuel_shortage_data() {
             }
         }
     }
-    if (L.limit > 0) {
+    var over = L.target ? L.overstack[L.target] : 0
+    if (L.moved.filter(u => pieces[u].class === "naval").length < 4 &&
+        G.active_stack.filter(u => pieces[u].class === "naval").length < (6 - (over >> 7))) {
         var non_selected = !G.active_stack.length
         for_each_unit_on_map((u, piece, loc) => {
             if (G.supply_cache[loc] & HEX_TEMP_FLAG1 && (piece.class === "naval" && piece.faction === JP)
@@ -8709,7 +8711,8 @@ function check_fuel_shortage_data() {
     hq.forEach(u => {
         var loc = G.location[u]
         if (G.supply_cache[loc] & HEX_TEMP_FLAG1
-            && (non_selected || loc === location)) {
+            && !set_has(L.moved, u)
+            && (over & 1) === 0) {
             set_add(result, u)
         }
     })
@@ -8764,12 +8767,11 @@ P.fuel_shortage = {
             }
         })
         L.moved = []
-        L.limit = 4
         L.stage = 0
     },
     inactive: "apply card effect",
     prompt() {
-        prompt(`${offensive_card_header()} Move units. Ship could be selected: ${L.limit}.`)
+        prompt(`${offensive_card_header()} Move units. Units could be selected: ${5 - L.moved.length}.`)
         L.allowed_units.forEach(u => action_unit(u))
         L.allowed_hexes.forEach(h => action_hex(h))
         if (L.moved.length && !G.active_stack.length) {
@@ -8782,30 +8784,23 @@ P.fuel_shortage = {
     },
     action_hex(hex) {
         push_undo()
-        var over = L.overstack[hex]
-        if (over & 1) {
-            set_add(L.moved, HQ_YAMAMOTO)
-            set_add(L.moved, HQ_OZAWA)
-        }
-        L.limit -= over >> 7
         L.target = hex
         G.active_stack.forEach(u => {
             set_location(u, hex)
-            set_add(L.moved, u)
         })
         G.active_stack = []
         check_supply()
         check_fuel_shortage_data()
     },
     unit(u) {
-        push_undo()
+        if (G.active_stack.length === 0) {
+            push_undo()
+        }
+        L.moved.push(u)
         var piece = pieces[u]
         set_add(G.active_stack, u)
         if (is_cv_unit(piece)) {
             check_supply()
-        }
-        if (piece.class === "naval") {
-            L.limit -= 1
         }
         check_fuel_shortage_data()
     }
