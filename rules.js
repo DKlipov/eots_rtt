@@ -1716,9 +1716,9 @@ P.offensive_segment = {
             let card = hand[i]
             action_card(card)
         }
-        button("check_s")
-        if (G.debug) {
 
+        if (G.debug) {
+            button("check_s")
             button("control")
             button("isr")
             button("tp")
@@ -3607,6 +3607,7 @@ function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
         return true
     }
     for_each_unit_on_map((i, p) => both_sides_zoi || p.faction === faction ? set_zoi(i, p, oos_units) : null)
+    mark_supply_eligable_ports(faction)
     var size = oos_units[faction].filter(u => pieces[u].zoi_generator).length
     oos_units[faction] = []
     HQ_LIST.forEach(hq => {
