@@ -5009,7 +5009,7 @@ function resolve_into_turn_draw(faction) {
 
 P.cancel_offensive = {
     _begin() {
-        if (G.active === AP || G.offensive.offensive_card === CARRIER_RAID && G.offensive.type === EC) {
+        if (G.offensive.offensive_card === CARRIER_RAID && G.offensive.type === EC) {
             end()
             return
         }
@@ -5037,6 +5037,11 @@ P.cancel_offensive = {
     },
     card(c) {
         push_undo()
+        if (G.active === AP) {
+            end()
+            play_event(c)
+            return
+        }
         L.reactions_card = c
         G.offensive.active_cards.push(c)
     },
@@ -9204,10 +9209,23 @@ P.wingate = {
     },
     unit(u) {
         push_undo()
+        var loc = G.location[u]
         set_location(u, map_get(L.allowed_units, u))
         set_delete(G.offensive.active_units[JP], u)
         map_delete(G.offensive.paths, u)
         log(`${piece_get_log_str(u)} deactivated.`)
+        var committed = []
+        map_for_each(G.offensive.committed, (u, h) => {
+            if (h === loc) {
+                committed.push(u)
+            }
+        })
+        if (!is_faction_units(loc, JP) && !committed.length) {
+            set_delete(G.offensive.battle_hexes, loc)
+        }
+        if (!is_faction_ground_units(loc, JP)) {
+            set_delete(G.offensive.landing_hexes, loc)
+        }
         end()
     },
 }
