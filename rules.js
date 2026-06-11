@@ -1716,8 +1716,9 @@ P.offensive_segment = {
             let card = hand[i]
             action_card(card)
         }
+        button("check_s")
         if (G.debug) {
-            button("check_s")
+
             button("control")
             button("isr")
             button("tp")
@@ -4190,7 +4191,8 @@ function process_china_box_move(hex, base_path, move_type) {
     var faction = pieces[G.active_stack[0]].faction
     var move_data = L.move_data
     var china_rebase = faction === AP && base_path[0] % 10 === 0 && base_path[1] <= move_data.air_move_legs
-    if (china_rebase && (hex === DACCA || hex === JARHAT || hex === LEDO) && G.supply_cache[hex] & AP_SUPPLY_AIRFIELD && !map_has(L.allowed_hexes, CHINA_BOX)) {
+    if (china_rebase && (hex === DACCA || hex === JARHAT || hex === LEDO) && G.supply_cache[hex] & AP_SUPPLY_AIRFIELD && !map_has(L.allowed_hexes, CHINA_BOX)
+        && G.offensive.stage !== REACTION_STAGE) {
         var path_array = base_path.slice()
         path_array.push(CHINA_BOX)
         path_array[0] = move_type
@@ -8012,7 +8014,7 @@ P.tokyo_express = {
         for_each_unit_on_map((u, piece, location) => {
             if (piece.class === "hq" && piece.faction === JP && !set_has(G.oos, u)) {
                 for_each_hex_in_range(location, piece.cr, h => {
-                    if (get_map_data(h).terrain > OCEAN && is_space_controlled(h, JP)) {
+                    if (get_map_data(h).terrain > OCEAN && !is_faction_units(h, AP)) {
                         action_hex(h)
                     }
                 })
