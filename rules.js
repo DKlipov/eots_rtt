@@ -5037,6 +5037,7 @@ P.cancel_offensive = {
     },
     card(c) {
         push_undo()
+        log ("#GCancel offensive")
         if (G.active === AP) {
             end()
             play_event(c)
@@ -9214,6 +9215,7 @@ P.wingate = {
         set_delete(G.offensive.active_units[JP], u)
         map_delete(G.offensive.paths, u)
         log(`${piece_get_log_str(u)} deactivated.`)
+        check_supply()
         var committed = []
         map_for_each(G.offensive.committed, (u, h) => {
             if (h === loc) {
