@@ -390,7 +390,7 @@ function _on_click_thing(evt) {
 	if (evt.button === 0) {
 		var thing = evt.target.thing
 		evt.stopPropagation()
-		if (_focus_stack(evt.target.parentElement.thing)){}
+		if (_focus_stack(evt.target.parentElement.thing))
 			if (!send_action(thing.my_action, thing.my_id))
 				_blur_stack()
 	}
