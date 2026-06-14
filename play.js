@@ -907,10 +907,7 @@ P.check_unit_supply = {
         if (!LOCAL_STATE.supply_data) {
             return
         }
-        if (LOCAL_STATE.supply_data.supply_port) {
-            on_focus_hex_tip(LOCAL_STATE.supply_data.supply_port)
-        }
-        on_focus_piece_tip(LOCAL_STATE.supply_data.hq)
+        clear_paths()
         Object.keys(LOCAL_STATE.supply_data.path).forEach((type, index) => {
             var v = LOCAL_STATE.supply_data.path[type]
             var start = hex_center(v[0])
@@ -924,7 +921,9 @@ P.check_unit_supply = {
                 start = hex_center(v[j - 1])
                 finish = hex_center(v[j])
                 CANVAS_CTX.beginPath();
-                CANVAS_CTX.beginPath();
+                if (set_has(G.oos, LOCAL_STATE.supply_data.unit)) {
+                    CANVAS_CTX.setLineDash([5, 3]);
+                }
                 CANVAS_CTX.moveTo(start[0], start[1] + d);
                 CANVAS_CTX.lineTo(finish[0], finish[1] + d);
                 CANVAS_CTX.stroke();

@@ -3457,7 +3457,7 @@ function mark_hexes_supplied_from(hq, piece, is_check_supply_space) {
     if (!L.supply) {
         L.supply = {}
     }
-    L.supply.queue = []
+    L.supply.queue = [location]
     L.supply.retracing = [location]
     var second_ports = []
     var overland_ports = []
@@ -3466,7 +3466,6 @@ function mark_hexes_supplied_from(hq, piece, is_check_supply_space) {
     const supply_type = piece.supply
     const extended_supply_type = supply_type | (faction ? JOINT_SUPPLIED_HEX : 0)
     G.supply_cache[location] = G.supply_cache[location] | supply_type
-    L.supply.queue.push(location)
     for (; i < L.supply.queue.length; i++) {
         let item = L.supply.queue[i]
         let nh_list = get_near_hexes(item)
@@ -11462,10 +11461,11 @@ function supply_query(unit) {
     var result = {unit, path: {}}
     var piece = pieces[unit]
     var location = G.location[unit]
+    var oos = set_has(G.oos, unit)
     clear_supply_cache(CLEAN_SUPPLY_MASK[1 - piece.faction])
-    for_each_unit_on_map(mark_unit)
+    for_each_unit_on_map((i, p) => (!oos || p.faction === piece.faction) ? mark_unit(i, piece) : null)
     check_infrastructure()
-    for_each_unit_on_map((i, p) => set_zoi(i, p, [G.oos, G.oos]))
+    for_each_unit_on_map((i, p) => (!oos || p.faction === piece.faction) ? set_zoi(i, p, [G.oos, G.oos]) : null)
     mark_supply_eligable_ports(piece.faction)
     var supply_ports = L.supply
     L.supply = {}
@@ -11486,42 +11486,31 @@ function supply_query(unit) {
                 result.supply_port = result.path.to_port[0]
                 L.supply.queue = supply_ports.queue
                 L.supply.retracing = supply_ports.retracing
-                console.log("from")
-                console.log(int_to_hex(result.supply_port))
                 result.path.from_port = retrace_supply_path(result.supply_port)
-                console.log("!!!from")
             }
         }
     })
     L = {supply: {}}
-    check_hq_in_supply(result.hq, pieces[result.hq], piece.faction === AP ? JOINT_SUPPLIED_HEX : JP_SUPPLIED_HEX)
-
-    result.path.to_source = retrace_supply_path(L.supply.queue[L.supply.queue.length - 1])
-
+    if (result.hq) {
+        check_hq_in_supply(result.hq, pieces[result.hq], piece.faction === AP ? JOINT_SUPPLIED_HEX : JP_SUPPLIED_HEX)
+        result.path.to_source = retrace_supply_path(L.supply.queue[L.supply.queue.length - 1])
+    }
     return result
 }
 
 function retrace_supply_path(location) {
     var queue_i = L.supply.queue.length - 1
     while (L.supply.queue[queue_i] !== location && queue_i > 0 || L.supply.retracing[queue_i] === 0) {
-        if (L.supply.queue[queue_i] === location) {
-            console.log(queue_i)
-        }
         queue_i -= 1
     }
-    // console.log(queue_i)
     var result = [L.supply.queue[queue_i]]
     var parent = L.supply.retracing[queue_i]
     while (queue_i > 0) {
-        if (L.supply.queue[queue_i] === parent){
-            // console.log(`next ${int_to_hex(L.supply.queue[queue_i])} ${int_to_hex(L.supply.retracing[queue_i])}`)
-        }
-
         if (L.supply.queue[queue_i] === parent && L.supply.retracing[queue_i] !== 0) {
             result.push(parent)
             parent = L.supply.retracing[queue_i]
         }
-        if (parent === L.supply.queue[queue_i]) {
+        if (L.supply.retracing[queue_i] === L.supply.queue[queue_i] && parent === L.supply.queue[queue_i]) {
             return result
         }
         queue_i -= 1
