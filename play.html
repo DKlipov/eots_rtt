@@ -79,9 +79,16 @@
                 <li onclick="send_query('event_cards_ap')">
                     <div>Inspect Allied Cards</div>
                 <li onclick="send_query('pw_check')">
-                    <div>Inspect Political Will</div>
+                    <div>Inspect Political Status</div>
                 <li onclick="send_query('vp_check')" id="vp_check_button">
                     <div>Inspect Victory Points</div>
+            </menu>
+        </details>
+        <details id="supply_menu">
+            <summary><img src="/images/oil-drum.svg"></summary>
+            <menu>
+                <li onclick="check_unit_supply()">
+                    <div>Check unit supply</div>
             </menu>
         </details>
     </div>

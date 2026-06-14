@@ -1,6 +1,12 @@
 "use strict"
 
+var LOCAL_STATUS = 0
+const CHECK_SUPPLY = 1
+var LOCAL_STATE = null
+var STORED_STATE = null
 
+
+const P = {}
 const LAST_BOARD_HEX = 1478
 const ELIMINATED_BOX = 1482
 const DELAYED_BOX = 1483
@@ -686,10 +692,6 @@ function get_near_hexes(hex) {
     return result
 }
 
-function test(hex) {
-    return get_near_hexes(hex_to_int(hex)).map(h => int_to_hex(h))
-}
-
 function hex_to_int(i) {
     return (Math.floor(i / 100) - 10) * 29 + i % 100
 }
@@ -865,13 +867,97 @@ function update_role_info() {
     }
 }
 
+P.check_unit_supply = {
+    _begin() {
+    },
+    prompt() {
+        LOCAL_STATE.actions = {
+            "done": 1,
+            "undo": LOCAL_STATE.unit ? 1 : 0,
+
+        }
+        if (!LOCAL_STATE.unit) {
+            LOCAL_STATE.actions.unit = [...Array(data.pieces.length).keys()].filter(u => G.location[u] <= LAST_BOARD_HEX)
+        }
+        view.prompt = "Select unit to check supply."
+    },
+    undo() {
+        LOCAL_STATE.unit = 0
+        LOCAL_STATE.supply_data = null
+        on_update()
+    },
+    unit(u) {
+        LOCAL_STATE.unit = u
+        send_query({name: "check_unit_supply", u})
+    },
+    show_supply(supply_data) {
+        LOCAL_STATE.unit = supply_data.unit
+        LOCAL_STATE.supply_data = supply_data
+        on_update()
+    },
+    on_update() {
+        console.log(LOCAL_STATE.supply_data)
+        if (!LOCAL_STATE.supply_data) {
+            return
+        }
+        if (LOCAL_STATE.supply_data.supply_port) {
+            on_focus_hex_tip(LOCAL_STATE.supply_data.supply_port)
+        }
+        on_focus_piece_tip(LOCAL_STATE.supply_data.hq)
+        LOCAL_STATE.supply_data.path.forEach(v => {
+            var start = hex_center(v[0])
+            var finish
+            var color = "green"
+            var d = 0
+            CANVAS_CTX.strokeStyle = color
+            CANVAS_CTX.fillStyle = color
+            CANVAS_CTX.lineWidth = 1;
+            for (var j = 1; j < v.length; j++) {
+                start = hex_center(v[j - 1])
+                finish = hex_center(v[j])
+                CANVAS_CTX.beginPath();
+                CANVAS_CTX.beginPath();
+                CANVAS_CTX.moveTo(start[0], start[1] + d);
+                CANVAS_CTX.lineTo(finish[0], finish[1] + d);
+                CANVAS_CTX.stroke();
+                CANVAS_CTX.setLineDash([])
+            }
+            if (finish) {
+                CANVAS_CTX.beginPath();
+                CANVAS_CTX.fillRect(finish[0] - 4, finish[1] - 4 + d, 8, 8)
+                CANVAS_CTX.stroke();
+            }
+        })
+    },
+}
+
+function check_unit_supply() {
+    LOCAL_STATUS = "check_unit_supply"
+    LOCAL_STATE = {}
+    P.check_unit_supply._begin()
+    P.check_unit_supply.prompt()
+    update_header()
+    on_update()
+}
+
 function on_update() {
-
     begin_update()
-    update_role_info()
     world.log_boxes = []
-
     console.log(G)
+    if (LOCAL_STATUS) {
+        P[LOCAL_STATUS].prompt()
+    }
+    if (!G.proxy) {
+        STORED_STATE = JSON.parse(JSON.stringify(G))
+        G.proxy = 1
+    }
+    if (LOCAL_STATE) {
+        G.actions = LOCAL_STATE.actions
+        G.actions.proxy = 1
+        view.prompt = LOCAL_STATE.prompt
+    }
+
+    update_role_info()
     map_for_each(G.offensive.damaged, (u, s) => {
         if (s > 2) {
             G.location[u] = ELIMINATED_BOX
@@ -1053,6 +1139,10 @@ function on_update() {
         }
     }
 
+    if (LOCAL_STATUS) {
+        P[LOCAL_STATUS].on_update()
+    }
+
     action_button("roll", "Roll")
 
     action_button("event", "Play Event")
@@ -1106,6 +1196,29 @@ function on_update() {
     action_button("undo", "Undo")
     end_update()
 }
+
+var original_send_action = send_action
+
+function proxy_send_action(a, b) {
+    if (LOCAL_STATUS && a === "done") {
+        LOCAL_STATUS = null
+        LOCAL_STATE = null
+        view = STORED_STATE
+        update_header()
+        on_update()
+        return
+    }
+    if (LOCAL_STATUS) {
+        var a = P[LOCAL_STATUS][a](b)
+        P[LOCAL_STATUS].prompt()
+        update_header()
+        return a
+    } else {
+        return original_send_action(a, b)
+    }
+}
+
+var send_action = proxy_send_action
 
 function print_violations() {
     if (world.violations && world.violations.overstack) {
@@ -1270,6 +1383,8 @@ function toggle_dialog(id, response) {
         battle_info_dialog(name, response)
     } else if (name === "pw_check") {
         pw_dialog(name, response)
+    } else if (name === "check_unit_supply") {
+        P.check_unit_supply.show_supply(response)
     }
 }
 
