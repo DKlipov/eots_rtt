@@ -3316,7 +3316,7 @@ function mark_supply_ports_overland(hq, piece) {
             }
             const occupied_land = G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
             var distance = base_distance + get_ground_mp_cost(item, nh, j, faction)
-            if (distance > SUPPLY_PORT_RANGE || distance >= map_get(distance_map, nh, [100])[0] || occupied_land) {
+            if (distance > SUPPLY_PORT_RANGE || distance >= map_get(distance_map, nh, 100) || occupied_land) {
                 continue
             }
             map_set(distance_map, nh, distance)
@@ -3478,17 +3478,15 @@ function mark_hexes_supplied_from(hq, piece, is_check_supply_space) {
                 continue
             }
             const occupied_land = G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
-            if (!(MD.edges_int & GROUND << 5 * j) || occupied_land || map_get(overland_set, nh, 100) <= distance) {
+            if (!(MD.edges_int & GROUND << 5 * j) || occupied_land || map_get(overland_set, nh, 100) <= distance || distance > piece.cr) {
                 continue
             }
-            if (distance < piece.cr) {
-                L.supply.queue.push(nh)
-                L.supply.retracing.push(item)
-                const friendly_port = get_map_data(nh).port && is_space_controlled(nh, faction)
-                if (friendly_port && map_get(oversea_set, nh, 100) > distance) {
-                    map_set(oversea_set, nh, distance)
-                    second_ports.push(nh)
-                }
+            L.supply.queue.push(nh)
+            L.supply.retracing.push(item)
+            const friendly_port = get_map_data(nh).port && is_space_controlled(nh, faction)
+            if (friendly_port && map_get(oversea_set, nh, 100) > distance) {
+                map_set(oversea_set, nh, distance)
+                second_ports.push(nh)
             }
             map_set(overland_set, nh, distance)
 
@@ -3511,17 +3509,15 @@ function mark_hexes_supplied_from(hq, piece, is_check_supply_space) {
                 continue
             }
             const non_neutral_zoi = non_neutral_zoi_s || G.supply_cache[nh] & JP_ZOI << (1 - faction) && !(G.supply_cache[nh] & JP_ZOI_NTRL << (1 - faction))
-            if (!(MD.edges_int & WATER << 5 * j) || non_neutral_zoi || map_get(oversea_set, nh, 100) <= distance) {
+            if (!(MD.edges_int & WATER << 5 * j) || non_neutral_zoi || map_get(oversea_set, nh, 100) <= distance || distance > piece.cr) {
                 continue
             }
-            if (distance < piece.cr) {
-                L.supply.queue.push(nh)
-                L.supply.retracing.push(item)
-                const friendly_port = (get_map_data(nh).port && set_has(G.control, nh) !== faction)
-                if (friendly_port && !get_map_data(nh).island && get_map_data(nh).terrain !== ATOLL && map_get(overland_set, nh, 100) > distance) {
-                    map_set(overland_set, nh, distance)
-                    overland_ports.push(nh)
-                }
+            L.supply.queue.push(nh)
+            L.supply.retracing.push(item)
+            const friendly_port = (get_map_data(nh).port && set_has(G.control, nh) !== faction)
+            if (friendly_port && !get_map_data(nh).island && get_map_data(nh).terrain !== ATOLL && map_get(overland_set, nh, 100) > distance) {
+                map_set(overland_set, nh, distance)
+                overland_ports.push(nh)
             }
             map_set(oversea_set, nh, distance)
             if (get_map_data(nh).terrain > 0) {
@@ -3543,13 +3539,11 @@ function mark_hexes_supplied_from(hq, piece, is_check_supply_space) {
                 continue
             }
             const occupied_land = G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
-            if (!(MD.edges_int & GROUND << 5 * j) || occupied_land || map_get(overland_set, nh, 100) <= distance) {
+            if (!(MD.edges_int & GROUND << 5 * j) || occupied_land || map_get(overland_set, nh, 100) <= distance || distance > piece.cr) {
                 continue
             }
-            if (distance < piece.cr) {
-                L.supply.queue.push(nh)
-                L.supply.retracing.push(item)
-            }
+            L.supply.queue.push(nh)
+            L.supply.retracing.push(item)
             map_set(overland_set, nh, distance)
             if (!(G.supply_cache[nh] & extended_supply_type) && is_check_supply_space(nh, faction) && supply_source_in_range(nh, faction)) {
                 G.supply_cache[nh] = G.supply_cache[nh] | supply_type
@@ -3570,13 +3564,11 @@ function mark_hexes_supplied_from(hq, piece, is_check_supply_space) {
                 continue
             }
             const non_neutral_zoi = non_neutral_zoi_s || G.supply_cache[nh] & JP_ZOI << (1 - faction) && !(G.supply_cache[nh] & JP_ZOI_NTRL << (1 - faction))
-            if (!(MD.edges_int & WATER << 5 * j) || non_neutral_zoi || map_get(oversea_set, nh, 100) <= distance) {
+            if (!(MD.edges_int & WATER << 5 * j) || non_neutral_zoi || map_get(oversea_set, nh, 100) <= distance || distance > piece.cr) {
                 continue
             }
-            if (distance < piece.cr) {
-                L.supply.queue.push(nh)
-                L.supply.retracing.push(item)
-            }
+            L.supply.queue.push(nh)
+            L.supply.retracing.push(item)
             map_set(oversea_set, nh, distance)
             if (get_map_data(nh).terrain > 0) {
                 G.supply_cache[nh] = G.supply_cache[nh] | supply_type
@@ -11467,10 +11459,13 @@ function get_nation_info(nation) {
 
 function supply_query(unit) {
     L = {supply: {}}
-    var result = {unit, path: []}
+    var result = {unit, path: {}}
     var piece = pieces[unit]
     var location = G.location[unit]
     clear_supply_cache(CLEAN_SUPPLY_MASK[1 - piece.faction])
+    for_each_unit_on_map(mark_unit)
+    check_infrastructure()
+    for_each_unit_on_map((i, p) => set_zoi(i, p, [G.oos, G.oos]))
     mark_supply_eligable_ports(piece.faction)
     var supply_ports = L.supply
     L.supply = {}
@@ -11483,37 +11478,51 @@ function supply_query(unit) {
         mark_hexes_supplied_from(hq, hq_piece, l => l === location)
         if (G.supply_cache[location] & piece.supply) {
             result.hq = hq
-            result.path.push(retrace_supply_path(location))
+            result.path.to_hq = retrace_supply_path(location)
             if (L.supply.port_queue) {
                 L.supply.queue = L.supply.port_queue
                 L.supply.retracing = L.supply.port_retracing
-                result.path.push(retrace_supply_path(L.supply.queue[L.supply.queue.length - 1]))
-                result.supply_port = result.path[result.path.length - 1][0]
+                result.path.to_port = retrace_supply_path(L.supply.queue[L.supply.queue.length - 1])
+                result.supply_port = result.path.to_port[0]
                 L.supply.queue = supply_ports.queue
                 L.supply.retracing = supply_ports.retracing
-                result.path.push(retrace_supply_path(result.supply_port))
+                console.log("from")
+                console.log(int_to_hex(result.supply_port))
+                result.path.from_port = retrace_supply_path(result.supply_port)
+                console.log("!!!from")
             }
         }
     })
     L = {supply: {}}
     check_hq_in_supply(result.hq, pieces[result.hq], piece.faction === AP ? JOINT_SUPPLIED_HEX : JP_SUPPLIED_HEX)
 
-    result.path.push(retrace_supply_path(G.location[result.hq]))
+    result.path.to_source = retrace_supply_path(L.supply.queue[L.supply.queue.length - 1])
 
     return result
 }
 
 function retrace_supply_path(location) {
     var queue_i = L.supply.queue.length - 1
-    while (L.supply.queue[queue_i] !== location && queue_i > 0) {
+    while (L.supply.queue[queue_i] !== location && queue_i > 0 || L.supply.retracing[queue_i] === 0) {
+        if (L.supply.queue[queue_i] === location) {
+            console.log(queue_i)
+        }
         queue_i -= 1
     }
+    // console.log(queue_i)
     var result = [L.supply.queue[queue_i]]
     var parent = L.supply.retracing[queue_i]
     while (queue_i > 0) {
+        if (L.supply.queue[queue_i] === parent){
+            // console.log(`next ${int_to_hex(L.supply.queue[queue_i])} ${int_to_hex(L.supply.retracing[queue_i])}`)
+        }
+
         if (L.supply.queue[queue_i] === parent && L.supply.retracing[queue_i] !== 0) {
             result.push(parent)
             parent = L.supply.retracing[queue_i]
+        }
+        if (parent === L.supply.queue[queue_i]) {
+            return result
         }
         queue_i -= 1
     }

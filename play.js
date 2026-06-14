@@ -59,6 +59,13 @@ const VERTICAL_TURN_STACK_PARAMS = [
 const MANCHURIA_1 = hex_to_int(3302)
 const MANCHURIA_2 = hex_to_int(3303)
 
+const SUPPLY_TYPES = {
+    to_port: {color: "green"},
+    from_port: {color: "red"},
+    to_hq: {color: "blue"},
+    to_source: {color: "yellow"},
+}
+
 //status markers
 const JP_AGREEMENT = 0
 const AP_AGREEMENT = 1
@@ -904,14 +911,15 @@ P.check_unit_supply = {
             on_focus_hex_tip(LOCAL_STATE.supply_data.supply_port)
         }
         on_focus_piece_tip(LOCAL_STATE.supply_data.hq)
-        LOCAL_STATE.supply_data.path.forEach(v => {
+        Object.keys(LOCAL_STATE.supply_data.path).forEach((type, index) => {
+            var v = LOCAL_STATE.supply_data.path[type]
             var start = hex_center(v[0])
             var finish
-            var color = "green"
-            var d = 0
+            var color = SUPPLY_TYPES[type].color
+            var d = index - 2
             CANVAS_CTX.strokeStyle = color
             CANVAS_CTX.fillStyle = color
-            CANVAS_CTX.lineWidth = 1;
+            CANVAS_CTX.lineWidth = 3;
             for (var j = 1; j < v.length; j++) {
                 start = hex_center(v[j - 1])
                 finish = hex_center(v[j])
@@ -1209,6 +1217,9 @@ function proxy_send_action(a, b) {
         return
     }
     if (LOCAL_STATUS) {
+        if (!P[LOCAL_STATUS][a]) {
+            return
+        }
         var a = P[LOCAL_STATUS][a](b)
         P[LOCAL_STATUS].prompt()
         update_header()

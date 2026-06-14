@@ -4765,9 +4765,9 @@ data.cards = [
 //Hex sides
 //N,NE,SE,S,SW,NW
 //WATER_: 1, GROUND: 2, ROAD: 4, UNPLAYABLE_WATER: 8, UNPLAYABLE_LAND: 16
-const JP_SUPPLIED_HEX = 1 << 15
-const JOINT_SUPPLIED_HEX = 1 << 17
-const US_SUPPLIED_HEX = 1 << 18
+const JP_SUPPLIED_HEX = 1 << 17
+const JOINT_SUPPLIED_HEX = 1 << 19
+const US_SUPPLIED_HEX = 1 << 20
 data.map = [
     {id: 1004, terrain: OCEAN, edges: [0, 1, 1, 1, 0, 0]},
     {id: 1103, terrain: OCEAN, edges: [0, 0, 1, 1, 1, 0]},
