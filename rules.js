@@ -3509,7 +3509,7 @@ function mark_hexes_supplied_from(hq, piece, is_check_supply_space) {
             }
             L.supply.queue.push(nh)
             L.supply.retracing.push(item)
-            const friendly_port = (get_map_data(nh).port && set_has(G.control, nh) !== faction)
+            const friendly_port = (get_map_data(nh).port && is_space_controlled(nh, faction))
             if (friendly_port && !get_map_data(nh).island && get_map_data(nh).terrain !== ATOLL && map_get(overland_set, nh, 100) > distance) {
                 map_set(overland_set, nh, distance)
                 overland_ports.push(nh)
