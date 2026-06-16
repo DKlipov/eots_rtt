@@ -11,6 +11,7 @@ const LAST_BOARD_HEX = 1478
 const ELIMINATED_BOX = 1482
 const DELAYED_BOX = 1483
 const CHINA_BOX = 1484
+const PERM_ELIMINATED = 1485
 const AP_REINF = 1486
 const JP_REINF = 1487
 const TURN_BOX = 1490
@@ -1404,6 +1405,8 @@ function toggle_dialog(id, response) {
         pw_dialog(name, response)
     } else if (name === "check_unit_supply") {
         P.check_unit_supply.show_supply(response)
+    } else if (name === "elim_check") {
+        elim_dialog(name, response)
     }
 }
 
@@ -1534,6 +1537,86 @@ function pw_dialog(id, response) {
             dl.appendChild(print_nation_status(nation))
         }
         body.appendChild(dl)
+    })
+}
+
+function create_unit_display(data_id) {
+    const piece = data.pieces[data_id]
+    let p = document.createElement("div")
+    p.classList.add(...piece.counter.split(' '))
+    p.classList.add("d-piece", "unit", "piece")
+    //adapted the world.js tooltip_image to work here,
+    //would be better if we had a way to reuse the world framework element
+    if (is_mobile()) {
+        p.addEventListener("touchstart", function () {
+            long_tap(() => unit_tooltip_image(data_id, true))
+        })
+        p.addEventListener("touchend", function () {
+            long_tap_cancel()
+        })
+    } else {
+        p.addEventListener("mouseenter", function () {
+            unit_tooltip_image(data_id, true)
+        })
+    }
+    p.addEventListener("mouseleave", function () {
+        unit_tooltip_image(data_id, false)
+    })
+    return p
+}
+
+function elim_dialog(name, response) {
+
+    show_dialog(name, (body) => {
+        var elim = [[], [], [], []]
+        for (let i = 1; i < data.pieces.length; i++) {
+            const piece = data.pieces[i]
+            if ((G.location[i] === ELIMINATED_BOX || (G.location[i] === PERM_ELIMINATED && G.sid !== SOUTH_PACIFIC_SCENARIO))) {
+                if (piece.notreplaceable || G.location[i] === PERM_ELIMINATED) {
+                    elim[piece.faction * 2 + 1].push(i)
+                } else {
+                    elim[piece.faction * 2].push(i)
+                }
+            }
+        }
+        let create_sub_container = (parent, text, units) => {
+            let small_sub_cont = document.createElement("div")
+            let big_sub_cont = document.createElement("div")
+            let header = document.createElement("dt")
+            header.textContent = text
+            parent.appendChild(header)
+            small_sub_cont.classList.add("unit-grid")
+            parent.appendChild(small_sub_cont)
+            big_sub_cont.classList.add("big-unit-grid")
+            parent.appendChild(big_sub_cont)
+            units.forEach(u => {
+                let p = create_unit_display(u)
+                var piece = data.pieces[u]
+                if (piece.counter.includes("big")) {
+                    big_sub_cont.appendChild(p)
+                } else {
+                    small_sub_cont.appendChild(p)
+                }
+            })
+            return [big_sub_cont, small_sub_cont]
+        }
+
+        let create_player_section = (text, faction) => {
+            if (elim[faction * 2].length) {
+                create_sub_container(body, text + " Replaceable:", elim[faction * 2])
+            }
+            if (elim[faction * 2 + 1].length) {
+                create_sub_container(body, text + " Permanently Eliminated:", elim[faction * 2 + 1])
+            }
+        }
+
+
+        create_player_section("Allied", AP)
+        create_player_section("Japanese", JP)
+        if (elim.filter(a => a.length > 0).length === 0) {
+            append_header("No eliminated units yet.", body)
+        }
+
     })
 }
 

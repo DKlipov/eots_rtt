@@ -1,6 +1,5 @@
 Todo list:
-rolback alaska
-investigate gigili supply
+* rolback alaska
 * less annoying piece tooltip
 * big refactoring
 * fuzz-buzz testing
@@ -12,6 +11,4 @@ Bugs
 
 Done
 ? Hex-to-hex distance calculation
-? Check supply menu
 ? Burma scenario
-? Eliminated units display
