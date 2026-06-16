@@ -241,11 +241,11 @@ class Thing {
 			})
 		} else {
 			this.element.addEventListener("mouseenter", function () {
-				if (typeof tip === "function") tip(id, true)
+				if (typeof tip === "function") long_tap(()=>tip(id, true), 800)
 			})
 		}
         this.element.addEventListener("mouseleave", function () {
-            if (typeof tip === "function") tip(id, false)
+            if (typeof tip === "function") long_tap_cancel()
         })
 		return this
 	}
@@ -363,10 +363,10 @@ class Thing {
 }
 
 var long_tap_timer
-function long_tap(callback){
+function long_tap(callback, timeout = 200){
 		long_tap_timer = setTimeout(() => {
 			callback()
-		}, 200);
+		}, timeout);
     document.body.style.userSelect = "none";
     document.body.style.webkitUserSelect = "none";
 }

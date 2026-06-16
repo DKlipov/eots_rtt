@@ -369,7 +369,7 @@ div[data-tooltip]:after {
 .zoi_hex.ap { background-image: url(images/hex_zoi_ap.svg) }
 .zoi_hex.contested { background-image: url(images/hex_zoi_contested.svg) }
 .zoi_hex.lrb { background-image: url(images/hex_zoi_lrb.svg); opacity: 0.2 }
-.zoi_hex.yellow { background-image: url(images/hex_zoi_yellow.svg); }
+.zoi_hex.yellow { background-image: url(images/hex_zoi_yellow.svg);opacity: 1 }
 
 .action_hex {
 	box-sizing: border-box;

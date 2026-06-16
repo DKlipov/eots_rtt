@@ -5074,7 +5074,7 @@ data.map = [
         name: "Hong Kong",
         airfield: true,
         port: true,
-        region: "Hong Kong",
+        region: "China",
         city: CHINESE_CITY,
         terrain: MIXED,
         edges: [5, 1, 1, 1, 1, 1]

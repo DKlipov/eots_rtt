@@ -496,7 +496,7 @@ function on_init(scenario, game_options, static_view) {
     init_preference_checkbox("hidezoi", false)
 
     world.tip.addEventListener("touchstart", function () {
-        on_blur_card_tip()
+        on_blur_tip()
     })
     let map_elem = document.getElementById("mapwrap")
     switch (scenario) {
@@ -1423,7 +1423,7 @@ function show_dialog(id, dialog_generator) {
 
 function hide_dialog(id) {
     document.getElementById(id).classList.remove("show")
-    on_blur_unit_tip()
+    on_blur_tip()
 }
 
 function toggle_dialog_collapse(id) {
@@ -1495,7 +1495,7 @@ function show_card_list(id, response) {
             let p = document.createElement("dd")
             p.className = "cardtip"
             p.onmouseenter = () => on_focus_card_tip(c)
-            p.onmouseleave = () => on_blur_card_tip()
+            p.onmouseleave = () => on_blur_tip()
             //p.onmousedown = () => _tip_focus_event_mobile(NONE, c, "card event_card c" + c)
             p.innerHTML = format_card_info(c)
             dl.appendChild(p)
@@ -1901,7 +1901,7 @@ function format_card_info(c) {
 function sub_card(match, p1) {
     const c = p1 | 0
     const cn = "card-tip"
-    return `<span class="${cn}" onmouseenter="on_focus_card_tip(${c})" onclick="on_focus_card_tip(${c})" onmouseleave="on_blur_card_tip()">${data.cards[c].name}</span>`
+    return `<span class="${cn}" onmouseenter="on_focus_card_tip(${c})" onclick="on_focus_card_tip(${c})" onmouseleave="on_blur_tip()">${data.cards[c].name}</span>`
 }
 
 
@@ -1913,7 +1913,7 @@ function get_piece_elem(p) {
 function sub_piece(match, p1) {
     const piece_id = p1 | 0
     const name = data.pieces[piece_id].name
-    return `<span class="piece-tip" onclick="on_click_piece_tip(${piece_id})" onmouseenter="on_focus_piece_tip(${piece_id})" onmouseleave="on_blur_piece_tip(${piece_id})">${name}</span>`
+    return `<span class="piece-tip" onclick="on_click_piece_tip(${piece_id})" onmouseenter="on_focus_piece_tip(${piece_id})" onmouseleave="on_blur_tip()">${name}</span>`
 }
 
 function on_click_piece_tip(z) {
@@ -1927,7 +1927,7 @@ function on_focus_piece_tip(z) {
 
 function on_blur_piece_tip(z) {
     get_piece_elem(z).classList.toggle("tip", false)
-    on_blur_unit_tip()
+    on_blur_tip()
 }
 
 function get_hex_elem(h) {
@@ -1991,7 +1991,7 @@ function unit_tooltip_image(a, onoff) {
     if (onoff) {
         on_focus_unit_tip(a)
     } else {
-        on_blur_unit_tip()
+        on_blur_tip()
     }
 }
 
@@ -2043,7 +2043,7 @@ function on_focus_unit_tip(a) {
     }
 }
 
-function on_blur_unit_tip() {
+function on_blur_tip() {
     world.tip.hidden = true
     world.tip.innerHTML = ""
     world.tip.classList = ''
@@ -2058,10 +2058,4 @@ function on_focus_card_tip(c) {
     world.tip.innerHTML = ""
     const card = data.cards[c]
     world.tip.classList = `card card_${card.faction ? "ap" : "jp"}_${card.num}`
-}
-
-function on_blur_card_tip() {
-    world.tip.hidden = true
-    world.tip.innerHTML = ""
-    world.tip.classList = ''
 }

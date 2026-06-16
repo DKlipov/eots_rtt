@@ -5023,7 +5023,7 @@ P.special_reaction = {
 
 function into_turn_draw(faction) {
     if (G.draw_counter[faction] >= 3) {
-        log(`${side_get_log_str(faction)} already drown 3 cards, draw skipped.`)
+        log(`${side_get_log_str(faction)} already drawn 3 cards, draw skipped.`)
         return
     }
     G.draw_counter[faction]++
