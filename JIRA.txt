@@ -1,11 +1,11 @@
 Todo list:
-* rolback alaska
 * less annoying piece tooltip
 * big refactoring
 * fuzz-buzz testing
 * Implementation notes
 * stack refactoring
 * Mobile resizing lags & bugs
+* imporve repair of eliminated units
 
 Bugs
 
