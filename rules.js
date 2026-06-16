@@ -11519,8 +11519,8 @@ function supply_query(unit) {
         mark_hexes_supplied_kunming()
         if (G.supply_cache[location] & piece.supply) {
             result.path.to_hq = retrace_supply_path(location)
+            trace_kunming(result)
         }
-        trace_kunming(result)
     }
     return result
 }

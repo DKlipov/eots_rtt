@@ -887,7 +887,7 @@ P.check_unit_supply = {
             LOCAL_STATE.actions.unit = [...Array(data.pieces.length).keys()].filter(u => G.location[u] <= LAST_BOARD_HEX)
             LOCAL_STATE.actions.action_hex = [CHINA_BOX]
         }
-        view.prompt = "Select unit to check supply."
+        LOCAL_STATE.prompt = "Select unit to check supply."
     },
     undo() {
         LOCAL_STATE.unit = 0
@@ -911,7 +911,6 @@ P.check_unit_supply = {
         on_update()
     },
     on_update() {
-        console.log(LOCAL_STATE.supply_data)
         if (!LOCAL_STATE.supply_data) {
             return
         }
@@ -950,7 +949,6 @@ function check_unit_supply() {
     LOCAL_STATUS = "check_unit_supply"
     LOCAL_STATE = {}
     P.check_unit_supply._begin()
-    P.check_unit_supply.prompt()
     update_header()
     on_update()
 }
@@ -969,7 +967,6 @@ function on_update() {
     if (LOCAL_STATE) {
         G.actions = LOCAL_STATE.actions
         G.actions.proxy = 1
-        view.prompt = LOCAL_STATE.prompt
     }
 
     update_role_info()
@@ -1228,7 +1225,6 @@ function proxy_send_action(a, b) {
             return
         }
         var a = P[LOCAL_STATUS][a](b)
-        P[LOCAL_STATUS].prompt()
         update_header()
         return a
     } else {
@@ -1315,7 +1311,12 @@ function escape_text(text) {
 }
 
 function on_prompt(text) {
-    return escape_text(text)
+    if (LOCAL_STATUS) {
+        P[LOCAL_STATUS].prompt()
+        return escape_text(LOCAL_STATE.prompt)
+    } else {
+        return escape_text(text)
+    }
 }
 
 function on_log(text) {
