@@ -885,6 +885,7 @@ P.check_unit_supply = {
         }
         if (!LOCAL_STATE.unit) {
             LOCAL_STATE.actions.unit = [...Array(data.pieces.length).keys()].filter(u => G.location[u] <= LAST_BOARD_HEX)
+            LOCAL_STATE.actions.action_hex = [CHINA_BOX]
         }
         view.prompt = "Select unit to check supply."
     },
@@ -896,6 +897,13 @@ P.check_unit_supply = {
     unit(u) {
         LOCAL_STATE.unit = u
         send_query({name: "check_unit_supply", u})
+    },
+    action_hex(h) {
+        if (h !== CHINA_BOX) {
+            return
+        }
+        LOCAL_STATE.unit = 1
+        send_query({name: "check_unit_supply", u: h})
     },
     show_supply(supply_data) {
         LOCAL_STATE.unit = supply_data.unit
@@ -913,7 +921,7 @@ P.check_unit_supply = {
             var start = hex_center(v[0])
             var finish
             var color = SUPPLY_TYPES[type].color
-            var d = index - 2
+            var d = index * 2 - 3
             CANVAS_CTX.strokeStyle = color
             CANVAS_CTX.fillStyle = color
             CANVAS_CTX.lineWidth = 3;
@@ -921,7 +929,7 @@ P.check_unit_supply = {
                 start = hex_center(v[j - 1])
                 finish = hex_center(v[j])
                 CANVAS_CTX.beginPath();
-                if (set_has(G.oos, LOCAL_STATE.supply_data.unit)) {
+                if (LOCAL_STATE.supply_data.oos) {
                     CANVAS_CTX.setLineDash([5, 3]);
                 }
                 CANVAS_CTX.moveTo(start[0], start[1] + d);

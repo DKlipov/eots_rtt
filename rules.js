@@ -411,9 +411,6 @@ for (let i = 0; i <= LAST_BOARD_HEX; ++i) {
         if (border & WATER) {
             border |= UNPLAYABLE_WATER
         }
-        if (i % 29 >= 27) {
-            hex.supply_source |= JOINT_SUPPLIED_HEX
-        }
         hex.coastal = hex.coastal || (border & WATER)
         hex.edges_int = hex.edges_int | (border << 5 * j)
     }
@@ -3375,11 +3372,11 @@ function mark_supply_ports_oversea(hq, piece) {
 }
 
 function supply_source_in_range(location, faction) {
+    L.supply.port_queue = [location]
+    L.supply.port_retracing = [location]
     if (G.supply_cache[location] & JP_SUPPLY_PORT << faction) {
         return true
     }
-    L.supply.port_queue = [location]
-    L.supply.port_retracing = [location]
     const distance_map = []
     map_set(distance_map, location, 0)
 
@@ -3398,10 +3395,8 @@ function supply_source_in_range(location, faction) {
             if (distance > SUPPLY_PORT_RANGE || occupied_land || distance >= map_get(distance_map, nh, [100])) {
                 continue
             }
-            if (distance < SUPPLY_PORT_RANGE) {
-                L.supply.port_queue.push(nh)
-                L.supply.port_retracing.push(item)
-            }
+            L.supply.port_queue.push(nh)
+            L.supply.port_retracing.push(item)
             if (G.supply_cache[nh] & JP_SUPPLY_PORT << faction) {
                 return true
             }
@@ -3416,13 +3411,15 @@ function supply_source_in_range(location, faction) {
 function mark_hexes_supplied_kunming() {
     var i = 0
     const location = KUNMING
-    var queue = []
+    L.supply.queue = []
+    L.supply.retracing = []
     var overland_set = [KUNMING, 0]
     const supply_type = JOINT_SUPPLIED_HEX
     G.supply_cache[location] = G.supply_cache[location] | supply_type
-    queue.push(location)
-    for (; i < queue.length; i++) {
-        let item = queue[i]
+    L.supply.queue.push(location)
+    L.supply.retracing.push(location)
+    for (; i < L.supply.queue.length; i++) {
+        let item = L.supply.queue[i]
         let nh_list = get_near_hexes(item)
         const distance_base = map_get(overland_set, item)
         for (let j = 0; j < nh_list.length; j++) {
@@ -3434,9 +3431,8 @@ function mark_hexes_supplied_kunming() {
             if (distance > SUPPLY_PORT_RANGE || map_get(overland_set, nh, 100) <= distance) {
                 continue
             }
-            if (distance < SUPPLY_PORT_RANGE) {
-                queue.push(nh)
-            }
+            L.supply.queue.push(nh)
+            L.supply.retracing.push(item)
             map_set(overland_set, nh, distance)
             G.supply_cache[nh] = G.supply_cache[nh] | supply_type
         }
@@ -3476,7 +3472,7 @@ function mark_hexes_supplied_from(hq, piece, is_check_supply_space) {
             if (nh <= 0) {
                 continue
             }
-            const occupied_land = G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
+            const occupied_land = (G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction)) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
             if (!(MD.edges_int & GROUND << 5 * j) || occupied_land || map_get(overland_set, nh, 100) <= distance || distance > piece.cr) {
                 continue
             }
@@ -3537,7 +3533,7 @@ function mark_hexes_supplied_from(hq, piece, is_check_supply_space) {
             if (nh <= 0) {
                 continue
             }
-            const occupied_land = G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
+            const occupied_land = (G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction)) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
             if (!(MD.edges_int & GROUND << 5 * j) || occupied_land || map_get(overland_set, nh, 100) <= distance || distance > piece.cr) {
                 continue
             }
@@ -3687,11 +3683,15 @@ function check_burma_road() {
     }
     const faction = AP
     const location = KUNMING
-    var queue = [location]
+    if (!L.supply) {
+        L.supply = {}
+    }
+    L.supply.queue = [location]
+    L.supply.retracing = [location]
     var distance_map = [location, 0]
     var rangoon_achived = false
-    for (var i = 0; i < queue.length; i++) {
-        let item = queue[i]
+    for (var i = 0; i < L.supply.queue.length; i++) {
+        let item = L.supply.queue[i]
         let nh_list = get_near_hexes(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
@@ -3704,14 +3704,14 @@ function check_burma_road() {
                 continue
             }
             map_set(distance_map, nh, distance)
-
+            L.supply.queue.push(nh)
+            L.supply.retracing.push(item)
             if (nh === MADRAS) {
                 G.burma_road = 0
                 return
             } else if (nh === RANGOON) {
                 rangoon_achived = true
-            } else {
-                queue.push(nh)
+                i++
             }
         }
     }
@@ -3719,10 +3719,11 @@ function check_burma_road() {
         check_hump()
         return;
     }
-    queue = [RANGOON]
+    L.supply.queue.push(RANGOON)
+    L.supply.retracing.push(0)
     distance_map = [RANGOON, 0]
-    for (i = 0; i < queue.length; i++) {
-        let item = queue[i]
+    for (i = L.supply.queue.length - 1; i < L.supply.queue.length; i++) {
+        let item = L.supply.queue[i]
         let nh_list = get_near_hexes(item)
         var MD = get_map_data(item)
         for (let j = 0; j < nh_list.length; j++) {
@@ -3734,11 +3735,11 @@ function check_burma_road() {
                 continue
             }
             map_set(distance_map, nh, 1)
+            L.supply.queue.push(nh)
+            L.supply.retracing.push(item)
             if (nh === MADRAS || get_map_data(nh).supply_source & JOINT_SUPPLIED_HEX) {
                 G.burma_road = 0
                 return
-            } else {
-                queue.push(nh)
             }
         }
     }
@@ -3935,6 +3936,15 @@ function fill_overstack(faction) {
     })
 }
 
+function place_virtual_units() {
+    GARRISONED_CITY.forEach(h => {
+        if (is_space_controlled(h, JP) && (get_map_data(h).city === CHINESE_CITY || !set_has(G.garr_elim, h))) {
+            G.supply_cache[h] = G.supply_cache[h] | JP_GROUND_UNITS
+        }
+    })
+    for_each_hex_in_range(KUNMING, 1, h => G.supply_cache[h] = G.supply_cache[h] | AP_GROUND_UNITS)
+}
+
 function check_supply() {
     var cur_time = Date.now()
     if (!L) {
@@ -3944,12 +3954,7 @@ function check_supply() {
     G.supply_cache = []
     G.burma_road = 0
     for_each_unit_on_map(mark_unit)
-    GARRISONED_CITY.forEach(h => {
-        if (is_space_controlled(h, JP) && (get_map_data(h).city === CHINESE_CITY || !set_has(G.garr_elim, h))) {
-            G.supply_cache[h] = G.supply_cache[h] | JP_GROUND_UNITS
-        }
-    })
-    for_each_hex_in_range(KUNMING, 1, h => G.supply_cache[h] = G.supply_cache[h] | AP_GROUND_UNITS)
+    place_virtual_units()
     check_infrastructure()
     var oos_units = [[], []]
     G.oos = []
@@ -11458,17 +11463,32 @@ function get_nation_info(nation) {
 
 function supply_query(unit) {
     L = {supply: {}}
+
     var result = {unit, path: {}}
     var piece = pieces[unit]
     var location = G.location[unit]
-    var oos = set_has(G.oos, unit)
-    clear_supply_cache(CLEAN_SUPPLY_MASK[1 - piece.faction])
-    for_each_unit_on_map((i, p) => (!oos || p.faction === piece.faction) ? mark_unit(i, piece) : null)
+    result.oos = set_has(G.oos, unit)
+    if (unit === CHINA_BOX) {
+        piece = pieces[ap_army("5_cn")]
+        location = KUNMING
+        result.oos = G.burma_road === 2
+        result.hq = -1
+    }
+    G.supply_cache = []
+    for_each_unit_on_map((i, p) => (!result.oos || p.faction === piece.faction) ? mark_unit(i, p) : null)
+    place_virtual_units()
     check_infrastructure()
-    for_each_unit_on_map((i, p) => (!oos || p.faction === piece.faction) ? set_zoi(i, p, [G.oos, G.oos]) : null)
+    for_each_unit_on_map((i, p) => (!result.oos || p.faction === piece.faction) ? set_zoi(i, p, [G.oos, G.oos]) : null)
     mark_supply_eligable_ports(piece.faction)
-    var supply_ports = L.supply
+    L.supply_ports = L.supply
     L.supply = {}
+    if (unit === CHINA_BOX) {
+        trace_kunming(result)
+        return result
+    }
+    if (piece.class === "hq") {
+        result.hq = unit
+    }
     HQ_LIST.forEach(hq => {
         var hq_piece = pieces[hq]
         if (result.hq || G.location[hq] >= LAST_BOARD_HEX || !(hq_piece.supply & piece.supply) || get_distance(location, G.location[hq]) > hq_piece.cr
@@ -11478,24 +11498,49 @@ function supply_query(unit) {
         mark_hexes_supplied_from(hq, hq_piece, l => l === location)
         if (G.supply_cache[location] & piece.supply) {
             result.hq = hq
+            L.supply.queue = L.supply.queue.slice(0, L.supply.queue.indexOf(location) + 1)
             result.path.to_hq = retrace_supply_path(location)
             if (L.supply.port_queue) {
                 L.supply.queue = L.supply.port_queue
                 L.supply.retracing = L.supply.port_retracing
                 result.path.to_port = retrace_supply_path(L.supply.queue[L.supply.queue.length - 1])
                 result.supply_port = result.path.to_port[0]
-                L.supply.queue = supply_ports.queue
-                L.supply.retracing = supply_ports.retracing
+                L.supply.queue = L.supply_ports.queue
+                L.supply.retracing = L.supply_ports.retracing
                 result.path.from_port = retrace_supply_path(result.supply_port)
             }
         }
     })
-    L = {supply: {}}
+    L.supply = {}
     if (result.hq) {
         check_hq_in_supply(result.hq, pieces[result.hq], piece.faction === AP ? JOINT_SUPPLIED_HEX : JP_SUPPLIED_HEX)
         result.path.to_source = retrace_supply_path(L.supply.queue[L.supply.queue.length - 1])
+    } else if (piece.faction === AP && (G.burma_road < 2 || result.oos)) {
+        mark_hexes_supplied_kunming()
+        if (G.supply_cache[location] & piece.supply) {
+            result.path.to_hq = retrace_supply_path(location)
+        }
+        trace_kunming(result)
     }
     return result
+}
+
+function trace_kunming(result) {
+    if (G.burma_road === 0 || result.oos) {
+        if (result.oos) {
+            G.control = []
+        }
+        check_burma_road()
+        result.path.to_source = retrace_supply_path(L.supply.queue[L.supply.queue.length - 1])
+    } else {
+        var airfields = [DACCA, JARHAT].filter(h => G.supply_cache[h] & AP_SUPPLY_AIRFIELD)
+        if (airfields.length) {
+            L.supply.queue = L.supply_ports.queue
+            L.supply.retracing = L.supply_ports.retracing
+            result.path.from_port = retrace_supply_path(airfields[0])
+            result.path.to_port = [KUNMING, airfields[0]]
+        }
+    }
 }
 
 function retrace_supply_path(location) {
