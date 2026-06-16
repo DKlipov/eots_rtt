@@ -7542,7 +7542,7 @@ function filter_activation_units(condition, faction) {
 
 function could_play(card) {
     var faction = card.faction
-    return get_hand(faction).length && !set_has(G.discard[faction], card.c) && !set_has(G.removed[faction], card.c) && scenario_data().has_card(card.c)
+    return get_hand(faction).length && !set_has(G.discard[faction], card.c) && !set_has(G.removed[faction], card.c) && scenario_data().has_card(card.c) && G.active === faction
 }
 
 function trigger_event(stage, arg) {
