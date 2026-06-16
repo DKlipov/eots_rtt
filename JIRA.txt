@@ -1,4 +1,5 @@
 Todo list:
+* update disengadgenement (it fulfill card condition)
 * less annoying piece tooltip
 * big refactoring
 * fuzz-buzz testing
@@ -6,6 +7,10 @@ Todo list:
 * stack refactoring
 * Mobile resizing lags & bugs
 * imporve repair of eliminated units
+* avoid accidentially skip reation
+* update AP battle box color
+* log units in battle
+* log unit movement type
 
 Bugs
 

@@ -1072,6 +1072,7 @@ function on_update() {
             update_keyword("zoi_hex", hex, "contested", (zoi_state & 3) === 3)
             update_keyword("zoi_hex", hex, "jp", (zoi_state & 1) === 1)
             update_keyword("zoi_hex", hex, "ap", (zoi_state & 2) === 2)
+            update_keyword("zoi_hex", hex, "yellow", set_has(world.focused, hex))
         }
     }
 
@@ -1994,6 +1995,38 @@ function unit_tooltip_image(a, onoff) {
     }
 }
 
+function for_each_hex_in_range(hex, range, lambda) {
+    lambda(hex)
+    const y = hex % 29
+    const x = (hex - y) / 29
+    const d = x % 2
+    var i
+
+    for (var j = -range; j <= range; j++) {
+        if (x + j < 0 || x + j > 50) {
+            continue
+        }
+        const d2 = Math.abs(j) % 2
+        var current = (x + j) * 29 + y
+        lambda(current)
+        var limit = (range - d2) / 2 + (1 - d) * d2 + Math.floor((range - Math.abs(j)) / 2)
+        i = 0
+        while (current % 29 > 0 && i < limit) {
+            current -= 1
+            lambda(current)
+            i++
+        }
+        limit = (range - d2) / 2 + d * d2 + Math.floor((range - Math.abs(j)) / 2)
+        current = (x + j) * 29 + y
+        i = 0
+        while ((current) % 29 < 28 && i < limit) {
+            current += 1
+            lambda(current)
+            i++
+        }
+    }
+}
+
 function on_focus_unit_tip(a) {
     world.tip.hidden = false//is_mobile()
     const piece = data.pieces[a]
@@ -2003,12 +2036,21 @@ function on_focus_unit_tip(a) {
         world.tip.innerHTML += `<div class="unit-tip piece ${piece.counter} reduced"></div>`
     }
     world.tip.classList = "zoomed"
+    if (piece.class === "hq" && G.location[a] < LAST_BOARD_HEX && !world.focused.length) {
+        world.focused = []
+        for_each_hex_in_range(G.location[a], piece.cr, h => set_add(world.focused, h))
+        on_update()
+    }
 }
 
 function on_blur_unit_tip() {
     world.tip.hidden = true
     world.tip.innerHTML = ""
     world.tip.classList = ''
+    if (world.focused.length) {
+        world.focused = []
+        on_update()
+    }
 }
 
 function on_focus_card_tip(c) {

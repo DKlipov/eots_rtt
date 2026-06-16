@@ -9734,6 +9734,7 @@ P.turkey_shoot = {
     },
     done() {
         push_undo()
+        check_supply()
         end()
     }
 }
