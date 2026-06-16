@@ -707,3 +707,17 @@ div[data-tooltip]:after {
 .nation_info > dt {
     margin-left: 20px;
 }
+
+.d-piece{
+    position: relative;
+}
+
+.unit-grid{
+	display: grid;
+	grid-template-columns: 50px 50px 50px 50px 50px;
+}
+
+.big-unit-grid{
+	display: grid;
+	grid-template-columns: 50px 50px 50px 50px 50px;
+}

@@ -11364,6 +11364,8 @@ function on_query(q, params, b) {
         return vp_query()
     } else if (q === "pw_check") {
         return pw_query()
+    } else if (q === "elim_check") {
+        return elim_query()
     }
 }
 
@@ -11390,6 +11392,12 @@ function pw_query() {
         result.nations.push(get_japan_info())
     }
     return result
+}
+
+function elim_query(){
+    // all informations are already transmitted to the play.js side by the G sync
+    // so we do nothing here
+    return []
 }
 
 function get_china_info() {
