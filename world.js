@@ -98,7 +98,7 @@ const world = {
 	animate_list: [],
 	keyword_list: [],
 	text_list: [],
-	focused: [],
+	focused: null,
 	log_boxes: [],
 	violations: [],
 	window_list: [],

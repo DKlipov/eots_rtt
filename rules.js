@@ -993,7 +993,7 @@ function get_replacement_points() {
     var result = []
     L.replacement_points = result
     if (G.active === JP) {
-        G.reinforcements.NAVAL += ([3, 4, 11].includes(G.turn) ? 1 : 0)
+        G.reinforcements[NAVAl_REP] += ([3, 4, 11].includes(G.turn) ? 1 : 0)
         result[NAVAl_REP] = G.reinforcements[NAVAl_REP]
         result[AIR_REP] = G.reinforcements[AIR_REP]
         L.divisions = Math.min(2, G.china_divisions)
@@ -1047,13 +1047,13 @@ function get_S_P_replacement_points() {
 function print_reinforcements() {
     var reinf = L.replacement_points
     var string = ""
-    if (reinf[NAVAl_REP] !== undefined) {
+    if (reinf[NAVAl_REP] > 0 || reinf[NAVAl_REP] === 0) {
         string += `${G.active === AP ? "US Naval" : "Naval"}: ${reinf[NAVAl_REP]}`
     }
     if (reinf[COMMONWEALTH_REP] !== undefined) {
         string += `, Commonwealth: ${reinf[COMMONWEALTH_REP]}`
     }
-    if (reinf[AIR_REP] !== undefined) {
+    if (reinf[AIR_REP] > 0 || reinf[AIR_REP] === 0) {
         string += `, Air: ${reinf[AIR_REP]}`
     }
     if (reinf[GROUND_REP] !== undefined) {
@@ -2893,9 +2893,55 @@ P.move_offensive_units = {
         L.move_type = ANY_MOVE
         L.spec_move = 0
         check_supply()
+        this.check_disengagement(hex, curr_path)
         this.check_dist_attack(hex)
     },
     check_dist_attack(hex) {
+        var move_hexes = L.allowed_hexes
+        L.allowed_hexes = []
+        var escort = G.offensive.active_units[R].filter(u => {
+            var piece = pieces[u]
+            return G.location[u] === hex && piece.br && piece.class === "naval"
+        }).length
+        var piece = pieces[G.active_stack[0]]
+        var distant_attack =
+            (L.move_data.battle_range || escort)
+            && G.active_stack.length >= 1
+            && !set_has(G.offensive.battle_hexes, hex)
+            && G.offensive.stage !== POST_BATTLE_STAGE
+            && (G.offensive.stage === REACTION_STAGE || !is_b29_bombed(piece))
+        if (L.movable_units.length <= 0 && distant_attack) {
+            goto("choose_attack_hex", {move_hexes})
+        } else if (distant_attack) {
+            call("choose_attack_hex", {move_hexes})
+        } else if (L.movable_units.length <= 0) {
+            G.active_stack = []
+            end()
+        } else {
+            G.active_stack = []
+        }
+    },
+    check_disengagement(hex, path) {
+        if (true) {
+            return;
+        }
+        if (!(path[0] & GROUND_MOVE)) {
+            return
+        }
+        var bh = [0, 0]
+        var disengagement_hexes = get_disengagement_hexes(hex)
+        if (!disengagement_hexes.length) {
+            return;
+        }
+        for_each_unit_on_map((u, piece, location) => {
+            if (piece.class === "ground" && location === hex) {
+                bh[piece.faction] += set_has(G.reduced, u) ? piece.rcf : piece.cf
+                if (piece.faction !== G.offensive.attacker) {
+                    set_add(L.allowed_units, u)
+                }
+            }
+        })
+        P.ground_disengagement
         var move_hexes = L.allowed_hexes
         L.allowed_hexes = []
         var escort = G.offensive.active_units[R].filter(u => {
@@ -6298,7 +6344,7 @@ P.offensive_sequence = script(`
         trigger_event("before_reaction")
     }
     log ("#GOffensive reaction")
-    call ground_disengagement
+
     call special_reaction
     set G.offensive.all_bh G.offensive.battle_hexes.slice()
     call define_intelligence_condition
@@ -8510,7 +8556,7 @@ P.paratroopers = {
         for_each_unit_on_map((u, piece, location) => {
             if (piece.faction === JP) {
                 return
-            } else if (piece.service === "du" && !set_has(duth_hexes, location)) {
+            } else if (piece.service === "du" && piece.size === 1 && piece.class === "ground" && !set_has(duth_hexes, location)) {
                 set_add(duth_hexes, location)
             } else {
                 set_add(occupied_hexes, location)
@@ -10415,7 +10461,7 @@ P.arcadia = {
     discard() {
         G.hand[AP] = []
         G.draw[AP].push(find_card(AP, 4))
-        log(`Ap chooses 5 random cards.`)
+        log(`AP chooses 5 random cards.`)
         clear_undo()
         while (G.hand[AP].length < 5) {
             draw_card(AP)
@@ -10467,6 +10513,7 @@ P.japan_init_1942 = {
     card(c) {
         push_undo()
         discard_card(c)
+        log(`JP discard ${card_get_log_str(c)} and draw ${card_get_log_str(find_card(JP, 47))}.`)
         draw_specific_card(find_card(JP, 47))
     },
     skip() {

@@ -494,6 +494,7 @@ function on_init(scenario, game_options, static_view) {
     init_preference_checkbox("nopath", false)
     init_preference_checkbox("fullcontrol", false)
     init_preference_checkbox("hidezoi", false)
+    init_preference_checkbox("hiderange", false)
 
     world.tip.addEventListener("touchstart", function () {
         on_blur_tip()
@@ -1072,10 +1073,16 @@ function on_update() {
             update_keyword("zoi_hex", hex, "contested", (zoi_state & 3) === 3)
             update_keyword("zoi_hex", hex, "jp", (zoi_state & 1) === 1)
             update_keyword("zoi_hex", hex, "ap", (zoi_state & 2) === 2)
-            update_keyword("zoi_hex", hex, "yellow", set_has(world.focused, hex))
         }
     }
+    if (world.focused && !get_preference("hiderange", false)) {
+        var focused = []
+        for_each_hex_in_range(G.location[world.focused], data.pieces[world.focused].cr, hex => set_add(focused, hex))
+        for (var hex of ALL_BOARD_HEXES) {
+            update_keyword("zoi_hex", hex, "yellow", set_has(focused, hex))
+        }
 
+    }
 
     print_violations()
 
@@ -1913,7 +1920,7 @@ function get_piece_elem(p) {
 function sub_piece(match, p1) {
     const piece_id = p1 | 0
     const name = data.pieces[piece_id].name
-    return `<span class="piece-tip" onclick="on_click_piece_tip(${piece_id})" onmouseenter="on_focus_piece_tip(${piece_id})" onmouseleave="on_blur_tip()">${name}</span>`
+    return `<span class="piece-tip" onclick="on_click_piece_tip(${piece_id})" onmouseenter="on_focus_piece_tip(${piece_id})" onmouseleave="on_blur_piece_tip(${piece_id})">${name}</span>`
 }
 
 function on_click_piece_tip(z) {
@@ -2036,9 +2043,11 @@ function on_focus_unit_tip(a) {
         world.tip.innerHTML += `<div class="unit-tip piece ${piece.counter} reduced"></div>`
     }
     world.tip.classList = "zoomed"
-    if (piece.class === "hq" && G.location[a] < LAST_BOARD_HEX && !world.focused.length) {
-        world.focused = []
-        for_each_hex_in_range(G.location[a], piece.cr, h => set_add(world.focused, h))
+    if (piece.class === "hq" && G.location[a] < LAST_BOARD_HEX && world.focused !== a) {
+        world.focused = a
+        on_update()
+    } else if (piece.class !== "hq" && world.focused) {
+        world.focused = null
         on_update()
     }
 }
@@ -2047,8 +2056,8 @@ function on_blur_tip() {
     world.tip.hidden = true
     world.tip.innerHTML = ""
     world.tip.classList = ''
-    if (world.focused.length) {
-        world.focused = []
+    if (world.focused) {
+        world.focused = null
         on_update()
     }
 }
