@@ -5771,7 +5771,7 @@ P.ground_bombardment = {
             L.allowed_units.forEach(u => action_unit(u))
         }
 
-        prompt(`Choose one survived ground step.`)
+        prompt(`Assign hits. (One step should survive).`)
         if (!L.allowed_units.length) {
             button("done")
         }

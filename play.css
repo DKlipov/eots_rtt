@@ -413,6 +413,11 @@ div[data-tooltip]:after {
     /*box-sizing: border-box;*/
 }
 
+.transparent {
+    border: none !important;
+    opacity: 0.4;
+}
+
 .piece {
     border: 1px solid black;
 }

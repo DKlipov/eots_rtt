@@ -41,6 +41,7 @@ function toggle_markers_and_pieces() {
 	} else {
 		document.body.classList.add("hide-pieces")
 	}
+	on_update()
 }
 
 function is_disabled_button(action, id) {

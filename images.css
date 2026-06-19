@@ -50,6 +50,7 @@
 .small_units_yellow { background-image: url(pieces150/small_units_yellow.150.png); background-size: 735px 70px; }
 .small_units_yellow_air { background-image: url(pieces150/small_units_yellow_air.150.png); background-size: 455px 70px; }
 .small_markers_white { background-image: url(pieces150/small_markers_white.150.png); background-size: 70px 70px; }
+.small_markers_white.transparent { background-image: url(pieces150/transparent_markers_white.150.png); background-size: 70px 70px; }
 
 
 /* CARDS (1x) */

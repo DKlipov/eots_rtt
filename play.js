@@ -5,6 +5,22 @@ const CHECK_SUPPLY = 1
 var LOCAL_STATE = null
 var STORED_STATE = null
 
+//binary mask
+const JP_ZOI = 1 << 0
+const AP_ZOI = 1 << 1
+const JP_ZOI_NTRL = 1 << 2
+const AP_ZOI_NTRL = 1 << 3
+const JP_ZOI_DISABLED = 1 << 4
+const AP_ZOI_DISABLED = 1 << 5
+const JP_AIR_UNITS = 1 << 6
+const AP_AIR_UNITS = 1 << 7
+const JP_GROUND_UNITS = 1 << 8
+const AP_GROUND_UNITS = 1 << 9
+const JP_NAVAL_UNITS = 1 << 10
+const AP_NAVAL_UNITS = 1 << 11
+const JP_HQ_UNITS = 1 << 12
+const AP_HQ_UNITS = 1 << 13
+const JP_UNITS = JP_AIR_UNITS | JP_GROUND_UNITS | JP_NAVAL_UNITS | JP_HQ_UNITS
 
 const P = {}
 const LAST_BOARD_HEX = 1478
@@ -80,18 +96,14 @@ const CANVAS_CTX = document.getElementById("canvas").getContext("2d")
 const RESOURCE_HEX = [...Array(data.map.length).keys()].filter(h => data.map[h].resource).map(h => hex_to_int(data.map[h].id))
 
 const BR_REGIONS = ["India", "Ceylon", "NIndia", "Burma", "Siam", "Malaya", "Sumatra", "Indochina"]
-const JP_REGIONS = ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Siam", "Caroline", "Japan"]
-const JP_BOUNDARIES = [];
-
-[...Array(data.map.length).keys()].map(h => data.map[h]).filter(hex => (hex.airfield || hex.port || hex.port || hex.city) && JP_REGIONS.includes(hex.region))
-    .forEach(h => set_add(JP_BOUNDARIES, hex_to_int(h.id)))
-set_add(JP_BOUNDARIES, hex_to_int(3606))
-set_add(JP_BOUNDARIES, hex_to_int(2109))
+const JP_REGIONS = ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Siam", "Caroline", "Japan", "Marshall"]
+const JP_BOUNDARY_HEX = []
 
 const ROAD_EVENTS = Object.keys(data.events).filter(k => data.events[k].road).map(e => data.events[e])
 
 const REGIONS_BY_NATION = {}
 const HEX_BY_NATION = []
+
 
 for (var key of Object.keys(data.counters)) {
     data.counters[key] = "marker " + data.counters[key]
@@ -124,6 +136,9 @@ for (var i = 0; i < data.map.length; i++) {
         HEX_BY_NATION[hex] = -1
     } else {
         HEX_BY_NATION[hex] = -2
+    }
+    if (JP_REGIONS.includes(region)) {
+        set_add(JP_BOUNDARY_HEX, hex)
     }
 }
 
@@ -994,18 +1009,22 @@ function on_update() {
     if (G.pow <= 0) {
         G.capture = []
     }
-    var all_control = get_preference("fullcontrol", false)
+    var all_control = document.body.classList.contains("hide-pieces")
+    var vassal_control = get_preference("fullcontrol", false)
     for (var i = 0; i < G.control.length; i++) {
         var hn = HEX_BY_NATION[i]
         var cont = G.control[i]
         if (cont === AP && set_has(G.capture, i) && !all_control) {
             continue
         }
-        if (map_info.hex_check(i) && cont !== null && (all_control
-            || hn >= 0 && (G.surrender[HEX_BY_NATION[i]] > 0) == cont
+        var default_condition = (hn >= 0 && (G.surrender[HEX_BY_NATION[i]] > 0) == cont
             || hn === -1 && cont === AP
-            || hn === -2 && cont === JP)) {
-            populate_generic("s-loc", i, get_control_marker(i))
+            || hn === -2 && cont === JP)
+        var vassal_condition = (set_has(JP_BOUNDARY_HEX, i) + 0) === cont
+        if (map_info.hex_check(i) && cont !== null && (all_control || !is_faction_units(i, AP) && !is_faction_units(i, JP))
+            && (all_control || !vassal_control && default_condition || vassal_control && vassal_condition)
+        ) {
+            populate_generic("s-loc", i, get_control_marker(i) + (vassal_control ? " transparent" : ""))
         }
     }
     G.garr_elim.filter(h => G.control[h] === JP).forEach(h => populate_generic("s-loc", h, data.counters.no_garrison))
@@ -2067,4 +2086,8 @@ function on_focus_card_tip(c) {
     world.tip.innerHTML = ""
     const card = data.cards[c]
     world.tip.classList = `card card_${card.faction ? "ap" : "jp"}_${card.num}`
+}
+
+function is_faction_units(hex, faction) {
+    return G.supply_cache[hex] & JP_UNITS << faction
 }
