@@ -316,7 +316,7 @@ body.Allies #jp_hand {
     pointer-events: none;
     background-color: oldlace;
     border: 1px solid black;
-    border-radius: 5px;
+    /*border-radius: 5px;*/
     padding: 0 5px;
     width: max-content;
     display: none;
@@ -404,7 +404,8 @@ div[data-tooltip]:after {
 .piece.action, .marker.action {
     pointer-events: auto;
     border-color: yellow;
-    box-shadow: 0 0 2px black, inset 0 0 2px black;
+    box-shadow: 0 0 0 1px black, inset 0 0 0 1px black;
+    /*box-shadow: 0 0 2px black, inset 0 0 2px black;*/
     border-width: 4px;
     /*box-shadow: 0 0 0 3px lime; border-color: #000;*/
     /*border-color: transparent;*/
@@ -428,7 +429,7 @@ div[data-tooltip]:after {
     position: absolute;
     /*background-size: auto 100%;*/
     background-repeat: no-repeat;
-    border-radius: 5px;
+    /*border-radius: 5px;*/
     width: 35px;
     height: 35px;
     background-size: 35px 35px;
@@ -447,7 +448,7 @@ div[data-tooltip]:after {
 .unit-tip {
     transition: left 200ms, top 200ms;
     background-repeat: no-repeat;
-    border-radius: 5px;
+    /*border-radius: 5px;*/
     width: 35px;
     height: 35px;
     background-size: 35px 35px;
@@ -700,7 +701,7 @@ div[data-tooltip]:after {
     vertical-align: -12px;
     margin: 2px;
     background-repeat: no-repeat;
-    border-radius: 5px;
+    /*border-radius: 5px;*/
     width: 35px;
     height: 35px;
     background-size: 35px 35px;
