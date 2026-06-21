@@ -3938,7 +3938,7 @@ data.cards = [
         "oc": 4,
         "remove": true,
         "china": 1,
-        "name": "Doolottle Raid Reprisal",
+        "name": "Doolittle Raid Reprisal",
     },
     {
         "num": 7,

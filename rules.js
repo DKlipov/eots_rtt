@@ -251,7 +251,7 @@ const TOJO_RESIGNS = find_card(JP, 43)
 const SHO_GO = find_card(JP, 45)
 const GENERAL_ADACHI = find_card(JP, 48)
 const MATADOR = find_card(AP, 5)
-const DOOLITLE_RAID = find_card(AP, 8)
+const DOOLITLE_RAID = find_card(AP, 6)
 const ROCHEFORT = find_card(AP, 12)
 const SKIP_BOMBING = find_card(AP, 24)
 const SANDCRAB = find_card(AP, 30)
@@ -709,7 +709,7 @@ function try_delay_reinforcement(u, piece, location) {
 
 function could_sent_to_europe(u) {
     var piece = pieces[u]
-    return (piece.faction === AP && G.wie >= 3 && (piece.service === "army" || piece.type === "cve"))
+    return (piece.faction === AP && G.wie >= 3 && (piece.service === "army" || piece.type === "cve") && !piece.b29)
 }
 
 function sent_to_europe(u) {
@@ -903,7 +903,7 @@ P.reinforcement_segment = {
                 button("delay")
             } else {
                 prompt(`Choose hex to place ${piece_get_log_str(G.active_stack[0])} as reinforcement.`)
-                if (pieces[G.active_stack[0]].class !== "hq") {
+                if (pieces[G.active_stack[0]].class !== "hq" && !pieces[G.active_stack[0]].b29) {
                     button("delay")
                 }
             }
@@ -3906,7 +3906,7 @@ P.check_overstacking = {
         if (set_has(G.oos, u)) {
             eliminate(u)
         } else {
-            displace_to_turn(u, 1, true)
+            displace_to_turn(u, 2, true)
         }
         set_delete(L.allowed_units, u)
         var still_overstack = is_overstack(location, u, 0)
@@ -10007,7 +10007,7 @@ cards[find_card(AP, 78)].can_play = function () {
 
 cards[find_card(AP, 78)].before_battles = function () {
     var allowed_units = x_craft_targets()
-    call("submarine_attack", {success: 9, card: find_card(AP, 78), pre_allowed_units: allowed_units})
+    call("submarine_attack", {success: 7, card: find_card(AP, 78), pre_allowed_units: allowed_units})
 }
 
 cards[SOVIET_INVADE].can_play = function () {
