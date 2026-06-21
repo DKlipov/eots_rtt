@@ -3906,7 +3906,7 @@ P.check_overstacking = {
         if (set_has(G.oos, u)) {
             eliminate(u)
         } else {
-            displace_to_turn(u, 2, true)
+            displace_to_turn(u, pieces[u].class === "naval" ? 1 : 2, true)
         }
         set_delete(L.allowed_units, u)
         var still_overstack = is_overstack(location, u, 0)
