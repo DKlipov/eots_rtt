@@ -10371,6 +10371,7 @@ function setup_scenario_1942(options) {
     //jp setup
     set_add(G.control, hex_to_int(1912))
     set_add(G.control, hex_to_int(2012))
+    set_add(G.control, hex_to_int(2709))
     setup_jp_unit(jp_army(38), 1913)
     setup_jp_unit(jp_army(15), 2109)
     setup_jp_unit(jp_army(28), 2110, true)
@@ -10907,7 +10908,7 @@ function setup_scenario_1944() {
     })
     for_each_unit_on_map(u => control_hex(G.location[u], pieces[u].faction))
     set_delete(G.control, hex_to_int(4122))
-    var jp_control = [1813, 2014, 2017, 2018, 2019, 2110, 2305, 2415, 2517, 3119, 3219, 3319, 3620, 3814]
+    var jp_control = [1813, 2014, 2017, 2018, 2019, 2110, 2305, 2415, 2517, 2709, 3119, 3219, 3319, 3620, 3814]
     jp_control.forEach(h => set_add(G.control, hex_to_int(h)))
 
     G.turn = 8
@@ -11197,6 +11198,7 @@ function on_setup(scenario, options) {
     }
     set_add(G.control, hex_to_int(2109))
     set_add(G.control, hex_to_int(3606))
+    set_delete(G.control, hex_to_int(2709))
     reset_offensive()
     construct_decks()
     for (let i = 1; i < pieces.length; i++) {

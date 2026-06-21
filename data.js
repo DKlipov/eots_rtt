@@ -380,7 +380,7 @@ data.pieces = [
         "lf": 10,
         "br": 3,
         "ebr": 5,
-        "rcf": 10,
+        "rcf": 5,
     },
     {
         id: "army_jp_1sn",
