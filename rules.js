@@ -2159,6 +2159,7 @@ function mark_asp_reaction_hexes(hex) {
         return;
     }
     const asp_capable = is_hex_asp_capable(hex)
+    const naval_present = is_faction_naval_units(hex, G.offensive.attacker)
     const location = hex
     G.supply_cache[location] |= HEX_TEMP_FLAG1
     const queue = [location]
@@ -2183,7 +2184,7 @@ function mark_asp_reaction_hexes(hex) {
             }
             map_set(distance_map, nh, distance)
             G.supply_cache[nh] |= HEX_TEMP_FLAG1
-            if (asp_capable) {
+            if (asp_capable && (!naval_present || is_faction_naval_units(nh, 1 - G.offensive.attacker))) {
                 G.supply_cache[nh] |= HEX_TEMP_FLAG2
             }
         }
@@ -2200,9 +2201,11 @@ function get_reaction_able_units() {
     for_each_unit_on_map((u, piece) => {
         if (piece.faction === R && piece.class === "ground" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG3) {
             set_add(L.reaction_able_units, u)
-        } else if (piece.faction === R && piece.class === "ground" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG2 && (has_asp || piece.organic)) {
+        } else if (piece.faction === R && piece.class === "ground" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG2 && has_asp && !piece.organic) {
             set_add(L.asp_ground_units, u)
         } else if (piece.faction === R && piece.class === "naval" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG1) {
+            set_add(L.reaction_able_units, u)
+        } else if (piece.faction === R && piece.class === "ground" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG2 && piece.organic) {
             set_add(L.reaction_able_units, u)
         }
     })
@@ -2454,6 +2457,12 @@ P.activate_units = {
         }
         if (L.kwai && G.offensive.active_units[R].filter(u => KWAI_HQ_MOD.includes(get_map_data(G.location[u]).region)).length) {
             L.hq_bonus += L.kwai
+        }
+        if (G.offensive.stage === REACTION_STAGE && L.asp_ground_units) {
+            var asp_used = G.offensive.active_units[R].filter(u => set_has(L.asp_ground_units, u)).length
+            if (asp_used) {
+                L.allowed_units = L.allowed_units.filter(u => !set_has(L.asp_ground_units, u))
+            }
         }
         apply_inter_service()
         trigger_event("after_unit_activation")
@@ -4856,6 +4865,10 @@ function is_faction_ground_units(hex, faction) {
     return G.supply_cache[hex] & JP_GROUND_UNITS << faction
 }
 
+function is_faction_naval_units(hex, faction) {
+    return G.supply_cache[hex] & JP_NAVAL_UNITS << faction
+}
+
 function is_space_controlled(hex, faction) {
     return faction === AP && hex === CHINA_BOX || is_controllable_hex(hex) && set_has(G.control, hex) == 1 - faction && (!G.non_control || !set_has(G.non_control, hex))
 }
@@ -5011,6 +5024,7 @@ function roll_intelligence_dice() {
         modifier += event_modifier
     }
     let result = random(10)
+    result = 0
     const success = result !== 9 && result + modifier <= card_value
     log(`${dice_get_log_str(result, modifier, 1 - G.offensive.attacker)} <= ${Math.min(card_value, 8)} (${success ? "SUCCESS" : "FAILED"}).`)
     clear_undo()
