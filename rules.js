@@ -5024,7 +5024,6 @@ function roll_intelligence_dice() {
         modifier += event_modifier
     }
     let result = random(10)
-    result = 0
     const success = result !== 9 && result + modifier <= card_value
     log(`${dice_get_log_str(result, modifier, 1 - G.offensive.attacker)} <= ${Math.min(card_value, 8)} (${success ? "SUCCESS" : "FAILED"}).`)
     clear_undo()
