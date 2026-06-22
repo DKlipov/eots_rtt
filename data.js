@@ -5723,7 +5723,7 @@ data.map = [
         edges: [1, 1, 17, 24, 8, 1]
     },
     {id: 3320, region: "Guinea", terrain: JUNGLE, edges: [8, 2, 3, 1, 1, 3]},
-    {id: 3420, region: "Guinea", terrain: JUNGLE, edges: [1, 3, 2, 2, 2, 3]},
+    {id: 3420, region: "Guinea", terrain: JUNGLE, edges: [1, 3, 2, 2, 2, 17]},
     {id: 3421, region: "Guinea", terrain: MOUNTAIN, edges: [2, 2, 2, 2, 1, 3]},
     {id: 3422, region: "Guinea", terrain: JUNGLE, edges: [2, 2, 3, 1, 17, 8]},
     {id: 3519, region: "Guinea", terrain: MIXED, edges: [1, 1, 1, 3, 3, 1]},
