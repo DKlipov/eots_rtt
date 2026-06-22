@@ -5108,8 +5108,12 @@ P.cancel_offensive = {
             end()
             return
         }
-        L.cancel = for_each_card((c, card) => {
-            return card.type === CANCEL && card.could_play()
+        L.cancel = 0
+        for_each_card((c, card) => {
+            if (card.type === CANCEL && card.could_play()) {
+                console.log(card.name)
+                L.cancel++
+            }
         })
         if (!L.cancel) {
             end()
@@ -7600,7 +7604,7 @@ function filter_activation_units(condition, faction) {
 
 function could_play(card) {
     var faction = card.faction
-    return get_hand(faction).length && !set_has(G.discard[faction], card.c) && !set_has(G.removed[faction], card.c) && scenario_data().has_card(card.c) && G.active === faction
+    return get_hand(faction).length && !set_has(G.discard[faction], card.c) && !set_has(G.removed[faction], card.c) && scenario_data().has_card(card.c) && G.active === faction && card.can_play()
 }
 
 function trigger_event(stage, arg) {
