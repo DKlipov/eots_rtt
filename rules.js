@@ -1636,8 +1636,11 @@ function get_named_intelligence(int) {
 }
 
 function play_event(c) {
-    log(`${card_get_log_str(c)} played.`)
     var faction = cards[c].faction
+    if (G.future_offensive[faction] === c) {
+        log(`${side_get_log_str(faction)} played FO card.`)
+    }
+    log(`${card_get_log_str(c)} event played.`)
     if (cards[c].draw) {
         into_turn_draw(faction)
     }
@@ -1660,6 +1663,9 @@ function activate_card(c) {
     var faction = cards[c].faction
     G.offensive.active_cards.push(c)
     G.offensive.offensive_card = c
+    if (G.future_offensive[faction] === c) {
+        log(`${side_get_log_str(faction)} played FO card.`)
+    }
     discard_card(c)
     set_add(G.discard[faction], c)
     G.offensive.attacker = faction
