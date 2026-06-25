@@ -5360,7 +5360,7 @@ data.map = [
     },
     {
         id: 3014,
-        name: "Layte",
+        name: "Leyte",
         airfield: true,
         port: true,
         region: "Philippines",
