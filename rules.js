@@ -6838,9 +6838,9 @@ function set_control_over_nation(nation, only_ground = true) {
         var no_enemy_units = (only_ground && !is_faction_ground_units(i, 1 - faction)) || !is_faction_units(i, 1 - faction)
         var control_changed = is_controllable_hex(i) && no_enemy_units
         if (control_changed && faction === JP) {
-            set_add(G.control, i)
+            control_hex(i, JP)
         } else if (control_changed && faction === AP) {
-            set_delete(G.control, i)
+            control_hex(i, AP)
         }
     }
 }
