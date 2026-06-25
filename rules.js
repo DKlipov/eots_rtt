@@ -903,9 +903,6 @@ P.reinforcement_segment = {
                 button("delay")
             } else {
                 prompt(`Choose hex to place ${piece_get_log_str(G.active_stack[0])} as reinforcement.`)
-                if (pieces[G.active_stack[0]].class !== "hq" && !pieces[G.active_stack[0]].b29) {
-                    button("delay")
-                }
             }
             //debug
             button("auto")
