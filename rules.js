@@ -8468,8 +8468,9 @@ P.kamikaze_attack = {
                     }
                 })
             }
-            if (G.offensive.counter_offensive_card === SHO_GO && !G.offensive.sho_go) {
+            if (G.offensive.counter_offensive_card === SHO_GO && !G.offensive.sho_go && L.stage !== 1) {
                 action_card(SHO_GO)
+                button("bonus")
             }
         }
         if (L.allowed_units.length <= 0 || L.hits <= 0) {
@@ -8486,11 +8487,14 @@ P.kamikaze_attack = {
         check_supply()
         end()
     },
-    card(c) {
+    bonus() {
         push_undo()
         G.offensive.sho_go = 1
         L.hits += 1
         log(`+1 Kamikaze hit (Sho-Go).`)
+    },
+    card(c) {
+        this.bonus()
     },
     unit(u) {
         push_undo()
@@ -8509,6 +8513,10 @@ P.kamikaze_attack = {
             )
             L.stage++
             L.hits = 2
+            var kamikaze = G.offensive.active_cards.filter(c => cards[c].kamikaze)
+            if (kamikaze.length && G.offensive.counter_offensive_card === SHO_GO && !G.offensive.sho_go) {
+                this.bonus()
+            }
         } else {
             L.hits -= 1
             var bh = get_unit_battle_hex(u)

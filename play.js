@@ -1185,6 +1185,7 @@ function on_update() {
 
     action_button("roll", "Roll")
 
+    action_button("bonus", "Use Bonus")
     action_button("event", "Play Event")
     action_button("ops", "Play for Operations")
     action_button("hold", "Hold")
