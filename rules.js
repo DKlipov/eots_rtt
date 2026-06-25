@@ -776,7 +776,7 @@ function get_hq_reinforcement_hexes() {
             queue.push(i)
             set_add(overland_set, i)
             set_add(oversea_set, i)
-            if (get_map_data(i).port && is_space_controlled(i, faction) && !set_has(hqs, i)) {
+            if (get_map_data(i).port && is_space_controlled(i, faction) && !set_has(hqs, i) && !has_non_n_zoi(i, 1 - faction)) {
                 set_add(result, i)
             }
         }
@@ -810,7 +810,7 @@ function get_hq_reinforcement_hexes() {
             if (reachable) {
                 queue.push(nh)
             }
-            if (reachable && get_map_data(nh).port && is_space_controlled(nh, faction) && !set_has(hqs, nh)) {
+            if (reachable && get_map_data(nh).port && is_space_controlled(nh, faction) && !set_has(hqs, nh) && !has_non_n_zoi(i, 1 - faction)) {
                 set_add(result, nh)
             }
         }
