@@ -892,22 +892,22 @@ P.reinforcement_segment = {
     inactive: "place reinforcements",
     prompt() {
         if (L.europe.length) {
-            prompt(`Roll to sent to Europe. ${L.europe.length} units eligible.`)
+            prompt(`Sent to Europe die roll. ${L.europe.length} delayed units eligible.`)
             button("roll")
             return
         }
         if (G.active_stack.length) {
             L.allowed_hexes.forEach(hex => action_hex(hex))
             if (L.allowed_hexes.length === 0) {
-                prompt(`Choose hex to place ${piece_get_log_str(G.active_stack[0])} as reinforcement. (Not possible hexes).`)
+                prompt(`It's not possible to place ${piece_get_log_str(G.active_stack[0])} as a reinforcement. Press delay to move on to the next reinforcement.`)
                 button("delay")
             } else {
-                prompt(`Choose hex to place ${piece_get_log_str(G.active_stack[0])} as reinforcement.`)
+                prompt(`Choose hex to place ${piece_get_log_str(G.active_stack[0])} as a reinforcement.`)
             }
             //debug
             button("auto")
         } else if (L.europe1.length > 0) {
-            prompt(`Roll to sent delayed units to Europe. ${L.europe1.length} units eligible.`)
+            prompt(`Sent to Europe die roll. ${L.europe1.length} delayed units eligible.`)
             button("roll")
             return
         } else {
@@ -1251,7 +1251,7 @@ P.strategic_bombing = {
             button("done")
             return
         }
-        prompt("Choose units to strategic bombing.")
+        prompt("Choose units that wll conduct strategic bombing.")
         if (G.active_stack.length > 0) {
             button("roll")
         } else {
@@ -1354,22 +1354,22 @@ function deal_cards() {
     if (G.surrender[nations.CHINA.id] >= 5) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by China surrender.`)
+        log(`AP draw reduced by 1 due to China's surrender.`)
     }
     if (G.surrender[nations.INDIA.id] >= 4) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by unstable India.`)
+        log(`AP draw reduced by 1 due to India's surrender.`)
     }
     if (G.surrender[nations.AUSTRALIA.id]) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by Australia surrender.`)
+        log(`AP draw reduced by 1 due to Australia's surrender.`)
     }
     if (G.wie >= 10) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by War in Europe.`)
+        log(`AP draw reduced by 1 due to War in Europe at Level 4.`)
     }
     ap_cards = Math.max(ap_cards, 4)
     G.passes[AP] = Math.min(G.passes[AP], 2)
@@ -1403,7 +1403,7 @@ function S_P_deal_cards() {
     if (G.surrender[nations.CHINA.id] >= 5) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by China.`)
+        log(`AP draw reduced by 1 due to China's surrender.`)
     }
     log(`AP draw ${ap_cards} cards.`)
     if (G.passes[AP]) {
@@ -1896,7 +1896,7 @@ P.return_hq = {
     prompt() {
         mark_supplied_hexes(G.active)
         if (!G.active_stack.length) {
-            prompt(`Choose HQ return.`)
+            prompt(`Choose returning HQ.`)
             HQ_LIST.forEach(u => {
                 if (G.location[u] > TURN_BOX && pieces[u].faction === R) {
                     action_unit(u)
@@ -1997,7 +1997,7 @@ function get_china_offensive_modifiers() {
 P.china_offensive = {
     inactive: "commit China Offensive",
     prompt() {
-        prompt(`Roll to China Offensive.`)
+        prompt(`China Offensive Roll.`)
         button("roll")
     },
     roll() {
@@ -3078,7 +3078,7 @@ P.choose_attack_hex = {
     prompt() {
         var could_pass = could_stack_stop_here() && G.offensive.stage === ATTACK_STAGE
         if (!L.move_data.battle_range) {
-            prompt(`${offensive_card_header()} Commit units to escort. (No combat factor will be used!).`)
+            prompt(`${offensive_card_header()} Commit units to escort. (They will NOT contribute attack strength to the battle, only their defense strength!).`)
         } else {
             prompt(`${offensive_card_header()} Commit units to battle.${(!could_pass && G.offensive.stage === REACTION_STAGE && L.allowed_hexes.length === 0
             ) ? " (Reaction units must be committed to battle)." : ""}`)
@@ -4580,7 +4580,7 @@ P.ground_disengagement = {
             du.forEach(u => action_unit(u))
             button("done")
         } else {
-            prompt(`Choose hex to disengagement.`)
+            prompt(`Choose hex to move disengaging unit(s).`)
             L.allowed_hexes.forEach(h => action_hex(h))
         }
     },
