@@ -163,6 +163,7 @@ const BURMA_SCENARIO = 10
 const CAMPAIGN_SCENARIOS = [FULL_CAMPAIGN_SCENARIO, SHORT_CAMPAIGN_SCENARIO, EVEN_SHORT_CAMPAIGN_SCENARIO]
 
 const S_P_DECK = S_P_deck()
+const B_F_W_DECK = B_F_W_deck()
 
 const SCENARIO_DATA = [
     {
@@ -216,6 +217,16 @@ const SCENARIO_DATA = [
         last_turn: 12
     },
     {id: 9, name: "1944", setup: setup_scenario_1944, victory: victory_1944, one_year: true, last_turn: 10},
+    {
+        id: BURMA_SCENARIO, 
+        name: "Burma: The Forgotten War, 1943-1944", 
+        setup: setup_scenario_burma,
+        deal_cards: B_F_W_deal_cards,
+        replacement_points: get_B_F_W_replacement_points,
+        has_card: c => set_has(B_F_W_DECK, c),
+        victory: victory_burma, 
+        last_turn: 9
+    },
 ]
 
 SCENARIO_DATA.forEach(s => {
@@ -236,6 +247,14 @@ const SCENARIOS = SCENARIO_DATA.map(s => s.name)
 function S_P_deck() {
     var ap_draw = [8, 13, 20, 21, 23, 24, 25, 27, 28, 29, 31, 32, 36, 40, 43, 44, 46, 50, 52, 56, 64, 66, 81, 82]
     var jp_draw = [9, 13, 16, 17, 20, 23, 25, 27, 28, 29, 32, 33, 34, 35, 42, 44, 48, 49, 51, 52, 73, 75, 84, 85]
+    var deck = []
+    jp_draw.map(c => find_card(0, c)).forEach(c => set_add(deck, c))
+    ap_draw.map(c => find_card(1, c)).forEach(c => set_add(deck, c))
+    return deck
+}
+function B_F_W_deck() {
+    var ap_draw = [2, 7, 18, 19, 22, 26, 33, 34, 38, 39, 41, 42, 48, 49, 52, 57, 58, 59, 60, 77, 78, 81, 82, 83]
+    var jp_draw = [3, 4, 5, 6, 7, 8, 15, 16, 21, 22, 26, 33, 39, 40, 41, 42, 48, 49, 25, 50, 53, 54, 67, 82, 86]
     var deck = []
     jp_draw.map(c => find_card(0, c)).forEach(c => set_add(deck, c))
     ap_draw.map(c => find_card(1, c)).forEach(c => set_add(deck, c))
@@ -1404,6 +1423,42 @@ function S_P_deal_cards() {
         ap_cards -= 1
         G.passes[AP]++
         log(`AP draw reduced by China.`)
+    }
+    log(`AP draw ${ap_cards} cards.`)
+    if (G.passes[AP]) {
+        log(`AP receive ${G.passes[AP]} passes.`)
+    }
+    while (G.hand[AP].length < ap_cards) {
+        draw_card(AP)
+    }
+}
+function B_F_W_deal_cards(){
+    var jp_cards = 4
+    G.passes[JP] = 0
+    if (G.strategic_warfare) {
+        jp_cards -= G.strategic_warfare
+        log(`Strategic warfare reduces JP draw to ${jp_cards} (-${G.strategic_warfare}).`)
+        G.passes[JP] = 1
+    }
+    log(`JP receive ${jp_cards} cards.`)
+    if (G.passes[JP]) {
+        log(`JP receive ${G.passes[JP]} passes.`)
+    }
+    while (G.hand[JP].length < jp_cards) {
+        draw_card(JP)
+    }
+
+    let ap_cards = 4
+    G.passes[AP] = 0
+    if (G.surrender[nations.CHINA.id] >= 5) {
+        ap_cards -= 1
+        G.passes[AP]++
+        log(`AP draw reduced by China.`)
+    }
+    if (G.surrender[nations.INDIA.id] >= 4) {
+        ap_cards -= 1
+        G.passes[AP]++
+        log(`AP draw reduced by India.`)
     }
     log(`AP draw ${ap_cards} cards.`)
     if (G.passes[AP]) {
@@ -11100,6 +11155,108 @@ function setup_scenario_south_pacific() {
     log("!Empire of the Sun. South Pacific")
     log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
     call("offensive_phase")
+}
+
+function setup_scenario_burma(){
+    G.draw = [[], []]
+    G.removed = [[], []]
+    G.discard = [[], []]
+    for_each_card((i, card) => {
+        if (scenario_data().has_card(i)) {
+            G.draw[card.faction].push(i)
+        }
+    })
+
+    var removed = []
+    for (var i = 1; i < cards.length; i++) {
+        var faction = cards[i].faction
+        if (!set_has(G.draw[faction], i)) {
+            set_add(removed, i)
+        }
+    }
+
+    while (G.hand[AP].length < 3) {
+        draw_card(AP)
+    }
+
+    while (G.hand[JP].length < 2) {
+        draw_card(JP)
+    }
+
+
+    var surrender = [nations.AUSTRALIAN_MANDATES, nations.NEW_GUINEA]
+    surrender.forEach(n => {
+        G.surrender[n.id] = 1
+        set_control_over_nation(n)
+    })
+    G.surrender[nations.NEW_GUINEA.id] = 0
+    var ap_controlled = [5808, 3823, 4024, 4828]
+    ap_controlled.forEach(h => set_delete(G.control, hex_to_int(h)))
+    control_hex(hex_to_int(4719), JP)
+    control_hex(hex_to_int(3017), JP)
+    G.reduced = []
+
+    for_each_unit(u => G.location[u] = PERM_ELIMINATED)
+
+    //AP Setup  (same order as the setup table found in the rules p44)
+    setup_jp_unit(ap_air("14"), 2104)
+    setup_jp_unit(ap_air("14_lrb"), CHINA_BOX)
+    setup_jp_unit(ap_air("10_lrb"), 1805)
+    setup_jp_unit(find_piece("indomitable"), 1307)
+    setup_jp_unit(find_piece("warspite"), 1307)
+    setup_jp_unit(HQ_SEAC, 1805)
+    setup_jp_unit(ap_army("33"), 1905 )
+    setup_jp_unit(ap_air("seac"), 1905 )
+    setup_jp_unit(ap_air("seac_lrb"), 1905 )
+    setup_jp_unit(find_piece("london"), 1307)
+    setup_jp_unit(ap_army("1_ind"), 2205,true )
+    setup_jp_unit(ap_army("7"), 2006)
+    setup_jp_unit(ap_army("15"), 2006 )
+    setup_jp_unit(ap_army("4_ind"), 2105 )
+    
+    setup_jp_unit(ap_army("5_cn"), 2205 )
+    setup_jp_unit(ap_army("6_cn"), 2407, true )
+    setup_jp_unit(ap_army("66_cn"), 2407, true )
+
+    //jp setup (same order as the setup table found in the rules p44)
+    setup_jp_unit(jp_army("28"), 2007)
+    setup_jp_unit(jp_air("5"), 2008, true)
+    setup_jp_unit(jp_army("37"), 2008, true)
+    setup_jp_unit(find_piece("kamikaze"), 2008)
+    setup_jp_unit(jp_air("28"), 2102)
+    setup_jp_unit(jp_army("15"), 2106)
+    setup_jp_unit(jp_air("9"), 2110)
+    setup_jp_unit(jp_army("33"), 2206)
+    setup_jp_unit(HQ_JP_SOUTH, 2212)
+    setup_jp_unit(jp_army("38"), 2305, true)
+    setup_jp_unit(jp_air("8"), 2409)
+    setup_jp_unit(find_piece("zuiho"), SINGAPORE)
+    setup_jp_unit(find_piece("junyo"), SINGAPORE)
+    setup_jp_unit(find_piece("nagato"), SINGAPORE)
+
+    // todo Airbase on map Control Marker 1809 - Andaman
+
+    for (var i = 1; i < pieces.length; i++) {
+        if (G.location[i] === NON_PLACED_BOX && pieces[i].reinforcement) {
+            G.location[i] = TURN_BOX + pieces[i].reinforcement
+        }
+    }
+
+    G.turn = 6
+    G.political_will = 4
+    G.asp[JP] = [1, 0]
+    G.asp[AP] = [1, 0]
+    G.wie = 0
+    G.pow = 1
+    G.reinforcements = [2, 2]
+    G.surrender[nations.CHINA.id] = 2
+    G.inter_service = [1, 1]
+    G.china_divisions = 8
+
+    check_supply()
+    log("!Empire of the Sun. Burma: The Forgotten War, 1943-1944")
+    log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
+    call("burma_choose_offensive")
 }
 
 function future_offencive_card(card, turn) {
