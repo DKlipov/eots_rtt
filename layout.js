@@ -4,6 +4,9 @@ const layout = {
 	"box_air_unit_in_china": [852,407,121,75],
 	"box_isr_jp": [986,132,45,64],
 	"box_isr_us": [1048,132,45,64],
+	"box_eliminated": [100,1280,45,45],
+	"box_ap_reinf": [2298,544,45,45],
+	"box_jp_reinf": [1386,461,45,45],
 	"track_chinese_government": [603,130,281,63],
 	"track_japanese_divisions_available_china": [671,42,608,55],
 	"track_india_status": [396,51,250,55],
@@ -26,6 +29,9 @@ const layout = {
 	"track_strat_record": [602,691,313,47],
 	"track_strat_record_0_1": [335,687,177,118],
 	"track_strat_record_2": [513,691,88,47],
+	"box_eliminated": [50,680,45,45],
+	"box_ap_reinf": [823,583,45,45],
+	"box_jp_reinf": [58,103,45,45],
 },
 "burma" : {
 	"box_air_unit_in_china": [757,300,121,75],
@@ -40,6 +46,9 @@ const layout = {
 	"track_political_will": [731,732,517,64],
 	"track_wie": [871,590,377,45],
 	"track_strat_record": [779,672,467,53],
+	"box_eliminated": [50,680,45,45],
+	"box_ap_reinf": [823,583,45,45],
+	"box_jp_reinf": [58,103,45,45],
 },
 }
 
