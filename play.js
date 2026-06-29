@@ -570,13 +570,14 @@ function on_init(scenario, game_options, static_view) {
             define_board("#map", 1275, 825, [12, 12, 12, 12])
             map_info = BURMA_BOARD_INFO
 
-            define_s_loc(2015, map_layout.box_singapore)
-            define_thing("zoi_hex", 2015).layout(map_layout.box_singapore)
-            define_space("action_hex", 2015, map_layout.box_singapore)
-            define_thing("road", data.events.JARHAT_ROAD.id).layout([550, 286, 60, 60], "road_jarhat hide marker control")
-            define_thing("road", data.events.IMPHAL_ROAD.id).layout([551, 330, 60, 60], "road_imphal hide marker control")
-            define_thing("road", data.events.LEDO_ROAD.id).layout([601, 300, 60, 60], "road_ledo hide marker control")
-            define_thing("road", data.events.KWAI_RIVER_BRIDGE.id).layout([529, 501, 50, 95], "road_kwai hide marker control")
+            const singapore = hex_to_int(2015)
+            define_s_loc(singapore, map_layout.box_singapore)
+            define_thing("zoi_hex", singapore).layout(map_layout.box_singapore)
+            define_space("action_hex", singapore, map_layout.box_singapore)
+            define_thing("road", data.events.JARHAT_ROAD.id).layout([549, 286, 60, 60], "road_jarhat hide marker control")
+            define_thing("road", data.events.IMPHAL_ROAD.id).layout([550, 330, 60, 60], "road_imphal hide marker control")
+            define_thing("road", data.events.LEDO_ROAD.id).layout([600, 300, 60, 60], "road_ledo hide marker control")
+            define_thing("road", data.events.KWAI_RIVER_BRIDGE.id).layout([528, 501, 50, 95], "road_kwai hide marker control")
             break;
         }
         default: {
