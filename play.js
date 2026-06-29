@@ -422,7 +422,7 @@ function hex_in_map(x, y) {
     return x >= map_info.grid_x_offset &&
         y >= map_info.grid_y_offset &&
         x < map_info.grid_x_offset + map_info.ROW_HEX_NB &&
-        y < map_info.grid_x_offset + map_info.ROW_HEX_NB
+        y < map_info.grid_y_offset + map_info.COLUMN_HEX_NB
 }
 
 const MAIN_BOARD_INFO = {
@@ -451,26 +451,26 @@ const BURMA_BOARD_INFO = {
     "ROW_HEX_NB": 16,
     "grid_x_offset": 0,
     "grid_y_offset": 0,
-    "display_x_offset": 89.375,
-    "display_y_offset": 9.125,
-    "turn_a": 3,
-    "turn_b": 6,
-    "track_a": 3,
+    "display_x_offset": 48.375,
+    "display_y_offset": 53.375,
+    "turn_a": 6,
+    "turn_b": 9,
+    "track_a": 0,
     "track_b": 9,
     "wie_a": 7,
     "wie_b": 0,
-    "pw_a": 5,
+    "pw_a": 10,
     "pw_b": 0,
     "TURN_STACK_PARAMS": TURN_STACK_PARAMS,
-    "TRACK_STACK_PARAMS": TRACK_STACK_PARAMS,
+    "TRACK_STACK_PARAMS": VERTICAL_TURN_STACK_PARAMS,
     "hex_check": (i) => {
         let x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
         let y = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
 
 
-        if (y == 15 && x > 9) {
+        if (x == 15 && y > 9) {
             return false;
-        } else if (y == 16 && x > 9) {
+        } else if (x == 16 && y > 9) {
             return false;
         }
         return hex_in_map(x, y)
@@ -581,14 +581,15 @@ function on_init(scenario, game_options, static_view) {
             map_elem.classList.add("main");
             define_board("#map", 2550, 1650, [12, 12, 12, 12])
             map_info = MAIN_BOARD_INFO
-            define_thing("road", data.events.JARHAT_ROAD.id).layout([578, 286, 60, 60], "road_jarhat hide marker control")
-            define_thing("road", data.events.IMPHAL_ROAD.id).layout([579, 330, 60, 60], "road_imphal hide marker control")
-            define_thing("road", data.events.LEDO_ROAD.id).layout([629, 300, 60, 60], "road_ledo hide marker control")
-            define_thing("road", data.events.KWAI_RIVER_BRIDGE.id).layout([557, 501, 50, 95], "road_kwai hide marker control")
         }
     }
 
-
+    if(SID != SOUTH_PACIFIC_SCENARIO){
+        define_thing("road", data.events.JARHAT_ROAD.id).layout([578, 286, 60, 60], "road_jarhat hide marker control")
+        define_thing("road", data.events.IMPHAL_ROAD.id).layout([579, 330, 60, 60], "road_imphal hide marker control")
+        define_thing("road", data.events.LEDO_ROAD.id).layout([629, 300, 60, 60], "road_ledo hide marker control")
+        define_thing("road", data.events.KWAI_RIVER_BRIDGE.id).layout([557, 501, 50, 95], "road_kwai hide marker control")
+    }
     // used hexes
     var used_hex = []
     for (var i = 0; i < 60; ++i) {
@@ -655,7 +656,7 @@ function on_init(scenario, game_options, static_view) {
     define_layout_track_h("china", 5, 0, map_layout.track_chinese_government, 0)
 
     if (map_layout.track_japanese_divisions_available_china !== undefined) {
-        define_layout_track_h("divisions", 0, 12, map_layout.track_japanese_divisions_available_china, 0)
+        define_layout_track_h("divisions", 0, (SID == BURMA_SCENARIO ? 8 :12), map_layout.track_japanese_divisions_available_china, 0)
     }
     for (i = 0; i < 35; i++) {
         var battle = define_marker("battle", i, "conflict battle unit_status")
