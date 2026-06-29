@@ -1185,6 +1185,8 @@ function on_update() {
 
     action_button("roll", "Roll")
 
+    action_button("awaiting", "Await")
+    action_button("continue", "Continue")
     action_button("bonus", "Use Bonus")
     action_button("event", "Play Event")
     action_button("ops", "Play for Operations")
@@ -1234,6 +1236,7 @@ function on_update() {
     action_button("draw", "draw specific card(dbg)")
     action_button("auto", "auto(dbg)")
 
+    action_button("redo", "Redo")
     action_button("undo", "Undo")
     end_update()
 }

@@ -2684,63 +2684,15 @@ function get_move_buttons() {
 }
 
 P.move_to = script(`
-      call check_disengagement
+      set L.active G.active_stack
       call choose_attack_hex {move_hexes: L.L.allowed_hexes}
+      call prepare_disengagement
       eval {
         trigger_event("after_unit_move")
       }
       set L.L.allowed_hexes []
       set G.active_stack []
       `)
-
-P.check_disengagement = {
-    _begin() {
-        end()
-        return;
-        //hex, path
-        if (true) {
-            return;
-        }
-        if (!(path[0] & GROUND_MOVE)) {
-            return
-        }
-        var bh = [0, 0]
-        var disengagement_hexes = get_disengagement_hexes(hex)
-        if (!disengagement_hexes.length) {
-            return;
-        }
-        for_each_unit_on_map((u, piece, location) => {
-            if (piece.class === "ground" && location === hex) {
-                bh[piece.faction] += set_has(G.reduced, u) ? piece.rcf : piece.cf
-                if (piece.faction !== G.offensive.attacker) {
-                    set_add(L.allowed_units, u)
-                }
-            }
-        })
-        var move_hexes = L.allowed_hexes
-        L.allowed_hexes = []
-        var escort = G.offensive.active_units[R].filter(u => {
-            var piece = pieces[u]
-            return G.location[u] === hex && piece.br && piece.class === "naval"
-        }).length
-        var piece = pieces[G.active_stack[0]]
-        var distant_attack =
-            (L.move_data.battle_range || escort)
-            && G.active_stack.length >= 1
-            && !set_has(G.offensive.battle_hexes, hex)
-            && G.offensive.stage !== POST_BATTLE_STAGE
-            && (G.offensive.stage === REACTION_STAGE || !is_b29_bombed(piece))
-        if (L.movable_units.length <= 0) {
-            G.active_stack = []
-            end()
-        } else {
-            G.active_stack = []
-        }
-    },
-    inactive: "move units",
-    prompt() {
-    }
-}
 
 P.move_offensive_units = {
     _begin() {
@@ -3148,7 +3100,7 @@ function move_units(units, path) {
         return
     }
     var i = 3
-    var zoi_flag = !G.offensive.zoi_intelligence_modifier && G.offensive.stage === ATTACK_STAGE
+    var zoi_flag = !G.offensive.zoi_intelligence_modifier && G.offensive.stage === ATTACK_STAGE && pieces[units[0]].faction === G.offensive.attacker
     var zoi_generator_flag = G.active_stack.filter(u => pieces[u].zoi_generator).length
         || (path[0] & GROUND_MOVE) && G.active_stack.filter(u => pieces[u].class === "ground").length
     var enemy_faction = 1 - pieces[G.active_stack[0]].faction
@@ -4548,33 +4500,69 @@ function compute_ground_naval_strat_move() {
     map_delete(L.allowed_hexes, location)
 }
 
-P.ground_disengagement = {
+function get_disengagement_units() {
+    L.hex = G.location[L.L.active[0]]
+    L.cf_sum = [0, 0]
+    L.just_enetered = []
+    map_for_each(G.offensive.paths, (u, path) => {
+        var piece = pieces[u]
+        var location = G.location[u]
+        if (piece.faction === G.offensive.attacker && piece.class === "ground" && path[0] & GROUND_MOVE
+            && set_has(G.offensive.battle_hexes, location)) {
+            set_add(L.just_enetered, path[path.length - 2])
+        }
+    })
+    L.allowed_units = []
+    L.moved = []
+    for_each_unit_on_map((u, piece, location) => {
+        if (piece.class === "ground" && location === L.hex) {
+            L.cf_sum[piece.faction] += set_has(G.reduced, u) ? piece.rcf : piece.cf
+            if (piece.faction !== G.offensive.attacker && get_disengagement_hexes(location).length) {
+                set_add(L.allowed_units, u)
+            }
+        }
+    })
+}
+
+P.prepare_disengagement = {
     _begin() {
-        L.cf_sum = []
-        G.offensive.battle_hexes.forEach(b => {
-            map_set(L.cf_sum, b, [0, 0])
-        })
-        L.just_enetered = []
-        map_for_each(G.offensive.paths, (u, path) => {
-            var piece = pieces[u]
-            var location = G.location[u]
-            if (piece.faction === G.offensive.attacker && piece.class === "ground" && path[0] & GROUND_MOVE
-                && set_has(G.offensive.battle_hexes, location)) {
-                set_add(L.just_enetered, path[path.length - 2])
-            }
-        })
-        L.allowed_units = []
-        L.moved = []
-        for_each_unit_on_map((u, piece, location) => {
-            var bh = map_get(L.cf_sum, location)
-            if (piece.class === "ground" && bh) {
-                bh[piece.faction] += set_has(G.reduced, u) ? piece.rcf : piece.cf
-                if (piece.faction !== G.offensive.attacker && get_disengagement_hexes(location).length) {
-                    set_add(L.allowed_units, u)
-                }
-            }
-        })
-        if (get_disengagement_units().length <= 0) {
+        if (!(map_get(G.offensive.paths, G.active_stack[0], [0])[0] & GROUND_MOVE) || G.offensive.stage !== ATTACK_STAGE) {
+            end()
+            return
+        }
+        get_disengagement_units()
+        if (L.allowed_units.length <= 0 || L.cf_sum[1 - G.offensive.attacker] <= L.cf_sum[G.offensive.attacker]) {
+            end()
+            return;
+        }
+    },
+    inactive: "choose disengagement",
+    prompt() {
+        prompt(`Reaction player could use disengagement ability after this move.`)
+        button("awaiting")
+        button("continue")
+    },
+    awaiting() {
+        push_undo()
+        G.persisted_undo = G.undo
+        G.undo = []
+        G.active = 1 - G.offensive.attacker
+        goto("reaction_disengagement")
+    },
+    continue() {
+        if (!G.offensive.disengagement) {
+            G.offensive.disengagement = []
+        }
+        G.offensive.disengagement.push(copy_state())
+        end()
+    },
+}
+
+P.reaction_disengagement = {
+    _begin() {
+        get_disengagement_units()
+        G.active_stack = []
+        if (L.allowed_units.length <= 0) {
             end()
         }
     },
@@ -4582,8 +4570,7 @@ P.ground_disengagement = {
     prompt() {
         if (G.active_stack.length === 0) {
             prompt(`Choose unit for disengagement.`)
-            var du = get_disengagement_units()
-            du.forEach(u => action_unit(u))
+            L.allowed_units.forEach(u => action_unit(u))
             button("done")
         } else {
             prompt(`Choose hex to disengagement.`)
@@ -4591,33 +4578,28 @@ P.ground_disengagement = {
         }
     },
     done() {
-        push_undo()
         check_supply()
-        L.moved.forEach(u => map_delete(G.offensive.paths, u))
         end()
+        G.active = G.offensive.attacker
+        G.prepared_undo = G.persisted_undo
+        G.persisted_undo = null
+        prepare_redo()
     },
     unit(u) {
         push_undo()
         set_delete(L.allowed_units, u)
         G.active_stack = [u]
         var cf = set_has(G.reduced, u) ? pieces[u].rcf : pieces[u].cf
-        map_get(L.cf_sum, G.location[u])[1 - G.offensive.attacker] -= cf
+        L.cf_sum[G.active] -= cf
         set_add(L.moved, u)
+        map_set(G.offensive.paths, u, [GROUND_DISENGAGEMENT, 0, L.hex])
         compute_ground_disengagement(u)
     },
     action_hex(hex) {
-        push_undo()
         move_units(G.active_stack, map_get(L.allowed_hexes, hex))
         G.active_stack = []
         check_supply()
     }
-}
-
-function get_disengagement_units() {
-    return L.allowed_units.filter(u => {
-        var bh = map_get(L.cf_sum, G.location[u])
-        return (bh[G.offensive.attacker] < bh[1 - G.offensive.attacker] && bh[G.offensive.attacker] > 0)
-    })
 }
 
 function get_disengagement_hexes(hex) {
@@ -5122,7 +5104,6 @@ P.cancel_offensive = {
         L.cancel = 0
         for_each_card((c, card) => {
             if (card.type === CANCEL && card.could_play()) {
-                console.log(card.name)
                 L.cancel++
             }
         })
@@ -7735,7 +7716,7 @@ cards[find_card(JP, 2)].before_unit_move = function () {
 }
 
 cards[find_card(JP, 2)].after_unit_move = function () {
-    var hex = G.location[G.active_stack[0]]
+    var hex = G.location[L.active[0]]
     if (G.active === JP && (hex === MANILA || hex === SINGAPORE)) {
         call("coastal_artillery")
     }
@@ -7746,7 +7727,7 @@ P.coastal_artillery = {
         L.allowed_units = []
         var ground = []
         L.allowed_units = []
-        G.active_stack.forEach(u => {
+        L.L.active.forEach(u => {
             var piece = pieces[u]
             if (piece.class === "naval") {
                 set_add(L.allowed_units, u)
@@ -10214,7 +10195,6 @@ P.scenario_1941 = script(`
     call commit_offensive
     log ("#GOffensive reaction")
     set G.active AP
-    call ground_disengagement
     call conquest_of_se_asia_reaction
     set G.offensive.stage BATTLE_STAGE
     log ("#GResolve battles")
@@ -11832,6 +11812,8 @@ exports.view = function (state, role) {
 
         if (V.actions.undo === undefined)
             button("undo", G.undo?.length > 0)
+        if (V.actions.redo === undefined && G.redo && (G.redo.redo_count < G.redo_count || !G.redo_count))
+            button("redo")
 
         _save()
     } else {
@@ -11876,6 +11858,8 @@ exports.action = function (state, role, action, argument) {
         _run()
     } else if (action === "undo" && G.undo.length > 0) {
         pop_undo()
+    } else if (action === "redo" && G.redo) {
+        pop_redo()
     } else {
         throw new Error("Invalid action: " + action)
     }
@@ -11958,6 +11942,9 @@ function _run() {
                 end()
             }
         } else {
+            if (G.redo_count && !G.redo) {
+                push_redo()
+            }
             return // state
         }
     }
@@ -12241,6 +12228,10 @@ function clear_undo() {
     if (G.undo) {
         G.undo.length = 0
     }
+    if (G.prepared_undo) {
+        G.undo = G.prepared_undo
+        G.prepared_undo = null
+    }
 }
 
 function push_undo() {
@@ -12253,9 +12244,11 @@ function restore_state(state) {
     if (state) {
         var save_log = G.log
         var save_undo = G.undo
+        var save_redo = G.redo
         G = state
         G.log = save_log
         G.undo = save_undo
+        G.redo = save_redo
     }
 }
 
@@ -12265,6 +12258,8 @@ function copy_state() {
     for (k in G) {
         v = G[k]
         if (k === "undo")
+            continue
+        else if (k === "redo")
             continue
         else if (k === "log")
             v = v.length
@@ -12279,10 +12274,56 @@ function pop_undo() {
     if (G.undo) {
         var save_log = G.log
         var save_undo = G.undo
+        var save_redo = G.redo
         G = save_undo.pop()
         save_log.length = G.log
         G.log = save_log
         G.undo = save_undo
+        G.redo = save_redo
+    }
+}
+
+function prepare_redo() {
+    if (!G.redo_count) {
+        G.redo_count = 0
+    }
+    G.redo_count++
+    G.redo = null
+}
+
+function push_redo() {
+    G.redo = copy_state()
+    if (G.prepared_undo) {
+        G.redo.undo = object_copy(G.prepared_undo)
+    } else {
+        G.redo.undo = object_copy(G.undo)
+    }
+    G.redo.log = [0]
+    if (G.redo.undo.length > 0) {
+        G.redo.log[0] = G.redo.undo[0].log
+    }
+    for (var i = G.redo.log[0]; i < G.log.length; i++) {
+        G.redo.log.push(G.log[i])
+    }
+}
+
+
+function pop_redo() {
+    if (G.redo) {
+        var save_log = G.log
+        G = G.redo
+        save_log.length = G.log[0]
+        for (var i = 1; i < G.log.length; i++) {
+            save_log.push(G.log[i])
+        }
+        G.log = save_log
+        push_redo()
+    }
+}
+
+function clear_redo() {
+    if (G.redo) {
+        G.redo = null
     }
 }
 
