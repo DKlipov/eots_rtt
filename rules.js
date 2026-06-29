@@ -5069,7 +5069,7 @@ P.special_reaction = {
     },
     inactive: "commit special reaction",
     prompt() {
-        prompt(`${offensive_card_header()} Commit a special reaction.`)
+        prompt(`${offensive_card_header()} Choose hex to roll for special reaction.`)
         button("pass")
         L.possible_hexes.forEach(h => action_hex(h))
     },
@@ -5093,7 +5093,7 @@ P.special_reaction = {
 
 function into_turn_draw(faction) {
     if (G.draw_counter[faction] >= 3) {
-        log(`${side_get_log_str(faction)} already drawn 3 cards, draw skipped.`)
+        log(`${side_get_log_str(faction)} has drawn 3 cards already, draw skipped.`)
         return
     }
     G.draw_counter[faction]++
