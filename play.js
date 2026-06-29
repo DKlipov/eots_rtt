@@ -573,6 +573,10 @@ function on_init(scenario, game_options, static_view) {
             define_s_loc(2015, map_layout.box_singapore)
             define_thing("zoi_hex", 2015).layout(map_layout.box_singapore)
             define_space("action_hex", 2015, map_layout.box_singapore)
+            define_thing("road", data.events.JARHAT_ROAD.id).layout([550, 286, 60, 60], "road_jarhat hide marker control")
+            define_thing("road", data.events.IMPHAL_ROAD.id).layout([551, 330, 60, 60], "road_imphal hide marker control")
+            define_thing("road", data.events.LEDO_ROAD.id).layout([601, 300, 60, 60], "road_ledo hide marker control")
+            define_thing("road", data.events.KWAI_RIVER_BRIDGE.id).layout([529, 501, 50, 95], "road_kwai hide marker control")
             break;
         }
         default: {
@@ -581,15 +585,13 @@ function on_init(scenario, game_options, static_view) {
             map_elem.classList.add("main");
             define_board("#map", 2550, 1650, [12, 12, 12, 12])
             map_info = MAIN_BOARD_INFO
+            define_thing("road", data.events.JARHAT_ROAD.id).layout([578, 286, 60, 60], "road_jarhat hide marker control")
+            define_thing("road", data.events.IMPHAL_ROAD.id).layout([579, 330, 60, 60], "road_imphal hide marker control")
+            define_thing("road", data.events.LEDO_ROAD.id).layout([629, 300, 60, 60], "road_ledo hide marker control")
+            define_thing("road", data.events.KWAI_RIVER_BRIDGE.id).layout([557, 501, 50, 95], "road_kwai hide marker control")
         }
     }
 
-    if(SID != SOUTH_PACIFIC_SCENARIO){
-        define_thing("road", data.events.JARHAT_ROAD.id).layout([578, 286, 60, 60], "road_jarhat hide marker control")
-        define_thing("road", data.events.IMPHAL_ROAD.id).layout([579, 330, 60, 60], "road_imphal hide marker control")
-        define_thing("road", data.events.LEDO_ROAD.id).layout([629, 300, 60, 60], "road_ledo hide marker control")
-        define_thing("road", data.events.KWAI_RIVER_BRIDGE.id).layout([557, 501, 50, 95], "road_kwai hide marker control")
-    }
     // used hexes
     var used_hex = []
     for (var i = 0; i < 60; ++i) {
