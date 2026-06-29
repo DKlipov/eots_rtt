@@ -11270,12 +11270,12 @@ function setup_scenario_burma(){
     }
 
 
-    var surrender = [nations.AUSTRALIAN_MANDATES, nations.NEW_GUINEA]
+    //17.11.5. Burma has already surrendered; India and China have not yet surrendered.
+    var surrender = [nations.BURMA] 
     surrender.forEach(n => {
         G.surrender[n.id] = 1
         set_control_over_nation(n)
     })
-    G.surrender[nations.NEW_GUINEA.id] = 0
     var ap_controlled = [5808, 3823, 4024, 4828]
     ap_controlled.forEach(h => set_delete(G.control, hex_to_int(h)))
     control_hex(hex_to_int(4719), JP)
@@ -11339,6 +11339,12 @@ function setup_scenario_burma(){
     G.inter_service = [1, 1]
     G.china_divisions = 8
 
+    //17.11.14. Ledo and Imphal infrastructure have not yet been completed,
+    //Jarhat infrastructure is complete and treated as strategic trans-
+    //port routes.
+    G.events[events.JARHAT_ROAD.id] = 1
+    G.events[events.HUMP.id] = 1 //Burma Road: Hump Closed
+    G.events[events.KWAI_RIVER_BRIDGE.id] = 2// 17.11.13. Kwai Bridge Event has been played, note impact on Japanese activations.
     check_supply()
     log("!Empire of the Sun. Burma: The Forgotten War, 1943-1944")
     log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
