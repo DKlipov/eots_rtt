@@ -448,8 +448,35 @@ const MAIN_BOARD_INFO = {
 const BURMA_BOARD_INFO = {
     "LAST_BOARD_HEX": 2609,
     "COLUMN_HEX_NB": 13,
-    "ROW_HEX_NB": 16
+    "ROW_HEX_NB": 16,
+    "grid_x_offset": 0,
+    "grid_y_offset": 0,
+    "display_x_offset": 89.375,
+    "display_y_offset": 9.125,
+    "turn_a": 3,
+    "turn_b": 6,
+    "track_a": 3,
+    "track_b": 9,
+    "wie_a": 7,
+    "wie_b": 0,
+    "pw_a": 5,
+    "pw_b": 0,
+    "TURN_STACK_PARAMS": TURN_STACK_PARAMS,
+    "TRACK_STACK_PARAMS": TRACK_STACK_PARAMS,
+    "hex_check": (i) => {
+        let x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
+        let y = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
+
+
+        if (y == 15 && x > 9) {
+            return false;
+        } else if (y == 16 && x > 9) {
+            return false;
+        }
+        return hex_in_map(x, y)
+    }
 }
+
 const SOUTH_PAC_BOARD_INFO = {
     "LAST_BOARD_HEX": 5027,
     "COLUMN_HEX_NB": 12,
@@ -536,12 +563,16 @@ function on_init(scenario, game_options, static_view) {
             define_space("action_hex", 1400, map_layout.h_5808)
             break;
         }
-        case  "Burma: The Forgotten War": {
+        case  "Burma: The Forgotten War, 1943-1944": {
             SID = BURMA_SCENARIO
             map_layout = layout.burma;
             map_elem.classList.add("burma");
             define_board("#map", 1275, 825, [12, 12, 12, 12])
-            map_info = BURMA_INFO
+            map_info = BURMA_BOARD_INFO
+
+            define_s_loc(2015, map_layout.box_singapore)
+            define_thing("zoi_hex", 2015).layout(map_layout.box_singapore)
+            define_space("action_hex", 2015, map_layout.box_singapore)
             break;
         }
         default: {
@@ -594,7 +625,9 @@ function on_init(scenario, game_options, static_view) {
     define_s_loc(ELIMINATED_BOX, map_layout.box_eliminated)
     define_s_loc(AP_REINF, map_layout.box_ap_reinf)
     define_s_loc(JP_REINF, map_layout.box_jp_reinf)
-    define_s_loc(DELAYED_BOX, map_layout.box_delayed_reinf)
+    if(SID!=BURMA_SCENARIO){
+        define_s_loc(DELAYED_BOX, map_layout.box_delayed_reinf)
+    }
     define_s_loc(CHINA_BOX, map_layout.box_air_unit_in_china)
 
     define_space("action_hex", CHINA_BOX, map_layout.box_air_unit_in_china, "china_box")
@@ -754,7 +787,7 @@ function init_canvas(scenario) {
     let sizeX, sizeY;
     switch (scenario) {
         case "South Pacific":
-        case  "Burma: The Forgotten War": {
+        case  "Burma: The Forgotten War, 1943-1944": {
             sizeX = 1275
             sizeY = 825
             break;

@@ -1060,6 +1060,23 @@ function get_S_P_replacement_points() {
     return result
 }
 
+function get_B_F_W_replacement_points() {
+    var result = []
+    //TODO
+    L.replacement_points = result
+    if (G.active === JP) {
+        result[NAVAl_REP] = G.reinforcements[NAVAl_REP]
+        result[AIR_REP] = G.reinforcements[AIR_REP]
+        L.divisions = Math.min(1, G.china_divisions)
+        return result
+    }
+    L.divisions = undefined
+    result[NAVAl_REP] = 1
+    result[GROUND_REP] = 1
+    result[AIR_REP] = 4
+    return result
+}
+
 function print_reinforcements() {
     var reinf = L.replacement_points
     var string = ""
@@ -7649,6 +7666,75 @@ function victory_south_pacific() {
     return result
 }
 
+function victory_burma() {
+    //TODO
+    var result = {
+        vp: 0,
+        text: [],
+        won_side: "",
+        won_text: "",
+    }
+
+    adjust_vp(result, G.surrender[nations.CHINA.id] - 2, "China government status")
+    if (G.surrender[nations.CHINA.id] > 5) {
+        result.vp += 3
+        result.text.push(`+3 VP - China surrender.`)
+    }
+    binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
+        "Townsville did not isolated", [hex_to_int(3727), OAHU])
+
+    if (G.political_will < 4) {
+        result.vp += 4 - G.political_will
+        result.text.push(`+${4 - G.political_will} VP - Political will.`)
+    } else {
+        result.text.push(`0 VP - Political will >= 4.`)
+    }
+    var amh = 0
+    nations.AUSTRALIAN_MANDATES.ports.forEach(hex => {
+        var h = hex_to_int(hex)
+        if (is_space_controlled(h, JP) && get_map_data(h).port) {
+            amh++
+        }
+    })
+    adjust_vp(result, amh, "JP control of Mandates ports", nations.AUSTRALIAN_MANDATES.ports.map(h => hex_to_int(h)))
+    if (nations.AUSTRALIAN_MANDATES.ports.filter(h => !is_space_controlled(hex_to_int(h), JP)).length === 0) {
+        result.vp += 3
+        result.text.push(`+3 VP - JP control of Mandates.`)
+    } else if (nations.AUSTRALIAN_MANDATES.ports.filter(h => !is_space_controlled(hex_to_int(h), AP)).length === 0) {
+        result.vp -= 3
+        result.text.push(`-3 VP - AP control of Mandates.`)
+    } else {
+        result.text.push(`0 VP - None control of Mandates.`)
+    }
+    var new_guinea = 0
+    nations.NEW_GUINEA.keys.forEach(hex => {
+        var h = hex_to_int(hex)
+        if (is_space_controlled(h, JP) && get_map_data(h).port) {
+            new_guinea++
+        }
+    })
+    adjust_vp(result, new_guinea, "JP control of New Guinea ports", nations.NEW_GUINEA.keys.map(h => hex_to_int(h)).filter(h => h !== VOGELKOP))
+    binary_vp(result, is_space_controlled(VOGELKOP, AP), -1, "AP control of Vogelkop",
+        "JP control of Vogelkop", [VOGELKOP])
+    if (check_nation_controlled(nations.NEW_GUINEA, JP)) {
+        result.vp += 3
+        result.text.push(`+3 VP - JP control of New Guinea.`)
+    } else if (check_nation_controlled(nations.NEW_GUINEA, AP)) {
+        result.vp -= 3
+        result.text.push(`-3 VP - AP control of New Guinea.`)
+    } else {
+        result.text.push(`0 VP - None control of New Guinea.`)
+    }
+
+    var heb = G.control.map(h => get_map_data(h)).filter(md => md.region === "Hebrides" && md.port).length
+    binary_vp(result, heb, 1, "JP control of New Hebrides port",
+        "Non JP control of any New Hebrides port", G.original_control.filter(h => get_map_data(h).region === "Hebrides" && get_map_data(h).port))
+    var aus = G.control.map(h => get_map_data(h)).filter(md => md.region === "Australia" && md.port).length
+    binary_vp(result, aus, 1, "JP control of Australia mainland port",
+        "Non JP control of any Australia mainland port", G.original_control.filter(h => get_map_data(h).region === "Australia" && get_map_data(h).port))
+    return result
+}
+
 function set_inter_service(faction, rivalry) {
     if (G.inter_service[faction] && !rivalry) {
         log(`${side_get_log_str(faction)} inter-service agreement.`)
@@ -11200,7 +11286,7 @@ function setup_scenario_burma(){
 
     //AP Setup  (same order as the setup table found in the rules p44)
     setup_jp_unit(ap_air("14"), 2104)
-    setup_jp_unit(ap_air("14_lrb"), CHINA_BOX)
+    G.location[ap_air("14_lrb")] = CHINA_BOX
     setup_jp_unit(ap_air("10_lrb"), 1805)
     setup_jp_unit(find_piece("indomitable"), 1307)
     setup_jp_unit(find_piece("warspite"), 1307)
@@ -11223,16 +11309,16 @@ function setup_scenario_burma(){
     setup_jp_unit(jp_air("5"), 2008, true)
     setup_jp_unit(jp_army("37"), 2008, true)
     setup_jp_unit(find_piece("kamikaze"), 2008)
-    setup_jp_unit(jp_air("28"), 2102)
+    setup_jp_unit(jp_air("28"), 2012)
     setup_jp_unit(jp_army("15"), 2106)
     setup_jp_unit(jp_air("9"), 2110)
     setup_jp_unit(jp_army("33"), 2206)
     setup_jp_unit(HQ_JP_SOUTH, 2212)
     setup_jp_unit(jp_army("38"), 2305, true)
     setup_jp_unit(jp_air("8"), 2409)
-    setup_jp_unit(find_piece("zuiho"), SINGAPORE)
-    setup_jp_unit(find_piece("junyo"), SINGAPORE)
-    setup_jp_unit(find_piece("nagato"), SINGAPORE)
+    setup_jp_unit(find_piece("zuiho"), 2015)
+    setup_jp_unit(find_piece("junyo"), 2015)
+    setup_jp_unit(find_piece("nagato"), 2015)
 
     // todo Airbase on map Control Marker 1809 - Andaman
 
