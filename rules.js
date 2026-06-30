@@ -810,7 +810,7 @@ function get_hq_reinforcement_hexes() {
             if (reachable) {
                 queue.push(nh)
             }
-            if (reachable && get_map_data(nh).port && is_space_controlled(nh, faction) && !set_has(hqs, nh) && !has_non_n_zoi(i, 1 - faction)) {
+            if (reachable && get_map_data(nh).port && is_space_controlled(nh, faction) && !set_has(hqs, nh) && !has_non_n_zoi(nh, 1 - faction)) {
                 set_add(result, nh)
             }
         }
@@ -955,6 +955,8 @@ P.reinforcement_segment = {
         G.active_stack = [u]
         if (pieces[u].class !== "hq") {
             L.allowed_hexes = get_unit_reinforcement_hexes(u)
+        } else {
+            L.allowed_hexes = get_hq_reinforcement_hexes()
         }
     },
     action_hex(hex) {
@@ -2419,6 +2421,11 @@ P.activate_units = {
         }
 
         var hq = G.offensive.active_hq[G.active]
+        if (!hq) {
+            log_units_activated()
+            end()
+            return
+        }
         var piece = pieces[hq]
         if ((piece.service === "joint" || piece.service === "us") && !check_hq_in_supply(hq, piece, US_SUPPLIED_HEX)) {
             L.joint_disadvantage = 1
@@ -4821,7 +4828,7 @@ function mark_participate_attack_hex() {
 
 
 function has_non_n_zoi(hex, faction) {
-    return (G.supply_cache[hex] & (JP_ZOI << faction | JP_ZOI_NTRL << faction)) === JP_ZOI << faction
+    return (G.supply_cache[hex] & ((JP_ZOI << faction) | (JP_ZOI_NTRL << faction))) === (JP_ZOI << faction)
 }
 
 function has_zoi(hex, faction) {
