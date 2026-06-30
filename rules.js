@@ -11351,6 +11351,45 @@ function setup_scenario_burma(){
     call("burma_choose_offensive")
 }
 
+const BURMA_JAPANESE_OFF = [3,8,16,40,48,50]
+
+P.burma_choose_offensive = {
+    _begin(){
+        G.active = JP
+        G.offensive.active_cards = []
+        BURMA_JAPANESE_OFF.forEach(c=>{
+            c = find_card(JP, c)
+            if(! G.hand[JP].includes(c)){
+                G.offensive.active_cards.push(c)
+            }
+        })
+    },
+    prompt() {
+        if(L.confirm_card){
+            prompt(`Confirm `+card_get_log_str(L.confirm_card)+` as Future Offensive ?`)
+            button("done")
+        }else{
+            prompt(`Choose Military Event to use as Future Offensive.`)
+            
+            BURMA_JAPANESE_OFF.forEach(c => {
+                c = find_card(JP, c)
+                if(! G.hand[JP].includes(c)){
+                    action_card(c)
+                }
+            })
+        }
+    },
+    card(c) {
+        push_undo()
+        future_offencive_card(c,5) //First turn is 6, card is playable immediatly so turn mark as being designated during turn 5
+        L.confirm_card = c
+    },
+    done(){
+        G.offensive.active_cards = []
+        goto("offensive_phase")
+    }
+}
+
 function future_offencive_card(card, turn) {
     var faction = cards[card].faction
     if (G.future_offensive[faction] > 0) {
@@ -11580,6 +11619,9 @@ function on_view() {
         V.hand[AP] = G.hand[AP].slice()
         G.offensive.draw[AP].filter(c => c >= 0 && cards[c].faction === AP).forEach(c => V.hand[AP].push(c))
         V.future_offensive[AP] = G.future_offensive[AP]
+    }
+    if(L.P === "burma_choose_offensive" && R == AP){
+        V.offensive.active_cards = []
     }
 }
 
