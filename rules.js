@@ -892,22 +892,22 @@ P.reinforcement_segment = {
     inactive: "place reinforcements",
     prompt() {
         if (L.europe.length) {
-            prompt(`Roll to sent to Europe. ${L.europe.length} units eligible.`)
+            prompt(`Sent to Europe die roll. ${L.europe.length} delayed units eligible.`)
             button("roll")
             return
         }
         if (G.active_stack.length) {
             L.allowed_hexes.forEach(hex => action_hex(hex))
             if (L.allowed_hexes.length === 0) {
-                prompt(`Choose hex to place ${piece_get_log_str(G.active_stack[0])} as reinforcement. (Not possible hexes).`)
+                prompt(`It's not possible to place ${piece_get_log_str(G.active_stack[0])} as a reinforcement. Press delay to move on to the next reinforcement.`)
                 button("delay")
             } else {
-                prompt(`Choose hex to place ${piece_get_log_str(G.active_stack[0])} as reinforcement.`)
+                prompt(`Choose hex to place ${piece_get_log_str(G.active_stack[0])} as a reinforcement.`)
             }
             //debug
             button("auto")
         } else if (L.europe1.length > 0) {
-            prompt(`Roll to sent delayed units to Europe. ${L.europe1.length} units eligible.`)
+            prompt(`Sent to Europe die roll. ${L.europe1.length} delayed units eligible.`)
             button("roll")
             return
         } else {
@@ -1251,7 +1251,7 @@ P.strategic_bombing = {
             button("done")
             return
         }
-        prompt("Choose units to strategic bombing.")
+        prompt("Choose units that wll conduct strategic bombing.")
         if (G.active_stack.length > 0) {
             button("roll")
         } else {
@@ -1274,7 +1274,7 @@ P.strategic_bombing = {
         L.done = 1
     },
     done() {
-        log(`No units committed to strategic bombing.`)
+        log(`No units assigned to strategic bombing.`)
         G.events[events.STRAT_BOMBING_CAMPAIGN.id] = 0
         end()
     },
@@ -1354,22 +1354,22 @@ function deal_cards() {
     if (G.surrender[nations.CHINA.id] >= 5) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by China surrender.`)
+        log(`AP draw reduced by 1 due to China's surrender.`)
     }
     if (G.surrender[nations.INDIA.id] >= 4) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by unstable India.`)
+        log(`AP draw reduced by 1 due to India's surrender.`)
     }
     if (G.surrender[nations.AUSTRALIA.id]) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by Australia surrender.`)
+        log(`AP draw reduced by 1 due to Australia's surrender.`)
     }
     if (G.wie >= 10) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by War in Europe.`)
+        log(`AP draw reduced by 1 due to War in Europe at Level 4.`)
     }
     ap_cards = Math.max(ap_cards, 4)
     G.passes[AP] = Math.min(G.passes[AP], 2)
@@ -1403,7 +1403,7 @@ function S_P_deal_cards() {
     if (G.surrender[nations.CHINA.id] >= 5) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by China.`)
+        log(`AP draw reduced by 1 due to China's surrender.`)
     }
     log(`AP draw ${ap_cards} cards.`)
     if (G.passes[AP]) {
@@ -1902,7 +1902,7 @@ P.return_hq = {
     prompt() {
         mark_supplied_hexes(G.active)
         if (!G.active_stack.length) {
-            prompt(`Choose HQ return.`)
+            prompt(`Choose returning HQ.`)
             HQ_LIST.forEach(u => {
                 if (G.location[u] > TURN_BOX && pieces[u].faction === R) {
                     action_unit(u)
@@ -2001,13 +2001,12 @@ function get_china_offensive_modifiers() {
 }
 
 P.china_offensive = {
-    inactive: "commit China Offensive",
+    inactive: "confirm China Offensive",
     prompt() {
-        prompt(`Roll to China Offensive.`)
+        prompt(`China Offensive Roll.`)
         button("roll")
     },
     roll() {
-
         log(`JP started China offensive.`)
         let result = random(10)
         G.events[events.CHINA_OFFENSIVE.id] = G.turn
@@ -3032,14 +3031,14 @@ P.choose_attack_hex = {
             end()
         }
     },
-    inactive: "commit units to attack",
+    inactive: "assign units to attack",
     prompt() {
         var could_pass = could_stack_stop_here() && G.offensive.stage === ATTACK_STAGE
         if (!L.move_data.battle_range) {
-            prompt(`${offensive_card_header()} Commit units to escort. (No combat factor will be used!).`)
+            prompt(`${offensive_card_header()} Assign units to escort. (They will NOT contribute attack strength to the battle, only their defense strength!).`)
         } else {
-            prompt(`${offensive_card_header()} Commit units to battle.${(!could_pass && G.offensive.stage === REACTION_STAGE && L.allowed_hexes.length === 0
-            ) ? " (Reaction units must be committed to battle)." : ""}`)
+            prompt(`${offensive_card_header()} Assign units to battle.${(!could_pass && G.offensive.stage === REACTION_STAGE && L.allowed_hexes.length === 0
+            ) ? " (Reaction units must be assigned to battle)." : ""}`)
         }
 
         if (could_pass) {
@@ -3060,7 +3059,7 @@ P.choose_attack_hex = {
         end()
     },
     action_hex(hex) {
-        log(`Units ${G.active_stack.map(u => piece_get_log_str(u)).join(", ")} committed to attack to ${hex_get_log_str(hex)}.`)
+        log(`Units ${G.active_stack.map(u => piece_get_log_str(u)).join(", ")} assigned to attack to ${hex_get_log_str(hex)}.`)
         this.attack_hex(hex)
     },
 }
@@ -4571,7 +4570,7 @@ P.reaction_disengagement = {
     },
     inactive: "choose disengagement",
     prompt() {
-        prompt(`Choose hex to disengagement or skip.`)
+        prompt(`Choose hex to move disengaging unit(s) or skip.`)
         if (!L.skip) {
             L.allowed_hexes.forEach(h => action_hex(h))
             button("skip")
@@ -4629,7 +4628,7 @@ P.retro_disengagement = {
     },
     inactive: "choose disengagement",
     prompt() {
-        prompt(`Choose hex to disengagement or skip.`)
+        prompt(`Choose hex to move disengaging unit(s) or skip.`)
         if (L.next_d >= G.offensive.disengagement.length) {
             button("done")
             return
@@ -4972,7 +4971,7 @@ P.declare_battle_hexes = {
         if (G.active_stack.length === 0 && L.possible_units.length === 0) {
             prompt(`${offensive_card_header()} Confirm declared battle hexes.`)
         } else {
-            prompt(`${offensive_card_header()} Declare battle hexes and commit units.`)
+            prompt(`${offensive_card_header()} Declare battle hexes and assign units.`)
         }
         if (G.active_stack.length === 0) {
             L.possible_units.forEach(u => action_unit(u))
@@ -5026,7 +5025,7 @@ P.commit_offensive = script(`
     `)
 
 P.commit_offensive_confirm = {
-    inactive: "commit offensive",
+    inactive: "confirm offensive",
     prompt() {
         var action = "offensive"
         if (G.offensive.stage === REACTION_STAGE) {
@@ -5035,10 +5034,10 @@ P.commit_offensive_confirm = {
             action = "post battle move"
         }
         if (!L.L.verify_error) {
-            prompt(`${offensive_card_header()} Commit ${action}.`)
+            prompt(`${offensive_card_header()} Confirm ${action}.`)
             button("next")
         } else {
-            prompt(`${offensive_card_header()} Commit ${action}. ` + L.L.verify_error)
+            prompt(`${offensive_card_header()} Confirm ${action}. ` + L.L.verify_error)
         }
     },
     next() {
@@ -5115,9 +5114,9 @@ P.special_reaction = {
             end()
         }
     },
-    inactive: "commit special reaction",
+    inactive: "roll to special reaction",
     prompt() {
-        prompt(`${offensive_card_header()} Commit a special reaction.`)
+        prompt(`${offensive_card_header()} Choose hex to roll for special reaction.`)
         button("pass")
         L.possible_hexes.forEach(h => action_hex(h))
     },
@@ -5141,7 +5140,7 @@ P.special_reaction = {
 
 function into_turn_draw(faction) {
     if (G.draw_counter[faction] >= 3) {
-        log(`${side_get_log_str(faction)} already drawn 3 cards, draw skipped.`)
+        log(`${side_get_log_str(faction)} has drawn 3 cards already, draw skipped.`)
         return
     }
     G.draw_counter[faction]++
@@ -5178,7 +5177,7 @@ P.cancel_offensive = {
             return
         }
     },
-    inactive: "offensive reaction",
+    inactive: "reaction",
     prompt() {
         prompt(`${offensive_card_header()} Cancel offensive.`)
         if (L.reactions_card > 0) {
@@ -5682,9 +5681,9 @@ P.apply_hits = {
         button("undo", L.dmg_list[R].length)
         if (!G.offensive.battle.hit_able_units[R].length) {
             button("done")
-            prompt(`${battle_header()} Commit hits. Remaining: ${Math.max(G.offensive.battle.hits[R], 0)}.`)
+            prompt(`${battle_header()} Assign hits. Remaining: ${Math.max(G.offensive.battle.hits[R], 0)}.`)
         } else {
-            prompt(`${battle_header()} Apply hits. ${G.offensive.battle.hits[R]}`)
+            prompt(`${battle_header()} Assign hits. ${G.offensive.battle.hits[R]}`)
         }
     },
     undo() {
@@ -6216,7 +6215,7 @@ P.retreat = {
             prompt(`Choose unit to retreat.`)
             L.unit_to_retreat.forEach(u => action_unit(u))
         } else {
-            prompt(`Commit retreat.`)
+            prompt(`Confirm retreat.`)
             button("done")
         }
     },
@@ -6364,7 +6363,7 @@ P.emergency_move = {
                 button("done")
             }
         } else {
-            prompt(`Commit emergency move.`)
+            prompt(`Confirm emergency move.`)
             button("done")
         }
     },
@@ -6805,7 +6804,7 @@ P.india_surrender = {
         }
         if (!G.active_stack.length && (!L.unit_to_retreat.length || L.unit_to_retreat.map(u => pieces[u])
             .filter(piece => piece.service === "army" || piece.service === "navy" || piece.service === "us").length === L.unit_to_retreat.length)) {
-            prompt(`Commit emergency move.`)
+            prompt(`Confirm emergency move.`)
             button("done")
         }
     },
@@ -8496,7 +8495,7 @@ P.kamikaze_attack = {
         })
         L.stage = 1
     },
-    inactive: "commit kamikaze attack",
+    inactive: "launch kamikaze attack",
     prompt() {
         if (L.allowed_units.length <= 0) {
             prompt(`No kamikaze attack possible. No air units.`)
