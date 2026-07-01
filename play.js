@@ -479,7 +479,7 @@ const BURMA_BOARD_INFO = {
 
 const SOUTH_PAC_BOARD_INFO = {
     "LAST_BOARD_HEX": 5027,
-    "COLUMN_HEX_NB": 12,
+    "COLUMN_HEX_NB": 13,
     "ROW_HEX_NB": 21,
     "grid_x_offset": 20,
     "grid_y_offset": 16,
