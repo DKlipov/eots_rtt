@@ -1185,7 +1185,7 @@ function on_update() {
 
     action_button("roll", "Roll")
 
-    action_button("awaiting", "Await")
+    action_button("awaiting", "Prompt")
     action_button("continue", "Continue")
     action_button("bonus", "Use Bonus")
     action_button("event", "Play Event")

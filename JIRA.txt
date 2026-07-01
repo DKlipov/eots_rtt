@@ -11,6 +11,7 @@ Todo list:
 * update AP battle box color
 * log units in battle
 * log unit movement type
+* 6.21 rule check
 
 Bugs
 
