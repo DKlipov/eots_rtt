@@ -858,7 +858,7 @@ function get_hq_reinforcement_hexes() {
             if (reachable) {
                 queue.push(nh)
             }
-            if (reachable && get_map_data(nh).port && is_space_controlled(nh, faction) && !set_has(hqs, nh) && !has_non_n_zoi(i, 1 - faction)) {
+            if (reachable && get_map_data(nh).port && is_space_controlled(nh, faction) && !set_has(hqs, nh) && !has_non_n_zoi(nh, 1 - faction)) {
                 set_add(result, nh)
             }
         }
@@ -940,22 +940,22 @@ P.reinforcement_segment = {
     inactive: "place reinforcements",
     prompt() {
         if (L.europe.length) {
-            prompt(`Roll to sent to Europe. ${L.europe.length} units eligible.`)
+            prompt(`Sent to Europe die roll. ${L.europe.length} delayed units eligible.`)
             button("roll")
             return
         }
         if (G.active_stack.length) {
             L.allowed_hexes.forEach(hex => action_hex(hex))
             if (L.allowed_hexes.length === 0) {
-                prompt(`Choose hex to place ${piece_get_log_str(G.active_stack[0])} as reinforcement. (Not possible hexes).`)
+                prompt(`It's not possible to place ${piece_get_log_str(G.active_stack[0])} as a reinforcement. Press delay to move on to the next reinforcement.`)
                 button("delay")
             } else {
-                prompt(`Choose hex to place ${piece_get_log_str(G.active_stack[0])} as reinforcement.`)
+                prompt(`Choose hex to place ${piece_get_log_str(G.active_stack[0])} as a reinforcement.`)
             }
             //debug
             button("auto")
         } else if (L.europe1.length > 0) {
-            prompt(`Roll to sent delayed units to Europe. ${L.europe1.length} units eligible.`)
+            prompt(`Sent to Europe die roll. ${L.europe1.length} delayed units eligible.`)
             button("roll")
             return
         } else {
@@ -1003,6 +1003,8 @@ P.reinforcement_segment = {
         G.active_stack = [u]
         if (pieces[u].class !== "hq") {
             L.allowed_hexes = get_unit_reinforcement_hexes(u)
+        } else {
+            L.allowed_hexes = get_hq_reinforcement_hexes()
         }
     },
     action_hex(hex) {
@@ -1316,7 +1318,7 @@ P.strategic_bombing = {
             button("done")
             return
         }
-        prompt("Choose units to strategic bombing.")
+        prompt("Choose units that wll conduct strategic bombing.")
         if (G.active_stack.length > 0) {
             button("roll")
         } else {
@@ -1339,7 +1341,7 @@ P.strategic_bombing = {
         L.done = 1
     },
     done() {
-        log(`No units committed to strategic bombing.`)
+        log(`No units assigned to strategic bombing.`)
         G.events[events.STRAT_BOMBING_CAMPAIGN.id] = 0
         end()
     },
@@ -1419,22 +1421,22 @@ function deal_cards() {
     if (G.surrender[nations.CHINA.id] >= 5) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by China surrender.`)
+        log(`AP draw reduced by 1 due to China's surrender.`)
     }
     if (G.surrender[nations.INDIA.id] >= 4) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by unstable India.`)
+        log(`AP draw reduced by 1 due to India's surrender.`)
     }
     if (G.surrender[nations.AUSTRALIA.id]) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by Australia surrender.`)
+        log(`AP draw reduced by 1 due to Australia's surrender.`)
     }
     if (G.wie >= 10) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by War in Europe.`)
+        log(`AP draw reduced by 1 due to War in Europe at Level 4.`)
     }
     ap_cards = Math.max(ap_cards, 4)
     G.passes[AP] = Math.min(G.passes[AP], 2)
@@ -1468,7 +1470,7 @@ function S_P_deal_cards() {
     if (G.surrender[nations.CHINA.id] >= 5) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by China.`)
+        log(`AP draw reduced by 1 due to China's surrender.`)
     }
     log(`AP draw ${ap_cards} cards.`)
     if (G.passes[AP]) {
@@ -2003,7 +2005,7 @@ P.return_hq = {
     prompt() {
         mark_supplied_hexes(G.active)
         if (!G.active_stack.length) {
-            prompt(`Choose HQ return.`)
+            prompt(`Choose returning HQ.`)
             HQ_LIST.forEach(u => {
                 if (G.location[u] > TURN_BOX && pieces[u].faction === R) {
                     action_unit(u)
@@ -2102,13 +2104,12 @@ function get_china_offensive_modifiers() {
 }
 
 P.china_offensive = {
-    inactive: "commit China Offensive",
+    inactive: "confirm China Offensive",
     prompt() {
-        prompt(`Roll to China Offensive.`)
+        prompt(`China Offensive Roll.`)
         button("roll")
     },
     roll() {
-
         log(`JP started China offensive.`)
         let result = random(10)
         G.events[events.CHINA_OFFENSIVE.id] = G.turn
@@ -2521,6 +2522,11 @@ P.activate_units = {
         }
 
         var hq = G.offensive.active_hq[G.active]
+        if (!hq) {
+            log_units_activated()
+            end()
+            return
+        }
         var piece = pieces[hq]
         if ((piece.service === "joint" || piece.service === "us") && !check_hq_in_supply(hq, piece, US_SUPPLIED_HEX)) {
             L.joint_disadvantage = 1
@@ -2785,63 +2791,15 @@ function get_move_buttons() {
 }
 
 P.move_to = script(`
-      call check_disengagement
+      set L.active G.active_stack
       call choose_attack_hex {move_hexes: L.L.allowed_hexes}
+      call prepare_disengagement
       eval {
         trigger_event("after_unit_move")
       }
       set L.L.allowed_hexes []
       set G.active_stack []
       `)
-
-P.check_disengagement = {
-    _begin() {
-        end()
-        return;
-        //hex, path
-        if (true) {
-            return;
-        }
-        if (!(path[0] & GROUND_MOVE)) {
-            return
-        }
-        var bh = [0, 0]
-        var disengagement_hexes = get_disengagement_hexes(hex)
-        if (!disengagement_hexes.length) {
-            return;
-        }
-        for_each_unit_on_map((u, piece, location) => {
-            if (piece.class === "ground" && location === hex) {
-                bh[piece.faction] += set_has(G.reduced, u) ? piece.rcf : piece.cf
-                if (piece.faction !== G.offensive.attacker) {
-                    set_add(L.allowed_units, u)
-                }
-            }
-        })
-        var move_hexes = L.allowed_hexes
-        L.allowed_hexes = []
-        var escort = G.offensive.active_units[R].filter(u => {
-            var piece = pieces[u]
-            return G.location[u] === hex && piece.br && piece.class === "naval"
-        }).length
-        var piece = pieces[G.active_stack[0]]
-        var distant_attack =
-            (L.move_data.battle_range || escort)
-            && G.active_stack.length >= 1
-            && !set_has(G.offensive.battle_hexes, hex)
-            && G.offensive.stage !== POST_BATTLE_STAGE
-            && (G.offensive.stage === REACTION_STAGE || !is_b29_bombed(piece))
-        if (L.movable_units.length <= 0) {
-            G.active_stack = []
-            end()
-        } else {
-            G.active_stack = []
-        }
-    },
-    inactive: "move units",
-    prompt() {
-    }
-}
 
 P.move_offensive_units = {
     _begin() {
@@ -3181,14 +3139,14 @@ P.choose_attack_hex = {
             end()
         }
     },
-    inactive: "commit units to attack",
+    inactive: "assign units to attack",
     prompt() {
         var could_pass = could_stack_stop_here() && G.offensive.stage === ATTACK_STAGE
         if (!L.move_data.battle_range) {
-            prompt(`${offensive_card_header()} Commit units to escort. (No combat factor will be used!).`)
+            prompt(`${offensive_card_header()} Assign units to escort. (They will NOT contribute attack strength to the battle, only their defense strength!).`)
         } else {
-            prompt(`${offensive_card_header()} Commit units to battle.${(!could_pass && G.offensive.stage === REACTION_STAGE && L.allowed_hexes.length === 0
-            ) ? " (Reaction units must be committed to battle)." : ""}`)
+            prompt(`${offensive_card_header()} Assign units to battle.${(!could_pass && G.offensive.stage === REACTION_STAGE && L.allowed_hexes.length === 0
+            ) ? " (Reaction units must be assigned to battle)." : ""}`)
         }
 
         if (could_pass) {
@@ -3209,7 +3167,7 @@ P.choose_attack_hex = {
         end()
     },
     action_hex(hex) {
-        log(`Units ${G.active_stack.map(u => piece_get_log_str(u)).join(", ")} committed to attack to ${hex_get_log_str(hex)}.`)
+        log(`Units ${G.active_stack.map(u => piece_get_log_str(u)).join(", ")} assigned to attack to ${hex_get_log_str(hex)}.`)
         this.attack_hex(hex)
     },
 }
@@ -3249,10 +3207,10 @@ function move_units(units, path) {
         return
     }
     var i = 3
-    var zoi_flag = !G.offensive.zoi_intelligence_modifier && G.offensive.stage === ATTACK_STAGE
+    var zoi_flag = !G.offensive.zoi_intelligence_modifier && G.offensive.stage === ATTACK_STAGE && pieces[units[0]].faction === G.offensive.attacker
     var zoi_generator_flag = G.active_stack.filter(u => pieces[u].zoi_generator).length
         || (path[0] & GROUND_MOVE) && G.active_stack.filter(u => pieces[u].class === "ground").length
-    var enemy_faction = 1 - pieces[G.active_stack[0]].faction
+    var enemy_faction = 1 - pieces[units[0]].faction
     var point_to_point = []
     var last = null
     for (; i < path.length; i++) {
@@ -4649,76 +4607,166 @@ function compute_ground_naval_strat_move() {
     map_delete(L.allowed_hexes, location)
 }
 
-P.ground_disengagement = {
+function get_disengagement_units(units) {
+    L.hex = G.location[units]
+    L.cf_sum = [0, 0]
+    L.just_enetered = []
+    map_for_each(G.offensive.paths, (u, path) => {
+        var piece = pieces[u]
+        var location = G.location[u]
+        if (piece.faction === G.offensive.attacker && piece.class === "ground" && path[0] & GROUND_MOVE
+            && set_has(G.offensive.battle_hexes, location)) {
+            set_add(L.just_enetered, path[path.length - 2])
+        }
+    })
+    var result = []
+    for_each_unit_on_map((u, piece, location) => {
+        if (piece.class === "ground" && location === L.hex) {
+            L.cf_sum[piece.faction] += set_has(G.reduced, u) ? piece.rcf : piece.cf
+            if (piece.faction !== G.offensive.attacker && get_disengagement_hexes(location).length) {
+                set_add(result, u)
+            }
+        }
+    })
+    return result
+}
+
+P.prepare_disengagement = {
     _begin() {
-        L.cf_sum = []
-        G.offensive.battle_hexes.forEach(b => {
-            map_set(L.cf_sum, b, [0, 0])
-        })
-        L.just_enetered = []
-        map_for_each(G.offensive.paths, (u, path) => {
-            var piece = pieces[u]
-            var location = G.location[u]
-            if (piece.faction === G.offensive.attacker && piece.class === "ground" && path[0] & GROUND_MOVE
-                && set_has(G.offensive.battle_hexes, location)) {
-                set_add(L.just_enetered, path[path.length - 2])
-            }
-        })
-        L.allowed_units = []
-        L.moved = []
-        for_each_unit_on_map((u, piece, location) => {
-            var bh = map_get(L.cf_sum, location)
-            if (piece.class === "ground" && bh) {
-                bh[piece.faction] += set_has(G.reduced, u) ? piece.rcf : piece.cf
-                if (piece.faction !== G.offensive.attacker && get_disengagement_hexes(location).length) {
-                    set_add(L.allowed_units, u)
-                }
-            }
-        })
-        if (get_disengagement_units().length <= 0) {
+        if (!(map_get(G.offensive.paths, G.active_stack[0], [0])[0] & GROUND_MOVE) || G.offensive.stage !== ATTACK_STAGE) {
             end()
+            return
+        }
+        L.allowed_units = get_disengagement_units(L.L.active[0])
+        if (L.allowed_units.length <= 0 || L.cf_sum[1 - G.offensive.attacker] <= L.cf_sum[G.offensive.attacker]) {
+            end()
+            return;
         }
     },
     inactive: "choose disengagement",
     prompt() {
-        if (G.active_stack.length === 0) {
-            prompt(`Choose unit for disengagement.`)
-            var du = get_disengagement_units()
-            du.forEach(u => action_unit(u))
-            button("done")
-        } else {
-            prompt(`Choose hex to disengagement.`)
+        prompt(`Reaction player could use disengagement ability after this move.`)
+        button("awaiting")
+        button("continue")
+    },
+    awaiting() {
+        goto("reaction_disengagement")
+    },
+    continue() {
+        if (!G.offensive.disengagement) {
+            G.offensive.disengagement = []
+        }
+        G.offensive.disengagement.push(copy_state())
+        end()
+    },
+}
+
+P.reaction_disengagement = {
+    _begin() {
+        clear_redo()
+        L.allowed_units = get_disengagement_units(L.L.active[0])
+        G.active_stack = []
+        if (L.allowed_units.length <= 0) {
+            end()
+            return
+        }
+        G.persisted_undo = G.undo
+        G.undo = []
+        G.active = 1 - G.offensive.attacker
+        L.skip = 0
+        compute_ground_disengagement(L.allowed_units[0])
+    },
+    inactive: "choose disengagement",
+    prompt() {
+        prompt(`Choose hex to move disengaging unit(s) or skip.`)
+        if (!L.skip) {
             L.allowed_hexes.forEach(h => action_hex(h))
+            button("skip")
+        } else {
+            button("done")
         }
     },
     done() {
-        push_undo()
         check_supply()
-        L.moved.forEach(u => map_delete(G.offensive.paths, u))
         end()
+        G.active = G.offensive.attacker
+        G.prepared_undo = G.persisted_undo
+        G.persisted_undo = null
+        prepare_redo()
     },
-    unit(u) {
+    skip() {
         push_undo()
-        set_delete(L.allowed_units, u)
-        G.active_stack = [u]
-        var cf = set_has(G.reduced, u) ? pieces[u].rcf : pieces[u].cf
-        map_get(L.cf_sum, G.location[u])[1 - G.offensive.attacker] -= cf
-        set_add(L.moved, u)
-        compute_ground_disengagement(u)
+        L.skip = 1
     },
     action_hex(hex) {
         push_undo()
-        move_units(G.active_stack, map_get(L.allowed_hexes, hex))
+        var loc = G.location[L.allowed_units[0]]
+
+        move_units(L.allowed_units, map_get(L.allowed_hexes, hex))
         G.active_stack = []
         check_supply()
+        if (set_has(G.offensive.battle_hexes, loc) && !is_faction_units(loc, G.active)) {
+            set_delete(G.offensive.battle_hexes, loc)
+        }
+        L.skip = 1
     }
 }
 
-function get_disengagement_units() {
-    return L.allowed_units.filter(u => {
-        var bh = map_get(L.cf_sum, G.location[u])
-        return (bh[G.offensive.attacker] < bh[1 - G.offensive.attacker] && bh[G.offensive.attacker] > 0)
-    })
+P.retro_disengagement = {
+    _begin() {
+        clear_redo()
+        G.persisted_undo = G.undo
+        G.undo = []
+        G.active = 1 - G.offensive.attacker
+        L.next_d = -1
+        this.next_disengagement()
+    },
+    next_disengagement() {
+        if (L.next_d >= 0) {
+            G.offensive.disengagement[L.next_d] = null
+        }
+        L.next_d++
+        L.allowed_units = []
+        L.allowed_hexes
+        if (L.next_d >= G.offensive.disengagement.length) {
+            return
+        }
+        L.allowed_units = get_disengagement_units(G.offensive.disengagement[L.next_d].L.L.active[0])
+        compute_ground_disengagement(L.allowed_units[0])
+    },
+    inactive: "choose disengagement",
+    prompt() {
+        prompt(`Choose hex to move disengaging unit(s) or skip.`)
+        if (L.next_d >= G.offensive.disengagement.length) {
+            button("done")
+            return
+        }
+        L.allowed_hexes.forEach(h => action_hex(h))
+        button("skip")
+    },
+    done() {
+        check_supply()
+        end()
+        G.active = G.offensive.attacker
+        G.prepared_undo = G.persisted_undo
+        G.persisted_undo = null
+        prepare_redo()
+    },
+    skip() {
+        push_undo()
+        this.next_disengagement()
+    },
+    action_hex(hex) {
+        push_undo()
+        var loc = G.location[L.allowed_units[0]]
+        move_units(L.allowed_units, map_get(L.allowed_hexes, hex))
+        G.active_stack = []
+        check_supply()
+        if (set_has(G.offensive.battle_hexes, loc) && !is_faction_units(loc, G.active)) {
+            set_delete(G.offensive.battle_hexes, loc)
+        }
+        this.next_disengagement()
+    }
 }
 
 function get_disengagement_hexes(hex) {
@@ -4881,7 +4929,7 @@ function mark_participate_attack_hex() {
 
 
 function has_non_n_zoi(hex, faction) {
-    return (G.supply_cache[hex] & (JP_ZOI << faction | JP_ZOI_NTRL << faction)) === JP_ZOI << faction
+    return (G.supply_cache[hex] & ((JP_ZOI << faction) | (JP_ZOI_NTRL << faction))) === (JP_ZOI << faction)
 }
 
 function has_zoi(hex, faction) {
@@ -5031,7 +5079,7 @@ P.declare_battle_hexes = {
         if (G.active_stack.length === 0 && L.possible_units.length === 0) {
             prompt(`${offensive_card_header()} Confirm declared battle hexes.`)
         } else {
-            prompt(`${offensive_card_header()} Declare battle hexes and commit units.`)
+            prompt(`${offensive_card_header()} Declare battle hexes and assign units.`)
         }
         if (G.active_stack.length === 0) {
             L.possible_units.forEach(u => action_unit(u))
@@ -5070,15 +5118,22 @@ P.declare_battle_hexes = {
     },
 }
 
-P.commit_offensive = {
-    _begin() {
+P.commit_offensive = script(`
+    eval {
         check_supply()
         if (get_hand(AP).includes(SKIP_BOMBING)) {
             cache_skip_bombing()
         }
-        L.verify_error = trigger_event("before_commit_offensive")
-    },
-    inactive: "commit offensive",
+    }
+    set L.verify_error trigger_event("before_commit_offensive")
+    if ( G.offensive.stage === ATTACK_STAGE && G.offensive.disengagement && G.offensive.disengagement ){
+        call retro_disengagement
+    }
+    call commit_offensive_confirm
+    `)
+
+P.commit_offensive_confirm = {
+    inactive: "confirm offensive",
     prompt() {
         var action = "offensive"
         if (G.offensive.stage === REACTION_STAGE) {
@@ -5086,12 +5141,11 @@ P.commit_offensive = {
         } else if (G.offensive.stage === POST_BATTLE_STAGE) {
             action = "post battle move"
         }
-
-        if (!L.verify_error) {
-            prompt(`${offensive_card_header()} Commit ${action}.`)
+        if (!L.L.verify_error) {
+            prompt(`${offensive_card_header()} Confirm ${action}.`)
             button("next")
         } else {
-            prompt(`${offensive_card_header()} Commit ${action}. ` + L.verify_error)
+            prompt(`${offensive_card_header()} Confirm ${action}. ` + L.L.verify_error)
         }
     },
     next() {
@@ -5168,9 +5222,9 @@ P.special_reaction = {
             end()
         }
     },
-    inactive: "commit special reaction",
+    inactive: "roll to special reaction",
     prompt() {
-        prompt(`${offensive_card_header()} Commit a special reaction.`)
+        prompt(`${offensive_card_header()} Choose hex to roll for special reaction.`)
         button("pass")
         L.possible_hexes.forEach(h => action_hex(h))
     },
@@ -5194,7 +5248,7 @@ P.special_reaction = {
 
 function into_turn_draw(faction) {
     if (G.draw_counter[faction] >= 3) {
-        log(`${side_get_log_str(faction)} already drawn 3 cards, draw skipped.`)
+        log(`${side_get_log_str(faction)} has drawn 3 cards already, draw skipped.`)
         return
     }
     G.draw_counter[faction]++
@@ -5223,7 +5277,6 @@ P.cancel_offensive = {
         L.cancel = 0
         for_each_card((c, card) => {
             if (card.type === CANCEL && card.could_play()) {
-                console.log(card.name)
                 L.cancel++
             }
         })
@@ -5232,7 +5285,7 @@ P.cancel_offensive = {
             return
         }
     },
-    inactive: "offensive reaction",
+    inactive: "reaction",
     prompt() {
         prompt(`${offensive_card_header()} Cancel offensive.`)
         if (L.reactions_card > 0) {
@@ -5736,9 +5789,9 @@ P.apply_hits = {
         button("undo", L.dmg_list[R].length)
         if (!G.offensive.battle.hit_able_units[R].length) {
             button("done")
-            prompt(`${battle_header()} Commit hits. Remaining: ${Math.max(G.offensive.battle.hits[R], 0)}.`)
+            prompt(`${battle_header()} Assign hits. Remaining: ${Math.max(G.offensive.battle.hits[R], 0)}.`)
         } else {
-            prompt(`${battle_header()} Apply hits. ${G.offensive.battle.hits[R]}`)
+            prompt(`${battle_header()} Assign hits. ${G.offensive.battle.hits[R]}`)
         }
     },
     undo() {
@@ -6270,7 +6323,7 @@ P.retreat = {
             prompt(`Choose unit to retreat.`)
             L.unit_to_retreat.forEach(u => action_unit(u))
         } else {
-            prompt(`Commit retreat.`)
+            prompt(`Confirm retreat.`)
             button("done")
         }
     },
@@ -6418,7 +6471,7 @@ P.emergency_move = {
                 button("done")
             }
         } else {
-            prompt(`Commit emergency move.`)
+            prompt(`Confirm emergency move.`)
             button("done")
         }
     },
@@ -6859,7 +6912,7 @@ P.india_surrender = {
         }
         if (!G.active_stack.length && (!L.unit_to_retreat.length || L.unit_to_retreat.map(u => pieces[u])
             .filter(piece => piece.service === "army" || piece.service === "navy" || piece.service === "us").length === L.unit_to_retreat.length)) {
-            prompt(`Commit emergency move.`)
+            prompt(`Confirm emergency move.`)
             button("done")
         }
     },
@@ -7905,7 +7958,7 @@ cards[find_card(JP, 2)].before_unit_move = function () {
 }
 
 cards[find_card(JP, 2)].after_unit_move = function () {
-    var hex = G.location[G.active_stack[0]]
+    var hex = G.location[L.active[0]]
     if (G.active === JP && (hex === MANILA || hex === SINGAPORE)) {
         call("coastal_artillery")
     }
@@ -7916,7 +7969,7 @@ P.coastal_artillery = {
         L.allowed_units = []
         var ground = []
         L.allowed_units = []
-        G.active_stack.forEach(u => {
+        L.L.active.forEach(u => {
             var piece = pieces[u]
             if (piece.class === "naval") {
                 set_add(L.allowed_units, u)
@@ -8619,7 +8672,7 @@ P.kamikaze_attack = {
         })
         L.stage = 1
     },
-    inactive: "commit kamikaze attack",
+    inactive: "launch kamikaze attack",
     prompt() {
         if (L.allowed_units.length <= 0) {
             prompt(`No kamikaze attack possible. No air units.`)
@@ -10384,7 +10437,6 @@ P.scenario_1941 = script(`
     call commit_offensive
     log ("#GOffensive reaction")
     set G.active AP
-    call ground_disengagement
     call conquest_of_se_asia_reaction
     set G.offensive.stage BATTLE_STAGE
     log ("#GResolve battles")
@@ -11565,6 +11617,15 @@ function get_garrison_count() {
 }
 
 function on_view() {
+    var actual_g = G
+    if (R !== G.offensive.attacker && G.offensive.disengagement) {
+        for (var i = 0; i < G.offensive.disengagement.length; i++) {
+            if (G.offensive.disengagement[i]) {
+                G = G.offensive.disengagement[i]
+                break
+            }
+        }
+    }
     V.active = G.active
     V.turn = G.turn
     V.sid = G.sid
@@ -11651,6 +11712,7 @@ function on_view() {
     if(L.P === "burma_choose_offensive" && R == AP){
         V.offensive.active_cards = []
     }
+    G = actual_g
 }
 
 function action_card(c) {
@@ -12151,6 +12213,8 @@ exports.view = function (state, role) {
 
         if (V.actions.undo === undefined)
             button("undo", G.undo?.length > 0)
+        if (V.actions.redo === undefined && G.redo && (G.redo.redo_count > G.redo_count || !G.redo_count))
+            button("redo")
 
         _save()
     } else {
@@ -12195,6 +12259,8 @@ exports.action = function (state, role, action, argument) {
         _run()
     } else if (action === "undo" && G.undo.length > 0) {
         pop_undo()
+    } else if (action === "redo" && G.redo) {
+        pop_redo()
     } else {
         throw new Error("Invalid action: " + action)
     }
@@ -12277,6 +12343,9 @@ function _run() {
                 end()
             }
         } else {
+            if (G.redo_count && !G.redo) {
+                push_redo()
+            }
             return // state
         }
     }
@@ -12560,6 +12629,10 @@ function clear_undo() {
     if (G.undo) {
         G.undo.length = 0
     }
+    if (G.prepared_undo) {
+        G.undo = G.prepared_undo
+        G.prepared_undo = null
+    }
 }
 
 function push_undo() {
@@ -12572,9 +12645,11 @@ function restore_state(state) {
     if (state) {
         var save_log = G.log
         var save_undo = G.undo
+        var save_redo = G.redo
         G = state
         G.log = save_log
         G.undo = save_undo
+        G.redo = save_redo
     }
 }
 
@@ -12584,6 +12659,8 @@ function copy_state() {
     for (k in G) {
         v = G[k]
         if (k === "undo")
+            continue
+        else if (k === "redo")
             continue
         else if (k === "log")
             v = v.length
@@ -12598,10 +12675,56 @@ function pop_undo() {
     if (G.undo) {
         var save_log = G.log
         var save_undo = G.undo
+        var save_redo = G.redo
         G = save_undo.pop()
         save_log.length = G.log
         G.log = save_log
         G.undo = save_undo
+        G.redo = save_redo
+    }
+}
+
+function prepare_redo() {
+    if (!G.redo_count) {
+        G.redo_count = 0
+    }
+    G.redo_count++
+    G.redo = null
+}
+
+function push_redo() {
+    G.redo = copy_state()
+    if (G.prepared_undo) {
+        G.redo.undo = object_copy(G.prepared_undo)
+    } else {
+        G.redo.undo = object_copy(G.undo)
+    }
+    G.redo.log = [0]
+    if (G.redo.undo.length > 0) {
+        G.redo.log[0] = G.redo.undo[0].log
+    }
+    for (var i = G.redo.log[0]; i < G.log.length; i++) {
+        G.redo.log.push(G.log[i])
+    }
+}
+
+
+function pop_redo() {
+    if (G.redo) {
+        var save_log = G.log
+        G = G.redo
+        save_log.length = G.log[0]
+        for (var i = 1; i < G.log.length; i++) {
+            save_log.push(G.log[i])
+        }
+        G.log = save_log
+        push_redo()
+    }
+}
+
+function clear_redo() {
+    if (G.redo) {
+        G.redo = null
     }
 }
 

@@ -659,7 +659,7 @@ function on_init(scenario, game_options, static_view) {
     define_layout_track_h("china", 5, 0, map_layout.track_chinese_government, 0)
 
     if (map_layout.track_japanese_divisions_available_china !== undefined) {
-        define_layout_track_h("divisions", 0, (SID == BURMA_SCENARIO ? 8 :12), map_layout.track_japanese_divisions_available_china, 0)
+        define_layout_track_h("divisions", 1, (SID == BURMA_SCENARIO ? 9 :13), map_layout.track_japanese_divisions_available_china, 0)
     }
     for (i = 0; i < 35; i++) {
         var battle = define_marker("battle", i, "conflict battle unit_status")
@@ -1175,7 +1175,7 @@ function on_update() {
         populate_generic("india", Math.max(0, 4 - G.surrender[data.nations.INDIA.id]),
             (G.surrender[data.nations.INDIA.id] >= 5) ? data.counters.india_status_surrender : data.counters.india_status)
         populate_generic("burma", 2 - G.burma_road, G.events[data.events.HUMP.id] ? data.counters.burma_road_hump : data.counters.burma_road)
-        populate("divisions", G.china_divisions, `divisions`, 0)
+        populate("divisions", G.china_divisions + 1, `divisions`, 0)
     }
 
     populate_generic("china", Math.min(5, G.surrender[data.nations.CHINA.id]), data.counters.china)
@@ -1222,6 +1222,8 @@ function on_update() {
 
     action_button("roll", "Roll")
 
+    action_button("awaiting", "Await")
+    action_button("continue", "Continue")
     action_button("bonus", "Use Bonus")
     action_button("event", "Play Event")
     action_button("ops", "Play for Operations")
@@ -1271,6 +1273,7 @@ function on_update() {
     action_button("draw", "draw specific card(dbg)")
     action_button("auto", "auto(dbg)")
 
+    action_button("redo", "Redo")
     action_button("undo", "Undo")
     end_update()
 }
