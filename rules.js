@@ -387,6 +387,7 @@ const NON_PLAYABLE_HEX = {id: 0, terrain: OCEAN, region: "Ocean", edges_int: 0}
 const TUNNEL_HEX = {id: 0, terrain: OCEAN, region: "Ocean", edges_int: UNPLAYABLE_WATER | WATER}
 const MAP_DATA = []
 const S_P_MAP_DATA = []
+const B_F_W_MAP_DATA = []
 const AIRFIELD_LINKS = []
 
 map.forEach(h => MAP_DATA[hex_to_int(h.id)] = h)
@@ -448,6 +449,7 @@ for (let i = 0; i <= LAST_BOARD_HEX; ++i) {
         hex.supply_source |= JOINT_SUPPLIED_HEX
     }
     apply_south_pacific(Object.assign({}, hex))
+    apply_burma(Object.assign({}, hex))
 }
 MAP_DATA[CHINA_BOX] = {
     id: int_to_hex(CHINA_BOX),
@@ -495,6 +497,31 @@ function apply_south_pacific(hex) {
         hex.supply_source |= JP_SUPPLIED_HEX
     }
     S_P_MAP_DATA[id] = hex
+}
+
+B_F_W_MAP_DATA[SINGAPORE] = Object.assign({}, MAP_DATA[SINGAPORE])
+B_F_W_MAP_DATA[SINGAPORE].supply_source = JOINT_SUPPLIED_HEX | US_SUPPLIED_HEX
+function apply_burma(hex) {
+    var id = hex_to_int(hex.id)
+    var x = Math.floor(id / 29)
+    let y = id % 29
+
+    if (x == 15 && y > 9|| x == 16 && y > 9 || x >= 16 && y >= 13) {
+        B_F_W_MAP_DATA[id] = NON_PLAYABLE_HEX
+        return
+    }
+    //17.11.16. Andaman Islands
+    if(hex.id == 1809){
+        hex.airfield = true
+        hex.named = true
+    }
+    // 17.11.6 Allies trace to an ultimate supply source off the Western Map
+    // edge (Maldives edge). Japanese trace to an ultimate supply source
+    // supply overland to Saigon or via hex 1912
+    if(hex.id == 1912 || hex.id == 2212){
+        hex.supply_source |= JP_SUPPLIED_HEX
+    }
+    B_F_W_MAP_DATA[id] = hex
 }
 
 for (var i = 0; i < map.length; i++) {
@@ -752,6 +779,8 @@ function get_map_data(hex) {
         return TUNNEL_HEX
     } else if (scenario_data().id === SOUTH_PACIFIC_SCENARIO) {
         return S_P_MAP_DATA[hex]
+    } else if (scenario_data().id === BURMA_SCENARIO) {
+        return B_F_W_MAP_DATA[hex]
     }
     return MAP_DATA[hex]
 }
@@ -11276,10 +11305,9 @@ function setup_scenario_burma(){
         G.surrender[n.id] = 1
         set_control_over_nation(n)
     })
-    var ap_controlled = [5808, 3823, 4024, 4828]
-    ap_controlled.forEach(h => set_delete(G.control, hex_to_int(h)))
-    control_hex(hex_to_int(4719), JP)
-    control_hex(hex_to_int(3017), JP)
+    control_hex(hex_to_int(1912), JP)
+    control_hex(hex_to_int(1809), JP)
+    control_hex(hex_to_int(2112), JP)
     G.reduced = []
 
     for_each_unit(u => G.location[u] = PERM_ELIMINATED)
