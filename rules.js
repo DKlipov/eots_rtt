@@ -11412,7 +11412,7 @@ function setup_scenario_burma(){
     G.political_will = 4
     G.asp[JP] = [1, 0]
     G.asp[AP] = [1, 0]
-    G.wie = 0
+    G.wie = 3
     G.pow = 1
     G.reinforcements = [2, 2]
     G.surrender[nations.CHINA.id] = 2
