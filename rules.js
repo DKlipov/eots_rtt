@@ -11443,6 +11443,7 @@ function setup_scenario_burma(){
     G.events[events.JARHAT_ROAD.id] = 1
     G.events[events.HUMP.id] = 1 //Burma Road: Hump Closed
     G.events[events.KWAI_RIVER_BRIDGE.id] = 2// 17.11.13. Kwai Bridge Event has been played, note impact on Japanese activations.
+    G.events[events.DOOLITLE] = 2// 17.11.22. Doolittle Raid has occurred meeting the condition for the Doolittle Reprisal card.
     check_supply()
     log("!Empire of the Sun. Burma: The Forgotten War, 1943-1944")
     log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
