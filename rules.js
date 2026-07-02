@@ -334,6 +334,20 @@ const TOKYO_AIR_BASES = [3307, 3704, 3407, 3506, 3507, 3607, 3706, 3705, 3305, 3
 const RESOURCE_HEX = [...Array(map.length).keys()].filter(h => map[h].resource).map(h => hex_to_int(map[h].id))
 const COM_REPLACEMENT_POINTS = [1307, 1308, 2114, 2709, 3727].map(h => hex_to_int(h))
 const HQ_LIST = []
+const HEX_DIRECTION = []
+HEX_DIRECTION[31] = 0
+HEX_DIRECTION[2] = 1
+HEX_DIRECTION[1] = 2
+HEX_DIRECTION[29] = 3
+HEX_DIRECTION[59] = 4
+HEX_DIRECTION[60] = 5
+HEX_DIRECTION[41] = 0
+HEX_DIRECTION[11] = 1
+HEX_DIRECTION[10] = 2
+HEX_DIRECTION[39] = 3
+HEX_DIRECTION[68] = 4
+HEX_DIRECTION[69] = 5
+
 
 for (let i = 1; i < pieces.length; i++) {
     if (pieces[i].class === "hq") {
@@ -2143,7 +2157,7 @@ function mark_ground_reaction_hexes(location) {
             if (nh <= 0) {
                 continue
             }
-            var distance = base_distance + get_ground_move_cost(nh, item, (j + 3) % 6, R)//to correct distance processing with backward tracing
+            var distance = base_distance + get_ground_move_cost(nh, item, R)//to correct distance processing with backward tracing
             if (distance > G.offensive.ground_move_distance
                 || distance >= map_get(distance_map, nh, 100)
                 || set_has(G.offensive.battle_hexes, nh)) {
@@ -2702,6 +2716,13 @@ P.move_to = script(`
 
 P.move_offensive_units = {
     _begin() {
+        var clear_path = []
+        map_for_each(G.offensive.paths, u => {
+            if (pieces[u].faction === G.active) {
+                clear_path.push(u)
+            }
+        })
+        clear_path.forEach(u => map_delete(G.offensive.paths, u))
         L.move_data = {}
         L.move_type = ANY_MOVE
         L.movable_units = []
@@ -2960,11 +2981,12 @@ P.ground_move = {
         var curr_path = map_get(L.allowed_hexes, hex)
         move_units(G.active_stack, curr_path)
         check_supply()
-        L.move_data.ground_move_distance -= curr_path[1]
         L.move_data.location = hex
         L.allowed_hexes = []
         if (!should_ground_move_stop(hex, R)) {
             compute_ground_move_hexes()
+        } else {
+            this.done()
         }
     },
     done() {
@@ -2972,8 +2994,8 @@ P.ground_move = {
         if (is_faction_units(G.location[G.active_stack[0]], 1 - G.active)) {
             create_battle_hex(G.location[G.active_stack[0]])
         }
-        G.active_stack = []
-        end()
+        var hex = G.location[G.active_stack[0]]
+        goto("move_to", {hex})
     }
 }
 
@@ -4126,7 +4148,15 @@ function get_asp_limit(faction) {
     return Math.max(asp_lim - G.asp[faction][1], 0)
 }
 
-function get_ground_move_cost(from, to, direction, faction) {
+function get_direction(from, to) {
+    var x = ((from) % 29)
+    var d = ((from - x) / 29) % 2
+    var r = HEX_DIRECTION[from - to + 30 + d * 10]
+    return r ? r : 0
+}
+
+function get_ground_move_cost(from, to, faction) {
+    var direction = get_direction(from, to)
     if (!(get_map_data(from).edges_int & GROUND << 5 * direction)) {
         return 100;
     }
@@ -4591,7 +4621,6 @@ function with_state_as_G(state, apply) {
 
 P.retro_disengagement = {
     _begin() {
-        clear_redo()
         L.next_d = -1
         this.next_disengagement()
         if (L.next_d >= G.offensive.disengagement.length) {
@@ -4647,18 +4676,24 @@ P.retro_disengagement = {
                 move_units(move_log[0], move_log[1])
             }
             log("Offensive interrupted due to disengagement.")
-            check_supply()
-            prepare_redo()
-            G.offensive.disengagement = []
-            return
         }
-        G.offensive.disengagement = []
-        check_supply()
-        end()
         G.active = G.offensive.attacker
+        G.undo = []
         G.prepared_undo = G.persisted_undo
         G.persisted_undo = null
         prepare_redo()
+        G.offensive.disengagement = []
+        end()
+        var active_stack = L.active
+
+        check_supply()
+        if (L.P === "move_to") {
+            set_mt(ANY_MOVE)
+            L.allowed_hexes = []
+            L.spec_move = 0
+            G.active_stack = active_stack
+            call("ground_move")
+        }
     },
     skip() {
         push_undo()
@@ -4666,15 +4701,9 @@ P.retro_disengagement = {
     },
     reset_state() {
         G.persisted_undo.length = G.offensive.disengagement[L.next_d] + 1
-        var undo = G.persisted_undo
-        G.undo = undo
+        G.undo = G.persisted_undo
         pop_undo()
         L = G.L
-        end()
-        G.active = G.offensive.attacker
-        G.undo = []
-        G.prepared_undo = undo
-        G.persisted_undo = null
     },
     action_hex(hex) {
         push_undo()
@@ -4741,7 +4770,7 @@ function get_disengagement_hexes(hex, just_entered) {
     var nh_array = get_near_hexes(hex)
     for (var i = 0; i < nh_array.length; i++) {
         var nh = nh_array[i]
-        var distance = get_ground_move_cost(hex, nh, i, R)
+        var distance = get_ground_move_cost(hex, nh, R)
         if (nh > 0 && !set_has(just_entered, nh) && !is_faction_units(nh, G.offensive.attacker) && distance < 10) {
             set_add(result, nh)
         }
@@ -4752,39 +4781,19 @@ function get_disengagement_hexes(hex, just_entered) {
 function compute_ground_disengagement(unit) {
     let location = G.location[unit]
     var allowed_hexes = []
-    var ground_move_distance = G.offensive.ground_move_distance
-    const queue = [location]
-    const distance_map = [location, [0, location]]
     var just_entered = get_just_entered()
-    for (var i = 0; i < queue.length; i++) {
-        let item = queue[i]
-        let base_distance = map_get(distance_map, item)
-        let nh_list = get_near_hexes(item)
-        for (let j = 0; j < nh_list.length; j++) {
-            let nh = nh_list[j]
-            if (nh <= 0) {
-                continue
-            }
-            var distance = base_distance[0] + get_ground_move_cost(item, nh, j, 1 - G.offensive.attacker)
-            if (is_faction_units(nh, G.offensive.attacker) || set_has(just_entered, nh) || distance >= 100
-                || item !== location && (distance > ground_move_distance || distance >= map_get(distance_map, nh, [100])[0])) {
-                continue
-            }
-            let path_array = base_distance.slice()
-            path_array.push(nh)
-            path_array[0] = distance
-            map_set(distance_map, nh, path_array)
-
-            if (distance < ground_move_distance) {
-                queue.push(nh)
-            }
+    let nh_list = get_near_hexes(location)
+    for (let j = 0; j < nh_list.length; j++) {
+        let nh = nh_list[j]
+        if (nh <= 0) {
+            continue
         }
+        if (is_faction_units(nh, G.offensive.attacker) || set_has(just_entered, nh)) {
+            continue
+        }
+        map_set(allowed_hexes, nh, [GROUND_DISENGAGEMENT | GROUND_MOVE, 0, location, nh])
+
     }
-    map_for_each(distance_map, (k, v) => {
-        v.unshift(GROUND_DISENGAGEMENT | GROUND_MOVE)
-        map_set(allowed_hexes, k, v)
-    })
-    map_delete(allowed_hexes, location)
     return allowed_hexes
 }
 
@@ -4800,7 +4809,7 @@ function ground_move_denied(hex) {
     if (region === "IChina") {
         return G.active_stack.filter(u => pieces[u].service !== "ch").length
     }
-    if (R === JP && region === "India") {
+    if (G.active === JP && region === "India") {
         return G.active_stack.filter(u => pieces[u].class === "ground").length
     }
     if (G.active_stack.filter(u => pieces[u].service === "ch").length) {
@@ -4811,8 +4820,16 @@ function ground_move_denied(hex) {
 function get_ground_move(avoid_zoi) {
     const location = L.move_data.location
     const move_data = L.move_data
-
-    if (avoid_zoi && G.supply_cache[location] & JP_ZOI << (1 - R)) {
+    var max_distance = move_data.ground_move_distance
+    var path = map_get(G.offensive.paths, G.active_stack[0])
+    if (path) {
+        var d = 0
+        for (var i = 2; i < path.length - 1; i++) {
+            d += get_ground_move_cost(path[i], path[i + 1], G.active)
+        }
+        max_distance -= d
+    }
+    if (avoid_zoi && G.supply_cache[location] & JP_ZOI << (1 - G.active)) {
         return []
     }
     const queue = [location]
@@ -4826,19 +4843,19 @@ function get_ground_move(avoid_zoi) {
             if (nh <= 0) {
                 continue
             }
-            var distance = base_distance[0] + get_ground_move_cost(item, nh, j, R)
-            if ((avoid_zoi && G.supply_cache[nh] & JP_ZOI << (1 - R)) || distance > move_data.ground_move_distance || distance >= map_get(distance_map, nh, [100])[0]
+            var distance = base_distance[0] + get_ground_move_cost(item, nh, G.active)
+            if ((avoid_zoi && G.supply_cache[nh] & JP_ZOI << (1 - G.active)) || distance > max_distance || distance >= map_get(distance_map, nh, [100])[0]
                 || ground_move_denied(nh)) {
                 continue
             }
-            const stop_move = should_ground_move_stop(nh, R)
+            const stop_move = should_ground_move_stop(nh, G.active)
 
             let path_array = base_distance.slice()
             path_array.push(nh)
             path_array[0] = distance
             map_set(distance_map, nh, path_array)
 
-            if (distance < move_data.ground_move_distance && !stop_move) {
+            if (distance < max_distance && !stop_move) {
                 queue.push(nh)
             }
         }
@@ -6372,7 +6389,7 @@ function select_retreat_hex() {
     for (var i = 0; i < nh.length; i++) {
         var h = nh[i]
         if (h < 0 || h > LAST_BOARD_HEX || set_has(just_entered, h) || is_overstack(h, G.active_stack[0])
-            || is_faction_units(h, G.offensive.attacker) || get_ground_move_cost(G.offensive.battle.battle_hex, h, i, JP) >= 100
+            || is_faction_units(h, G.offensive.attacker) || get_ground_move_cost(G.offensive.battle.battle_hex, h, JP) >= 100
             || ground_move_denied(h) || set_has(G.offensive.battle_hexes, h)) {
             continue
         } else {
@@ -12403,6 +12420,10 @@ function clear_undo() {
         G.undo = G.prepared_undo
         G.prepared_undo = null
     }
+    if (G.redo && G.redo_count > G.redo.redo_count) {
+        G.redo = null
+    }
+    G.redo_count++
 }
 
 function push_undo() {
@@ -12497,12 +12518,6 @@ function pop_redo() {
         G.log = save_log
         G.delayed_state = delayed
         push_redo()
-    }
-}
-
-function clear_redo() {
-    if (G.redo) {
-        G.redo = null
     }
 }
 
