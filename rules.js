@@ -141,7 +141,7 @@ const JP_REINF = 1487
 const TURN_BOX = 1490
 const TUNNEL_BOX = 1600
 
-const {pieces, cards, map, sp_map, nations, events} = require("./data.js")
+const { pieces, cards, map, sp_map, nations, events } = require("./data.js")
 
 const ROAD_EVENTS = Object.keys(events).filter(k => events[k].road).map(k => {
     var event = events[k]
@@ -191,8 +191,8 @@ const SCENARIO_DATA = [
         one_year: true,
         last_turn: 4
     },
-    {id: YEAR_1942_1943_SCENARIO, name: "1942-1943", setup: setup_scenario_1942, victory: victory_1943, last_turn: 7},
-    {id: 4, name: "1942-1944", setup: setup_scenario_1942, victory: victory_1944, last_turn: 10},
+    { id: YEAR_1942_1943_SCENARIO, name: "1942-1943", setup: setup_scenario_1942, victory: victory_1943, last_turn: 7 },
+    { id: 4, name: "1942-1944", setup: setup_scenario_1942, victory: victory_1944, last_turn: 10 },
     {
         id: SHORT_CAMPAIGN_SCENARIO,
         name: "1942-1945 (The Shortened Campaign)",
@@ -208,7 +208,7 @@ const SCENARIO_DATA = [
         one_year: true,
         last_turn: 7
     },
-    {id: 7, name: "1943-1944", setup: setup_scenario_1943, victory: victory_1944, last_turn: 10},
+    { id: 7, name: "1943-1944", setup: setup_scenario_1943, victory: victory_1944, last_turn: 10 },
     {
         id: EVEN_SHORT_CAMPAIGN_SCENARIO,
         name: "1943-1945 (The Even Shorter Campaign)",
@@ -216,15 +216,15 @@ const SCENARIO_DATA = [
         victory: victory_1945,
         last_turn: 12
     },
-    {id: 9, name: "1944", setup: setup_scenario_1944, victory: victory_1944, one_year: true, last_turn: 10},
+    { id: 9, name: "1944", setup: setup_scenario_1944, victory: victory_1944, one_year: true, last_turn: 10 },
     {
-        id: BURMA_SCENARIO, 
-        name: "Burma: The Forgotten War, 1943-1944", 
+        id: BURMA_SCENARIO,
+        name: "Burma: The Forgotten War, 1943-1944",
         setup: setup_scenario_burma,
         deal_cards: B_F_W_deal_cards,
         replacement_points: get_B_F_W_replacement_points,
         has_card: c => set_has(B_F_W_DECK, c),
-        victory: victory_burma, 
+        victory: victory_burma,
         last_turn: 9
     },
 ]
@@ -383,8 +383,8 @@ function find_card(faction, num) {
 const SP_TONNELLING = [hex_to_int(4825), 21, hex_to_int(4826), 22, hex_to_int(4828), 24, hex_to_int(4926), 22]
 const S_P_TONNELLING_SET = [hex_to_int(4825), hex_to_int(4826), hex_to_int(4828), hex_to_int(4926), OAHU]
 const OAHU_NEAR = S_P_TONNELLING_SET.filter(h => h !== OAHU).map((h, i) => TUNNEL_BOX + 100 * i + map_get(SP_TONNELLING, h))
-const NON_PLAYABLE_HEX = {id: 0, terrain: OCEAN, region: "Ocean", edges_int: 0}
-const TUNNEL_HEX = {id: 0, terrain: OCEAN, region: "Ocean", edges_int: UNPLAYABLE_WATER | WATER}
+const NON_PLAYABLE_HEX = { id: 0, terrain: OCEAN, region: "Ocean", edges_int: 0 }
+const TUNNEL_HEX = { id: 0, terrain: OCEAN, region: "Ocean", edges_int: UNPLAYABLE_WATER | WATER }
 const MAP_DATA = []
 const S_P_MAP_DATA = []
 const B_F_W_MAP_DATA = []
@@ -405,7 +405,7 @@ for (var i = 0; i < sp_map.length; i++) {
 for (let i = 0; i <= LAST_BOARD_HEX; ++i) {
     let hex = MAP_DATA[i]
     if (!hex) {
-        hex = {id: int_to_hex(i), terrain: OCEAN, region: "Ocean"}
+        hex = { id: int_to_hex(i), terrain: OCEAN, region: "Ocean" }
         MAP_DATA[i] = hex
     }
 
@@ -506,19 +506,19 @@ function apply_burma(hex) {
     var x = Math.floor(id / 29)
     let y = id % 29
 
-    if (x == 15 && y > 9|| x == 16 && y > 9 || x >= 16 && y >= 13) {
+    if (x == 15 && y > 9 || x == 16 && y > 9 || x >= 16 && y >= 13) {
         B_F_W_MAP_DATA[id] = NON_PLAYABLE_HEX
         return
     }
     //17.11.16. Andaman Islands
-    if(hex.id == 1809){
+    if (hex.id == 1809) {
         hex.airfield = true
         hex.named = true
     }
     // 17.11.6 Allies trace to an ultimate supply source off the Western Map
     // edge (Maldives edge). Japanese trace to an ultimate supply source
     // supply overland to Saigon or via hex 1912
-    if(hex.id == 1912 || hex.id == 2212){
+    if (hex.id == 1912 || hex.id == 2212) {
         hex.supply_source |= JP_SUPPLIED_HEX
     }
     B_F_W_MAP_DATA[id] = hex
@@ -900,10 +900,10 @@ P.reinforcement_segment = {
         var delayed_units = false
         for_each_unit((u, piece, location) => {
             if (piece.faction !== G.active || !(
-                    piece.reinforcement === G.turn
-                    || location === DELAYED_BOX
-                    || location === TURN_BOX + G.turn
-                )
+                piece.reinforcement === G.turn
+                || location === DELAYED_BOX
+                || location === TURN_BOX + G.turn
+            )
                 || location === PERM_ELIMINATED) {
                 return
             }
@@ -1099,7 +1099,7 @@ function get_B_F_W_replacement_points() {
         //17.11.21. Japanese Replacements: Japanese begin the game with 2 air
         //replacements, 1 Ground taken from China per turn (optional)
         //plus Air steps per event card, no naval replacements
-        result[NAVAl_REP] = 0 
+        result[NAVAl_REP] = 0
         result[AIR_REP] = G.reinforcements[AIR_REP]
         L.divisions = Math.min(1, G.china_divisions)
         return result
@@ -1110,7 +1110,7 @@ function get_B_F_W_replacement_points() {
     L.divisions = undefined
     result[AIR_REP] = 1
     result[COMMONWEALTH_REP] = 1
-    if(G.turn == 9){
+    if (G.turn == 9) {
         result[NAVAl_REP] = 1
         result[CHINESE_REP] = 1
     }
@@ -1489,7 +1489,7 @@ function S_P_deal_cards() {
         draw_card(AP)
     }
 }
-function B_F_W_deal_cards(){
+function B_F_W_deal_cards() {
     var jp_cards = 4
     G.passes[JP] = 0
     if (G.strategic_warfare) {
@@ -1853,7 +1853,7 @@ P.offensive_segment = {
     },
     card(c) {
         push_undo()
-        goto("offensive_segment_card_action", {c: c})
+        goto("offensive_segment_card_action", { c: c })
     },
     pass() {
         push_undo()
@@ -2371,8 +2371,8 @@ function get_activatable_units(hq, hq_supply_type) {
     G.offensive.battle_hexes.forEach(h => mark_attack_zone(h, R === AP ? 2 : 3))
     var hump = is_event_active(events.HUMP)
     if (faction === AP && (G.supply_cache[KUNMING] & HEX_TEMP_FLAG3
-            || hump && (G.supply_cache[JARHAT] & HEX_TEMP_FLAG3)
-            || hump && (G.supply_cache[DACCA] & HEX_TEMP_FLAG3))
+        || hump && (G.supply_cache[JARHAT] & HEX_TEMP_FLAG3)
+        || hump && (G.supply_cache[DACCA] & HEX_TEMP_FLAG3))
         || hump && (G.supply_cache[LEDO] & HEX_TEMP_FLAG3)) {
         G.supply_cache[CHINA_BOX] |= HEX_TEMP_FLAG3
     } else {
@@ -3031,10 +3031,10 @@ P.move_offensive_units = {
         L.move_type = ANY_MOVE
         L.spec_move = 0
         check_supply()
-        call("move_to", {hex})
+        call("move_to", { hex })
     },
     no_move() {
-        call("move_to", {hex: G.location[G.active_stack[0]]})
+        call("move_to", { hex: G.location[G.active_stack[0]] })
     },
     done() {
         push_undo()
@@ -4016,7 +4016,7 @@ P.commit_overstacking = {
         }
         L.hexes = []
         L.allowed_units.forEach(u => set_add(L.hexes, G.location[u]))
-        L.violations = {overstack: L.hexes}
+        L.violations = { overstack: L.hexes }
     },
     inactive: "check overstacked units",
     prompt() {
@@ -6656,7 +6656,7 @@ P.national_status_segment = function () {
         if (G.surrender[nations.PHILIPPINES.id]) {
             for_each_unit_on_map((u, piece, location) => {
                 if ((piece.class === "ground" || piece.class === "hq" ||
-                        (piece.service !== "army" && piece.service !== "navy" && piece.service !== "us"))
+                    (piece.service !== "army" && piece.service !== "navy" && piece.service !== "us"))
                     && piece.faction === AP
                     && nations.PHILIPPINES.regions.includes(get_map_data(location).region)) {
                     eliminate(u)
@@ -7271,10 +7271,10 @@ function get_victory() {
     if (!vp.won_side && vp.vp <= 2) {
         vp.won_side = "Allies"
         vp.won_text = `Allied Decisive Victory`
-    } else if (!vp.won_side && vp.vp <= 5) {
+    } else if (!vp.won_side && vp.vp <= (G.sid!=BURMA_SCENARIO?5:4)) {
         vp.won_side = "Allies"
         vp.won_text = `Allied Tactical Victory`
-    } else if (!vp.won_side && vp.vp <= 9) {
+    } else if (!vp.won_side && vp.vp <= (G.sid!=BURMA_SCENARIO?9:8)) {
         vp.won_side = "Japan"
         vp.won_text = `Japanese Tactical Victory`
     } else if (!vp.won_side) {
@@ -7758,71 +7758,90 @@ function victory_south_pacific() {
 }
 
 function victory_burma() {
-    //TODO
     var result = {
         vp: 0,
         text: [],
         won_side: "",
         won_text: "",
     }
+    // 23. Progress of the War (PoW): Ignore the normal PoW rules. If
+    //   the Allies do not capture at least one hex at the conclusion of
+    //   the game that began the game controlled by the Japanese, minus
+    //   1 US Political Will.
 
+    //TODO check capture of japanese hexe (Probably not in this function)
+
+    //A. China track: +1 VP per box left or –1 per box right of the Major
+    // Breakthrough Box. If China Surrenders, receive a bonus +3
+    // victory points for a total of +5 VP and the China track can no
+    // longer be altered for the rest of the game.
     adjust_vp(result, G.surrender[nations.CHINA.id] - 2, "China government status")
     if (G.surrender[nations.CHINA.id] > 5) {
         result.vp += 3
         result.text.push(`+3 VP - China surrender.`)
     }
-    binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
-        "Townsville did not isolated", [hex_to_int(3727), OAHU])
-
+    if (G.burma_road >= 1) {
+        //B. Burma Road is closed: +3 VP
+        result.vp += 3
+        result.text.push(`3 VP - Burma Road is closed.`)
+    } else {
+        //C. Burma Road is open: –1 VP
+        result.vp -= 1
+        result.text.push(`-1 VP - Burma Road is open.`)
+    }
+    //D. For each box US Political Will is below 4: +1 per box. Example,
+    //a US Political Will of 3 equals +1 VP. Cumulative with Victory
+    //Condition E.
     if (G.political_will < 4) {
         result.vp += 4 - G.political_will
         result.text.push(`+${4 - G.political_will} VP - Political will.`)
     } else {
         result.text.push(`0 VP - Political will >= 4.`)
     }
-    var amh = 0
-    nations.AUSTRALIAN_MANDATES.ports.forEach(hex => {
-        var h = hex_to_int(hex)
-        if (is_space_controlled(h, JP) && get_map_data(h).port) {
-            amh++
-        }
-    })
-    adjust_vp(result, amh, "JP control of Mandates ports", nations.AUSTRALIAN_MANDATES.ports.map(h => hex_to_int(h)))
-    if (nations.AUSTRALIAN_MANDATES.ports.filter(h => !is_space_controlled(hex_to_int(h), JP)).length === 0) {
-        result.vp += 3
-        result.text.push(`+3 VP - JP control of Mandates.`)
-    } else if (nations.AUSTRALIAN_MANDATES.ports.filter(h => !is_space_controlled(hex_to_int(h), AP)).length === 0) {
-        result.vp -= 3
-        result.text.push(`-3 VP - AP control of Mandates.`)
-    } else {
-        result.text.push(`0 VP - None control of Mandates.`)
+    //E. War in Europe: +1 VP if WiE is a negative number (not zero) or
+    //–1 if WiE is a positive number (not zero). If zero, 0 VP.
+    if (G.wie <= 2) {
+        result.vp -= 1
+        result.text.push(`-1 VP - War in Europe > 0`)
+    } else if (G.wie > 3) {
+        result.vp += 1
+        result.text.push(`-1 VP - War in Europe < 0`)
     }
-    var new_guinea = 0
-    nations.NEW_GUINEA.keys.forEach(hex => {
-        var h = hex_to_int(hex)
-        if (is_space_controlled(h, JP) && get_map_data(h).port) {
-            new_guinea++
-        }
-    })
-    adjust_vp(result, new_guinea, "JP control of New Guinea ports", nations.NEW_GUINEA.keys.map(h => hex_to_int(h)).filter(h => h !== VOGELKOP))
-    binary_vp(result, is_space_controlled(VOGELKOP, AP), -1, "AP control of Vogelkop",
-        "JP control of Vogelkop", [VOGELKOP])
-    if (check_nation_controlled(nations.NEW_GUINEA, JP)) {
-        result.vp += 3
-        result.text.push(`+3 VP - JP control of New Guinea.`)
-    } else if (check_nation_controlled(nations.NEW_GUINEA, AP)) {
-        result.vp -= 3
-        result.text.push(`-3 VP - AP control of New Guinea.`)
+    //F. For controlling each hex of Northern India, +1 VP per hex
+    let india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
+    adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
+    //G. For India Unrest or Strikes, +1 Victory Point (awarded on the last game turn)
+    let india_status = G.surrender[nations.INDIA.id]
+    if (india_status > 0 && india_status <= 2) {
+        result.vp += 1
+        result.text.push(`+1 VP - India ${nations.INDIA.statuses[india_status]}`)
+        //H. For India Unstable, Revolts, or Surrender; +2 VPs (awarded on the last game turn).
+    } else if (india_status > 0) {
+        result.vp += 2
+        result.text.push(`+2 VP - India ${nations.INDIA.statuses[india_status]}`)
     } else {
-        result.text.push(`0 VP - None control of New Guinea.`)
+        result.text.push(`0 VP - India ${nations.INDIA.statuses[india_status]}`)
+    }
+    //I. Rangoon is Allied Control: –2 VP (no additional VPs for theResource hex).
+    if (is_space_controlled(RANGOON, AP)) {
+        result.vp -= 2
+        result.text.push(`-2 VP - Rangoon is Allied Control`)
+        //J. Rangoon is Japanese Control: +2 VP
+    } else {
+        result.vp += 2
+        result.text.push(`2 VP - Rangoon is Japanese Control`)
+    }
+    //K. If the Allies are under ISR at the end of the game +1 VP.
+    if (G.inter_service = [AP]) {
+        result.vp += 1
+        result.text.push(`1 VP - Allies are under ISR`)
+    }
+    //L. If the Japanese are under ISR at the end of the game –1 VP
+    if (G.inter_service = [AP]) {
+        result.vp -= 1
+        result.text.push(`-1 VP - Japanese are under ISR`)
     }
 
-    var heb = G.control.map(h => get_map_data(h)).filter(md => md.region === "Hebrides" && md.port).length
-    binary_vp(result, heb, 1, "JP control of New Hebrides port",
-        "Non JP control of any New Hebrides port", G.original_control.filter(h => get_map_data(h).region === "Hebrides" && get_map_data(h).port))
-    var aus = G.control.map(h => get_map_data(h)).filter(md => md.region === "Australia" && md.port).length
-    binary_vp(result, aus, 1, "JP control of Australia mainland port",
-        "Non JP control of any Australia mainland port", G.original_control.filter(h => get_map_data(h).region === "Australia" && get_map_data(h).port))
     return result
 }
 
@@ -8074,7 +8093,7 @@ cards[JN_25_SPECIAL].can_play = function () {
 }
 
 cards[find_card(JP, 5)].event = function () {
-    call("replacement_segment", {replacement_points: [undefined, 2]})
+    call("replacement_segment", { replacement_points: [undefined, 2] })
 }
 
 cards[find_card(JP, 6)].can_play = function () {
@@ -8320,7 +8339,7 @@ function has_active_naval_units(faction) {
 cards[find_card(JP, 24)].can_play = () => has_active_naval_units(AP)
 
 cards[find_card(JP, 24)].after_battles = function () {
-    call("submarine_attack", {success: 4, card: find_card(JP, 24)})
+    call("submarine_attack", { success: 4, card: find_card(JP, 24) })
 }
 
 cards[find_card(JP, 25)].before_battle_roll = function (faction) {
@@ -8342,7 +8361,7 @@ cards[find_card(JP, 25)].before_battle_roll = function (faction) {
 cards[find_card(JP, 27)].can_play = () => has_active_naval_units(AP)
 
 cards[find_card(JP, 27)].after_battles = function () {
-    call("submarine_attack", {success: 4, critical: 7, card: find_card(JP, 27)})
+    call("submarine_attack", { success: 4, critical: 7, card: find_card(JP, 27) })
 }
 
 only_one_ground_unit(find_card(JP, 28))
@@ -8397,7 +8416,7 @@ cards[find_card(JP, 29)].before_battle_roll = function (faction) {
 }
 
 cards[find_card(JP, 30)].event = function () {
-    call("replacement_segment", {replacement_points: [undefined, 3]})
+    call("replacement_segment", { replacement_points: [undefined, 3] })
 }
 
 cards[find_card(JP, 31)].event = function () {
@@ -8549,7 +8568,7 @@ P.guadalcanal_evacuation = {
 }
 
 function get_guadalcanal_evacuation_destination(location) {
-    const move_data = {naval_move_distance: 15}
+    const move_data = { naval_move_distance: 15 }
     if (get_map_data(location).port && is_space_controlled(location, JP)) {
         move_data.naval_move_distance = 30
     }
@@ -8585,7 +8604,7 @@ function get_guadalcanal_evacuation_destination(location) {
 cards[find_card(JP, 36)].can_play = () => has_active_naval_units(AP)
 
 cards[find_card(JP, 36)].before_battles = function () {
-    call("submarine_attack", {success: 4, card: find_card(JP, 36)})
+    call("submarine_attack", { success: 4, card: find_card(JP, 36) })
 }
 
 cards[find_card(JP, 37)].before_activation = function () {
@@ -8605,7 +8624,7 @@ cards[find_card(JP, 37)].before_activation = function () {
 cards[find_card(JP, 38)].before_activation = cards[find_card(JP, 37)].before_activation
 
 cards[find_card(JP, 39)].event = function () {
-    call("replacement_segment", {replacement_points: [undefined, undefined, 2]})
+    call("replacement_segment", { replacement_points: [undefined, undefined, 2] })
 }
 
 cards[find_card(JP, 39)].before_replacement = function () {
@@ -8742,12 +8761,12 @@ P.kamikaze_attack = {
             damage_unit(u)
             L.allowed_units = []
             G.offensive.active_units[AP].forEach(ap => {
-                    var bh = get_unit_battle_hex(ap)
-                    if (pieces[ap].faction === AP && pieces[ap].class === "naval" && unit_on_board(ap) && set_has(G.offensive.kamikaze, bh)
-                        && get_distance(bh, location) <= pieces[u].ebr) {
-                        set_add(L.allowed_units, ap)
-                    }
+                var bh = get_unit_battle_hex(ap)
+                if (pieces[ap].faction === AP && pieces[ap].class === "naval" && unit_on_board(ap) && set_has(G.offensive.kamikaze, bh)
+                    && get_distance(bh, location) <= pieces[u].ebr) {
+                    set_add(L.allowed_units, ap)
                 }
+            }
             )
             L.stage++
             L.hits = 2
@@ -8936,11 +8955,11 @@ cards[find_card(JP, 68)].event = cards[find_card(JP, 33)].event
 
 cards[find_card(JP, 71)].event = function () {
     check_event(events.INTERCEPTORS)
-    call("replacement_segment", {replacement_points: [undefined, 2]})
+    call("replacement_segment", { replacement_points: [undefined, 2] })
 }
 
 cards[find_card(JP, 72)].event = function () {
-    call("replacement_segment", {replacement_points: [3]})
+    call("replacement_segment", { replacement_points: [3] })
 }
 
 cards[find_card(JP, 73)].before_activation = function () {
@@ -8953,7 +8972,7 @@ cards[find_card(JP, 73)].before_activation = function () {
 cards[find_card(JP, 75)].can_play = () => has_active_naval_units(AP)
 
 cards[find_card(JP, 75)].before_battles = function () {
-    call("submarine_attack", {success: 4, card: find_card(JP, 75)})
+    call("submarine_attack", { success: 4, card: find_card(JP, 75) })
 }
 
 cards[find_card(JP, 76)].before_unit_activation = function () {
@@ -9154,7 +9173,7 @@ P.fuel_shortage = {
 }
 
 cards[find_card(JP, 78)].event = function () {
-    call("event_unit", {unit: jp_air("t")})
+    call("event_unit", { unit: jp_air("t") })
 }
 
 P.event_unit = {
@@ -9210,7 +9229,7 @@ cards[find_card(JP, 85)].before_unit_activation = function () {
 cards[find_card(JP, 86)].can_play = () => has_active_naval_units(AP)
 
 cards[find_card(JP, 86)].after_battles = function () {
-    call("submarine_attack", {success: 7, card: find_card(JP, 86)})
+    call("submarine_attack", { success: 7, card: find_card(JP, 86) })
 }
 
 P.submarine_attack = {
@@ -9283,7 +9302,7 @@ cards[find_card(AP, 1)].can_play = function () {
 }
 
 cards[find_card(AP, 3)].event = function () {
-    call("replacement_segment", {replacement_points: [undefined, undefined, 2]})
+    call("replacement_segment", { replacement_points: [undefined, undefined, 2] })
 }
 
 cards[find_card(AP, 3)].before_replacement = function () {
@@ -9395,7 +9414,7 @@ cards[find_card(AP, 10)].event = function () {
 only_one_ground_unit(find_card(AP, 13))
 
 cards[find_card(AP, 15)].event = function () {
-    call("replacement_segment", {replacement_points: [2]})
+    call("replacement_segment", { replacement_points: [2] })
 }
 
 cards[find_card(AP, 16)].event = function () {
@@ -9518,7 +9537,7 @@ cards[find_card(AP, 20)].before_activation = function () {
         check_supply()
     } else {
         eliminate_permanently(HQ_SOUTH_GHORMLEY)
-        call("event_unit", {unit: HQ_SOUTH_HELSEY})
+        call("event_unit", { unit: HQ_SOUTH_HELSEY })
     }
 }
 
@@ -9889,7 +9908,7 @@ cards[find_card(AP, 38)].before_commit_offensive = function () {
 
 cards[find_card(AP, 39)].event = function () {
     set_inter_service(AP, 0)
-    call("replacement_segment", {replacement_points: [undefined, 1, undefined, 3]})
+    call("replacement_segment", { replacement_points: [undefined, 1, undefined, 3] })
     call("build_road")
 }
 
@@ -9900,7 +9919,7 @@ cards[find_card(AP, 39)].before_replacement = function () {
 cards[find_card(AP, 44)].before_unit_activation = cards[find_card(AP, 35)].before_unit_activation
 
 cards[find_card(AP, 48)].before_activation = function () {
-    call("replacement_segment", {replacement_points: [undefined, undefined, undefined, 1]})
+    call("replacement_segment", { replacement_points: [undefined, undefined, undefined, 1] })
 }
 
 cards[find_card(AP, 48)].before_replacement = function () {
@@ -9935,12 +9954,12 @@ cards[find_card(AP, 50)].after_unit_activation = function () {
         }
     })
     L.allowed_units = L.possible_units.filter(u => {
-            var piece = pieces[u]
-            return !set_has(G.offensive.active_units[AP], u) &&
-                (piece.service === "army" && (army > 0 || naval <= 1)
-                    || piece.service === "navy" && (army <= 0 || naval > 1 || naval === 0 && !piece.br && piece.class === "naval")
-                )
-        }
+        var piece = pieces[u]
+        return !set_has(G.offensive.active_units[AP], u) &&
+            (piece.service === "army" && (army > 0 || naval <= 1)
+                || piece.service === "navy" && (army <= 0 || naval > 1 || naval === 0 && !piece.br && piece.class === "naval")
+            )
+    }
     )
 }
 
@@ -10075,7 +10094,7 @@ cards[find_card(AP, 60)].event = function () {
 cards[DARTER_DACE].can_play = () => has_active_naval_units(JP)
 
 cards[DARTER_DACE].before_battles = function () {
-    call("submarine_attack", {success: 4, critical: 7, card: DARTER_DACE})
+    call("submarine_attack", { success: 4, critical: 7, card: DARTER_DACE })
 }
 
 cards[KING_II].before_commit_offensive = function () {
@@ -10103,7 +10122,7 @@ cards[find_card(AP, 67)].event = cards[find_card(AP, 60)].event
 cards[find_card(AP, 68)].can_play = () => has_active_naval_units(JP)
 
 cards[find_card(AP, 68)].after_battles = function () {
-    call("submarine_attack", {success: 7, card: find_card(AP, 68)})
+    call("submarine_attack", { success: 7, card: find_card(AP, 68) })
 }
 
 cards[find_card(AP, 69)].before_commit_offensive = function () {
@@ -10259,7 +10278,7 @@ cards[find_card(AP, 78)].can_play = function () {
 
 cards[find_card(AP, 78)].before_battles = function () {
     var allowed_units = x_craft_targets()
-    call("submarine_attack", {success: 7, card: find_card(AP, 78), pre_allowed_units: allowed_units})
+    call("submarine_attack", { success: 7, card: find_card(AP, 78), pre_allowed_units: allowed_units })
 }
 
 cards[SOVIET_INVADE].can_play = function () {
@@ -10419,7 +10438,7 @@ function reduce_unit(unit, no_log = false) {
 
 function setup_scenario_1941(options) {
     if (options.historical) {
-        G.options = {historical: true}
+        G.options = { historical: true }
     }
     draw_specific_card(find_card(JP, 1))
     draw_specific_card(find_card(JP, 2))
@@ -10580,7 +10599,7 @@ P.operation_no_1 = {
 
 function setup_scenario_1942(options) {
     if (options.historical) {
-        G.options = {historical: true}
+        G.options = { historical: true }
     }
 
     for (let i = 1; i < pieces.length; i++) {
@@ -10800,7 +10819,7 @@ function emergency_move_1942() {
             set_add(unit_to_retreat, u)
         }
     })
-    call("emergency_move", {unit_to_retreat})
+    call("emergency_move", { unit_to_retreat })
 }
 
 function setup_scenario_1943() {
@@ -11338,7 +11357,7 @@ function setup_scenario_south_pacific() {
     call("offensive_phase")
 }
 
-function setup_scenario_burma(){
+function setup_scenario_burma() {
     G.draw = [[], []]
     G.removed = [[], []]
     G.discard = [[], []]
@@ -11366,7 +11385,7 @@ function setup_scenario_burma(){
 
 
     //17.11.5. Burma has already surrendered; India and China have not yet surrendered.
-    var surrender = [nations.BURMA] 
+    var surrender = [nations.BURMA]
     surrender.forEach(n => {
         G.surrender[n.id] = 1
         set_control_over_nation(n)
@@ -11385,18 +11404,18 @@ function setup_scenario_burma(){
     setup_jp_unit(find_piece("indomitable"), 1307)
     setup_jp_unit(find_piece("warspite"), 1307)
     setup_jp_unit(HQ_SEAC, 1805)
-    setup_jp_unit(ap_army("33"), 1905 )
-    setup_jp_unit(ap_air("seac"), 1905 )
-    setup_jp_unit(ap_air("seac_lrb"), 1905 )
+    setup_jp_unit(ap_army("33"), 1905)
+    setup_jp_unit(ap_air("seac"), 1905)
+    setup_jp_unit(ap_air("seac_lrb"), 1905)
     setup_jp_unit(find_piece("london"), 1307)
-    setup_jp_unit(ap_army("1_ind"), 2205,true )
+    setup_jp_unit(ap_army("1_ind"), 2205, true)
     setup_jp_unit(ap_army("7"), 2006)
-    setup_jp_unit(ap_army("15"), 2006 )
-    setup_jp_unit(ap_army("4_ind"), 2105 )
-    
-    setup_jp_unit(ap_army("5_cn"), 2205 )
-    setup_jp_unit(ap_army("6_cn"), 2407, true )
-    setup_jp_unit(ap_army("66_cn"), 2407, true )
+    setup_jp_unit(ap_army("15"), 2006)
+    setup_jp_unit(ap_army("4_ind"), 2105)
+
+    setup_jp_unit(ap_army("5_cn"), 2205)
+    setup_jp_unit(ap_army("6_cn"), 2407, true)
+    setup_jp_unit(ap_army("66_cn"), 2407, true)
 
     //jp setup (same order as the setup table found in the rules p44)
     setup_jp_unit(jp_army("28"), 2007)
@@ -11428,7 +11447,7 @@ function setup_scenario_burma(){
     G.asp[AP] = [1, 0]
     G.wie = 3
     G.pow = 1
-    
+
     //17.11.21. Japanese Replacements: Japanese begin the game with 2 air
     //replacements, 1 Ground taken from China per turn (optional)
     //plus Air steps per event card, no naval replacements
@@ -11450,29 +11469,29 @@ function setup_scenario_burma(){
     call("burma_choose_offensive")
 }
 
-const BURMA_JAPANESE_OFF = [3,8,16,40,48,50]
+const BURMA_JAPANESE_OFF = [3, 8, 16, 40, 48, 50]
 
 P.burma_choose_offensive = {
-    _begin(){
+    _begin() {
         G.active = JP
         G.offensive.active_cards = []
-        BURMA_JAPANESE_OFF.forEach(c=>{
+        BURMA_JAPANESE_OFF.forEach(c => {
             c = find_card(JP, c)
-            if(! G.hand[JP].includes(c)){
+            if (!G.hand[JP].includes(c)) {
                 G.offensive.active_cards.push(c)
             }
         })
     },
     prompt() {
-        if(L.confirm_card){
-            prompt(`Confirm `+card_get_log_str(L.confirm_card)+` as Future Offensive ?`)
+        if (L.confirm_card) {
+            prompt(`Confirm ` + card_get_log_str(L.confirm_card) + ` as Future Offensive ?`)
             button("done")
-        }else{
+        } else {
             prompt(`Choose Military Event to use as Future Offensive.`)
-            
+
             BURMA_JAPANESE_OFF.forEach(c => {
                 c = find_card(JP, c)
-                if(! G.hand[JP].includes(c)){
+                if (!G.hand[JP].includes(c)) {
                     action_card(c)
                 }
             })
@@ -11480,10 +11499,10 @@ P.burma_choose_offensive = {
     },
     card(c) {
         push_undo()
-        future_offencive_card(c,5) //First turn is 6, card is playable immediatly so turn mark as being designated during turn 5
+        future_offencive_card(c, 5) //First turn is 6, card is playable immediatly so turn mark as being designated during turn 5
         L.confirm_card = c
     },
-    done(){
+    done() {
         G.offensive.active_cards = []
         goto("offensive_phase")
     }
@@ -11728,7 +11747,7 @@ function on_view() {
         G.offensive.draw[AP].filter(c => c >= 0 && cards[c].faction === AP).forEach(c => V.hand[AP].push(c))
         V.future_offensive[AP] = G.future_offensive[AP]
     }
-    if(L.P === "burma_choose_offensive" && R == AP){
+    if (L.P === "burma_choose_offensive" && R == AP) {
         V.offensive.active_cards = []
     }
     G = actual_g
@@ -11941,13 +11960,13 @@ function get_japan_info() {
 function get_nation_info(nation) {
     var id = nation.id
     var surrender = G.surrender[id]
-    return {id, control: surrender ? JP : AP}
+    return { id, control: surrender ? JP : AP }
 }
 
 function supply_query(unit) {
-    L = {supply: {}}
+    L = { supply: {} }
 
-    var result = {unit, path: {}}
+    var result = { unit, path: {} }
     var piece = pieces[unit]
     var location = G.location[unit]
     result.oos = set_has(G.oos, unit)
@@ -12062,7 +12081,7 @@ function battle_info_query(battle) {
         battle_name: battle,
     }
     var battle_hex = G.offensive.battle_names[battle]
-    G.offensive.battle = {battle_hex}
+    G.offensive.battle = { battle_hex }
     prepare_battle()
     result.air_naval = G.offensive.battle.air_naval
     G.log = []
@@ -12105,7 +12124,7 @@ function draw_list() {
     }
     hand[AP].sort()
     hand[JP].sort()
-    return {hand}
+    return { hand }
 }
 
 
@@ -12138,7 +12157,7 @@ function action(action, argument) {
 function finish(result, message) {
     G.active = -1
     G.result = ROLES[result] ?? result
-    G.L = L = {message}
+    G.L = L = { message }
     log()
     log(message)
 }
@@ -12151,13 +12170,13 @@ function call_or_goto(pred, name, env) {
 }
 
 function call(name, env) {
-    G.L = L = {...env, P: name, I: 0, L: L}
+    G.L = L = { ...env, P: name, I: 0, L: L }
     P[name]?._begin?.()
 }
 
 function goto(name, env) {
     P[L.P]?._end?.()
-    G.L = L = {...env, P: name, I: 0, L: L.L}
+    G.L = L = { ...env, P: name, I: 0, L: L.L }
     P[name]?._begin?.()
 }
 
@@ -12538,7 +12557,7 @@ function _parse(text) {
                     emit(`if (++(${i}) <= ${end}) L.I = ${ix_loop}`)
                     return
                 }
-                    // for i in (array) { block }
+                // for i in (array) { block }
                 // NOTE: array is evaluated repeatedly so should be a constant!
                 else if (line.length === 5 && line[2] === "in") {
                     k = line[1]

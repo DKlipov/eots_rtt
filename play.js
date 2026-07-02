@@ -1864,10 +1864,18 @@ function vp_dialog(id, response) {
         })
         append_header("", dl, "br")
         append_header("Summary:", dl)
-        append_header("2 VP or less - Allied Decisive Victory.", dl)
-        append_header("3-5 VP Allied Tactical Victory.", dl)
-        append_header("6-9 VP Japanese Tactical Victory.", dl)
-        append_header("10 VP Japanese Decisive Victory.", dl)
+        if(SID == BURMA_SCENARIO){
+            append_header("2 VP or less - Allied Decisive Victory.", dl)
+            append_header("3-4 VP Allied Tactical Victory.", dl)
+            append_header("5-8 VP Japanese Tactical Victory.", dl)
+            append_header("9 VP Japanese Decisive Victory.", dl)
+        }else{
+            append_header("2 VP or less - Allied Decisive Victory.", dl)
+            append_header("3-5 VP Allied Tactical Victory.", dl)
+            append_header("6-9 VP Japanese Tactical Victory.", dl)
+            append_header("10 VP Japanese Decisive Victory.", dl)
+        }
+
         body.appendChild(dl)
     })
 }
