@@ -7271,10 +7271,10 @@ function get_victory() {
     if (!vp.won_side && vp.vp <= 2) {
         vp.won_side = "Allies"
         vp.won_text = `Allied Decisive Victory`
-    } else if (!vp.won_side && vp.vp <= 5) {
+    } else if (!vp.won_side && vp.vp <= (G.sid!=BURMA_SCENARIO?5:4)) {
         vp.won_side = "Allies"
         vp.won_text = `Allied Tactical Victory`
-    } else if (!vp.won_side && vp.vp <= 9) {
+    } else if (!vp.won_side && vp.vp <= (G.sid!=BURMA_SCENARIO?9:8)) {
         vp.won_side = "Japan"
         vp.won_text = `Japanese Tactical Victory`
     } else if (!vp.won_side) {
