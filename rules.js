@@ -3902,7 +3902,7 @@ P.check_overstacking = {
 
 P.commit_overstacking = {
     _begin() {
-        if (init_overstack_check()) {
+        if (G.offensive.stage !== POST_BATTLE_STAGE || init_overstack_check()) {
             end()
             return
         }
@@ -4171,7 +4171,9 @@ function compute_possible_battle_hexes() {
         if (pieces[u].parenthetical) {
             range = pieces[u].br
         }
-        if (map_has(G.offensive.committed, u) || path[0] & STRAT_MOVE || path[0] & AIR_EXTENDED_MOVE || is_faction_units(location, 1 - pieces[u].faction)
+        if (
+            map_has(G.offensive.committed, u) && set_has(G.offensive.battle_hexes, map_get(G.offensive.committed, u, 0)) ||
+            path[0] & STRAT_MOVE || path[0] & AIR_EXTENDED_MOVE || is_faction_units(location, 1 - pieces[u].faction)
             || is_b29_bombed(piece)) {
             return
         }
@@ -4577,7 +4579,8 @@ P.prepare_disengagement = {
 function with_state_as_G(state, apply) {
     var actual_g = G
     G = state
-    G.active = actual_g.active
+    G = state
+    // G.active = actual_g.active
     var log = G.log
     G.log = []
     var result = apply()
@@ -4640,9 +4643,8 @@ P.retro_disengagement = {
             var move_log = L.move_log
             this.reset_state()
             for (var i = 0; i < move_log.length - 1; i++) {
-                var loc = G.location[move_log[0]]
+                remove_battle_hex_without_def(G.location[move_log[0]])
                 move_units(move_log[0], move_log[1])
-                remove_battle_hex_without_def(loc)
             }
             log("Offensive interrupted due to disengagement.")
             check_supply()
@@ -4698,6 +4700,7 @@ P.retro_disengagement = {
                 }
             }
         })
+        remove_battle_hex_without_def(G.location[L.allowed_units[0]])
         L.move_log.push(L.allowed_units, path)
         move_units(L.allowed_units, path)
         if (!L.conflicted) {
@@ -4714,6 +4717,9 @@ P.retro_disengagement = {
                     map_for_each(L.move_log, (units, path) => {
                         units.forEach(u => view.location[u] = path[path.length - 1])
                     })
+                }
+                if (L.allowed_units) {
+                    view.active_stack = L.allowed_units
                 }
 
             })
@@ -5022,6 +5028,10 @@ function check_amph_mod() {
 
 P.declare_battle_hexes = {
     _begin() {
+        if (G.offensive.stage === POST_BATTLE_STAGE) {
+            end()
+            return
+        }
         check_supply()
         check_amph_mod()
         G.offensive.battle_names.filter(h => set_has(G.offensive.battle_hexes, h))
@@ -5088,12 +5098,25 @@ P.commit_offensive = script(`
             cache_skip_bombing()
         }
     }
-    set L.verify_error trigger_event("before_commit_offensive")
-    if ( G.offensive.stage === ATTACK_STAGE && G.delayed_state && G.delayed_state.length ){
-        call retro_disengagement
+    if ( G.offensive.stage === ATTACK_STAGE && G.offensive.disengagement && G.offensive.disengagement.length ){
+        call disengagement_confirm
     }
+    call declare_battle_hexes
+    set L.verify_error trigger_event("before_commit_offensive")
+    call commit_overstacking
     call commit_offensive_confirm
     `)
+
+P.disengagement_confirm = {
+    inactive: "choose disengagement",
+    prompt() {
+        prompt(`Reaction player could use disengagement ability with some of his units.`)
+        button("awaiting")
+    },
+    awaiting() {
+        goto("retro_disengagement")
+    },
+}
 
 P.commit_offensive_confirm = {
     inactive: "confirm offensive",
@@ -6487,7 +6510,7 @@ P.offensive_sequence = script(`
         trigger_event("before_movement")
     }
     call move_offensive_units
-    call declare_battle_hexes
+    set G.todo 1
     call commit_offensive
     set G.active 1-G.offensive.attacker
     call cancel_offensive
@@ -6530,13 +6553,13 @@ P.offensive_sequence = script(`
     if (G.offensive.intelligence !== SURPRISE) {
         call move_offensive_units
         set G.offensive.active_units[1-G.offensive.attacker] []
-        call commit_overstacking
+        set G.todo 1
         call commit_offensive
     }
     set G.active G.offensive.attacker
     call move_offensive_units
     set G.offensive.active_units[G.offensive.attacker] []
-    call check_overstacking
+    set G.todo 1
     call commit_offensive
     set G.active 1-G.offensive.attacker
     call emergency_move
@@ -10333,7 +10356,7 @@ P.scenario_1941 = script(`
     call operation_no_1
     call activate_units
     call move_offensive_units
-    call declare_battle_hexes
+    set G.todo 1
     call commit_offensive
     log ("#GOffensive reaction")
     set G.active AP
@@ -10350,7 +10373,7 @@ P.scenario_1941 = script(`
     set G.active G.offensive.attacker
     call move_offensive_units
     set G.offensive.active_units[G.offensive.attacker] []
-    call check_overstacking
+    set G.todo 1
     call commit_offensive
     eval {
         reset_offensive()
@@ -10442,7 +10465,6 @@ P.operation_z_battle = script(`
       set G.active JP
       call operation_z_pbm
       set G.offensive.active_units[G.offensive.attacker] []
-      call check_overstacking
       eval {
         check_supply()
       }
