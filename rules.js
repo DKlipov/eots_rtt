@@ -1093,18 +1093,27 @@ function get_S_P_replacement_points() {
 
 function get_B_F_W_replacement_points() {
     var result = []
-    //TODO
+
     L.replacement_points = result
     if (G.active === JP) {
-        result[NAVAl_REP] = G.reinforcements[NAVAl_REP]
+        //17.11.21. Japanese Replacements: Japanese begin the game with 2 air
+        //replacements, 1 Ground taken from China per turn (optional)
+        //plus Air steps per event card, no naval replacements
+        result[NAVAl_REP] = 0 
         result[AIR_REP] = G.reinforcements[AIR_REP]
         L.divisions = Math.min(1, G.china_divisions)
         return result
     }
+    //17.11.20. Allied Replacements: 1 Commonwealth ground step per turn, 1
+    //Chinese ground step on Game turns 7 and 9, 1 air step per turn,
+    //one Naval on game turn 9
     L.divisions = undefined
-    result[NAVAl_REP] = 1
-    result[GROUND_REP] = 1
-    result[AIR_REP] = 4
+    result[AIR_REP] = 1
+    result[COMMONWEALTH_REP] = 1
+    if(G.turn == 9){
+        result[NAVAl_REP] = 1
+        result[CHINESE_REP] = 1
+    }
     return result
 }
 
@@ -6804,7 +6813,7 @@ function displace_to_turn(unit, turns, not_delayed) {
         eliminate(unit)
         return
     }
-    if (G.turn + turns > 12 || G.sid === SOUTH_PACIFIC_SCENARIO && G.turn + turns > 6) {
+    if (G.turn + turns > 12 || G.sid === SOUTH_PACIFIC_SCENARIO && G.turn + turns > 6 || G.sid === BURMA_SCENARIO && G.turn + turns > 9) {
         log(`${piece_get_log_str(unit)} should be displaced to turn box ${G.turn + turns} but permanently eliminated instead.`)
         if (pieces[unit].class === "hq") {
             set_location(unit, TURN_BOX + 13)
@@ -11301,6 +11310,11 @@ function setup_scenario_south_pacific() {
     setup_jp_unit(find_piece("kamikaze"), 4021)
     setup_jp_unit(find_piece("nachi"), 4021)
 
+    //reinforcements
+    setup_jp_unit(jp_army("29"), int_to_hex(NON_PLACED_BOX), true)
+    setup_jp_unit(ap_air("20_bc"), int_to_hex(NON_PLACED_BOX))
+
+
     for (var i = 1; i < pieces.length; i++) {
         if (G.location[i] === NON_PLACED_BOX && pieces[i].reinforcement) {
             G.location[i] = TURN_BOX + pieces[i].reinforcement
@@ -11414,7 +11428,11 @@ function setup_scenario_burma(){
     G.asp[AP] = [1, 0]
     G.wie = 3
     G.pow = 1
-    G.reinforcements = [2, 2]
+    
+    //17.11.21. Japanese Replacements: Japanese begin the game with 2 air
+    //replacements, 1 Ground taken from China per turn (optional)
+    //plus Air steps per event card, no naval replacements
+    G.reinforcements = [0, 2]
     G.surrender[nations.CHINA.id] = 2
     G.inter_service = [1, 1]
     G.china_divisions = 8
