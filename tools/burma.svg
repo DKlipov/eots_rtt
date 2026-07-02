@@ -38,9 +38,9 @@
      inkscape:pageshadow="2"
      inkscape:window-width="2560"
      inkscape:window-height="1411"
-     inkscape:zoom="0.99999999"
-     inkscape:cx="662"
-     inkscape:cy="460.5"
+     inkscape:zoom="5.6568542"
+     inkscape:cx="167.58431"
+     inkscape:cy="728.76193"
      inkscape:current-layer="svg89"
      id="namedview6"
      inkscape:document-rotation="0"
@@ -77,6 +77,14 @@
      height="75.117653"
      x="757.2655"
      y="299.50531" />
+  <rect
+     style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:5.25416;stroke-linejoin:round"
+     inkscape:label="box_singapore"
+     id="zone_0-9-9"
+     width="79.099693"
+     height="67.693031"
+     x="31.540733"
+     y="724.06586" />
   <rect
      style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:3.84668;stroke-linejoin:round"
      inkscape:label="box_isr_jp"
@@ -157,4 +165,28 @@
      height="52.545002"
      x="778.89264"
      y="671.57654" />
+   <rect
+     style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:3.84668;stroke-linejoin:round"
+     inkscape:label="box_eliminated"
+     id="zone_0-9-2-2-9"
+     width="45 "
+     height="45"
+     x="50"
+     y="680" />
+  <rect
+     style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:3.84668;stroke-linejoin:round"
+     inkscape:label="box_ap_reinf"
+     id="zone_0-9-2-2-9-8"
+     width="45"
+     height="45"
+     x="823"
+     y="583" />
+  <rect
+     style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:3.84668;stroke-linejoin:round"
+     inkscape:label="box_jp_reinf"
+     id="zone_0-9-2-2-9-8-2"
+     width="45"
+     height="45"
+     x="58"
+     y="103" />
 </svg>

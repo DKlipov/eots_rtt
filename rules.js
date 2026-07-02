@@ -163,6 +163,7 @@ const BURMA_SCENARIO = 10
 const CAMPAIGN_SCENARIOS = [FULL_CAMPAIGN_SCENARIO, SHORT_CAMPAIGN_SCENARIO, EVEN_SHORT_CAMPAIGN_SCENARIO]
 
 const S_P_DECK = S_P_deck()
+const B_F_W_DECK = B_F_W_deck()
 
 const SCENARIO_DATA = [
     {
@@ -216,6 +217,16 @@ const SCENARIO_DATA = [
         last_turn: 12
     },
     {id: 9, name: "1944", setup: setup_scenario_1944, victory: victory_1944, one_year: true, last_turn: 10},
+    {
+        id: BURMA_SCENARIO, 
+        name: "Burma: The Forgotten War, 1943-1944", 
+        setup: setup_scenario_burma,
+        deal_cards: B_F_W_deal_cards,
+        replacement_points: get_B_F_W_replacement_points,
+        has_card: c => set_has(B_F_W_DECK, c),
+        victory: victory_burma, 
+        last_turn: 9
+    },
 ]
 
 SCENARIO_DATA.forEach(s => {
@@ -236,6 +247,14 @@ const SCENARIOS = SCENARIO_DATA.map(s => s.name)
 function S_P_deck() {
     var ap_draw = [8, 13, 20, 21, 23, 24, 25, 27, 28, 29, 31, 32, 36, 40, 43, 44, 46, 50, 52, 56, 64, 66, 81, 82]
     var jp_draw = [9, 13, 16, 17, 20, 23, 25, 27, 28, 29, 32, 33, 34, 35, 42, 44, 48, 49, 51, 52, 73, 75, 84, 85]
+    var deck = []
+    jp_draw.map(c => find_card(0, c)).forEach(c => set_add(deck, c))
+    ap_draw.map(c => find_card(1, c)).forEach(c => set_add(deck, c))
+    return deck
+}
+function B_F_W_deck() {
+    var ap_draw = [2, 7, 18, 19, 22, 26, 33, 34, 38, 39, 41, 42, 48, 49, 52, 57, 58, 59, 60, 77, 78, 81, 82, 83]
+    var jp_draw = [3, 4, 5, 6, 7, 8, 15, 16, 21, 22, 26, 33, 39, 40, 41, 42, 48, 49, 25, 50, 53, 54, 67, 82, 86]
     var deck = []
     jp_draw.map(c => find_card(0, c)).forEach(c => set_add(deck, c))
     ap_draw.map(c => find_card(1, c)).forEach(c => set_add(deck, c))
@@ -368,6 +387,7 @@ const NON_PLAYABLE_HEX = {id: 0, terrain: OCEAN, region: "Ocean", edges_int: 0}
 const TUNNEL_HEX = {id: 0, terrain: OCEAN, region: "Ocean", edges_int: UNPLAYABLE_WATER | WATER}
 const MAP_DATA = []
 const S_P_MAP_DATA = []
+const B_F_W_MAP_DATA = []
 const AIRFIELD_LINKS = []
 
 map.forEach(h => MAP_DATA[hex_to_int(h.id)] = h)
@@ -429,6 +449,7 @@ for (let i = 0; i <= LAST_BOARD_HEX; ++i) {
         hex.supply_source |= JOINT_SUPPLIED_HEX
     }
     apply_south_pacific(Object.assign({}, hex))
+    apply_burma(Object.assign({}, hex))
 }
 MAP_DATA[CHINA_BOX] = {
     id: int_to_hex(CHINA_BOX),
@@ -476,6 +497,31 @@ function apply_south_pacific(hex) {
         hex.supply_source |= JP_SUPPLIED_HEX
     }
     S_P_MAP_DATA[id] = hex
+}
+
+B_F_W_MAP_DATA[SINGAPORE] = Object.assign({}, MAP_DATA[SINGAPORE])
+B_F_W_MAP_DATA[SINGAPORE].supply_source = JOINT_SUPPLIED_HEX | US_SUPPLIED_HEX
+function apply_burma(hex) {
+    var id = hex_to_int(hex.id)
+    var x = Math.floor(id / 29)
+    let y = id % 29
+
+    if (x == 15 && y > 9|| x == 16 && y > 9 || x >= 16 && y >= 13) {
+        B_F_W_MAP_DATA[id] = NON_PLAYABLE_HEX
+        return
+    }
+    //17.11.16. Andaman Islands
+    if(hex.id == 1809){
+        hex.airfield = true
+        hex.named = true
+    }
+    // 17.11.6 Allies trace to an ultimate supply source off the Western Map
+    // edge (Maldives edge). Japanese trace to an ultimate supply source
+    // supply overland to Saigon or via hex 1912
+    if(hex.id == 1912 || hex.id == 2212){
+        hex.supply_source |= JP_SUPPLIED_HEX
+    }
+    B_F_W_MAP_DATA[id] = hex
 }
 
 for (var i = 0; i < map.length; i++) {
@@ -733,6 +779,8 @@ function get_map_data(hex) {
         return TUNNEL_HEX
     } else if (scenario_data().id === SOUTH_PACIFIC_SCENARIO) {
         return S_P_MAP_DATA[hex]
+    } else if (scenario_data().id === BURMA_SCENARIO) {
+        return B_F_W_MAP_DATA[hex]
     }
     return MAP_DATA[hex]
 }
@@ -1040,6 +1088,32 @@ function get_S_P_replacement_points() {
     result[NAVAl_REP] = 1
     result[GROUND_REP] = 1
     result[AIR_REP] = 4
+    return result
+}
+
+function get_B_F_W_replacement_points() {
+    var result = []
+
+    L.replacement_points = result
+    if (G.active === JP) {
+        //17.11.21. Japanese Replacements: Japanese begin the game with 2 air
+        //replacements, 1 Ground taken from China per turn (optional)
+        //plus Air steps per event card, no naval replacements
+        result[NAVAl_REP] = 0
+        result[AIR_REP] = G.reinforcements[AIR_REP]
+        L.divisions = Math.min(1, G.china_divisions)
+        return result
+    }
+    //17.11.20. Allied Replacements: 1 Commonwealth ground step per turn, 1
+    //Chinese ground step on Game turns 7 and 9, 1 air step per turn,
+    //one Naval on game turn 9
+    L.divisions = undefined
+    result[AIR_REP] = 1
+    result[COMMONWEALTH_REP] = 1
+    if (G.turn == 9) {
+        result[NAVAl_REP] = 1
+        result[CHINESE_REP] = 1
+    }
     return result
 }
 
@@ -1406,6 +1480,42 @@ function S_P_deal_cards() {
         ap_cards -= 1
         G.passes[AP]++
         log(`AP draw reduced by 1 due to China's surrender.`)
+    }
+    log(`AP draw ${ap_cards} cards.`)
+    if (G.passes[AP]) {
+        log(`AP receive ${G.passes[AP]} passes.`)
+    }
+    while (G.hand[AP].length < ap_cards) {
+        draw_card(AP)
+    }
+}
+function B_F_W_deal_cards(){
+    var jp_cards = 4
+    G.passes[JP] = 0
+    if (G.strategic_warfare) {
+        jp_cards -= G.strategic_warfare
+        log(`Strategic warfare reduces JP draw to ${jp_cards} (-${G.strategic_warfare}).`)
+        G.passes[JP] = 1
+    }
+    log(`JP receive ${jp_cards} cards.`)
+    if (G.passes[JP]) {
+        log(`JP receive ${G.passes[JP]} passes.`)
+    }
+    while (G.hand[JP].length < jp_cards) {
+        draw_card(JP)
+    }
+
+    let ap_cards = 4
+    G.passes[AP] = 0
+    if (G.surrender[nations.CHINA.id] >= 5) {
+        ap_cards -= 1
+        G.passes[AP]++
+        log(`AP draw reduced by China.`)
+    }
+    if (G.surrender[nations.INDIA.id] >= 4) {
+        ap_cards -= 1
+        G.passes[AP]++
+        log(`AP draw reduced by India.`)
     }
     log(`AP draw ${ap_cards} cards.`)
     if (G.passes[AP]) {
@@ -6703,7 +6813,7 @@ function displace_to_turn(unit, turns, not_delayed) {
         eliminate(unit)
         return
     }
-    if (G.turn + turns > 12 || G.sid === SOUTH_PACIFIC_SCENARIO && G.turn + turns > 6) {
+    if (G.turn + turns > 12 || G.sid === SOUTH_PACIFIC_SCENARIO && G.turn + turns > 6 || G.sid === BURMA_SCENARIO && G.turn + turns > 9) {
         log(`${piece_get_log_str(unit)} should be displaced to turn box ${G.turn + turns} but permanently eliminated instead.`)
         if (pieces[unit].class === "hq") {
             set_location(unit, TURN_BOX + 13)
@@ -7161,10 +7271,10 @@ function get_victory() {
     if (!vp.won_side && vp.vp <= 2) {
         vp.won_side = "Allies"
         vp.won_text = `Allied Decisive Victory`
-    } else if (!vp.won_side && vp.vp <= 5) {
+    } else if (!vp.won_side && vp.vp <= (G.sid!=BURMA_SCENARIO?5:4)) {
         vp.won_side = "Allies"
         vp.won_text = `Allied Tactical Victory`
-    } else if (!vp.won_side && vp.vp <= 9) {
+    } else if (!vp.won_side && vp.vp <= (G.sid!=BURMA_SCENARIO?9:8)) {
         vp.won_side = "Japan"
         vp.won_text = `Japanese Tactical Victory`
     } else if (!vp.won_side) {
@@ -7644,6 +7754,94 @@ function victory_south_pacific() {
     var aus = G.control.map(h => get_map_data(h)).filter(md => md.region === "Australia" && md.port).length
     binary_vp(result, aus, 1, "JP control of Australia mainland port",
         "Non JP control of any Australia mainland port", G.original_control.filter(h => get_map_data(h).region === "Australia" && get_map_data(h).port))
+    return result
+}
+
+function victory_burma() {
+    var result = {
+        vp: 0,
+        text: [],
+        won_side: "",
+        won_text: "",
+    }
+    // 23. Progress of the War (PoW): Ignore the normal PoW rules. If
+    //   the Allies do not capture at least one hex at the conclusion of
+    //   the game that began the game controlled by the Japanese, minus
+    //   1 US Political Will.
+
+    //TODO check capture of japanese hexe (Probably not in this function)
+
+    //A. China track: +1 VP per box left or –1 per box right of the Major
+    // Breakthrough Box. If China Surrenders, receive a bonus +3
+    // victory points for a total of +5 VP and the China track can no
+    // longer be altered for the rest of the game.
+    adjust_vp(result, G.surrender[nations.CHINA.id] - 2, "China government status")
+    if (G.surrender[nations.CHINA.id] > 5) {
+        result.vp += 3
+        result.text.push(`+3 VP - China surrender.`)
+    }
+    if (G.burma_road >= 1) {
+        //B. Burma Road is closed: +3 VP
+        result.vp += 3
+        result.text.push(`3 VP - Burma Road is closed.`)
+    } else {
+        //C. Burma Road is open: –1 VP
+        result.vp -= 1
+        result.text.push(`-1 VP - Burma Road is open.`)
+    }
+    //D. For each box US Political Will is below 4: +1 per box. Example,
+    //a US Political Will of 3 equals +1 VP. Cumulative with Victory
+    //Condition E.
+    if (G.political_will < 4) {
+        result.vp += 4 - G.political_will
+        result.text.push(`+${4 - G.political_will} VP - Political will.`)
+    } else {
+        result.text.push(`0 VP - Political will >= 4.`)
+    }
+    //E. War in Europe: +1 VP if WiE is a negative number (not zero) or
+    //–1 if WiE is a positive number (not zero). If zero, 0 VP.
+    if (G.wie <= 2) {
+        result.vp -= 1
+        result.text.push(`-1 VP - War in Europe > 0`)
+    } else if (G.wie > 3) {
+        result.vp += 1
+        result.text.push(`-1 VP - War in Europe < 0`)
+    }
+    //F. For controlling each hex of Northern India, +1 VP per hex
+    let india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
+    adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
+    //G. For India Unrest or Strikes, +1 Victory Point (awarded on the last game turn)
+    let india_status = G.surrender[nations.INDIA.id]
+    if (india_status > 0 && india_status <= 2) {
+        result.vp += 1
+        result.text.push(`+1 VP - India ${nations.INDIA.statuses[india_status]}`)
+        //H. For India Unstable, Revolts, or Surrender; +2 VPs (awarded on the last game turn).
+    } else if (india_status > 0) {
+        result.vp += 2
+        result.text.push(`+2 VP - India ${nations.INDIA.statuses[india_status]}`)
+    } else {
+        result.text.push(`0 VP - India ${nations.INDIA.statuses[india_status]}`)
+    }
+    //I. Rangoon is Allied Control: –2 VP (no additional VPs for theResource hex).
+    if (is_space_controlled(RANGOON, AP)) {
+        result.vp -= 2
+        result.text.push(`-2 VP - Rangoon is Allied Control`)
+        //J. Rangoon is Japanese Control: +2 VP
+    } else {
+        result.vp += 2
+        result.text.push(`2 VP - Rangoon is Japanese Control`)
+    }
+    //K. If the Allies are under ISR at the end of the game +1 VP.
+    if (G.inter_service = [AP]) {
+        result.vp += 1
+        result.text.push(`1 VP - Allies are under ISR`)
+    }
+    //L. If the Japanese are under ISR at the end of the game –1 VP
+    if (G.inter_service = [AP]) {
+        result.vp -= 1
+        result.text.push(`-1 VP - Japanese are under ISR`)
+    }
+
     return result
 }
 
@@ -11154,6 +11352,159 @@ function setup_scenario_south_pacific() {
     call("offensive_phase")
 }
 
+function setup_scenario_burma(){
+    G.draw = [[], []]
+    G.removed = [[], []]
+    G.discard = [[], []]
+    for_each_card((i, card) => {
+        if (scenario_data().has_card(i)) {
+            G.draw[card.faction].push(i)
+        }
+    })
+
+    var removed = []
+    for (var i = 1; i < cards.length; i++) {
+        var faction = cards[i].faction
+        if (!set_has(G.draw[faction], i)) {
+            set_add(removed, i)
+        }
+    }
+
+    while (G.hand[AP].length < 3) {
+        draw_card(AP)
+    }
+
+    while (G.hand[JP].length < 2) {
+        draw_card(JP)
+    }
+
+
+    //17.11.5. Burma has already surrendered; India and China have not yet surrendered.
+    var surrender = [nations.BURMA] 
+    surrender.forEach(n => {
+        G.surrender[n.id] = 1
+        set_control_over_nation(n)
+    })
+    control_hex(hex_to_int(1912), JP)
+    control_hex(hex_to_int(1809), JP)
+    control_hex(hex_to_int(2112), JP)
+    G.reduced = []
+
+    for_each_unit(u => G.location[u] = PERM_ELIMINATED)
+
+    //AP Setup  (same order as the setup table found in the rules p44)
+    setup_jp_unit(ap_air("14"), 2104)
+    G.location[ap_air("14_lrb")] = CHINA_BOX
+    setup_jp_unit(ap_air("10_lrb"), 1805)
+    setup_jp_unit(find_piece("indomitable"), 1307)
+    setup_jp_unit(find_piece("warspite"), 1307)
+    setup_jp_unit(HQ_SEAC, 1805)
+    setup_jp_unit(ap_army("33"), 1905 )
+    setup_jp_unit(ap_air("seac"), 1905 )
+    setup_jp_unit(ap_air("seac_lrb"), 1905 )
+    setup_jp_unit(find_piece("london"), 1307)
+    setup_jp_unit(ap_army("1_ind"), 2205,true )
+    setup_jp_unit(ap_army("7"), 2006)
+    setup_jp_unit(ap_army("15"), 2006 )
+    setup_jp_unit(ap_army("4_ind"), 2105 )
+    
+    setup_jp_unit(ap_army("5_cn"), 2205 )
+    setup_jp_unit(ap_army("6_cn"), 2407, true )
+    setup_jp_unit(ap_army("66_cn"), 2407, true )
+
+    //jp setup (same order as the setup table found in the rules p44)
+    setup_jp_unit(jp_army("28"), 2007)
+    setup_jp_unit(jp_air("5"), 2008, true)
+    setup_jp_unit(jp_army("37"), 2008, true)
+    setup_jp_unit(find_piece("kamikaze"), 2008)
+    setup_jp_unit(jp_air("28"), 2012)
+    setup_jp_unit(jp_army("15"), 2106)
+    setup_jp_unit(jp_air("9"), 2110)
+    setup_jp_unit(jp_army("33"), 2206)
+    setup_jp_unit(HQ_JP_SOUTH, 2212)
+    setup_jp_unit(jp_army("38"), 2305, true)
+    setup_jp_unit(jp_air("8"), 2409)
+    setup_jp_unit(find_piece("zuiho"), 2015)
+    setup_jp_unit(find_piece("junyo"), 2015)
+    setup_jp_unit(find_piece("nagato"), 2015)
+
+    //reinforcements
+    setup_jp_unit(jp_army("29"), int_to_hex(NON_PLACED_BOX), true)
+    setup_jp_unit(ap_air("20_bc"), int_to_hex(NON_PLACED_BOX))
+
+    for (var i = 1; i < pieces.length; i++) {
+        if (G.location[i] === NON_PLACED_BOX && pieces[i].reinforcement) {
+            G.location[i] = TURN_BOX + pieces[i].reinforcement
+        }
+    }
+
+    G.turn = 6
+    G.political_will = 4
+    G.asp[JP] = [1, 0]
+    G.asp[AP] = [1, 0]
+    G.wie = 3
+    G.pow = 1
+
+    //17.11.21. Japanese Replacements: Japanese begin the game with 2 air
+    //replacements, 1 Ground taken from China per turn (optional)
+    //plus Air steps per event card, no naval replacements
+    G.reinforcements = [0, 2]
+    G.surrender[nations.CHINA.id] = 2
+    G.inter_service = [1, 1]
+    G.china_divisions = 8
+
+    //17.11.14. Ledo and Imphal infrastructure have not yet been completed,
+    //Jarhat infrastructure is complete and treated as strategic trans-
+    //port routes.
+    G.events[events.JARHAT_ROAD.id] = 1
+    G.events[events.HUMP.id] = 1 //Burma Road: Hump Closed
+    G.events[events.KWAI_RIVER_BRIDGE.id] = 2// 17.11.13. Kwai Bridge Event has been played, note impact on Japanese activations.
+    G.events[events.DOOLITLE] = 2// 17.11.22. Doolittle Raid has occurred meeting the condition for the Doolittle Reprisal card.
+    check_supply()
+    log("!Empire of the Sun. Burma: The Forgotten War, 1943-1944")
+    log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
+    call("burma_choose_offensive")
+}
+
+const BURMA_JAPANESE_OFF = [3,8,16,40,48,50]
+
+P.burma_choose_offensive = {
+    _begin(){
+        G.active = JP
+        G.offensive.active_cards = []
+        BURMA_JAPANESE_OFF.forEach(c=>{
+            c = find_card(JP, c)
+            if(! G.hand[JP].includes(c)){
+                G.offensive.active_cards.push(c)
+            }
+        })
+    },
+    prompt() {
+        if(L.confirm_card){
+            prompt(`Confirm `+card_get_log_str(L.confirm_card)+` as Future Offensive ?`)
+            button("done")
+        }else{
+            prompt(`Choose Military Event to use as Future Offensive.`)
+            
+            BURMA_JAPANESE_OFF.forEach(c => {
+                c = find_card(JP, c)
+                if(! G.hand[JP].includes(c)){
+                    action_card(c)
+                }
+            })
+        }
+    },
+    card(c) {
+        push_undo()
+        future_offencive_card(c,5) //First turn is 6, card is playable immediatly so turn mark as being designated during turn 5
+        L.confirm_card = c
+    },
+    done(){
+        G.offensive.active_cards = []
+        goto("offensive_phase")
+    }
+}
+
 function future_offencive_card(card, turn) {
     var faction = cards[card].faction
     if (G.future_offensive[faction] > 0) {
@@ -11392,6 +11743,9 @@ function on_view() {
         V.hand[AP] = G.hand[AP].slice()
         G.offensive.draw[AP].filter(c => c >= 0 && cards[c].faction === AP).forEach(c => V.hand[AP].push(c))
         V.future_offensive[AP] = G.future_offensive[AP]
+    }
+    if(L.P === "burma_choose_offensive" && R == AP){
+        V.offensive.active_cards = []
     }
     G = actual_g
 }

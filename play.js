@@ -422,7 +422,7 @@ function hex_in_map(x, y) {
     return x >= map_info.grid_x_offset &&
         y >= map_info.grid_y_offset &&
         x < map_info.grid_x_offset + map_info.ROW_HEX_NB &&
-        y < map_info.grid_x_offset + map_info.ROW_HEX_NB
+        y < map_info.grid_y_offset + map_info.COLUMN_HEX_NB
 }
 
 const MAIN_BOARD_INFO = {
@@ -448,11 +448,38 @@ const MAIN_BOARD_INFO = {
 const BURMA_BOARD_INFO = {
     "LAST_BOARD_HEX": 2609,
     "COLUMN_HEX_NB": 13,
-    "ROW_HEX_NB": 16
+    "ROW_HEX_NB": 16,
+    "grid_x_offset": 0,
+    "grid_y_offset": 0,
+    "display_x_offset": 48.375,
+    "display_y_offset": 53.375,
+    "turn_a": 6,
+    "turn_b": 9,
+    "track_a": 0,
+    "track_b": 9,
+    "wie_a": 7,
+    "wie_b": 0,
+    "pw_a": 10,
+    "pw_b": 0,
+    "TURN_STACK_PARAMS": TURN_STACK_PARAMS,
+    "TRACK_STACK_PARAMS": VERTICAL_TURN_STACK_PARAMS,
+    "hex_check": (i) => {
+        let x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
+        let y = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
+
+
+        if (x == 15 && y > 9) {
+            return false;
+        } else if (x == 16 && y > 9) {
+            return false;
+        }
+        return hex_in_map(x, y)
+    }
 }
+
 const SOUTH_PAC_BOARD_INFO = {
     "LAST_BOARD_HEX": 5027,
-    "COLUMN_HEX_NB": 12,
+    "COLUMN_HEX_NB": 13,
     "ROW_HEX_NB": 21,
     "grid_x_offset": 20,
     "grid_y_offset": 16,
@@ -536,12 +563,21 @@ function on_init(scenario, game_options, static_view) {
             define_space("action_hex", 1400, map_layout.h_5808)
             break;
         }
-        case  "Burma: The Forgotten War": {
+        case  "Burma: The Forgotten War, 1943-1944": {
             SID = BURMA_SCENARIO
             map_layout = layout.burma;
             map_elem.classList.add("burma");
             define_board("#map", 1275, 825, [12, 12, 12, 12])
-            map_info = BURMA_INFO
+            map_info = BURMA_BOARD_INFO
+
+            const singapore = hex_to_int(2015)
+            define_s_loc(singapore, map_layout.box_singapore)
+            define_thing("zoi_hex", singapore).layout(map_layout.box_singapore)
+            define_space("action_hex", singapore, map_layout.box_singapore)
+            define_thing("road", data.events.JARHAT_ROAD.id).layout([549, 286, 60, 60], "road_jarhat hide marker control")
+            define_thing("road", data.events.IMPHAL_ROAD.id).layout([550, 330, 60, 60], "road_imphal hide marker control")
+            define_thing("road", data.events.LEDO_ROAD.id).layout([600, 300, 60, 60], "road_ledo hide marker control")
+            define_thing("road", data.events.KWAI_RIVER_BRIDGE.id).layout([528, 501, 50, 95], "road_kwai hide marker control")
             break;
         }
         default: {
@@ -556,7 +592,6 @@ function on_init(scenario, game_options, static_view) {
             define_thing("road", data.events.KWAI_RIVER_BRIDGE.id).layout([557, 501, 50, 95], "road_kwai hide marker control")
         }
     }
-
 
     // used hexes
     var used_hex = []
@@ -594,7 +629,9 @@ function on_init(scenario, game_options, static_view) {
     define_s_loc(ELIMINATED_BOX, map_layout.box_eliminated)
     define_s_loc(AP_REINF, map_layout.box_ap_reinf)
     define_s_loc(JP_REINF, map_layout.box_jp_reinf)
-    define_s_loc(DELAYED_BOX, map_layout.box_delayed_reinf)
+    if(SID!=BURMA_SCENARIO){
+        define_s_loc(DELAYED_BOX, map_layout.box_delayed_reinf)
+    }
     define_s_loc(CHINA_BOX, map_layout.box_air_unit_in_china)
 
     define_space("action_hex", CHINA_BOX, map_layout.box_air_unit_in_china, "china_box")
@@ -622,7 +659,7 @@ function on_init(scenario, game_options, static_view) {
     define_layout_track_h("china", 5, 0, map_layout.track_chinese_government, 0)
 
     if (map_layout.track_japanese_divisions_available_china !== undefined) {
-        define_layout_track_h("divisions", 1, 13, map_layout.track_japanese_divisions_available_china, 0)
+        define_layout_track_h("divisions", 1, (SID == BURMA_SCENARIO ? 9 :13), map_layout.track_japanese_divisions_available_china, 0)
     }
     for (i = 0; i < 35; i++) {
         var battle = define_marker("battle", i, "conflict battle unit_status")
@@ -754,7 +791,7 @@ function init_canvas(scenario) {
     let sizeX, sizeY;
     switch (scenario) {
         case "South Pacific":
-        case  "Burma: The Forgotten War": {
+        case  "Burma: The Forgotten War, 1943-1944": {
             sizeX = 1275
             sizeY = 825
             break;
@@ -1827,10 +1864,18 @@ function vp_dialog(id, response) {
         })
         append_header("", dl, "br")
         append_header("Summary:", dl)
-        append_header("2 VP or less - Allied Decisive Victory.", dl)
-        append_header("3-5 VP Allied Tactical Victory.", dl)
-        append_header("6-9 VP Japanese Tactical Victory.", dl)
-        append_header("10 VP Japanese Decisive Victory.", dl)
+        if(SID == BURMA_SCENARIO){
+            append_header("2 VP or less - Allied Decisive Victory.", dl)
+            append_header("3-4 VP Allied Tactical Victory.", dl)
+            append_header("5-8 VP Japanese Tactical Victory.", dl)
+            append_header("9 VP Japanese Decisive Victory.", dl)
+        }else{
+            append_header("2 VP or less - Allied Decisive Victory.", dl)
+            append_header("3-5 VP Allied Tactical Victory.", dl)
+            append_header("6-9 VP Japanese Tactical Victory.", dl)
+            append_header("10 VP Japanese Decisive Victory.", dl)
+        }
+
         body.appendChild(dl)
     })
 }
