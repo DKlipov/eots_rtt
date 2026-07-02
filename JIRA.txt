@@ -12,6 +12,7 @@ Todo list:
 * log units in battle
 * log unit movement type
 * 6.21 rule check
+* Confirm reaction (-offensive-)
 
 Bugs
 
