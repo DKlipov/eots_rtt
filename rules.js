@@ -4687,7 +4687,7 @@ P.retro_disengagement = {
         var active_stack = L.active
 
         check_supply()
-        if (L.P === "move_to") {
+        if (L.P === "move_to" && !set_has(G.offensive.battle_hexes, G.location[active_stack[0]])) {
             set_mt(ANY_MOVE)
             L.allowed_hexes = []
             L.spec_move = 0
@@ -4760,7 +4760,7 @@ P.retro_disengagement = {
 function remove_battle_hex_without_def(loc) {
     var defender = 1 - G.offensive.attacker
     var non_ground = JP_UNITS - JP_GROUND_UNITS
-    if (set_has(G.offensive.battle_hexes, loc) && !(G.supply_cache[hex] & non_ground << defender) && !get_garrison(hex).length) {
+    if (set_has(G.offensive.battle_hexes, loc) && !(G.supply_cache[loc] & (non_ground << defender)) && !get_garrison(loc).length) {
         set_delete(G.offensive.battle_hexes, loc)
     }
 }
@@ -11336,6 +11336,7 @@ function on_setup(scenario, options) {
     G.scenario = scenario
     G.sid = SCENARIO_DATA.filter(s => s.name === G.scenario)[0].id//scenario id
     G.active = JP
+    G.redo_count = 0
     G.turn = 1
     G.passes = [0, 0]
     G.removed = [[], []] // removed one-time events
@@ -12420,29 +12421,16 @@ function clear_undo() {
         G.undo = G.prepared_undo
         G.prepared_undo = null
     }
-    if (G.redo && G.redo_count > G.redo.redo_count) {
+    if (G.redo && G.redo.changed_control) {
         G.redo = null
+    } else if (G.redo) {
+        G.redo.changed_control = 1
     }
-    G.redo_count++
 }
 
 function push_undo() {
     if (G.undo) {
         G.undo.push(copy_state())
-    }
-}
-
-function restore_state(state) {
-    if (state) {
-        var save_log = G.log
-        var save_undo = G.undo
-        var save_redo = G.redo
-        var delayed = G.delayed_state
-        G = state
-        G.log = save_log
-        G.undo = save_undo
-        G.redo = save_redo
-        G.delayed_state = delayed
     }
 }
 
@@ -12455,7 +12443,9 @@ function copy_state() {
             continue
         else if (k === "redo")
             continue
-        else if (k === "delayed_state")
+        else if (k === "persisted_undo")
+            continue
+        else if (k === "prepared_undo")
             continue
         else if (k === "log")
             v = v.length
@@ -12468,16 +12458,34 @@ function copy_state() {
 
 function pop_undo() {
     if (G.undo) {
-        var save_log = G.log
-        var save_undo = G.undo
-        var save_redo = G.redo
-        var delayed = G.delayed_state
-        G = save_undo.pop()
-        save_log.length = G.log
-        G.log = save_log
-        G.undo = save_undo
-        G.redo = save_redo
-        G.delayed_state = delayed
+        var state = G.undo.pop()
+        G.log.length = state.log
+        restore_state(state)
+    }
+}
+
+function pop_redo() {
+    if (G.redo) {
+        delete G.redo.changed_control
+        push_undo()
+        G.log.length = G.redo.log[0]
+        for (var i = 1; i < G.redo.log.length; i++) {
+            G.log.push(G.redo.log[i])
+        }
+        restore_state(G.redo)
+        push_redo()
+        G.redo.changed_control = 1
+    }
+}
+
+function restore_state(state) {
+    if (state) {
+        state.log = G.log
+        state.undo = G.undo
+        state.redo = G.redo
+        state.persisted_undo = G.persisted_undo
+        state.prepared_undo = G.prepared_undo
+        G = state
     }
 }
 
@@ -12502,22 +12510,6 @@ function push_redo() {
     }
     for (var i = G.redo.log[0]; i < G.log.length; i++) {
         G.redo.log.push(G.log[i])
-    }
-}
-
-
-function pop_redo() {
-    if (G.redo) {
-        var save_log = G.log
-        var delayed = G.delayed_state
-        G = G.redo
-        save_log.length = G.log[0]
-        for (var i = 1; i < G.log.length; i++) {
-            save_log.push(G.log[i])
-        }
-        G.log = save_log
-        G.delayed_state = delayed
-        push_redo()
     }
 }
 

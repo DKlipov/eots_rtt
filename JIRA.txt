@@ -12,6 +12,7 @@ Todo list:
 * 6.21 rule check
 * Confirm reaction (-offensive-)
 * aa ground count as naval units
+* log aa failed without fight
 
 Bugs
 
