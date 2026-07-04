@@ -4932,6 +4932,7 @@ data.map = [
     {id: 2506, region: "IChina", terrain: MIXED, edges: [0, 0, 0, 2, 2, 2]},
     {id: 2507, region: "IChina", terrain: MIXED, edges: [2, 0, 0, 2, 2, 2]},
     {id: 2408, region: "IChina", terrain: MIXED},
+    {id: 2608, region: "IChina", terrain: MIXED}, //Only playable in the burma scenario
     {id: 2307, region: "IChina", terrain: MIXED},
     {id: 2109, region: "Siam", terrain: JUNGLE, edges: [5, 2, 2, 2, 5, 1]},
     {id: 2210, name: "Udorn", region: "Siam", city: CITY, terrain: OPEN, edges: [2, 2, 2, 2, 4, 2]},

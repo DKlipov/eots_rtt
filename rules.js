@@ -451,6 +451,10 @@ for (let i = 0; i <= LAST_BOARD_HEX; ++i) {
         hex.supply_source |= US_SUPPLIED_HEX
         hex.supply_source |= JOINT_SUPPLIED_HEX
     }
+    if(i ==472 ){
+        // remove hex only found in the burma scenario (2608)
+        MAP_DATA[i] = NON_PLAYABLE_HEX
+    }
     apply_south_pacific(Object.assign({}, hex))
     apply_burma(Object.assign({}, hex))
 }
@@ -511,7 +515,7 @@ function apply_burma(hex) {
     var x = Math.floor(id / 29)
     let y = id % 29
 
-    if (x == 15 && y > 9|| x == 16 && y > 9 || x >= 16 && y >= 13) {
+    if (x == 15 && y > 9|| x == 16 && y > 9 || x >= 17 || y >= 13) {
         B_F_W_MAP_DATA[id] = NON_PLAYABLE_HEX
         return
     }
@@ -3321,11 +3325,14 @@ function get_near_hexes(hex) {
         }
         result.push(TUNNEL_BOX + map_get(SP_TONNELLING, hex) + 400)
     }
-    if (G.sid === BURMA_SCENARIO && B_F_W_TONNELLING_SET.includes(hex)) {
-        if (hex === SINGAPORE) {
-            return SINGAPORE_NEAR
+    if (G.sid === BURMA_SCENARIO){
+
+        if(B_F_W_TONNELLING_SET.includes(hex)) {
+            if (hex === SINGAPORE) {
+                return SINGAPORE_NEAR
+            }
+            result.push(TUNNEL_BOX + map_get(B_F_W_TONNELLING, hex) + 400)
         }
-        result.push(TUNNEL_BOX + map_get(B_F_W_TONNELLING, hex) + 400)
     }
     return result
 }

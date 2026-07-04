@@ -443,12 +443,15 @@ const MAIN_BOARD_INFO = {
     "pw_b": 0,
     "TURN_STACK_PARAMS": TURN_STACK_PARAMS,
     "TRACK_STACK_PARAMS": TRACK_STACK_PARAMS,
-    "hex_check": () => true
+    "hex_check": (i) => {
+        return i!=472 && //Remove the hex exclusive to the burma scenario    
+               i!=92 // Remove unplayable hex in india not catched by the standard data check (1305)
+    }
 }
 const BURMA_BOARD_INFO = {
     "LAST_BOARD_HEX": 2609,
     "COLUMN_HEX_NB": 13,
-    "ROW_HEX_NB": 16,
+    "ROW_HEX_NB": 17,
     "grid_x_offset": 0,
     "grid_y_offset": 0,
     "display_x_offset": 48.375,
@@ -473,7 +476,8 @@ const BURMA_BOARD_INFO = {
         } else if (x == 16 && y > 9) {
             return false;
         }
-        return hex_in_map(x, y)
+        return hex_in_map(x, y) && 
+                i != 92 // Remove unplayable hex in india not catched by the standard data check (1305)
     }
 }
 
