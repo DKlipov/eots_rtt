@@ -4283,7 +4283,7 @@ data.cards = [
         "oc": 5,
         "remove": true,
         "china": 1,
-        "name": "Patric Hurley",
+        "name": "Patrick Hurley",
     },
     {
         "num": 42,

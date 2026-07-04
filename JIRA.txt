@@ -2,8 +2,6 @@ Todo list:
 * update disengadgenement (it fulfill card condition)
 * less annoying piece tooltip
 * big refactoring
-* fuzz-buzz testing
-* Implementation notes
 * stack refactoring
 * Mobile resizing lags & bugs
 * imporve repair of eliminated units
@@ -11,6 +9,10 @@ Todo list:
 * update AP battle box color
 * log units in battle
 * log unit movement type
+* 6.21 rule check
+* Confirm reaction (-offensive-)
+* aa ground count as naval units
+* log aa failed without fight
 
 Bugs
 
