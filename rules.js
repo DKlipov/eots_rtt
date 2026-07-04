@@ -6824,12 +6824,20 @@ P.national_status_segment = function () {
         })
     }
     if (check_nation_controlled(nations.INDIA, JP)) {
-        degrade_india(true)
+        //17.11.27. During the Game turn 9 Political Phase the India status can only
+        //shift for India surrender, else do not move the India marker and
+        //score any VP based on its location during the last Political Phase.
+        if(G.sid != BURMA_SCENARIO || G.turn < 9 || G.surrender[nations.INDIA.id] === 3){
+            degrade_india(true)
+        }
         if (G.surrender[nations.INDIA.id] === 4) {
             change_political_will(-nations.INDIA.pw, nations.INDIA.name)
         }
     } else {
-        india_stable()
+        //17.11.27. 
+        if(G.sid != BURMA_SCENARIO || G.turn < 9){
+            india_stable()
+        }
     }
 
     if (!is_event_active(events.AUSTRALIA_SURRENDER) && check_nation_surrender(nations.AUSTRALIA)) {
@@ -7168,7 +7176,10 @@ P.political_will_segment = function () {
     check_occupation(events.ALASKA_OCCUPATION, true)
     check_jp_resources_event()
     check_naval_situation()
-    check_progress_of_war()
+    // 17.11.23 do not check pow in the burma scenario
+    if(G.sid != BURMA_SCENARIO){
+        check_progress_of_war()
+    }
     end()
 }
 
