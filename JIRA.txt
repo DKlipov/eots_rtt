@@ -1,22 +1,19 @@
 Todo list:
-do not use road after disengadge
-* update disengadgenement (it fulfill card condition)
+
+* aa ground count as naval units
+* log aa failed without fight
+* 6.21 rule check
+* Confirm reaction (-offensive-)
 * less annoying piece tooltip
 * big refactoring
 * stack refactoring
 * Mobile resizing lags & bugs
 * imporve repair of eliminated units
 * avoid accidentially skip reation
-* update AP battle box color
 * log units in battle
 * log unit movement type
-* 6.21 rule check
-* Confirm reaction (-offensive-)
-* aa ground count as naval units
-* log aa failed without fight
 
 Bugs
 
 Done
 ? Hex-to-hex distance calculation
-? Burma scenario

@@ -64,21 +64,11 @@ header {
 #log .h2 { padding-top:2px; padding-bottom:2px; text-align: center; }
 #log .h3 { padding-top:1px; padding-bottom:1px; text-align: center; }
 
-#log .group { margin: 0 8px }
-#log .group.h4 { text-align: center; padding: 0px; }
-#log .group.h4.ap { background-color: hsl(0, 20%, 80%); }
-#log .group.h4.cp { background-color: hsl(214, 30%, 80%); }
-#log .group.ap { background-color: hsl(0, 20%, 90%) }
-#log .group.cp { background-color: hsl(214, 30%, 90%) }
-
 #log div.i { padding-left: 32px; text-indent: -12px; }
 #log div.ii { padding-left: 44px; text-indent: -12px; }
 
 #log div.bold { font-weight: bold }
 #log div.italic { font-style: italic }
-
-#log .apvp { color: brown; }
-#log .cpvp { color: blue; }
 
 #log .card-tip {
     cursor: pointer;

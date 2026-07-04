@@ -4201,8 +4201,8 @@ function compute_possible_battle_hexes() {
         if (pieces[u].parenthetical) {
             range = pieces[u].br
         }
-        if (
-            map_has(G.offensive.committed, u) && set_has(G.offensive.battle_hexes, map_get(G.offensive.committed, u, 0)) ||
+        var committed = map_get(G.offensive.committed, u, 0)
+        if (map_has(G.offensive.committed, u) && (set_has(G.offensive.battle_hexes, committed) || set_has(G.offensive.landing_hexes, committed)) ||
             path[0] & STRAT_MOVE || path[0] & AIR_EXTENDED_MOVE || is_faction_units(location, 1 - pieces[u].faction)
             || is_b29_bombed(piece)) {
             return
@@ -4820,19 +4820,16 @@ function get_ground_move(avoid_zoi) {
     const location = L.move_data.location
     const move_data = L.move_data
     var max_distance = move_data.ground_move_distance
+    var spent_distance = 0
     var path = map_get(G.offensive.paths, G.active_stack[0])
     if (path) {
-        var d = 0
-        for (var i = 2; i < path.length - 1; i++) {
-            d += get_ground_move_cost(path[i], path[i + 1], G.active)
-        }
-        max_distance -= d
+        spent_distance = path[1]
     }
     if (avoid_zoi && G.supply_cache[location] & JP_ZOI << (1 - G.active)) {
         return []
     }
     const queue = [location]
-    const distance_map = [location, [0, location]]
+    const distance_map = [location, [spent_distance, location]]
     for (var i = 0; i < queue.length; i++) {
         let item = queue[i]
         let base_distance = map_get(distance_map, item)
@@ -6052,7 +6049,9 @@ P.apply_naval_winner = function () {
 
     var air_cover = attacker_units.filter(u => pieces[u].br).length || !defender_units.filter(u => pieces[u].br).length
     var attacker_win = attacker_power > defender_power && air_cover || defender_power === 0
-    log(`${attacker_win ? "Attacker" : "Defender"} win battle (${attacker_power} - ${defender_power}) ${!air_cover ? "no attacker CV or air" : ""}.`)
+    if (battle.amph_ground.length) {
+        log(`${attacker_win ? "Attacker" : "Defender"} won battle (${attacker_power} - ${defender_power}) ${!air_cover ? "no attacker CV or air" : ""}.`)
+    }
     if (!attacker_win) {
         battle.amph_ground.forEach(u => set_delete(battle.ground[G.offensive.attacker], u))
     }
@@ -6159,7 +6158,7 @@ P.apply_ground_winner = function () {
     if (!battle.ground[G.offensive.attacker].filter(unit_on_board).length) {
         attacker_win = 0
     }
-    log(`${attacker_win ? "Attacker" : "Defender"} win in ground combat ${hex_get_log_str(battle.battle_hex)}.`)
+    log(`${attacker_win ? "Attacker" : "Defender"} won in ground combat ${hex_get_log_str(battle.battle_hex)}.`)
     battle.winner = (attacker_win == G.offensive.attacker) + 0
     if (attacker_win) {
         capture_hex(battle.battle_hex, G.offensive.attacker)
