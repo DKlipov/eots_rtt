@@ -7430,6 +7430,36 @@ function victory_check() {
     if (G.political_will <= 0) {
         finish("Japan", "Japanese Victory by Treaty Negotiations")
     }
+    if (G.sid == BURMA_SCENARIO && scenario_data().last_turn <= G.turn){
+        // 17.11.23. Progress of the War (PoW): Ignore the normal PoW rules. If
+        //   the Allies do not capture at least one hex at the conclusion of
+        //   the game that began the game controlled by the Japanese, minus
+        //   1 US Political Will.
+
+        let no_capture = true
+        for (var i = 1; i < LAST_BOARD_HEX; i++) {
+            var hex_data = get_map_data(i)
+            // only hex 2006 begins with allied control
+            if (!nations.BURMA.regions.includes(hex_data.region) || hex_data.id == 2006) {
+                continue
+            }
+            if(!set_has(G.control, hex_to_int(hex_data.id)) ){
+                no_capture = false
+                break;
+            }
+        }
+        if(no_capture){
+            change_political_will(-1, "no allied control of any hex originally controlled by the Japanese");
+        }
+        //17.11.26. At the end of the game if the War in Europe is in a box with a
+        //negative number the US PW is reduced by one prior to scoring.
+        //If positive, the US PW is increased by one. If zero, no effect
+        if (G.wie <= 2) {
+            change_political_will(1, "War in Europe positive.")
+        } else if (G.wie > 3) {
+            change_political_will(-1, "War in Europe negative.")
+        }
+    }
     var vp = get_victory()
     if (scenario_data().last_turn <= G.turn) {
         vp.text.forEach(t => log(t))
@@ -7904,12 +7934,6 @@ function victory_burma() {
         won_side: "",
         won_text: "",
     }
-    // 23. Progress of the War (PoW): Ignore the normal PoW rules. If
-    //   the Allies do not capture at least one hex at the conclusion of
-    //   the game that began the game controlled by the Japanese, minus
-    //   1 US Political Will.
-
-    //TODO check capture of japanese hexe (Probably not in this function)
 
     //A. China track: +1 VP per box left or –1 per box right of the Major
     // Breakthrough Box. If China Surrenders, receive a bonus +3
@@ -7945,7 +7969,7 @@ function victory_burma() {
         result.text.push(`-1 VP - War in Europe > 0`)
     } else if (G.wie > 3) {
         result.vp += 1
-        result.text.push(`-1 VP - War in Europe < 0`)
+        result.text.push(`1 VP - War in Europe < 0`)
     }
     //F. For controlling each hex of Northern India, +1 VP per hex
     let india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
