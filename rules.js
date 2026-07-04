@@ -387,7 +387,7 @@ const B_F_W_TONNELLING_SET = [hex_to_int(1912),SINGAPORE]
 const OAHU_NEAR = S_P_TONNELLING_SET.filter(h => h !== OAHU).map((h, i) => TUNNEL_BOX + 100 * i + map_get(SP_TONNELLING, h))
 const SINGAPORE_NEAR = B_F_W_TONNELLING_SET.filter(h => h !== SINGAPORE).map((h, i) => TUNNEL_BOX + 100 * i + map_get(B_F_W_TONNELLING, h))
 const NON_PLAYABLE_HEX = {id: 0, terrain: OCEAN, region: "Ocean", edges_int: 0}
-const TUNNEL_HEX = {id: 0, terrain: OCEAN, region: "Ocean", edges_int: UNPLAYABLE_WATER | WATER}
+const TUNNEL_HEX = {id: 0, terrain: OCEAN, region: "Ocean", edges_int: UNPLAYABLE_WATER | WATER | (WATER<<5)}
 const MAP_DATA = []
 const S_P_MAP_DATA = []
 const B_F_W_MAP_DATA = []
@@ -3307,15 +3307,23 @@ function get_edge_hexes(hex) {
 
 function get_near_hexes(hex) {
     if (hex > TUNNEL_BOX) {
-        hex -= 1
-        if (hex % 100 === 0) {
+        let toward_map_hex =  hex - 1
+        let toward_offmap_box_hex =  hex + 1
+        if (toward_map_hex % 100 === 0) {
             if(G.sid === SOUTH_PACIFIC_SCENARIO){
-                return [S_P_TONNELLING_SET[(hex - TUNNEL_BOX) / 100]]
+                return [S_P_TONNELLING_SET[(toward_map_hex - TUNNEL_BOX) / 100]]
             }else{
-                return [B_F_W_TONNELLING_SET[(hex - TUNNEL_BOX) / 100]]
+                return [B_F_W_TONNELLING_SET[(toward_map_hex - TUNNEL_BOX) / 100], toward_offmap_box_hex]
             }
         } else {
-            return [hex]
+            if(G.sid === SOUTH_PACIFIC_SCENARIO){
+                return [toward_map_hex]
+            }else if(G.sid === BURMA_SCENARIO){
+                if( SINGAPORE_NEAR.includes(hex)){
+                    toward_offmap_box_hex = SINGAPORE
+                }
+                return [toward_map_hex, toward_offmap_box_hex]
+            }
         }
     }
     var result = get_edge_hexes(hex)
@@ -3331,7 +3339,7 @@ function get_near_hexes(hex) {
             if (hex === SINGAPORE) {
                 return SINGAPORE_NEAR
             }
-            result.push(TUNNEL_BOX + map_get(B_F_W_TONNELLING, hex) + 400)
+            result.push(TUNNEL_BOX + 1)
         }
     }
     return result
