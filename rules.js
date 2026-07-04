@@ -2717,8 +2717,8 @@ P.move_to = script(`
 P.move_offensive_units = {
     _begin() {
         var clear_path = []
-        map_for_each(G.offensive.paths, u => {
-            if (pieces[u].faction === G.active) {
+        map_for_each(G.offensive.paths, (u, path) => {
+            if (pieces[u].faction === G.active && path[0] & GROUND_DISENGAGEMENT) {
                 clear_path.push(u)
             }
         })
@@ -4792,7 +4792,6 @@ function compute_ground_disengagement(unit) {
             continue
         }
         map_set(allowed_hexes, nh, [GROUND_DISENGAGEMENT | GROUND_MOVE, 0, location, nh])
-
     }
     return allowed_hexes
 }
@@ -11411,7 +11410,7 @@ function get_garrison_count() {
 }
 
 function on_view() {
-    if (P[L.P].on_view) {
+    if (L.P && P[L.P].on_view) {
         return P[L.P].on_view()
     }
     return create_view()

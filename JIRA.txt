@@ -1,4 +1,5 @@
 Todo list:
+do not use road after disengadge
 * update disengadgenement (it fulfill card condition)
 * less annoying piece tooltip
 * big refactoring
