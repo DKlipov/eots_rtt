@@ -382,7 +382,10 @@ function find_card(faction, num) {
 
 const SP_TONNELLING = [hex_to_int(4825), 21, hex_to_int(4826), 22, hex_to_int(4828), 24, hex_to_int(4926), 22]
 const S_P_TONNELLING_SET = [hex_to_int(4825), hex_to_int(4826), hex_to_int(4828), hex_to_int(4926), OAHU]
+const B_F_W_TONNELLING = [hex_to_int(1912), 3]
+const B_F_W_TONNELLING_SET = [hex_to_int(1912),SINGAPORE]
 const OAHU_NEAR = S_P_TONNELLING_SET.filter(h => h !== OAHU).map((h, i) => TUNNEL_BOX + 100 * i + map_get(SP_TONNELLING, h))
+const SINGAPORE_NEAR = B_F_W_TONNELLING_SET.filter(h => h !== SINGAPORE).map((h, i) => TUNNEL_BOX + 100 * i + map_get(B_F_W_TONNELLING, h))
 const NON_PLAYABLE_HEX = {id: 0, terrain: OCEAN, region: "Ocean", edges_int: 0}
 const TUNNEL_HEX = {id: 0, terrain: OCEAN, region: "Ocean", edges_int: UNPLAYABLE_WATER | WATER}
 const MAP_DATA = []
@@ -500,7 +503,9 @@ function apply_south_pacific(hex) {
 }
 
 B_F_W_MAP_DATA[SINGAPORE] = Object.assign({}, MAP_DATA[SINGAPORE])
-B_F_W_MAP_DATA[SINGAPORE].supply_source = JOINT_SUPPLIED_HEX | US_SUPPLIED_HEX
+B_F_W_MAP_DATA[SINGAPORE].edges_int += WATER // set water edge for upper edge
+B_F_W_TONNELLING.filter(h => h !== SINGAPORE).forEach(h => B_F_W_MAP_DATA[h].edges_int += (WATER << 30))
+
 function apply_burma(hex) {
     var id = hex_to_int(hex.id)
     var x = Math.floor(id / 29)
@@ -3300,7 +3305,11 @@ function get_near_hexes(hex) {
     if (hex > TUNNEL_BOX) {
         hex -= 1
         if (hex % 100 === 0) {
-            return [S_P_TONNELLING_SET[(hex - 1600) / 100]]
+            if(G.sid === SOUTH_PACIFIC_SCENARIO){
+                return [S_P_TONNELLING_SET[(hex - TUNNEL_BOX) / 100]]
+            }else{
+                return [B_F_W_TONNELLING_SET[(hex - TUNNEL_BOX) / 100]]
+            }
         } else {
             return [hex]
         }
@@ -3311,6 +3320,12 @@ function get_near_hexes(hex) {
             return OAHU_NEAR
         }
         result.push(TUNNEL_BOX + map_get(SP_TONNELLING, hex) + 400)
+    }
+    if (G.sid === BURMA_SCENARIO && B_F_W_TONNELLING_SET.includes(hex)) {
+        if (hex === SINGAPORE) {
+            return SINGAPORE_NEAR
+        }
+        result.push(TUNNEL_BOX + map_get(B_F_W_TONNELLING, hex) + 400)
     }
     return result
 }
