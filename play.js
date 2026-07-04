@@ -76,6 +76,10 @@ const VERTICAL_TURN_STACK_PARAMS = [
 const MANCHURIA_1 = hex_to_int(3302)
 const MANCHURIA_2 = hex_to_int(3303)
 
+const SINGAPORE = hex_to_int(2015)
+
+const TUNNEL_BOX = 1600
+
 const SUPPLY_TYPES = {
     to_port: {color: "green"},
     from_port: {color: "red"},
@@ -773,6 +777,17 @@ function hex_center(i) {
     }
     let row = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
     let column = (Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB))
+    if(SID == BURMA_SCENARIO){
+        if(i == SINGAPORE ){
+            const box = map_layout.box_singapore
+            return center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
+        }
+        if(i > TUNNEL_BOX){
+            // display TUNNEL_BOX hexes in 1913
+            column = 9;
+            row = 13;
+        }
+    }
     return [
         (map_info.display_x_offset) + (column - map_info.grid_x_offset) * HEX_X_SIZE,
         (map_info.display_y_offset) + (row - map_info.grid_y_offset) * HEX_Y_SIZE + (column & 1) * 27.625
