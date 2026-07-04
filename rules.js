@@ -1024,7 +1024,25 @@ P.reinforcement_segment = {
     },
     unit(u) {
         G.active_stack = [u]
-        if (pieces[u].class !== "hq") {
+        if(G.sid == BURMA_SCENARIO){
+            L.allowed_hexes = []
+            if(G.active === JP){
+                // 17.11.17. Turn 8 Japanese reinforcements: 29th Army (reduced) arrives
+                //in Rangoon if it is Japanese controlled else it is lost.
+                if(is_space_controlled(RANGOON, JP) ){
+                    L.allowed_hexes = [RANGOON]
+                }
+            }
+            if(G.active === AP){
+                // 17.11.18. Turn 9 Allied reinforcements: US B29. If China has not
+                // surrendered and the Allies have an eligible airbase in Northern
+                // India the B29 arrives in the Air Units in China Box. 
+                if(G.surrender[nations.CHINA.id] < 5 && !is_overstack(CHINA_BOX, u) && G.burma_road < 2 ){
+                    // TODO check if G.burma_road < 2 is equivalent to "the Allies have an eligible airbase in Northern India"
+                    L.allowed_hexes = [RANGOON]
+                }
+            }
+        }else if (pieces[u].class !== "hq") {
             L.allowed_hexes = get_unit_reinforcement_hexes(u)
         } else {
             L.allowed_hexes = get_hq_reinforcement_hexes()
@@ -7454,7 +7472,7 @@ function victory_check() {
             if (!nations.BURMA.regions.includes(hex_data.region) || hex_data.id == 2006) {
                 continue
             }
-            if(!set_has(G.control, hex_to_int(hex_data.id)) ){
+            if(is_space_controlled(hex_to_int(hex_data.id), AP)){
                 no_capture = false
                 break;
             }
