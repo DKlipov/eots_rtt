@@ -779,13 +779,15 @@ function hex_center(i) {
     let column = (Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB))
     if(SID == BURMA_SCENARIO){
         if(i == SINGAPORE ){
-            const box = map_layout.box_singapore
+            const box = map_layout.label_singapore
             return center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
         }
         if(i > TUNNEL_BOX){
-            // display TUNNEL_BOX hexes in 1913
-            column = 9;
-            row = 13;
+            // display TUNNEL_BOX directly to the left of the blue singapore label
+            const box = map_layout.label_singapore
+            let sing_left_coord = center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
+            sing_left_coord[0]-=47;
+            return sing_left_coord;
         }
     }
     return [

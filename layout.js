@@ -46,9 +46,10 @@ const layout = {
 	"track_political_will": [731,732,517,64],
 	"track_wie": [871,590,377,45],
 	"track_strat_record": [779,672,467,53],
-	"box_eliminated": [50,680,45,45],
+	"box_eliminated": [306,29,45,45],
+	"label_singapore": [496,781,64,17],
 	"box_ap_reinf": [823,583,45,45],
-	"box_jp_reinf": [58,103,45,45],
+	"box_jp_reinf": [34,34,45,45],
 },
 }
 

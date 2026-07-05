@@ -38,9 +38,9 @@
      inkscape:pageshadow="2"
      inkscape:window-width="2560"
      inkscape:window-height="1411"
-     inkscape:zoom="5.6568542"
-     inkscape:cx="167.58431"
-     inkscape:cy="728.76193"
+     inkscape:zoom="7.9999999"
+     inkscape:cx="531.25"
+     inkscape:cy="760.06251"
      inkscape:current-layer="svg89"
      id="namedview6"
      inkscape:document-rotation="0"
@@ -165,14 +165,22 @@
      height="52.545002"
      x="778.89264"
      y="671.57654" />
-   <rect
+  <rect
      style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:3.84668;stroke-linejoin:round"
      inkscape:label="box_eliminated"
      id="zone_0-9-2-2-9"
-     width="45 "
+     width="45"
      height="45"
-     x="50"
-     y="680" />
+     x="306"
+     y="28.999996" />
+  <rect
+     style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:2.80425;stroke-linejoin:round"
+     inkscape:label="label_singapore"
+     id="zone_0-9-2-2-9-9"
+     width="64.25"
+     height="16.75"
+     x="496.125"
+     y="780.75" />
   <rect
      style="opacity:0.388889;fill:#ff0000;stroke:none;stroke-width:3.84668;stroke-linejoin:round"
      inkscape:label="box_ap_reinf"
@@ -187,6 +195,6 @@
      id="zone_0-9-2-2-9-8-2"
      width="45"
      height="45"
-     x="58"
-     y="103" />
+     x="34"
+     y="34" />
 </svg>
