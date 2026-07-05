@@ -543,7 +543,7 @@ function apply_burma(hex) {
     // 17.11.6 Allies trace to an ultimate supply source off the Western Map
     // edge (Maldives edge). Japanese trace to an ultimate supply source
     // supply overland to Saigon or via hex 1912
-    if(hex.id == 1912 || hex.id == 2212){
+    if(hex.id == 1912 || hex.id == 2212 ){
         hex.supply_source |= JP_SUPPLIED_HEX
     }
     B_F_W_MAP_DATA[id] = hex
@@ -832,6 +832,14 @@ function get_unit_reinforcement_hexes(u) {
         && (!piece.b29 || G.location[B_29_1] !== CHINA_BOX && G.location[B_29_2] !== CHINA_BOX)) {
         set_add(result, CHINA_BOX)
     }
+    if(G.sid == BURMA_SCENARIO){
+        // 17.11.17. Turn 8 Japanese reinforcements: 29th Army (reduced) arrives
+        //in Rangoon if it is Japanese controlled else it is lost.
+        // 17.11.18. Turn 9 Allied reinforcements: US B29. If China has not
+        // surrendered and the Allies have an eligible airbase in Northern
+        // India the B29 arrives in the Air Units in China Box. 
+        return result.filter(hex===RANGOON || hex === CHINA_BOX)
+    }
     return result
 }
 
@@ -1026,25 +1034,7 @@ P.reinforcement_segment = {
     },
     unit(u) {
         G.active_stack = [u]
-        if(G.sid == BURMA_SCENARIO){
-            L.allowed_hexes = []
-            if(G.active === JP){
-                // 17.11.17. Turn 8 Japanese reinforcements: 29th Army (reduced) arrives
-                //in Rangoon if it is Japanese controlled else it is lost.
-                if(is_space_controlled(RANGOON, JP) ){
-                    L.allowed_hexes = [RANGOON]
-                }
-            }
-            if(G.active === AP){
-                // 17.11.18. Turn 9 Allied reinforcements: US B29. If China has not
-                // surrendered and the Allies have an eligible airbase in Northern
-                // India the B29 arrives in the Air Units in China Box. 
-                if(G.surrender[nations.CHINA.id] < 5 && !is_overstack(CHINA_BOX, u) && G.burma_road < 2 ){
-                    // TODO check if G.burma_road < 2 is equivalent to "the Allies have an eligible airbase in Northern India"
-                    L.allowed_hexes = [RANGOON]
-                }
-            }
-        }else if (pieces[u].class !== "hq") {
+        if (pieces[u].class !== "hq") {
             L.allowed_hexes = get_unit_reinforcement_hexes(u)
         } else {
             L.allowed_hexes = get_hq_reinforcement_hexes()
@@ -1553,7 +1543,7 @@ function B_F_W_deal_cards(){
     if (G.surrender[nations.CHINA.id] >= 5) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by China.`)
+        log(`AP draw reduced by 1 due to China's surrender.`)
     }
     if (G.surrender[nations.INDIA.id] >= 4) {
         ap_cards -= 1
@@ -1727,9 +1717,11 @@ function get_allowed_actions(num) {
     }
     if (num !== SANDCRAB || !result.includes("event")) {
         result.push("ops")
-        result.push("displace_hq")
+        if(G.sid !== BURMA_SCENARIO){
+            result.push("displace_hq")
+        }
         if (HQ_LIST.filter(u => G.location[u] > TURN_BOX && pieces[u].faction === R).length
-            && (R !== JP || G.sid !== SOUTH_PACIFIC_SCENARIO)) {
+            && (R !== JP || G.sid !== SOUTH_PACIFIC_SCENARIO) && G.sid !== BURMA_SCENARIO) {
             result.push("return_hq")
         }
         if (card.ops >= 3) {
@@ -2659,6 +2651,7 @@ function is_controllable_hex(hex) {
         || hex === CHINA_BOX
         || hex === ATTU && sid === YEAR_1942_SCENARIO
         || get_map_data(hex).region === "AMandates" && (sid === YEAR_1943_SCENARIO || sid === YEAR_1942_1943_SCENARIO) && G.surrender[nations.AUSTRALIAN_MANDATES.id]
+        || sid === BURMA_SCENARIO && get_map_data(hex).region === "Burma" // need to check non named hexes for 17.11.23
 }
 
 //setup only, reduced checks and logging
@@ -7430,6 +7423,25 @@ P.end_of_turn_phase = script(`
     goto strategic_phase
 `)
 
+function set_supply_control(){
+    G.original_control = G.control
+    var adjusted_control = G.control.slice()
+    for (var i = 0; i < data.controllable.length; i++) {
+        var hex = data.controllable[i]
+        var orig = set_has(data.original_control, hex) ? set_add : set_delete
+        var supply = set_has(G.control, hex) ? JP_SUPPLIED_HEX : AP_SUPPLIED_HEX
+        if (!(G.supply_cache[hex] & supply)) {
+            orig(adjusted_control, hex)
+        }
+    }
+    G.control = adjusted_control
+}
+
+function restore_original_control(){
+    G.control = G.original_control
+    delete G.original_control
+}
+
 function get_victory() {
     var data = scenario_data()
     HQ_LIST.forEach(hq => {
@@ -7444,17 +7456,7 @@ function get_victory() {
     if (G.burma_road < 2) {
         mark_hexes_supplied_kunming()
     }
-    G.original_control = G.control
-    var adjusted_control = G.control.slice()
-    for (var i = 0; i < data.controllable.length; i++) {
-        var hex = data.controllable[i]
-        var orig = set_has(data.original_control, hex) ? set_add : set_delete
-        var supply = set_has(G.control, hex) ? JP_SUPPLIED_HEX : AP_SUPPLIED_HEX
-        if (!(G.supply_cache[hex] & supply)) {
-            orig(adjusted_control, hex)
-        }
-    }
-    G.control = adjusted_control
+    set_supply_control()
     var vp = data.victory()
     if (!vp.won_side && vp.vp <= 2) {
         vp.won_side = "Allies"
@@ -7469,8 +7471,7 @@ function get_victory() {
         vp.won_side = "Japan"
         vp.won_text = `Japanese Decisive Victory`
     }
-    G.control = G.original_control
-    delete G.original_control
+    restore_original_control()
     return vp
 }
 
@@ -7488,6 +7489,8 @@ function victory_check() {
         for (var i = 1; i < LAST_BOARD_HEX; i++) {
             var hex_data = get_map_data(i)
             // only hex 2006 begins with allied control
+            // we only check for burma as this is the only region the AP player can potentially take hexes from the JP player
+            // due to 17.11.1
             if (!nations.BURMA.regions.includes(hex_data.region) || hex_data.id == 2006) {
                 continue
             }
@@ -11597,6 +11600,7 @@ function setup_scenario_burma(){
         draw_card(JP)
     }
 
+    for_each_unit(u => G.location[u] = PERM_ELIMINATED)
 
     //17.11.5. Burma has already surrendered; India and China have not yet surrendered.
     var surrender = [nations.BURMA] 
@@ -11609,7 +11613,6 @@ function setup_scenario_burma(){
     control_hex(hex_to_int(2112), JP)
     G.reduced = []
 
-    for_each_unit(u => G.location[u] = PERM_ELIMINATED)
 
     //AP Setup  (same order as the setup table found in the rules p44)
     setup_jp_unit(ap_air("14"), 2104)

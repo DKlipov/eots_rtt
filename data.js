@@ -4995,7 +4995,7 @@ data.map = [
     {id: 2111, region: "Indochina", airfield: true, terrain: MIXED, edges: [3, 2, 2, 1, 1, 1]},
     {
         id: 2211,
-        name: "Phom Penh",
+        name: "Phnom Penh",
         city: CITY,
         region: "Indochina",
         airfield: true,
