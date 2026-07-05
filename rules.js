@@ -398,12 +398,12 @@ function find_card(faction, num) {
 
 const SP_TONNELLING = [hex_to_int(4825), 21, hex_to_int(4826), 22, hex_to_int(4828), 24, hex_to_int(4926), 22]
 const S_P_TONNELLING_SET = [hex_to_int(4825), hex_to_int(4826), hex_to_int(4828), hex_to_int(4926), OAHU]
-const B_F_W_TONNELLING = [hex_to_int(1912), 3]
+const B_F_W_TONNELLING = [hex_to_int(1912), 2]
 const B_F_W_TONNELLING_SET = [hex_to_int(1912),SINGAPORE]
 const OAHU_NEAR = S_P_TONNELLING_SET.filter(h => h !== OAHU).map((h, i) => TUNNEL_BOX + 100 * i + map_get(SP_TONNELLING, h))
 const SINGAPORE_NEAR = B_F_W_TONNELLING_SET.filter(h => h !== SINGAPORE).map((h, i) => TUNNEL_BOX + 100 * i + map_get(B_F_W_TONNELLING, h))
 const NON_PLAYABLE_HEX = {id: 0, terrain: OCEAN, region: "Ocean", edges_int: 0}
-const TUNNEL_HEX = {id: 0, terrain: OCEAN, region: "Ocean", edges_int: UNPLAYABLE_WATER | WATER | (WATER<<5)}
+const TUNNEL_HEX = {id: 0, terrain: OCEAN, region: "Ocean", edges_int: UNPLAYABLE_WATER | WATER | (WATER<<5) | ROAD | (ROAD << 5)|GROUND|(GROUND << 5)}
 const MAP_DATA = []
 const S_P_MAP_DATA = []
 const B_F_W_MAP_DATA = []
@@ -523,8 +523,8 @@ function apply_south_pacific(hex) {
 }
 
 B_F_W_MAP_DATA[SINGAPORE] = Object.assign({}, MAP_DATA[SINGAPORE])
-B_F_W_MAP_DATA[SINGAPORE].edges_int += WATER // set water edge for upper edge
-B_F_W_TONNELLING.filter(h => h !== SINGAPORE).forEach(h => B_F_W_MAP_DATA[h].edges_int += (WATER << 30))
+B_F_W_MAP_DATA[SINGAPORE].edges_int += WATER| ROAD| GROUND// set water and railroad edge for upper edge
+B_F_W_TONNELLING_SET.filter(h => h !== SINGAPORE).forEach(h => B_F_W_MAP_DATA[h].edges_int |= (WATER << 15) | (ROAD<<15) | (GROUND<<15))
 
 function apply_burma(hex) {
     var id = hex_to_int(hex.id)
@@ -3375,8 +3375,10 @@ function get_near_hexes(hex) {
         if(B_F_W_TONNELLING_SET.includes(hex)) {
             if (hex === SINGAPORE) {
                 return SINGAPORE_NEAR
+            }else{
+                // We override the hex below with the start of the tunnel hexes
+                result[3] = TUNNEL_BOX + 1
             }
-            result.push(TUNNEL_BOX + 1)
         }
     }
     return result
