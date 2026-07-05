@@ -5284,7 +5284,7 @@ P.cancel_offensive = {
             return
         }
     },
-    inactive: "reaction",
+    inactive: "react",
     prompt() {
         prompt(`${offensive_card_header()} Cancel offensive.`)
         if (L.reactions_card > 0) {
