@@ -348,6 +348,8 @@ const ATTU = hex_to_int(4600)
 const OAHU = hex_to_int(5808)
 const HARBIN = hex_to_int(3302)
 const MUKDEN = hex_to_int(3303)
+const SAIGON = hex_to_int(2212)
+const CALCUTTA = hex_to_int(1805)
 const TOKYO_AIR_BASES = [3307, 3704, 3407, 3506, 3507, 3607, 3706, 3705, 3305, 3306, 3303, 3209, 3709].map(h => hex_to_int(h))
 
 const RESOURCE_HEX = [...Array(map.length).keys()].filter(h => map[h].resource).map(h => hex_to_int(map[h].id))
@@ -4972,6 +4974,23 @@ function ground_move_denied(hex) {
     }
     if (G.active_stack.filter(u => pieces[u].service === "ch").length) {
         return !(region === "IChina" || region === "NIndia" || region === "Burma")
+    }
+    if(G.SID == BURMA_SCENARIO){
+        // 17.11.1 Map: Note that there is an off map box for Singapore where the
+        // Japanese naval units marked OM (Off Map) are set up. There is
+        // also a China Air Units box where the Allied 14th Long Range
+        // Air unit marked ‘C’ (China) is placed. Allied forces may never
+        // move outside of China, Burma, or India. All units (both sides)
+        // can enter Burma, Northern India, Ceylon, Andaman Island, and
+        // the Maldives. Japanese forces cannot enter China, but can move
+        // in Siam, French Indochina, and Malaya.
+
+        // the china restriction for japanese forces is already applied by the base rules
+
+        if(G.active === AP && (region === "Siam" || region === "Indochina" )){
+            return true;
+        }
+
     }
 }
 
@@ -10516,6 +10535,14 @@ SCENARIO_DATA[SOUTH_PACIFIC_SCENARIO].before_unit_activation = function () {
 SCENARIO_DATA[SOUTH_PACIFIC_SCENARIO].before_choose_hq = function () {
     if (G.offensive.attacker === JP && G.offensive.battle_hexes.filter(h => get_map_data(h).region === "Hebrides").length <= 0) {
         array_delete_item(L.possible_units, HQ_CENTRAL_PACIFIC)
+    }
+}
+
+SCENARIO_DATA[BURMA_SCENARIO].before_commit_offensive = function () {
+    // 17.11.9
+    if (set_has(G.offensive.battle_hexes, SAIGON) || set_has(G.offensive.battle_hexes, CALCUTTA) ){
+        // Saigon should not be able to be attacked due to 17.11.1, but putting a check here just in case
+        return "HQs cannot be attacked or removed from play (by either player) for any reason."
     }
 }
 
