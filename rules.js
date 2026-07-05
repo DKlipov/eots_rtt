@@ -403,7 +403,7 @@ const B_F_W_TONNELLING_SET = [hex_to_int(1912),SINGAPORE]
 const OAHU_NEAR = S_P_TONNELLING_SET.filter(h => h !== OAHU).map((h, i) => TUNNEL_BOX + 100 * i + map_get(SP_TONNELLING, h))
 const SINGAPORE_NEAR = B_F_W_TONNELLING_SET.filter(h => h !== SINGAPORE).map((h, i) => TUNNEL_BOX + 100 * i + map_get(B_F_W_TONNELLING, h))
 const NON_PLAYABLE_HEX = {id: 0, terrain: OCEAN, region: "Ocean", edges_int: 0}
-const TUNNEL_HEX = {id: 0, terrain: OCEAN, region: "Ocean", edges_int: UNPLAYABLE_WATER | WATER | (WATER<<5) | ROAD | (ROAD << 5)|GROUND|(GROUND << 5)}
+const TUNNEL_HEX = {id: 0, terrain: OCEAN, region: "Ocean", edges_int: UNPLAYABLE_WATER | (UNPLAYABLE_WATER<<5) | UNPLAYABLE_LAND| (UNPLAYABLE_LAND << 5) | WATER | (WATER<<5) | ROAD | (ROAD << 5)|GROUND|(GROUND << 5)}
 const MAP_DATA = []
 const S_P_MAP_DATA = []
 const B_F_W_MAP_DATA = []
@@ -2392,11 +2392,11 @@ function get_activatable_units(hq, hq_supply_type) {
                     (MD.edges_int & UNPLAYABLE_LAND << 5 * j && !occupied_land && !solely_occupied_land(nh, 1 - faction)) ||
                     (MD.edges_int & UNPLAYABLE_WATER << 5 * j && !non_neutral_zoi && !has_non_n_zoi(nh, 1 - faction))
                 )) {
-                map_set(distance_map, nh, distance)
-                G.supply_cache[nh] |= HEX_TEMP_FLAG3
-                if (distance < range) {
-                    queue.push(nh)
-                }
+                    map_set(distance_map, nh, distance)
+                    G.supply_cache[nh] |= HEX_TEMP_FLAG3
+                    if (distance < range) {
+                        queue.push(nh)
+                    }
             }
         }
     }
@@ -5155,7 +5155,13 @@ function get_naval_move(zoi_mask) {
             && !pbm
         var no_enemy_units = !is_faction_units(nh, 1 - R)
         var landing = port_transport && (no_enemy_units || G.offensive.stage === POST_BATTLE_STAGE) || aa_landing && no_enemy_units
-        if ((naval_attack || landing && G.offensive.stage !== REACTION_STAGE) && (!L.move_data.is_ground_present || !ground_move_denied(nh))) {
+        let burma_pbm = G.sid != BURMA_SCENARIO || //only in the burma scenario
+                            G.offensive.stage !== POST_BATTLE_STAGE || //only for pbm
+                            G.active === AP || //only for the japanese
+                            nh === SINGAPORE || //can pbm to singapore
+                            move_data.is_ground_present || //
+                            G.active_stack.filter(u => !G.non_pbm_bound.includes(u)).length == 0 //Only kamikaze moving
+        if ((naval_attack || landing && G.offensive.stage !== REACTION_STAGE) && (!L.move_data.is_ground_present || !ground_move_denied(nh)) && burma_pbm) {
             map_set(result, nh, v)
         }
     })
@@ -11684,6 +11690,9 @@ function setup_scenario_burma(){
     G.events[events.HUMP.id] = 1 //Burma Road: Hump Closed
     G.events[events.KWAI_RIVER_BRIDGE.id] = 2// 17.11.13. Kwai Bridge Event has been played, note impact on Japanese activations.
     G.events[events.DOOLITLE] = 2// 17.11.22. Doolittle Raid has occurred meeting the condition for the Doolittle Reprisal card.
+
+    G.non_pbm_bound = [find_piece("kamikaze")]
+
     check_supply()
     log("!Empire of the Sun. Burma: The Forgotten War, 1943-1944")
     log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
