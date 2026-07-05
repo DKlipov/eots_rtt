@@ -3086,6 +3086,9 @@ P.move_offensive_units = {
         if (G.offensive.stage === POST_BATTLE_STAGE) {
             G.offensive.active_units[R] = []
         }
+        if(G.sid == BURMA_SCENARIO){
+            G.non_pbm_bound = G.non_pbm_bound.filter(u=>G.location[u] != SINGAPORE)
+        }
         G.active_stack = []
         end()
     },
