@@ -1054,10 +1054,14 @@ function on_update() {
             populate_generic("s-loc", h, "unit " + data.pieces[marker].counter)
         }
     })
+    var supplied_hex = []
     for (var i = 1; i < data.pieces.length; ++i) {
         var loc = G.location[i]
         if (loc > 0) {
             place_unit(i, G.location[i])
+            if (!set_has(G.oos, i)) {
+                set_add(supplied_hex, G.location[i])
+            }
         }
     }
     if (G.actions && G.actions.unselect && !G.actions.unit) {
@@ -1079,7 +1083,7 @@ function on_update() {
     var oos_hex_set = []
     for (i = 0; i < G.oos.length; i++) {
         let hex = G.location[G.oos[i]]
-        if (!set_has(oos_hex_set, hex) && hex <= LAST_BOARD_HEX) {
+        if (!set_has(oos_hex_set, hex) && hex <= LAST_BOARD_HEX && !set_has(supplied_hex, hex)) {
             populate_generic("s-loc", hex, data.counters.oos)
             set_add(oos_hex_set, hex)
         }

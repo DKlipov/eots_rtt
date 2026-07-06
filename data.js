@@ -2950,7 +2950,7 @@ data.pieces = [
     {
         id: "army_ap_3_nz",
         "faction": AP,
-        "name": "3rd New Zeeland Division",
+        "name": "3rd New Zealand Division",
         "counter": "small_units_beige unit_ix_12",
         "class": "ground",
         "service": "br",

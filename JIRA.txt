@@ -2,7 +2,9 @@ Todo list:
 
 * aa ground count as naval units
 * log aa failed without fight
-* 6.21 rule check
+* Returned HQ less restricked
+* check india surrender sequence
+* overstaking warning for offensive and reaction
 * Confirm reaction (-offensive-)
 * less annoying piece tooltip
 * big refactoring
@@ -12,6 +14,7 @@ Todo list:
 * avoid accidentially skip reation
 * log units in battle
 * log unit movement type
+* zoom not works
 
 Bugs
 
