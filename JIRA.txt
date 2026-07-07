@@ -1,7 +1,5 @@
 Todo list:
 
-* aa ground count as naval units
-* log aa failed without fight
 * Returned HQ less restricked
 * check india surrender sequence
 * overstaking warning for offensive and reaction

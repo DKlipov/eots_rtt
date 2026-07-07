@@ -3282,10 +3282,11 @@ function mark_unit(i, piece) {
         G.supply_cache[location] = G.supply_cache[location] | (JP_AIR_UNITS << piece.faction)
     } else if (piece.class === "hq") {
         G.supply_cache[location] = G.supply_cache[location] | (JP_HQ_UNITS << piece.faction)
+    } else if (piece.class === "naval" ||
+        piece.class === "ground" && (map_get(G.offensive.paths, i, [0])[0] & AMPH_MOVE)) {
+        G.supply_cache[location] = G.supply_cache[location] | (JP_NAVAL_UNITS << piece.faction)
     } else if (piece.class === "ground") {
         G.supply_cache[location] = G.supply_cache[location] | (JP_GROUND_UNITS << piece.faction)
-    } else if (piece.class === "naval") {
-        G.supply_cache[location] = G.supply_cache[location] | (JP_NAVAL_UNITS << piece.faction)
     }
 }
 
@@ -6149,6 +6150,7 @@ function get_hits_count(d) {
 
 P.apply_ground_winner = function () {
     var battle = G.offensive.battle
+    battle.amph_ground.forEach(u => map_get(G.offensive.paths, u, [0])[0] -= AMPH_MOVE)
     if (battle.ground[G.offensive.attacker].length === 0) {
         end()
         return
