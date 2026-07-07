@@ -4952,7 +4952,7 @@ data.map = [
     {id: 2012, name: "Singora", region: "Malaya", city: CITY, airfield: true, terrain: OPEN, edges: [5, 1, 5, 2, 4, 2]},
     {
         id: 2112,
-        name: "Kota Bhary",
+        name: "Kota Bharu",
         region: "Malaya",
         city: CITY,
         airfield: true,

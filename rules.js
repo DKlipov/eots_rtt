@@ -4809,7 +4809,7 @@ function ground_move_denied(hex) {
     if (region === "IChina") {
         return G.active_stack.filter(u => pieces[u].service !== "ch").length
     }
-    if (G.active === JP && region === "India") {
+    if (pieces[G.active_stack[0]].faction === JP && region === "India") {
         return G.active_stack.filter(u => pieces[u].class === "ground").length
     }
     if (G.active_stack.filter(u => pieces[u].service === "ch").length) {
@@ -8260,7 +8260,7 @@ cards[find_card(JP, 25)].before_battle_roll = function (faction) {
     }
     var modifier = 0
     G.offensive.battle.air_naval[AP].filter(u => unit_on_board(u)).map(u => pieces[u]).forEach(piece => {
-        if (piece.type === "cv") {
+        if (piece.type === "cv" && is_us_unit(piece)) {
             G.offensive.battle.strength[faction] -= 2
             modifier -= 2
         }
