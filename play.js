@@ -2004,14 +2004,16 @@ function escaped_list(match, p1) {
 function sub_hex(match, p1) {
     const hex_id = p1 | 0
     const name = get_hex_name(hex_id)
-    return `<span class="hex-tip" onclick="on_focus_hex_tip(${hex_id})" onmouseenter="on_focus_hex_tip(${hex_id})" onmouseleave="on_blur_hex_tip(${hex_id})">${name}</span>`
+    return `<span class="hex-tip" onclick="on_click_hex_tip(${hex_id})" onmouseenter="on_focus_hex_tip(${hex_id})" onmouseleave="on_blur_hex_tip(${hex_id})">${name}</span>`
 }
 
 
 function on_focus_hex_tip(z) {
-    var el = get_hex_elem(z).element
-    scroll_into_view(el)
     lookup_thing("action_hex", z).element.classList.toggle("tip", true)
+}
+
+function on_click_hex_tip(z) {
+    scroll_into_view(get_hex_elem(z).element)
 }
 
 function on_blur_hex_tip(z) {
