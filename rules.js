@@ -4098,8 +4098,10 @@ function get_move_data() {
     result.naval_move_distance = G.offensive.naval_move_distance
     result.air_move_legs = cards[G.offensive.active_cards[0]].ops
     if (L.move_type & STRAT_MOVE) {
-        result.naval_move_distance = G.offensive.naval_move_distance * 2
         result.air_move_legs = cards[G.offensive.active_cards[0]].ops * 2
+    }
+    if (L.move_type & STRAT_MOVE && get_map_data(result.location).port) {
+        result.naval_move_distance = G.offensive.naval_move_distance * 2
     }
     result.ground_move_distance = G.offensive.ground_move_distance
     if (result.extended_battle_range < result.battle_range) {
