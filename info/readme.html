@@ -11,15 +11,12 @@ h1{text-align:center}body{max-width:50rem;margin:0 auto;}
 
 <hr>
 
-<p>This read me will discuss details of how the RTT module works from a UI perspective and how it implements certain features to play a game of Empire of the Sun.</p>
-
-<hr>
-
 <p><b>Offensive Unit Activation & Movement</b></p>
 
-<p>After playing a card for Ops or a Military card for Event, the module prompts to activate an HQ (highlighting which ones are available). Hover over an HQ to show its range and click on the tooltip in the upper right to remove the grid.</p>
-<p>Once selected, all units eligible to be activated from that HQ will be highlighted. Select units up to the maximum allowed for the card played. Once all are selected click Done and then you will be able to move them.</p>
-<p>With unit movement, it is not required to count hexes or legs (in the case of air units) to move a unit on the board. The module will highlight all the eligble destinations available for the unit selected to move to. All that is required is to choose a destination and the unit will move there. For more advanced movement capability, click the Advanced Move button to open up options for avoiding ZOI or strategic movement.</p>
+<p>Select a highlighted card and choose a play option button in the upper right taskbar. To start building an Offensive, choose an HQ and activate & move units from there.</p>
+<p>When activating units, you click to add them or click them again to remove them. Clicking the undo button will step you back to the Choose HQ step.<p/>
+<p>With unit movement, it is not required to count hexes or legs (in the case of air units) to move a unit on the board. The module will highlight all the eligible destinations available for the unit selected to move to. All that is required is to choose a destination and the unit will move there. For more advanced movement capability, click the Advanced Move button to open up options for avoiding ZOI or strategic movement.</p>
+<p>To move a stack of the same type of unit, simply click on multiple units in the hex before choosing a destination hex. </p>
 <p><i>Important note:</i> By default, the module assumes that the unit will use the regular movement type that allows for battle. For ground units that move by Amphibious Assault, it will automatically increase the Amphib Shipping Used marker when clicking on an overseas destination that isn't a friendly port. For air units with parenthetical ranges, it will not move by extended range unless Extended is clicked in the Advanced Move sub-menu to open up those destinations to be selected.</p>
 <p><i>Undo.</i> At any time during Offensive planning, every step can be Undo-ed all the way back to the card play itself until the Next button is clicked when "Confirm offensive" is in the taskbar. When that happens, everything is committed and play is passed to the Reaction player. Undo even works with reaction disengagement (more on that below).</p>
 <p><i>Offensive Sequence.</i> All the steps of the offensive sequence in 7.2 are strictly followed by the module, but the module will declare/assign battle hexes as units are being moved as an aid to planning. Just understand that battle hexes are not technically declared until after all units have completed moving and this is important for the disengagement rules (more on that below)</p>
@@ -33,18 +30,34 @@ h1{text-align:center}body{max-width:50rem;margin:0 auto;}
 
 <p><b>Reaction Disengagement</b></p>
 
-<p>The ground disengagement rules in 8.43 can be triggered during an offensive ground unit of a lower CF value that ground moves into an enemy unit with a higher CF value. This can also happen if two or more ground units are moving as a stack. When this happens, the module will show "Reaction player could use disengagement ability after this move." in the taskbar and two buttons: Prompt and Continue.</p>
+<p>The ground disengagement rules in 8.43 can be triggered during an offensive if a ground unit of a lower CF value that ground moves into an enemy unit with a higher CF value. This can also happen if two or more ground units are moving as a stack. When this happens, the module will show "Reaction player could use disengagement ability after this move." in the taskbar and two buttons: Prompt and Continue.</p>
 <p><i>Prompt:</i> When clicked, this will immediately switch control to the Reaction player where they can choose to either disengage or remain in the hex.</p>
-<p><i>Continue:</i> When clicked, this will not switch control to the Reaction player and allow the Offensive player to continue moving units. At the end of all movement the module will switch control to the Reaction player to decide whether to disengage or not. The module will remember the original order the ground units moved into which hexes to preserve the choice for the reaction player.</p>
+<p><i>Continue:</i> When clicked, this will not switch control to the Reaction player and allow the Offensive player to continue moving units. At the end of all movement the module will switch control to the Reaction player to decide whether to disengage or not at that original point. The module will remember in which order the ground units moved into which hexes to preserve the disengagement choice for the reaction player.</p>
 <p>In either case, the module will revert back to the Offensive player to continue moving or to commit the offensive. </p>
 <p><i>Important note:</i> This whole sequence can be fully undo-ed at any time by the Offensive player, including re-prompting the Reaction player to disengage if the ground unit move is re-done. Undo functionality is preserved until the offensive is committed.</p>
+
+<hr>
+
+<p><b>Tips & Tricks</b></p>
+
+<p>- Clicking on a Battle Hex marker will bring up the Battle Info dialog. This will show all the CF values and modifiers of the attacker and defender for that battle.</p>
+<p>- Hovering over an HQ will display a highlighted hex grid of that HQ's range. To remove it, click the large HQ icon in the upper right. </p>
+<p>- Returnable eliminated units can be found in the lower left of the map under the Turn track. They will become selectable during the Replacements phase. </p>
+<p>- <i>Supply Checker</i>: Click the gas can icon on the taskbar and then click on a unit to display its supply path or how it is blocked. </p>
+
+<hr>
+
+<p><b>Card Notes</b></p>
+
+<p><i>Tokyo Express:</i> Any JP controlled hex can include unnamed empty hexes with this card. The module will show which hexes are allowed for the Tokyo Express marker placement.</p>
+<p><i>Orde Wingate:</i> Cancelling the activation of a single unit can be a tricky business depending on the how the unit moved. Every effort was spent to make this interaction bug free. However, if you find an unusual situation that the module doesn't handle correctly, we want to know about it! Please post to the Discord channel, with the Game Number, so we can fix it. </p>
 
 <hr>
 
 <p><b>Other notes</b></p>
 
 <p>- Supply: Unit supply is checked continuously throughout the offensive sequence and especially during unit movement. If unexpected supply changes happen during movement, be sure to Undo back to adjust the move.</p>
-<p>- The hexside between 2216 and 2217 in Western Borneo is land only. We received an older map graphic from GMT and haven't yet got the latest one.</p>
+<p>- The hexside between 2216 and 2217 in Western Borneo is land only. We received an older map graphic from GMT and haven't yet gotten an updated one.</p>
 
 <hr>
 <p style="text-align:center">
