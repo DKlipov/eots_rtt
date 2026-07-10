@@ -1054,10 +1054,14 @@ function on_update() {
             populate_generic("s-loc", h, "unit " + data.pieces[marker].counter)
         }
     })
+    var supplied_hex = []
     for (var i = 1; i < data.pieces.length; ++i) {
         var loc = G.location[i]
         if (loc > 0) {
             place_unit(i, G.location[i])
+            if (!set_has(G.oos, i)) {
+                set_add(supplied_hex, G.location[i])
+            }
         }
     }
     if (G.actions && G.actions.unselect && !G.actions.unit) {
@@ -1079,7 +1083,7 @@ function on_update() {
     var oos_hex_set = []
     for (i = 0; i < G.oos.length; i++) {
         let hex = G.location[G.oos[i]]
-        if (!set_has(oos_hex_set, hex) && hex <= LAST_BOARD_HEX) {
+        if (!set_has(oos_hex_set, hex) && hex <= LAST_BOARD_HEX && !set_has(supplied_hex, hex)) {
             populate_generic("s-loc", hex, data.counters.oos)
             set_add(oos_hex_set, hex)
         }
@@ -1185,7 +1189,7 @@ function on_update() {
 
     action_button("roll", "Roll")
 
-    action_button("awaiting", "Await")
+    action_button("awaiting", "Prompt")
     action_button("continue", "Continue")
     action_button("bonus", "Use Bonus")
     action_button("event", "Play Event")
@@ -2000,14 +2004,16 @@ function escaped_list(match, p1) {
 function sub_hex(match, p1) {
     const hex_id = p1 | 0
     const name = get_hex_name(hex_id)
-    return `<span class="hex-tip" onclick="on_focus_hex_tip(${hex_id})" onmouseenter="on_focus_hex_tip(${hex_id})" onmouseleave="on_blur_hex_tip(${hex_id})">${name}</span>`
+    return `<span class="hex-tip" onclick="on_click_hex_tip(${hex_id})" onmouseenter="on_focus_hex_tip(${hex_id})" onmouseleave="on_blur_hex_tip(${hex_id})">${name}</span>`
 }
 
 
 function on_focus_hex_tip(z) {
-    var el = get_hex_elem(z).element
-    scroll_into_view(el)
     lookup_thing("action_hex", z).element.classList.toggle("tip", true)
+}
+
+function on_click_hex_tip(z) {
+    scroll_into_view(get_hex_elem(z).element)
 }
 
 function on_blur_hex_tip(z) {

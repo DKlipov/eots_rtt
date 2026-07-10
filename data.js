@@ -2950,7 +2950,7 @@ data.pieces = [
     {
         id: "army_ap_3_nz",
         "faction": AP,
-        "name": "3rd New Zeeland Division",
+        "name": "3rd New Zealand Division",
         "counter": "small_units_beige unit_ix_12",
         "class": "ground",
         "service": "br",
@@ -4283,7 +4283,7 @@ data.cards = [
         "oc": 5,
         "remove": true,
         "china": 1,
-        "name": "Patric Hurley",
+        "name": "Patrick Hurley",
     },
     {
         "num": 42,
@@ -4952,7 +4952,7 @@ data.map = [
     {id: 2012, name: "Singora", region: "Malaya", city: CITY, airfield: true, terrain: OPEN, edges: [5, 1, 5, 2, 4, 2]},
     {
         id: 2112,
-        name: "Kota Bhary",
+        name: "Kota Bharu",
         region: "Malaya",
         city: CITY,
         airfield: true,
