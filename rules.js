@@ -5965,7 +5965,7 @@ P.ground_bombardment = {
             set_delete(L.allowed_units, unit)
             L.garrison_present = L.allowed_units.filter(u => pieces[u].garrison).length
         }
-        if (L.allowed_units.length === 1 && set_has(G.reduced, pieces[L.allowed_units[0]])) {
+        if (L.allowed_units.length === 1 && set_has(G.reduced, L.allowed_units[0])) {
             L.allowed_units = []
         }
     },
@@ -11411,7 +11411,7 @@ function get_garrison_count() {
 }
 
 function on_view() {
-    if (L.P && P[L.P].on_view) {
+    if (L.P && P[L.P] && P[L.P].on_view) {
         return P[L.P].on_view()
     }
     return create_view()
