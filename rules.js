@@ -2966,6 +2966,9 @@ P.ground_move = {
         L.move_data = get_move_data()
         check_supply()
         compute_ground_move_hexes()
+        if (map_get(G.offensive.paths, G.active_stack[0])[1] > 0) {
+            L.moved = 1
+        }
     },
     inactive: "move units",
     prompt() {
@@ -2978,6 +2981,10 @@ P.ground_move = {
         }
     },
     action_hex(hex) {
+        if (L.moved || should_ground_move_stop(hex, R)) {
+            push_undo()
+            L.moved = 0
+        }
         var curr_path = map_get(L.allowed_hexes, hex)
         move_units(G.active_stack, curr_path)
         check_supply()
@@ -2986,16 +2993,19 @@ P.ground_move = {
         if (!should_ground_move_stop(hex, R)) {
             compute_ground_move_hexes()
         } else {
-            this.done()
+            this.complete()
         }
     },
-    done() {
-        push_undo()
+    complete() {
         if (is_faction_units(G.location[G.active_stack[0]], 1 - G.active)) {
             create_battle_hex(G.location[G.active_stack[0]])
         }
         var hex = G.location[G.active_stack[0]]
         goto("move_to", {hex})
+    },
+    done() {
+        push_undo()
+        this.complete()
     }
 }
 
@@ -4733,6 +4743,9 @@ P.retro_disengagement = {
             }
         })
         remove_battle_hex_without_def(G.location[L.allowed_units[0]])
+        if (!set_has(G.offensive.battle_hexes, G.location[L.allowed_units[0]])) {
+            capture_hex(G.location[L.allowed_units[0]], G.offensive.attacker)
+        }
         L.move_log.push(L.allowed_units, path)
         move_units(L.allowed_units, path)
         if (!L.conflicted) {
@@ -4785,7 +4798,7 @@ function compute_ground_disengagement(unit) {
     let location = G.location[unit]
     var allowed_hexes = []
     var just_entered = get_just_entered()
-    let nh_list = get_near_hexes(location)
+    let nh_list = get_disengagement_hexes(location, just_entered)
     for (let j = 0; j < nh_list.length; j++) {
         let nh = nh_list[j]
         if (nh <= 0) {
@@ -6518,7 +6531,7 @@ function capture_landing_hexes() {
     G.offensive.active_units[G.offensive.attacker].forEach(u => {
         var piece = pieces[u]
         var location = G.location[u]
-        if (piece.class === "ground" && !set_has(G.offensive.all_bh,location)) {
+        if (piece.class === "ground" && !set_has(G.offensive.all_bh, location)) {
             capture_hex(location, G.offensive.attacker)
         }
     })
