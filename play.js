@@ -1996,9 +1996,21 @@ function escaped_list(match, p1) {
     if (array <= 3) {
         return `<span>${text}</span>`
     } else {
-        return `<span id="${id}"><span class="list-tip" onclick="expand_list(${id})" >${header}</span><span hidden>${text}</span></span>`
+        return `<span id="${id}"><span class="list-tip" onclick="expand_list(${id})" onmouseenter="on_focus_list(${id})" onmouseleave="on_blur_list(${id})">\<${header}\></span><span hidden>${text}</span></span>`
     }
 
+}
+
+function on_focus_list(parent){
+    for (let el of parent.children[1].children){
+        el.onmouseenter();
+    } 
+    on_blur_tip() //prevent unit tooltip from showing
+}
+function on_blur_list(parent){
+    for (let el of parent.children[1].children){
+        el.onmouseleave();
+    } 
 }
 
 function sub_hex(match, p1) {
