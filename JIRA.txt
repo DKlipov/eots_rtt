@@ -1,6 +1,5 @@
 Todo list:
-
-* Returned HQ less restricked
+sextant buggy
 * check india surrender sequence
 * overstaking warning for offensive and reaction
 * Confirm reaction (-offensive-)
@@ -13,6 +12,7 @@ Todo list:
 * log units in battle
 * log unit movement type
 * zoom not works
+* log battle participation
 
 Bugs
 

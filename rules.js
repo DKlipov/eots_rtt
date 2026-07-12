@@ -2923,7 +2923,7 @@ P.move_offensive_units = {
         }
         if (is_faction_units(hex, 1 - R) && G.active === G.offensive.attacker && G.offensive.stage === ATTACK_STAGE) {
             create_battle_hex(hex)
-        } else if (is_space_controlled(hex, 1 - R) && curr_path[0] & AMPH_MOVE) {
+        } else if (!is_space_controlled(hex, R) && curr_path[0] & AMPH_MOVE) {
             create_landing_hex(hex)
         }
         if (curr_path[0] & AMPH_MOVE && G.offensive.stage === REACTION_STAGE) {
@@ -5208,7 +5208,7 @@ P.special_reaction = {
             }
         })
         L.possible_hexes = G.offensive.landing_hexes.filter(h => {
-            if (!get_map_data(h).named || !has_zoi(h, G.active)) {
+            if (!get_map_data(h).named || !has_zoi(h, G.active || !is_space_controlled(h, G.active))) {
                 return false
             }
             for (var i = 1; i < hq_list.length; i += 2) {
@@ -6515,8 +6515,13 @@ P.emergency_move = {
 }
 
 function capture_landing_hexes() {
-    G.offensive.landing_hexes.forEach(h => capture_hex(h, G.offensive.attacker))
-    G.offensive.landing_hexes = []
+    G.offensive.active_units[G.offensive.attacker].forEach(u => {
+        var piece = pieces[u]
+        var location = G.location[u]
+        if (piece.class === "ground" && !set_has(G.offensive.all_bh,location)) {
+            capture_hex(location, G.offensive.attacker)
+        }
+    })
 }
 
 P.offensive_sequence = script(`
@@ -6908,7 +6913,7 @@ P.india_surrender = {
     inactive: "execute India surrender sequence",
     prompt() {
         if (G.active_stack.length) {
-            prompt(`Choose space to move.`)
+            prompt(`India surrenders. Choose space to move.`)
             L.hex_to_retreat.forEach(u => action_hex(u))
 
             var piece = pieces[G.active_stack[0]]
@@ -6918,12 +6923,12 @@ P.india_surrender = {
                 button("eliminate")
             }
         } else if (L.unit_to_retreat.length) {
-            prompt(`Choose unit to emergency move.`)
+            prompt(`India surrenders. Choose unit to emergency move.`)
             L.unit_to_retreat.forEach(u => action_unit(u))
         }
         if (!G.active_stack.length && (!L.unit_to_retreat.length || L.unit_to_retreat.map(u => pieces[u])
             .filter(piece => piece.service === "army" || piece.service === "navy" || piece.service === "us").length === L.unit_to_retreat.length)) {
-            prompt(`Confirm emergency move.`)
+            prompt(`India surrenders. Confirm emergency move.`)
             button("done")
         }
     },
@@ -6957,9 +6962,11 @@ P.india_surrender = {
         G.non_control = []
         if (!is_faction_units(MADRAS, AP)) {
             set_add(G.non_control, MADRAS)
+            log(`${hex_get_log_str(MADRAS)} uncontrolled.`)
         }
         if (!is_faction_units(hex_to_int(1805), AP)) {
             set_add(G.non_control, hex_to_int(1805))
+            log(`${hex_get_log_str(hex_to_int(1805))} uncontrolled.`)
         }
     },
     done() {
@@ -7317,8 +7324,8 @@ function victory_1942() {
     }
     adjust_vp(result, G.surrender[nations.CHINA.id], "China government status")
     if (G.surrender[nations.CHINA.id] > 5) {
-        result.vp += 3
-        result.text.push(`+3 VP - China surrender`)
+        result.vp += 5
+        result.text.push(`+5 VP - China surrender`)
     }
     binary_vp(result, G.burma_road >= 1, 1, "Burma road closed", `Burma road open`)
     binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
@@ -11445,6 +11452,9 @@ function create_view() {
         } else {
             control[hex] = AP
         }
+    }
+    if (G.non_control) {
+        G.non_control.forEach(h => control[h] = undefined)
     }
     V.control = control
     V.capture = G.capture
