@@ -2539,7 +2539,7 @@ function capture_hex(hex, side = G.active) {
         log(`Tokyo express marker removed.`)
         G.events[events.TOKYO_EXPRESS.id] = 0
     }
-    if (!is_controllable_hex(hex)) {
+    if (hex > LAST_BOARD_HEX || !is_controllable_hex(hex)) {
         return
     }
     if (G.non_control) {
