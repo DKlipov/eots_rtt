@@ -609,7 +609,7 @@ div[data-tooltip]:after {
 
 .list-tip { /* for text in log and dialogs */
     cursor: pointer;
-    font-style: italic
+    font-weight: bolder;
 }
 
 .list-tip > * {
