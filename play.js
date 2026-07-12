@@ -2005,6 +2005,7 @@ function on_focus_list(parent){
     for (let el of parent.children[1].children){
         el.onmouseenter();
     } 
+    on_blur_tip() //prevent unit tooltip from showing
 }
 function on_blur_list(parent){
     for (let el of parent.children[1].children){
