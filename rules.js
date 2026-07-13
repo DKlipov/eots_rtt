@@ -7329,9 +7329,12 @@ function victory_check() {
         finish("Japan", "Japanese Victory by Treaty Negotiations")
     }
     var vp = get_victory()
-    if (scenario_data().last_turn <= G.turn) {
+    if (scenario_data().last_turn <= G.turn && G.turn < 12) {
+        log("#GVP Scoring.")
         vp.text.forEach(t => log(t))
-        log(`Total VP: ${vp.vp}.`)
+        log(`#GTotal VP: ${vp.vp}.`)
+    }
+    if (scenario_data().last_turn <= G.turn) {
         finish(vp.won_side, vp.won_text)
     }
 }
@@ -10417,6 +10420,7 @@ P.scenario_1941 = script(`
     set G.active AP
     call conquest_of_se_asia_reaction
     set G.offensive.stage BATTLE_STAGE
+    set G.offensive.all_bh G.offensive.battle_hexes.slice()
     log ("#GResolve battles")
     log ("#IIntelligence condition: "+get_named_intelligence(G.offensive.intelligence))
     set G.active G.offensive.attacker
