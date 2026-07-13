@@ -1,6 +1,6 @@
 Todo list:
 sextant buggy
-* check india surrender sequence
+* sandcrab no FO
 * overstaking warning for offensive and reaction
 * Confirm reaction (-offensive-)
 * less annoying piece tooltip

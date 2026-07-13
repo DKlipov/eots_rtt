@@ -183,16 +183,6 @@ const SCENARIO_DATA = [
         last_turn: 12
     },
     {
-        id: YEAR_1942_SCENARIO,
-        name: "1942",
-        setup: setup_scenario_1942,
-        victory: victory_1942,
-        one_year: true,
-        last_turn: 4
-    },
-    {id: YEAR_1942_1943_SCENARIO, name: "1942-1943", setup: setup_scenario_1942, victory: victory_1943, last_turn: 7},
-    {id: 4, name: "1942-1944", setup: setup_scenario_1942, victory: victory_1944, last_turn: 10},
-    {
         id: SHORT_CAMPAIGN_SCENARIO,
         name: "1942-1945 (The Shortened Campaign)",
         setup: setup_scenario_1942,
@@ -200,22 +190,45 @@ const SCENARIO_DATA = [
         last_turn: 12
     },
     {
-        id: YEAR_1943_SCENARIO,
-        name: "1943",
-        setup: setup_scenario_1943,
-        victory: victory_1943,
-        one_year: true,
-        last_turn: 7
-    },
-    {id: 7, name: "1943-1944", setup: setup_scenario_1943, victory: victory_1944, last_turn: 10},
-    {
         id: EVEN_SHORT_CAMPAIGN_SCENARIO,
         name: "1943-1945 (The Even Shorter Campaign)",
         setup: setup_scenario_1943,
         victory: victory_1945,
         last_turn: 12
     },
-    {id: 9, name: "1944", setup: setup_scenario_1944, victory: victory_1944, one_year: true, last_turn: 10},
+    {
+        id: YEAR_1942_SCENARIO,
+        name: "1942 One Year Scenario",
+        setup: setup_scenario_1942,
+        victory: victory_1942,
+        one_year: true,
+        last_turn: 4
+    },
+    {
+        id: YEAR_1943_SCENARIO,
+        name: "1943 One Year Scenario",
+        setup: setup_scenario_1943,
+        victory: victory_1943,
+        one_year: true,
+        last_turn: 7
+    },
+    {
+        id: 9,
+        name: "1944 One Year Scenario",
+        setup: setup_scenario_1944,
+        victory: victory_1944,
+        one_year: true,
+        last_turn: 10
+    },
+    {
+        id: YEAR_1942_1943_SCENARIO,
+        name: "1942-1943 Two Year Scenario",
+        setup: setup_scenario_1942,
+        victory: victory_1943,
+        last_turn: 7
+    },
+    {id: 7, name: "1943-1944 Two Year Scenario", setup: setup_scenario_1943, victory: victory_1944, last_turn: 10},
+    {id: 4, name: "1942-1944 Three Year Scenario", setup: setup_scenario_1942, victory: victory_1944, last_turn: 10},
 ]
 
 SCENARIO_DATA.forEach(s => {
@@ -6531,10 +6544,11 @@ function capture_landing_hexes() {
     G.offensive.active_units[G.offensive.attacker].forEach(u => {
         var piece = pieces[u]
         var location = G.location[u]
-        if (piece.class === "ground" && !set_has(G.offensive.all_bh, location)) {
+        if (piece.class === "ground" && (!G.offensive.all_bh || !set_has(G.offensive.all_bh, location))) {
             capture_hex(location, G.offensive.attacker)
         }
     })
+    G.offensive.landing_hexes = []
 }
 
 P.offensive_sequence = script(`
@@ -7335,14 +7349,14 @@ function victory_1942() {
         won_side: "",
         won_text: "",
     }
-    adjust_vp(result, G.surrender[nations.CHINA.id], "China government status")
+    adjust_vp(result, G.surrender[nations.CHINA.id], "China Government Front Status")
     if (G.surrender[nations.CHINA.id] > 5) {
         result.vp += 5
         result.text.push(`+5 VP - China surrender`)
     }
-    binary_vp(result, G.burma_road >= 1, 1, "Burma road closed", `Burma road open`)
+    binary_vp(result, G.burma_road >= 1, 1, "The Burma Road is closed", `The Burma Road is open`)
     binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
-        "Townsville did not isolated", [hex_to_int(3727), OAHU])
+        "Townsville was not isolated", [hex_to_int(3727), OAHU])
 
     var india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
     adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
@@ -7377,24 +7391,24 @@ function victory_1942() {
         "Oahu was not captured")
     binary_vp(result, set_has(G.captured_once, hex_to_int(5708)) || set_has(G.captured_once, hex_to_int(5908)), 1,
         `Kauai or Hawaii was captured`,
-        "Kauai or Hawaii was not captured")
+        "Neither Kauai nor Hawaii were captured")
 
     binary_vp(result, is_space_controlled(hex_to_int(5108), JP) && is_faction_units(hex_to_int(5108), JP), 1,
-        `Midway captured`,
-        "Midway not captured", [hex_to_int(5108)])
+        `Midway was captured`,
+        "Midway was not captured", [hex_to_int(5108)])
     binary_vp(result, is_space_controlled(hex_to_int(4612), JP) && is_faction_units(hex_to_int(4612), JP), 1,
-        `Wake island captured`,
-        "Wake island not captured", [hex_to_int(4612)])
+        `Wake island was captured`,
+        "Wake island was not captured", [hex_to_int(4612)])
     binary_vp(result, is_space_controlled(ATTU, JP), 1,
-        `Attu/Kiska captured`,
-        "Attu/Kiska not captured", [ATTU])
+        `Attu/Kiska was captured`,
+        "Attu/Kiska was not captured", [ATTU])
     binary_vp(result, is_space_controlled(hex_to_int(5100), JP), 1,
-        `Dutch Harbor captured`,
-        "Dutch Harbor not captured", [hex_to_int(5100)])
+        `Dutch Harbor was captured`,
+        "Dutch Harbor was not captured", [hex_to_int(5100)])
 
     binary_vp(result, get_jp_resources() <= 12, -3,
         `Japan control 12 resource hexes or less`,
-        "Japan control more 12 resource hexes", RESOURCE_HEX)
+        "Japan control more than 12 resource hexes", RESOURCE_HEX)
     if (get_jp_resources() < 12) {
         result.won_side = "Allies"
         result.won_text = "Japan captured less than 12 resource hexes"
@@ -7468,9 +7482,9 @@ function victory_1943() {
         won_text: "",
     }
     binary_vp(result, G.surrender[nations.CHINA.id] >= 5, 5, "China surrender", `China not surrender`)
-    binary_vp(result, G.burma_road >= 1, 1, "Burma road closed", `Burma road open`)
+    binary_vp(result, G.burma_road >= 1, 1, "The Burma Road is closed", `The Burma Road is open`)
     binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
-        "Townsville did not isolated", [hex_to_int(3727), OAHU])
+        "Townsville was not isolated", [hex_to_int(3727), OAHU])
 
     var india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
     adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
@@ -7518,7 +7532,7 @@ function victory_1943() {
         "Oahu was not captured")
     binary_vp(result, set_has(G.captured_once, hex_to_int(5708)) || set_has(G.captured_once, hex_to_int(5908)), 1,
         `Kauai or Hawaii was captured`,
-        "Kauai or Hawaii was not captured")
+        "Neither Kauai nor Hawaii were captured")
     binary_vp(result, check_nation_controlled(nations.MARSHALL, AP),
         -3, "AP control Marshall Islands", `AP do not control Marshall Islands`,
         nations.MARSHALL.keys.map(h => hex_to_int(h))
@@ -7569,9 +7583,9 @@ function victory_1944() {
         won_text: "",
     }
     binary_vp(result, G.surrender[nations.CHINA.id] >= 5, 5, "China surrender", `China not surrender`)
-    binary_vp(result, G.burma_road >= 1, 1, "Burma road closed", `Burma road open`)
+    binary_vp(result, G.burma_road >= 1, 1, "The Burma Road is closed", `The Burma Road is open`)
     binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
-        "Townsville did not isolated", [hex_to_int(3727), OAHU])
+        "Townsville was not isolated", [hex_to_int(3727), OAHU])
 
     var india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
     adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
@@ -7658,7 +7672,7 @@ function victory_1945() {
         finish("Allies", "Japan surrenders by strategic bombing campaign")
     } else {
         result.won_side = "Japan"
-        result.won_text = `Japan not surrounded.`
+        result.won_text = `Japan did not surrender.`
     }
     return result
 }
@@ -7684,7 +7698,7 @@ function get_hex_control_log(hex_control) {
         }
 
     })
-    var hex_log = " (Not supplied hexes counts as "
+    var hex_log = " (Unsupplied hexes count as "
     if (ap.length > 0) {
         hex_log += "AP control: " + ap.map(h => hex_get_log_str(h)).join(",")
         if (jp.length > 0) {
@@ -7719,13 +7733,13 @@ function victory_south_pacific() {
         won_text: "",
     }
 
-    adjust_vp(result, G.surrender[nations.CHINA.id] - 2, "China government status")
+    adjust_vp(result, G.surrender[nations.CHINA.id] - 2, "China Government Front Status")
     if (G.surrender[nations.CHINA.id] > 5) {
         result.vp += 3
         result.text.push(`+3 VP - China surrender.`)
     }
     binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
-        "Townsville did not isolated", [hex_to_int(3727), OAHU])
+        "Townsville was not isolated", [hex_to_int(3727), OAHU])
 
     if (G.political_will < 4) {
         result.vp += 4 - G.political_will
@@ -7740,15 +7754,15 @@ function victory_south_pacific() {
             amh++
         }
     })
-    adjust_vp(result, amh, "JP control of Mandates ports", nations.AUSTRALIAN_MANDATES.ports.map(h => hex_to_int(h)))
+    adjust_vp(result, amh, "JP control of Australian Mandates ports", nations.AUSTRALIAN_MANDATES.ports.map(h => hex_to_int(h)))
     if (nations.AUSTRALIAN_MANDATES.ports.filter(h => !is_space_controlled(hex_to_int(h), JP)).length === 0) {
         result.vp += 3
-        result.text.push(`+3 VP - JP control of Mandates.`)
+        result.text.push(`+3 VP - JP control of Australian Mandates.`)
     } else if (nations.AUSTRALIAN_MANDATES.ports.filter(h => !is_space_controlled(hex_to_int(h), AP)).length === 0) {
         result.vp -= 3
-        result.text.push(`-3 VP - AP control of Mandates.`)
+        result.text.push(`-3 VP - AP control of Australian Mandates.`)
     } else {
-        result.text.push(`0 VP - None control of Mandates.`)
+        result.text.push(`0 VP -  No one controls the Australian Mandates.`)
     }
     var new_guinea = 0
     nations.NEW_GUINEA.keys.forEach(hex => {
@@ -7767,15 +7781,15 @@ function victory_south_pacific() {
         result.vp -= 3
         result.text.push(`-3 VP - AP control of New Guinea.`)
     } else {
-        result.text.push(`0 VP - None control of New Guinea.`)
+        result.text.push(`0 VP - No one controls New Guinea.`)
     }
 
     var heb = G.control.map(h => get_map_data(h)).filter(md => md.region === "Hebrides" && md.port).length
     binary_vp(result, heb, 1, "JP control of New Hebrides port",
-        "Non JP control of any New Hebrides port", G.original_control.filter(h => get_map_data(h).region === "Hebrides" && get_map_data(h).port))
+        "No JP control of any New Hebrides port", G.original_control.filter(h => get_map_data(h).region === "Hebrides" && get_map_data(h).port))
     var aus = G.control.map(h => get_map_data(h)).filter(md => md.region === "Australia" && md.port).length
     binary_vp(result, aus, 1, "JP control of Australia mainland port",
-        "Non JP control of any Australia mainland port", G.original_control.filter(h => get_map_data(h).region === "Australia" && get_map_data(h).port))
+        "No JP control of any Australia mainland port", G.original_control.filter(h => get_map_data(h).region === "Australia" && get_map_data(h).port))
     return result
 }
 
@@ -10409,6 +10423,7 @@ P.scenario_1941 = script(`
         capture_landing_hexes()
     }
     set G.offensive.stage POST_BATTLE_STAGE
+    log ("#GPost battle movement")
     set G.active G.offensive.attacker
     call move_offensive_units
     set G.offensive.active_units[G.offensive.attacker] []
@@ -11690,8 +11705,8 @@ function get_china_info() {
     if (!surrender) {
         info.push(`Offensive ${(G.turn - offensive > 1) ? "" : "not "}possible${offensive > 0 ? ". Last launched turn " + offensive : ""}.`)
         mods.log.forEach(l => info.push(l))
-        info.push(`Not played JP cards to China government status: ${count[JP]}.`)
-        info.push(`Not played AP cards to China government status: ${count[AP]}.`)
+        info.push(`Not played JP cards to China Government Front Status: ${count[JP]}.`)
+        info.push(`Not played AP cards to China Government Front Status: ${count[AP]}.`)
     }
     return {
         id, control: surrender ? JP : AP, info,
