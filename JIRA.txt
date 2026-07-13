@@ -1,6 +1,5 @@
 Todo list:
 
-scenarion end marker
 * sandcrab no FO
 * overstaking warning for offensive and reaction
 * Confirm reaction (-offensive-)

@@ -5644,11 +5644,11 @@ function get_ground_roll_modifiers(faction) {
         })
         if (air[faction] && !air[1 - faction]) {
             result += 2
-            log(`+2 Attacker air support.`)
+            log(`+2 Attacker Air support.`)
         }
         if (naval[faction] && !naval[1 - faction]) {
             result += 2
-            log(`+2 Attacker naval support.`)
+            log(`+2 Attacker Naval support.`)
         }
     }
     if (faction === G.offensive.attacker) {
@@ -5795,7 +5795,7 @@ P.assign_hits = script(`
       `)
 
 function battle_header() {
-    return `${G.offensive.battle.ground_stage ? "Ground" : "Naval"} combat ${hex_get_log_str(G.offensive.battle.battle_hex)}.`
+    return `${G.offensive.battle.ground_stage ? "Ground" : "Air Naval"} combat ${hex_get_log_str(G.offensive.battle.battle_hex)}.`
 }
 
 P.apply_hits = {
@@ -6263,7 +6263,7 @@ function prepare_battle() {
     })
     if (battle.air_naval[JP].length && (battle.air_naval[AP].length || battle.ground[AP].length)
         || battle.air_naval[AP].length && (battle.air_naval[JP].length || battle.ground[JP].length)) {
-        log(`Air/naval combat:`)
+        log(`Air Naval combat:`)
     }
 }
 

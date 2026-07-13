@@ -6045,6 +6045,8 @@ data.counters = {
     dei_surrender: "big_markers_white big unit_ix_9",
     malaya_surrender: "big_markers_white big unit_ix_8",
     phillipines_surrender: "big_markers_white big unit_ix_7",
+    scenario_start: "scenario_start",
+    scenario_end: "scenario_end",
 }
 
 data.nations = {
