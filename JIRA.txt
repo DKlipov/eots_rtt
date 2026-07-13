@@ -1,5 +1,6 @@
 Todo list:
-sextant buggy
+
+scenarion end marker
 * sandcrab no FO
 * overstaking warning for offensive and reaction
 * Confirm reaction (-offensive-)
@@ -13,6 +14,7 @@ sextant buggy
 * log unit movement type
 * zoom not works
 * log battle participation
+* overstacking check after each move
 
 Bugs
 

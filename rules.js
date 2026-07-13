@@ -1555,7 +1555,7 @@ function is_imphal_build_enabled() {
 }
 
 function get_infrastructure_actions() {
-    if (R === AP && check_nation_controlled(nations.INDIA, AP) && is_space_controlled(AKYAB, AP)) {
+    if (G.active === AP && check_nation_controlled(nations.INDIA, AP) && is_space_controlled(AKYAB, AP)) {
         if (!is_event_active(events.JARHAT_ROAD)) {
             return ["jarhat"]
         }
@@ -1568,14 +1568,14 @@ function get_infrastructure_actions() {
         }
         return result
     }
-    if (R === JP && !is_event_active(events.IMPHAL_ROAD) && is_imphal_build_enabled()) {
+    if (G.active === JP && !is_event_active(events.IMPHAL_ROAD) && is_imphal_build_enabled()) {
         return ["imphal"]
     }
     return []
 }
 
 function get_event_infrastructure_actions() {
-    if (!is_event_active(events.JARHAT_ROAD) && !is_faction_units(JARHAT, JP)) {
+    if (!is_event_active(events.JARHAT_ROAD) && is_space_controlled(JARHAT,) && !is_faction_units(JARHAT, JP)) {
         return ["jarhat"]
     } else if (is_faction_units(JARHAT, JP)) {
         return []
@@ -5072,7 +5072,7 @@ function check_amph_mod() {
 
 P.declare_battle_hexes = {
     _begin() {
-        if (G.offensive.stage === POST_BATTLE_STAGE) {
+        if (G.offensive.stage !== ATTACK_STAGE) {
             end()
             return
         }
@@ -5665,7 +5665,8 @@ function get_ground_roll_modifiers(faction) {
             log(`-3 Mountains.`)
         }
     }
-    if (faction !== G.offensive.attacker && battle.amph_ground.filter(u => unit_on_board(u)).length && set_has(G.offensive.amp_mod, battle.battle_hex)) {
+    if (faction !== G.offensive.attacker && set_has(G.offensive.amp_mod, battle.battle_hex) && battle.amph_ground.filter(u => unit_on_board(u) && set_has(battle.ground[G.offensive.attacker], u)).length) {
+        console.log(battle.amph_ground)
         result += 3
         log(`+3 Amphibious assault.`)
     }
@@ -6612,7 +6613,7 @@ P.offensive_sequence = script(`
     set G.active G.offensive.attacker
     call move_offensive_units
     set G.offensive.active_units[G.offensive.attacker] []
-    set G.todo 1
+    call check_overstacking
     call commit_offensive
     set G.active 1-G.offensive.attacker
     call emergency_move
@@ -7243,6 +7244,8 @@ P.attrition_phase = script(`
     call attrition
     eval {
         check_supply()
+        check_occupation(events.HAWAII_OCCUPATION, true)
+        check_occupation(events.ALASKA_OCCUPATION, true)
     }
     goto end_of_turn_phase
 `)
@@ -9717,13 +9720,13 @@ cards[find_card(AP, 33)].before_activation = function () {
 P.build_road = {
     inactive: "choose hex to build CBI",
     prompt() {
-        if (!get_event_infrastructure_actions().length) {
+        if (!get_infrastructure_actions().length) {
             prompt("CBI could not be built.")
             button("skip")
             return
         }
         prompt(`Choose hex to build CBI.`)
-        get_event_infrastructure_actions().map(h => {
+        get_infrastructure_actions().map(h => {
             if (h === "jarhat") {
                 return JARHAT
             } else if (h === "imphal") {
@@ -10432,6 +10435,7 @@ P.scenario_1941 = script(`
     log ("#GPost battle movement")
     set G.active G.offensive.attacker
     call move_offensive_units
+    call check_overstacking
     set G.offensive.active_units[G.offensive.attacker] []
     set G.todo 1
     call commit_offensive
