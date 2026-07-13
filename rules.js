@@ -5702,7 +5702,6 @@ function get_ground_roll_modifiers(faction) {
         }
     }
     if (faction !== G.offensive.attacker && set_has(G.offensive.amp_mod, battle.battle_hex) && battle.amph_ground.filter(u => unit_on_board(u) && set_has(battle.ground[G.offensive.attacker], u)).length) {
-        console.log(battle.amph_ground)
         result += 3
         log(`+3 Amphibious assault.`)
     }
@@ -6593,11 +6592,17 @@ function capture_landing_hexes() {
     G.offensive.active_units[G.offensive.attacker].forEach(u => {
         var piece = pieces[u]
         var location = G.location[u]
-        if (piece.class === "ground" && (!G.offensive.all_bh || !set_has(G.offensive.all_bh, location))) {
+        if (piece.class === "ground" && !set_has(G.offensive.all_bh, location)) {
             capture_hex(location, G.offensive.attacker)
         }
     })
+    map_for_each(G.offensive.paths, (u, path) => {
+        if (!set_has(G.offensive.all_bh, G.location[u]) && path[0] & AMPH_MOVE) {
+            path[0] -= AMPH_MOVE
+        }
+    })
     G.offensive.landing_hexes = []
+    check_supply()
 }
 
 P.offensive_sequence = script(`
