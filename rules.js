@@ -1597,25 +1597,27 @@ function get_allowed_actions(num) {
     if (num === TOJO_RESIGNS && G.turn >= 8 || num === SOVIET_INVADE && card.can_play()) {
         return ["event"]
     }
+
     if (!(card.pw && scenario_data().one_year)
         && (card.type === MILITARY || card.type === POLITICAL || card.type === RESOURCE) && card.can_play()) {
         result.push("event")
     }
-    if (num !== SANDCRAB || !result.includes("event")) {
-        result.push("ops")
-        result.push("displace_hq")
-        if (HQ_LIST.filter(u => G.location[u] > TURN_BOX && pieces[u].faction === R).length
-            && (R !== JP || G.sid !== SOUTH_PACIFIC_SCENARIO)) {
-            result.push("return_hq")
+    if (num === SANDCRAB && result.includes("event")) {
+        return result
+    }
+    result.push("ops")
+    result.push("displace_hq")
+    if (HQ_LIST.filter(u => G.location[u] > TURN_BOX && pieces[u].faction === R).length
+        && (R !== JP || G.sid !== SOUTH_PACIFIC_SCENARIO)) {
+        result.push("return_hq")
+    }
+    if (card.ops >= 3) {
+        if (G.inter_service[card.faction] && scenario_data().one_year) {
+            result.push("inter_service")
         }
-        if (card.ops >= 3) {
-            if (G.inter_service[card.faction] && scenario_data().one_year) {
-                result.push("inter_service")
-            }
-            get_infrastructure_actions().forEach(a => result.push(a))
-            if (R === JP && G.turn - G.events[events.CHINA_OFFENSIVE.id] > 1 && G.surrender[nations.CHINA.id] < 5) {
-                result.push("china_offensive")
-            }
+        get_infrastructure_actions().forEach(a => result.push(a))
+        if (R === JP && G.turn - G.events[events.CHINA_OFFENSIVE.id] > 1 && G.surrender[nations.CHINA.id] < 5) {
+            result.push("china_offensive")
         }
     }
 
@@ -3113,7 +3115,6 @@ P.choose_attack_hex = {
         end()
     },
     action_hex(hex) {
-        log(`Units ${G.active_stack.map(u => piece_get_log_str(u)).join(", ")} assigned to attack to ${hex_get_log_str(hex)}.`)
         this.attack_hex(hex)
     },
 }
@@ -3131,10 +3132,17 @@ function attack_hex(hex) {
             set_add(non_cv, u)
         }
     })
+    var distant = G.active_stack.slice()
     if (non_cv.length && path_to_bh && non_cv.length < G.active_stack.length) {
         move_units(non_cv, path_to_bh)
         check_supply()
+        non_cv.forEach(u => set_delete(distant, u))
     }
+    log(`${units_str(distant)} assigned to attack to ${hex_get_log_str(hex)}.`)
+}
+
+function units_str(units) {
+    return list_get_log_str(`${piece_get_log_str(units[0])} with ${units.length - 1} units`, units.map(u => piece_get_log_str(u)))
 }
 
 function move_units(units, path) {
@@ -3149,7 +3157,7 @@ function move_units(units, path) {
     units.forEach(u => {
         map_set(G.offensive.paths, u, full_path.slice())
     })
-    var units_list = list_get_log_str(`${piece_get_log_str(units[0])} with ${units.length - 1} units`, units.map(u => piece_get_log_str(u)))
+    var units_list = units_str(units)
     if (path.length === 3) {
         log(`${units_list} skipped move.`)
         return
@@ -3184,7 +3192,25 @@ function move_units(units, path) {
     }
     var destination = path[path.length - 1]
     units.forEach(u => set_location(u, destination, true))
-    log(`${units_list} moved to ${list_get_log_str(hex_get_log_str(destination), point_to_point)}`)
+    log(`${units_list} moved to ${list_get_log_str(hex_get_log_str(destination), point_to_point)}${get_move_type(path[0])}.`)
+}
+
+function get_move_type(type) {
+    if (G.offensive.stage !== ATTACK_STAGE) {
+        return ""
+    }
+    if (type & STRAT_MOVE) {
+        return " (Strategic move)"
+    } else if (type & AIR_EXTENDED_MOVE) {
+        return " (Extended range)"
+    } else if (type & GROUND_DISENGAGEMENT) {
+        return " (Disengagement)"
+    } else if (type & BARGES_MOVE) {
+        return " (Barges)"
+    } else if (type & GROUND_MOVE) {
+        return " (Ground move)"
+    }
+    return ""
 }
 
 function for_each_hex_in_range(hex, range, lambda) {
@@ -5163,7 +5189,17 @@ P.disengagement_confirm = {
 }
 
 P.commit_offensive_confirm = {
-    inactive: "confirm offensive",
+    inactive() {
+        if (G.offensive.stage === ATTACK_STAGE) {
+            return "confirm offensive"
+        } else if (G.offensive.stage === REACTION_STAGE) {
+            return "confirm reaction"
+        } else if (G.offensive.stage === POST_BATTLE_MOVE) {
+            return "confirm post battle move"
+        } else {
+            return "confirm action"
+        }
+    },
     prompt() {
         var action = "offensive"
         if (G.offensive.stage === REACTION_STAGE) {
@@ -6086,6 +6122,9 @@ P.apply_naval_winner = function () {
     }
     if (!attacker_win) {
         battle.amph_ground.forEach(u => set_delete(battle.ground[G.offensive.attacker], u))
+        if (battle.ground[G.offensive.attacker].length) {
+            log(`${list_get_log_str(battle.amph_ground.length + " units", battle.amph_ground.map(u => piece_get_log_str(u)))} could not participate ground combat.`)
+        }
     }
     end()
 }
@@ -6261,10 +6300,17 @@ function prepare_battle() {
         set_add(G.reduced, u)
         set_add(battle.ground[JP], u)
     })
+    log(`Attacker: ${log_in_battle_units(attacker)}.`)
+    log(`Defender: ${log_in_battle_units(1 - attacker)}.`)
     if (battle.air_naval[JP].length && (battle.air_naval[AP].length || battle.ground[AP].length)
         || battle.air_naval[AP].length && (battle.air_naval[JP].length || battle.ground[JP].length)) {
         log(`Air Naval combat:`)
     }
+}
+
+function log_in_battle_units(faction) {
+    var att = [...G.offensive.battle.air_naval[faction], ...G.offensive.battle.ground[faction]]
+    return list_get_log_str(att.length + " units", att.map(u => set_has(G.reduced, u) ? `(${piece_get_log_str(u)})` : piece_get_log_str(u)))
 }
 
 function get_garrison(hex) {
@@ -12064,6 +12110,9 @@ exports.view = function (state, role) {
             V.prompt = L.message
         } else {
             var inactive = P[L.P]?.inactive
+            if (typeof inactive === 'function') {
+                inactive = inactive()
+            }
             if (inactive) {
                 if (Array.isArray(G.active))
                     V.prompt = `Waiting for ${G.active.join(" and ")} to ${inactive}.`
