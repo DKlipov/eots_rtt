@@ -246,6 +246,8 @@ SCENARIO_DATA.forEach(s => {
 
 const SCENARIOS = SCENARIO_DATA.map(s => s.name)
 
+SCENARIO_DATA.sort((a, b) => a.id - b.id)
+
 function S_P_deck() {
     var ap_draw = [8, 13, 20, 21, 23, 24, 25, 27, 28, 29, 31, 32, 36, 40, 43, 44, 46, 50, 52, 56, 64, 66, 81, 82]
     var jp_draw = [9, 13, 16, 17, 20, 23, 25, 27, 28, 29, 32, 33, 34, 35, 42, 44, 48, 49, 51, 52, 73, 75, 84, 85]
@@ -7481,7 +7483,7 @@ function victory_1943() {
         won_side: "",
         won_text: "",
     }
-    binary_vp(result, G.surrender[nations.CHINA.id] >= 5, 5, "China surrender", `China not surrender`)
+    binary_vp(result, G.surrender[nations.CHINA.id] >= 5, 5, "China surrender", `China did not surrender`)
     binary_vp(result, G.burma_road >= 1, 1, "The Burma Road is closed", `The Burma Road is open`)
     binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
         "Townsville was not isolated", [hex_to_int(3727), OAHU])
@@ -7582,7 +7584,7 @@ function victory_1944() {
         won_side: "",
         won_text: "",
     }
-    binary_vp(result, G.surrender[nations.CHINA.id] >= 5, 5, "China surrender", `China not surrender`)
+    binary_vp(result, G.surrender[nations.CHINA.id] >= 5, 5, "China surrender", `China did not surrender`)
     binary_vp(result, G.burma_road >= 1, 1, "The Burma Road is closed", `The Burma Road is open`)
     binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
         "Townsville was not isolated", [hex_to_int(3727), OAHU])
