@@ -162,9 +162,27 @@ const GROUND_DISENGAGEMENT = 1 << 13
 
 const SOUTH_PACIFIC_SCENARIO = 0
 const FULL_CAMPAIGN_SCENARIO = 1
+const YEAR_1942_SCENARIO = 2
+const YEAR_1942_1943_SCENARIO = 3
+const YEAR_1942_1944 = 4
 const SHORT_CAMPAIGN_SCENARIO = 5
+const YEAR_1943_SCENARIO = 6
 const EVEN_SHORT_CAMPAIGN_SCENARIO = 8
 const BURMA_SCENARIO = 10
+
+const SCENARIO_LENGTH = [
+    [0, 0],
+    [0, 0],
+    [2, 4],
+    [2, 7],
+    [2, 10],
+    [2, 0],
+    [5, 7],
+    [5, 10],
+    [5, 0],
+    [8, 10],
+
+]
 
 const CAMPAIGN_SCENARIOS = [FULL_CAMPAIGN_SCENARIO, SHORT_CAMPAIGN_SCENARIO, EVEN_SHORT_CAMPAIGN_SCENARIO]
 
@@ -271,6 +289,14 @@ const TRACK_MARKERS = [
 ]
 
 const TURN_MARKERS = [
+    {
+        counter: data.counters.scenario_start,
+        value: G => SCENARIO_LENGTH[G.sid][0]
+    },
+    {
+        counter: data.counters.scenario_end,
+        value: G => SCENARIO_LENGTH[G.sid][1]
+    },
     {
         counter: data.counters.future_offensive_jp,
         value: G => G.events[data.events.FUTURE_OFFENSIVE_JP.id]
@@ -2001,16 +2027,17 @@ function escaped_list(match, p1) {
 
 }
 
-function on_focus_list(parent){
-    for (let el of parent.children[1].children){
+function on_focus_list(parent) {
+    for (let el of parent.children[1].children) {
         el.onmouseenter();
-    } 
+    }
     on_blur_tip() //prevent unit tooltip from showing
 }
-function on_blur_list(parent){
-    for (let el of parent.children[1].children){
+
+function on_blur_list(parent) {
+    for (let el of parent.children[1].children) {
         el.onmouseleave();
-    } 
+    }
 }
 
 function sub_hex(match, p1) {
