@@ -3333,10 +3333,9 @@ function mark_unit(i, piece) {
         G.supply_cache[location] = G.supply_cache[location] | (JP_AIR_UNITS << piece.faction)
     } else if (piece.class === "hq") {
         G.supply_cache[location] = G.supply_cache[location] | (JP_HQ_UNITS << piece.faction)
-    } else if (piece.class === "naval" ||
-        piece.class === "ground" && (map_get(G.offensive.paths, i, [0])[0] & AMPH_MOVE)) {
+    } else if (piece.class === "naval") {
         G.supply_cache[location] = G.supply_cache[location] | (JP_NAVAL_UNITS << piece.faction)
-    } else if (piece.class === "ground") {
+    } else if (piece.class === "ground" && !(map_get(G.offensive.paths, i, [0])[0] & AMPH_MOVE)) {
         G.supply_cache[location] = G.supply_cache[location] | (JP_GROUND_UNITS << piece.faction)
     }
 }
@@ -4430,7 +4429,7 @@ function compute_air_move_hexes() {
             map_set(distance_map, nh, path_array)
             if (get_map_data(nh).airfield && is_space_controlled(nh, G.active) && (nh !== AIR_FERRY || !is_faction_units(AIR_FERRY, JP))) {
                 fields_queue.push(nh)
-                if (nh !== AIR_FERRY && (!is_faction_ground_units(nh, 1 - R) && !set_has(G.offensive.battle_hexes, nh) || G.offensive.stage === POST_BATTLE_STAGE)
+                if (nh !== AIR_FERRY && (!set_has(G.offensive.landing_hexes, nh) && !set_has(G.offensive.battle_hexes, nh) || G.offensive.stage === POST_BATTLE_STAGE)
                     && (target_in_battle_range(move_data.extended_battle_range, nh, bh) || G.offensive.stage !== REACTION_STAGE)) {
                     path_array = path_array.slice()
                     path_array[0] = move_type
@@ -9721,6 +9720,7 @@ cards[find_card(AP, 26)].before_battle_roll = function (faction) {
 cards[find_card(AP, 27)].event = function () {
     set_location(HQ_OZAWA, G.location[HQ_YAMAMOTO])
     eliminate_permanently(HQ_YAMAMOTO)
+    check_supply()
 }
 
 cards[find_card(AP, 28)].before_commit_offensive = function () {
