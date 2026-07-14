@@ -99,7 +99,7 @@ const CANVAS = document.getElementById("canvas")
 const CANVAS_CTX = document.getElementById("canvas").getContext("2d")
 const RESOURCE_HEX = [...Array(data.map.length).keys()].filter(h => data.map[h].resource).map(h => hex_to_int(data.map[h].id))
 
-const BR_REGIONS = ["India", "Ceylon", "NIndia", "Burma", "Siam", "Malaya", "Sumatra", "Indochina"]
+const BR_REGIONS = ["India", "Ceylon", "NIndia", "Burma", "Siam", "Malaya", "Sumatra", "Indochina", "IChina"]
 const JP_REGIONS = ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Siam", "Caroline", "Japan", "Marshall"]
 const JP_BOUNDARY_HEX = []
 
@@ -107,6 +107,7 @@ const ROAD_EVENTS = Object.keys(data.events).filter(k => data.events[k].road).ma
 
 const REGIONS_BY_NATION = {}
 const HEX_BY_NATION = []
+const BR_NATIONS = [-3, data.nations.AUSTRALIA.id, data.nations.BURMA.id, data.nations.MALAYA.id]
 
 
 for (var key of Object.keys(data.counters)) {
@@ -138,6 +139,8 @@ for (var i = 0; i < data.map.length; i++) {
         HEX_BY_NATION[hex] = nation.id
     } else if (JP_REGIONS.includes(region)) {
         HEX_BY_NATION[hex] = -1
+    } else if (BR_REGIONS.includes(region)) {
+        HEX_BY_NATION[hex] = -3
     } else {
         HEX_BY_NATION[hex] = -2
     }
@@ -185,7 +188,7 @@ const SCENARIO_LENGTH = [
     [5, 10],
     [5, 0],
     [8, 10],
-
+    [0, 0],
 ]
 
 const CAMPAIGN_SCENARIOS = [FULL_CAMPAIGN_SCENARIO, SHORT_CAMPAIGN_SCENARIO, EVEN_SHORT_CAMPAIGN_SCENARIO]
@@ -474,8 +477,8 @@ const MAIN_BOARD_INFO = {
     "TURN_STACK_PARAMS": TURN_STACK_PARAMS,
     "TRACK_STACK_PARAMS": TRACK_STACK_PARAMS,
     "hex_check": (i) => {
-        return i!=472 && //Remove the hex exclusive to the burma scenario    
-               i!=92 // Remove unplayable hex in india not catched by the standard data check (1305)
+        return i != 472 && //Remove the hex exclusive to the burma scenario
+            i != 92 // Remove unplayable hex in india not catched by the standard data check (1305)
     }
 }
 const BURMA_BOARD_INFO = {
@@ -506,8 +509,8 @@ const BURMA_BOARD_INFO = {
         } else if (x == 16 && y > 9) {
             return false;
         }
-        return hex_in_map(x, y) && 
-                i != 92 // Remove unplayable hex in india not catched by the standard data check (1305)
+        return hex_in_map(x, y) &&
+            i != 92 // Remove unplayable hex in india not catched by the standard data check (1305)
     }
 }
 
@@ -663,7 +666,7 @@ function on_init(scenario, game_options, static_view) {
     define_s_loc(ELIMINATED_BOX, map_layout.box_eliminated)
     define_s_loc(AP_REINF, map_layout.box_ap_reinf)
     define_s_loc(JP_REINF, map_layout.box_jp_reinf)
-    if(SID!=BURMA_SCENARIO){
+    if (SID != BURMA_SCENARIO) {
         define_s_loc(DELAYED_BOX, map_layout.box_delayed_reinf)
     }
     define_s_loc(CHINA_BOX, map_layout.box_air_unit_in_china)
@@ -693,7 +696,7 @@ function on_init(scenario, game_options, static_view) {
     define_layout_track_h("china", 5, 0, map_layout.track_chinese_government, 0)
 
     if (map_layout.track_japanese_divisions_available_china !== undefined) {
-        define_layout_track_h("divisions", 1, (SID == BURMA_SCENARIO ? 9 :13), map_layout.track_japanese_divisions_available_china, 0)
+        define_layout_track_h("divisions", 1, (SID == BURMA_SCENARIO ? 9 : 13), map_layout.track_japanese_divisions_available_china, 0)
     }
     for (i = 0; i < 35; i++) {
         var battle = define_marker("battle", i, "conflict battle unit_status")
@@ -803,16 +806,16 @@ function hex_center(i) {
     }
     let row = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
     let column = (Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB))
-    if(SID == BURMA_SCENARIO){
-        if(i == SINGAPORE ){
+    if (SID == BURMA_SCENARIO) {
+        if (i == SINGAPORE) {
             const box = map_layout.label_singapore
             return center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
         }
-        if(i > TUNNEL_BOX){
+        if (i > TUNNEL_BOX) {
             // display TUNNEL_BOX directly to the left of the blue singapore label
             const box = map_layout.label_singapore
             let sing_left_coord = center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
-            sing_left_coord[0]-=47;
+            sing_left_coord[0] -= 47;
             return sing_left_coord;
         }
     }
@@ -959,6 +962,8 @@ function get_control_marker(h) {
         return data.counters.control_jp
     } else if (h === MANCHURIA_1 || h === MANCHURIA_2) {
         return data.counters.control_sov
+    } else if (G.sid === BURMA_SCENARIO || BR_NATIONS.includes(HEX_BY_NATION[h])) {
+        return data.counters.control_br
     } else {
         return data.counters.control_us
     }
@@ -1103,7 +1108,7 @@ function on_update() {
         }
         var default_condition = (hn >= 0 && (G.surrender[HEX_BY_NATION[i]] > 0) == cont
             || hn === -1 && cont === AP
-            || hn === -2 && cont === JP)
+            || hn < -1 && cont === JP)
         var vassal_condition = (set_has(JP_BOUNDARY_HEX, i) + 0) === cont
         if (map_info.hex_check(i) && cont !== null && (all_control || !is_faction_units(i, AP) && !is_faction_units(i, JP))
             && (all_control || !vassal_control && default_condition || vassal_control && vassal_condition)
@@ -1915,12 +1920,12 @@ function vp_dialog(id, response) {
         })
         append_header("", dl, "br")
         append_header("Summary:", dl)
-        if(SID == BURMA_SCENARIO){
+        if (SID == BURMA_SCENARIO) {
             append_header("2 VP or less - Allied Decisive Victory.", dl)
             append_header("3-4 VP Allied Tactical Victory.", dl)
             append_header("5-8 VP Japanese Tactical Victory.", dl)
             append_header("9 VP Japanese Decisive Victory.", dl)
-        }else{
+        } else {
             append_header("2 VP or less - Allied Decisive Victory.", dl)
             append_header("3-5 VP Allied Tactical Victory.", dl)
             append_header("6-9 VP Japanese Tactical Victory.", dl)

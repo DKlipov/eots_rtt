@@ -1,5 +1,5 @@
 Todo list:
-
+return ground aa existance
 * overstaking warning for offensive and reaction
 * less annoying piece tooltip
 * big refactoring

@@ -5979,6 +5979,7 @@ data.counters = {
     control_jp: "small_markers_white unit_ix_2",
     capture_jp: "small_markers_white unit_ix_2 gray",
     control_us: "small_markers_white unit_ix_2 reduced",
+    control_br: "small_markers_white unit_ix_1",
     capture_us: "small_markers_white unit_ix_2 reduced gray",
     control_sov: "small_markers_white unit_ix_1 reduced",
     capture_sov: "small_markers_white unit_ix_1 reduced gray",
