@@ -3496,7 +3496,7 @@ function mark_unit(i, piece) {
         G.supply_cache[location] = G.supply_cache[location] | (JP_HQ_UNITS << piece.faction)
     } else if (piece.class === "naval") {
         G.supply_cache[location] = G.supply_cache[location] | (JP_NAVAL_UNITS << piece.faction)
-    } else if (piece.class === "ground" && !(map_get(G.offensive.paths, i, [0])[0] & AMPH_MOVE)) {
+    } else if (piece.class === "ground") {
         G.supply_cache[location] = G.supply_cache[location] | (JP_GROUND_UNITS << piece.faction)
     }
 }
@@ -4886,7 +4886,7 @@ P.retro_disengagement = {
             var move_log = L.move_log
             this.reset_state()
             for (var i = 0; i < move_log.length - 1; i++) {
-                remove_battle_hex_without_def(G.location[move_log[0]])
+                remove_battle_hex_without_def(G.location[move_log[i][0]])
                 move_units(move_log[0], move_log[1])
             }
             log("Offensive interrupted due to disengagement.")

@@ -1,4 +1,5 @@
 Todo list:
+cv should not swith bh
 return ground aa existance
 * overstaking warning for offensive and reaction
 * less annoying piece tooltip
