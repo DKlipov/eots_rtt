@@ -5199,12 +5199,12 @@ function get_naval_move(zoi_mask) {
             && !pbm
         var no_enemy_units = !is_faction_units(nh, 1 - R)
         var landing = port_transport && (no_enemy_units || G.offensive.stage === POST_BATTLE_STAGE) || aa_landing && no_enemy_units
-        if ((naval_attack || landing && G.offensive.stage !== REACTION_STAGE) && (!L.move_data.is_ground_present || !ground_move_denied(nh)) && burma_pbm) {
+        if ((naval_attack || landing && G.offensive.stage !== REACTION_STAGE) && (!L.move_data.is_ground_present || !ground_move_denied(nh))) {
             map_set(result, nh, v)
         }
     })
-    var burma_pbm = G.sid === BURMA_SCENARIO ||
-        G.offensive.stage === POST_BATTLE_STAGE ||
+    var burma_pbm = G.sid === BURMA_SCENARIO &&
+        G.offensive.stage === POST_BATTLE_STAGE &&
         G.active === JP
     var kamikaze_only = burma_pbm && set_has(G.active_stack, KAMIKAZE) &&
         map_get(G.offensive.paths, KAMIKAZE, [0, 0, 0])[0] !== SINGAPORE
