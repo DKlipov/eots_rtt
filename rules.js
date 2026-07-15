@@ -4007,9 +4007,9 @@ function check_burma_road() {
 }
 
 function is_overstack(hex, unit, multip = 1) {
-    fill_overstack(G.active)
-    var overstack = L.overstack[hex]
     var piece = pieces[unit]
+    fill_overstack(piece.faction)
+    var overstack = L.overstack[hex]
     var multiplier = ((G.location[unit] === hex || G.location[piece.pair] === hex) ? 0 : 1) * multip
     if (hex === CHINA_BOX && piece.b29) {
         var count = 0

@@ -1,15 +1,11 @@
 Todo list:
-cv should not swith bh
-return ground aa existance
+* imporve repair of eliminated units
 * overstaking warning for offensive and reaction
+* overstacking check after each move
 * less annoying piece tooltip
-* big refactoring
 * stack refactoring
 * Mobile resizing lags & bugs
-* imporve repair of eliminated units
-* avoid accidentially skip reation
 * zoom not works
-* overstacking check after each move
 
 Bugs
 
