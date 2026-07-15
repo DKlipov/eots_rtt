@@ -938,9 +938,9 @@ function update_reinf_active() {
 P.reinforcement_segment = {
     _begin() {
         mark_supplied_hexes(G.active)
-        if (G.wie <= 7 && G.active === AP) {
+        if (G.wie <= 7 && G.active === AP && G.sid !== BURMA_SCENARIO) {
             change_asp(AP, 1)
-        } else if (G.active === AP) {
+        } else if (G.active === AP && G.wie >= 7) {
             log(`War in europe prevent from AP amphibious shipping reinforcement.`)
         }
         if (G.active === AP && (is_event_active(events.PANAMA_CANAL) === G.turn - 1) && G.wie < 3) {
@@ -6903,8 +6903,12 @@ P.political_phase = script(`
 `)
 
 P.national_status_segment = function () {
-    log(`@Turn ${G.turn}. National status segment.`)
     L.pw = G.political_will
+    if (scenario_data().id === BURMA_SCENARIO) {
+        check_nation_surrender(nations.BURMA)
+        end()
+        return;
+    }
     if (check_nation_surrender(nations.NEW_GUINEA)) {
         set_control_over_nation(nations.NEW_GUINEA, false)
     }
@@ -7293,6 +7297,10 @@ function reset_events() {
 
 
 P.political_will_segment = function () {
+    if (G.sid === BURMA_SCENARIO) {
+        end()
+        return
+    }
     if (!events.ALLIED_NATIONS_SURRENDERS.nations.filter(n => !G.surrender[n]).length &&
         G.surrender[nations.INDIA.id] >= 4 && G.surrender[nations.CHINA.id] >= 5) {
         check_event(events.ALLIED_NATIONS_SURRENDERS)
@@ -7301,10 +7309,7 @@ P.political_will_segment = function () {
     check_occupation(events.ALASKA_OCCUPATION, true)
     check_jp_resources_event()
     check_naval_situation()
-    // 17.11.23 do not check pow in the burma scenario
-    if (G.sid !== BURMA_SCENARIO) {
-        check_progress_of_war()
-    }
+    check_progress_of_war()
     end()
 }
 
@@ -7341,7 +7346,7 @@ function check_naval_situation() {
 }
 
 function check_jp_resources_event() {
-    if (get_jp_resources() <= 3 && G.turn >= 5 && scenario_data().id !== SOUTH_PACIFIC_SCENARIO) {
+    if (get_jp_resources() <= 3 && G.turn >= 5 && scenario_data().id !== SOUTH_PACIFIC_SCENARIO && scenario_data().id !== BURMA_SCENARIO) {
         check_event(events.JAPAN_LACK_OF_RESOURCES)
     }
 }
