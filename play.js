@@ -1075,6 +1075,10 @@ function on_update() {
         G.actions.proxy = 1
     }
 
+    if (G.actions && G.actions["card"]) {
+        G.actions["play_card"] = 1
+    }
+
     update_role_info()
     map_for_each(G.offensive.damaged, (u, s) => {
         if (s > 2) {
@@ -1276,6 +1280,7 @@ function on_update() {
         P[LOCAL_STATUS].on_update()
     }
 
+    action_button("play_card", "Play card")
     action_button("roll", "Roll")
 
     action_button("awaiting", "Prompt")
@@ -1337,6 +1342,10 @@ function on_update() {
 var original_send_action = send_action
 
 function proxy_send_action(a, b) {
+    if (a === "play_card") {
+        scroll_into_view(lookup_thing("card", G.actions.card[0]).element)
+        return
+    }
     if (LOCAL_STATUS && a === "done") {
         LOCAL_STATUS = null
         LOCAL_STATE = null
