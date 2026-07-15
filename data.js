@@ -3529,6 +3529,7 @@ data.cards = [
         "oc": 2,
         "ec": 4,
         "logistic": 4,
+        "remove": true,
         "name": "Chenault",
     },
     {

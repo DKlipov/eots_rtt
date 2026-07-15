@@ -2914,7 +2914,7 @@ P.move_offensive_units = {
             L.movable_units.forEach(u => action_unit(u))
         } else {
             var buttons = get_move_buttons()
-            if (buttons.length > 2 && !L.spec_move) {
+            if (buttons.length > 3 && !L.spec_move) {
                 button("move")
             } else if (buttons.length) {
                 buttons.forEach(b => button(b))
@@ -3206,19 +3206,19 @@ P.choose_attack_hex = {
             return G.location[u] === hex && piece.br && piece.class === "naval"
         }).length
         var battle_range = L.L.L.move_data.battle_range
+        var path = map_get(G.offensive.paths, G.active_stack[0], [0, 0, 0])
+        var moved_to_bh = set_has(G.offensive.battle_hexes, hex) && !set_has(G.offensive.battle_hexes, path[2])
         var distant_attack =
             (battle_range || escort)
             && G.active_stack.length >= 1
-            && !set_has(G.offensive.battle_hexes, hex)
             && G.offensive.stage !== POST_BATTLE_STAGE
             && (G.offensive.stage === REACTION_STAGE || !is_b29_bombed(pieces[G.active_stack[0]]))
-        if (!distant_attack) {
+        if (!distant_attack || moved_to_bh) {
             end()
             return
         }
 
         L.allowed_hexes = get_air_attack_hex()
-        var path = map_get(G.offensive.paths, G.active_stack[0])
         if (G.offensive.stage === REACTION_STAGE && set_has(G.offensive.battle_hexes, path[2])) {
             this.attack_hex(path[2])
         } else if (L.allowed_hexes.length <= 0 && G.offensive.stage !== REACTION_STAGE) {
@@ -5083,7 +5083,7 @@ function mark_attack_zone(location, battle_range) {
     G.supply_cache[location] = G.supply_cache[location] | HEX_TEMP_FLAG2 | HEX_TEMP_FLAG1
     if (!L.move_data.is_ground_present) {
         for_each_hex_in_range(location, battle_range, h => {
-            if (!is_faction_units(h, 1 - G.active)) {
+            if (G.offensive.stage === REACTION_STAGE || !is_faction_units(h, 1 - G.active)) {
                 G.supply_cache[h] = G.supply_cache[h] | HEX_TEMP_FLAG1
             }
         })
