@@ -1,5 +1,4 @@
 Todo list:
-* imporve repair of eliminated units
 * overstaking warning for offensive and reaction
 * overstacking check after each move
 * less annoying piece tooltip

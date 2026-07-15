@@ -1221,6 +1221,7 @@ P.replacement_segment = {
         L.divisions_used = 0
         L.replacable_units = []
         L.allowed_hexes = []
+        L.returned = []
         for_each_unit((u, piece, location) => {
             if (piece.faction === G.active
                 && !piece.notreplaceable
@@ -1236,20 +1237,29 @@ P.replacement_segment = {
     },
     inactive: "use replacements",
     prompt() {
+        var ru = L.replacable_units.filter(u => L.replacement_points[pieces[u].replacement] > 0)
         var not_used_unground = L.divisions_used <= 0 || L.replacement_points[GROUND_REP] <= 0
+        var first_replacable = ru.filter(u => G.location[u] === ELIMINATED_BOX)[0]
+        if (first_replacable) {
+            action("to_unit", first_replacable)
+        }
         if (G.active_stack.length > 0) {
             prompt(`Choose hex to place ${piece_get_log_str(G.active_stack[0])}${not_used_unground ? "" : "(Ground replacements should be spent)"}.`)
             L.allowed_hexes.forEach(h => action_hex(h))
+            ru.filter(u => G.location[u] === ELIMINATED_BOX).forEach(u => action_unit(u))
+            L.returned.filter(u => G.active_stack[0] !== u).forEach(u => action_unit(u))
             return
         }
-        if (not_used_unground) {
+        if (!ru.length) {
             button("done")
+        } else if (not_used_unground) {
+            button("skip")
         }
-        var ru = L.replacable_units.filter(u => L.replacement_points[pieces[u].replacement] > 0)
         if (L.divisions && L.replacable_units.filter(u => pieces[u].class === "ground").length) {
             action("divisions", 0)
             button("divisions_button")
         }
+
         prompt(`Choose unit to reinforce. ${ru.length || L.divisions ? print_reinforcements() : "(Done)."}`)
         ru.forEach(u => action_unit(u))
 
@@ -1272,9 +1282,26 @@ P.replacement_segment = {
     action_hex(hex) {
         push_undo()
         set_location(G.active_stack[0], hex)
+        set_delete(L.returned, G.active_stack[0])
         G.active_stack = []
+        if (L.returned.length) {
+            G.active_stack = [L.returned[0]]
+            L.allowed_hexes = get_unit_reinforcement_hexes(L.returned[0])
+            trigger_event("before_place_replacement")
+        }
     },
     unit(u) {
+        //todo remove
+        if (!L.returned) {
+            L.returned = []
+        }
+        if (G.location[u] === get_service_reinf_hex()) {
+            G.active_stack = [u]
+            L.allowed_hexes = get_unit_reinforcement_hexes(u)
+            trigger_event("before_place_replacement")
+            return
+        }
+
         push_undo()
         if (set_has(G.reduced, u)) {
             set_delete(G.reduced, u)
@@ -1283,10 +1310,12 @@ P.replacement_segment = {
         } else {
             set_add(G.reduced, u)
             G.active_stack = [u]
-            L.allowed_hexes = get_unit_reinforcement_hexes(u)
+            G.location[u] = get_service_reinf_hex()
+            set_add(L.returned, u)
             if (pieces[u].b29) {
                 G.b29u |= B29_REPLACED << pieces[u].b29
             }
+            L.allowed_hexes = get_unit_reinforcement_hexes(u)
             trigger_event("before_place_replacement")
         }
         L.replacement_points[pieces[u].replacement] -= 1
@@ -1294,11 +1323,18 @@ P.replacement_segment = {
             G.reinforcements[pieces[u].replacement] -= 1
         }
     },
+    skip() {
+        this.done()
+    },
     done() {
         push_undo()
         check_supply()
         end()
     }
+}
+
+function get_service_reinf_hex() {
+    return G.active === AP ? AP_REINF : JP_REINF
 }
 
 function change_asp(faction, count) {

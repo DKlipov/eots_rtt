@@ -1281,6 +1281,7 @@ function on_update() {
     }
 
     action_button("play_card", "Play card")
+    action_button("to_unit", "Rebuild unit")
     action_button("roll", "Roll")
 
     action_button("awaiting", "Prompt")
@@ -1344,6 +1345,11 @@ var original_send_action = send_action
 function proxy_send_action(a, b) {
     if (a === "play_card") {
         scroll_into_view(lookup_thing("card", G.actions.card[0]).element)
+        return
+    } else if (a === "to_unit") {
+        var el = lookup_thing("unit", G.actions.to_unit[0]).element
+        scroll_into_view(el)
+        _focus_stack(el.parentElement.thing)
         return
     }
     if (LOCAL_STATUS && a === "done") {
