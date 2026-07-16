@@ -77,6 +77,7 @@ const MANCHURIA_1 = hex_to_int(3302)
 const MANCHURIA_2 = hex_to_int(3303)
 
 const SINGAPORE = hex_to_int(2015)
+const OAHU = hex_to_int(5808)
 
 const TUNNEL_BOX = 1600
 
@@ -100,7 +101,7 @@ const CANVAS_CTX = document.getElementById("canvas").getContext("2d")
 const RESOURCE_HEX = [...Array(data.map.length).keys()].filter(h => data.map[h].resource).map(h => hex_to_int(data.map[h].id))
 
 const BR_REGIONS = ["India", "Ceylon", "NIndia", "Burma", "Siam", "Malaya", "Sumatra", "Indochina", "IChina"]
-const JP_REGIONS = ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Siam", "Caroline", "Japan", "Marshall"]
+const JP_REGIONS = ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Caroline", "Japan", "Marshall"]
 const JP_BOUNDARY_HEX = []
 
 const ROAD_EVENTS = Object.keys(data.events).filter(k => data.events[k].road).map(e => data.events[e])
@@ -380,7 +381,7 @@ function clear_paths() {
 
 function get_element_weight(e) {
     var marker = !e.thing || e.thing.my_action !== "unit"
-    if (marker && e.classList.contains("unit_status")) {
+    if (marker && e.classList.contains("top")) {
         return 64000;
     } else if (marker) {
         return 0;
@@ -427,7 +428,7 @@ function sort_unit_stack(a, focus) {
     var map = []
     var index = 0;
     for (var e of a) {
-        // if (e.classList.contains("unit_status") && (!e.thing || e.thing.my_action !== "unit") && !focus) {
+        // if (e.classList.contains("top") && (!e.thing || e.thing.my_action !== "unit") && !focus) {
         // continue
         // }
         map_set(map, get_element_weight(e) + index, e)
@@ -539,7 +540,9 @@ const SOUTH_PAC_BOARD_INFO = {
         if (SP_BORDER[x] && y < SP_BORDER[x]) {
             return false
         }
-        if (x == 24 && y == 16) {
+        if (i === 1188) {
+            return false
+        } else if (x == 24 && y == 16) {
             return true;
         } else if ((x % 2 == 0) && y == 16) {
             return false;
@@ -699,7 +702,7 @@ function on_init(scenario, game_options, static_view) {
         define_layout_track_h("divisions", 1, (SID == BURMA_SCENARIO ? 9 : 13), map_layout.track_japanese_divisions_available_china, 0)
     }
     for (i = 0; i < 35; i++) {
-        var battle = define_marker("battle", i, "conflict battle unit_status")
+        var battle = define_marker("battle", i, "conflict battle top")
         battle.element.innerText = String.fromCharCode(65 + i)
         battle.element.index = i
         battle.element.addEventListener("mousedown", evt => {
@@ -707,7 +710,7 @@ function on_init(scenario, game_options, static_view) {
                 send_query({name: "battle_info", index: evt.target.index})
             }
         })
-        define_marker("landing", i, "conflict landing unit_status")
+        define_marker("landing", i, "conflict landing top")
             .element.innerText = String.fromCharCode(65 + i)
     }
     define_marker("divisions", 0, data.counters.divisions_china)
@@ -768,26 +771,40 @@ function update_hand(side) {
     }
 }
 
-function get_near_hexes(hex) {
-    let x = Math.floor(hex / 29)
+function get_edge_hexes(hex) {
     let y = hex % 29
-    let y_diff = x % 2 ? 1 : -1
+    let x = (hex - y) / 29
+
+    let y_diff = 1 - (x % 2)
+    let y1_diff = 1 - y_diff
     let result = []
-    if (y > 0) {
-        result.push(hex - 1)
-    }
-    if (y < 28) {
-        result.push(hex + 1)
-    }
-    if (x > 0) {
-        result.push(hex - 29)
-        result.push(hex - 29 + y_diff)
-    }
-    if (x < 50) {
-        result.push(hex + 29)
-        result.push(hex + 29 + y_diff)
-    }
+    result.push((-y >> 31) * hex * -1 - 1)                                                                          //N or -1
+    result.push((-((x - 50 >> 31) & (-y1_diff | -hex % 29 >> 31)) - 1) * (hex + 30 - y_diff) + hex + 29 - y_diff)   //NE or -1
+    result.push((-((x - 50 >> 31) & ((-hex - 1) % 29 >> 31)) - 1) * (hex + 30 + y1_diff) + hex + 29 + y1_diff)      //SE or -1
+    result.push((-((-hex - 1 - y1_diff) % 29 >> 31) - 1) * (hex + 2) + hex + 1)                                     //S or -1
+    result.push((-((-x >> 31) & ((-hex - 1) % 29 >> 31)) - 1) * (hex - 28 + y1_diff) + hex - 29 + y1_diff)      //SW or -1
+    result.push((-((-x >> 31) & (-y1_diff | -hex % 29 >> 31)) - 1) * (hex - 28 - y_diff) + hex - 29 - y_diff)   //NW or -1
     return result
+}
+
+function get_distance(first_hex, second_hex) {
+    if (first_hex > LAST_BOARD_HEX || second_hex > LAST_BOARD_HEX) {
+        return 500
+    }
+    var yf = first_hex % 29
+    var ys = second_hex % 29
+    var xf = (first_hex - yf) / 29
+    var xs = (second_hex - ys) / 29
+    var rx = Math.abs(xs - xf)
+    var ry = ys - yf - (rx % 2) * (xf % 2)
+    if (ry <= (-rx >> 1)) {
+        ry = Math.abs(ry) - rx % 2
+    } else if (ry < rx >> 1) {
+        const c = (rx >> 1) - ry
+        ry = (rx >> 1) + ((c + (rx % 2)) >> 1)
+        rx -= c
+    }
+    return rx + ry - (rx >> 1)
 }
 
 function hex_to_int(i) {
@@ -818,6 +835,9 @@ function hex_center(i) {
             sing_left_coord[0] -= 47;
             return sing_left_coord;
         }
+    } else if (SID === SOUTH_PACIFIC_SCENARIO && i >= OAHU) {
+        const box = map_layout.h_5808
+        return center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
     }
     return [
         (map_info.display_x_offset) + (column - map_info.grid_x_offset) * HEX_X_SIZE,
@@ -1051,6 +1071,89 @@ P.check_unit_supply = {
     },
 }
 
+P.check_distance = {
+    _begin() {
+        LOCAL_STATE.points = []
+        LOCAL_STATE.range = 0
+    },
+    prompt() {
+        document.body.classList.add("hex-clickable")
+        LOCAL_STATE.actions = {
+            "done": 1,
+            "range": LOCAL_STATE.points.length > 1,
+            "undo": LOCAL_STATE.points.length ? 1 : 0,
+        }
+        LOCAL_STATE.prompt = "Click hex to check distance."
+    },
+    undo() {
+        LOCAL_STATE.points = []
+        this.redraw()
+    },
+    unit(u) {
+        this.action_hex(G.location[u])
+    },
+    range() {
+        LOCAL_STATE.range = !LOCAL_STATE.range
+        this.redraw()
+    },
+    action_hex(h) {
+        if (SID === SOUTH_PACIFIC_SCENARIO && h === OAHU || SID === BURMA_SCENARIO && h === SINGAPORE || h > LAST_BOARD_HEX) {
+            return;
+        }
+        while (LOCAL_STATE.points.includes(h)) {
+            if (LOCAL_STATE.points.pop() === h) {
+                this.redraw()
+                return
+            }
+        }
+        if (LOCAL_STATE.points.length) {
+            get_hex_path(LOCAL_STATE.points[LOCAL_STATE.points.length - 1], h).forEach(hex =>
+                LOCAL_STATE.points.push(hex))
+        } else {
+            LOCAL_STATE.points.push(h)
+        }
+        this.redraw()
+    },
+    redraw() {
+        if (LOCAL_STATE.range && LOCAL_STATE.points.length > 1) {
+            world.range = [LOCAL_STATE.points[0], LOCAL_STATE.points.length - 1]
+        } else {
+            world.range = [0, 0]
+        }
+        on_update()
+    },
+    on_update() {
+        if (!LOCAL_STATE.points.length) {
+            return
+        }
+        LOCAL_STATE.points.forEach((hex, index) => {
+            var marker = populate_generic("s-loc", hex, "marker top distance")
+            marker.thing.element.textContent = `${index} ${int_to_hex(hex)}`
+        })
+    },
+}
+
+function get_hex_path(from, to) {
+    var result = []
+    var current = from
+    while (current !== to) {
+        var nh = get_edge_hexes(current)
+        var d = 500
+        var r = -1
+        for (var i = 0; i < nh.length; i++) {
+            var dist = get_distance(nh[i], to)
+            if (dist < d) {
+                r = nh[i]
+                d = dist
+            }
+        }
+        result.push(r)
+        current = r
+    }
+    return result
+
+}
+
 function check_unit_supply() {
     LOCAL_STATUS = "check_unit_supply"
     LOCAL_STATE = {}
@@ -1059,8 +1162,17 @@ function check_unit_supply() {
     on_update()
 }
 
+function check_distance() {
+    LOCAL_STATUS = "check_distance"
+    LOCAL_STATE = {}
+    P.check_distance._begin()
+    update_header()
+    on_update()
+}
+
 function on_update() {
     begin_update()
+    document.body.classList.remove("hex-clickable")
     world.log_boxes = []
     console.log(G)
     if (LOCAL_STATUS) {
@@ -1191,9 +1303,10 @@ function on_update() {
             update_keyword("zoi_hex", hex, "ap", (zoi_state & 2) === 2)
         }
     }
-    if (world.focused && !get_preference("hiderange", false)) {
+
+    if (world.range && !get_preference("hiderange", false)) {
         var focused = []
-        for_each_hex_in_range(G.location[world.focused], data.pieces[world.focused].cr, hex => set_add(focused, hex))
+        for_each_hex_in_range(world.range[0], world.range[1], hex => set_add(focused, hex))
         for (var hex of ALL_BOARD_HEXES) {
             update_keyword("zoi_hex", hex, "yellow", set_has(focused, hex))
         }
@@ -1292,7 +1405,6 @@ function on_update() {
     action_button("hold", "Hold")
     action_button("move", "Advanced move")
     action_button("no_move", "No move")
-    action_button("done", "Done")
     action_button("eliminate", "Eliminate")
     action_button("stop", "Stop")
     action_button("displace", "Displace")
@@ -1313,6 +1425,7 @@ function on_update() {
     action_button("all", "Choose all")
     action_button("pass", "Pass")
     action_button("skip", "Skip")
+    action_button("range", "Range")
 
     action_button("next", "Next")
     action_button("done", "Done")
@@ -2197,11 +2310,13 @@ function on_focus_unit_tip(a) {
         world.tip.innerHTML += `<div class="unit-tip piece ${piece.counter} reduced"></div>`
     }
     world.tip.classList = "zoomed"
-    if (piece.class === "hq" && G.location[a] < LAST_BOARD_HEX && world.focused !== a) {
-        world.focused = a
-        on_update()
-    } else if (piece.class !== "hq" && world.focused) {
-        world.focused = null
+    var prev = world.range[0]
+    if (piece.class === "hq" && G.location[a] < LAST_BOARD_HEX) {
+        world.range = [G.location[a], data.pieces[a].cr]
+    } else {
+        world.range = [0, 0]
+    }
+    if (prev !== world.range) {
         on_update()
     }
 }
@@ -2210,8 +2325,8 @@ function on_blur_tip() {
     world.tip.hidden = true
     world.tip.innerHTML = ""
     world.tip.classList = ''
-    if (world.focused) {
-        world.focused = null
+    if (world.range[0]) {
+        world.range = [0, 0]
         on_update()
     }
 }

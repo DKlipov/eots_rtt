@@ -1260,7 +1260,7 @@ P.replacement_segment = {
             button("divisions_button")
         }
 
-        prompt(`Choose unit to reinforce. ${ru.length || L.divisions ? print_reinforcements() : "(Done)."}`)
+        prompt(`Choose unit to reinforce ${print_reinforcements()}${ru.length || L.divisions ? "" : " (Done)"}.`)
         ru.forEach(u => action_unit(u))
 
     },
@@ -4129,7 +4129,7 @@ P.check_overstacking = {
             end()
         }
     },
-    inactive: "displace overstacked units",
+    inactive: "remove overstacked units",
     prompt() {
         prompt(`Remove overstacked units.`)
         L.allowed_units.forEach(u => action_unit(u))
@@ -6335,7 +6335,7 @@ P.apply_naval_winner = function () {
     }
     if (!attacker_win) {
         battle.amph_ground.forEach(u => set_delete(battle.ground[G.offensive.attacker], u))
-        if (battle.ground[G.offensive.attacker].length) {
+        if (battle.amph_ground.length) {
             log(`${list_get_log_str(battle.amph_ground.length + " units", battle.amph_ground.map(u => piece_get_log_str(u)))} could not participate ground combat.`)
         }
     }
@@ -6778,6 +6778,7 @@ P.emergency_move = {
         push_undo()
         eliminate(G.active_stack[0])
         G.active_stack = []
+        check_supply()
     },
     unit(u) {
         push_undo()
@@ -11991,7 +11992,7 @@ function on_setup(scenario, options) {
         G.debug = 1
     }
     for (let i = 1; i < LAST_BOARD_HEX; i++) {
-        if (is_controllable_hex(i) && ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Siam", "Caroline", "Marshall", "Japan"].includes(get_map_data(i).region)) {
+        if (is_controllable_hex(i) && ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Caroline", "Marshall", "Japan"].includes(get_map_data(i).region)) {
             set_add(G.control, i)
         }
     }

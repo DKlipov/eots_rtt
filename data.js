@@ -3269,7 +3269,7 @@ data.cards = [
         "oc": 2,
         "remove": true,
         "intelligence": AMBUSH,
-        "name": "US Army Breacks Japanese Army Codes",
+        "name": "US Army Breaks Japanese Army Codes",
     },
     {
         "num": 27,
@@ -5770,7 +5770,7 @@ data.map = [
         airfield: true,
         region: "Guinea",
         terrain: JUNGLE,
-        edges: [3, 1, 2, 2, 2, 3]
+        edges: [3, 1, 2, 2, 2, 2]
     },
     {id: 3722, region: "Guinea", terrain: MOUNTAIN, edges: [2, 2, 3, 1, 1, 3]},
     {
@@ -5976,7 +5976,7 @@ data.sp_map = [
 ]
 
 data.counters = {
-    oos: "oos unit_status",
+    oos: "oos top",
     control_jp: "small_markers_white unit_ix_2",
     capture_jp: "small_markers_white unit_ix_2 gray",
     control_us: "small_markers_white unit_ix_2 reduced",
@@ -6033,7 +6033,7 @@ data.counters = {
     naval_repl: "small_markers_yellow unit_ix_11",
     drawn_ap: "small_markers_black unit_ix_4",
     drawn_jp: "small_markers_black unit_ix_8",
-    tokyo_express: "big_markers_white big unit_ix_1 unit_status",
+    tokyo_express: "big_markers_white big unit_ix_1 top",
     defensive_doctrine: "big_markers_yellow big unit_ix_1",
     escorts2: "small_markers_yellow unit_ix_3",
     escorts4: "small_markers_yellow unit_ix_3 reduced",
