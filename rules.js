@@ -1899,7 +1899,8 @@ function build_road(card, event) {
     push_undo()
     activate_card(card)
     check_event(event)
-    log(`${side_get_log_str(R)} build CBI ${event.name}.`)
+    log(`${card_get_log_str(card)} played.`)
+    log(`CBI infrastructure built ${event.name}.`)
     check_supply()
     goto("end_action")
 }
@@ -10148,7 +10149,7 @@ P.build_road = {
         push_undo()
         var event = ROAD_EVENTS.filter(e => e.keys[0] === h)[0]
         check_event(event)
-        log(`${side_get_log_str(R)} build infrastructure ${hex_get_log_str(event.keys[0])}.`)
+        log(`CBI infrastructure built - ${hex_get_log_str(event.keys[0])}.`)
         check_supply()
         end()
     },
