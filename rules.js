@@ -4577,10 +4577,11 @@ function compute_air_move_hexes() {
     if (L.move_type === STRAT_MOVE) {
         check_supply()
     }
-    var avoid_zoi_flag = L.move_type === AVOID_ZOI || move_data.move_type & STRAT_MOVE
+    var strat_flag = move_data.move_type & STRAT_MOVE
     if ((L.move_type === STRAT_MOVE) && has_non_n_zoi(location, 1 - R)) {
         return []
     }
+    var avoid_zoi_flag = L.move_type === AVOID_ZOI
     if ((L.move_type === AVOID_ZOI) && has_zoi(location, 1 - R)) {
         return []
     }
@@ -4613,7 +4614,8 @@ function compute_air_move_hexes() {
                 continue
             }
             var cached = map_get(distance_map, nh, [9])[0]
-            if (avoid_zoi_flag && has_non_n_zoi(nh, 1 - R)
+            if (strat_flag && has_non_n_zoi(nh, 1 - R)
+                || avoid_zoi_flag && has_zoi(nh, 1 - R)
                 || distance % 10 > L.move_data.extended_battle_range
                 || (distance >= cached && distance % 10 >= cached % 10)
                 || G.offensive.stage === REACTION_STAGE && set_has(G.offensive.battle_hexes, nh)
