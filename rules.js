@@ -502,6 +502,8 @@ MAP_DATA[CHINA_BOX] = {
     airfield: true,
     edges_int: MAP_DATA[OAHU].edges_int
 }
+B_F_W_MAP_DATA[CHINA_BOX] = MAP_DATA[CHINA_BOX]
+S_P_MAP_DATA[CHINA_BOX] = MAP_DATA[CHINA_BOX]
 S_P_MAP_DATA[OAHU] = Object.assign({}, MAP_DATA[OAHU])
 S_P_MAP_DATA[OAHU].supply_source = JOINT_SUPPLIED_HEX | US_SUPPLIED_HEX
 S_P_MAP_DATA[hex_to_int(4819)] = Object.assign({}, MAP_DATA[hex_to_int(4819)])
@@ -1886,9 +1888,9 @@ function activate_card(c) {
 }
 
 function get_hand(side) {
-    if (G.events[events.FUTURE_OFFENSIVE_JP.id + R] < G.turn && G.future_offensive[R] > 0) {
+    if (G.events[events.FUTURE_OFFENSIVE_JP.id + side] < G.turn && G.future_offensive[side] > 0) {
         var result = G.hand[side].slice()
-        result.push(G.future_offensive[R])
+        result.push(G.future_offensive[side])
         return result
     } else {
         return G.hand[side]

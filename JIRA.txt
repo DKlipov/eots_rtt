@@ -1,4 +1,6 @@
 Todo list:
+* null when reinforcement
+* change log message for placed units
 * overstaking warning for offensive and reaction
 * overstacking check after each move
 * less annoying piece tooltip
