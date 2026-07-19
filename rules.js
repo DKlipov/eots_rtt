@@ -9443,7 +9443,8 @@ function check_fuel_shortage_data() {
         var loc = G.location[u]
         if (G.supply_cache[loc] & HEX_TEMP_FLAG1
             && !set_has(L.moved, u)
-            && (over & 1) === 0) {
+            && (over & 1) === 0
+            && (non_selected || loc === location)) {
             set_add(result, u)
         }
     })
@@ -9481,7 +9482,7 @@ P.fuel_shortage = {
         L.allowed_units = []
         L.allowed_hexes = []
         L.ports = []
-        G.control.forEach(h => {
+        RESOURCE_HEX.forEach(h => {
             if (get_map_data(h).resource) {
                 for_each_hex_in_range(h, 3, rh => {
                     var md = get_map_data(rh)
