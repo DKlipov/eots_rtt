@@ -815,7 +815,7 @@ function sent_to_europe(u) {
     var roll = random(10)
     clear_undo()
     result = roll <= modifier
-    log(`${piece_get_log_str(u)}: ${dice_get_log_str(roll, 0, AP)} ${result ? "<=" : ">"} ${modifier}${G.inter_service[AP] ? "(ISR active)" : ""}.`)
+    log(`${piece_get_log_str(u)}: ${dice_get_log_str(roll, 0, AP)} ${result ? "<=" : ">"} ${modifier}${G.inter_service[AP] ? " (ISR active)" : ""}.`)
     if (result) {
         displace_to_turn(u, 3)
     }
@@ -1066,8 +1066,7 @@ P.reinforcement_segment = {
     action_hex(hex) {
         push_undo()
         set_delete(L.unit_reinforcement, G.active_stack[0])
-        set_location(G.active_stack[0], hex, true)
-        log(`${piece_get_log_str(G.active_stack[0])} placed to ${hex_get_log_str(hex)}.`)
+        set_location(G.active_stack[0], hex)
         if (pieces[G.active_stack[0]].class === "hq") {
             set_delete(L.allowed_hexes, hex)
             G.supply_cache[hex] |= pieces[G.active_stack[0]].supply
@@ -1176,19 +1175,19 @@ function get_B_F_W_replacement_points() {
 function print_reinforcements() {
     var reinf = L.replacement_points
     var string = ""
-    if (reinf[NAVAl_REP] > 0 || reinf[NAVAl_REP] === 0) {
+    if (reinf[NAVAl_REP]) {
         string += `${G.active === AP ? "US Naval" : "Naval"}: ${reinf[NAVAl_REP]}`
     }
-    if (reinf[COMMONWEALTH_REP] !== undefined) {
+    if (reinf[COMMONWEALTH_REP]) {
         string += `, Commonwealth: ${reinf[COMMONWEALTH_REP]}`
     }
-    if (reinf[AIR_REP] > 0 || reinf[AIR_REP] === 0) {
+    if (reinf[AIR_REP]) {
         string += `, Air: ${reinf[AIR_REP]}`
     }
-    if (reinf[GROUND_REP] !== undefined) {
+    if (reinf[GROUND_REP]) {
         string += `, Ground: ${reinf[GROUND_REP]}`
     }
-    if (reinf[CHINESE_REP] !== undefined) {
+    if (reinf[CHINESE_REP]) {
         string += `, China: ${reinf[CHINESE_REP]}`
     }
     if (L.divisions >= 0) {
@@ -4195,10 +4194,14 @@ P.commit_overstacking = {
 }
 
 function set_location(unit, location, no_logs) {
-    if (!no_logs && (location <= LAST_BOARD_HEX || location === CHINA_BOX)) {
+    var prev_location = G.location[unit]
+    var prev_out = prev_location > LAST_BOARD_HEX && prev_location !== CHINA_BOX
+    var current_on_map = location <= LAST_BOARD_HEX || location === CHINA_BOX
+    if (!no_logs && prev_out && current_on_map) {
+        log(`${piece_get_log_str(unit)} placed to ${hex_get_log_str(location)}.`)
+    } else if (!no_logs && current_on_map) {
         log(`${piece_get_log_str(unit)} moved to ${hex_get_log_str(location)}.`)
     }
-    var prev_location = G.location[unit]
     var pair_location = G.location[pieces[unit].pair]
     var size = get_overstack_size(unit)
     if (L.overstack && (prev_location <= LAST_BOARD_HEX || prev_location === CHINA_BOX) && pair_location !== prev_location) {
@@ -5863,7 +5866,7 @@ function fill_hit_able_units(faction) {
             battle.at_crit_only = 1
         }
     }
-    if (ground_bomb && get_map_data(battle.battle_hex).city > CITY) {
+    if (get_map_data(battle.battle_hex).city > CITY) {
         var garrisons = []
         map_for_each(result, u => {
             if (pieces[u].garrison) {
@@ -7320,9 +7323,9 @@ function set_control_over_nation(nation, only_ground = true) {
         var no_enemy_units = (only_ground && !is_faction_ground_units(i, 1 - faction)) || !is_faction_units(i, 1 - faction)
         var control_changed = is_controllable_hex(i) && no_enemy_units
         if (control_changed && faction === JP) {
-            control_hex(i, JP)
+            capture_hex(i, JP)
         } else if (control_changed && faction === AP) {
-            control_hex(i, AP)
+            capture_hex(i, AP)
         }
     }
 }
@@ -8682,20 +8685,15 @@ cards[find_card(JP, 23)].before_battle_roll = function (faction) {
     if (faction === AP || !G.offensive.battle.ground_stage) {
         return
     }
-    var any_com_unit = false
+    var any_com_unit = 0
     G.offensive.battle.ground[JP].map(u => pieces[u]).forEach(piece => {
-        if (unit_on_board(piece.u) && piece.class === "ground" && piece.size === 3) {
-            any_com_unit = true
-        }
-    })
-    G.offensive.battle.ground[AP].map(u => pieces[u]).forEach(piece => {
-        if (unit_on_board(piece.u) && piece.class === "ground" && piece.size === 3) {
-            any_com_unit = true
+        if (unit_on_board(piece.u) && piece.class === "ground" && piece.size === 1) {
+            any_com_unit = piece.u
         }
     })
     if (any_com_unit) {
         G.offensive.battle.roll_modifiers += 1
-        log(`+1 Operation RE.`)
+        log(`+1 Operation RE (${piece_get_log_str(any_com_unit)}).`)
     }
 }
 

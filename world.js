@@ -235,19 +235,24 @@ class Thing {
 		var id = this.my_id
 		if (is_mobile()) {
 			this.element.addEventListener("touchstart", function () {
-				if (typeof tip === "function") long_tap(()=>tip(id, true))
+				if (typeof tip === "function") long_tap(() => tip(id, true))
 			})
 			this.element.addEventListener("touchend", function () {
 				if (typeof tip === "function") long_tap_cancel()
 			})
 		} else {
 			this.element.addEventListener("mouseenter", function () {
-				if (typeof tip === "function") long_tap(()=>tip(id, true), 800)
+				if (event.ctrlKey) {
+					tip(id, true)
+				}
+				world.focused = [tip, id]
+			})
+			this.element.addEventListener("mouseleave", function () {
+				if (typeof tip === "function") on_blur_tip()
+				world.focused = null
 			})
 		}
-        this.element.addEventListener("mouseleave", function () {
-            if (typeof tip === "function") long_tap_cancel()
-        })
+
 		return this
 	}
 
@@ -1286,6 +1291,14 @@ document.body.addEventListener("keydown", function (e) {
 				wind.element.hidden = true
 			}
 		}
+	} else if (world.focused && (e.key === "Control")) {
+		world.focused[0](world.focused[1], true)
+	}
+})
+
+document.body.addEventListener("keyup", function (e) {
+	if ("Control") {
+		on_blur_tip()
 	}
 })
 

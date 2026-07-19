@@ -84,8 +84,8 @@ body.hide-pieces .marker:not(.control) { display: none }
 	pointer-events: auto;
 	position: fixed;
 	z-index: 1000;
-	right: 240px;
-	top: 60px;
+	left: 30px;
+	top: 100px;
 }
 
 @media (max-width: 800px) {

@@ -226,14 +226,18 @@ const UNIT_MOVEMENT_MARKERS = [
 
 ]
 
+function jp_gray_amp(){
+    return (G.inter_service[JP] && G.asp[0][0] > 1)
+}
+
 const TRACK_MARKERS = [
     {
-        counter: () => G.events[data.events.BARGES.id] > 0 ? data.counters.asp_b_jp : data.counters.asp_jp,
+        counter: () => (G.events[data.events.BARGES.id] > 0 ? data.counters.asp_b_jp : data.counters.asp_jp) + (jp_gray_amp() ? " gray" : ""),
         value: G => G.asp[0][0]
     },
     {
-        counter: () => (G.events[data.events.BARGES.id] > 0 ? data.counters.asp_b_jp : data.counters.asp_jp) + " gray",
-        value: G => (G.inter_service[JP] && G.asp[0][0] > 1) ? Math.ceil(G.asp[0][0] / 2) : 0
+        counter: () => (G.events[data.events.BARGES.id] > 0 ? data.counters.asp_b_jp : data.counters.asp_jp),
+        value: G => (jp_gray_amp()) ? Math.ceil(G.asp[0][0] / 2) : 0
     },
     {
         counter: data.counters.asp_ap,
@@ -2316,7 +2320,7 @@ function on_focus_unit_tip(a) {
     } else {
         world.range = [0, 0]
     }
-    if (prev !== world.range) {
+    if (prev !== world.range[0]) {
         on_update()
     }
 }
