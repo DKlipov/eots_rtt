@@ -91,7 +91,7 @@ body.hide-pieces .marker:not(.control) { display: none }
 @media (max-width: 800px) {
 	#tip {
 		top: 180px;
-		/*left: 0;*/
+		left: auto;
 		right: 30px;
 		/*bottom: 0;*/
 		margin: auto;

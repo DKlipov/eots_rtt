@@ -53,10 +53,12 @@ const GROUND_DISENGAGEMENT = 1 << 13
 const MANUAL_MOVEMENT = 1 << 14
 
 //Offensive stages
+const EVENT_STAGE = 13
 const ATTACK_STAGE = 1 << 10
 const REACTION_STAGE = REACTION_MOVE
 const BATTLE_STAGE = 2
 const POST_BATTLE_STAGE = POST_BATTLE_MOVE
+const EMERGENCY_STAGE = 14
 
 //Intelligence
 const SURPRISE = 1
@@ -4078,8 +4080,26 @@ function get_overstack_size(unit) {
     }
 }
 
-function init_overstack_check() {
+function init_overstack_check(count_movable) {
+    var positions = []
+    if (!count_movable) {
+        G.offensive.active_units[G.active].forEach(u => {
+            var path = map_get(G.offensive.paths, u, [0])[0]
+            var piece = pieces[u]
+            var pbm_impossible = (path & STRAT_MOVE) || piece.class === "ground"
+            if (!pbm_impossible) {
+                map_set(positions, u, G.location[u])
+                G.location[u] = NON_PLACED_BOX
+            }
+        })
+    }
     fill_overstack(G.active)
+    var result = count_units_stacking()
+    map_for_each(positions, (u, l) => G.location[u] = l)
+    return result
+}
+
+function count_units_stacking() {
     L.allowed_units = []
     L.ground_units = []
     var overstack_naval = []
@@ -4127,12 +4147,22 @@ function init_overstack_check() {
 
 P.check_overstacking = {
     _begin() {
-        if (init_overstack_check()) {
+        L.remove_flag = G.offensive.stage === EVENT_STAGE || G.offensive.stage === EMERGENCY_STAGE || G.offensive.stage === POST_BATTLE_STAGE && G.active === G.offensive.attacker
+        if (init_overstack_check(L.remove_flag)) {
             end()
+            return
         }
+        L.hexes = []
+        L.allowed_units.forEach(u => set_add(L.hexes, G.location[u]))
+        L.violations = {overstack: L.hexes}
     },
-    inactive: "remove overstacked units",
+    inactive: "check stacking",
     prompt() {
+        if (!L.remove_flag) {
+            prompt(`Review overstacked units. Hexes: ${L.hexes.map(h => hex_get_log_str(h)).join(", ")}.`)
+            button("done")
+            return
+        }
         prompt(`Remove overstacked units.`)
         L.allowed_units.forEach(u => action_unit(u))
         if (L.allowed_units.length === 0) {
@@ -4170,27 +4200,6 @@ P.check_overstacking = {
             }
         }
     }
-}
-
-P.commit_overstacking = {
-    _begin() {
-        if (G.offensive.stage !== POST_BATTLE_STAGE || init_overstack_check()) {
-            end()
-            return
-        }
-        L.hexes = []
-        L.allowed_units.forEach(u => set_add(L.hexes, G.location[u]))
-        L.violations = {overstack: L.hexes}
-    },
-    inactive: "check overstacked units",
-    prompt() {
-        prompt(`Review overstacked units. Hexes: ${L.hexes.map(h => hex_get_log_str(h)).join(", ")}.`)
-        button("done")
-    },
-    done() {
-        push_undo()
-        end()
-    },
 }
 
 function set_location(unit, location, no_logs) {
@@ -5395,7 +5404,7 @@ P.commit_offensive = script(`
     }
     call declare_battle_hexes
     set L.verify_error trigger_event("before_commit_offensive")
-    call commit_overstacking
+    call check_overstacking
     call commit_offensive_confirm
     `)
 
@@ -6756,7 +6765,7 @@ P.emergency_move = {
             if (hq_disp) {
                 check_supply()
             }
-            end()
+            goto("check_overstacking")
         } else {
             log("#GEmergency move:")
         }
@@ -6807,7 +6816,7 @@ P.emergency_move = {
     },
     done() {
         push_undo()
-        end()
+        goto("check_overstacking")
     }
 }
 
@@ -6829,6 +6838,7 @@ function capture_landing_hexes() {
 }
 
 P.offensive_sequence = script(`
+    set G.offensive.stage ATTACK_STAGE
     eval {
         trigger_event("before_activation")
     }
@@ -6887,11 +6897,12 @@ P.offensive_sequence = script(`
     set G.active G.offensive.attacker
     call move_offensive_units
     set G.offensive.active_units[G.offensive.attacker] []
-    call check_overstacking
+    set G.todo 1
     call commit_offensive
     set G.active 1-G.offensive.attacker
+    set G.offensive.stage EMERGENCY_STAGE
     call emergency_move
-    call check_overstacking
+    set G.todo 1
 `)
 
 P.battle_sequence = script(`
@@ -6939,10 +6950,10 @@ P.political_phase = script(`
     call india_surrender
     set G.active JP
     call emergency_move
-    call check_overstacking
+    set G.todo 1
     set G.active AP
     call emergency_move
-    call check_overstacking
+    set G.todo 1
     call political_will_segment
     goto attrition_phase
 `)
@@ -11010,7 +11021,7 @@ P.scenario_1941 = script(`
     log ("#GPost battle movement")
     set G.active G.offensive.attacker
     call move_offensive_units
-    call check_overstacking
+    set G.todo 1
     set G.offensive.active_units[G.offensive.attacker] []
     set G.todo 1
     call commit_offensive
@@ -11018,7 +11029,7 @@ P.scenario_1941 = script(`
         reset_offensive()
         emergency_move_1942()
     }
-    call check_overstacking
+    set G.todo 1
     goto political_phase
     `)
 
@@ -11244,7 +11255,7 @@ P.scenario_1942 = script(`
     eval {
         emergency_move_1942()
     }
-    call check_overstacking
+    set G.todo 1
     call arcadia
     set G.active JP
     call japan_init_1942
@@ -12167,7 +12178,7 @@ function reset_offensive() {
         offensive_card: -1,
         counter_offensive_card: -1,
         intelligence: SURPRISE,
-        stage: ATTACK_STAGE,
+        stage: EVENT_STAGE,
         logistic: 0,
         naval_move_distance: 0,
         ground_move_distance: 0,
