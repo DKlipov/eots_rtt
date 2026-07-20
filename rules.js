@@ -857,8 +857,8 @@ function get_unit_reinforcement_hexes(u) {
         && (!piece.b29 || G.location[B_29_1] !== CHINA_BOX && G.location[B_29_2] !== CHINA_BOX)) {
         set_add(result, CHINA_BOX)
     }
-    if (G.sid === BURMA_SCENARIO ) {
-        if(L.P == "reinforcement_segment"){
+    if (G.sid === BURMA_SCENARIO) {
+        if (L.P == "reinforcement_segment") {
             // 17.11.17. Turn 8 Japanese reinforcements: 29th Army (reduced) arrives
             //in Rangoon if it is Japanese controlled else it is lost.
             // 17.11.18. Turn 9 Allied reinforcements: US B29. If China has not
@@ -1769,8 +1769,11 @@ function get_event_infrastructure_actions() {
 
 function get_allowed_actions(num) {
     let card = cards[num]
-    var result = ["discard"]
+    var result = []
 
+    if (!card.reshuffle) {
+        result.push("discard")
+    }
     if (num === TOJO_RESIGNS && G.turn >= 8 || num === SOVIET_INVADE && card.can_play()) {
         return ["event"]
     }
@@ -2489,7 +2492,7 @@ function get_activatable_units(hq, hq_supply_type) {
             && !set_has(G.offensive.active_units[R], i)
             && (!set_has(G.oos, i) || L.card === GENERAL_ADACHI)
             && (!reaction_movement || is_unit_reaction_able(i) && (!is_b29_bombed(piece) || is_faction_units(loc, JP)))
-            && (G.sid != BURMA_SCENARIO||!reaction_movement || loc!=SINGAPORE) //Burma: do not allow reaction activation for Singapore units 
+            && (G.sid != BURMA_SCENARIO || !reaction_movement || loc != SINGAPORE) //Burma: do not allow reaction activation for Singapore units
         ) {
             set_add(result, i)
         }
@@ -6686,6 +6689,9 @@ function select_retreat_hex() {
     if (pieces[u].faction === G.offensive.attacker) {
         var path = map_get(G.offensive.paths, u)
         L.hex_to_retreat = [path[path.length - 2]]
+        if (is_faction_units(L.hex_to_retreat, 1 - G.offensive.attacker)) {
+            L.hex_to_retreat = []
+        }
         return
     }
     var just_entered = []
@@ -8832,9 +8838,10 @@ cards[find_card(JP, 33)].event = function () {
 P.draw_from_discard = {
     _begin() {
         L.skip = 0
-        if (G.discard[R].length === 0 || G.discard[R].length === 1 && G.discard[R][0] === G.offensive.offensive_card) {
+        L.cards = G.hand[G.active].filter(c => !cards[c].reshuffle)
+        if (G.discard[G.active].length === 0 || G.discard[G.active].length === 1 && G.discard[G.active][0] === G.offensive.offensive_card) {
             L.skip = 1
-        } else if (G.hand[R].length === 0) {
+        } else if (L.cards.length === 0) {
             L.skip = 2
         }
     },
@@ -8851,16 +8858,16 @@ P.draw_from_discard = {
         }
         if (L.card) {
             prompt(`Choose card to draw.`)
-            G.discard[R].forEach(c => action_card(c))
+            G.discard[G.active].forEach(c => action_card(c))
         } else {
             prompt(`Choose card to discard.`)
-            G.hand[R].forEach(c => action_card(c))
+            L.cards.forEach(c => action_card(c))
             button("skip")
         }
     },
     skip() {
         push_undo()
-        log(`${side_get_log_str(R)} skip replace card option.`)
+        log(`${side_get_log_str(G.active)} skip replace card option.`)
         end()
     },
     card(c) {
@@ -8869,19 +8876,19 @@ P.draw_from_discard = {
             L.card = c
             G.offensive.active_cards = []
             var event = G.offensive.offensive_card
-            G.discard[R].forEach(c => {
+            G.discard[G.active].forEach(c => {
                 if (event !== c) {
                     G.offensive.active_cards.push(c)
                 }
             })
-            log(`${side_get_log_str(R)} discard ${card_get_log_str(c)}.`)
+            log(`${side_get_log_str(G.active)} discard ${card_get_log_str(c)}.`)
             discard_card(c)
             return
         }
-        set_delete(G.discard[R], c)
-        G.hand[R].push(c)
+        set_delete(G.discard[G.active], c)
+        G.hand[G.active].push(c)
         G.offensive.active_cards = []
-        log(`${side_get_log_str(R)} draw ${card_get_log_str(c)} from discard pile.`)
+        log(`${side_get_log_str(G.active)} draw ${card_get_log_str(c)} from discard pile.`)
         end()
     }
 }
@@ -10467,6 +10474,9 @@ function discard_random_card(faction) {
     var i = G.hand[faction][random(G.hand[faction].length)]
     discard_card(i)
     log(`${card_get_log_str(i)} discarded.`)
+    if (i === TOJO_RESIGNS && G.turn >= 8) {
+        cards[i].event()
+    }
     clear_undo()
 }
 
@@ -10939,6 +10949,7 @@ function setup_scenario_burma() {
     G.non_pbm_bound = [find_piece("kamikaze")]
 
     check_supply()
+    prepare_game_log()
     log("!Empire of the Sun. Burma: The Forgotten War, 1943-1944.")
     log(`@Turn ${G.turn} - ${get_year_season()} ${get_year()}.`)
     call("burma_choose_offensive")
@@ -10990,6 +11001,7 @@ function setup_scenario_1941(options) {
     draw_specific_card(find_card(JP, 1))
     draw_specific_card(find_card(JP, 2))
     check_supply()
+    prepare_game_log()
     log("!Empire of the Sun. The Pacific War 1941-1945")
     call("scenario_1941")
 }
@@ -11250,6 +11262,7 @@ function setup_scenario_1942(options) {
     G.political_will = 8
     G.china_divisions = 11
     check_supply()
+    prepare_game_log()
     log("!Empire of the Sun")
     log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
     call("scenario_1942")
@@ -11577,6 +11590,7 @@ function setup_scenario_1943() {
         draw_card(AP)
     }
     check_supply()
+    prepare_game_log()
     log("!Empire of the Sun")
     log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
     call("offensive_phase")
@@ -11764,6 +11778,7 @@ function setup_scenario_1944() {
         draw_card(AP)
     }
     check_supply()
+    prepare_game_log()
     log("!Empire of the Sun")
     log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
     call("offensive_phase")
@@ -11895,10 +11910,16 @@ function setup_scenario_south_pacific() {
     G.inter_service = [1, 1]
     G.china_divisions = 9
 
+    prepare_game_log()
     check_supply()
     log("!Empire of the Sun. South Pacific")
     log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
     call("offensive_phase")
+}
+
+function prepare_game_log() {
+    G.log = []
+    G.capture = []
 }
 
 function future_offencive_card(card, turn) {
