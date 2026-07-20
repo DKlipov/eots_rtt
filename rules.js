@@ -855,13 +855,15 @@ function get_unit_reinforcement_hexes(u) {
         && (!piece.b29 || G.location[B_29_1] !== CHINA_BOX && G.location[B_29_2] !== CHINA_BOX)) {
         set_add(result, CHINA_BOX)
     }
-    if (G.sid === BURMA_SCENARIO) {
-        // 17.11.17. Turn 8 Japanese reinforcements: 29th Army (reduced) arrives
-        //in Rangoon if it is Japanese controlled else it is lost.
-        // 17.11.18. Turn 9 Allied reinforcements: US B29. If China has not
-        // surrendered and the Allies have an eligible airbase in Northern
-        // India the B29 arrives in the Air Units in China Box.
-        return result.filter(hex => hex === RANGOON || hex === CHINA_BOX)
+    if (G.sid === BURMA_SCENARIO ) {
+        if(L.P == "reinforcement_segment"){
+            // 17.11.17. Turn 8 Japanese reinforcements: 29th Army (reduced) arrives
+            //in Rangoon if it is Japanese controlled else it is lost.
+            // 17.11.18. Turn 9 Allied reinforcements: US B29. If China has not
+            // surrendered and the Allies have an eligible airbase in Northern
+            // India the B29 arrives in the Air Units in China Box.
+            return result.filter(hex => hex === RANGOON || hex === CHINA_BOX)
+        }
     }
     return result
 }
@@ -1164,7 +1166,7 @@ function get_B_F_W_replacement_points() {
     //one Naval on game turn 9
     L.divisions = undefined
     result[AIR_REP] = 1
-    result[COMMONWEALTH_REP] = 1
+    result[GROUND_REP] = 1 // No US ground units on the map. so GROUND_REP is effectively a commonwealth ground step
     if (G.turn === 9) {
         result[NAVAl_REP] = 1
         result[CHINESE_REP] = 1
