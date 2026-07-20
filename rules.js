@@ -631,7 +631,7 @@ function is_commonwelth(piece) {
 }
 
 function is_us_unit(piece) {
-    return (piece.service === "navy" || piece.service === "army") || piece.faction === AP
+    return (piece.service === "navy" || piece.service === "army") && piece.faction === AP
 }
 
 function get_unit_supply_type(piece) {
@@ -857,13 +857,15 @@ function get_unit_reinforcement_hexes(u) {
         && (!piece.b29 || G.location[B_29_1] !== CHINA_BOX && G.location[B_29_2] !== CHINA_BOX)) {
         set_add(result, CHINA_BOX)
     }
-    if (G.sid === BURMA_SCENARIO) {
-        // 17.11.17. Turn 8 Japanese reinforcements: 29th Army (reduced) arrives
-        //in Rangoon if it is Japanese controlled else it is lost.
-        // 17.11.18. Turn 9 Allied reinforcements: US B29. If China has not
-        // surrendered and the Allies have an eligible airbase in Northern
-        // India the B29 arrives in the Air Units in China Box.
-        return result.filter(hex => hex === RANGOON || hex === CHINA_BOX)
+    if (G.sid === BURMA_SCENARIO ) {
+        if(L.P == "reinforcement_segment"){
+            // 17.11.17. Turn 8 Japanese reinforcements: 29th Army (reduced) arrives
+            //in Rangoon if it is Japanese controlled else it is lost.
+            // 17.11.18. Turn 9 Allied reinforcements: US B29. If China has not
+            // surrendered and the Allies have an eligible airbase in Northern
+            // India the B29 arrives in the Air Units in China Box.
+            return result.filter(hex => hex === RANGOON || hex === CHINA_BOX)
+        }
     }
     return result
 }
@@ -1166,7 +1168,7 @@ function get_B_F_W_replacement_points() {
     //one Naval on game turn 9
     L.divisions = undefined
     result[AIR_REP] = 1
-    result[COMMONWEALTH_REP] = 1
+    result[GROUND_REP] = 1 // No US ground units on the map. so GROUND_REP is effectively a commonwealth ground step
     if (G.turn === 9) {
         result[NAVAl_REP] = 1
         result[CHINESE_REP] = 1
@@ -2487,6 +2489,7 @@ function get_activatable_units(hq, hq_supply_type) {
             && !set_has(G.offensive.active_units[R], i)
             && (!set_has(G.oos, i) || L.card === GENERAL_ADACHI)
             && (!reaction_movement || is_unit_reaction_able(i) && (!is_b29_bombed(piece) || is_faction_units(loc, JP)))
+            && (G.sid != BURMA_SCENARIO||!reaction_movement || loc!=SINGAPORE) //Burma: do not allow reaction activation for Singapore units 
         ) {
             set_add(result, i)
         }
@@ -5958,7 +5961,9 @@ function get_naval_roll_modifiers(faction) {
         result += 3
         log(`+3 Surprise attack.`)
     }
-    var ap_air_superiority = faction === AP && battle.air_naval[AP].filter(u => unit_on_board(u) && pieces[u].br && is_us_unit(pieces[u])).length > 0
+    var ap_air_superiority = faction === AP && battle.air_naval[AP].filter(
+        u => unit_on_board(u) && pieces[u].br && is_us_unit(pieces[u])
+    ).length > 0
     if (ap_air_superiority && G.turn >= 8) {
         result += 3
         log(`+3 AP air superiority (1944-1945).`)
