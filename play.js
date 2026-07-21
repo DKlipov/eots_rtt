@@ -226,7 +226,7 @@ const UNIT_MOVEMENT_MARKERS = [
 
 ]
 
-function jp_gray_amp(){
+function jp_gray_amp() {
     return (G.inter_service[JP] && G.asp[0][0] > 1)
 }
 
@@ -2201,7 +2201,9 @@ function get_hex_elem(h) {
 function get_hex_name(h) {
     const hex = int_to_hex(h)
     const hex_id = data.map.findIndex((element) => element.id === hex)
-    if (hex_id != -1) {
+    if (h === CHINA_BOX) {
+        return "China Box"
+    } else if (hex_id != -1) {
         const hex_data = data.map[hex_id]
         if (hex_data.name) {
             return `${hex_data.name} (${hex})`

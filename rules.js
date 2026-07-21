@@ -3347,7 +3347,7 @@ function move_units(units, path) {
         log(`${units_list} skipped move.`)
         return
     }
-    var i = 3
+    var i = 2
     var zoi_flag = !G.offensive.zoi_intelligence_modifier && G.offensive.stage === ATTACK_STAGE && pieces[units[0]].faction === G.offensive.attacker
     var zoi_generator_flag = G.active_stack.filter(u => pieces[u].zoi_generator).length
         || (path[0] & GROUND_MOVE) && G.active_stack.filter(u => pieces[u].class === "ground").length
@@ -5627,9 +5627,9 @@ P.cancel_offensive = {
         G.offensive.offensive_card = reaction_card
         G.offensive.cancelled = offensive
         G.active = JP
-        play_event(reaction_card)
-        log(`Offensive cancelled, ${card_get_log_str(offensive_card)} discarded.`)
         goto("end_action")
+        play_event(reaction_card)
+        log(`${card_get_log_str(offensive_card)} discarded.`)
         call("default_event")
     }
 }
@@ -5643,7 +5643,7 @@ P.define_intelligence_condition = {
         L.card = false
         G.offensive.logistic = cards[G.offensive.offensive_card].ops
     },
-    inactive: "offensive reaction",
+    inactive: "react",
     prompt() {
         prompt(`${offensive_card_header()} Change intelligence condition.`)
         if (G.offensive.type === EC && cards[G.offensive.offensive_card].intelligence && !L.card && !L.rolled) {
@@ -5709,7 +5709,7 @@ P.attack_reaction_cards = {
             end()
         }
     },
-    inactive: "offensive reaction",
+    inactive: "react",
     prompt() {
         var played_cards = G.offensive.active_cards.filter(c => cards[c].faction === R).length
         prompt(`${offensive_card_header()} Play reaction cards.${played_cards >= 3 ? " (No more than 3 reaction cards allowed)." : ""}`)
@@ -8436,7 +8436,7 @@ P.conquest_of_se_asia_reaction = {
             }
         })
     },
-    inactive: "offensive reaction",
+    inactive: "react",
     prompt() {
         if (G.active_stack.length <= 0) {
             prompt(`${offensive_card_header()} Choose unit to reaction.`)
@@ -8698,7 +8698,6 @@ P.worker_strikes_unit = {
 
 cards[find_card(JP, 21)].event = function () {
     G.active = AP
-    G.offensive.active_cards = [find_card(JP, 21)]
     call("worker_strikes_unit")
 }
 

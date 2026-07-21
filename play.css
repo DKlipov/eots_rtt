@@ -386,6 +386,14 @@ body.hex-clickable .action_hex { z-index: 50; }
     box-sizing: border-box;
 }
 
+.action_hex.china_box.tip, .turn_box.tip {
+    border: 4px solid lime;
+    background-image: none;
+    box-shadow: 0 0 0 1px black, inset 0 0 0 1px black;
+    z-index: 100;
+    box-sizing: border-box;
+}
+
 .s-loc {
     /*z-index: 3;*/
 }
