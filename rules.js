@@ -281,6 +281,7 @@ function B_F_W_deck() {
 
 //cards
 const OPERATION_NO_1 = find_card(JP, 2)
+const OPERATION_C = find_card(JP, 8)
 const COL_TSUJI = find_card(JP, 3)
 const JN_25_SPECIAL = find_card(JP, 13)
 const TOJO_RESIGNS = find_card(JP, 43)
@@ -762,6 +763,9 @@ P.strategic_phase = script(`
 
 function set_pow() {
     G.pow = 0
+    if (scenario_data().id === BURMA_SCENARIO) {
+        return
+    }
     if (G.turn >= 4) {
         G.pow = Math.min(4, G.asp[AP][0])
     }
@@ -856,16 +860,6 @@ function get_unit_reinforcement_hexes(u) {
     if (faction === AP && piece.class === "air" && G.burma_road < 2 && G.surrender[nations.CHINA.id] < 5 && !is_overstack(CHINA_BOX, u)
         && (!piece.b29 || G.location[B_29_1] !== CHINA_BOX && G.location[B_29_2] !== CHINA_BOX)) {
         set_add(result, CHINA_BOX)
-    }
-    if (G.sid === BURMA_SCENARIO) {
-        if (L.P == "reinforcement_segment") {
-            // 17.11.17. Turn 8 Japanese reinforcements: 29th Army (reduced) arrives
-            //in Rangoon if it is Japanese controlled else it is lost.
-            // 17.11.18. Turn 9 Allied reinforcements: US B29. If China has not
-            // surrendered and the Allies have an eligible airbase in Northern
-            // India the B29 arrives in the Air Units in China Box.
-            return result.filter(hex => hex === RANGOON || hex === CHINA_BOX)
-        }
     }
     return result
 }
@@ -1063,6 +1057,14 @@ P.reinforcement_segment = {
         G.active_stack = [u]
         if (pieces[u].class !== "hq") {
             L.allowed_hexes = get_unit_reinforcement_hexes(u)
+            if (G.sid === BURMA_SCENARIO) {
+                // 17.11.17. Turn 8 Japanese reinforcements: 29th Army (reduced) arrives
+                //in Rangoon if it is Japanese controlled else it is lost.
+                // 17.11.18. Turn 9 Allied reinforcements: US B29. If China has not
+                // surrendered and the Allies have an eligible airbase in Northern
+                // India the B29 arrives in the Air Units in China Box.
+                L.allowed_hexes = L.allowed_hexes.filter(hex => hex === RANGOON || hex === CHINA_BOX)
+            }
         } else {
             L.allowed_hexes = get_hq_reinforcement_hexes()
         }
@@ -1168,9 +1170,9 @@ function get_B_F_W_replacement_points() {
     //one Naval on game turn 9
     L.divisions = undefined
     result[AIR_REP] = 1
-    result[GROUND_REP] = 1 // No US ground units on the map. so GROUND_REP is effectively a commonwealth ground step
+    result[GROUND_REP] = 1
     if (G.turn === 9) {
-        result[NAVAl_REP] = 1
+        result[COMMONWEALTH_REP] = 1
         result[CHINESE_REP] = 1
     }
     return result
@@ -2492,7 +2494,6 @@ function get_activatable_units(hq, hq_supply_type) {
             && !set_has(G.offensive.active_units[R], i)
             && (!set_has(G.oos, i) || L.card === GENERAL_ADACHI)
             && (!reaction_movement || is_unit_reaction_able(i) && (!is_b29_bombed(piece) || is_faction_units(loc, JP)))
-            && (G.sid != BURMA_SCENARIO || !reaction_movement || loc != SINGAPORE) //Burma: do not allow reaction activation for Singapore units
         ) {
             set_add(result, i)
         }
@@ -2715,13 +2716,14 @@ function offensive_card_header() {
 
 function is_controllable_hex(hex) {
     var sid = scenario_data().id
-    return get_map_data(hex).named || hex === WEST_HONSHU
+    var map_data = get_map_data(hex)
+    return map_data.named || hex === WEST_HONSHU
         || hex === KWAI_BRIDGE && !is_event_active(events.KWAI_RIVER_BRIDGE)
         || hex === KWAI_BRIDGE_1 && !is_event_active(events.KWAI_RIVER_BRIDGE)
         || hex === CHINA_BOX
         || hex === ATTU && sid === YEAR_1942_SCENARIO
-        || get_map_data(hex).region === "AMandates" && (sid === YEAR_1943_SCENARIO || sid === YEAR_1942_1943_SCENARIO) && G.surrender[nations.AUSTRALIAN_MANDATES.id]
-        || sid === BURMA_SCENARIO && get_map_data(hex).region === "Burma" // need to check non named hexes for 17.11.23
+        || map_data.region === "AMandates" && (sid === YEAR_1943_SCENARIO || sid === YEAR_1942_1943_SCENARIO) && G.surrender[nations.AUSTRALIAN_MANDATES.id]
+        || sid === BURMA_SCENARIO && map_data.region === "Burma" // need to check non named hexes for 17.11.23
 }
 
 //setup only, reduced checks and logging
@@ -3377,7 +3379,7 @@ function move_units(units, path) {
     }
     var destination = path[path.length - 1]
     units.forEach(u => set_location(u, destination, true))
-    log(`${units_list} moved to ${list_get_log_str(hex_get_log_str(destination), point_to_point)}${get_move_type(path[0])}.`)
+    log(`${units_list} moved to ${list_get_log_str(hex_get_log_str(destination)+", "+point_to_point.length, point_to_point)}${get_move_type(path[0])}.`)
 }
 
 function get_move_type(type) {
@@ -5266,7 +5268,7 @@ function get_naval_move(zoi_mask) {
         G.offensive.stage === POST_BATTLE_STAGE &&
         G.active === JP
     var kamikaze_only = burma_pbm && set_has(G.active_stack, KAMIKAZE) &&
-        map_get(G.offensive.paths, KAMIKAZE, [0, 0, 0])[0] !== SINGAPORE
+        !map_get(G.offensive.paths, KAMIKAZE, [0, 0, 0]).includes(SINGAPORE, 2)
         && G.active_stack.filter(u => pieces[u].class === "naval").length === 1
 
     if (burma_pbm && move_data.is_naval_present && !kamikaze_only) {
@@ -8502,7 +8504,7 @@ cards[find_card(JP, 8)].before_battle_roll = function (faction) {
     }
     var any_com_unit = false
     G.offensive.battle.air_naval[AP].map(u => pieces[u]).forEach(piece => {
-        if (piece.service === "br" && piece.class === "air" || piece.id === "kent") {
+        if (piece.service === "br" && piece.class === "naval" || piece.id === "kent") {
             any_com_unit = true
         }
     })
@@ -10726,6 +10728,11 @@ SCENARIO_DATA[BURMA_SCENARIO].before_commit_offensive = function () {
     }
 }
 
+SCENARIO_DATA[BURMA_SCENARIO].before_unit_activation = function () {
+    filter_activation_units((u) => G.location[u] !== SINGAPORE || pieces[u].class !== "naval"
+        || G.offensive.stage === ATTACK_STAGE && G.offensive.offensive_card === OPERATION_C, JP)
+}
+
 
 function get_year() {
     var t = G.turn + 1
@@ -10875,6 +10882,7 @@ function setup_scenario_burma() {
     control_hex(hex_to_int(2112), JP)
     G.reduced = []
 
+    for_each_unit(u => G.location[u] = PERM_ELIMINATED)
 
     //AP Setup  (same order as the setup table found in the rules p44)
     setup_jp_unit(ap_air("14"), 2104)
@@ -10927,7 +10935,6 @@ function setup_scenario_burma() {
     G.asp[JP] = [1, 0]
     G.asp[AP] = [1, 0]
     G.wie = 3
-    G.pow = 1
 
     //17.11.21. Japanese Replacements: Japanese begin the game with 2 air
     //replacements, 1 Ground taken from China per turn (optional)
@@ -10944,8 +10951,6 @@ function setup_scenario_burma() {
     G.events[events.HUMP.id] = 1 //Burma Road: Hump Closed
     G.events[events.KWAI_RIVER_BRIDGE.id] = 2// 17.11.13. Kwai Bridge Event has been played, note impact on Japanese activations.
     G.events[events.DOOLITLE] = 2// 17.11.22. Doolittle Raid has occurred meeting the condition for the Doolittle Reprisal card.
-
-    G.non_pbm_bound = [find_piece("kamikaze")]
 
     check_supply()
     prepare_game_log()
@@ -10969,7 +10974,7 @@ P.burma_choose_offensive = {
     },
     prompt() {
         if (L.confirm_card) {
-            prompt(`Confirm ` + card_get_log_str(L.confirm_card) + ` as Future Offensive ?`)
+            prompt(`Confirm ` + card_get_log_str(L.confirm_card) + ` as Future Offensive?`)
             button("done")
         } else {
             prompt(`Choose Military Event to use as Future Offensive.`)

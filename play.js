@@ -602,9 +602,8 @@ function on_init(scenario, game_options, static_view) {
                 ...VERTICAL_TURN_STACK_PARAMS
             )
 
-            define_s_loc(1400, map_layout.h_5808)
-            define_thing("zoi_hex", 1400).layout(map_layout.h_5808)
-            define_space("action_hex", 1400, map_layout.h_5808)
+            define_s_loc(1400, center_rect(map_layout.h_5808, 45, 45))
+            define_space("action_hex", 1400, center_rect(map_layout.h_5808, 68, 68))
             break;
         }
         case  "Burma: The Forgotten War, 1943-1944": {
@@ -614,10 +613,8 @@ function on_init(scenario, game_options, static_view) {
             define_board("#map", 1275, 825, [12, 12, 12, 12])
             map_info = BURMA_BOARD_INFO
 
-            const singapore = hex_to_int(2015)
-            define_s_loc(singapore, map_layout.box_singapore)
-            define_thing("zoi_hex", singapore).layout(map_layout.box_singapore)
-            define_space("action_hex", singapore, map_layout.box_singapore)
+            define_s_loc(SINGAPORE, center_rect(map_layout.box_singapore, 45, 45))
+            define_space("action_hex", SINGAPORE, center_rect(map_layout.box_singapore, 68, 68))
             define_thing("road", data.events.JARHAT_ROAD.id).layout([549, 286, 60, 60], "road_jarhat hide marker control")
             define_thing("road", data.events.IMPHAL_ROAD.id).layout([550, 330, 60, 60], "road_imphal hide marker control")
             define_thing("road", data.events.LEDO_ROAD.id).layout([600, 300, 60, 60], "road_ledo hide marker control")
@@ -750,10 +747,8 @@ function update_hand(side) {
     var fo_card;
     if (G.future_offensive[side] > 0) {
         fo_card = populate("hand", side, "card", G.future_offensive[side])
-        fo_card.innerHTML = ''
     } else if (G.events[data.events.FUTURE_OFFENSIVE_JP.id + side] > 0) {
         fo_card = populate_generic_to_parent(lookup_thing("hand", side).element, side === JP ? "card card_jp_0" : "card card_ap_0")
-        fo_card.innerHTML = ''
     }
 
     if (G.events[data.events.FUTURE_OFFENSIVE_JP.id + side] === G.turn) {
@@ -769,8 +764,7 @@ function update_hand(side) {
     } else {
         for (let i = 0; i < G.hand[side].length; i++) {
             let card = G.hand[side][i]
-            var element = populate("hand", side, "card", card)
-            element.innerHTML = ''
+            populate("hand", side, "card", card)
         }
     }
 }
@@ -1215,6 +1209,7 @@ function on_update() {
     // G.actions.board_hex = []
     // G.actions.board_hex.push(hex_to_int(piece.start))
     document.getElementById("vp_check_button").classList.toggle("disabled", CAMPAIGN_SCENARIOS.includes(G.sid))
+    document.getElementById("pw_check_button").classList.toggle("disabled", G.sid === BURMA_SCENARIO)
     if (G.pow <= 0) {
         G.capture = []
     }
@@ -1319,6 +1314,7 @@ function on_update() {
 
     print_violations()
 
+    world.things["card"].forEach(e => e.element.innerHTML = '')
     update_hand(AP)
     update_hand(JP)
     if (G.offensive.active_cards.length > 0) {
@@ -1827,7 +1823,7 @@ function elim_dialog(name, response) {
         var elim = [[], [], [], []]
         for (let i = 1; i < data.pieces.length; i++) {
             const piece = data.pieces[i]
-            if ((G.location[i] === ELIMINATED_BOX || (G.location[i] === PERM_ELIMINATED && G.sid !== SOUTH_PACIFIC_SCENARIO))) {
+            if ((G.location[i] === ELIMINATED_BOX || (G.location[i] === PERM_ELIMINATED && (G.sid !== SOUTH_PACIFIC_SCENARIO && G.sid !== BURMA_SCENARIO)))) {
                 if (piece.notreplaceable || G.location[i] === PERM_ELIMINATED) {
                     elim[piece.faction * 2 + 1].push(i)
                 } else {
@@ -2203,6 +2199,8 @@ function get_hex_name(h) {
     const hex_id = data.map.findIndex((element) => element.id === hex)
     if (h === CHINA_BOX) {
         return "China Box"
+    } else if (h > LAST_BOARD_HEX) {
+        return "offboard"
     } else if (hex_id != -1) {
         const hex_data = data.map[hex_id]
         if (hex_data.name) {
@@ -2248,6 +2246,9 @@ function on_blur_list(parent) {
 function sub_hex(match, p1) {
     const hex_id = p1 | 0
     const name = get_hex_name(hex_id)
+    if (hex_id > LAST_BOARD_HEX && hex_id !== CHINA_BOX) {
+        return "offboard"
+    }
     return `<span class="hex-tip" onclick="on_click_hex_tip(${hex_id})" onmouseenter="on_focus_hex_tip(${hex_id})" onmouseleave="on_blur_hex_tip(${hex_id})">${name}</span>`
 }
 
@@ -2319,6 +2320,9 @@ function on_focus_unit_tip(a) {
     var prev = world.range[0]
     if (piece.class === "hq" && G.location[a] < LAST_BOARD_HEX) {
         world.range = [G.location[a], data.pieces[a].cr]
+        if (a === HQ_CENTRAL_PACIFIC && G.sid === SOUTH_PACIFIC_SCENARIO) {
+            world.range = [hex_to_int(5226), 5]
+        }
     } else {
         world.range = [0, 0]
     }

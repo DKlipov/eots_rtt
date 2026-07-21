@@ -18,7 +18,7 @@ const layout = {
 },
 "southpac" : {
 	"box_delayed_reinf": [1140,710,116,95],
-	"h_5808": [1025,660,70,63],
+	"h_5808": [1065,690,45,45],
 	"box_air_unit_in_china": [19,602,98,60],
 	"box_isr_jp": [127,619,43,43],
 	"box_isr_us": [179,619,42,42],
@@ -35,7 +35,7 @@ const layout = {
 },
 "burma" : {
 	"box_air_unit_in_china": [757,300,121,75],
-	"box_singapore": [32,724,79,68],
+	"box_singapore": [70,754,45,45],
 	"box_isr_jp": [383,218,45,64],
 	"box_isr_us": [435,216,45,64],
 	"track_chinese_government": [367,129,281,63],
