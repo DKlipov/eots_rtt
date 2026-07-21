@@ -990,6 +990,11 @@ P.reinforcement_segment = {
             log(`AP reinforcements delayed.`)
         }
         update_reinf_active()
+        if (L.hq_reinforcement.length === 0 && L.unit_reinforcement.length === 0) {
+            log("No possible reinforcements.")
+            end()
+            return
+        }
     },
     inactive: "place reinforcements",
     prompt() {
@@ -3379,7 +3384,7 @@ function move_units(units, path) {
     }
     var destination = path[path.length - 1]
     units.forEach(u => set_location(u, destination, true))
-    log(`${units_list} moved to ${list_get_log_str(hex_get_log_str(destination)+", "+point_to_point.length, point_to_point)}${get_move_type(path[0])}.`)
+    log(`${units_list} moved to ${list_get_log_str(hex_get_log_str(destination) + ", " + point_to_point.length, point_to_point)}${get_move_type(path[0])}.`)
 }
 
 function get_move_type(type) {
@@ -4249,7 +4254,7 @@ function fill_overstack(faction) {
             L.overstack[location] |= 1
         } else if (location <= LAST_BOARD_HEX && piece.class === "naval") {
             L.overstack[location] += (1 << 7)
-        } else if ((location <= LAST_BOARD_HEX || location === CHINA_BOX) && (piece.type !== "lrb" || pair_location !== location)) {
+        } else if (location === CHINA_BOX || (location <= LAST_BOARD_HEX && (piece.type !== "lrb" || pair_location !== location))) {
             L.overstack[location] += (1 << 1)
         }
     })
@@ -4726,7 +4731,9 @@ function compute_ground_naval_move_hexes() {
             } else {
                 v.unshift(mt)
             }
-            map_set(L.allowed_hexes, k, v)
+            if (!move_data.is_ground_present || L.move_type === AMPH_MOVE || get_distance(move_data.location, k) > 1) {
+                map_set(L.allowed_hexes, k, v)
+            }
         })
     }
     if ((L.move_data.move_type & GROUND_MOVE) && (L.move_type !== AMPH_MOVE)) {
@@ -10967,9 +10974,7 @@ P.burma_choose_offensive = {
         G.offensive.active_cards = []
         BURMA_JAPANESE_OFF.forEach(c => {
             c = find_card(JP, c)
-            if (!G.hand[JP].includes(c)) {
-                G.offensive.active_cards.push(c)
-            }
+            G.offensive.active_cards.push(c)
         })
     },
     prompt() {
@@ -10978,7 +10983,6 @@ P.burma_choose_offensive = {
             button("done")
         } else {
             prompt(`Choose Military Event to use as Future Offensive.`)
-
             BURMA_JAPANESE_OFF.forEach(c => {
                 c = find_card(JP, c)
                 if (!G.hand[JP].includes(c)) {

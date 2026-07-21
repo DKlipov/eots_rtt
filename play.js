@@ -502,7 +502,7 @@ const BURMA_BOARD_INFO = {
     "wie_b": 0,
     "pw_a": 10,
     "pw_b": 0,
-    "TURN_STACK_PARAMS": TURN_STACK_PARAMS,
+    "TURN_STACK_PARAMS": VERTICAL_TURN_STACK_PARAMS,
     "TRACK_STACK_PARAMS": VERTICAL_TURN_STACK_PARAMS,
     "hex_check": (i) => {
         let x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
@@ -582,9 +582,9 @@ function on_init(scenario, game_options, static_view) {
     init_preference_checkbox("hidezoi", false)
     init_preference_checkbox("hiderange", false)
 
-    world.tip.addEventListener("touchstart", function () {
-        on_blur_tip()
-    })
+    // world.tip.addEventListener("touchstart", function () {
+    //     on_blur_tip()
+    // })
     let map_elem = document.getElementById("mapwrap")
     switch (scenario) {
         case "South Pacific": {
@@ -1315,8 +1315,6 @@ function on_update() {
     print_violations()
 
     world.things["card"].forEach(e => e.element.innerHTML = '')
-    update_hand(AP)
-    update_hand(JP)
     if (G.offensive.active_cards.length > 0) {
         document.getElementById("active_cards").classList.remove("hide")
         for (let i = 0; i < G.offensive.active_cards.length; i++) {
@@ -1325,7 +1323,8 @@ function on_update() {
     } else {
         document.getElementById("active_cards").classList.add("hide")
     }
-
+    update_hand(AP)
+    update_hand(JP)
 
     G.offensive.battle_hexes.forEach(h => populate("s-loc", h, "battle", G.offensive.battle_names.indexOf(h)))
     G.offensive.landing_hexes.forEach(h => populate("s-loc", h, "landing", G.offensive.battle_names.indexOf(h)))
