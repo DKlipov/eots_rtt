@@ -6033,7 +6033,7 @@ data.counters = {
     naval_repl: "small_markers_yellow unit_ix_11",
     drawn_ap: "small_markers_black unit_ix_4",
     drawn_jp: "small_markers_black unit_ix_8",
-    tokyo_express: "big_markers_white big unit_ix_1 top",
+    tokyo_express: "big_markers_white big unit_ix_1",
     defensive_doctrine: "big_markers_yellow big unit_ix_1",
     escorts2: "small_markers_yellow unit_ix_3",
     escorts4: "small_markers_yellow unit_ix_3 reduced",

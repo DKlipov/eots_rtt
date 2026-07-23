@@ -1907,7 +1907,7 @@ function activate_card(c) {
 }
 
 function get_hand(side) {
-    if (G.events[events.FUTURE_OFFENSIVE_JP.id + side] < G.turn && G.future_offensive[side] > 0) {
+    if (G.events[events.FUTURE_OFFENSIVE_JP.id + side] < G.turn && G.future_offensive[side] > 0 && G.hand[side].length) {
         var result = G.hand[side].slice()
         result.push(G.future_offensive[side])
         return result
@@ -2877,7 +2877,7 @@ P.confirm_bh = {
 }
 
 function create_landing_hex(hex) {
-    if (set_has(G.offensive.landing_hexes, hex)) {
+    if (set_has(G.offensive.landing_hexes, hex) || set_has(G.offensive.battle_hexes, hex)) {
         return
     }
     G.offensive.battle_names.push(hex)
@@ -2965,7 +2965,9 @@ P.move_offensive_units = {
         if (L.spec_move) {
 
         } else if (G.offensive.stage === ATTACK_STAGE
-            || G.offensive.stage === POST_BATTLE_STAGE && !G.active_stack.length && L.movable_units.filter(u => !could_unit_stop_here(u)).length === 0) {
+            || G.offensive.stage === POST_BATTLE_STAGE && !G.active_stack.length && L.movable_units.filter(u => !could_unit_stop_here(u)).length === 0
+            || G.offensive.stage === REACTION_STAGE && !G.active_stack.length && L.movable_units.filter(u => !set_has(G.offensive.battle_hexes, G.location[u])).length === 0
+        ) {
             button("done")
         }
 
@@ -5598,7 +5600,7 @@ P.cancel_offensive = {
                 L.cancel++
             }
         })
-        if (!L.cancel) {
+        if (!L.cancel || get_hand(G.active).length === 0) {
             end()
             return
         }
@@ -5610,7 +5612,7 @@ P.cancel_offensive = {
             button("done")
             return
         }
-        get_hand(R).filter(c => cards[c].type === CANCEL && cards[c].can_play()).forEach(c => action_card(c))
+        get_hand(G.active).filter(c => cards[c].type === CANCEL && cards[c].can_play()).forEach(c => action_card(c))
         button("skip")
     },
     skip() {
@@ -9066,6 +9068,9 @@ cards[find_card(JP, 44)].before_activation = function () {
     G.jp_asp = G.asp[JP][1]
     log('JP gain 2 temporary ASPs.')
     G.asp[JP][0] += 2
+    if (G.inter_service[JP]) {
+        G.asp[JP][0] += 2
+    }
     call("tokyo_express")
 }
 
@@ -9074,6 +9079,9 @@ cards[find_card(JP, 44)].before_commit_offensive = function () {
         return
     }
     G.asp[JP][0] -= 2
+    if (G.inter_service[JP]) {
+        G.asp[JP][0] -= 2
+    }
     G.asp[JP][1] -= Math.min(G.asp[JP][1] - G.jp_asp, 2)
     delete G['jp_asp']
 }
@@ -12379,6 +12387,7 @@ function get_india_info() {
 
 function get_japan_info() {
     var info = get_nation_info(nations.JAPAN)
+    info.control = JP
     var resource_trace = check_japan_resource_trace()
     info.info = []
     var resorce_event = is_event_active(events.JAPAN_TRACE_RESOURCES)
