@@ -2298,7 +2298,7 @@ P.choose_hq = {
         })
         trigger_event("before_choose_hq")
         if (L.possible_units.length === 1) {
-            this.unit(L.possible_units[0])
+            this.choose(L.possible_units[0])
         } else if (!L.possible_units.length) {
             log(`No hq could be selected.`)
         }
@@ -2315,14 +2315,17 @@ P.choose_hq = {
         push_undo()
         end()
     },
-    unit(u) {
-        push_undo()
+    choose(u) {
         G.offensive.active_hq[G.active] = u
         if (G.offensive.type === EC && L.card > 0 && cards[L.card].logistic_alt && cards[L.card].logistic_alt[0].includes(u)) {
             G.offensive.logistic = cards[L.card].logistic_alt[1]
         }
         log(`${piece_get_log_str(u)} activated for ${R === G.offensive.attacker ? "offensive" : "reaction"}.`)
         end()
+    },
+    unit(u) {
+        push_undo()
+        this.choose(u)
     },
 }
 
@@ -10783,7 +10786,7 @@ SCENARIO_DATA[BURMA_SCENARIO].before_commit_offensive = function () {
 
 SCENARIO_DATA[BURMA_SCENARIO].before_unit_activation = function () {
     filter_activation_units((u) => G.location[u] !== SINGAPORE || pieces[u].class !== "naval"
-        || G.offensive.stage === ATTACK_STAGE && G.offensive.offensive_card === OPERATION_C, JP)
+        || G.offensive.stage === ATTACK_STAGE && G.offensive.type === EC && G.offensive.offensive_card === OPERATION_C, JP)
 }
 
 
