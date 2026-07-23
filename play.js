@@ -721,7 +721,7 @@ function on_init(scenario, game_options, static_view) {
     }
     for (let i = 1; i < data.cards.length; ++i) {
         let card = data.cards[i]
-        card.element = define_card("card", i, `card_${card.faction ? "ap" : "jp"}_${card.num}`)
+        card.element = define_card("card", i, `card_${card.faction ? "ap" : "jp"}_${card.num}`).tooltip_image(on_focus_card_tip)
         card.element.card = i
     }
     define_panel("#jp_hand", "hand", JP)
