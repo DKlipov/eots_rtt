@@ -8114,7 +8114,7 @@ function victory_1944() {
     }
     adjust_vp(result, ng_diff, "Control of New Guinea",
         nations.NEW_GUINEA.keys.map(h => hex_to_int(h)))
-    binary_vp(result, is_space_controlled(RABAUL, AP) || !(G.supply_cache[RABAUL] & JP_SUPPLIED_HEX), 3,
+    binary_vp(result, is_space_controlled(RABAUL, AP) || !(G.supply_cache[RABAUL] & JP_SUPPLIED_HEX), -3,
         `Rabaul ${is_space_controlled(RABAUL, AP) ? "controlled" : "out of supply"}`,
         "Rabaul JP controlled and supplied")
 
@@ -11753,6 +11753,7 @@ function setup_scenario_1944() {
     setup_jp_unit(jp_air(4), 3004)
     setup_jp_unit(jp_army("kor"), 3305)
     setup_jp_unit(HQ_OZAWA, 3407)
+    setup_jp_unit(find_piece("junyo"), 3407)
     setup_jp_unit(find_piece("nagato"), 3407)
     setup_jp_unit(find_piece("mogami"), 3407, true)
     setup_jp_unit(find_piece("kaiyo"), 3407)
@@ -11787,6 +11788,7 @@ function setup_scenario_1944() {
     setup_jp_unit(jp_army("4sn"), 4612, true)
     setup_jp_unit(jp_army("3sn"), 4715)
     setup_jp_unit(jp_air("24"), 4715, true)
+    G.location[jp_air("t")] = ELIMINATED_BOX
 
     var surrender = [nations.MALAYA, nations.PHILIPPINES, nations.DEI, nations.BURMA, nations.AUSTRALIAN_MANDATES]
     surrender.forEach(n => {

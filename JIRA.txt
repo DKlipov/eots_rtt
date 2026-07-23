@@ -1,4 +1,7 @@
 Todo list:
+* Retreat special step, attacker could overstack
+* fast mode
+* scenario desription
 * stack refactoring
 * Mobile resizing lags & bugs
 * zoom not works
