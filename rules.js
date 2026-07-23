@@ -1624,7 +1624,20 @@ function B_F_W_deal_cards() {
     if (G.surrender[nations.INDIA.id] >= 4) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by India.`)
+        log(`AP draw reduced by 1 due to India surrender.`)
+    }
+    if (ap_cards === 4 && is_space_controlled(hex_to_int(2006), AP) && is_space_controlled(hex_to_int(2105), AP)
+        && is_space_controlled(hex_to_int(2205), AP)) {
+        log("Diverted Logistics:")
+        clear_undo()
+        let result = random(10)
+        const success = result > 3
+        log(`${dice_get_log_str(result, AP)} > 3 (${success ? "SUCCESS" : "FAILED"}).`)
+        if (!success) {
+            ap_cards -= 1
+            G.passes[AP]++
+            log(`AP draw reduced by 1 due to Diverted Logistics.`)
+        }
     }
     log(`AP draw ${ap_cards} cards.`)
     if (G.passes[AP]) {
@@ -4306,8 +4319,11 @@ function check_supply() {
     if (scenario_data().id === SOUTH_PACIFIC_SCENARIO && G.turn === 3) {
         var mask = G.supply_cache[TRUK] & JP_UNITS
         G.supply_cache[TRUK] ^= (mask)
-    }
-    mark_supply_eligable_ports(AP)
+    } else if (scenario_data().id === BURMA_SCENARIO) {
+        var mask = G.supply_cache[SINGAPORE] & JP_UNITS
+        G.supply_cache[SINGAPORE] ^= (mask)
+    } else
+        mark_supply_eligable_ports(AP)
     mark_supply_eligable_ports(JP)
     L.supply = 0
     if (G.debug) {

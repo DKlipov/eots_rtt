@@ -3,7 +3,3 @@ Todo list:
 * Mobile resizing lags & bugs
 * zoom not works
 * logging check
-* burma singapore not attack
-* burma no hq attack
-* burma india surrender
-* burma diverted logistic
