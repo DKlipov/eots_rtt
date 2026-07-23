@@ -1180,6 +1180,12 @@ function get_B_F_W_replacement_points() {
         result[COMMONWEALTH_REP] = 1
         result[CHINESE_REP] = 1
     }
+    if (is_event_active(events.INDEPENDENCE_CAMPAIGN)) {
+        result[GROUND_REP] = Math.max(0, result[GROUND_REP] - is_event_active(events.INDEPENDENCE_CAMPAIGN))
+        log(`-${is_event_active(events.INDEPENDENCE_CAMPAIGN)} AP ground replacement, Indian independence campaign (no commonwealth units could be replaced).`)
+        G.events[events.INDEPENDENCE_CAMPAIGN.id] = 0
+        L.INDEPENDENCE_CAMPAIGN = 1
+    }
     return result
 }
 
@@ -6254,6 +6260,9 @@ P.ground_bombardment = {
         var faction = battle.air_naval[G.offensive.attacker].length ? (1 - G.offensive.attacker) : G.offensive.attacker
         L.allowed_units = battle.ground[faction].filter(u => unit_on_board(u))
         L.garrison_present = L.allowed_units.filter(u => pieces[u].garrison).length
+        if (L.allowed_units.length === 1 || L.allowed_units.filter(u => pieces[u].garrison).length) {
+            G.active = G.offensive.attacker
+        }
         if (L.allowed_units.length === 1 && set_has(G.reduced, L.allowed_units[0])) {
             end()
         }
@@ -6982,6 +6991,16 @@ P.national_status_segment = function () {
     L.pw = G.political_will
     if (scenario_data().id === BURMA_SCENARIO) {
         check_nation_surrender(nations.BURMA)
+        //17.11.27. During the Game turn 9 Political Phase the India status can only
+        //shift for India surrender, else do not move the India marker and
+        //score any VP based on its location during the last Political Phase.
+        var ind_control = check_nation_controlled(nations.INDIA, JP)
+        if (ind_control && G.turn < 9 || G.surrender[nations.INDIA.id] === 3) {
+            degrade_india(true)
+        } else if (!ind_control && G.turn < 9) {
+            //17.11.27.
+            india_stable()
+        }
         end()
         return;
     }
@@ -7030,17 +7049,9 @@ P.national_status_segment = function () {
         })
     }
     if (check_nation_controlled(nations.INDIA, JP)) {
-        //17.11.27. During the Game turn 9 Political Phase the India status can only
-        //shift for India surrender, else do not move the India marker and
-        //score any VP based on its location during the last Political Phase.
-        if (G.sid !== BURMA_SCENARIO || G.turn < 9 || G.surrender[nations.INDIA.id] === 3) {
-            degrade_india(true)
-        }
+        degrade_india(true)
     } else {
-        //17.11.27.
-        if (G.sid !== BURMA_SCENARIO || G.turn < 9) {
-            india_stable()
-        }
+        india_stable()
     }
 
     if (!is_event_active(events.AUSTRALIA_SURRENDER) && check_nation_surrender(nations.AUSTRALIA)) {
@@ -7155,6 +7166,9 @@ function degrade_india(could_revolt = false) {
     if (G.surrender[nations.INDIA.id] < (could_revolt ? 4 : 3)) {
         G.surrender[nations.INDIA.id] += 1
         log(`India status changed to ${nations.INDIA.statuses[G.surrender[nations.INDIA.id]]}.`)
+        if (G.surrender[nations.INDIA.id] === 4) {
+            change_political_will(-nations.INDIA.pw, "India surrender")
+        }
     }
 }
 
@@ -7252,6 +7266,14 @@ P.india_surrender = {
         G.surrender[nations.INDIA.id] = 5
         if (!L.unit_to_retreat.length) {
             this.update_control()
+        }
+        if (G.sid === BURMA_SCENARIO) {
+            var vp = get_victory()
+            log("#GVP Scoring.")
+            vp.text.forEach(t => log(t))
+            log(`#GTotal VP: ${vp.vp}.`)
+            finish("Japan", "Japanese Victory - India Surrender.")
+            return;
         }
     },
     inactive: "execute India surrender sequence",

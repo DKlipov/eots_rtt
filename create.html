@@ -1,9 +1,27 @@
 <div id="year_1942" class="scenario_info">
     <p>
         <label><input type="checkbox" value="true" name="historical" id="historical" checked>Use historical japanese
-            hand</label>
+            hand.</label>
 </div>
-<label><input type="checkbox" name="debug" id="debug">Debug mode (additional interactions, you should not check it)</label>
+<label hidden><input type="checkbox" name="fast" id="fast">Async mode (Experienced players).</label>
+<div>
+    <label><input type="checkbox" name="debug" id="debug">Debug mode (additional interactions, you should not check it)</label>
+</div>
+
+<div id="fast_mode_desc">
+    <p>
+        The async mode it is an experimental feature that allow experienced players play faster, if they live in different time zones. Some interactions will be automatically applied if it is possible.
+        If you choose you SHOULD check opponent moves and log before your action. Important things could be missed!
+        What optimized:
+    <p> * Special reaction rolls automatically.
+    <p> * Reaction roll automatically (if could not possible to play card).
+    <p> * Reaction step skipped if nothing possible to do.
+    <p> * Battle hexes checked automatically from A to Z, one by one.
+    <p> * Loss applied automatically if only one possible unit to assign hit (could be repeated multiple times), or all units could be eliminated.
+    <p> * Submarine cards rolled automatically, hits applied automatically if only one unit possible.
+    <p> * Pbm skipped if nothing possible to do.
+    <p> * Submarine and B29 rolls automated.
+</div>
 <script>
     let scenario = document.querySelector("select[name='scenario']");
     scenario.onchange = function (evt) {
@@ -16,6 +34,13 @@
         }
     }
     scenario.onchange();
+    var fast_checkbox = document.querySelector("#fast");
+    fast_checkbox.onchange = function (evt) {
+        document.querySelector("#fast_mode_desc").hidden = !fast_checkbox.checked
+        console.log(fast_checkbox.value)
+        console.log(fast_checkbox.checked)
+    }
+    fast_checkbox.onchange();
 </script>
 
 
