@@ -6119,6 +6119,8 @@ P.execute_attack = function () {
 
 P.choose_battle = {
     _begin() {
+        console.log("begin?")
+        console.log(G.async)
         G.offensive.battle = {}
         G.active = G.offensive.attacker
         if (G.async) {
@@ -6126,8 +6128,9 @@ P.choose_battle = {
         }
     },
     select_first() {
-        for (var i = 0; i < G.offensive.battle_names; i++) {
+        for (var i = 0; i < G.offensive.battle_names.length; i++) {
             if (set_has(G.offensive.battle_hexes, G.offensive.battle_names[i])) {
+                console.log(`selected ${i} ${int_to_hex(G.offensive.battle_names[i])}`)
                 this.action_hex(G.offensive.battle_names[i])
                 return
             }
@@ -6188,6 +6191,9 @@ P.apply_hits = {
         }
     },
     try_to_assign(faction) {
+        if (!G.offensive.battle.hit_able_units[faction].length) {
+            return
+        }
         R = faction
         var hits = G.offensive.battle.hits[R]
         var could_eliminate_all = hits >= G.offensive.battle.total_lf[R]
@@ -6247,7 +6253,6 @@ P.apply_hits = {
         if (!L.done[1 - R]) {
             G.active = 1 - R
         } else {
-            push_undo()
             apply_loss()
             check_supply()
             end()
@@ -6655,11 +6660,6 @@ function prepare_battle() {
             set_add(battle.air_naval[piece.faction], u)
         } else if (location === hex && piece.class === "ground") {
             set_add(battle.ground[piece.faction], u)
-            //debug, to fix bug with not retreated units
-            if (!map_has(G.offensive.paths, u)) {
-                displace_to_turn(u, 1, true)
-                return
-            }
             if (attacker === piece.faction && map_get(G.offensive.paths, u)[0] & AMPH_MOVE) {
                 set_add(battle.amph_ground, u)
             }
@@ -11179,6 +11179,7 @@ P.scenario_1941 = script(`
         G.offensive.attacker = JP
     }
     log ("#JJP Action. Operation No. 1")
+    set G.offensive.stage ATTACK_STAGE
     call operation_no_1
     call activate_units
     call move_offensive_units
