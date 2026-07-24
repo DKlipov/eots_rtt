@@ -1,20 +1,108 @@
-<div id="year_1942" class="scenario_info">
+<div id="South Pacific" class="scenario_info">
+
+    The scenario focuses on the Allied drives up the Solomon Islands and New Guinea. The game features a damaged but
+    still powerful Imperial Japanese Navy (IJN) poised to slow and potentially stop the Allied advance. The game starts
+    on the eve of Operation Watchtower (Guadalcanal Invasion), so this card begins in the opening Allied hand of cards.
+    The Japanese hand begins with the Savo Island reaction card setting up the potential for the historical opening.
+
+    This scenario uses the South Pacific mini-map, is four game turns long (game turns 3, 4, 5, and 6) and begins on
+    game turn 3 at the beginning of the Offensives Phase with the US having the option to use their Future Offensive
+    card to pre-empt the Japanese going first. There is no Reinforcement, Replacement, or Strategic Warfare Segments
+    conducted for game turn 3. Victory is determined by the VP schedule outlined in the rulebook.
+
+    For new players to Empire of the Sun, this is the first of three scenarios to play when learning the game. Second
+    would be the 1943 scenario (17.3) and the last is the 1942 Shortened Campaign (17.8).
+</div>
+<div id="1942 One Year Scenario" class="scenario_info">
+
+    This scenario is three game turns long (only covering the turns in 1942) and begins on game turn 2 at the beginning
+    of the Offensives Phase. There is no Reinforcement, Replacement, or Strategic Warfare Segments conducted for game
+    turn 2, as it has already been incorporated into the starting locations. The game is concluded at the end of game
+    turn 4 and victory is determined by the VP schedule outlined in the rulebook.
+</div>
+<div id="1943 One Year Scenario" class="scenario_info">
+
+    This scenario is three game turns long (only covering the turns in 1943) and begins on game turn 5 at the beginning
+    of the Offensives Phase. There is no Reinforcement, Replacement, or Strategic Warfare Segments conducted for game
+    turn 5, as it has already been incorporated into the starting locations. The game is concluded at the end of game
+    turn 7 and victory is determined by the VP schedule outlined in the rulebook.
+
+    For new players to Empire of the Sun, this is the second of three scenarios to play when learning the game. First
+    would be the South Pacific scenario (17.10) and the last is the 1942 Shortened Campaign (17.8).
+</div>
+<div id="1944 One Year Scenario" class="scenario_info">
+
+    This scenario is three game turns long (only covering the turns in 1944) and begins on game turn 8 at the beginning
+    of the Offensives Phase. There is no Reinforcement, Replacement, or Strategic Warfare Segments conducted for game
+    turn 8, as it has already been incorporated into the starting locations. The game is concluded at the end of game
+    turn 10 and victory is determined by the VP schedule outlined in the rulebook.
+</div>
+<div id="1941-1945 (The Full Campaign)" class="scenario_info">
+
+    This is the Full Campaign, which includes the December 1941 mini-turn as outlined in 17.1 of the rulebook. Victory
+    is determined as defined in 16.0 of the rulebook.
+
+    It is recommended before tackling the Full Campaign that players have already played the South Pacific scenario, the
+    1943 yearly scenario and the 1942 Shortened Campaign (in that order) at least once.
+</div>
+<div id="1942-1945 (The Shortened Campaign)" class="scenario_info">
+
+    This scenario starts as if for the 1942 Scenario (17.2) and uses all of the setup requirements of that scenario, but
+    plays the rest of war, using the Campaign Scenario (17.1) conditions and length for everything else. It is
+    essentially the Full Campaign without the December 1941 mini-turn and is commonly used in tournament play. Victory
+    is determined as defined in 16.0 of the rulebook.
+
+    For new players to Empire of the Sun, this is the third of three scenarios to play when learning the game. First
+    would be the South Pacific scenario (17.10) and the second would be the 1943 scenario (17.3).
+</div>
+<div id="1943-1945 (The Even Shorter Campaign)" class="scenario_info">
+
+    This scenario starts as if for the 1943 Scenario (17.3) and uses all of the setup requirements of that scenario, but
+    plays the rest of war, using the Campaign Scenario (17.1) conditions and length for everything else. Victory is
+    determined as defined in 16.0 of the rulebook.
+</div>
+<div id="1942-1943 Two Year Scenario" class="scenario_info">
+
+    This scenario uses the starting conditions of the 1942 yearly scenario, but plays through to turn 7. It uses the
+    1943 VP schedule to determine victory.
+</div>
+<div id="1943-1944 Two Year Scenario" class="scenario_info">
+
+    This scenario uses the starting conditions of the 1943 yearly scenario, but plays through to turn 10. It uses the
+    1944 VP schedule to determine victory.
+</div>
+<div id="1942-1944 Three Year Scenario" class="scenario_info">
+
+    This scenario uses the starting conditions of the 1942 yearly scenario, but plays through to turn 10. It uses the
+    1944 VP schedule to determine victory.
+</div>
+<div id="Burma: The Forgotten War, 1943-1944" class="scenario_info">
+
+    This scenario examines Burma, the lowest priority Allied theater.
+    The scenario begins on turn 6 with each side receiving a reduced hand of cards. On turns 7, 8, and 9, each side
+    begins with a base of four cards that can be reduced for both sides by a variety of reasons specific to a particular
+    session of the scenario.
+</div>
+<div id="hist_hand">
     <p>
         <label><input type="checkbox" value="true" name="historical" id="historical" checked>Use historical japanese
             hand.</label>
 </div>
+<hr>
 <label><input type="checkbox" name="async" id="async">Async mode (Experienced players).</label>
 
 <div id="async_mode_desc">
     <p>
-        The async mode it is an experimental feature that allow experienced players play faster, if they live in different time zones. Some interactions will be automatically applied if it is possible.
+        The async mode it is an experimental feature that allow experienced players play faster, if they live in
+        different time zones. Some interactions will be automatically applied if it is possible.
         If you choose you SHOULD check opponent moves and log before your action. Important things could be missed!
         What optimized:
     <p> * Special reaction rolls automatically.
     <p> * Reaction roll automatically (if could not possible to play card).
     <p> * Reaction step skipped if nothing possible to do.
     <p> * Battle hexes checked automatically from A to Z, one by one.
-    <p> * Loss applied automatically if only one possible unit to assign hit (could be repeated multiple times), or all units could be eliminated.
+    <p> * Loss applied automatically if only one possible unit to assign hit (could be repeated multiple times), or all
+        units could be eliminated.
     <p> * Submarine cards rolled automatically, hits applied automatically if only one unit possible.
     <p> * Attrition loss automated.
     <p> * Submarine and B29 rolls automated.
@@ -26,90 +114,20 @@
     let scenario = document.querySelector("select[name='scenario']");
     scenario.onchange = function (evt) {
         document.querySelectorAll(".scenario_info").forEach(e => e.hidden = true);
-        // document.getElementById(scenario.value).classList.add("show");
+        document.getElementById(scenario.value).hidden = false;
+        console.log(scenario.value)
+        console.log(scenario.value)
         if (scenario.value.indexOf("1942") >= 0 || scenario.value.indexOf("1941") >= 0) {
-            document.querySelector("#year_1942").hidden = false;
+            document.querySelector("#hist_hand").hidden = false;
         } else {
-            document.querySelector("#historical").checked = false
+            document.querySelector("#hist_hand").hidden = true;
+            document.querySelector("#hist_hand").checked = false
         }
     }
     scenario.onchange();
     var fast_checkbox = document.querySelector("#async");
     fast_checkbox.onchange = function (evt) {
         document.querySelector("#async_mode_desc").hidden = !fast_checkbox.checked
-        console.log(fast_checkbox.value)
-        console.log(fast_checkbox.checked)
     }
     fast_checkbox.onchange();
 </script>
-
-
-<!--
-- South Pacific
-
-The scenario focuses on the Allied drives up the Solomon Islands and New Guinea. The game features a damaged but still powerful Imperial Japanese Navy (IJN) poised to slow and potentially stop the Allied advance. The game starts on the eve of Operation Watchtower (Guadalcanal Invasion), so this card begins in the opening Allied hand of cards. The Japanese hand begins with the Savo Island reaction card setting up the potential for the historical opening.
-
-This scenario uses the South Pacific mini-map, is four game turns long (game turns 3, 4, 5, and 6) and begins on game turn 3 at the beginning of the Offensives Phase with the US having the option to use their Future Offensive card to pre-empt the Japanese going first. There is no Reinforcement, Replacement, or Strategic Warfare Segments conducted for game turn 3. Victory is determined by the VP schedule outlined in the rulebook.
-
-For new players to Empire of the Sun, this is the first of three scenarios to play when learning the game. Second would be the 1943 scenario (17.3) and the last is the 1942 Shortened Campaign (17.8).
--->
-
-<!--
-- 1942
-
-This scenario is three game turns long (only covering the turns in 1942) and begins on game turn 2 at the beginning of the Offensives Phase. There is no Reinforcement, Replacement, or Strategic Warfare Segments conducted for game turn 2, as it has already been incorporated into the starting locations. The game is concluded at the end of game turn 4 and victory is determined by the VP schedule outlined in the rulebook.
--->
-
-<!--
-- 1943
-
-This scenario is three game turns long (only covering the turns in 1943) and begins on game turn 5 at the beginning of the Offensives Phase. There is no Reinforcement, Replacement, or Strategic Warfare Segments conducted for game turn 5, as it has already been incorporated into the starting locations. The game is concluded at the end of game turn 7 and victory is determined by the VP schedule outlined in the rulebook.
-
-For new players to Empire of the Sun, this is the second of three scenarios to play when learning the game. First would be the South Pacific scenario (17.10) and the last is the 1942 Shortened Campaign (17.8).
--->
-
-<!--
-- 1944
-
-This scenario is three game turns long (only covering the turns in 1944) and begins on game turn 8 at the beginning of the Offensives Phase. There is no Reinforcement, Replacement, or Strategic Warfare Segments conducted for game turn 8, as it has already been incorporated into the starting locations. The game is concluded at the end of game turn 10 and victory is determined by the VP schedule outlined in the rulebook.
--->
-
-<!--
-- The Full Campaign, Dec 1941-Aug 1945
-
-This is the Full Campaign, which includes the December 1941 mini-turn as outlined in 17.1 of the rulebook. Victory is determined as defined in 16.0 of the rulebook. 
-
-It is recommended before tackling the Full Campaign that players have already played the South Pacific scenario, the 1943 yearly scenario and the 1942 Shortened Campaign (in that order) at least once.
--->
-
-<!--
-- The Shortened Campaign (1942-1945)
-
-This scenario starts as if for the 1942 Scenario (17.2) and uses all of the setup requirements of that scenario, but plays the rest of war, using the Campaign Scenario (17.1) conditions and length for everything else. It is essentially the Full Campaign without the December 1941 mini-turn and is commonly used in tournament play. Victory is determined as defined in 16.0 of the rulebook. 
-
-For new players to Empire of the Sun, this is the third of three scenarios to play when learning the game. First would be the South Pacific scenario (17.10) and the second would be the 1943 scenario (17.3).
--->
-
-<!--
-- The Even Shorter Campaign (1943-1945)
-
-This scenario starts as if for the 1943 Scenario (17.3) and uses all of the setup requirements of that scenario, but plays the rest of war, using the Campaign Scenario (17.1) conditions and length for everything else. Victory is determined as defined in 16.0 of the rulebook. 
--->
-
-<!--
-- 1942-1943
-
-This scenario uses the starting conditions of the 1942 yearly scenario, but plays through to turn 7. It uses the 1943 VP schedule to determine victory.
--->
-
-<!--
-- 1943-1944
-
-This scenario uses the starting conditions of the 1943 yearly scenario, but plays through to turn 10. It uses the 1944 VP schedule to determine victory.
--->
-
-<!--
-- 1942-1944
-
-This scenario uses the starting conditions of the 1942 yearly scenario, but plays through to turn 10. It uses the 1944 VP schedule to determine victory.
--->

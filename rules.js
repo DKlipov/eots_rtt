@@ -6119,8 +6119,6 @@ P.execute_attack = function () {
 
 P.choose_battle = {
     _begin() {
-        console.log("begin?")
-        console.log(G.async)
         G.offensive.battle = {}
         G.active = G.offensive.attacker
         if (G.async) {
@@ -6130,7 +6128,6 @@ P.choose_battle = {
     select_first() {
         for (var i = 0; i < G.offensive.battle_names.length; i++) {
             if (set_has(G.offensive.battle_hexes, G.offensive.battle_names[i])) {
-                console.log(`selected ${i} ${int_to_hex(G.offensive.battle_names[i])}`)
                 this.action_hex(G.offensive.battle_names[i])
                 return
             }
