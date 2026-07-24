@@ -10540,6 +10540,7 @@ function on_init(scenario, game_options, static_view) {
             SID = SOUTH_PACIFIC_SCENARIO
             map_layout = layout.southpac;
             map_elem.classList.add("southpac");
+            update_map_size(1275, 825)
             define_board("#map", 1275, 825, [12, 12, 12, 12])
             map_info = SOUTH_PAC_BOARD_INFO
 
@@ -10559,6 +10560,7 @@ function on_init(scenario, game_options, static_view) {
             SID = BURMA_SCENARIO
             map_layout = layout.burma;
             map_elem.classList.add("burma");
+            update_map_size(1275, 825)
             define_board("#map", 1275, 825, [12, 12, 12, 12])
             map_info = BURMA_BOARD_INFO
 
@@ -10575,6 +10577,7 @@ function on_init(scenario, game_options, static_view) {
             SID = FULL_CAMPAIGN_SCENARIO
             map_layout = layout.mainmap;
             map_elem.classList.add("main");
+            update_map_size(2550, 1650)
             define_board("#map", 2550, 1650, [12, 12, 12, 12])
             map_info = MAIN_BOARD_INFO
             define_thing("road", events.JARHAT_ROAD.id).layout([578, 286, 60, 60], "road_jarhat hide marker control")
