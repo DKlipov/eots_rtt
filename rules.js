@@ -1370,6 +1370,9 @@ function change_asp(faction, count) {
 P.submarine_warfare = {
     _begin() {
         G.active = AP
+        if (G.async) {
+            this.roll()
+        }
     },
     inactive: "roll for submarine warfare",
     prompt() {
@@ -1426,6 +1429,10 @@ P.strategic_bombing = {
             }
             G.events[events.STRAT_BOMBING_CAMPAIGN.id] = 0
             end()
+            return
+        }
+        if (G.async) {
+            this.all()
         }
     },
     inactive: "roll to strategic bombing",
@@ -2679,6 +2686,9 @@ P.activate_units = {
         trigger_event("before_unit_activation")
         if (!L.possible_units.length) {
             log_units_activated()
+            if (G.offensive.stage === REACTION_STAGE) {
+                G.offensive.active_hq[G.active] = 0
+            }
             end()
         } else {
             this.update_possible_units()
@@ -2973,7 +2983,7 @@ P.move_offensive_units = {
         if (L.movable_units.length <= 0) {
             end()
         }
-        if(G.offensive.stage===POST_BATTLE_MOVE && G.active===G.offensive.attacker){
+        if (G.offensive.stage === POST_BATTLE_MOVE && G.active === G.offensive.attacker) {
             call("retreat")
         }
     },
@@ -3183,7 +3193,6 @@ P.move_offensive_units = {
         call("move_to", {hex: G.location[G.active_stack[0]]})
     },
     done() {
-        push_undo()
         G.offensive.active_units[R].filter(u => !map_has(G.offensive.paths, u))
             .forEach(u => map_set(G.offensive.paths, u, [ANY_MOVE, 0, G.location[u]]))
         if (G.offensive.stage === POST_BATTLE_STAGE) {
@@ -5561,6 +5570,10 @@ P.special_reaction = {
         })
         if (L.possible_hexes.length <= 0) {
             end()
+            return
+        }
+        if (G.async) {
+            L.possible_hexes.slice().forEach(h => action_hex(h))
         }
     },
     inactive: "roll to special reaction",
@@ -5674,12 +5687,26 @@ P.cancel_offensive = {
 
 P.define_intelligence_condition = {
     _begin() {
-        if (G.offensive.battle_hexes.length <= 0 || G.offensive.offensive_card === CARRIER_RAID && G.offensive.type === EC) {
+        var no_reaction = G.offensive.battle_hexes.length <= 0 || G.offensive.offensive_card === CARRIER_RAID && G.offensive.type === EC
+        if (no_reaction && G.async) {
             end()
+            return
         }
         L.rolled = false
         L.card = false
         G.offensive.logistic = cards[G.offensive.offensive_card].ops
+        if (!G.async) {
+            return;
+        }
+        var cancel = 0
+        for_each_card((c, card) => {
+            if ((card.type === INTELLIGENCE || card.type === COUNTER_OFFENSIVE) && card.could_play()) {
+                cancel++
+            }
+        })
+        if (!cancel || get_hand(G.active).length === 0) {
+            this.roll()
+        }
     },
     inactive: "react",
     prompt() {
@@ -5745,6 +5772,7 @@ P.attack_reaction_cards = {
         log("#GOffensive reaction cards.")
         if (get_hand(G.active).filter(c => cards[c].type === REACTION && cards[c].can_play()).length <= 0) {
             end()
+            return
         }
     },
     inactive: "react",
@@ -5752,7 +5780,7 @@ P.attack_reaction_cards = {
         var played_cards = G.offensive.active_cards.filter(c => cards[c].faction === R).length
         prompt(`${offensive_card_header()} Play reaction cards.${played_cards >= 3 ? " (No more than 3 reaction cards allowed)." : ""}`)
         if (played_cards < 3) {
-            get_hand(R).filter(c => cards[c].type === REACTION && cards[c].can_play()).forEach(c => action_card(c))
+            get_hand(G.active).filter(c => cards[c].type === REACTION && cards[c].can_play()).forEach(c => action_card(c))
         }
         button("done")
     },
@@ -5784,6 +5812,17 @@ P.apply_attack_reaction = {
         if (L.allowed_cards.length <= 0) {
             end()
             return
+        }
+        this._resume()
+    },
+    _resume() {
+        if (G.async) {
+            while (L.allowed_cards.length) {
+                this.card(L.allowed_cards[0])
+                if (L.P !== "apply_attack_reaction") {
+                    return
+                }
+            }
         }
     },
     inactive: "apply reaction cards",
@@ -5886,15 +5925,17 @@ function fill_hit_able_units(faction) {
         var base_lf = L.pool[i + 1]
         var loss_factor = battle.ground_stage && set_has(battle.amph_ground, unit) ? Math.ceil(base_lf / 2) : base_lf
         var reduced_status = get_reduced_status(unit, faction)
-        total_lf += loss_factor
-        if (reduced_status === 0) {
-            total_lf += loss_factor
-            has_full_size = 1
-        }
         var could_be_damaged = (!piece.br || distant_hits || set_has(battle.distant_hits_list[faction], unit)
             || G.location[unit] === battle.battle_hex)
         if (!could_be_damaged) {
             continue
+        }
+        if (!piece.garrison) {
+            total_lf += loss_factor
+            if (reduced_status === 0) {
+                total_lf += loss_factor
+                has_full_size = 1
+            }
         }
         if (loss_factor <= hit_limit && (critical || reduced_status === 0 || piece.one_step && battle.ground_stage)) {
             map_set(result, unit, loss_factor)
@@ -5932,6 +5973,11 @@ function fill_hit_able_units(faction) {
     }
 
     battle.hit_able_units[faction] = result
+    if (!battle.total_lf) {
+        //debug
+        battle.total_lf = [0, 0]
+    }
+    battle.total_lf[faction] = total_lf
 }
 
 function unit_on_board(unit) {
@@ -6075,6 +6121,17 @@ P.choose_battle = {
     _begin() {
         G.offensive.battle = {}
         G.active = G.offensive.attacker
+        if (G.async) {
+            this.select_first()
+        }
+    },
+    select_first() {
+        for (var i = 0; i < G.offensive.battle_names; i++) {
+            if (set_has(G.offensive.battle_hexes, G.offensive.battle_names[i])) {
+                this.action_hex(G.offensive.battle_names[i])
+                return
+            }
+        }
     },
     inactive: "choose battle hex",
     prompt() {
@@ -6125,6 +6182,22 @@ P.apply_hits = {
         }
         L.dmg_list = [[], []]
         L.done = [!battle.hit_able_units[0].length, !battle.hit_able_units[1].length]
+        if (G.async) {
+            this.try_to_assign(JP)
+            this.try_to_assign(AP)
+        }
+    },
+    try_to_assign(faction) {
+        R = faction
+        var hits = G.offensive.battle.hits[R]
+        var could_eliminate_all = hits >= G.offensive.battle.total_lf[R]
+        var battle = G.offensive.battle
+        while (battle.hit_able_units[R].length && (could_eliminate_all || battle.hit_able_units[R].length === 1)) {
+            this.unit(battle.hit_able_units[R][0])
+        }
+        if (!battle.hit_able_units[R].length) {
+            this.done()
+        }
     },
     inactive: "apply hits",
     prompt() {
@@ -6569,6 +6642,7 @@ function prepare_battle() {
         distant_hits_list: [[], []],
         critical: [false, false],
         damaged: [[], []],
+        total_lf: [],
     }
     var battle = G.offensive.battle
     var attacker = G.offensive.attacker
@@ -6645,7 +6719,8 @@ function prepare_ground_battle() {
         distant_hits_list: [[], []],
         critical: [false, false],
         damaged: [[], []],
-        winner: 1 - G.offensive.attacker
+        winner: 1 - G.offensive.attacker,
+        total_lf: [0, 0],
     }
     battle = G.offensive.battle
     var hex = battle.battle_hex
@@ -6676,10 +6751,11 @@ P.retreat = {
             G.offensive.retreat = []
         }
         G.active = G.offensive.attacker
-        L.unit_to_retreat = G.offensive.retreat
+        L.unit_to_retreat = G.offensive.retreat.slice()
         L.hex_to_retreat = []
         if (!L.unit_to_retreat.length) {
             end()
+            return
         }
     },
     inactive: "retreat",
@@ -7578,6 +7654,13 @@ P.attrition = {
         })
         if (!L.unit_to_attrition.length) {
             end()
+            return
+        }
+        while (G.async && L.unit_to_attrition.length) {
+            this.unit(L.unit_to_attrition[0])
+        }
+        if (G.async) {
+            this.done()
         }
     },
     inactive: "apply attrition losses",
@@ -7595,10 +7678,8 @@ P.attrition = {
             reduce_unit(u)
         }
         set_delete(L.unit_to_attrition, u)
-        clear_undo()
     },
     done() {
-        clear_undo()
         end()
     }
 }
@@ -9718,6 +9799,13 @@ P.submarine_attack = {
         if (L.allowed_units.length <= 0 || L.hits <= 0) {
             G.active = cards[L.card].faction
             end()
+            return
+        }
+        while (G.async && L.allowed_units.length === 1 && L.hits) {
+            this.unit(L.allowed_units[0])
+        }
+        if (!L.hits || !L.allowed_units.length) {
+            this.done()
         }
     },
     inactive: "apply card effect",
@@ -12099,6 +12187,9 @@ function on_setup(scenario, options) {
 
     if (options.debug) {
         G.debug = 1
+    }
+    if (options.async) {
+        G.async = 1
     }
     for (let i = 1; i < LAST_BOARD_HEX; i++) {
         if (is_controllable_hex(i) && ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Caroline", "Marshall", "Japan"].includes(get_map_data(i).region)) {
