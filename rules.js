@@ -2977,7 +2977,7 @@ P.move_offensive_units = {
     },
     inactive: "move units",
     prompt() {
-        prompt(`${offensive_card_header()} Move activated units.`)
+        prompt(`${offensive_card_header()} Move units.`)
         if (L.spec_move) {
 
         } else if (G.offensive.stage === ATTACK_STAGE
@@ -6496,6 +6496,9 @@ function get_hits_count(d) {
 }
 
 P.apply_ground_winner = function () {
+    if (get_map_data(G.offensive.battle.battle_hex).city > CITY) {
+        reset_garrison()
+    }
     var battle = G.offensive.battle
     battle.amph_ground.forEach(u => map_get(G.offensive.paths, u, [0])[0] -= AMPH_MOVE)
     if (battle.ground[G.offensive.attacker].length === 0) {
@@ -6512,6 +6515,17 @@ P.apply_ground_winner = function () {
     if (attacker_win) {
         capture_hex(battle.battle_hex, G.offensive.attacker)
     }
+    battle.ground[attacker_win ? (1 - G.offensive.attacker) : G.offensive.attacker].forEach(u => {
+        if (!unit_on_board(u)) {
+            return
+
+        }
+        if (set_has(G.offensive.battle.amph_ground, u)) {
+            set_add(G.offensive.ground_pbm, u)
+        } else {
+            set_add(G.offensive.retreat, u)
+        }
+    })
     end()
 }
 
@@ -6651,42 +6665,28 @@ function reset_garrison() {
 
 P.retreat = {
     _begin() {
-        if (get_map_data(G.offensive.battle.battle_hex).city > CITY) {
-            reset_garrison()
-        }
         G.active = G.offensive.attacker
-        var looser = 1 - G.offensive.battle.winner
-        L.unit_to_retreat = []
+        L.unit_to_retreat = G.offensive.retreat
         L.hex_to_retreat = []
-        var battle_hex = G.offensive.battle.battle_hex
-        capture_hex(battle_hex, G.offensive.battle.winner)
-        for_each_unit_on_map((u, piece) => {
-            var retreat_unit = piece.faction === looser && piece.class === "ground" && G.location[u] === battle_hex
-            if (retreat_unit && set_has(G.offensive.battle.amph_ground, u)) {
-                set_add(G.offensive.ground_pbm, u)
-            } else if (retreat_unit) {
-                set_add(L.unit_to_retreat, u)
-            }
-        })
         if (!L.unit_to_retreat.length) {
             end()
         } else {
-            log(`Retreat:`)
+            log(`#GRetreat:`)
         }
     },
     inactive: "retreat",
     prompt() {
         if (G.active_stack.length) {
-            prompt(`Choose space to retreat.`)
+            prompt(`${offensive_card_header()} Choose space to retreat.`)
             L.hex_to_retreat.forEach(u => action_hex(u))
             if (!L.hex_to_retreat.length) {
                 button("eliminate")
             }
         } else if (L.unit_to_retreat.length) {
-            prompt(`Choose unit to retreat.`)
+            prompt(`${offensive_card_header()} Choose unit to retreat.`)
             L.unit_to_retreat.forEach(u => action_unit(u))
         } else {
-            prompt(`Confirm retreat.`)
+            prompt(`${offensive_card_header()} Confirm retreat.`)
             button("done")
         }
     },
@@ -6697,7 +6697,6 @@ P.retreat = {
         G.active_stack = []
     },
     action_hex(hex) {
-        push_undo()
         if (ground_move_denied(hex)) {
             log(`${pieces[G.active_stack[0]]} retreat to restricted area`)
             eliminate(G.active_stack[0])
@@ -6725,6 +6724,7 @@ P.retreat = {
 function select_retreat_hex() {
     L.hex_to_retreat = []
     var u = G.active_stack[0]
+    var location = G.location[u]
     if (pieces[u].faction === G.offensive.attacker) {
         var path = map_get(G.offensive.paths, u)
         L.hex_to_retreat = [path[path.length - 2]]
@@ -6734,20 +6734,20 @@ function select_retreat_hex() {
         return
     }
     var just_entered = []
-    map_for_each(G.offensive.paths, (u, path) => {
-        var piece = pieces[u]
-        if (piece.faction === G.offensive.attacker && piece.class === "ground" && set_has(G.offensive.battle.ground[G.offensive.attacker], u)
+    map_for_each(G.offensive.paths, (au, path) => {
+        var piece = pieces[au]
+        if (piece.faction === G.offensive.attacker && piece.class === "ground" && G.location[au] === location
             && path[0] & GROUND_MOVE) {
             set_add(just_entered, path[path.length - 2])
         }
     })
     var able = []
-    var nh = get_near_hexes(G.offensive.battle.battle_hex)
+    var nh = get_near_hexes(location)
     for (var i = 0; i < nh.length; i++) {
         var h = nh[i]
         if (h < 0 || h > LAST_BOARD_HEX || set_has(just_entered, h) || is_overstack(h, G.active_stack[0])
-            || is_faction_units(h, G.offensive.attacker) || get_ground_move_cost(G.offensive.battle.battle_hex, h, JP) >= 100
-            || ground_move_denied(h) || set_has(G.offensive.battle_hexes, h)) {
+            || is_faction_units(h, G.offensive.attacker) || get_ground_move_cost(location, h, JP) >= 100
+            || ground_move_denied(h)) {
             continue
         } else {
             set_add(able, h)
@@ -6945,6 +6945,7 @@ P.offensive_sequence = script(`
         call commit_offensive
     }
     set G.active G.offensive.attacker
+    call retreat
     call move_offensive_units
     set G.offensive.active_units[G.offensive.attacker] []
     set G.todo 1
@@ -6987,7 +6988,6 @@ P.battle_sequence = script(`
       call execute_attack {active: 1 - G.offensive.attacker}
       call assign_hits
       call apply_ground_winner
-      call retreat
       set G.offensive.battle {}
       log ("")
     }
@@ -12279,6 +12279,7 @@ function reset_offensive() {
         committed: [],
         battle_names: [],
         barges: 0,
+        retreat: [],
         zoi_intelligence_modifier: false,
         battle: {},
     }

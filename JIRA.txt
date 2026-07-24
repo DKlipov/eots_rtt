@@ -1,5 +1,4 @@
 Todo list:
-* Retreat special step, attacker could overstack
 * fast mode
 * scenario desription
 * stack refactoring
