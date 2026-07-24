@@ -2972,7 +2972,9 @@ P.move_offensive_units = {
         }).forEach(u => set_add(L.movable_units, u))
         if (L.movable_units.length <= 0) {
             end()
-            return
+        }
+        if(G.offensive.stage===POST_BATTLE_MOVE && G.active===G.offensive.attacker){
+            call("retreat")
         }
     },
     inactive: "move units",
@@ -6520,6 +6522,10 @@ P.apply_ground_winner = function () {
             return
 
         }
+        if (!G.offensive.retreat) {
+            //debug
+            G.offensive.retreat = []
+        }
         if (set_has(G.offensive.battle.amph_ground, u)) {
             set_add(G.offensive.ground_pbm, u)
         } else {
@@ -6665,13 +6671,15 @@ function reset_garrison() {
 
 P.retreat = {
     _begin() {
+        if (!G.offensive.retreat) {
+            //debug
+            G.offensive.retreat = []
+        }
         G.active = G.offensive.attacker
         L.unit_to_retreat = G.offensive.retreat
         L.hex_to_retreat = []
         if (!L.unit_to_retreat.length) {
             end()
-        } else {
-            log(`#GRetreat:`)
         }
     },
     inactive: "retreat",
@@ -6701,7 +6709,8 @@ P.retreat = {
             log(`${pieces[G.active_stack[0]]} retreat to restricted area`)
             eliminate(G.active_stack[0])
         } else {
-            set_location(G.active_stack[0], hex)
+            set_location(G.active_stack[0], hex, true)
+            log(`${piece_get_log_str(G.active_stack[0])} retreat to ${hex_get_log_str(hex)}.`)
             capture_hex(hex, pieces[G.active_stack[0]].faction)
             if (set_has(G.offensive.battle_hexes, hex)) {
                 map_set(G.offensive.committed, G.active_stack[0], G.offensive.battle.battle_hex)
@@ -6945,7 +6954,7 @@ P.offensive_sequence = script(`
         call commit_offensive
     }
     set G.active G.offensive.attacker
-    call retreat
+    set G.todo 1
     call move_offensive_units
     set G.offensive.active_units[G.offensive.attacker] []
     set G.todo 1
