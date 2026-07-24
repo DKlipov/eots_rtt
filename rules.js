@@ -3419,7 +3419,7 @@ function move_units(units, path) {
     }
     var destination = path[path.length - 1]
     units.forEach(u => set_location(u, destination, true))
-    log(`${units_list} moved to ${list_get_log_str(hex_get_log_str(destination) + ", " + point_to_point.length, point_to_point)}${get_move_type(path[0])}.`)
+    log(`${units_list} moved to ${list_get_log_str(hex_get_log_str(destination) + ", " + point_to_point.length - 1, point_to_point)}${get_move_type(path[0])}.`)
 }
 
 function get_move_type(type) {
@@ -6473,7 +6473,10 @@ P.apply_naval_winner = function () {
         log(`${attacker_win ? "Attacker" : "Defender"} won battle (${attacker_power} - ${defender_power}) ${!air_cover ? "no attacker CV or air" : ""}.`)
     }
     if (!attacker_win) {
-        battle.amph_ground.forEach(u => set_delete(battle.ground[G.offensive.attacker], u))
+        battle.amph_ground.forEach(u => {
+            set_delete(battle.ground[G.offensive.attacker], u)
+            set_add(G.offensive.ground_pbm, u)
+        })
         if (battle.amph_ground.length) {
             log(`${list_get_log_str(battle.amph_ground.length + " units", battle.amph_ground.map(u => piece_get_log_str(u)))} could not participate ground combat.`)
         }
@@ -6652,6 +6655,11 @@ function prepare_battle() {
             set_add(battle.air_naval[piece.faction], u)
         } else if (location === hex && piece.class === "ground") {
             set_add(battle.ground[piece.faction], u)
+            //debug, to fix bug with not retreated units
+            if (!map_has(G.offensive.paths, u)) {
+                displace_to_turn(u, 1, true)
+                return
+            }
             if (attacker === piece.faction && map_get(G.offensive.paths, u)[0] & AMPH_MOVE) {
                 set_add(battle.amph_ground, u)
             }
