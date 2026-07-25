@@ -1531,21 +1531,7 @@ const ICONS = {
 
 function escape_text(text) {
     text = String(text)
-    text = text.replace(/---/g, "\u2014")
-    text = text.replace(/--/g, "\u2013")
-    text = text.replace(/->/g, "\u2192")
-    text = text.replace(/-( ?[\d])/g, "\u2212$1")
-    text = text.replace(/&/g, "&amp;")
-    text = text.replace(/</g, "&lt;")
-    text = text.replace(/>/g, "&gt;")
-    text = text.replace(/\[/g, "<")
-    text = text.replace(/\]/g, ">")
     text = text.replace(/\^(.*?)\^/g, escaped_list)
-    text = text.replace(/([ +-]1) action points/g, "$1 action point")
-    text = text.replace(/([ +-]1) trenches/g, "$1 trench")
-    text = text.replace(/([ +-]1) units/g, "$1 unit")
-    text = text.replace(/([ +-]1) hits/g, "$1 hit")
-    text = text.replace(/[BRW]\d/g, (m) => ICONS[m] ?? m)
     text = text.replace(/C(\d+)/g, sub_card)
     text = text.replace(/P(\d+)/g, sub_piece)
     text = text.replace(/H(\d+)/g, sub_hex)
@@ -2214,7 +2200,7 @@ function escaped_list(match, p1) {
     if (array <= 3) {
         return `<span>${text}</span>`
     } else {
-        return `<span id="${id}"><span class="list-tip" onclick="expand_list(${id})" onmouseenter="on_focus_list(${id})" onmouseleave="on_blur_list(${id})">\<${header}\></span><span hidden>${text}</span></span>`
+        return `<span id="${id}"><span class="list-tip" onclick="expand_list(${id})" onmouseenter="on_focus_list(${id})" onmouseleave="on_blur_list(${id})">&lt;${header}&gt;</span><span hidden>${text}</span></span>`
     }
 
 }

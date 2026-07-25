@@ -1,4 +1,2 @@
 Todo list:
-* logging check
-* Mobile resizing lags & bugs
-* check css errors
+* surrender markers

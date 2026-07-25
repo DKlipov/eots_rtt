@@ -1866,7 +1866,7 @@ function play_event(c) {
     if (G.future_offensive[faction] === c) {
         log(`${side_get_log_str(faction)} played FO card.`)
     }
-    log(`${card_get_log_str(c)} event played.`)
+    log(`${card_get_log_str(c)} played as event.`)
     if (cards[c].draw) {
         into_turn_draw(faction)
     }
@@ -1949,7 +1949,7 @@ P.offensive_segment = {
     pass() {
         push_undo()
         G.passes[R] -= 1
-        log(`${side_get_log_str(R)} passed, ${G.passes[R]} passes remains.`)
+        log(`Pass used, ${G.passes[R]} remains.`)
         goto("end_action")
     },
 }
@@ -1964,7 +1964,7 @@ P.offensive_segment_card_action = {
         push_undo()
         activate_card(L.c)
         G.offensive.type = OC
-        log(`${side_get_log_str(R)} played ${card_get_log_str(L.c)} as operation card.`)
+        log(`${card_get_log_str(L.c)} played as operation card.`)
         goto("offensive_sequence")
     },
     event() {
@@ -4086,8 +4086,6 @@ function count_units_stacking() {
     })
     if (L.allowed_units.length === 0) {
         return true
-    } else {
-        log(`#G${side_get_log_str(G.active)} overstacking losses.`)
     }
     return false
 }
@@ -4102,6 +4100,9 @@ P.check_overstacking = {
         L.hexes = []
         L.allowed_units.forEach(u => set_add(L.hexes, G.location[u]))
         L.violations = {overstack: L.hexes}
+        if (L.remove_flag && L.allowed_units.length) {
+            log(`#G${side_get_log_str(G.active)} Check stacking.`)
+        }
     },
     inactive: "check stacking",
     prompt() {
@@ -5286,8 +5287,6 @@ P.declare_battle_hexes = {
         check_amph_mod()
         G.offensive.battle_names.filter(h => set_has(G.offensive.battle_hexes, h))
             .forEach(h => log(`Battle ${String.fromCharCode(65 + G.offensive.battle_names.indexOf(h))} declared in ${hex_get_log_str(h)}.`))
-        G.offensive.battle_names.filter(h => set_has(G.offensive.landing_hexes, h))
-            .forEach(h => log(`Amphibious landing ${String.fromCharCode(65 + G.offensive.battle_names.indexOf(h))} declared in ${hex_get_log_str(h)}.`))
         compute_possible_battle_hexes()
         if (L.possible_units.length <= 0 && G.offensive.battle_hexes.length <= 0) {
             log("No battle hexes declared.")
@@ -5429,7 +5428,6 @@ function roll_intelligence_dice() {
     var modifier = 0
     if (G.offensive.zoi_intelligence_modifier) {
         modifier -= 2
-        log(`-2 units moved through reaction ZOI.`)
     }
     var event_modifier = trigger_event("before_intelligence_roll")
     if (event_modifier) {
@@ -5665,7 +5663,6 @@ P.define_intelligence_condition = {
 
 P.attack_reaction_cards = {
     _begin() {
-        log("#GOffensive reaction cards.")
         if (get_hand(G.active).filter(c => cards[c].type === REACTION && cards[c].can_play()).length <= 0) {
             end()
             return
@@ -6979,7 +6976,7 @@ P.political_phase = script(`
 `)
 
 P.national_status_segment = function () {
-    L.pw = G.political_will
+    L.pw = 0
     if (scenario_data().id === BURMA_SCENARIO) {
         check_nation_surrender(nations.BURMA)
         //17.11.27. During the Game turn 9 Political Phase the India status can only
@@ -6992,6 +6989,7 @@ P.national_status_segment = function () {
             //17.11.27.
             india_stable()
         }
+        change_political_will(L.pw, "National status")
         end()
         return;
     }
@@ -7005,6 +7003,7 @@ P.national_status_segment = function () {
             G.surrender[nations.AUSTRALIAN_MANDATES.id] = (surr) ? 0 : G.turn
             log(`${nations.AUSTRALIAN_MANDATES.name} controlled ${surr ? "AP" : "JP"}.`)
         }
+        change_political_will(L.pw, "National status")
         end()
         return;
     }
@@ -7062,7 +7061,6 @@ P.national_status_segment = function () {
         check_event(events.MARSHALL_CAPTURED)
         log("AP captured Marshall islands.")
     }
-    G.political_will = L.pw
     if (check_nation_controlled(nations.JAPAN, AP)) {
         finish("Allies", "Allies Victory - Japanese mainland islands captured")
         return
@@ -7076,6 +7074,7 @@ P.national_status_segment = function () {
         check_event(events.JAPAN_TRACE_RESOURCES)
         log(`JP mainland city could not trace path to resource hex (${G.turn + 1 - is_event_active(events.JAPAN_TRACE_RESOURCES)}/3).`)
     }
+    change_political_will(L.pw, "National status")
     end()
 }
 
@@ -7158,7 +7157,7 @@ function degrade_india(could_revolt = false) {
         G.surrender[nations.INDIA.id] += 1
         log(`India status changed to ${nations.INDIA.statuses[G.surrender[nations.INDIA.id]]}.`)
         if (G.surrender[nations.INDIA.id] === 4) {
-            change_political_will(-nations.INDIA.pw, "India surrender")
+            L.pw -= nations.INDIA.pw
         }
     }
 }
@@ -7204,10 +7203,15 @@ function china_surrender() {
 }
 
 function change_political_will(diff, cause) {
+    if (diff === 0) {
+        return
+    }
     G.political_will = Math.max(G.political_will + diff, 0)
     G.political_will = Math.min(G.political_will, 10)
-    L.pw += diff
-    log(`Political will changed to ${G.political_will} (${diff}) ${cause}.`)
+    if (diff > 0) {
+        diff = "+" + diff
+    }
+    log(`Political will changed to ${G.political_will} (${diff}) - ${cause}.`)
 }
 
 function get_wie_level() {
@@ -7231,6 +7235,9 @@ function change_wie(diff, cause) {
     }
     G.wie = Math.max(G.wie + diff, 0)
     G.wie = Math.min(G.wie, scenario_data().id === SOUTH_PACIFIC_SCENARIO ? 7 : 10)
+    if (diff > 0) {
+        diff = "+" + diff
+    }
     log(`War in europe changed to ${get_wie_level()} (${3 - G.wie}), ${cause} (${diff}).`)
 }
 
@@ -7350,7 +7357,7 @@ function check_nation_surrender(nation) {
     G.surrender[nation.id] = (faction === AP) ? 0 : G.turn
     log(`${nation.name} ${faction === JP ? "surrender" : "liberated"}.`)
     if (nation.pw) {
-        change_political_will(nation.pw * (G.surrender[nation.id] ? -1 : 1), "")
+        L.pw += nation.pw * (G.surrender[nation.id] ? -1 : 1)
     }
     return true
 }
