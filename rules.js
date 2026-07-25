@@ -426,7 +426,7 @@ const TUNNEL_HEX = {
     id: 0,
     terrain: OCEAN,
     region: "Ocean",
-    edges_int: UNPLAYABLE_WATER | (UNPLAYABLE_WATER << 5) | UNPLAYABLE_LAND | (UNPLAYABLE_LAND << 5) | WATER | (WATER << 5) | ROAD | (ROAD << 5) | GROUND | (GROUND << 5)
+    edges_int: UNPLAYABLE_WATER | WATER | ((UNPLAYABLE_WATER | WATER) << 5)
 }
 const MAP_DATA = []
 const S_P_MAP_DATA = []
@@ -550,7 +550,8 @@ function apply_south_pacific(hex) {
 
 B_F_W_MAP_DATA[SINGAPORE] = Object.assign({}, MAP_DATA[SINGAPORE])
 B_F_W_MAP_DATA[SINGAPORE].edges_int += WATER | ROAD | GROUND// set water and railroad edge for upper edge
-B_F_W_TONNELLING_SET.filter(h => h !== SINGAPORE).forEach(h => B_F_W_MAP_DATA[h].edges_int |= (WATER << 15) | (ROAD << 15) | (GROUND << 15))
+B_F_W_MAP_DATA[SINGAPORE].airfield = false
+B_F_W_TONNELLING_SET.filter(h => h !== SINGAPORE).forEach(h => B_F_W_MAP_DATA[h].edges_int |= (WATER << 15))
 
 function apply_burma(hex) {
     var id = hex_to_int(hex.id)
@@ -5035,6 +5036,9 @@ function ground_move_denied(hex) {
         return !(region === "IChina" || region === "NIndia" || region === "Burma")
     }
     if (G.sid === BURMA_SCENARIO && G.active === AP && (region === "Siam" || region === "Indochina")) {
+        return true;
+    }
+    if (G.sid === BURMA_SCENARIO && hex === SINGAPORE) {
         return true;
     }
 }
