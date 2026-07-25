@@ -1530,6 +1530,7 @@ const ICONS = {
 
 function escape_text(text) {
     text = String(text)
+    text = text.replace(/[BRW]\d/g, (m) => ICONS[m] ?? m)
     text = text.replace(/\^(.*?)\^/g, escaped_list)
     text = text.replace(/C(\d+)/g, sub_card)
     text = text.replace(/P(\d+)/g, sub_piece)
