@@ -2686,9 +2686,6 @@ P.activate_units = {
         trigger_event("before_unit_activation")
         if (!L.possible_units.length) {
             log_units_activated()
-            if (G.offensive.stage === REACTION_STAGE) {
-                G.offensive.active_hq[G.active] = 0
-            }
             end()
         } else {
             this.update_possible_units()
@@ -3419,7 +3416,7 @@ function move_units(units, path) {
     }
     var destination = path[path.length - 1]
     units.forEach(u => set_location(u, destination, true))
-    log(`${units_list} moved to ${list_get_log_str(hex_get_log_str(destination) + ", " + point_to_point.length - 1, point_to_point)}${get_move_type(path[0])}.`)
+    log(`${units_list} moved to ${list_get_log_str(hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
 }
 
 function get_move_type(type) {
@@ -5823,6 +5820,9 @@ P.apply_attack_reaction = {
                     return
                 }
             }
+        }
+        if (!L.allowed_card.length) {
+            this.done()
         }
     },
     inactive: "apply reaction cards",

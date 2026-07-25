@@ -1994,7 +1994,7 @@ data.pieces = [
     {
         id: "belleau",
         "faction": AP,
-        "name": "Belleau Wool",
+        "name": "Belleau Wood",
         "counter": "big_units_blue big unit_ix_15",
         "class": "naval",
         "type": "cvl",
