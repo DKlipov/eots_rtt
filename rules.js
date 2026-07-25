@@ -5609,6 +5609,10 @@ P.define_intelligence_condition = {
     inactive: "react",
     prompt() {
         prompt(`${offensive_card_header()} Change intelligence condition.`)
+        if (!G.offensive.battle_hexes.length) {
+            button("done")
+            return
+        }
         if (G.offensive.type === EC && cards[G.offensive.offensive_card].intelligence && !L.card && !L.rolled) {
             button("skip")
         } else if ((G.offensive.type === OC || !cards[G.offensive.offensive_card].intelligence)
@@ -12222,7 +12226,9 @@ function action_unit(p) {
 }
 
 function unselect_unit(p) {
-    action("unselect", p)
+    if (!globalThis.RTT_FUZZER) {
+        action("unselect", p)
+    }
 }
 
 function action_hex(p) {
