@@ -1179,7 +1179,6 @@ function on_update() {
     begin_update()
     document.body.classList.remove("hex-clickable")
     world.log_boxes = []
-    console.log(G)
     if (LOCAL_STATUS) {
         P[LOCAL_STATUS].prompt()
     }
@@ -1209,12 +1208,6 @@ function on_update() {
         draw_paths()
     }
 
-
-    // console.log(V)
-    // console.log(R)
-    // G.actions={}
-    // G.actions.board_hex = []
-    // G.actions.board_hex.push(hex_to_int(piece.start))
     document.getElementById("vp_check_button").classList.toggle("disabled", CAMPAIGN_SCENARIOS.includes(G.sid))
     document.getElementById("pw_check_button").classList.toggle("disabled", G.sid === BURMA_SCENARIO)
     if (G.pow <= 0) {
@@ -1443,16 +1436,6 @@ function on_update() {
     action_button("ground_move", "Ground")
     action_button("extended_air", "Extended range")
     action_button("barges", "Barges")
-
-    //debug
-    action_button("isr", "Flip isr(dbg)")
-    action_button("tp", "Teleport(dbg)")
-    action_button("check_s", "Check supply(dbg)")
-    action_button("deploy_b29", "deploy_b29(dbg)")
-    action_button("ns", "discard cards(dbg)")
-    action_button("control", "change hex control(dbg)")
-    action_button("draw", "draw specific card(dbg)")
-    action_button("auto", "auto(dbg)")
 
     action_button("redo", "Redo")
     action_button("undo", "Undo")

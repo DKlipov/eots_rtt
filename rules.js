@@ -1011,8 +1011,6 @@ P.reinforcement_segment = {
             } else {
                 prompt(`Choose hex to place ${piece_get_log_str(G.active_stack[0])} as a reinforcement.`)
             }
-            //debug
-            button("auto")
         } else if (L.europe1.length > 0) {
             prompt(`Sent to Europe die roll. ${L.europe1.length} delayed units eligible.`)
             button("roll")
@@ -1048,15 +1046,6 @@ P.reinforcement_segment = {
         L.europe = []
         L.europe1 = []
         clear_undo()
-    },
-    auto() {
-        while (L.unit_reinforcement.length) {
-            if (L.allowed_hexes.length) {
-                this.action_hex(L.allowed_hexes[0])
-            } else {
-                this.delay()
-            }
-        }
     },
     unit(u) {
         G.active_stack = [u]
@@ -1218,13 +1207,6 @@ function print_reinforcements() {
 
 P.replacement_segment = {
     _begin() {
-        //debug
-        if (!Array.isArray(G.reinforcements)) {
-            var ar = []
-            ar[AIR_REP] = G.reinforcements.AIR
-            ar[NAVAl_REP] = G.reinforcements.NAVAL
-            G.reinforcements = ar
-        }
         if (G.active === JP && L.replacement_points && L.replacement_points[NAVAl_REP]) {
             G.reinforcements[NAVAl_REP] += L.replacement_points[NAVAl_REP]
         }
@@ -1309,10 +1291,6 @@ P.replacement_segment = {
         }
     },
     unit(u) {
-        //todo remove
-        if (!L.returned) {
-            L.returned = []
-        }
         if (G.location[u] === get_service_reinf_hex()) {
             G.active_stack = [u]
             L.allowed_hexes = get_unit_reinforcement_hexes(u)
@@ -1948,8 +1926,6 @@ function build_road(card, event) {
 
 P.offensive_segment = {
     _begin() {
-        L.debug = false
-        L.eliminate = false
         if (G.active === AP) {
             G.offensive.weather_rollback = copy_state()
         }
@@ -1965,28 +1941,6 @@ P.offensive_segment = {
             let card = hand[i]
             action_card(card)
         }
-
-        if (G.debug) {
-            button("check_s")
-            button("control")
-            button("isr")
-            button("tp")
-            button("check_s")
-            button("ns")
-
-            button("eliminate")
-            button("draw")
-        }
-        if (L.debug) {
-            for (var i = 1; i < LAST_BOARD_HEX; i++) {
-                if (is_controllable_hex(i)) {
-                    action_hex(i)
-                }
-            }
-        }
-        if (L.eliminate) {
-            for_each_unit_on_map(u => action_unit(u))
-        }
     },
     card(c) {
         push_undo()
@@ -1997,58 +1951,6 @@ P.offensive_segment = {
         G.passes[R] -= 1
         log(`${side_get_log_str(R)} passed, ${G.passes[R]} passes remains.`)
         goto("end_action")
-    },
-    //debug
-    draw() {
-        push_undo()
-        G.offensive.active_cards = [TOJO_RESIGNS]
-        var a = G.draw[R].slice()
-        a.forEach(c => discard_card(c))
-        call("draw_from_discard")
-    },
-    isr() {
-        G.inter_service[R] = 1 - G.inter_service[R]
-    },
-    check_s() {
-        log("Forced supply check.")
-        check_supply()
-    },
-    tp() {
-        call("tp_units")
-    },
-    ns() {
-        G.hand[AP].forEach(c => {
-            G.discard[AP].push(c)
-        })
-        G.hand[JP].forEach(c => {
-            G.discard[JP].push(c)
-        })
-        G.hand = [[], []]
-        goto("political_phase")
-    },
-    control() {
-        L.debug = !L.debug
-    },
-    eliminate() {
-        L.eliminate = !L.eliminate
-    },
-    action_hex(hex) {
-        capture_hex(hex, set_has(G.control, hex) ? AP : JP)
-        check_supply()
-    },
-    unit(u) {
-        if (set_has(G.reduced, u)) {
-            eliminate(u)
-        } else {
-            set_add(G.reduced, u)
-        }
-    },
-    deploy_b29() {
-        capture_hex(hex_to_int(3709), AP)
-        set_location(ap_air("20_bc"), hex_to_int(3709))
-        set_location(ap_air("20_bc"), JARHAT)
-        set_location(ap_air("21_bc"), hex_to_int(3709))
-        set_location(ap_air("21_bc"), JARHAT)
     },
 }
 
@@ -4337,9 +4239,6 @@ function check_supply() {
         mark_supply_eligable_ports(AP)
     mark_supply_eligable_ports(JP)
     L.supply = 0
-    if (G.debug) {
-        log(`Check supply. Check iteration ${i}. ${Date.now() - cur_time} ms spent.`)
-    }
 }
 
 function extended_pbm_possible() {
@@ -5973,10 +5872,6 @@ function fill_hit_able_units(faction) {
     }
 
     battle.hit_able_units[faction] = result
-    if (!battle.total_lf) {
-        //debug
-        battle.total_lf = [0, 0]
-    }
     battle.total_lf[faction] = total_lf
 }
 
@@ -6600,10 +6495,6 @@ P.apply_ground_winner = function () {
             return
 
         }
-        if (!G.offensive.retreat) {
-            //debug
-            G.offensive.retreat = []
-        }
         if (set_has(G.offensive.battle.amph_ground, u)) {
             set_add(G.offensive.ground_pbm, u)
         } else {
@@ -6751,10 +6642,6 @@ function reset_garrison() {
 
 P.retreat = {
     _begin() {
-        if (!G.offensive.retreat) {
-            //debug
-            G.offensive.retreat = []
-        }
         G.active = G.offensive.attacker
         L.unit_to_retreat = G.offensive.retreat.slice()
         L.hex_to_retreat = []
@@ -6988,7 +6875,6 @@ P.offensive_sequence = script(`
         trigger_event("before_movement")
     }
     call move_offensive_units
-    set G.todo 1
     call commit_offensive
     set G.active 1-G.offensive.attacker
     call cancel_offensive
@@ -7031,19 +6917,15 @@ P.offensive_sequence = script(`
     if (G.offensive.intelligence !== SURPRISE) {
         call move_offensive_units
         set G.offensive.active_units[1-G.offensive.attacker] []
-        set G.todo 1
         call commit_offensive
     }
     set G.active G.offensive.attacker
-    set G.todo 1
     call move_offensive_units
     set G.offensive.active_units[G.offensive.attacker] []
-    set G.todo 1
     call commit_offensive
     set G.active 1-G.offensive.attacker
     set G.offensive.stage EMERGENCY_STAGE
     call emergency_move
-    set G.todo 1
 `)
 
 P.battle_sequence = script(`
@@ -7090,10 +6972,8 @@ P.political_phase = script(`
     call india_surrender
     set G.active JP
     call emergency_move
-    set G.todo 1
     set G.active AP
     call emergency_move
-    set G.todo 1
     call political_will_segment
     goto attrition_phase
 `)
@@ -11180,7 +11060,6 @@ P.scenario_1941 = script(`
     call operation_no_1
     call activate_units
     call move_offensive_units
-    set G.todo 1
     call commit_offensive
     log ("#GOffensive reaction")
     set G.active AP
@@ -11198,15 +11077,12 @@ P.scenario_1941 = script(`
     log ("#GPost battle movement")
     set G.active G.offensive.attacker
     call move_offensive_units
-    set G.todo 1
     set G.offensive.active_units[G.offensive.attacker] []
-    set G.todo 1
     call commit_offensive
     eval {
         reset_offensive()
         emergency_move_1942()
     }
-    set G.todo 1
     goto political_phase
     `)
 
@@ -11433,7 +11309,6 @@ P.scenario_1942 = script(`
     eval {
         emergency_move_1942()
     }
-    set G.todo 1
     call arcadia
     set G.active JP
     call japan_init_1942
@@ -12191,10 +12066,7 @@ function on_setup(scenario, options) {
     G.pow = 0
     G.captured_once = []
 
-    if (options.debug) {
-        G.debug = 1
-    }
-    if (options.async) {
+    if (options.experienced) {
         G.async = 1
     }
     for (let i = 1; i < LAST_BOARD_HEX; i++) {
