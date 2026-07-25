@@ -584,7 +584,6 @@ function on_init(scenario, game_options, static_view) {
     init_preference_checkbox("nopath", false)
     init_preference_checkbox("fullcontrol", false)
     init_preference_checkbox("hidezoi", false)
-    init_preference_checkbox("hiderange", false)
 
     // world.tip.addEventListener("touchstart", function () {
     //     on_blur_tip()
@@ -1303,13 +1302,10 @@ function on_update() {
         }
     }
 
-    if (world.range && !get_preference("hiderange", false)) {
-        var focused = []
-        for_each_hex_in_range(world.range[0], world.range[1], hex => set_add(focused, hex))
-        for (var hex of ALL_BOARD_HEXES) {
-            update_keyword("zoi_hex", hex, "yellow", set_has(focused, hex))
-        }
-
+    var focused = []
+    for_each_hex_in_range(world.range[0], world.range[1], hex => set_add(focused, hex))
+    for (var hex of ALL_BOARD_HEXES) {
+        update_keyword("zoi_hex", hex, "yellow", set_has(focused, hex))
     }
 
     print_violations()
@@ -1358,6 +1354,9 @@ function on_update() {
         var marker = nation.counter
         var hex = nation.counter_hex
         var value = G.surrender[nation.id]
+        if (nation.id === data.nations.MARSHALL.id) {
+            value = !value
+        }
         if (marker && turns[value] && value) {
             populate_generic("turn", value, marker)
         }

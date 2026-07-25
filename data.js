@@ -6048,6 +6048,9 @@ data.counters = {
     dei_surrender: "big_markers_white big unit_ix_9",
     malaya_surrender: "big_markers_white big unit_ix_8",
     phillipines_surrender: "big_markers_white big unit_ix_7",
+    mandates_surrender: "big am_surrender",
+    guinea_surrender: "big ng_surrender",
+    marshall_surrender: "big mi_surrender",
     scenario_start: "scenario_start",
     scenario_end: "scenario_end",
 }
@@ -6111,6 +6114,8 @@ data.nations = {
     AUSTRALIAN_MANDATES: {
         id: 6,
         name: "Australian Mandates",
+        counter: data.counters.mandates_surrender,
+        counter_hex: 3920,
         regions: ["AMandates"],
         keys: [4021, 4423],
         ports: [4423, 4222, 4021, 4020, 3820]
@@ -6118,12 +6123,16 @@ data.nations = {
     NEW_GUINEA: {
         id: 7,
         name: "New Guinea",
+        counter: data.counters.guinea_surrender,
+        counter_hex: 3521,
         regions: ["Guinea"],
         keys: [3219, 3319, 3520, 3720, 3822, 3823, 4024]
     },
     MARSHALL: {
         id: 8,
         name: "Marshall Islands",
+        counter_hex: 4515,
+        counter: data.counters.marshall_surrender,
         regions: ["Marshall"],
         keys: [4415, 4715]
     },
