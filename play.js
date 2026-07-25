@@ -574,9 +574,7 @@ for (var i = 0; i < data.sp_map.length; i++) {
 }
 
 function set_map_size(w, h) {
-    if (update_map_size) {
-        update_map_size(w, h)
-    }
+    update_map_size(w, h)
 }
 
 function on_init(scenario, game_options, static_view) {

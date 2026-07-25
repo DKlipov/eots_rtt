@@ -5821,7 +5821,7 @@ P.apply_attack_reaction = {
                 }
             }
         }
-        if (!L.allowed_card.length) {
+        if (!L.allowed_cards.length) {
             this.done()
         }
     },

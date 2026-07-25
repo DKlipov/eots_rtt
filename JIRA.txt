@@ -1,4 +1,4 @@
 Todo list:
 * logging check
 * Mobile resizing lags & bugs
-* zoom not works
+* check css errors
