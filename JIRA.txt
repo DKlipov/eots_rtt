@@ -1,5 +1,4 @@
 Todo list:
-* stack refactoring
 * logging check
 * Mobile resizing lags & bugs
 * zoom not works
