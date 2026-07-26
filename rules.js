@@ -3303,6 +3303,7 @@ function move_units(units, path) {
             point_to_point[point_to_point.length - 1] = "rebase " + hex_get_log_str(hex)
         }
     }
+    i = 2
     var destination = path[path.length - 1]
     log(`${units_list} moved to ${list_get_log_str(hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
     for (; i < path.length; i++) {
