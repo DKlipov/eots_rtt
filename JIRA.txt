@@ -1,1 +1,3 @@
 Todo list:
+* rangoon supply small map
+* fizzbuzz fixes

@@ -117,8 +117,8 @@
         if (scenario.value.indexOf("1942") >= 0 || scenario.value.indexOf("1941") >= 0) {
             document.querySelector("#hist_hand").hidden = false;
         } else {
+            document.querySelector("#historical").checked = false
             document.querySelector("#hist_hand").hidden = true;
-            document.querySelector("#hist_hand").checked = false
         }
     }
     scenario.onchange();

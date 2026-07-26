@@ -2184,9 +2184,9 @@ P.choose_hq = {
         }
         L.possible_units = []
         var hq_list = []
-        if (R === G.offensive.attacker && G.offensive.type === EC) {
+        if (G.active === G.offensive.attacker && G.offensive.type === EC) {
             L.card = G.offensive.offensive_card
-        } else if (R !== G.offensive.attacker && G.offensive.counter_offensive_card > 0) {
+        } else if (G.active !== G.offensive.attacker && G.offensive.counter_offensive_card > 0) {
             L.card = G.offensive.counter_offensive_card
         }
         if (L.card && cards[L.card].hq) {
@@ -2197,9 +2197,9 @@ P.choose_hq = {
             if (G.location[u] > LAST_BOARD_HEX) {
                 return
             }
-            if (piece.faction === R && piece.class === "hq" &&
+            if (piece.faction === G.active && piece.class === "hq" &&
                 (!set_has(G.oos, u) || L.card === GENERAL_ADACHI)
-                && (R === G.offensive.attacker
+                && (G.active === G.offensive.attacker
                     || G.offensive.battle_hexes.filter(bh => get_distance(bh, G.location[u]) <= piece.cr).length)
                 && (hq_list.length <= 0 || hq_list.includes(u))
             ) {
@@ -2230,7 +2230,7 @@ P.choose_hq = {
         if (G.offensive.type === EC && L.card > 0 && cards[L.card].logistic_alt && cards[L.card].logistic_alt[0].includes(u)) {
             G.offensive.logistic = cards[L.card].logistic_alt[1]
         }
-        log(`${piece_get_log_str(u)} activated for ${R === G.offensive.attacker ? "offensive" : "reaction"}.`)
+        log(`${piece_get_log_str(u)} activated for ${G.active === G.offensive.attacker ? "offensive" : "reaction"}.`)
         end()
     },
     unit(u) {
@@ -3066,6 +3066,7 @@ P.move_offensive_units = {
             }
             return
         }
+        move_units(G.active_stack, curr_path)
         if (is_faction_units(hex, 1 - R) && G.active === G.offensive.attacker && G.offensive.stage === ATTACK_STAGE) {
             create_battle_hex(hex)
         } else if (!is_space_controlled(hex, R) && curr_path[0] & AMPH_MOVE) {
@@ -3073,7 +3074,6 @@ P.move_offensive_units = {
         }
         if (curr_path[0] & AMPH_MOVE && G.offensive.stage === REACTION_STAGE) {
             G.asp[R][1] += 1
-
             G.offensive.r_asp = 1
         } else if (curr_path[0] & AMPH_MOVE &&
             (!get_map_data(hex).port || !is_space_controlled(hex, R) || is_faction_units(hex, 1 - R) || (L.move_type === AMPH_MOVE))) {
@@ -3083,7 +3083,6 @@ P.move_offensive_units = {
                 G.offensive.r_asp += L.move_data.asp_points
             }
         }
-        move_units(G.active_stack, curr_path)
         L.move_type = ANY_MOVE
         L.spec_move = 0
         check_supply()
@@ -3303,6 +3302,10 @@ function move_units(units, path) {
         } else if (last) {
             point_to_point[point_to_point.length - 1] = "rebase " + hex_get_log_str(hex)
         }
+    }
+    var destination = path[path.length - 1]
+    log(`${units_list} moved to ${list_get_log_str(hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
+    for (; i < path.length; i++) {
         last = hex
         if (zoi_flag && zoi_generator_flag && (G.supply_cache[hex] & (POSSIBLE_ZOI << enemy_faction))) {
             units.forEach(u => set_location(u, hex, 1))
@@ -3317,9 +3320,7 @@ function move_units(units, path) {
             capture_hex(hex)
         }
     }
-    var destination = path[path.length - 1]
     units.forEach(u => set_location(u, destination, true))
-    log(`${units_list} moved to ${list_get_log_str(hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
 }
 
 function get_move_type(type) {
@@ -5603,7 +5604,7 @@ P.define_intelligence_condition = {
             }
         })
         if (!cancel || get_hand(G.active).length === 0) {
-            this.roll()
+            return no_reaction ? (this.skip()) : (this.roll())
         }
     },
     inactive: "react",
@@ -7595,8 +7596,8 @@ P.attrition_phase = script(`
     call attrition
     eval {
         check_supply()
-        check_occupation(events.HAWAII_OCCUPATION, true)
-        check_occupation(events.ALASKA_OCCUPATION, true)
+        check_occupation(events.HAWAII_OCCUPATION)
+        check_occupation(events.ALASKA_OCCUPATION)
     }
     goto end_of_turn_phase
 `)
@@ -10165,7 +10166,7 @@ cards[find_card(AP, 28)].before_commit_offensive = function () {
         return
     }
     G.offensive.landing_hexes.forEach(l => {
-        if (get_map_data(l).island) {
+        if (get_map_data(l).island && !is_faction_units(l, AP) && !is_faction_units(l, JP)) {
             for_each_hex_in_range(l, 1, h => {
                 if (h !== l && get_map_data(h).island && !is_faction_units(h, JP)) {
                     capture_hex(h, AP)
