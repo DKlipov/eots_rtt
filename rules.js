@@ -5473,7 +5473,7 @@ P.special_reaction = {
             return
         }
         if (G.async) {
-            L.possible_hexes.slice().forEach(h => action_hex(h))
+            L.possible_hexes.slice().forEach(h => this.action_hex(h))
         }
     },
     inactive: "roll to special reaction",
