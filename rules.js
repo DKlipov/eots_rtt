@@ -5833,15 +5833,15 @@ function fill_hit_able_units(faction) {
         var reduced_status = get_reduced_status(unit, faction)
         var could_be_damaged = (!piece.br || distant_hits || set_has(battle.distant_hits_list[faction], unit)
             || G.location[unit] === battle.battle_hex)
-        if (!could_be_damaged) {
-            continue
-        }
         if (!piece.garrison) {
             total_lf += loss_factor
-            if (reduced_status === 0) {
-                total_lf += loss_factor
-                has_full_size = 1
-            }
+        }
+        if (reduced_status === 0) {
+            total_lf += loss_factor
+            has_full_size = 1
+        }
+        if (!could_be_damaged) {
+            continue
         }
         if (loss_factor <= hit_limit && (critical || reduced_status === 0 || piece.one_step && battle.ground_stage)) {
             map_set(result, unit, loss_factor)
