@@ -6265,6 +6265,13 @@ P.ground_bombardment = {
         }
         if (L.allowed_units.length === 1 && set_has(G.reduced, L.allowed_units[0])) {
             end()
+            return
+        }
+        while (G.async && (L.garrison_present || L.allowed_units.length === 1)) {
+            this.unit(L.allowed_units[0])
+        }
+        if (!L.allowed_units.length) {
+            this.done()
         }
     },
     inactive: "assign hits (the Reaction player chooses which reduced unit will be the last ground step)",
@@ -6306,7 +6313,7 @@ P.assign_crit = {
     prompt() {
         map_for_each(G.offensive.battle.hit_able_units[G.offensive.attacker], u => action_unit(u))
         prompt(`Choose one step applied by critical hit.`)
-        if (!G.offensive.battle.hit_able_units[1 - G.active].length) {
+        if (!G.offensive.battle.hit_able_units[G.offensive.attacker].length) {
             button("done")
         }
     },
