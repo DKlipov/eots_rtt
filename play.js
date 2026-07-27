@@ -573,6 +573,10 @@ for (var i = 0; i < data.sp_map.length; i++) {
     }
 }
 
+function set_map_size(w, h) {
+    update_map_size(w, h)
+}
+
 function on_init(scenario, game_options, static_view) {
     init_canvas(scenario)
 
@@ -580,7 +584,6 @@ function on_init(scenario, game_options, static_view) {
     init_preference_checkbox("nopath", false)
     init_preference_checkbox("fullcontrol", false)
     init_preference_checkbox("hidezoi", false)
-    init_preference_checkbox("hiderange", false)
 
     // world.tip.addEventListener("touchstart", function () {
     //     on_blur_tip()
@@ -604,6 +607,7 @@ function on_init(scenario, game_options, static_view) {
 
             define_s_loc(1400, center_rect(map_layout.h_5808, 45, 45))
             define_space("action_hex", 1400, center_rect(map_layout.h_5808, 68, 68))
+            set_map_size(1275, 825)
             break;
         }
         case  "Burma: The Forgotten War, 1943-1944": {
@@ -619,6 +623,7 @@ function on_init(scenario, game_options, static_view) {
             define_thing("road", data.events.IMPHAL_ROAD.id).layout([550, 330, 60, 60], "road_imphal hide marker control")
             define_thing("road", data.events.LEDO_ROAD.id).layout([600, 300, 60, 60], "road_ledo hide marker control")
             define_thing("road", data.events.KWAI_RIVER_BRIDGE.id).layout([528, 501, 50, 95], "road_kwai hide marker control")
+            set_map_size(1275, 825)
             break;
         }
         default: {
@@ -631,6 +636,7 @@ function on_init(scenario, game_options, static_view) {
             define_thing("road", data.events.IMPHAL_ROAD.id).layout([579, 330, 60, 60], "road_imphal hide marker control")
             define_thing("road", data.events.LEDO_ROAD.id).layout([629, 300, 60, 60], "road_ledo hide marker control")
             define_thing("road", data.events.KWAI_RIVER_BRIDGE.id).layout([557, 501, 50, 95], "road_kwai hide marker control")
+            set_map_size(2550, 1650)
         }
     }
 
@@ -721,7 +727,7 @@ function on_init(scenario, game_options, static_view) {
     }
     for (let i = 1; i < data.cards.length; ++i) {
         let card = data.cards[i]
-        card.element = define_card("card", i, `card_${card.faction ? "ap" : "jp"}_${card.num}`)
+        card.element = define_card("card", i, `card_${card.faction ? "ap" : "jp"}_${card.num}`).tooltip_image(on_focus_card_tip)
         card.element.card = i
     }
     define_panel("#jp_hand", "hand", JP)
@@ -1172,7 +1178,6 @@ function on_update() {
     begin_update()
     document.body.classList.remove("hex-clickable")
     world.log_boxes = []
-    console.log(G)
     if (LOCAL_STATUS) {
         P[LOCAL_STATUS].prompt()
     }
@@ -1202,12 +1207,6 @@ function on_update() {
         draw_paths()
     }
 
-
-    // console.log(V)
-    // console.log(R)
-    // G.actions={}
-    // G.actions.board_hex = []
-    // G.actions.board_hex.push(hex_to_int(piece.start))
     document.getElementById("vp_check_button").classList.toggle("disabled", CAMPAIGN_SCENARIOS.includes(G.sid))
     document.getElementById("pw_check_button").classList.toggle("disabled", G.sid === BURMA_SCENARIO)
     if (G.pow <= 0) {
@@ -1303,13 +1302,10 @@ function on_update() {
         }
     }
 
-    if (world.range && !get_preference("hiderange", false)) {
-        var focused = []
-        for_each_hex_in_range(world.range[0], world.range[1], hex => set_add(focused, hex))
-        for (var hex of ALL_BOARD_HEXES) {
-            update_keyword("zoi_hex", hex, "yellow", set_has(focused, hex))
-        }
-
+    var focused = []
+    for_each_hex_in_range(world.range[0], world.range[1], hex => set_add(focused, hex))
+    for (var hex of ALL_BOARD_HEXES) {
+        update_keyword("zoi_hex", hex, "yellow", set_has(focused, hex))
     }
 
     print_violations()
@@ -1358,6 +1354,9 @@ function on_update() {
         var marker = nation.counter
         var hex = nation.counter_hex
         var value = G.surrender[nation.id]
+        if (nation.id === data.nations.MARSHALL.id) {
+            value = !value
+        }
         if (marker && turns[value] && value) {
             populate_generic("turn", value, marker)
         }
@@ -1436,16 +1435,6 @@ function on_update() {
     action_button("ground_move", "Ground")
     action_button("extended_air", "Extended range")
     action_button("barges", "Barges")
-
-    //debug
-    action_button("isr", "Flip isr(dbg)")
-    action_button("tp", "Teleport(dbg)")
-    action_button("check_s", "Check supply(dbg)")
-    action_button("deploy_b29", "deploy_b29(dbg)")
-    action_button("ns", "discard cards(dbg)")
-    action_button("control", "change hex control(dbg)")
-    action_button("draw", "draw specific card(dbg)")
-    action_button("auto", "auto(dbg)")
 
     action_button("redo", "Redo")
     action_button("undo", "Undo")
@@ -1541,21 +1530,8 @@ const ICONS = {
 
 function escape_text(text) {
     text = String(text)
-    text = text.replace(/---/g, "\u2014")
-    text = text.replace(/--/g, "\u2013")
-    text = text.replace(/->/g, "\u2192")
-    text = text.replace(/-( ?[\d])/g, "\u2212$1")
-    text = text.replace(/&/g, "&amp;")
-    text = text.replace(/</g, "&lt;")
-    text = text.replace(/>/g, "&gt;")
-    text = text.replace(/\[/g, "<")
-    text = text.replace(/\]/g, ">")
-    text = text.replace(/\^(.*?)\^/g, escaped_list)
-    text = text.replace(/([ +-]1) action points/g, "$1 action point")
-    text = text.replace(/([ +-]1) trenches/g, "$1 trench")
-    text = text.replace(/([ +-]1) units/g, "$1 unit")
-    text = text.replace(/([ +-]1) hits/g, "$1 hit")
     text = text.replace(/[BRW]\d/g, (m) => ICONS[m] ?? m)
+    text = text.replace(/\^(.*?)\^/g, escaped_list)
     text = text.replace(/C(\d+)/g, sub_card)
     text = text.replace(/P(\d+)/g, sub_piece)
     text = text.replace(/H(\d+)/g, sub_hex)
@@ -2224,7 +2200,7 @@ function escaped_list(match, p1) {
     if (array <= 3) {
         return `<span>${text}</span>`
     } else {
-        return `<span id="${id}"><span class="list-tip" onclick="expand_list(${id})" onmouseenter="on_focus_list(${id})" onmouseleave="on_blur_list(${id})">\<${header}\></span><span hidden>${text}</span></span>`
+        return `<span id="${id}"><span class="list-tip" onclick="expand_list(${id})" onmouseenter="on_focus_list(${id})" onmouseleave="on_blur_list(${id})">&lt;${header}&gt;</span><span hidden>${text}</span></span>`
     }
 
 }

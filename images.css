@@ -12,6 +12,9 @@
 .marker.strat_air_small { background-image: url(pieces150/strat_air_small.png); }
 .marker.barges_small { background-image: url(pieces150/barges_small.png); }
 .marker.oos_small { background-image: url(pieces150/oos_small.webp); }
+.marker.ng_surrender { background-image: url(pieces150/ng_sur.png);background-size: 45px 45px; }
+.marker.am_surrender { background-image: url(pieces150/am_sur.png);background-size: 45px 45px; }
+.marker.mi_surrender { background-image: url(pieces150/mi_sur.png);background-size: 45px 45px; }
 .road_ledo { background-image: url(pieces150/road_ledo.png); background-size: 50px 55px;background-repeat: no-repeat; }
 .road_imphal { background-image: url(pieces150/road_imphal.png);background-size: 50px 55px;background-repeat: no-repeat; }
 .road_jarhat { background-image: url(pieces150/road_jarhat.png); background-size: 55px 45px;background-repeat: no-repeat;}

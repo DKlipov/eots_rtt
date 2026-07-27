@@ -888,39 +888,34 @@ function _layout_stacks() {
         start_x -= stack.element.offsetLeft
         start_y -= stack.element.offsetTop
         let sub_cache = []
-        let i = 0, k = 0
+        let i = 0, k = 0, sh = 0
         var childs = stack.my_stack.sort_children(stack.element.children, world.focus === stack)
         for (var child of childs) {
-            var w = child.offsetWidth
-            var h = child.offsetHeight
+            var [w, h] = get_child_size(child)
             var x = start_x + major_dx * i + minor_dx * k + (stack_w - w) * grav_x
             var y = start_y + major_dy * i + minor_dy * k + (stack_h - h) * grav_y
-            sub_cache.push([x, y, z + i])
+            child.style.left = x + "px"
+            child.style.top = y + "px"
+            child.style.zIndex = z + i
             if (++i === wrap) {
                 i = 0
+                sh = 0
                 ++k
             }
         }
         cache.push(sub_cache)
     }
+}
 
-    // quick workaround to avoid layout thrashing caused by reading offsetWidth, offsetHeight etc
-    let i = 0;
-    for (var stack of world.stack_list) {
-        let k = 0;
-        for (var child of stack.element.children) {
-            child.classList.add("hide")
-        }
-        for (var child of stack.my_stack.sort_children(stack.element.children, world.focus === stack)) {
-            child.classList.remove("hide")
-            const pre_calc = cache[i][k]
-            k++
-            child.style.left = pre_calc[0] + "px"
-            child.style.top = pre_calc[1] + "px"
-            child.style.zIndex = pre_calc[2]
-        }
-        i++;
+function get_child_size(child) {
+    var size = 37
+    if (child.classList.contains("big")) {
+        size = 47
     }
+    if (child.classList.contains("action")) {
+        size += 8
+    }
+    return [size, size]
 }
 
 function _reset_stacks() {
@@ -1055,8 +1050,6 @@ function end_update() {
     for (e of document.querySelectorAll(".panel.autohide"))
         e.hidden = (e.querySelector(".panel-body").children.length === 0)
 
-    _layout_stacks()
-
     for (thing of world.keyword_list)
         thing.element.setAttribute("class", [...thing.my_keywords, ...thing.my_dynamic_keywords].join(" "))
 
@@ -1095,6 +1088,7 @@ function end_update() {
                 thing.body.innerHTML = text
         }
     }
+    _layout_stacks()
 
     _animate_end()
 }

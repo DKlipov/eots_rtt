@@ -1,9 +1,3 @@
 Todo list:
-* tooltip fixes
-* stack refactoring
-* Mobile resizing lags & bugs
-* zoom not works
-* logging check
-* burma singapore not attack
-* burma no hq attack
-* burma india surrender
+* rangoon supply small map
+* fizzbuzz fixes
