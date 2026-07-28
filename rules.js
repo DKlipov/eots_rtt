@@ -7762,7 +7762,7 @@ function victory_burma() {
     adjust_vp(result, G.surrender[nations.CHINA.id] - 2, "China government status")
     if (G.surrender[nations.CHINA.id] > 5) {
         result.vp += 3
-        result.text.push(`+3 VP - China surrender.`)
+        result.text.push(`+3 VP - China surrendered.`)
     }
     if (G.burma_road >= 1) {
         //B. Burma Road is closed: +3 VP
@@ -7847,7 +7847,7 @@ function victory_1942() {
     adjust_vp(result, G.surrender[nations.CHINA.id], "China Government Front Status")
     if (G.surrender[nations.CHINA.id] > 5) {
         result.vp += 5
-        result.text.push(`+5 VP - China surrender`)
+        result.text.push(`+5 VP - China surrendered`)
     }
     binary_vp(result, G.burma_road >= 1, 1, "The Burma Road is closed", `The Burma Road is open`)
     binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
@@ -7884,10 +7884,10 @@ function victory_1942() {
 
     binary_vp(result, set_has(G.captured_once, OAHU), 3, `Oahu was captured`,
         "Oahu was not captured")
-    binary_vp(result, set_has(G.captured_once, hex_to_int(5708)) || set_has(G.captured_once, hex_to_int(5908)), 1,
-        `Kauai or Hawaii was captured`,
-        "Neither Kauai nor Hawaii were captured")
-
+    binary_vp(result, set_has(G.captured_once, hex_to_int(5708)), 1, `Kauai was captured`,
+        "Kauai was not captured")
+    binary_vp(result, set_has(G.captured_once, hex_to_int(5908)), 1, `Hawaii was captured`,
+        "Hawaii was not captured")
     binary_vp(result, is_space_controlled(hex_to_int(5108), JP) && is_faction_units(hex_to_int(5108), JP), 1,
         `Midway was captured`,
         "Midway was not captured", [hex_to_int(5108)])
@@ -7900,7 +7900,6 @@ function victory_1942() {
     binary_vp(result, is_space_controlled(hex_to_int(5100), JP), 1,
         `Dutch Harbor was captured`,
         "Dutch Harbor was not captured", [hex_to_int(5100)])
-
     binary_vp(result, get_jp_resources() <= 12, -3,
         `Japan control 12 resource hexes or less`,
         "Japan control more than 12 resource hexes", RESOURCE_HEX)
@@ -7976,7 +7975,7 @@ function victory_1943() {
         won_side: "",
         won_text: "",
     }
-    binary_vp(result, G.surrender[nations.CHINA.id] >= 5, 5, "China surrender", `China did not surrender`)
+    binary_vp(result, G.surrender[nations.CHINA.id] >= 5, 5, "China surrendered", `China did not surrender`)
     binary_vp(result, G.burma_road >= 1, 1, "The Burma Road is closed", `The Burma Road is open`)
     binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
         "Townsville was not isolated", [hex_to_int(3727), OAHU])
@@ -7999,7 +7998,7 @@ function victory_1943() {
     } else {
         mandate_diff = -3
     }
-    adjust_vp(result, mandate_diff, "Control of Australian Mandates")
+    adjust_vp(result, mandate_diff, "JP Control of Australian Mandates")
     if (!G.surrender[nations.AUSTRALIAN_MANDATES.id]) {
         var mandate_count = 0
         var mandate_hexes = []
@@ -8025,9 +8024,10 @@ function victory_1943() {
     }
     binary_vp(result, set_has(G.captured_once, OAHU), 3, `Oahu was captured`,
         "Oahu was not captured")
-    binary_vp(result, set_has(G.captured_once, hex_to_int(5708)) || set_has(G.captured_once, hex_to_int(5908)), 1,
-        `Kauai or Hawaii was captured`,
-        "Neither Kauai nor Hawaii were captured")
+    binary_vp(result, set_has(G.captured_once, hex_to_int(5708)), 1, `Kauai was captured`,
+        "Kauai was not captured")
+    binary_vp(result, set_has(G.captured_once, hex_to_int(5908)), 1, `Hawaii was captured`,
+        "Hawaii was not captured")
     binary_vp(result, check_nation_controlled(nations.MARSHALL, AP),
         -3, "AP control Marshall Islands", `AP do not control Marshall Islands`,
         nations.MARSHALL.keys.map(h => hex_to_int(h))
@@ -8228,7 +8228,7 @@ function victory_south_pacific() {
     adjust_vp(result, G.surrender[nations.CHINA.id] - 2, "China Government Front Status")
     if (G.surrender[nations.CHINA.id] > 5) {
         result.vp += 3
-        result.text.push(`+3 VP - China surrender.`)
+        result.text.push(`+3 VP - China surrendered.`)
     }
     binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
         "Townsville was not isolated", [hex_to_int(3727), OAHU])
