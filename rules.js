@@ -8077,7 +8077,7 @@ function victory_1944() {
         won_side: "",
         won_text: "",
     }
-    binary_vp(result, G.surrender[nations.CHINA.id] >= 5, 5, "China surrender", `China did not surrender`)
+    binary_vp(result, G.surrender[nations.CHINA.id] >= 5, 5, "China surrendered", `China did not surrender`)
     binary_vp(result, G.burma_road >= 1, 1, "The Burma Road is closed", `The Burma Road is open`)
     binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
         "Townsville was not isolated", [hex_to_int(3727), OAHU])
@@ -8094,11 +8094,8 @@ function victory_1944() {
     } else {
         result.text.push(`0 VP - India ${nations.INDIA.statuses[india_status]}`)
     }
-    var mandate_diff = 0
-    if (G.surrender[nations.AUSTRALIAN_MANDATES.id]) {
-        mandate_diff = 1
-    }
-    adjust_vp(result, mandate_diff, "Control of Australian Mandates")
+    binary_vp(result, G.surrender[nations.AUSTRALIAN_MANDATES.id], 1, "JP Control of the Australian Mandates",
+              "JP don't control the Australian Mandates")
     if (G.political_will <= 5) {
         result.vp += 6 - G.political_will
         result.text.push(`+${6 - G.political_will} VP - Political will`)
@@ -8114,11 +8111,11 @@ function victory_1944() {
     } else if (!check_nation_controlled(nations.NEW_GUINEA, AP)) {
         ng_diff = 3
     }
-    adjust_vp(result, ng_diff, "Control of New Guinea",
+    adjust_vp(result, ng_diff, "Control of New Guinea (JP: +5 / Neither: +3 / AP: 0)",
         nations.NEW_GUINEA.keys.map(h => hex_to_int(h)))
-    binary_vp(result, is_space_controlled(RABAUL, AP) || !(G.supply_cache[RABAUL] & JP_SUPPLIED_HEX), -3,
-        `Rabaul ${is_space_controlled(RABAUL, AP) ? "controlled" : "out of supply"}`,
-        "Rabaul JP controlled and supplied")
+    binary_vp(result, is_space_controlled(RABAUL, JP) && (G.supply_cache[RABAUL] & JP_SUPPLIED_HEX), 3,
+        "Rabaul is JP controlled and supplied", 
+        `Rabaul is ${is_space_controlled(RABAUL, AP) ? "AP controlled" : "out of supply"}`)
 
     var philipine_ports = [MANILA, hex_to_int(3014), hex_to_int(2915)]
     var pp = philipine_ports.filter(h => is_space_controlled(h, AP) && (G.supply_cache[h] & AP_SUPPLIED_HEX)).length
@@ -8130,7 +8127,7 @@ function victory_1944() {
     } else if (pp >= 2) {
         phillipine_diff = 0
     }
-    adjust_vp(result, phillipine_diff, "Control of Philippines ports",
+    adjust_vp(result, phillipine_diff, "AP Control of Philippines ports (0: +5 / 1: +3 / 2+: 0) ",
         philipine_ports)
 
     var tokyo_ports = 0
