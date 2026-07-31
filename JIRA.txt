@@ -1,6 +1,5 @@
 Todo list:
-* chronicle fix
-* strange check cross zoi
+* marine could not react
+* bad supply line at crome
 * rangoon supply small map
 * fizzbuzz fixes
-* marine could not react

@@ -3323,12 +3323,13 @@ function move_units(units, path) {
         } else if (last) {
             point_to_point[point_to_point.length - 1] = "rebase " + hex_get_log_str(hex)
         }
+        last = hex
     }
-    i = 2
+    i = 3
     var destination = path[path.length - 1]
     log(`${units_list} moved to ${list_get_log_str(hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
     for (; i < path.length; i++) {
-        last = hex
+        var hex = path[i]
         if (zoi_flag && zoi_generator_flag && (G.supply_cache[hex] & (POSSIBLE_ZOI << enemy_faction))) {
             units.forEach(u => set_location(u, hex, 1))
             check_supply()
@@ -8123,7 +8124,7 @@ function victory_1944() {
         result.text.push(`0 VP - India ${nations.INDIA.statuses[india_status]}`)
     }
     binary_vp(result, G.surrender[nations.AUSTRALIAN_MANDATES.id], 1, "JP Control of the Australian Mandates",
-              "JP don't control the Australian Mandates")
+        "JP don't control the Australian Mandates")
     if (G.political_will <= 5) {
         result.vp += 6 - G.political_will
         result.text.push(`+${6 - G.political_will} VP - Political will`)
@@ -8142,7 +8143,7 @@ function victory_1944() {
     adjust_vp(result, ng_diff, "Control of New Guinea (JP: +5 / Neither: +3 / AP: 0)",
         nations.NEW_GUINEA.keys.map(h => hex_to_int(h)))
     binary_vp(result, is_space_controlled(RABAUL, JP) && (G.supply_cache[RABAUL] & JP_SUPPLIED_HEX), 3,
-        "Rabaul is JP controlled and supplied", 
+        "Rabaul is JP controlled and supplied",
         `Rabaul is ${is_space_controlled(RABAUL, AP) ? "AP controlled" : "out of supply"}`)
 
     var philipine_ports = [MANILA, hex_to_int(3014), hex_to_int(2915)]
@@ -10192,12 +10193,23 @@ cards[find_card(AP, 27)].event = function () {
     check_supply()
 }
 
+cards[find_card(AP, 28)].before_activation = function () {
+    G.offensive.chronicle = []
+    for_each_unit_on_map((u, piece, location) => {
+        set_add(G.offensive.chronicle, location)
+    })
+}
+
 cards[find_card(AP, 28)].before_commit_offensive = function () {
     if (G.offensive.stage !== ATTACK_STAGE) {
         return
     }
+    if (!G.offensive.chronicle) {
+        //todo: remove
+        G.offensive.chronicle = []
+    }
     G.offensive.landing_hexes.forEach(l => {
-        if (get_map_data(l).island && !is_faction_units(l, AP) && !is_faction_units(l, JP)) {
+        if (get_map_data(l).island && !set_has(G.offensive.chronicle, l) && !is_faction_units(l, JP)) {
             for_each_hex_in_range(l, 1, h => {
                 if (h !== l && get_map_data(h).island && !is_faction_units(h, JP)) {
                     capture_hex(h, AP)

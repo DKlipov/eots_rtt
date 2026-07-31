@@ -111,8 +111,6 @@
     scenario.onchange = function (evt) {
         document.querySelectorAll(".scenario_info").forEach(e => e.hidden = true);
         document.getElementById(scenario.value).hidden = false;
-        console.log(scenario.value)
-        console.log(scenario.value)
         if (scenario.value.indexOf("1942") >= 0 || scenario.value.indexOf("1941") >= 0) {
             document.querySelector("#hist_hand").hidden = false;
         } else {
