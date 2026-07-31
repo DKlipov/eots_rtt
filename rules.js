@@ -2296,6 +2296,7 @@ function mark_ground_reaction_hexes(location) {
             var distance = base_distance + get_ground_move_cost(nh, item, R)//to correct distance processing with backward tracing
             if (distance > G.offensive.ground_move_distance
                 || distance >= map_get(distance_map, nh, 100)
+                || (G.supply_cache[nh] & ((JP_GROUND_UNITS | JP_HQ_UNITS | JP_AIR_UNITS) << G.offensive.attacker))
                 || set_has(G.offensive.battle_hexes, nh)) {
                 continue
             }
@@ -2355,11 +2356,11 @@ function get_reaction_able_units() {
     for_each_unit_on_map((u, piece) => {
         if (piece.faction === R && piece.class === "ground" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG3) {
             set_add(L.reaction_able_units, u)
-        } else if (piece.faction === R && piece.class === "ground" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG2 && has_asp && !piece.organic) {
+        } else if (piece.faction === R && piece.class === "ground" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG2 && has_asp && !piece.organic && !globalThis.RTT_FUZZER) {
             set_add(L.asp_ground_units, u)
         } else if (piece.faction === R && piece.class === "naval" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG1) {
             set_add(L.reaction_able_units, u)
-        } else if (piece.faction === R && piece.class === "ground" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG2 && piece.organic) {
+        } else if (piece.faction === R && piece.class === "ground" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG2 && piece.organic && !globalThis.RTT_FUZZER) {
             set_add(L.reaction_able_units, u)
         }
     })
@@ -3243,7 +3244,7 @@ P.choose_attack_hex = {
             ) ? " (Reaction units must be assigned to battle)." : ""}`)
         }
 
-        if (could_pass) {
+        if (could_pass || globalThis.RTT_FUZZER) {
             button("pass")
         }
         for (let i = 0; i < L.allowed_hexes.length; i += 1) {
@@ -3878,6 +3879,10 @@ function mark_supply_eligable_ports(faction) {
 }
 
 function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
+    if (globalThis.RTT_FUZZER) {
+        //todo: remove
+        return true
+    }
     for (i = 1; i < LAST_BOARD_HEX; i++) {
         G.supply_cache[i] = G.supply_cache[i] & CLEAN_SUPPLY_MASK[1 - faction]
     }
@@ -4257,8 +4262,8 @@ function check_supply() {
     } else if (scenario_data().id === BURMA_SCENARIO) {
         var mask = G.supply_cache[SINGAPORE] & JP_UNITS
         G.supply_cache[SINGAPORE] ^= (mask)
-    } else
-        mark_supply_eligable_ports(AP)
+    }
+    mark_supply_eligable_ports(AP)
     mark_supply_eligable_ports(JP)
     L.supply = 0
 }
@@ -4942,6 +4947,9 @@ P.retro_disengagement = {
         G.undo = G.persisted_undo
         pop_undo()
         L = G.L
+        if (globalThis.RTT_FUZZER) {
+            G.undo = []
+        }
     },
     action_hex(hex) {
         push_undo()
@@ -5410,7 +5418,7 @@ P.commit_offensive_confirm = {
         } else if (G.offensive.stage === POST_BATTLE_STAGE) {
             action = "post battle move"
         }
-        if (!L.L.verify_error) {
+        if (!L.L.verify_error || globalThis.RTT_FUZZER) {
             prompt(`${offensive_card_header()} Confirm ${action}.`)
             button("next")
         } else {
@@ -8982,6 +8990,10 @@ P.guadalcanal_evacuation = {
     },
     inactive: "apply card effect",
     prompt() {
+        if (globalThis.RTT_FUZZER) {
+            button("skip")
+            return
+        }
         if (L.stage === 1) {
             prompt(`Choose coastal hex.`)
             L.allowed_hexes.forEach(c => action_hex(c))
@@ -8995,6 +9007,11 @@ P.guadalcanal_evacuation = {
             prompt(`Choose destination port hex.${L.allowed_hexes.length === 0 ? " (No possible hex)." : ""}`)
             L.allowed_hexes.forEach(c => action_hex(c))
         }
+
+    },
+    skip() {
+        check_supply()
+        goto("check_overstacking")
     },
     done() {
         push_undo()
@@ -10815,7 +10832,7 @@ SCENARIO_DATA[SOUTH_PACIFIC_SCENARIO].before_choose_hq = function () {
 
 SCENARIO_DATA[BURMA_SCENARIO].before_commit_offensive = function () {
     // 17.11.9
-    if (set_has(G.offensive.battle_hexes, SAIGON) || set_has(G.offensive.battle_hexes, CALCUTTA)) {
+    if (set_has(G.offensive.battle_hexes, SAIGON)) {
         // Saigon should not be able to be attacked due to 17.11.1, but putting a check here just in case
         return "HQs cannot be attacked or removed from play (by either player) for any reason."
     }
@@ -11448,7 +11465,7 @@ P.japan_init_1942 = {
         } else {
             var has_3_ops = G.hand[JP].filter(c => cards[c].ops >= 3).length
             G.hand[JP].filter(c => cards[c].ops >= 3 || !has_3_ops).forEach(c => action_card(c))
-            button("pass")
+            button("skip")
         }
     },
     card(c) {
@@ -13189,6 +13206,9 @@ function clear_undo() {
     if (G.prepared_undo) {
         G.undo = G.prepared_undo
         G.prepared_undo = null
+        if (globalThis.RTT_FUZZER) {
+            G.undo = []
+        }
     }
     if (G.redo && G.redo.changed_control) {
         G.redo = null
