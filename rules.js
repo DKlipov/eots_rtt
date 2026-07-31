@@ -1635,7 +1635,7 @@ function B_F_W_deal_cards() {
 }
 
 P.offensive_phase = script(`
-    log ("@Turn "+ G.turn+". Offensives phase.")
+    log ("@Turn "+ G.turn+". Offensives phase")
     call initiative_segment
     eval {
         commit_into_turn_draw()
@@ -2789,11 +2789,15 @@ function create_battle_hex(hex) {
     // call("confirm_bh")
 }
 
+function get_bh_str(hex) {
+    return `${String.fromCharCode(65 + G.offensive.battle_names.indexOf(hex))} (${hex_get_log_str(hex)})`
+}
+
 P.confirm_bh = {
     inactive: "declare battle hex",
     prompt() {
         var hex = G.offensive.battle_names[G.offensive.battle_names.length - 1]
-        prompt(`New battle hex declared ${String.fromCharCode(65 + G.offensive.battle_names.length - 1)} (${hex_get_log_str(hex)}).`)
+        prompt(`New battle hex declared ${get_bh_str(hex)}.`)
         button("done")
     },
     done() {
@@ -2844,8 +2848,29 @@ function get_move_buttons() {
     return result
 }
 
+function after_unit_move() {
+    var curr_path = map_get(G.offensive.paths, G.active_stack[0], [0, 0, 0])
+    var hex = curr_path[curr_path.length - 1]
+    if (set_has(G.offensive.battle_hexes, hex) && G.offensive.stage === REACTION_STAGE) {
+        G.offensive.active_units[G.offensive.attacker].forEach(u => {
+            if (map_has(G.offensive.committed, u) && G.location[u] === hex) {
+                map_delete(G.offensive.committed, u)
+                log(`${piece_get_log_str(u)} turned back to battle hex ${get_bh_str(hex)}.`)
+            }
+        })
+    }
+    if (is_faction_units(hex, 1 - R) && G.active === G.offensive.attacker && G.offensive.stage === ATTACK_STAGE) {
+        create_battle_hex(hex)
+    } else if (!is_space_controlled(hex, R) && curr_path[0] & AMPH_MOVE) {
+        create_landing_hex(hex)
+    }
+}
+
 P.move_to = script(`
       set L.active G.active_stack
+      eval {
+        after_unit_move()
+      }
       call choose_attack_hex {move_hexes: L.L.allowed_hexes}
       call prepare_disengagement
       eval {
@@ -2961,6 +2986,7 @@ P.move_offensive_units = {
         L.move_data = {}
         L.move_type = ANY_MOVE
         L.spec_move = 0
+        check_supply()
         if (L.movable_units.length <= 0) {
             end()
         }
@@ -3067,11 +3093,6 @@ P.move_offensive_units = {
             return
         }
         move_units(G.active_stack, curr_path)
-        if (is_faction_units(hex, 1 - R) && G.active === G.offensive.attacker && G.offensive.stage === ATTACK_STAGE) {
-            create_battle_hex(hex)
-        } else if (!is_space_controlled(hex, R) && curr_path[0] & AMPH_MOVE) {
-            create_landing_hex(hex)
-        }
         if (curr_path[0] & AMPH_MOVE && G.offensive.stage === REACTION_STAGE) {
             G.asp[R][1] += 1
             G.offensive.r_asp = 1
@@ -6415,8 +6436,15 @@ P.broken_aa = {
             end()
             return
         }
-        battle.amph_ground.forEach(u => set_delete(battle.ground[G.offensive.attacker], u))
+        L.allowed_units.forEach(u => {
+            set_delete(battle.ground[G.offensive.attacker], u)
+            set_add(G.offensive.ground_pbm, u)
+        })
         log("Amphibious Assault failed due to lack of naval escort.")
+        if (G.async) {
+            L.allowed_units.forEach(u => this.unit(u))
+            this.done()
+        }
     },
     inactive: "amphibiously assaulting units are turned back",
     prompt() {
@@ -6664,7 +6692,7 @@ P.retreat = {
             return
         }
     },
-    inactive: "retreat",
+    inactive: "perform retreats",
     prompt() {
         if (G.active_stack.length) {
             prompt(`${offensive_card_header()} Choose space to retreat.`)
@@ -9312,9 +9340,7 @@ P.paratroopers = {
     prompt() {
         prompt(`Choose paratroopers landing hex.`)
         L.allowed_hexes.forEach(u => action_hex(u))
-        if (L.allowed_hexes.length <= 0) {
-            button("skip")
-        }
+        button("skip")
     },
     skip() {
         push_undo()
@@ -11016,7 +11042,7 @@ function setup_scenario_burma() {
 
     check_supply()
     prepare_game_log()
-    log("!Empire of the Sun. Burma: The Forgotten War, 1943-1944.")
+    log_scenario()
     log(`@Turn ${G.turn} - ${get_year_season()} ${get_year()}.`)
     call("burma_choose_offensive")
 }
@@ -11065,7 +11091,7 @@ function setup_scenario_1941(options) {
     draw_specific_card(find_card(JP, 2))
     check_supply()
     prepare_game_log()
-    log("!Empire of the Sun. The Pacific War 1941-1945")
+    log("!Empire of the Sun. The Pacific War 1941-1945.")
     call("scenario_1941")
 }
 
@@ -11323,9 +11349,13 @@ function setup_scenario_1942(options) {
     G.china_divisions = 11
     check_supply()
     prepare_game_log()
-    log("!Empire of the Sun")
+    log_scenario()
     log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
     call("scenario_1942")
+}
+
+function log_scenario() {
+    log(`!Empire of the Sun. ${scenario_data().name}.`)
 }
 
 P.scenario_1942 = script(`
@@ -11650,7 +11680,7 @@ function setup_scenario_1943() {
     }
     check_supply()
     prepare_game_log()
-    log("!Empire of the Sun")
+    log_scenario()
     log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
     call("offensive_phase")
 }
@@ -11840,7 +11870,7 @@ function setup_scenario_1944() {
     }
     check_supply()
     prepare_game_log()
-    log("!Empire of the Sun")
+    log_scenario()
     log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
     call("offensive_phase")
 }
@@ -11973,7 +12003,7 @@ function setup_scenario_south_pacific() {
 
     prepare_game_log()
     check_supply()
-    log("!Empire of the Sun. South Pacific")
+    log_scenario()
     log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
     call("offensive_phase")
 }
