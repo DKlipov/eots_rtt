@@ -4691,7 +4691,7 @@ function compute_ground_naval_move_hexes() {
             } else {
                 v.unshift(mt)
             }
-            if (!move_data.is_ground_present || L.move_type === AMPH_MOVE || get_distance(move_data.location, k) > 1) {
+            if (!move_data.is_ground_present || L.move_type === AMPH_MOVE || get_distance(move_data.location, k) > 1 || G.offensive.stage !== ATTACK_STAGE) {
                 map_set(L.allowed_hexes, k, v)
             }
         })

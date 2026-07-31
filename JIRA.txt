@@ -1,5 +1,4 @@
 Todo list:
-* marine could not react
-* bad supply line at crome
 * rangoon supply small map
+* bad supply line at crome
 * fizzbuzz fixes
