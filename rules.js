@@ -1241,9 +1241,6 @@ P.replacement_segment = {
         var ru = L.replacable_units.filter(u => L.replacement_points[pieces[u].replacement] > 0)
         var not_used_unground = L.divisions_used <= 0 || L.replacement_points[GROUND_REP] <= 0
         var first_replacable = ru.filter(u => G.location[u] === ELIMINATED_BOX)[0]
-        if (first_replacable) {
-            action("to_unit", first_replacable)
-        }
         if (G.active_stack.length > 0) {
             prompt(`Choose hex to place ${piece_get_log_str(G.active_stack[0])}${not_used_unground ? "" : "(Ground replacements should be spent)"}.`)
             L.allowed_hexes.forEach(h => action_hex(h))
@@ -2596,18 +2593,20 @@ P.activate_units = {
     },
     inactive: "activate units",
     prompt() {
-        var too_much = G.offensive.active_units[R].length > (G.offensive.logistic + L.hq_bonus)
+        var too_much = G.offensive.active_units[R].length - (G.offensive.logistic + L.hq_bonus)
         var hint = `${G.offensive.logistic} + ${L.hq_bonus}`
-        if (too_much) {
+        if (too_much > 0) {
             hint = "Too many units selected"
         }
         if (G.offensive.active_units[R].length === (G.offensive.logistic + L.hq_bonus)) {
             hint = "Done"
         }
         prompt(`${offensive_card_header()} Activate units: ${G.offensive.active_units[R].length} of  ${G.offensive.logistic + L.hq_bonus} (${hint}).`)
-        L.allowed_units.forEach(u => action_unit(u))
+        if (!globalThis.RTT_FUZZER || too_much < -1) {
+            L.allowed_units.forEach(u => action_unit(u))
+        }
         G.offensive.active_units[R].forEach(u => unselect_unit(u))
-        if (!too_much) {
+        if (too_much <= 0) {
             button("done")
         }
     },
@@ -12272,7 +12271,11 @@ function action_unit(p) {
 
 function unselect_unit(p) {
     if (!globalThis.RTT_FUZZER) {
-        action("unselect", p)
+        action("unit", p)
+        if (!V.unselect) {
+            V.unselect = []
+        }
+        set_add(V.unselect, p)
     }
 }
 

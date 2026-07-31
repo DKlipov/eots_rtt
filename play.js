@@ -1193,6 +1193,9 @@ function on_update() {
     if (G.actions && G.actions["card"]) {
         G.actions["play_card"] = 1
     }
+    if (G.actions && G.actions["unit"] && G.actions["unit"].filter(u => G.location[u] === ELIMINATED_BOX).length) {
+        G.actions["to_unit"] = [G.actions["unit"].filter(u => G.location[u] === ELIMINATED_BOX)[0]]
+    }
 
     update_role_info()
     map_for_each(G.offensive.damaged, (u, s) => {
@@ -1267,15 +1270,9 @@ function on_update() {
             }
         }
     }
-    if (G.actions && G.actions.unselect && !G.actions.unit) {
-        G.actions.unit = []
-    }
-    if (G.actions && G.actions.unselect) {
-        G.actions.unselect.forEach(a => set_add(G.actions.unit, a))
-    }
     for (var thing of world.things["unit"]) {
         if (thing) {
-            thing.element.classList.toggle("unselect", !!(G.actions && G.actions.unselect && set_has(G.actions.unselect, thing.my_id)))
+            thing.element.classList.toggle("unselect", !!(G.unselect && set_has(G.unselect, thing.my_id)))
         }
     }
 
