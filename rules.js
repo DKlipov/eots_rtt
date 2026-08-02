@@ -726,7 +726,7 @@ function setup_original_control() {
 
 P.strategic_phase = script(`
     log ("!Turn " + G.turn + " - " + get_year_season() + " " + get_year())
-    log ("@Turn " + G.turn + ". Strategic phase.")
+    log ("@Turn " + G.turn + ". Strategic phase")
     eval {
         check_jp_resources_event()
     }
@@ -3340,7 +3340,7 @@ function move_units(units, path) {
             check_supply()
         }
         if (zoi_flag && has_zoi(hex, 1 - R)) {
-            log("#IReaction zoi violated! -2 to reaction intelligence rolls.")
+            log("#IReaction zoi violated! -2 to reaction intelligence rolls")
             G.offensive.zoi_intelligence_modifier = 1
             zoi_flag = 0
         }
@@ -4128,7 +4128,7 @@ P.check_overstacking = {
         L.allowed_units.forEach(u => set_add(L.hexes, G.location[u]))
         L.violations = {overstack: L.hexes}
         if (L.remove_flag && L.allowed_units.length) {
-            log(`#G${side_get_log_str(G.active)} Check stacking.`)
+            log(`#G${side_get_log_str(G.active)} Check stacking`)
         }
     },
     inactive: "check stacking",
@@ -4647,10 +4647,11 @@ function compute_air_move_hexes() {
 function compute_ground_naval_move_hexes() {
     let location = L.move_data.location
     let move_data = L.move_data
-    // to check when depart of ground unit could change zoi
+    var enemy_non_n_zoi = move_data.is_ground_present && !move_data.battle_range && has_non_n_zoi(location, 1 - R) && G.offensive.stage !== POST_BATTLE_STAGE
+
+    // when last ground unit depart by sea supply could changed. We persist original state to be able restore it after pathfinding
     var supply = G.supply_cache
     var oos = G.oos
-    var enemy_non_n_zoi = move_data.is_ground_present && !move_data.battle_range && has_non_n_zoi(location, 1 - R) && G.offensive.stage !== POST_BATTLE_STAGE
     if (L.move_data.is_ground_present && !L.move_data.battle_range) {
         var ground_unit_stay = 0
         for_each_unit_on_map((u, piece, loc) => {
@@ -4664,8 +4665,9 @@ function compute_ground_naval_move_hexes() {
             G.active_stack.forEach(u => G.location[u] = location)
         }
     }
-    L.allowed_hexes = []
 
+
+    L.allowed_hexes = []
     var mt = 0
     if (L.move_data.move_type & NAVAL_MOVE && !enemy_non_n_zoi) {
         var zoi_mask = 0
@@ -4704,6 +4706,8 @@ function compute_ground_naval_move_hexes() {
     if (G.offensive.stage !== POST_BATTLE_STAGE) {
         map_delete(L.allowed_hexes, location)
     }
+
+    //restore original supply map if it was temporaly changed
     G.supply_cache = supply
     G.oos = oos
 }
@@ -4941,6 +4945,8 @@ P.retro_disengagement = {
     },
     skip() {
         push_undo()
+        var units = list_get_log_str(L.allowed_units.length + " units", L.allowed_units.map(u => set_has(G.reduced, u) ? `(${piece_get_log_str(u)})` : piece_get_log_str(u)))
+        log(`${units} skip disengagement.`)
         this.next_disengagement()
     },
     reset_state() {
@@ -5692,7 +5698,7 @@ P.define_intelligence_condition = {
         var success = roll_intelligence_dice()
         if (success) {
             G.offensive.intelligence = INTERCEPT
-            log(`#IIntelligence condition changed to ${get_named_intelligence(G.offensive.intelligence)}.`)
+            log(`#IIntelligence condition changed to ${get_named_intelligence(G.offensive.intelligence)}`)
         }
         L.rolled = 1
         if (success || !get_hand(R).includes(JN_25_SPECIAL)) {
@@ -6628,6 +6634,9 @@ function prepare_battle() {
 
 function log_in_battle_units(faction) {
     var att = [...G.offensive.battle.air_naval[faction], ...G.offensive.battle.ground[faction]]
+    if (!att.length) {
+        return "no units"
+    }
     return list_get_log_str(att.length + " units", att.map(u => set_has(G.reduced, u) ? `(${piece_get_log_str(u)})` : piece_get_log_str(u)))
 }
 
@@ -7017,7 +7026,7 @@ P.battle_sequence = script(`
 `)
 
 P.political_phase = script(`
-    log ("@Turn "+G.turn+". Political phase.")
+    log ("@Turn "+G.turn+". Political phase")
   
     call national_status_segment
     call india_surrender
@@ -7321,9 +7330,9 @@ P.india_surrender = {
         }
         if (G.sid === BURMA_SCENARIO) {
             var vp = get_victory()
-            log("#GVP Scoring.")
+            log("#GVP Scoring")
             vp.text.forEach(t => log(t))
-            log(`#GTotal VP: ${vp.vp}.`)
+            log(`#GTotal VP: ${vp.vp}`)
             finish("Japan", "Japanese Victory - India Surrender.")
             return;
         }
@@ -7634,7 +7643,7 @@ P.attrition_phase = script(`
     if (G.turn ===1) {
         goto end_of_turn_phase
     }
-    log ("@Turn "+G.turn+". Attrition phase.")
+    log ("@Turn "+G.turn+". Attrition phase")
     set G.active JP
     call attrition
     set G.active AP
@@ -7661,7 +7670,7 @@ function reshuffle() {
 }
 
 P.end_of_turn_phase = script(`
-    log ("@Turn " + G.turn + ". End of turn phase.")
+    log ("@Turn " + G.turn + ". End of turn phase")
     eval {
         victory_check()
         reset_events()
@@ -7775,9 +7784,9 @@ function victory_check() {
     }
     var vp = get_victory()
     if (scenario_data().last_turn <= G.turn && G.turn < 12) {
-        log("#GVP Scoring.")
+        log("#GVP Scoring")
         vp.text.forEach(t => log(t))
-        log(`#GTotal VP: ${vp.vp}.`)
+        log(`#GTotal VP: ${vp.vp}`)
     }
     if (scenario_data().last_turn <= G.turn) {
         finish(vp.won_side, vp.won_text)
@@ -10648,6 +10657,10 @@ P.airborne_landing = {
     _begin() {
         L.allowed_hexes = []
         var unit = ap_army("11_d")
+        if (G.location[unit] > LAST_BOARD_HEX) {
+            end()
+            return;
+        }
         if (set_has(G.offensive.active_units[AP], unit)) {
             return
         }
@@ -11073,7 +11086,7 @@ function setup_scenario_burma() {
     check_supply()
     prepare_game_log()
     log_scenario()
-    log(`@Turn ${G.turn} - ${get_year_season()} ${get_year()}.`)
+    log(`@Turn ${G.turn} - ${get_year_season()} ${get_year()}`)
     call("burma_choose_offensive")
 }
 
@@ -11121,7 +11134,7 @@ function setup_scenario_1941(options) {
     draw_specific_card(find_card(JP, 2))
     check_supply()
     prepare_game_log()
-    log("!Empire of the Sun. The Pacific War 1941-1945.")
+    log("!Empire of the Sun. The Pacific War 1941-1945")
     call("scenario_1941")
 }
 
@@ -11406,7 +11419,7 @@ P.arcadia = {
     inactive: "apply card effect",
     prompt() {
         if (G.hand[AP].length === 1) {
-            prompt(`Hold arcadia or discard and replace with random card.`)
+            prompt(`Hold Arcadia or discard and replace with random card.`)
             action("hold", find_card(AP, 4))
             action("discard", find_card(AP, 4))
         } else {

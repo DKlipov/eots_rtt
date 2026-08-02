@@ -5793,7 +5793,7 @@ data.map = [
         terrain: MOUNTAIN,
         edges: [2, 4, 3, 1, 1, 3]
     },
-    {id: 3922, name: "Buna", city: CITY, airfield: true, region: "Guinea", terrain: MIXED, edges: [1, 1, 1, 2, 2, 3]},
+    {id: 3922, name: "Buna", city: CITY, airfield: true, region: "Guinea", terrain: MIXED, edges: [1, 1, 1, 2, 4, 3]},
     {id: 3923, region: "Guinea", terrain: MIXED, edges: [2, 8, 3, 1, 1, 3]},
     {
         id: 4024,
