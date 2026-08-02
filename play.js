@@ -1150,7 +1150,7 @@ function get_hex_path(from, to) {
         var r = -1
         for (var i = 0; i < nh.length; i++) {
             var dist = get_distance(nh[i], to)
-            if (dist < d) {
+            if (dist < d && world.things["s-loc"][nh[i]]) {
                 r = nh[i]
                 d = dist
             }

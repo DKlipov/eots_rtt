@@ -4695,7 +4695,7 @@ function compute_ground_naval_move_hexes() {
             } else {
                 v.unshift(mt)
             }
-            if (!move_data.is_ground_present || L.move_type === AMPH_MOVE || get_distance(move_data.location, k) > 1 || G.offensive.stage !== ATTACK_STAGE) {
+            if (!move_data.is_ground_present || L.move_type === AMPH_MOVE || L.move_type === BARGES_MOVE || get_distance(move_data.location, k) > 1 || G.offensive.stage !== ATTACK_STAGE) {
                 map_set(L.allowed_hexes, k, v)
             }
         })
@@ -9771,7 +9771,7 @@ P.submarine_attack = {
     prompt() {
         prompt(`Submarine attack. Apply hits: ${L.hits}.`)
         L.allowed_units.forEach(u => action_unit(u))
-        if (L.allowed_units.length === 0) {
+        if (L.allowed_units.length === 0 || L.hits <= 0) {
             button("done")
         }
     },
@@ -9783,14 +9783,6 @@ P.submarine_attack = {
             set_delete(L.allowed_units, u)
         }
         L.hits -= 1
-        if (L.allowed_units.length <= 0 || L.hits <= 0) {
-            if (G.active === cards[L.card].faction) {
-                end()
-                return
-            } else {
-                L.allowed_units = []
-            }
-        }
     },
     done() {
         G.active = cards[L.card].faction
