@@ -538,12 +538,16 @@ const SOUTH_PAC_BOARD_INFO = {
     "TURN_STACK_PARAMS": VERTICAL_TURN_STACK_PARAMS,
     "TRACK_STACK_PARAMS": VERTICAL_TURN_STACK_PARAMS,
     "hex_check": (i) => {
+        if(int_to_hex(i)===4818||int_to_hex(i)===4918){
+            return true
+        }
         let x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
         let y = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
 
         if (SP_BORDER[x] && y < SP_BORDER[x]) {
             return false
         }
+
         if (i === 1188) {
             return false
         } else if (x == 24 && y == 16) {

@@ -1,3 +1,5 @@
 Todo list:
+* carrier raid reaction possible
+* port moresby ground move denied
 * fizzbuzz fixes
 * bad supply line at crome

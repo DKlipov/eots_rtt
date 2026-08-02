@@ -509,7 +509,6 @@ B_F_W_MAP_DATA[CHINA_BOX] = MAP_DATA[CHINA_BOX]
 S_P_MAP_DATA[CHINA_BOX] = MAP_DATA[CHINA_BOX]
 S_P_MAP_DATA[OAHU] = Object.assign({}, MAP_DATA[OAHU])
 S_P_MAP_DATA[OAHU].supply_source = JOINT_SUPPLIED_HEX | US_SUPPLIED_HEX
-S_P_MAP_DATA[hex_to_int(4819)] = Object.assign({}, MAP_DATA[hex_to_int(4819)])
 S_P_MAP_DATA[hex_to_int(4819)].terrain = OCEAN
 S_P_TONNELLING_SET.filter(h => h !== OAHU).forEach(h => S_P_MAP_DATA[h].edges_int += (WATER << 30))
 
@@ -861,6 +860,9 @@ function get_unit_reinforcement_hexes(u) {
     if (faction === AP && piece.class === "air" && G.burma_road < 2 && G.surrender[nations.CHINA.id] < 5 && !is_overstack(CHINA_BOX, u)
         && (!piece.b29 || G.location[B_29_1] !== CHINA_BOX && G.location[B_29_2] !== CHINA_BOX)) {
         set_add(result, CHINA_BOX)
+    }
+    if (globalThis.RTT_FUZZER && result.length === 0) {
+        result = HQ_LIST.filter(u => pieces[u].faction === faction && G.location[u] < LAST_BOARD_HEX)
     }
     return result
 }
@@ -2354,7 +2356,7 @@ function get_reaction_able_units() {
     })
     const has_asp = get_asp_limit(R) && G.offensive.counter_offensive_card !== MATADOR
     for_each_unit_on_map((u, piece) => {
-        if (piece.faction === R && piece.class === "ground" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG3) {
+        if (piece.faction === R && piece.class === "ground" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG3 && !globalThis.RTT_FUZZER) {
             set_add(L.reaction_able_units, u)
         } else if (piece.faction === R && piece.class === "ground" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG2 && has_asp && !piece.organic && !globalThis.RTT_FUZZER) {
             set_add(L.asp_ground_units, u)
@@ -2515,7 +2517,7 @@ function is_air_reaction_able(u) {
     let distance_incr_i = 0
     for (var i = 0; i < queue.length; i++) {
         let item = queue[i]
-        let nh_list = map_get(AIRFIELD_LINKS, item)
+        let nh_list = map_get(AIRFIELD_LINKS, item, [])
         let j = 1;
         while (j < nh_list.length && nh_list[j] <= range) {
             let nh = nh_list[j - 1]
@@ -2726,6 +2728,9 @@ function could_stack_stop_here() {
     if (L.move_data.is_ground_present && G.offensive.stage === POST_BATTLE_STAGE) {
         return false
     }
+    if (L.move_data.is_ground_present && !L.move_data.is_naval_present) {
+        return true
+    }
     var location = G.location[G.active_stack[0]]
     if (!L.move_data.battle_range && G.offensive.stage === REACTION_STAGE) {
         return set_has(G.offensive.battle_hexes, location)
@@ -2835,11 +2840,11 @@ function get_move_buttons() {
     if (G.offensive.stage === ATTACK_STAGE && L.move_data.move_type & GROUND_MOVE && L.move_type === ANY_MOVE) {
         result.push("ground_move")
     }
-    if ((no_move_p) && L.move_type === ANY_MOVE && !L.spec_move) {
+    if ((no_move_p) && (L.move_type === ANY_MOVE && !L.spec_move || L.allowed_hexes.length === 0)) {
         result.push("no_move")
     }
-    if (G.offensive.stage === ATTACK_STAGE && G.offensive.barges) {
-        result.push("barges", L.move_type !== BARGES_MOVE && G.offensive.barges > 1 && G.active_stack.filter(u => pieces[u].class === "ground").length === 1)
+    if (G.offensive.stage === ATTACK_STAGE && G.offensive.barges && L.move_type !== BARGES_MOVE && G.offensive.barges > 1 && G.active_stack.filter(u => pieces[u].class === "ground").length === 1) {
+        result.push("barges")
     }
 
     if (!no_move_p && eliminate_p) {
@@ -2859,7 +2864,7 @@ function after_unit_move() {
             }
         })
     }
-    if (is_faction_units(hex, 1 - R) && G.active === G.offensive.attacker && G.offensive.stage === ATTACK_STAGE) {
+    if (is_faction_units(hex, 1 - G.active) && G.active === G.offensive.attacker && G.offensive.stage === ATTACK_STAGE) {
         create_battle_hex(hex)
     } else if (!is_space_controlled(hex, R) && curr_path[0] & AMPH_MOVE) {
         create_landing_hex(hex)
@@ -3879,10 +3884,6 @@ function mark_supply_eligable_ports(faction) {
 }
 
 function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
-    if (globalThis.RTT_FUZZER) {
-        //todo: remove
-        return true
-    }
     for (i = 1; i < LAST_BOARD_HEX; i++) {
         G.supply_cache[i] = G.supply_cache[i] & CLEAN_SUPPLY_MASK[1 - faction]
     }
@@ -5062,6 +5063,9 @@ function ground_move_denied(hex) {
     }
     if (G.active_stack.filter(u => pieces[u].service === "ch").length) {
         return !(region === "IChina" || region === "NIndia" || region === "Burma")
+    }
+    if (G.sid === SOUTH_PACIFIC_SCENARIO && G.active === AP && hex === TRUK) {
+        return true;
     }
     if (G.sid === BURMA_SCENARIO && G.active === AP && (region === "Siam" || region === "Indochina")) {
         return true;
@@ -9716,6 +9720,7 @@ cards[find_card(JP, 86)].after_battles = function () {
 
 P.submarine_attack = {
     _begin() {
+        clear_undo()
         G.active = cards[L.card].faction
         if (L.card === DARTER_DACE) {
             G.active = JP
@@ -9741,7 +9746,6 @@ P.submarine_attack = {
         if (L.pre_allowed_units) {
             L.allowed_units = L.pre_allowed_units
         }
-        clear_undo()
         if (L.allowed_units.length <= 0 || L.hits <= 0) {
             G.active = cards[L.card].faction
             end()
@@ -10582,6 +10586,10 @@ cards[find_card(AP, 60)].can_play = function () {
 }
 
 function discard_random_card(faction) {
+    if (!G.hand[faction].length) {
+        log(`${side_get_log_str(faction)} hand is empty, could not discard random card.`)
+        return
+    }
     var i = G.hand[faction][random(G.hand[faction].length)]
     discard_card(i)
     log(`${card_get_log_str(i)} discarded.`)
