@@ -5641,7 +5641,7 @@ P.define_intelligence_condition = {
             }
         })
         if (!cancel || get_hand(G.active).length === 0) {
-            return no_reaction ? (this.skip()) : (this.roll())
+            return (G.offensive.type === EC && cards[G.offensive.offensive_card].intelligence) ? (this.skip()) : (this.roll())
         }
     },
     inactive: "react",
@@ -12163,7 +12163,6 @@ function on_setup(scenario, options) {
             set_add(G.control, i)
         }
     }
-    set_add(G.control, hex_to_int(2109))
     set_add(G.control, hex_to_int(3606))
     set_delete(G.control, hex_to_int(2709))
     reset_offensive()
