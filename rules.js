@@ -9168,9 +9168,9 @@ function set_kamikaze_able_battles() {
         return
     }
     var ap_naval_commited = []
-    map_for_each(G.offensive.paths, (u, path) => {
+    G.offensive.active_units[AP].forEach(u=>{
         if (pieces[u].faction === AP && pieces[u].class === "naval" && unit_on_board(u)) {
-            set_add(ap_naval_commited, path[path.length - 1])
+            set_add(ap_naval_commited, get_unit_battle_hex(u))
         }
     })
     var battles = []

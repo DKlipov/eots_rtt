@@ -1,4 +1,3 @@
 Todo list:
-* check overstack warning
 * fizzbuzz fixes
 * bad supply line at crome
