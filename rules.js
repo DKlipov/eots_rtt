@@ -5657,7 +5657,9 @@ P.define_intelligence_condition = {
             && G.offensive.intelligence === SURPRISE && !L.rolled) {
             button("roll")
         }
-
+        if (G.offensive.offensive_card === CARRIER_RAID && G.offensive.type === EC) {
+            return;
+        }
         if (!L.rolled) {
             get_hand(G.active).filter(c => {
                 var card = cards[c]
