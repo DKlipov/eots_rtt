@@ -415,23 +415,23 @@ function find_card(faction, num) {
 
 /* INIT */
 
-const SP_TONNELLING = [hex_to_int(4825), 21, hex_to_int(4826), 22, hex_to_int(4828), 24, hex_to_int(4926), 22]
-const S_P_TONNELLING_SET = [hex_to_int(4825), hex_to_int(4826), hex_to_int(4828), hex_to_int(4926), OAHU]
-const B_F_W_TONNELLING = [hex_to_int(1912), 2]
-const B_F_W_TONNELLING_SET = [hex_to_int(1912)]
-const OAHU_NEAR = S_P_TONNELLING_SET.filter(h => h !== OAHU).map((h, i) => TUNNEL_BOX + 100 * i + map_get(SP_TONNELLING, h))
-const SINGAPORE_NEAR = B_F_W_TONNELLING_SET.map((h, i) => TUNNEL_BOX + 100 * i + map_get(B_F_W_TONNELLING, h))
-const NON_PLAYABLE_HEX = {id: 0, terrain: OCEAN, region: "Ocean", edges_int: 0}
-const TUNNEL_HEX = {
-    id: 0,
-    terrain: OCEAN,
-    region: "Ocean",
-    edges_int: UNPLAYABLE_WATER | WATER | ((UNPLAYABLE_WATER | WATER) << 5)
+function non_playable_hex(id) {
+    return {id: id, terrain: OCEAN, region: "Ocean", edges_int: 0, nh: []}
 }
+
 const MAP_DATA = []
 const S_P_MAP_DATA = []
 const B_F_W_MAP_DATA = []
 const AIRFIELD_LINKS = []
+
+const TONNELING = [
+    {from: hex_to_int(4825), distance: 21, to: OAHU, map: S_P_MAP_DATA, duplex: true},
+    {from: hex_to_int(4826), distance: 22, to: OAHU, map: S_P_MAP_DATA, duplex: true},
+    {from: hex_to_int(4828), distance: 24, to: OAHU, map: S_P_MAP_DATA, duplex: true},
+    {from: hex_to_int(4926), distance: 22, to: OAHU, map: S_P_MAP_DATA, duplex: true},
+    {from: hex_to_int(1912), distance: 2, to: SINGAPORE, map: B_F_W_MAP_DATA, duplex: true},
+    {from: SAIGON, distance: 6, to: hex_to_int(1912), map: B_F_W_MAP_DATA, duplex: false},
+]
 
 map.forEach(h => MAP_DATA[hex_to_int(h.id)] = h)
 
@@ -448,7 +448,7 @@ for (var i = 0; i < sp_map.length; i++) {
 for (let i = 0; i <= LAST_BOARD_HEX; ++i) {
     let hex = MAP_DATA[i]
     if (!hex) {
-        hex = {id: int_to_hex(i), terrain: OCEAN, region: "Ocean"}
+        hex = {id: int_to_hex(i), terrain: OCEAN, region: "Ocean", nh: get_edge_hexes(i)}
         MAP_DATA[i] = hex
     }
 
@@ -491,9 +491,10 @@ for (let i = 0; i <= LAST_BOARD_HEX; ++i) {
         hex.supply_source |= US_SUPPLIED_HEX
         hex.supply_source |= JOINT_SUPPLIED_HEX
     }
+    hex.nh = get_edge_hexes(i)
     if (i === 472) {
         // remove hex only found in the burma scenario (2608)
-        MAP_DATA[i] = NON_PLAYABLE_HEX
+        MAP_DATA[i] = non_playable_hex(i)
     }
     apply_south_pacific(Object.assign({}, hex))
     apply_burma(Object.assign({}, hex))
@@ -509,15 +510,16 @@ B_F_W_MAP_DATA[CHINA_BOX] = MAP_DATA[CHINA_BOX]
 S_P_MAP_DATA[CHINA_BOX] = MAP_DATA[CHINA_BOX]
 S_P_MAP_DATA[OAHU] = Object.assign({}, MAP_DATA[OAHU])
 S_P_MAP_DATA[OAHU].supply_source = JOINT_SUPPLIED_HEX | US_SUPPLIED_HEX
+S_P_MAP_DATA[OAHU].nh = []
+S_P_MAP_DATA[OAHU].edges_int = 0
 S_P_MAP_DATA[hex_to_int(4819)].terrain = OCEAN
-S_P_TONNELLING_SET.filter(h => h !== OAHU).forEach(h => S_P_MAP_DATA[h].edges_int += (WATER << 30))
 
 function apply_south_pacific(hex) {
     var id = hex_to_int(hex.id)
     var x = Math.floor(id / 29)
     let y = id % 29
     if (map_get(S_P_first_hex, x, 0) > y || x < 20 || x > 40) {
-        S_P_MAP_DATA[id] = NON_PLAYABLE_HEX
+        S_P_MAP_DATA[id] = non_playable_hex(id)
         return
     }
     var sp_map_item = sp_map.filter(h => h.id === hex.id)[0]
@@ -544,13 +546,14 @@ function apply_south_pacific(hex) {
     if (sp_map_item && sp_map_item.top) {
         hex.supply_source |= JP_SUPPLIED_HEX
     }
+    hex.nh = get_edge_hexes(id)
     S_P_MAP_DATA[id] = hex
 }
 
 B_F_W_MAP_DATA[SINGAPORE] = Object.assign({}, MAP_DATA[SINGAPORE])
-B_F_W_MAP_DATA[SINGAPORE].edges_int += WATER | ROAD | GROUND// set water and railroad edge for upper edge
+B_F_W_MAP_DATA[SINGAPORE].edges_int = 0
+B_F_W_MAP_DATA[SINGAPORE].nh = []
 B_F_W_MAP_DATA[SINGAPORE].airfield = false
-B_F_W_TONNELLING_SET.forEach(h => B_F_W_MAP_DATA[h].edges_int |= (WATER << 15))
 
 function apply_burma(hex) {
     var id = hex_to_int(hex.id)
@@ -558,7 +561,7 @@ function apply_burma(hex) {
     let y = id % 29
 
     if (x === 15 && y > 9 || x === 16 && y > 9 || x >= 17 || y >= 13) {
-        B_F_W_MAP_DATA[id] = NON_PLAYABLE_HEX
+        B_F_W_MAP_DATA[id] = non_playable_hex(id)
         return
     }
     //17.11.16. Andaman Islands
@@ -572,7 +575,37 @@ function apply_burma(hex) {
     if (hex.id === 1912 || hex.id === 2212) {
         hex.supply_source |= JP_SUPPLIED_HEX
     }
+    hex.nh = get_edge_hexes(id)
     B_F_W_MAP_DATA[id] = hex
+}
+
+var t1 = 1
+for (var i = 0; i < TONNELING.length; i++) {
+    var tonnel = TONNELING[i]
+    create_tonnel(tonnel)
+    if (tonnel.duplex) {
+        var from = tonnel.from
+        tonnel.from = tonnel.to
+        tonnel.to = from
+        create_tonnel(tonnel)
+    }
+}
+
+function create_tonnel(data) {
+    data.map[data.from].edges_int += (WATER | UNPLAYABLE_WATER) << (5 * data.map[data.from].nh.length)
+    data.map[data.from].nh.push(TUNNEL_BOX + t1)
+    for (var i = 0; i < data.distance; i++) {
+        var hex = {
+            id: TUNNEL_BOX + t1,
+            terrain: OCEAN,
+            region: "Ocean",
+            edges_int: WATER | UNPLAYABLE_WATER,
+            nh: [TUNNEL_BOX + t1 + 1]
+        }
+        data.map[TUNNEL_BOX + t1] = hex
+        t1++
+    }
+    data.map[TUNNEL_BOX + t1 - 1].nh[0] = data.to
 }
 
 for (var i = 0; i < map.length; i++) {
@@ -829,9 +862,7 @@ function sent_to_europe(u) {
 }
 
 function get_map_data(hex) {
-    if (hex > TUNNEL_BOX) {
-        return TUNNEL_HEX
-    } else if (scenario_data().id === SOUTH_PACIFIC_SCENARIO) {
+    if (scenario_data().id === SOUTH_PACIFIC_SCENARIO) {
         return S_P_MAP_DATA[hex]
     } else if (scenario_data().id === BURMA_SCENARIO) {
         return B_F_W_MAP_DATA[hex]
@@ -3418,41 +3449,7 @@ function get_edge_hexes(hex) {
 }
 
 function get_near_hexes(hex) {
-    if (hex > TUNNEL_BOX) {
-        let toward_map_hex = hex - 1
-        let toward_offmap_box_hex = hex + 1
-        if (toward_map_hex % 100 === 0) {
-            if (G.sid === SOUTH_PACIFIC_SCENARIO) {
-                return [S_P_TONNELLING_SET[(toward_map_hex - TUNNEL_BOX) / 100]]
-            } else {
-                return [B_F_W_TONNELLING_SET[(toward_map_hex - TUNNEL_BOX) / 100], toward_offmap_box_hex]
-            }
-        } else {
-            if (G.sid === SOUTH_PACIFIC_SCENARIO) {
-                return [toward_map_hex]
-            } else if (G.sid === BURMA_SCENARIO) {
-                if (SINGAPORE_NEAR.includes(hex)) {
-                    toward_offmap_box_hex = SINGAPORE
-                }
-                return [toward_map_hex, toward_offmap_box_hex]
-            }
-        }
-    }
-    var result = get_edge_hexes(hex)
-    if (G.sid === SOUTH_PACIFIC_SCENARIO && S_P_TONNELLING_SET.includes(hex)) {
-        if (hex === OAHU) {
-            return OAHU_NEAR
-        }
-        result.push(TUNNEL_BOX + map_get(SP_TONNELLING, hex) + 400)
-    }
-    if (G.sid === BURMA_SCENARIO && hex === SINGAPORE) {
-        return SINGAPORE_NEAR
-    } else if (G.sid === BURMA_SCENARIO && hex === SAIGON) {
-        result[3] = TUNNEL_BOX + 6
-    } else if (G.sid === BURMA_SCENARIO && B_F_W_TONNELLING_SET.includes(hex)) {
-        result[3] = TUNNEL_BOX + 1
-    }
-    return result
+    return get_map_data(hex).nh
 }
 
 function for_each_card(apply) {
@@ -3616,6 +3613,7 @@ function mark_supply_ports_oversea(hq, piece) {
     }
     L.supply.queue.push(location)
     L.supply.retracing.push(location)
+    // return;//todo: remove
     var distance_map = [location]
     for (var i = L.supply.queue.length - 1; i < L.supply.queue.length; i++) {
         let item = L.supply.queue[i]
@@ -3764,6 +3762,7 @@ function mark_hexes_supplied_from(hq, piece, is_check_supply_space) {
             }
         }
     }
+    // return;//todo: remove
     L.supply.queue.push(location)
     L.supply.retracing.push(location)
     for (; i < L.supply.queue.length; i++) {
@@ -3884,6 +3883,7 @@ function mark_supply_eligable_ports(faction) {
 }
 
 function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
+    // return;//todo: remove
     for (i = 1; i < LAST_BOARD_HEX; i++) {
         G.supply_cache[i] = G.supply_cache[i] & CLEAN_SUPPLY_MASK[1 - faction]
     }
@@ -9168,7 +9168,7 @@ function set_kamikaze_able_battles() {
         return
     }
     var ap_naval_commited = []
-    G.offensive.active_units[AP].forEach(u=>{
+    G.offensive.active_units[AP].forEach(u => {
         if (pieces[u].faction === AP && pieces[u].class === "naval" && unit_on_board(u)) {
             set_add(ap_naval_commited, get_unit_battle_hex(u))
         }
@@ -11390,7 +11390,7 @@ function setup_scenario_1942(options) {
 }
 
 function log_scenario() {
-    log(`!Empire of the Sun. ${scenario_data().name}.`)
+    log(`!Empire of the Sun. ${scenario_data().name}`)
 }
 
 P.scenario_1942 = script(`
