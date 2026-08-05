@@ -1,3 +1,5 @@
 Todo list:
 * fizzbuzz fixes
 * bad supply line at crome
+* franciso async assign did not triggered
+* reaction skip should not show information
