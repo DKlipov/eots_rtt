@@ -20,6 +20,8 @@ const JP_NAVAL_UNITS = 1 << 10
 const AP_NAVAL_UNITS = 1 << 11
 const JP_HQ_UNITS = 1 << 12
 const AP_HQ_UNITS = 1 << 13
+const JP_CONTROLLED = 1 << 23
+const HEX_CONTROLLABLE = 1 << 24
 const JP_UNITS = JP_AIR_UNITS | JP_GROUND_UNITS | JP_NAVAL_UNITS | JP_HQ_UNITS
 
 const P = {}
@@ -230,6 +232,10 @@ function jp_gray_amp() {
     return (G.inter_service[JP] && G.asp[0][0] > 1)
 }
 
+function is_space_controlled(hex, faction) {
+    return (G.supply_cache[hex] & JP_CONTROLLED) && !faction
+}
+
 const TRACK_MARKERS = [
     {
         counter: () => (G.events[data.events.BARGES.id] > 0 ? data.counters.asp_b_jp : data.counters.asp_jp) + (jp_gray_amp() ? " gray" : ""),
@@ -252,7 +258,7 @@ const TRACK_MARKERS = [
     {
         counter: data.counters.resource_jp,
         alt_counter: data.counters.resource_jp_1,
-        value: G => RESOURCE_HEX.filter(h => G.control[h] === JP).length
+        value: G => RESOURCE_HEX.filter(h => is_space_controlled(h, JP)).length
     },
     {
         counter: data.counters.naval_repl,
@@ -376,7 +382,7 @@ const TURN_MARKERS = [
 ]
 
 function current_pow(G) {
-    return G.capture.filter(h => G.control[h] === AP).length
+    return G.capture.filter(h => is_space_controlled(h, AP)).length
 }
 
 function clear_paths() {
@@ -538,7 +544,7 @@ const SOUTH_PAC_BOARD_INFO = {
     "TURN_STACK_PARAMS": VERTICAL_TURN_STACK_PARAMS,
     "TRACK_STACK_PARAMS": VERTICAL_TURN_STACK_PARAMS,
     "hex_check": (i) => {
-        if(int_to_hex(i)===4818||int_to_hex(i)===4918){
+        if (int_to_hex(i) === 4818 || int_to_hex(i) === 4918) {
             return true
         }
         let x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
@@ -984,9 +990,9 @@ function place_unit(u, location) {
 
 function get_control_marker(h) {
     var capture = set_has(G.capture, h)
-    if (capture && G.control[h] === JP) {
+    if (capture && is_space_controlled(h, JP)) {
         return data.counters.capture_jp
-    } else if (G.control[h] === JP) {
+    } else if (is_space_controlled(h, JP)) {
         return data.counters.control_jp
     } else if (h === MANCHURIA_1 || h === MANCHURIA_2) {
         return data.counters.control_sov
@@ -1221,10 +1227,10 @@ function on_update() {
     }
     var all_control = document.body.classList.contains("hide-pieces")
     var vassal_control = get_preference("fullcontrol", false)
-    for (var i = 0; i < G.control.length; i++) {
+    for (var i = 0; i < LAST_BOARD_HEX; i++) {
         var hn = HEX_BY_NATION[i]
-        var cont = G.control[i]
-        if (cont === AP && set_has(G.capture, i) && !all_control) {
+        var cont = is_space_controlled(i, JP) ? JP : AP
+        if (cont === AP && set_has(G.capture, i) && !all_control || !(G.supply_cache[i] & HEX_CONTROLLABLE)) {
             continue
         }
         var default_condition = (hn >= 0 && (G.surrender[HEX_BY_NATION[i]] > 0) == cont
@@ -1237,7 +1243,7 @@ function on_update() {
             populate_generic("s-loc", i, get_control_marker(i) + (vassal_control ? " transparent" : ""))
         }
     }
-    G.garr_elim.filter(h => G.control[h] === JP).forEach(h => populate_generic("s-loc", h, data.counters.no_garrison))
+    G.garr_elim.filter(h => is_space_controlled(h, JP)).forEach(h => populate_generic("s-loc", h, data.counters.no_garrison))
     var base_road_counters = get_preference("noroad", false)
     ROAD_EVENTS.filter(event => map_info.hex_check(hex_to_int(event.keys[0]))).forEach(event => {
         var thing = lookup_thing("road", event.id)
@@ -1281,7 +1287,7 @@ function on_update() {
     }
 
     if (G.pow > 0) {
-        G.capture.filter(h => G.control[h] === AP)
+        G.capture.filter(h => is_space_controlled(h, AP))
             .forEach(h => populate_generic("s-loc", h, data.counters.pow))
     }
     var oos_hex_set = []
@@ -1854,7 +1860,7 @@ function print_pow() {
         append_header(`No progress of war required for turn ${G.turn}.`, main)
         return main
     }
-    var current_pow = G.capture.filter(h => G.control[h] === AP)
+    var current_pow = G.capture.filter(h => is_space_controlled(h, AP))
     var completed = current_pow.length >= G.pow
     main.appendChild(create_icon(...((completed ? "" : "gray ") + data.counters.pow_target).split(" ")))
     main.innerHTML += ` Progress of war (${completed ? "Completed" : "-1 PW"}).`
@@ -1868,12 +1874,12 @@ function print_pow() {
 function print_resources() {
     let main = document.createElement("div")
     var completed = G.events[data.events.JAPAN_LACK_OF_RESOURCES.id]
-    var value = RESOURCE_HEX.filter(h => G.control[h] === JP).length
+    var value = RESOURCE_HEX.filter(h => is_space_controlled(h, JP)).length
     main.appendChild(create_icon(...((completed ? "" : "gray ") + data.counters.resource_jp).split(" ")))
     if (completed) {
         main.innerHTML += ` JP control 3 or less resource hexes completed (-3 PW).`
     } else {
-        RESOURCE_HEX.filter(h => G.control[h] === JP).length
+        RESOURCE_HEX.filter(h => is_space_controlled(h, JP)).length
         main.innerHTML += ` JP control ${value} > 3 resource hexes.`
     }
     return main
@@ -1943,7 +1949,7 @@ function print_nation_status(response) {
     var control = [[], []]
     if (nation.keys) {
         nation.keys.forEach(k => {
-            if (G.control[hex_to_int(k)] === JP) {
+            if (is_space_controlled(hex_to_int(k))) {
                 control[JP].push(hex_to_int(k))
             } else {
                 control[AP].push(hex_to_int(k))
