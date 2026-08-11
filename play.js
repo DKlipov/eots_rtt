@@ -1,38 +1,15 @@
 "use strict"
 
+const {events, pieces, map, sp_map, cards} = require("./data");
 var LOCAL_STATUS = 0
 const CHECK_SUPPLY = 1
 var LOCAL_STATE = null
 var STORED_STATE = null
-
-//binary mask
-const JP_ZOI = 1 << 0
-const AP_ZOI = 1 << 1
-const JP_ZOI_NTRL = 1 << 2
-const AP_ZOI_NTRL = 1 << 3
-const JP_ZOI_DISABLED = 1 << 4
-const AP_ZOI_DISABLED = 1 << 5
-const JP_AIR_UNITS = 1 << 6
-const AP_AIR_UNITS = 1 << 7
-const JP_GROUND_UNITS = 1 << 8
-const AP_GROUND_UNITS = 1 << 9
-const JP_NAVAL_UNITS = 1 << 10
-const AP_NAVAL_UNITS = 1 << 11
-const JP_HQ_UNITS = 1 << 12
-const AP_HQ_UNITS = 1 << 13
-const JP_CONTROLLED = 1 << 23
-const HEX_CONTROLLABLE = 1 << 24
-const JP_UNITS = JP_AIR_UNITS | JP_GROUND_UNITS | JP_NAVAL_UNITS | JP_HQ_UNITS
-
 const P = {}
-const LAST_BOARD_HEX = 1478
-const ELIMINATED_BOX = 1482
-const DELAYED_BOX = 1483
-const CHINA_BOX = 1484
-const PERM_ELIMINATED = 1485
-const AP_REINF = 1486
-const JP_REINF = 1487
-const TURN_BOX = 1490
+
+/** init.js*/
+
+/** init.js*/
 
 const HEX_X_SIZE = 48.0
 const HEX_Y_SIZE = 55.25
@@ -78,11 +55,6 @@ const VERTICAL_TURN_STACK_PARAMS = [
 const MANCHURIA_1 = hex_to_int(3302)
 const MANCHURIA_2 = hex_to_int(3303)
 
-const SINGAPORE = hex_to_int(2015)
-const OAHU = hex_to_int(5808)
-
-const TUNNEL_BOX = 1600
-
 const SUPPLY_TYPES = {
     to_port: {color: "green"},
     from_port: {color: "red"},
@@ -94,19 +66,12 @@ const SUPPLY_TYPES = {
 const JP_AGREEMENT = 0
 const AP_AGREEMENT = 1
 
-
-const JP_GARRISON_JP = find_piece("army_jp_g_mainland")
-const JP_GARRISON_CN = find_piece("army_jp_g_1")
-
 const CANVAS = document.getElementById("canvas")
 const CANVAS_CTX = document.getElementById("canvas").getContext("2d")
-const RESOURCE_HEX = [...Array(data.map.length).keys()].filter(h => data.map[h].resource).map(h => hex_to_int(data.map[h].id))
 
 const BR_REGIONS = ["India", "Ceylon", "NIndia", "Burma", "Siam", "Malaya", "Sumatra", "Indochina", "IChina"]
 const JP_REGIONS = ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Caroline", "Japan", "Marshall"]
 const JP_BOUNDARY_HEX = []
-
-const ROAD_EVENTS = Object.keys(data.events).filter(k => data.events[k].road).map(e => data.events[e])
 
 const REGIONS_BY_NATION = {}
 const HEX_BY_NATION = []
@@ -1261,7 +1226,7 @@ function on_update() {
         populate_generic("s-loc", G.events[data.events.TOKYO_EXPRESS.id], data.counters.tokyo_express)
     }
     map_for_each(G.garrison, (h, count) => {
-        var marker = JP_GARRISON_CN
+        var marker = JP_GARRISON_CN[0]
         if (count === 0) {
             count = 1
             marker = JP_GARRISON_JP
@@ -2333,3 +2298,7 @@ function on_focus_card_tip(c) {
 function is_faction_units(hex, faction) {
     return G.supply_cache[hex] & JP_UNITS << faction
 }
+
+/** common.js*/
+
+/** common.js*/
