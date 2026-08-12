@@ -1,4 +1,5 @@
-
+let last = Date.now()
+let count = 0
 function check_supply() {
     L.supply = {}
     clear_supply_cache(CLEAN_ALL_MASK)
@@ -276,7 +277,8 @@ function mark_supply_ports_oversea(hq, piece) {
     const faction = piece.faction
     const location = G.location[hq]
     G.supply_cache[location] = G.supply_cache[location] | JP_SUPPLY_PORT << faction
-    if (!L.supply.queue) {
+    if (!L.supply || !L.supply.queue) {
+        L.supply={}
         L.supply.queue = []
         L.supply.retracing = []
     }
@@ -565,10 +567,10 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
     metric(1, i)
 }
 
-function check_unit_supply(location, i, piece) {
+function check_piece_supply(location, i, piece) {
     if (piece.class === "hq") {
         return true
-    } else if (set_has(G.offensive.active_units[piece.faction], i)) {
+    } else if (G.offensive.active_units[piece.faction] && set_has(G.offensive.active_units[piece.faction], i)) {
         return true
     }
     return G.supply_cache[location] & piece.supply
@@ -653,7 +655,7 @@ function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
     }
     for_each_unit((i, p, location) => {
         if ((location <= LAST_BOARD_HEX || location === CHINA_BOX) &&
-            p.class !== "hq" && p.faction === faction && !check_unit_supply(G.location[i], i, p)
+            p.class !== "hq" && p.faction === faction && !check_piece_supply(G.location[i], i, p)
         ) {
             set_add(oos_units[faction], i)
         }
@@ -662,4 +664,52 @@ function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
         check_burma_road()
     }
     return oos_units[faction].filter(u => pieces[u].zoi_generator).length === size && burma === G.burma_road
+}
+
+function get_ground_mp_cost(from, to, direction, faction) {
+    if (!(get_map_data(from).edges_int & GROUND << 5 * direction)) {
+        return 100;
+    }
+    if ((get_map_data(from).edges_int & ROAD << (5 * direction))
+        && !(G.supply_cache[to] & TRANSPORT_ROUTE_DISABLED)
+        && !(G.supply_cache[from] & TRANSPORT_ROUTE_DISABLED)
+        && ((G.supply_cache[to] & (JP_UNITS << faction)) || !(G.supply_cache[to] & (JP_UNITS << 1 - faction)))
+        && ((G.supply_cache[from] & (JP_UNITS << faction)) || !(G.supply_cache[from] & (JP_UNITS << 1 - faction)))
+    ) {
+        return 1;
+    } else {
+        return ((get_map_data(to).terrain >> 1) + 1) * 2
+    }
+}
+
+function get_ground_move_cost(from, to, faction) {
+    var direction = get_direction(from, to)
+    if (!(get_map_data(from).edges_int & GROUND << 5 * direction)) {
+        return 100;
+    }
+    if ((get_map_data(from).edges_int & ROAD << (5 * direction))
+        && !(G.supply_cache[to] & (TRANSPORT_ROUTE_DISABLED | (JP_GA_UNITS << 1 - faction)))
+        && !(G.supply_cache[from] & TRANSPORT_ROUTE_DISABLED)
+    ) {
+        return 1;
+    } else {
+        return ((get_map_data(to).terrain >> 1) + 1) * 2
+    }
+}
+
+function is_space_controlled(hex, faction) {
+    return (!(G.supply_cache[hex] & JP_CONTROLLED) == faction) && (!G.non_control || !set_has(G.non_control, hex))
+}
+
+
+function is_faction_units(hex, faction) {
+    return G.supply_cache[hex] & JP_UNITS << faction
+}
+
+function is_faction_ground_units(hex, faction) {
+    return G.supply_cache[hex] & JP_GROUND_UNITS << faction
+}
+
+function is_faction_naval_units(hex, faction) {
+    return G.supply_cache[hex] & JP_NAVAL_UNITS << faction
 }

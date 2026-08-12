@@ -2,7 +2,7 @@
 
 "use strict"
 
-var G, V, R // convenient aliases so that we can share bits of code verbatim from rules.js
+var G, V, R, L // convenient aliases so that we can share bits of code verbatim from rules.js
 
 /* MISC */
 
@@ -1016,6 +1016,7 @@ function _animate_position(thing, inv_scale, max_duration) {
 
 function begin_update() {
     G = V = view
+    L = {}
     R = roles[player]?.index ?? -1
 
     // reset unused element cache
