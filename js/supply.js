@@ -713,3 +713,11 @@ function is_faction_ground_units(hex, faction) {
 function is_faction_naval_units(hex, faction) {
     return G.supply_cache[hex] & JP_NAVAL_UNITS << faction
 }
+
+function has_non_n_zoi(hex, faction) {
+    return (G.supply_cache[hex] & ((JP_ZOI << faction) | (JP_ZOI_NTRL << faction))) === (JP_ZOI << faction)
+}
+
+function has_zoi(hex, faction) {
+    return (G.supply_cache[hex] & JP_ZOI << faction)
+}

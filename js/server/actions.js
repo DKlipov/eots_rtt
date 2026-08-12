@@ -25,6 +25,9 @@ function get_china_offensive_modifiers() {
 
 P.china_offensive = {
     inactive: "confirm China Offensive",
+    _begin() {
+       check_supply()
+    },
     prompt() {
         prompt(`China Offensive Roll.`)
         button("roll")
@@ -59,8 +62,8 @@ P.displace_hq = {
     },
     unit(u) {
         push_undo()
+        G.supply_cache[G.location[u]] -= (JP_HQ_UNITS << pieces[u].faction)
         eliminate(u)
-        check_supply()
         if (!check_sudden_death()) {
             goto("end_action")
         }
@@ -70,6 +73,7 @@ P.displace_hq = {
 P.return_hq = {
     inactive: "choose HQ",
     prompt() {
+        check_supply()
         mark_supplied_hexes(G.active)
         if (!G.active_stack.length) {
             prompt(`Choose returning HQ.`)
@@ -102,7 +106,6 @@ P.return_hq = {
         log(`${piece_get_log_str(G.active_stack[0])} selected for early return.`)
         set_location(G.active_stack[0], hex)
         G.active_stack = []
-        check_supply()
         goto("end_action")
     }
 }
@@ -113,7 +116,6 @@ function build_road(card, event) {
     check_event(event)
     log(`${card_get_log_str(card)} played.`)
     log(`CBI infrastructure built ${event.name}.`)
-    check_supply()
     goto("end_action")
 }
 

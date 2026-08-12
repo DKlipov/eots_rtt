@@ -223,7 +223,6 @@ function setup_scenario_burma() {
     G.events[events.KWAI_RIVER_BRIDGE.id] = 2// 17.11.13. Kwai Bridge Event has been played, note impact on Japanese activations.
     G.events[events.DOOLITLE] = 2// 17.11.22. Doolittle Raid has occurred meeting the condition for the Doolittle Reprisal card.
 
-    check_supply()
     prepare_game_log()
     log_scenario()
     log(`@Turn ${G.turn} - ${get_year_season()} ${get_year()}`)
@@ -272,7 +271,6 @@ function setup_scenario_1941(options) {
     }
     draw_specific_card(find_card(JP, 1))
     draw_specific_card(find_card(JP, 2))
-    check_supply()
     prepare_game_log()
     log("!Empire of the Sun. The Pacific War 1941-1945")
     call("scenario_1941")
@@ -352,7 +350,6 @@ P.operation_z = {
         log(`${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(u => piece_get_log_str(u)))} moved to ${hex_get_log_str(h)}.`)
         create_battle_hex(OAHU)
         G.offensive.active_units[JP].forEach(u => commit_to_attack(u, OAHU))
-        check_supply()
         goto("operation_z_battle")
     },
 }
@@ -376,7 +373,6 @@ P.operation_z_pbm = {
         })
         log(`${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(u => piece_get_log_str(u)))} moved to ${hex_get_log_str(h)}.`)
         G.active_stack = []
-        check_supply()
         end()
     },
 }
@@ -401,9 +397,6 @@ P.operation_z_battle = script(`
       set G.active JP
       call operation_z_pbm
       set G.offensive.active_units[G.offensive.attacker] []
-      eval {
-        check_supply()
-      }
       call commit_offensive
 `)
 
@@ -530,7 +523,6 @@ function setup_scenario_1942(options) {
     G.asp[1] = [1, 0]
     G.political_will = 8
     G.china_divisions = 11
-    check_supply()
     prepare_game_log()
     log_scenario()
     log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
@@ -861,7 +853,6 @@ function setup_scenario_1943() {
     while (G.hand[AP].length < 7) {
         draw_card(AP)
     }
-    check_supply()
     prepare_game_log()
     log_scenario()
     log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
@@ -1051,7 +1042,6 @@ function setup_scenario_1944() {
     while (G.hand[AP].length < 7) {
         draw_card(AP)
     }
-    check_supply()
     prepare_game_log()
     log_scenario()
     log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
@@ -1185,7 +1175,6 @@ function setup_scenario_south_pacific() {
     G.china_divisions = 9
 
     prepare_game_log()
-    check_supply()
     log_scenario()
     log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
     call("offensive_phase")

@@ -319,7 +319,6 @@ function reset_events() {
             G.events[event.id] = 0
         }
     })
-    check_supply()
 }
 
 P.political_will_segment = function () {
@@ -383,7 +382,6 @@ P.attrition_phase = script(`
     set G.active AP
     call attrition
     eval {
-        check_supply()
         check_occupation(events.HAWAII_OCCUPATION)
         check_occupation(events.ALASKA_OCCUPATION)
     }
@@ -413,6 +411,7 @@ P.end_of_turn_phase = script(`
 
 P.attrition = {
     _begin() {
+        check_supply()
         L.unit_to_attrition = []
         var hq_list = []
         for_each_unit_on_map((u, piece) => {

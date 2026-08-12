@@ -148,6 +148,7 @@ function update_reinf_active() {
 
 P.reinforcement_segment = {
     _begin() {
+        check_supply()
         mark_supplied_hexes(G.active)
         if (G.wie <= 7 && G.active === AP && G.sid !== BURMA_SCENARIO) {
             change_asp(AP, 1)
@@ -296,7 +297,6 @@ P.reinforcement_segment = {
     },
     done() {
         push_undo()
-        check_supply()
         end()
     }
 }
@@ -417,7 +417,6 @@ P.replacement_segment = {
     },
     done() {
         push_undo()
-        check_supply()
         end()
     }
 }

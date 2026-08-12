@@ -36,7 +36,6 @@ P.india_surrender = {
                 eliminate_permanently(u)
             }
         })
-        check_supply()
         G.surrender[nations.INDIA.id] = 5
         if (!L.unit_to_retreat.length) {
             this.update_control()
@@ -95,10 +94,8 @@ P.india_surrender = {
         push_undo()
         set_location(G.active_stack[0], hex)
         G.active_stack = []
-        check_supply()
     },
     update_control() {
-        check_supply()
         G.non_control = []
         if (!is_faction_units(MADRAS, AP)) {
             set_add(G.non_control, MADRAS)

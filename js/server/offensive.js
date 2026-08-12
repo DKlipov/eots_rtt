@@ -115,6 +115,7 @@ P.choose_hq = {
         if (L.card && cards[L.card].hq) {
             hq_list = cards[L.card].hq
         }
+        check_supply()
         HQ_LIST.forEach((u) => {
             var piece = pieces[u]
             if (G.location[u] > LAST_BOARD_HEX) {
@@ -483,6 +484,7 @@ P.activate_units = {
             end()
             return
         }
+        check_supply()
         var piece = pieces[hq]
         if ((piece.service === "joint" || piece.service === "us") && !check_hq_in_supply(hq, piece, US_SUPPLIED_HEX)) {
             L.joint_disadvantage = 1
@@ -832,7 +834,6 @@ P.move_offensive_units = {
         L.move_data = {}
         L.move_type = ANY_MOVE
         L.spec_move = 0
-        check_supply()
         if (L.movable_units.length <= 0) {
             end()
         }
@@ -952,7 +953,6 @@ P.move_offensive_units = {
         }
         L.move_type = ANY_MOVE
         L.spec_move = 0
-        check_supply()
         call("move_to", {hex})
     },
     no_move() {
@@ -997,7 +997,6 @@ P.ground_move = {
         }
         var curr_path = map_get(L.allowed_hexes, hex)
         move_units(G.active_stack, curr_path)
-        check_supply()
         L.move_data.location = hex
         L.allowed_hexes = []
         if (!should_ground_move_stop(hex, R)) {
@@ -1128,7 +1127,6 @@ function attack_hex(hex) {
     var distant = G.active_stack.slice()
     if (non_cv.length && path_to_bh && non_cv.length < G.active_stack.length) {
         move_units(non_cv, path_to_bh)
-        check_supply()
         non_cv.forEach(u => set_delete(distant, u))
     }
     log(`${units_str(distant)} assigned to attack to ${hex_get_log_str(hex)}.`)
@@ -1174,7 +1172,6 @@ function move_units(units, path) {
         var hex = path[i]
         if (zoi_flag && zoi_generator_flag && (G.supply_cache[hex] & (POSSIBLE_ZOI << enemy_faction))) {
             units.forEach(u => set_location(u, hex, 1))
-            check_supply()
         }
         if (zoi_flag && has_zoi(hex, 1 - R)) {
             log("#IReaction zoi violated! -2 to reaction intelligence rolls")
@@ -1665,7 +1662,7 @@ function compute_air_move_hexes() {
         move_type |= AIR_EXTENDED_MOVE
     }
     if (L.move_type === STRAT_MOVE) {
-        check_supply()
+        // check_supply()
     }
     var strat_flag = move_data.move_type & STRAT_MOVE
     if ((L.move_type === STRAT_MOVE) && has_non_n_zoi(location, 1 - R)) {
@@ -1764,7 +1761,7 @@ function compute_ground_naval_move_hexes() {
         })
         if (!ground_unit_stay) {
             G.active_stack.forEach(u => G.location[u] = ELIMINATED_BOX)
-            check_supply()
+            // check_supply()
             G.active_stack.forEach(u => G.location[u] = location)
         }
     }
@@ -1848,7 +1845,7 @@ function compute_ground_naval_strat_move() {
     })
     if (!ground_unit_stay || move_data.battle_range) {
         G.active_stack.forEach(u => G.location[u] = ELIMINATED_BOX)
-        check_supply()
+        // check_supply()
         G.active_stack.forEach(u => G.location[u] = location)
     }
     if (move_data.battle_range && has_non_n_zoi(location, 1 - R)) {
@@ -2024,7 +2021,6 @@ P.retro_disengagement = {
         end()
         var active_stack = L.active
 
-        check_supply()
         if (L.P === "move_to" && !set_has(G.offensive.battle_hexes, G.location[active_stack[0]])) {
             set_mt(ANY_MOVE)
             L.allowed_hexes = []
@@ -2375,7 +2371,6 @@ P.declare_battle_hexes = {
             end()
             return
         }
-        check_supply()
         check_amph_mod()
         G.offensive.battle_names.filter(h => set_has(G.offensive.battle_hexes, h))
             .forEach(h => log(`Battle ${String.fromCharCode(65 + G.offensive.battle_names.indexOf(h))} declared in ${hex_get_log_str(h)}.`))
@@ -2434,7 +2429,6 @@ P.declare_battle_hexes = {
 
 P.commit_offensive = script(`
     eval {
-        check_supply()
         if (get_hand(AP).includes(SKIP_BOMBING)) {
             cache_skip_bombing()
         }
@@ -2533,6 +2527,12 @@ P.special_reaction = {
                 hq_list.push(G.location[u], piece.cr)
             }
         })
+        if (G.offensive.landing_hexes.filter(h => get_map_data(h).named && is_space_controlled(h, G.active)).length) {
+            check_supply()
+        } else {
+            end()
+            return
+        }
         L.possible_hexes = G.offensive.landing_hexes.filter(h => {
             if (!get_map_data(h).named || !has_zoi(h, G.active || !is_space_controlled(h, G.active))) {
                 return false
@@ -3208,7 +3208,6 @@ P.apply_hits = {
             G.active = 1 - R
         } else {
             apply_loss()
-            check_supply()
             end()
         }
     }
@@ -3851,9 +3850,6 @@ P.emergency_move = {
         }
 
         if (!L.unit_to_retreat.length) {
-            if (hq_disp) {
-                check_supply()
-            }
             goto("check_overstacking")
         } else {
             log("#GEmergency move:")
@@ -3884,7 +3880,6 @@ P.emergency_move = {
         push_undo()
         eliminate(G.active_stack[0])
         G.active_stack = []
-        check_supply()
     },
     unit(u) {
         push_undo()
@@ -3896,12 +3891,10 @@ P.emergency_move = {
         push_undo()
         set_location(G.active_stack[0], hex)
         G.active_stack = []
-        check_supply()
     },
     no_move() {
         push_undo()
         G.active_stack = []
-        check_supply()
     },
     done() {
         push_undo()
@@ -3923,5 +3916,4 @@ function capture_landing_hexes() {
         }
     })
     G.offensive.landing_hexes = []
-    check_supply()
 }

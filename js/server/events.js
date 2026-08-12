@@ -528,7 +528,6 @@ P.tokyo_express = {
         push_undo()
         log(`Tokyo Express placed: ${hex_get_log_str(h)}.`)
         G.events[events.TOKYO_EXPRESS.id] = h
-        check_supply()
         end()
     }
 }
@@ -681,7 +680,6 @@ P.guadalcanal_evacuation = {
 
     },
     skip() {
-        check_supply()
         goto("check_overstacking")
     },
     done() {
@@ -701,7 +699,6 @@ P.guadalcanal_evacuation = {
         } else {
             G.offensive.active_units[JP].forEach(u => set_location(u, h))
             G.offensive.active_units[JP] = []
-            check_supply()
             goto("check_overstacking")
         }
     },
@@ -895,7 +892,6 @@ P.kamikaze_attack = {
     },
     done() {
         push_undo()
-        check_supply()
         end()
     },
     bonus() {
@@ -1038,7 +1034,6 @@ P.paratroopers = {
                 eliminate(u)
             }
         })
-        check_supply()
         end()
     }
 }
@@ -1264,6 +1259,7 @@ function check_fuel_shortage_data() {
 
 P.fuel_shortage = {
     _begin() {
+        check_supply()
         fill_overstack(JP)
         L.move_type = STRAT_MOVE
         L.allowed_units = []
@@ -1331,6 +1327,7 @@ cards[find_card(JP, 78)].event = function () {
 
 P.event_unit = {
     _begin() {
+        check_supply()
         mark_supplied_hexes(G.active)
     },
     inactive: "place unit",
@@ -1341,7 +1338,6 @@ P.event_unit = {
     action_hex(h) {
         push_undo()
         set_location(L.unit, h)
-        check_supply()
         end()
     }
 }
@@ -1471,6 +1467,7 @@ cards[find_card(AP, 4)].event = function () {
 
 P.place_abda = {
     _begin() {
+        check_supply()
         mark_supplied_hexes(G.active)
         var dei = ["Java", "Borneo", "Sumatra", "Celebes"]
         L.allowed_hexes = get_unit_reinforcement_hexes(HQ_ABDA).filter(h => dei.includes(get_map_data(h).region))
@@ -1495,7 +1492,6 @@ P.place_abda = {
     action_hex(h) {
         push_undo()
         set_location(HQ_ABDA, h)
-        check_supply()
         end()
     }
 }
@@ -1603,21 +1599,18 @@ P.us_raiders = {
         push_undo()
         log(`US raiders: ${piece_get_log_str(u)}.`)
         damage_unit(u)
-        if (!unit_on_board(u)) {
-            check_supply()
-        }
         end()
     }
 }
 
 cards[find_card(AP, 17)].event = function () {
     check_event(events.HUMP)
-    check_supply()
     call("repair_avg")
 }
 
 P.repair_avg = {
     _begin() {
+        check_supply()
         mark_supplied_hexes(G.active)
         L.allowed_units = []
         var regions = ["NIndia", "Burma"]
@@ -1665,7 +1658,6 @@ P.repair_avg = {
     action_hex(h) {
         set_location(G.active_stack[0], h)
         G.active_stack = []
-        check_supply()
         end()
     }
 }
@@ -1686,7 +1678,6 @@ cards[find_card(AP, 20)].before_activation = function () {
     if (unit_on_board(HQ_SOUTH_GHORMLEY)) {
         set_location(HQ_SOUTH_HELSEY, G.location[HQ_SOUTH_GHORMLEY])
         eliminate_permanently(HQ_SOUTH_GHORMLEY)
-        check_supply()
     } else {
         eliminate_permanently(HQ_SOUTH_GHORMLEY)
         call("event_unit", {unit: HQ_SOUTH_HELSEY})
@@ -1728,7 +1719,6 @@ P.wingate = {
         set_delete(G.offensive.active_units[JP], u)
         map_delete(G.offensive.paths, u)
         log(`${piece_get_log_str(u)} deactivated.`)
-        check_supply()
         var committed = []
         map_for_each(G.offensive.committed, (u, h) => {
             if (h === loc) {
@@ -1759,6 +1749,7 @@ cards[SKIP_BOMBING].before_battles = function () {
 }
 
 function cache_skip_bombing() {
+    check_supply()
     clear_supply_cache(CLEAN_ATTACK_ZONE_MASK)
     for_each_unit_on_map((u, piece, location) => {
         if (is_us_unit(piece) && piece.br && piece.class === "air" && piece.type !== "lrb") {
@@ -1866,7 +1857,6 @@ cards[find_card(AP, 26)].before_battle_roll = function (faction) {
 cards[find_card(AP, 27)].event = function () {
     set_location(HQ_OZAWA, G.location[HQ_YAMAMOTO])
     eliminate_permanently(HQ_YAMAMOTO)
-    check_supply()
 }
 
 cards[find_card(AP, 28)].before_activation = function () {
@@ -1950,7 +1940,6 @@ P.build_road = {
         var event = ROAD_EVENTS.filter(e => e.keys[0] === h)[0]
         check_event(event)
         log(`CBI infrastructure built - ${hex_get_log_str(event.keys[0])}.`)
-        check_supply()
         end()
     },
     skip() {
@@ -2138,6 +2127,7 @@ cards[find_card(AP, 51)].before_activation = function () {
 
 P.place_14_air = {
     _begin() {
+        check_supply()
         mark_supplied_hexes(G.active)
         L.allowed_hexes = get_unit_reinforcement_hexes(AP_AIR_14).filter(h => h === CHINA_BOX || get_map_data(h).region === "NIndia")
         if (!L.allowed_hexes.length) {
@@ -2156,7 +2146,6 @@ P.place_14_air = {
     action_hex(h) {
         push_undo()
         set_location(AP_AIR_14, h)
-        check_supply()
         end()
     },
     eliminate() {
@@ -2229,7 +2218,6 @@ P.turkey_shoot = {
     },
     done() {
         push_undo()
-        check_supply()
         end()
     }
 }
@@ -2324,6 +2312,7 @@ P.airborne_landing = {
         if (range <= 0) {
             return
         }
+        check_supply()
         for_each_hex_in_range(air_location, range, h => {
             if (!has_non_n_zoi(h, JP) && !is_faction_units(h, JP) && !is_faction_units(h, AP) && get_map_data(h).terrain > OCEAN) {
                 set_add(L.allowed_hexes, h)
@@ -2348,7 +2337,6 @@ P.airborne_landing = {
         log(`${piece_get_log_str(ap_army("11_d"))} landed at ${hex_get_log_str(h)}.`)
         set_location(ap_army("11_d"), h)
         capture_hex(h, AP)
-        check_supply()
         end()
     }
 }
@@ -2359,6 +2347,7 @@ cards[find_card(AP, 70)].before_activation = function () {
 
 P.place_armor = {
     _begin() {
+        check_supply()
         mark_supplied_hexes(G.active)
         var regions = ["NIndia", "Burma", "India", "Ceylon"]
         L.allowed_hexes = get_unit_reinforcement_hexes(ARMOR_BRIGADE).filter(h => regions.includes(get_map_data(h).region))
