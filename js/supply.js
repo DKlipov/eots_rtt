@@ -35,6 +35,14 @@ function check_supply() {
     L.supply = 0
 }
 
+function check_units() {
+    clear_supply_cache(CLEAN_ALL_MASK)
+    G.burma_road = 0
+    for_each_unit_on_map(mark_unit)
+    place_virtual_units()
+    check_infrastructure()
+}
+
 function clear_supply_cache(mask) {
     for (var i = 1; i < LAST_BOARD_HEX; i++) {
         G.supply_cache[i] = G.supply_cache[i] & mask

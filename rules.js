@@ -7383,6 +7383,14 @@ function check_supply() {
     L.supply = 0
 }
 
+function check_units() {
+    clear_supply_cache(CLEAN_ALL_MASK)
+    G.burma_road = 0
+    for_each_unit_on_map(mark_unit)
+    place_virtual_units()
+    check_infrastructure()
+}
+
 function clear_supply_cache(mask) {
     for (var i = 1; i < LAST_BOARD_HEX; i++) {
         G.supply_cache[i] = G.supply_cache[i] & mask
@@ -16049,6 +16057,7 @@ cards[find_card(JP, 28)].before_activation = function () {
 
 P.tokyo_express = {
     _begin() {
+        check_units()
     },
     inactive: "place Tokyo Express marker",
     prompt() {
@@ -16188,6 +16197,7 @@ cards[find_card(JP, 35)].event = function () {
 
 P.guadalcanal_evacuation = {
     _begin() {
+        check_units()
         L.allowed_hexes = []
         for (var i = 0; i < LAST_BOARD_HEX; i++) {
             if (is_faction_units(i, JP) && get_map_data(i).coastal) {
@@ -16382,6 +16392,7 @@ function set_kamikaze_able_battles() {
 
 P.kamikaze_attack = {
     _begin() {
+        check_units()
         L.allowed_units = []
         for_each_unit_on_map((u, piece, location) => {
             if (piece.faction === JP && piece.class === "air" && G.offensive.kamikaze.filter(bh => get_distance(bh, location) <= piece.ebr).length) {
