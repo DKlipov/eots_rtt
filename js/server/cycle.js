@@ -377,6 +377,9 @@ P.attrition_phase = script(`
         goto end_of_turn_phase
     }
     log ("@Turn "+G.turn+". Attrition phase")
+    eval {
+       check_supply()
+    }
     set G.active JP
     call attrition
     set G.active AP
@@ -411,7 +414,6 @@ P.end_of_turn_phase = script(`
 
 P.attrition = {
     _begin() {
-        check_supply()
         L.unit_to_attrition = []
         var hq_list = []
         for_each_unit_on_map((u, piece) => {

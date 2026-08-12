@@ -484,7 +484,6 @@ P.activate_units = {
             end()
             return
         }
-        check_supply()
         var piece = pieces[hq]
         if ((piece.service === "joint" || piece.service === "us") && !check_hq_in_supply(hq, piece, US_SUPPLIED_HEX)) {
             L.joint_disadvantage = 1
@@ -974,7 +973,7 @@ P.ground_move = {
         L.allowed_hexes = []
         L.move_type = ANY_MOVE
         L.move_data = get_move_data()
-        check_supply()
+        //check_supply()
         compute_ground_move_hexes()
         if (map_get(G.offensive.paths, G.active_stack[0])[1] > 0) {
             L.moved = 1

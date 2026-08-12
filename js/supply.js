@@ -1,6 +1,7 @@
 let last = Date.now()
-let count = 0
+let count = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 function check_supply() {
+    metric(0,1)
     L.supply = {}
     clear_supply_cache(CLEAN_ALL_MASK)
     G.burma_road = 0
@@ -31,7 +32,6 @@ function check_supply() {
     }
     mark_supply_eligable_ports(AP)
     mark_supply_eligable_ports(JP)
-    G.oos = []
     L.supply = 0
 }
 
@@ -395,11 +395,10 @@ function unit_or_airfield(location, faction) {
 }
 
 function metric(code, sum) {
-    return
     count[code] += sum
-    if (count[code] > 1000000) {
+    if (count[code] > 1000) {
         var time = (Date.now() - last)
-        console.log(`count: ${count.map(c => c * 1000 / time)}`)
+        console.log(`count: ${count.map(c => Math.ceil(c * 1000 / time))}`)
         last = Date.now()
         count = count.map(c => 0)
     }
@@ -409,7 +408,6 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
     if (!hq_list.length) {
         return;
     }
-    metric(0, 1)
     var i = 0
     const faction = pieces[hq_list[0]].faction
     if (!L) {
@@ -467,7 +465,6 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
             }
         }
     }
-    metric(1, i)
     L.supply.queue = []
     i = 0
     hq_list.forEach(hq => {
@@ -512,7 +509,6 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
             }
         }
     }
-    metric(1, i)
     // for(var j=0;j<500;j++){
     //     i++
     // }
@@ -544,7 +540,6 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
             }
         }
     }
-    metric(1, i)
     L.supply.queue = []
     i = 0
     second_ports.forEach(h => L.supply.queue.push(h))
@@ -572,7 +567,6 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
             }
         }
     }
-    metric(1, i)
 }
 
 function check_piece_supply(location, i, piece) {
@@ -728,4 +722,13 @@ function has_non_n_zoi(hex, faction) {
 
 function has_zoi(hex, faction) {
     return (G.supply_cache[hex] & JP_ZOI << faction)
+}
+
+function check_unit_supply(location, i, piece) {
+    if (piece.class === "hq") {
+        return true
+    } else if (set_has(G.offensive.active_units[piece.faction], i)) {
+        return true
+    }
+    return G.supply_cache[location] & piece.supply
 }

@@ -1752,7 +1752,6 @@ cards[SKIP_BOMBING].before_battles = function () {
 }
 
 function cache_skip_bombing() {
-    check_supply()
     clear_supply_cache(CLEAN_ATTACK_ZONE_MASK)
     for_each_unit_on_map((u, piece, location) => {
         if (is_us_unit(piece) && piece.br && piece.class === "air" && piece.type !== "lrb") {
