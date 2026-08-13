@@ -469,7 +469,7 @@ function on_init(scenario, game_options, static_view) {
     let map_elem = document.getElementById("mapwrap")
     switch (scenario) {
         case "South Pacific": {
-            data.nations.AUSTRALIAN_MANDATES.keys = data.nations.AUSTRALIAN_MANDATES.ports
+            nations.AUSTRALIAN_MANDATES.keys = nations.AUSTRALIAN_MANDATES.ports
             SID = SOUTH_PACIFIC_SCENARIO
             map_layout = layout.southpac;
             map_elem.classList.add("southpac");

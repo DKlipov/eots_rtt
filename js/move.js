@@ -556,6 +556,9 @@ function ground_move_denied(hex) {
     if (G.sid === BURMA_SCENARIO && hex === SINGAPORE) {
         return true;
     }
+    if(G.turn===1 && (hex === SINGAPORE ||hex === MANILA) && !L.move_data.is_naval_present){
+        return true;
+    }
 }
 
 function get_ground_move(avoid_zoi) {

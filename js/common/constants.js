@@ -57,6 +57,7 @@ const AVOID_ZOI = 1 << 11
 const ORGANIC_ONLY = 1 << 12
 const GROUND_DISENGAGEMENT = 1 << 13
 const MANUAL_MOVEMENT = 1 << 14
+const VIOLATE_ZOI = 1 << 15
 
 //Offensive stages
 const EVENT_STAGE = 13
@@ -132,7 +133,6 @@ const TURN_BOX = 1490
 const TUNNEL_BOX = 1600
 
 
-
 //Regions
 const KWAI_HQ_MOD = ["NIndia", "Burma", "Ceylon"]
 
@@ -168,7 +168,7 @@ const TOKYO_AIR_BASES = [3307, 3704, 3407, 3506, 3507, 3607, 3706, 3705, 3305, 3
 const SAIGON = hex_to_int(2212)
 const CALCUTTA = hex_to_int(1805)
 
-const NEW_HEBRIDES = []//todo: remove
+const NEW_HEBRIDES = [4825, 4826, 4828, 4926].map(h => hex_to_int(h))
 const COM_REPLACEMENT_POINTS = [1307, 1308, 2114, 2709, 3727].map(h => hex_to_int(h))
 
 const HEX_DIRECTION = []

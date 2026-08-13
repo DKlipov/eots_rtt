@@ -67,6 +67,7 @@ const AVOID_ZOI = 1 << 11
 const ORGANIC_ONLY = 1 << 12
 const GROUND_DISENGAGEMENT = 1 << 13
 const MANUAL_MOVEMENT = 1 << 14
+const VIOLATE_ZOI = 1 << 15
 
 //Offensive stages
 const EVENT_STAGE = 13
@@ -142,7 +143,6 @@ const TURN_BOX = 1490
 const TUNNEL_BOX = 1600
 
 
-
 //Regions
 const KWAI_HQ_MOD = ["NIndia", "Burma", "Ceylon"]
 
@@ -178,7 +178,7 @@ const TOKYO_AIR_BASES = [3307, 3704, 3407, 3506, 3507, 3607, 3706, 3705, 3305, 3
 const SAIGON = hex_to_int(2212)
 const CALCUTTA = hex_to_int(1805)
 
-const NEW_HEBRIDES = []//todo: remove
+const NEW_HEBRIDES = [4825, 4826, 4828, 4926].map(h => hex_to_int(h))
 const COM_REPLACEMENT_POINTS = [1307, 1308, 2114, 2709, 3727].map(h => hex_to_int(h))
 
 const HEX_DIRECTION = []
@@ -7413,6 +7413,9 @@ function mark_unit(i, piece) {
     } else if (piece.class === "ground") {
         G.supply_cache[location] = G.supply_cache[location] | (JP_GROUND_UNITS << piece.faction)
     }
+    if (piece.br) {
+        for_each_hex_in_range(location, 2, h => G.supply_cache[h] |= JP_ZOI_DISABLED << piece.faction)
+    }
 }
 
 function place_virtual_units() {
@@ -7645,7 +7648,6 @@ function mark_supply_ports_oversea(hq, piece) {
     }
     L.supply.queue.push(location)
     L.supply.retracing.push(location)
-    // return;//todo: remove
     var distance_map = [location]
     for (var i = L.supply.queue.length - 1; i < L.supply.queue.length; i++) {
         let item = L.supply.queue[i]
@@ -7862,10 +7864,6 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
             }
         }
     }
-    // for(var j=0;j<500;j++){
-    //     i++
-    // }
-    // return;//todo: remove
     L.supply.queue = []
     i = 0
     overland_ports.forEach(k => L.supply.queue.push(k))
@@ -7960,7 +7958,6 @@ function mark_supply_eligable_ports(faction) {
 }
 
 function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
-    // return;//todo: remove
     clear_supply_cache(NON_SUPPLY_MASK)
     var burma = G.burma_road
     if (G.burma_road < 2) {
@@ -8653,6 +8650,9 @@ function ground_move_denied(hex) {
         return true;
     }
     if (G.sid === BURMA_SCENARIO && hex === SINGAPORE) {
+        return true;
+    }
+    if(G.turn===1 && (hex === SINGAPORE ||hex === MANILA) && !L.move_data.is_naval_present){
         return true;
     }
 }
@@ -11781,7 +11781,6 @@ function could_air_stop_here() {
 }
 
 
-
 function create_battle_hex(hex) {
     if (set_has(G.offensive.battle_hexes, hex)) {
         return
@@ -12062,7 +12061,6 @@ P.move_offensive_units = {
         map_set(G.offensive.paths, u, path)
         L.move_data = get_move_data()
         set_delete(L.movable_units, u)
-        trigger_event("before_unit_move", u)
     },
     pass() {
         L.allowed_hexes = []
@@ -12071,7 +12069,7 @@ P.move_offensive_units = {
             end()
         }
     },
-    move(curr_path){
+    move(curr_path) {
         if (L.move_type === BARGES_MOVE) {
             G.offensive.barges = 1
             log(`Barges ability used.`)
@@ -12178,7 +12176,7 @@ P.ground_move = {
 
 function set_mt(mt) {
     L.move_type = mt
-    // update_move_hex()
+    L.move_data=get_move_data()
 }
 
 function get_air_attack_hex() {
@@ -12290,6 +12288,7 @@ function attack_hex(hex) {
 }
 
 function move_units(units, path) {
+    check_units()
     const prev_path = map_get(G.offensive.paths, units[0])
     var full_path = [path[0], path[1]]
     if (prev_path) {
@@ -12307,9 +12306,13 @@ function move_units(units, path) {
         return
     }
     var i = 2
-    var zoi_flag = !G.offensive.zoi_intelligence_modifier && G.offensive.stage === ATTACK_STAGE && pieces[units[0]].faction === G.offensive.attacker
-    var zoi_generator_flag = G.active_stack.filter(u => pieces[u].zoi_generator).length
+    var zoi_cross_denied = path[0] & STRAT_MOVE || path[0] & AMPH_MOVE && !L.move_data.battle_range
+    var zoi_cross_declared = !zoi_cross_denied && path[0] & VIOLATE_ZOI
+    var could_zoi_cross = !G.offensive.zoi_intelligence_modifier && G.offensive.stage === ATTACK_STAGE && pieces[units[0]].faction === G.offensive.attacker
+    var could_zoi_change = G.active_stack.filter(u => pieces[u].zoi_generator).length
         || (path[0] & GROUND_MOVE) && G.active_stack.filter(u => pieces[u].class === "ground").length
+    var supply_checked = false
+    var faction = pieces[units[0]].faction
     var enemy_faction = 1 - pieces[units[0]].faction
     var point_to_point = []
     var last = null
@@ -12322,24 +12325,72 @@ function move_units(units, path) {
         }
         last = hex
     }
-    i = 3
+    var distance = 0
+    var legs = 1
+    i = 2
     var destination = path[path.length - 1]
     log(`${units_list} moved to ${list_get_log_str(hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
     for (; i < path.length; i++) {
         var hex = path[i]
-        if (zoi_flag && zoi_generator_flag && (G.supply_cache[hex] & (POSSIBLE_ZOI << enemy_faction))) {
-            units.forEach(u => set_location(u, hex, 1))
+        if (i > 2 && path[0] & GROUND_MOVE) {
+            distance += get_ground_move_cost(path[i - 1], path[i], faction)
+        } else if (i > 2 && path[i - 1] !== path[i]) {
+            distance++
         }
-        if (zoi_flag && has_zoi(hex, 1 - R)) {
+        if (i > 2 && L.move_data.is_air_present && path[i - 1] === path[i]) {
+            if (distance > L.move_data.extended_battle_range) {
+                throw new Error("Bad move paths")
+            }
+            legs++
+            distance = 0
+        }
+        if (i > 2 && broken_hex_edge(path[0], path[i - 1], path[i])) {
+            throw new Error("Bad move paths")
+        }
+        if (could_zoi_cross && !supply_checked && (G.supply_cache[hex] & (POSSIBLE_ZOI << enemy_faction))) {
+            if (zoi_cross_declared) {
+                G.supply_cache[hex] |= JP_ZOI << enemy_faction
+            } else {
+                units.forEach(u => set_location(u, hex, 1))
+                check_supply()
+                supply_checked = 1
+            }
+        }
+        if (could_zoi_cross && has_zoi(hex, enemy_faction)) {
+            if (zoi_cross_denied && has_non_n_zoi(hex, enemy_faction)) {
+                throw new Error("Bad move paths")
+            }
             log("#IReaction zoi violated! -2 to reaction intelligence rolls")
             G.offensive.zoi_intelligence_modifier = 1
-            zoi_flag = 0
+            could_zoi_cross = 0
+        } else if (supply_checked && could_zoi_change) {
+            supply_checked = 0
         }
         if (path[0] & GROUND_MOVE && !is_faction_units(hex, 1 - R)) {
             capture_hex(hex)
         }
     }
+    if (L.move_data.is_air_present && (distance > L.move_data.extended_battle_range || legs > L.move_data.air_move_legs)
+        || path[0] & GROUND_MOVE && distance > L.move_data.ground_move_distance
+        || distance > L.move_data.naval_move_distance
+    ) {
+        throw new Error("Bad move path")
+    }
     units.forEach(u => set_location(u, destination, true))
+}
+
+function broken_hex_edge(move_type, from, to) {
+    if (get_distance(from, to) > 1) {
+        return 1
+    }
+    var direction = get_direction(from, to)
+    if (move_type & GROUND_MOVE) {
+        return !(get_map_data(from).edges_int & GROUND << 5 * direction)
+    }
+    if (move_type & AIR_MOVE) {
+        return !((get_map_data(from).edges_int >> 5 * direction) % 32)
+    }
+    return !(get_map_data(from).edges_int & WATER << 5 * direction)
 }
 
 function get_move_type(type) {
@@ -12359,7 +12410,6 @@ function get_move_type(type) {
     }
     return ""
 }
-
 
 
 function is_overstack(hex, unit, multip = 1) {
@@ -12563,7 +12613,6 @@ function fill_overstack(faction) {
         }
     })
 }
-
 
 
 function compute_possible_battle_hexes() {
@@ -12900,8 +12949,6 @@ function compute_ground_disengagement(unit) {
     }
     return allowed_hexes
 }
-
-
 
 
 function commit_to_attack(unit, hex) {
@@ -15344,8 +15391,6 @@ P.offensive_segment_card_action = {
     inactive: "select action",
     prompt() {
         prompt(`${card_get_log_str(L.c)}: Select action.`)
-        // button("discard")
-        // return // todo: remove
         get_allowed_actions(L.c).forEach(a => button(a))
     },
     ops() {
@@ -15691,25 +15736,6 @@ function mark_hexes_in_move_range(hex, range) {
             map_set(distance_map, nh, distance)
             if (get_map_data(nh).terrain > OCEAN) {
                 set_add(G.offensive.aa_hexes, nh)
-            }
-        }
-    }
-}
-
-cards[find_card(JP, 2)].before_unit_move = function () {
-    if (G.active !== JP) {
-        return
-    }
-    if (L.move_data.is_ground_present && !L.move_data.is_naval_present) {
-        map_delete(L.allowed_hexes, SINGAPORE)
-        map_delete(L.allowed_hexes, MANILA)
-    }
-    var cache = L.allowed_hexes
-    if (L.move_data.is_ground_present) {
-        L.allowed_hexes = []
-        for (var i = 0; i < cache.length; i += 2) {
-            if (!(cache[i + 1][0] & AMPH_MOVE) || set_has(G.offensive.aa_hexes, cache[i])) {
-                map_set(L.allowed_hexes, cache[i], cache[i + 1])
             }
         }
     }
@@ -17457,10 +17483,6 @@ cards[find_card(AP, 28)].before_activation = function () {
 cards[find_card(AP, 28)].before_commit_offensive = function () {
     if (G.offensive.stage !== ATTACK_STAGE) {
         return
-    }
-    if (!G.offensive.chronicle) {
-        //todo: remove
-        G.offensive.chronicle = []
     }
     G.offensive.landing_hexes.forEach(l => {
         if (get_map_data(l).island && !set_has(G.offensive.chronicle, l) && !is_faction_units(l, JP)) {

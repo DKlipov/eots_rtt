@@ -589,7 +589,6 @@ function could_air_stop_here() {
 }
 
 
-
 function create_battle_hex(hex) {
     if (set_has(G.offensive.battle_hexes, hex)) {
         return
@@ -870,7 +869,6 @@ P.move_offensive_units = {
         map_set(G.offensive.paths, u, path)
         L.move_data = get_move_data()
         set_delete(L.movable_units, u)
-        trigger_event("before_unit_move", u)
     },
     pass() {
         L.allowed_hexes = []
@@ -879,7 +877,7 @@ P.move_offensive_units = {
             end()
         }
     },
-    move(curr_path){
+    move(curr_path) {
         if (L.move_type === BARGES_MOVE) {
             G.offensive.barges = 1
             log(`Barges ability used.`)
@@ -986,7 +984,7 @@ P.ground_move = {
 
 function set_mt(mt) {
     L.move_type = mt
-    // update_move_hex()
+    L.move_data=get_move_data()
 }
 
 function get_air_attack_hex() {
@@ -1098,6 +1096,7 @@ function attack_hex(hex) {
 }
 
 function move_units(units, path) {
+    check_units()
     const prev_path = map_get(G.offensive.paths, units[0])
     var full_path = [path[0], path[1]]
     if (prev_path) {
@@ -1115,9 +1114,13 @@ function move_units(units, path) {
         return
     }
     var i = 2
-    var zoi_flag = !G.offensive.zoi_intelligence_modifier && G.offensive.stage === ATTACK_STAGE && pieces[units[0]].faction === G.offensive.attacker
-    var zoi_generator_flag = G.active_stack.filter(u => pieces[u].zoi_generator).length
+    var zoi_cross_denied = path[0] & STRAT_MOVE || path[0] & AMPH_MOVE && !L.move_data.battle_range
+    var zoi_cross_declared = !zoi_cross_denied && path[0] & VIOLATE_ZOI
+    var could_zoi_cross = !G.offensive.zoi_intelligence_modifier && G.offensive.stage === ATTACK_STAGE && pieces[units[0]].faction === G.offensive.attacker
+    var could_zoi_change = G.active_stack.filter(u => pieces[u].zoi_generator).length
         || (path[0] & GROUND_MOVE) && G.active_stack.filter(u => pieces[u].class === "ground").length
+    var supply_checked = false
+    var faction = pieces[units[0]].faction
     var enemy_faction = 1 - pieces[units[0]].faction
     var point_to_point = []
     var last = null
@@ -1130,24 +1133,72 @@ function move_units(units, path) {
         }
         last = hex
     }
-    i = 3
+    var distance = 0
+    var legs = 1
+    i = 2
     var destination = path[path.length - 1]
     log(`${units_list} moved to ${list_get_log_str(hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
     for (; i < path.length; i++) {
         var hex = path[i]
-        if (zoi_flag && zoi_generator_flag && (G.supply_cache[hex] & (POSSIBLE_ZOI << enemy_faction))) {
-            units.forEach(u => set_location(u, hex, 1))
+        if (i > 2 && path[0] & GROUND_MOVE) {
+            distance += get_ground_move_cost(path[i - 1], path[i], faction)
+        } else if (i > 2 && path[i - 1] !== path[i]) {
+            distance++
         }
-        if (zoi_flag && has_zoi(hex, 1 - R)) {
+        if (i > 2 && L.move_data.is_air_present && path[i - 1] === path[i]) {
+            if (distance > L.move_data.extended_battle_range) {
+                throw new Error("Bad move paths")
+            }
+            legs++
+            distance = 0
+        }
+        if (i > 2 && broken_hex_edge(path[0], path[i - 1], path[i])) {
+            throw new Error("Bad move paths")
+        }
+        if (could_zoi_cross && !supply_checked && (G.supply_cache[hex] & (POSSIBLE_ZOI << enemy_faction))) {
+            if (zoi_cross_declared) {
+                G.supply_cache[hex] |= JP_ZOI << enemy_faction
+            } else {
+                units.forEach(u => set_location(u, hex, 1))
+                check_supply()
+                supply_checked = 1
+            }
+        }
+        if (could_zoi_cross && has_zoi(hex, enemy_faction)) {
+            if (zoi_cross_denied && has_non_n_zoi(hex, enemy_faction)) {
+                throw new Error("Bad move paths")
+            }
             log("#IReaction zoi violated! -2 to reaction intelligence rolls")
             G.offensive.zoi_intelligence_modifier = 1
-            zoi_flag = 0
+            could_zoi_cross = 0
+        } else if (supply_checked && could_zoi_change) {
+            supply_checked = 0
         }
         if (path[0] & GROUND_MOVE && !is_faction_units(hex, 1 - R)) {
             capture_hex(hex)
         }
     }
+    if (L.move_data.is_air_present && (distance > L.move_data.extended_battle_range || legs > L.move_data.air_move_legs)
+        || path[0] & GROUND_MOVE && distance > L.move_data.ground_move_distance
+        || distance > L.move_data.naval_move_distance
+    ) {
+        throw new Error("Bad move path")
+    }
     units.forEach(u => set_location(u, destination, true))
+}
+
+function broken_hex_edge(move_type, from, to) {
+    if (get_distance(from, to) > 1) {
+        return 1
+    }
+    var direction = get_direction(from, to)
+    if (move_type & GROUND_MOVE) {
+        return !(get_map_data(from).edges_int & GROUND << 5 * direction)
+    }
+    if (move_type & AIR_MOVE) {
+        return !((get_map_data(from).edges_int >> 5 * direction) % 32)
+    }
+    return !(get_map_data(from).edges_int & WATER << 5 * direction)
 }
 
 function get_move_type(type) {
@@ -1167,7 +1218,6 @@ function get_move_type(type) {
     }
     return ""
 }
-
 
 
 function is_overstack(hex, unit, multip = 1) {
@@ -1371,7 +1421,6 @@ function fill_overstack(faction) {
         }
     })
 }
-
 
 
 function compute_possible_battle_hexes() {
@@ -1708,8 +1757,6 @@ function compute_ground_disengagement(unit) {
     }
     return allowed_hexes
 }
-
-
 
 
 function commit_to_attack(unit, hex) {

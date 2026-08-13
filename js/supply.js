@@ -61,6 +61,9 @@ function mark_unit(i, piece) {
     } else if (piece.class === "ground") {
         G.supply_cache[location] = G.supply_cache[location] | (JP_GROUND_UNITS << piece.faction)
     }
+    if (piece.br) {
+        for_each_hex_in_range(location, 2, h => G.supply_cache[h] |= JP_ZOI_DISABLED << piece.faction)
+    }
 }
 
 function place_virtual_units() {
@@ -293,7 +296,6 @@ function mark_supply_ports_oversea(hq, piece) {
     }
     L.supply.queue.push(location)
     L.supply.retracing.push(location)
-    // return;//todo: remove
     var distance_map = [location]
     for (var i = L.supply.queue.length - 1; i < L.supply.queue.length; i++) {
         let item = L.supply.queue[i]
@@ -510,10 +512,6 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
             }
         }
     }
-    // for(var j=0;j<500;j++){
-    //     i++
-    // }
-    // return;//todo: remove
     L.supply.queue = []
     i = 0
     overland_ports.forEach(k => L.supply.queue.push(k))
@@ -608,7 +606,6 @@ function mark_supply_eligable_ports(faction) {
 }
 
 function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
-    // return;//todo: remove
     clear_supply_cache(NON_SUPPLY_MASK)
     var burma = G.burma_road
     if (G.burma_road < 2) {

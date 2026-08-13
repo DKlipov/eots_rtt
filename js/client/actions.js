@@ -177,7 +177,7 @@ function check_distance() {
 var original_send_action = send_action
 
 function proxy_send_action(a, b) {
-    if (G.actions.move && a === "action_hex") {
+    if (G.actions && G.actions.move && a === "action_hex") {
         var path = map_get(L.allowed_hexes, b)
         if (path) {
             G.actions["move"] = [path[0]]

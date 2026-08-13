@@ -63,6 +63,7 @@ const AVOID_ZOI = 1 << 11
 const ORGANIC_ONLY = 1 << 12
 const GROUND_DISENGAGEMENT = 1 << 13
 const MANUAL_MOVEMENT = 1 << 14
+const VIOLATE_ZOI = 1 << 15
 
 //Offensive stages
 const EVENT_STAGE = 13
@@ -138,7 +139,6 @@ const TURN_BOX = 1490
 const TUNNEL_BOX = 1600
 
 
-
 //Regions
 const KWAI_HQ_MOD = ["NIndia", "Burma", "Ceylon"]
 
@@ -174,7 +174,7 @@ const TOKYO_AIR_BASES = [3307, 3704, 3407, 3506, 3507, 3607, 3706, 3705, 3305, 3
 const SAIGON = hex_to_int(2212)
 const CALCUTTA = hex_to_int(1805)
 
-const NEW_HEBRIDES = []//todo: remove
+const NEW_HEBRIDES = [4825, 4826, 4828, 4926].map(h => hex_to_int(h))
 const COM_REPLACEMENT_POINTS = [1307, 1308, 2114, 2709, 3727].map(h => hex_to_int(h))
 
 const HEX_DIRECTION = []
@@ -7409,6 +7409,9 @@ function mark_unit(i, piece) {
     } else if (piece.class === "ground") {
         G.supply_cache[location] = G.supply_cache[location] | (JP_GROUND_UNITS << piece.faction)
     }
+    if (piece.br) {
+        for_each_hex_in_range(location, 2, h => G.supply_cache[h] |= JP_ZOI_DISABLED << piece.faction)
+    }
 }
 
 function place_virtual_units() {
@@ -7641,7 +7644,6 @@ function mark_supply_ports_oversea(hq, piece) {
     }
     L.supply.queue.push(location)
     L.supply.retracing.push(location)
-    // return;//todo: remove
     var distance_map = [location]
     for (var i = L.supply.queue.length - 1; i < L.supply.queue.length; i++) {
         let item = L.supply.queue[i]
@@ -7858,10 +7860,6 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
             }
         }
     }
-    // for(var j=0;j<500;j++){
-    //     i++
-    // }
-    // return;//todo: remove
     L.supply.queue = []
     i = 0
     overland_ports.forEach(k => L.supply.queue.push(k))
@@ -7956,7 +7954,6 @@ function mark_supply_eligable_ports(faction) {
 }
 
 function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
-    // return;//todo: remove
     clear_supply_cache(NON_SUPPLY_MASK)
     var burma = G.burma_road
     if (G.burma_road < 2) {
@@ -8651,6 +8648,9 @@ function ground_move_denied(hex) {
     if (G.sid === BURMA_SCENARIO && hex === SINGAPORE) {
         return true;
     }
+    if(G.turn===1 && (hex === SINGAPORE ||hex === MANILA) && !L.move_data.is_naval_present){
+        return true;
+    }
 }
 
 function get_ground_move(avoid_zoi) {
@@ -9218,7 +9218,7 @@ function on_init(scenario, game_options, static_view) {
     let map_elem = document.getElementById("mapwrap")
     switch (scenario) {
         case "South Pacific": {
-            data.nations.AUSTRALIAN_MANDATES.keys = data.nations.AUSTRALIAN_MANDATES.ports
+            nations.AUSTRALIAN_MANDATES.keys = nations.AUSTRALIAN_MANDATES.ports
             SID = SOUTH_PACIFIC_SCENARIO
             map_layout = layout.southpac;
             map_elem.classList.add("southpac");
@@ -9567,7 +9567,7 @@ function check_distance() {
 var original_send_action = send_action
 
 function proxy_send_action(a, b) {
-    if (G.actions.move && a === "action_hex") {
+    if (G.actions && G.actions.move && a === "action_hex") {
         var path = map_get(L.allowed_hexes, b)
         if (path) {
             G.actions["move"] = [path[0]]

@@ -110,25 +110,6 @@ function mark_hexes_in_move_range(hex, range) {
     }
 }
 
-cards[find_card(JP, 2)].before_unit_move = function () {
-    if (G.active !== JP) {
-        return
-    }
-    if (L.move_data.is_ground_present && !L.move_data.is_naval_present) {
-        map_delete(L.allowed_hexes, SINGAPORE)
-        map_delete(L.allowed_hexes, MANILA)
-    }
-    var cache = L.allowed_hexes
-    if (L.move_data.is_ground_present) {
-        L.allowed_hexes = []
-        for (var i = 0; i < cache.length; i += 2) {
-            if (!(cache[i + 1][0] & AMPH_MOVE) || set_has(G.offensive.aa_hexes, cache[i])) {
-                map_set(L.allowed_hexes, cache[i], cache[i + 1])
-            }
-        }
-    }
-}
-
 cards[find_card(JP, 2)].after_unit_move = function () {
     var hex = G.location[L.active[0]]
     if (G.active === JP && (hex === MANILA || hex === SINGAPORE)) {
@@ -1871,10 +1852,6 @@ cards[find_card(AP, 28)].before_activation = function () {
 cards[find_card(AP, 28)].before_commit_offensive = function () {
     if (G.offensive.stage !== ATTACK_STAGE) {
         return
-    }
-    if (!G.offensive.chronicle) {
-        //todo: remove
-        G.offensive.chronicle = []
     }
     G.offensive.landing_hexes.forEach(l => {
         if (get_map_data(l).island && !set_has(G.offensive.chronicle, l) && !is_faction_units(l, JP)) {

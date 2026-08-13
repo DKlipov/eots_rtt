@@ -153,8 +153,6 @@ P.offensive_segment_card_action = {
     inactive: "select action",
     prompt() {
         prompt(`${card_get_log_str(L.c)}: Select action.`)
-        // button("discard")
-        // return // todo: remove
         get_allowed_actions(L.c).forEach(a => button(a))
     },
     ops() {
