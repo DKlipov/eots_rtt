@@ -5,3 +5,4 @@ Todo list:
 * reaction skip should not show information
 japanese air could not move china
 * check destination point for move_units
+* fix vp counters

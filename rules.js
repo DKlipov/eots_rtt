@@ -7809,7 +7809,7 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
             L.supply.queue.push(nh)
             // L.supply.retracing.push(item)
             const friendly_port = get_map_data(nh).port && is_space_controlled(nh, faction)
-            if (friendly_port && oversea_set[nh] < distance) {
+            if (friendly_port &&  !(oversea_set[nh] >= distance)) {
                 oversea_set[nh] = (distance)
                 second_ports.push(nh)
             }
@@ -18285,7 +18285,7 @@ function create_view() {
     V.offensive = object_copy(G.offensive)
     V.move_type = L.move_type
     if (G.offensive.battle.battle_hex) {
-        set_add(G.offensive.battle_hexes, G.offensive.battle.battle_hex)
+        set_add(V.offensive.battle_hexes, G.offensive.battle.battle_hex)
     }
     V.offensive.damaged = G.offensive.battle && G.offensive.battle.damaged && G.offensive.battle.damaged[R] ? G.offensive.battle.damaged[R] : []
     V.garrison = []

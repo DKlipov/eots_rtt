@@ -197,7 +197,7 @@ function create_view() {
     V.offensive = object_copy(G.offensive)
     V.move_type = L.move_type
     if (G.offensive.battle.battle_hex) {
-        set_add(G.offensive.battle_hexes, G.offensive.battle.battle_hex)
+        set_add(V.offensive.battle_hexes, G.offensive.battle.battle_hex)
     }
     V.offensive.damaged = G.offensive.battle && G.offensive.battle.damaged && G.offensive.battle.damaged[R] ? G.offensive.battle.damaged[R] : []
     V.garrison = []
