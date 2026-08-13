@@ -15634,7 +15634,6 @@ function get_allowed_actions(num) {
 
 /** import server/actions.js*/
 /** import server/events.js*/
-
 /* EVENTS */
 
 function filter_activation_units(condition, faction) {
@@ -17044,9 +17043,10 @@ P.submarine_attack = {
     inactive: "apply card effect",
     prompt() {
         prompt(`Submarine attack. Apply hits: ${L.hits}.`)
-        L.allowed_units.forEach(u => action_unit(u))
         if (L.allowed_units.length === 0 || L.hits <= 0) {
             button("done")
+        } else {
+            L.allowed_units.forEach(u => action_unit(u))
         }
     },
     unit(u) {
