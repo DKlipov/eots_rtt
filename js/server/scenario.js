@@ -1552,7 +1552,7 @@ function victory_1944() {
         "Rabaul is JP controlled and supplied",
         `Rabaul is ${is_space_controlled(RABAUL, AP) ? "AP controlled" : "out of supply"}`)
 
-    var philipine_ports = [MANILA, hex_to_int(3014), hex_to_int(2915)]
+    var philipine_ports = [MANILA, hex_to_int(3014), hex_to_int(2915), hex_to_int(2715)]
     var pp = philipine_ports.filter(h => is_space_controlled(h, AP) && (G.supply_cache[h] & AP_SUPPLIED_HEX)).length
     var phillipine_diff = 0
     if (pp === 0) {
