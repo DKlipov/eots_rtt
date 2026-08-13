@@ -98,3 +98,7 @@ function get_distance(first_hex, second_hex) {
     }
     return rx + ry - (rx >> 1)
 }
+
+function offensive_card_header() {
+    return `${G.offensive.type === EC ? "EC" : "OC"}: ${cards[G.offensive.active_cards[0]].ops} Ops.`
+}

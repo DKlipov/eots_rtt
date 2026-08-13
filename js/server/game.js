@@ -194,23 +194,11 @@ function create_view() {
     V.reinforcements = G.reinforcements
     V.burma_road = G.burma_road
     V.china_divisions = G.china_divisions
-    var bh = G.offensive.battle_hexes.slice()
+    V.offensive = object_copy(G.offensive)
     if (G.offensive.battle.battle_hex) {
-        set_add(bh, G.offensive.battle.battle_hex)
+        set_add(G.offensive.battle_hexes, G.offensive.battle.battle_hex)
     }
-    V.offensive = {
-        attacker: G.offensive.attacker,
-        active_units: G.offensive.active_units[0].concat(G.offensive.active_units[1]),
-        paths: G.offensive.paths,
-        active_cards: G.offensive.active_cards,
-        active_hq: G.offensive.active_hq,
-        battle_hexes: bh,
-        landing_hexes: G.offensive.landing_hexes,
-        committed: G.offensive.committed,
-        battle_names: G.offensive.battle_names,
-        organic: G.offensive.organic,
-        damaged: G.offensive.battle && G.offensive.battle.damaged && G.offensive.battle.damaged[R] ? G.offensive.battle.damaged[R] : [],
-    }
+    V.offensive.damaged = G.offensive.battle && G.offensive.battle.damaged && G.offensive.battle.damaged[R] ? G.offensive.battle.damaged[R] : []
     V.garrison = []
     var div_count = get_garrison_count()
     G.offensive.battle_hexes.forEach(h => {
@@ -753,19 +741,7 @@ function commit_into_turn_draw() {
     G.offensive.draw = []
 }
 
-function target_in_battle_range(range, location, targets) {
-    for (var i = 0; i < targets.length; i++) {
-        if (get_distance(location, targets[i]) <= range) {
-            return true
-        }
-    }
-    return false
-}
 
-
-function offensive_card_header() {
-    return `${G.offensive.type === EC ? "EC" : "OC"}: ${cards[G.offensive.active_cards[0]].ops} Ops.`
-}
 
 function is_controllable_hex(hex) {
     return G.supply_cache[hex] & HEX_CONTROLLABLE

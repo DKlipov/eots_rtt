@@ -1,6 +1,7 @@
 var LOCAL_STATUS = 0
 var LOCAL_STATE = null
 var STORED_STATE = null
+var L = {}
 const P = {}
 
 P.check_unit_supply = {
@@ -176,7 +177,15 @@ function check_distance() {
 var original_send_action = send_action
 
 function proxy_send_action(a, b) {
-    if (a === "play_card") {
+    if (G.actions.move && a === "action_hex") {
+        var path = map_get(L.allowed_hexes, b)
+        if (path) {
+            G.actions["move"] = [path[0]]
+            original_send_action("move", path)
+        } else if (G.actions.action_hex && set_has(G.actions.action_hex, b)) {
+            original_send_action(a, b)
+        }
+    } else if (a === "play_card") {
         scroll_into_view(lookup_thing("card", G.actions.card[0]).element)
         return
     } else if (a === "to_unit") {

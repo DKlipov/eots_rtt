@@ -97,11 +97,7 @@ function place_unit(u, location) {
         unit = populate("s-loc", location, "unit", u)
         unit.classList.toggle("reduced", (set_has(G.reduced, u) && !one_step) || location === ELIMINATED_BOX
             || pieces[u].class === "hq" && G.inter_service[pieces[u].faction])
-        if (piece.faction === JP) {
-            unit.classList.toggle("activated_red", G.offensive.active_units.includes(u))
-        } else {
-            unit.classList.toggle("activated_blue", G.offensive.active_units.includes(u))
-        }
+        unit.classList.toggle(piece.faction ? "activated_blue" : "activated_red", set_has(G.offensive.active_units[piece.faction], u))
         unit.classList.toggle("selected", G.active_stack.includes(u))
         unit.innerHTML = '';
         var battle = map_get(G.offensive.committed, u)
@@ -160,6 +156,14 @@ function update_role_info() {
 function on_update() {
     begin_update()
     check_supply()
+    if (G.actions && G.actions.move) {
+        L.allowed_hexes = []
+        update_move_hex()
+        if (!G.actions.action_hex) {
+            G.actions.action_hex = []
+        }
+        map_for_each(L.allowed_hexes, h => set_add(G.actions.action_hex, h))
+    }
     document.body.classList.remove("hex-clickable")
     world.log_boxes = []
     if (LOCAL_STATUS) {
