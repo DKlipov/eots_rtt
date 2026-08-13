@@ -4,3 +4,4 @@ Todo list:
 * franciso async assign did not triggered
 * reaction skip should not show information
 japanese air could not move china
+* check destination point for move_units

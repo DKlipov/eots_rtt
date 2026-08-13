@@ -12029,7 +12029,11 @@ P.move_offensive_units = {
             }
             set_delete(G.active_stack, u)
             set_add(L.movable_units, u)
-            L.move_data = get_move_data()
+            if (G.active_stack.length) {
+                L.move_data = get_move_data()
+            } else {
+                L.move_data = {}
+            }
             return
         }
         if (G.active_stack.length === 0) {
