@@ -878,6 +878,10 @@ P.move_offensive_units = {
         }
     },
     move(curr_path) {
+        if(globalThis.RTT_FUZZER){
+            this.no_move()
+            return
+        }
         if (L.move_type === BARGES_MOVE) {
             G.offensive.barges = 1
             log(`Barges ability used.`)
@@ -2044,7 +2048,8 @@ P.cancel_offensive = {
         clear_undo()
         end()
         G.offensive.offensive_card = reaction_card
-        G.offensive.cancelled = offensive
+        G.offensive.cancelled ={}
+        G.offensive.cancelled.active_units=G.offensive.active_units
         G.active = JP
         goto("end_action")
         play_event(reaction_card)

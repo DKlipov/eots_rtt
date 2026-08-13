@@ -91,8 +91,8 @@ SCENARIO_DATA.forEach(s => {
     s.removed_cards = []
 })
 
-// const SCENARIOS = SCENARIO_DATA.map(s => s.name)
-const SCENARIOS = ["1942-1945 (The Shortened Campaign)"]
+const SCENARIOS = SCENARIO_DATA.map(s => s.name)
+// const SCENARIOS = ["1942-1945 (The Shortened Campaign)"]
 
 SCENARIO_DATA.sort((a, b) => a.id - b.id)
 
