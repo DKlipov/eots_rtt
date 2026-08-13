@@ -8250,7 +8250,7 @@ function compute_air_move_hexes() {
     let location = L.move_data.location
     L.allowed_hexes = []
     let move_data = L.move_data
-    var move_type = ANY_MOVE
+    var move_type = AIR_MOVE
     if (move_data.move_type & STRAT_MOVE) {
         move_type |= STRAT_MOVE
     }
