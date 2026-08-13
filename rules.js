@@ -11922,7 +11922,7 @@ P.move_offensive_units = {
         } else {
             var buttons = get_move_buttons()
             if (buttons.length > 3 && !L.spec_move) {
-                button("move")
+                button("advanced_move")
             } else if (buttons.length) {
                 buttons.forEach(b => button(b))
             }
@@ -11954,7 +11954,7 @@ P.move_offensive_units = {
             })
         }
     },
-    move() {
+    advanced_move() {
         L.spec_move = 1
     },
     _resume() {
@@ -12119,7 +12119,7 @@ P.ground_move = {
         L.allowed_hexes = []
         L.move_type = ANY_MOVE
         L.move_data = get_move_data()
-        //check_supply()
+        check_units()
         compute_ground_move_hexes()
         if (map_get(G.offensive.paths, G.active_stack[0])[1] > 0) {
             L.moved = 1
@@ -18237,6 +18237,7 @@ function create_view() {
     V.burma_road = G.burma_road
     V.china_divisions = G.china_divisions
     V.offensive = object_copy(G.offensive)
+    V.move_type = L.move_type
     if (G.offensive.battle.battle_hex) {
         set_add(G.offensive.battle_hexes, G.offensive.battle.battle_hex)
     }

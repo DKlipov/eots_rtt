@@ -195,6 +195,7 @@ function create_view() {
     V.burma_road = G.burma_road
     V.china_divisions = G.china_divisions
     V.offensive = object_copy(G.offensive)
+    V.move_type = L.move_type
     if (G.offensive.battle.battle_hex) {
         set_add(G.offensive.battle_hexes, G.offensive.battle.battle_hex)
     }

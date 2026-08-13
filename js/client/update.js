@@ -158,6 +158,7 @@ function on_update() {
     check_supply()
     if (G.actions && G.actions.move) {
         L.allowed_hexes = []
+        L.move_type = G.move_type
         update_move_hex()
         if (!G.actions.action_hex) {
             G.actions.action_hex = []
@@ -386,7 +387,7 @@ function on_update() {
     action_button("event", "Play Event")
     action_button("ops", "Play for Operations")
     action_button("hold", "Hold")
-    action_button("move", "Advanced move")
+    action_button("advanced_move", "Advanced move")
     action_button("no_move", "No move")
     action_button("eliminate", "Eliminate")
     action_button("stop", "Stop")

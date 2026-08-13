@@ -742,7 +742,7 @@ P.move_offensive_units = {
         } else {
             var buttons = get_move_buttons()
             if (buttons.length > 3 && !L.spec_move) {
-                button("move")
+                button("advanced_move")
             } else if (buttons.length) {
                 buttons.forEach(b => button(b))
             }
@@ -774,7 +774,7 @@ P.move_offensive_units = {
             })
         }
     },
-    move() {
+    advanced_move() {
         L.spec_move = 1
     },
     _resume() {
@@ -939,7 +939,7 @@ P.ground_move = {
         L.allowed_hexes = []
         L.move_type = ANY_MOVE
         L.move_data = get_move_data()
-        //check_supply()
+        check_units()
         compute_ground_move_hexes()
         if (map_get(G.offensive.paths, G.active_stack[0])[1] > 0) {
             L.moved = 1
