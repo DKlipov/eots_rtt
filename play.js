@@ -7347,9 +7347,10 @@ function offensive_card_header() {
 }/** import common/utils.js*/
 /** import supply.js*/
 let last = Date.now()
-let count = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+let count = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
 function check_supply() {
-    metric(0,1)
+    metric(0, 1)
     L.supply = {}
     clear_supply_cache(CLEAN_ALL_MASK)
     G.burma_road = 0
@@ -7634,7 +7635,7 @@ function mark_supply_ports_oversea(hq, piece) {
     const location = G.location[hq]
     G.supply_cache[location] = G.supply_cache[location] | JP_SUPPLY_PORT << faction
     if (!L.supply || !L.supply.queue) {
-        L.supply={}
+        L.supply = {}
         L.supply.queue = []
         L.supply.retracing = []
     }
@@ -8048,6 +8049,17 @@ function get_ground_move_cost(from, to, faction) {
 }
 
 function is_space_controlled(hex, faction) {
+    if (G.control) {
+        var mask = ~(JP_CONTROLLED | HEX_CONTROLLABLE)
+        clear_supply_cache(mask)
+        G.control.forEach(h => G.supply_cache[h] |= JP_CONTROLLED)
+        for (var i = 0; i < LAST_BOARD_HEX; i++) {
+            if (create_controllable_hex(i)) {
+                G.supply_cache[i] |= HEX_CONTROLLABLE
+            }
+        }
+        G.control = null
+    }
     return (!(G.supply_cache[hex] & JP_CONTROLLED) == faction) && (!G.non_control || !set_has(G.non_control, hex))
 }
 

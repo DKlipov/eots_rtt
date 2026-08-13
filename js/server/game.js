@@ -85,7 +85,6 @@ function on_setup(scenario, options) {
     G.oos = []
     G.reinforcements = [0, 0]
     G.strategic_warfare = 0
-    G.control = []//todo: remove
     G.capture = []
     G.garr_elim = []
     G.draw_counter = [0, 0]
@@ -132,7 +131,7 @@ function on_setup(scenario, options) {
 }
 
 function create_controllable_hex(hex) {
-    var sid = scenario_data().id
+    var sid = G.sid
     var map_data = get_map_data(hex)
     return map_data.named || hex === WEST_HONSHU
         || hex === KWAI_BRIDGE// && !is_event_active(events.KWAI_RIVER_BRIDGE)
@@ -157,6 +156,7 @@ function get_garrison_count() {
 }
 
 function on_view() {
+    is_space_controlled(OAHU,JP)//todo: remove
     if (L.P && P[L.P] && P[L.P].on_view) {
         return P[L.P].on_view()
     }
