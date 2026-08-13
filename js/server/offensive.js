@@ -882,7 +882,7 @@ P.move_offensive_units = {
         }
     },
     move(curr_path) {
-        if(globalThis.RTT_FUZZER){
+        if (globalThis.RTT_FUZZER) {
             this.no_move()
             return
         }
@@ -992,7 +992,7 @@ P.ground_move = {
 
 function set_mt(mt) {
     L.move_type = mt
-    L.move_data=get_move_data()
+    L.move_data = get_move_data()
 }
 
 function get_air_attack_hex() {
@@ -1148,12 +1148,12 @@ function move_units(units, path) {
     log(`${units_list} moved to ${list_get_log_str(hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
     for (; i < path.length; i++) {
         var hex = path[i]
-        if (i > 2 && path[0] & GROUND_MOVE) {
+        if (i > 2 && !(path[0] & GROUND_DISENGAGEMENT) && path[0] & GROUND_MOVE) {
             distance += get_ground_move_cost(path[i - 1], path[i], faction)
         } else if (i > 2 && path[i - 1] !== path[i]) {
             distance++
         }
-        if (i > 2 && L.move_data.is_air_present && path[i - 1] === path[i]) {
+        if (i > 2 && path[0] & AIR_MOVE && path[i - 1] === path[i]) {
             if (distance > L.move_data.extended_battle_range) {
                 throw new Error("Bad move paths")
             }
@@ -1186,9 +1186,10 @@ function move_units(units, path) {
             capture_hex(hex)
         }
     }
-    if (L.move_data.is_air_present && (distance > L.move_data.extended_battle_range || legs > L.move_data.air_move_legs)
-        || path[0] & GROUND_MOVE && distance > L.move_data.ground_move_distance
-        || distance > L.move_data.naval_move_distance
+    if (path[0] & AIR_MOVE && (distance > L.move_data.extended_battle_range || legs > L.move_data.air_move_legs)
+        || path[0] & GROUND_DISENGAGEMENT && distance > 1
+        || path[0] & GROUND_MOVE && !(path[0] & GROUND_DISENGAGEMENT) && distance > L.move_data.ground_move_distance
+        || path[0] & NAVAL_MOVE && distance > L.move_data.naval_move_distance
     ) {
         throw new Error("Bad move path")
     }
@@ -2052,8 +2053,8 @@ P.cancel_offensive = {
         clear_undo()
         end()
         G.offensive.offensive_card = reaction_card
-        G.offensive.cancelled ={}
-        G.offensive.cancelled.active_units=G.offensive.active_units
+        G.offensive.cancelled = {}
+        G.offensive.cancelled.active_units = G.offensive.active_units
         G.active = JP
         goto("end_action")
         play_event(reaction_card)

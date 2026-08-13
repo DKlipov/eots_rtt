@@ -8262,7 +8262,7 @@ function compute_air_move_hexes() {
         move_type |= AIR_EXTENDED_MOVE
     }
     if (L.move_type === STRAT_MOVE) {
-        // check_supply()
+         check_supply()
     }
     var strat_flag = move_data.move_type & STRAT_MOVE
     if ((L.move_type === STRAT_MOVE) && has_non_n_zoi(location, 1 - R)) {
@@ -8361,7 +8361,8 @@ function compute_ground_naval_move_hexes() {
         })
         if (!ground_unit_stay) {
             G.active_stack.forEach(u => G.location[u] = ELIMINATED_BOX)
-            // check_supply()
+            supply = object_copy(G.supply_cache)
+            check_supply()
             G.active_stack.forEach(u => G.location[u] = location)
         }
     }
@@ -8445,7 +8446,7 @@ function compute_ground_naval_strat_move() {
     })
     if (!ground_unit_stay || move_data.battle_range) {
         G.active_stack.forEach(u => G.location[u] = ELIMINATED_BOX)
-        // check_supply()
+        check_supply()
         G.active_stack.forEach(u => G.location[u] = location)
     }
     if (move_data.battle_range && has_non_n_zoi(location, 1 - R)) {
@@ -8479,7 +8480,7 @@ function compute_ground_naval_strat_move() {
             map_set(distance_map, nh, path_array)
             if (get_map_data(nh).port && is_space_controlled(nh, G.active) && !is_faction_units(nh, 1 - G.active)) {
                 path_array = path_array.slice()
-                path_array.unshift(STRAT_MOVE)
+                path_array.unshift(STRAT_MOVE | NAVAL_MOVE)
                 map_set(L.allowed_hexes, nh, path_array)
             }
 
@@ -8631,28 +8632,29 @@ function should_ground_move_stop(hex, faction) {
 
 function ground_move_denied(hex) {
     var region = get_map_data(hex).region
+    var faction = pieces[G.active_stack[0]].faction
     if (region === "Manchuria") {
         return true
     }
     if (region === "IChina") {
         return G.active_stack.filter(u => pieces[u].service !== "ch").length
     }
-    if (pieces[G.active_stack[0]].faction === JP && region === "India") {
+    if (faction === JP && region === "India") {
         return G.active_stack.filter(u => pieces[u].class === "ground").length
     }
     if (G.active_stack.filter(u => pieces[u].service === "ch").length) {
         return !(region === "IChina" || region === "NIndia" || region === "Burma")
     }
-    if (G.sid === SOUTH_PACIFIC_SCENARIO && G.active === AP && hex === TRUK) {
+    if (G.sid === SOUTH_PACIFIC_SCENARIO && faction === AP && hex === TRUK) {
         return true;
     }
-    if (G.sid === BURMA_SCENARIO && G.active === AP && (region === "Siam" || region === "Indochina")) {
+    if (G.sid === BURMA_SCENARIO && faction === AP && (region === "Siam" || region === "Indochina")) {
         return true;
     }
     if (G.sid === BURMA_SCENARIO && hex === SINGAPORE) {
         return true;
     }
-    if(G.turn===1 && (hex === SINGAPORE ||hex === MANILA) && !L.move_data.is_naval_present){
+    if (G.turn === 1 && faction === JP && (hex === SINGAPORE || hex === MANILA) && !L.move_data.is_naval_present) {
         return true;
     }
 }
@@ -12074,7 +12076,7 @@ P.move_offensive_units = {
         }
     },
     move(curr_path) {
-        if(globalThis.RTT_FUZZER){
+        if (globalThis.RTT_FUZZER) {
             this.no_move()
             return
         }
@@ -12184,7 +12186,7 @@ P.ground_move = {
 
 function set_mt(mt) {
     L.move_type = mt
-    L.move_data=get_move_data()
+    L.move_data = get_move_data()
 }
 
 function get_air_attack_hex() {
@@ -12340,12 +12342,12 @@ function move_units(units, path) {
     log(`${units_list} moved to ${list_get_log_str(hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
     for (; i < path.length; i++) {
         var hex = path[i]
-        if (i > 2 && path[0] & GROUND_MOVE) {
+        if (i > 2 && !(path[0] & GROUND_DISENGAGEMENT) && path[0] & GROUND_MOVE) {
             distance += get_ground_move_cost(path[i - 1], path[i], faction)
         } else if (i > 2 && path[i - 1] !== path[i]) {
             distance++
         }
-        if (i > 2 && L.move_data.is_air_present && path[i - 1] === path[i]) {
+        if (i > 2 && path[0] & AIR_MOVE && path[i - 1] === path[i]) {
             if (distance > L.move_data.extended_battle_range) {
                 throw new Error("Bad move paths")
             }
@@ -12378,9 +12380,10 @@ function move_units(units, path) {
             capture_hex(hex)
         }
     }
-    if (L.move_data.is_air_present && (distance > L.move_data.extended_battle_range || legs > L.move_data.air_move_legs)
-        || path[0] & GROUND_MOVE && distance > L.move_data.ground_move_distance
-        || distance > L.move_data.naval_move_distance
+    if (path[0] & AIR_MOVE && (distance > L.move_data.extended_battle_range || legs > L.move_data.air_move_legs)
+        || path[0] & GROUND_DISENGAGEMENT && distance > 1
+        || path[0] & GROUND_MOVE && !(path[0] & GROUND_DISENGAGEMENT) && distance > L.move_data.ground_move_distance
+        || path[0] & NAVAL_MOVE && distance > L.move_data.naval_move_distance
     ) {
         throw new Error("Bad move path")
     }
@@ -13244,8 +13247,8 @@ P.cancel_offensive = {
         clear_undo()
         end()
         G.offensive.offensive_card = reaction_card
-        G.offensive.cancelled ={}
-        G.offensive.cancelled.active_units=G.offensive.active_units
+        G.offensive.cancelled = {}
+        G.offensive.cancelled.active_units = G.offensive.active_units
         G.active = JP
         goto("end_action")
         play_event(reaction_card)

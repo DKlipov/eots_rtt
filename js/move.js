@@ -166,7 +166,7 @@ function compute_air_move_hexes() {
         move_type |= AIR_EXTENDED_MOVE
     }
     if (L.move_type === STRAT_MOVE) {
-        // check_supply()
+         check_supply()
     }
     var strat_flag = move_data.move_type & STRAT_MOVE
     if ((L.move_type === STRAT_MOVE) && has_non_n_zoi(location, 1 - R)) {
@@ -265,7 +265,8 @@ function compute_ground_naval_move_hexes() {
         })
         if (!ground_unit_stay) {
             G.active_stack.forEach(u => G.location[u] = ELIMINATED_BOX)
-            // check_supply()
+            supply = object_copy(G.supply_cache)
+            check_supply()
             G.active_stack.forEach(u => G.location[u] = location)
         }
     }
@@ -349,7 +350,7 @@ function compute_ground_naval_strat_move() {
     })
     if (!ground_unit_stay || move_data.battle_range) {
         G.active_stack.forEach(u => G.location[u] = ELIMINATED_BOX)
-        // check_supply()
+        check_supply()
         G.active_stack.forEach(u => G.location[u] = location)
     }
     if (move_data.battle_range && has_non_n_zoi(location, 1 - R)) {
@@ -383,7 +384,7 @@ function compute_ground_naval_strat_move() {
             map_set(distance_map, nh, path_array)
             if (get_map_data(nh).port && is_space_controlled(nh, G.active) && !is_faction_units(nh, 1 - G.active)) {
                 path_array = path_array.slice()
-                path_array.unshift(STRAT_MOVE)
+                path_array.unshift(STRAT_MOVE | NAVAL_MOVE)
                 map_set(L.allowed_hexes, nh, path_array)
             }
 
@@ -535,28 +536,29 @@ function should_ground_move_stop(hex, faction) {
 
 function ground_move_denied(hex) {
     var region = get_map_data(hex).region
+    var faction = pieces[G.active_stack[0]].faction
     if (region === "Manchuria") {
         return true
     }
     if (region === "IChina") {
         return G.active_stack.filter(u => pieces[u].service !== "ch").length
     }
-    if (pieces[G.active_stack[0]].faction === JP && region === "India") {
+    if (faction === JP && region === "India") {
         return G.active_stack.filter(u => pieces[u].class === "ground").length
     }
     if (G.active_stack.filter(u => pieces[u].service === "ch").length) {
         return !(region === "IChina" || region === "NIndia" || region === "Burma")
     }
-    if (G.sid === SOUTH_PACIFIC_SCENARIO && G.active === AP && hex === TRUK) {
+    if (G.sid === SOUTH_PACIFIC_SCENARIO && faction === AP && hex === TRUK) {
         return true;
     }
-    if (G.sid === BURMA_SCENARIO && G.active === AP && (region === "Siam" || region === "Indochina")) {
+    if (G.sid === BURMA_SCENARIO && faction === AP && (region === "Siam" || region === "Indochina")) {
         return true;
     }
     if (G.sid === BURMA_SCENARIO && hex === SINGAPORE) {
         return true;
     }
-    if(G.turn===1 && (hex === SINGAPORE ||hex === MANILA) && !L.move_data.is_naval_present){
+    if (G.turn === 1 && faction === JP && (hex === SINGAPORE || hex === MANILA) && !L.move_data.is_naval_present) {
         return true;
     }
 }
