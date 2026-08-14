@@ -6,3 +6,4 @@ Todo list:
 japanese air could not move china
 * check destination point for move_units
 * fix vp counters
+* marine+army combined aa allowed

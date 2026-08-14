@@ -407,8 +407,6 @@ function is_air_reaction_able(u) {
     const cached = map_get(L.air_reaction_hex_map, location)
     if (cached && cached <= range) {
         return true
-    } else if (cached === 0) {
-        return false
     }
     if (target_in_battle_range(range, location, G.offensive.battle_hexes)) {
         map_set(L.air_reaction_hex_map, location, range)
@@ -902,7 +900,7 @@ P.move_offensive_units = {
         if (curr_path[0] & AMPH_MOVE && G.offensive.stage === REACTION_STAGE) {
             G.asp[R][1] += 1
             G.offensive.r_asp = 1
-        } else if (curr_path[0] & AMPH_MOVE &&
+        } else if (curr_path[0] & AMPH_MOVE && G.offensive.stage !== POST_BATTLE_STAGE &&
             (!get_map_data(hex).port || !is_space_controlled(hex, R) || is_faction_units(hex, 1 - R) || (L.move_type === AMPH_MOVE))) {
             G.asp[R][1] += L.move_data.asp_points
             log(`${side_get_log_str(G.active)} ASP used ${L.move_data.asp_points} (${G.asp[R][1]}).`)
