@@ -12396,6 +12396,9 @@ function move_units(units, path) {
 }
 
 function broken_hex_edge(move_type, from, to) {
+    if (from === to) {
+        return false
+    }
     var direction = get_map_data(from).nh.indexOf(to)
     if (direction < 0) {
         return 1
