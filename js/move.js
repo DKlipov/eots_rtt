@@ -166,7 +166,7 @@ function compute_air_move_hexes() {
         move_type |= AIR_EXTENDED_MOVE
     }
     if (L.move_type === STRAT_MOVE) {
-         check_supply()
+        check_supply()
     }
     var strat_flag = move_data.move_type & STRAT_MOVE
     if ((L.move_type === STRAT_MOVE) && has_non_n_zoi(location, 1 - R)) {
@@ -549,7 +549,7 @@ function ground_move_denied(hex) {
     if (G.active_stack.filter(u => pieces[u].service === "ch").length) {
         return !(region === "IChina" || region === "NIndia" || region === "Burma")
     }
-    if (G.sid === SOUTH_PACIFIC_SCENARIO && faction === AP && hex === TRUK) {
+    if (G.sid === SOUTH_PACIFIC_SCENARIO && faction === AP && hex === TRUK && G.turn === 3) {
         return true;
     }
     if (G.sid === BURMA_SCENARIO && faction === AP && (region === "Siam" || region === "Indochina")) {

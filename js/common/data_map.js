@@ -1356,6 +1356,10 @@ B_F_W_MAP_DATA[SINGAPORE] = Object.assign({}, MAP_DATA[SINGAPORE])
 B_F_W_MAP_DATA[SINGAPORE].edges_int = 0
 B_F_W_MAP_DATA[SINGAPORE].nh = []
 B_F_W_MAP_DATA[SINGAPORE].airfield = false
+B_F_W_MAP_DATA[SAIGON].nh.length = 3
+B_F_W_MAP_DATA[SAIGON].edges_int = B_F_W_MAP_DATA[SAIGON].edges_int % (1 << 5 * 4)
+B_F_W_MAP_DATA[hex_to_int(1912)].nh.length = 3
+B_F_W_MAP_DATA[hex_to_int(1912)].edges_int = (B_F_W_MAP_DATA[hex_to_int(1912)].edges_int % (1 << 5 * 3))
 
 var t1 = 1
 for (var i = 0; i < TONNELING.length; i++) {
@@ -1368,6 +1372,9 @@ for (var i = 0; i < TONNELING.length; i++) {
         create_tonnel(tonnel)
     }
 }
+B_F_W_MAP_DATA[hex_to_int(1912)].nh.push(-1)
+B_F_W_MAP_DATA[hex_to_int(1912)].nh.push(hex_to_int(1812))
+B_F_W_MAP_DATA[hex_to_int(1912)].edges_int |= ((WATER | UNPLAYABLE_WATER) << 5 * 5)
 
 for (var i = 0; i < map.length; i++) {
     if (!map[i].airfield) {
@@ -1458,7 +1465,7 @@ function apply_burma(hex) {
 }
 
 function create_tonnel(data) {
-    data.map[data.from].edges_int += (WATER | UNPLAYABLE_WATER) << (5 * data.map[data.from].nh.length)
+    data.map[data.from].edges_int |= (WATER | UNPLAYABLE_WATER) << (5 * data.map[data.from].nh.length)
     data.map[data.from].nh.push(TUNNEL_BOX + t1)
     for (var i = 0; i < data.distance; i++) {
         var hex = {

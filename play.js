@@ -4054,7 +4054,7 @@ var cards = [
         "logistic": 6,
         "hq": [HQ_SEAC],
         "remove": true,
-        "name": "Slim`s Burma Offensive",
+        "name": "Slim's Burma Offensive",
     },
     {
         "num": 71,
@@ -5035,7 +5035,7 @@ var cards = [
         "ops": 3,
         "type": POLITICAL,
         "oc": 5,
-        "name": "Indian Worker`s Strike",
+        "name": "Indian Worker's Strike",
     },
     {
         "num": 83,
@@ -6476,6 +6476,10 @@ B_F_W_MAP_DATA[SINGAPORE] = Object.assign({}, MAP_DATA[SINGAPORE])
 B_F_W_MAP_DATA[SINGAPORE].edges_int = 0
 B_F_W_MAP_DATA[SINGAPORE].nh = []
 B_F_W_MAP_DATA[SINGAPORE].airfield = false
+B_F_W_MAP_DATA[SAIGON].nh.length = 3
+B_F_W_MAP_DATA[SAIGON].edges_int = B_F_W_MAP_DATA[SAIGON].edges_int % (1 << 5 * 4)
+B_F_W_MAP_DATA[hex_to_int(1912)].nh.length = 3
+B_F_W_MAP_DATA[hex_to_int(1912)].edges_int = (B_F_W_MAP_DATA[hex_to_int(1912)].edges_int % (1 << 5 * 3))
 
 var t1 = 1
 for (var i = 0; i < TONNELING.length; i++) {
@@ -6488,6 +6492,9 @@ for (var i = 0; i < TONNELING.length; i++) {
         create_tonnel(tonnel)
     }
 }
+B_F_W_MAP_DATA[hex_to_int(1912)].nh.push(-1)
+B_F_W_MAP_DATA[hex_to_int(1912)].nh.push(hex_to_int(1812))
+B_F_W_MAP_DATA[hex_to_int(1912)].edges_int |= ((WATER | UNPLAYABLE_WATER) << 5 * 5)
 
 for (var i = 0; i < map.length; i++) {
     if (!map[i].airfield) {
@@ -6578,7 +6585,7 @@ function apply_burma(hex) {
 }
 
 function create_tonnel(data) {
-    data.map[data.from].edges_int += (WATER | UNPLAYABLE_WATER) << (5 * data.map[data.from].nh.length)
+    data.map[data.from].edges_int |= (WATER | UNPLAYABLE_WATER) << (5 * data.map[data.from].nh.length)
     data.map[data.from].nh.push(TUNNEL_BOX + t1)
     for (var i = 0; i < data.distance; i++) {
         var hex = {
@@ -8258,7 +8265,7 @@ function compute_air_move_hexes() {
         move_type |= AIR_EXTENDED_MOVE
     }
     if (L.move_type === STRAT_MOVE) {
-         check_supply()
+        check_supply()
     }
     var strat_flag = move_data.move_type & STRAT_MOVE
     if ((L.move_type === STRAT_MOVE) && has_non_n_zoi(location, 1 - R)) {
@@ -8641,7 +8648,7 @@ function ground_move_denied(hex) {
     if (G.active_stack.filter(u => pieces[u].service === "ch").length) {
         return !(region === "IChina" || region === "NIndia" || region === "Burma")
     }
-    if (G.sid === SOUTH_PACIFIC_SCENARIO && faction === AP && hex === TRUK) {
+    if (G.sid === SOUTH_PACIFIC_SCENARIO && faction === AP && hex === TRUK && G.turn === 3) {
         return true;
     }
     if (G.sid === BURMA_SCENARIO && faction === AP && (region === "Siam" || region === "Indochina")) {

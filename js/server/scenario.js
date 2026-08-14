@@ -139,6 +139,7 @@ function setup_scenario_burma() {
     while (G.hand[JP].length < 2) {
         draw_card(JP)
     }
+    remove_card(DOOLITLE_RAID)
 
     for_each_unit(u => G.location[u] = PERM_ELIMINATED)
 
@@ -1179,7 +1180,6 @@ function setup_scenario_south_pacific() {
     log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
     call("offensive_phase")
 }
-
 
 
 function victory_burma() {

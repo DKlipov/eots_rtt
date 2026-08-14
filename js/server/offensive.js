@@ -1197,10 +1197,10 @@ function move_units(units, path) {
 }
 
 function broken_hex_edge(move_type, from, to) {
-    if (get_distance(from, to) > 1) {
+    var direction = get_map_data(from).nh.indexOf(to)
+    if (direction < 0) {
         return 1
     }
-    var direction = get_direction(from, to)
     if (move_type & GROUND_MOVE) {
         return !(get_map_data(from).edges_int & GROUND << 5 * direction)
     }

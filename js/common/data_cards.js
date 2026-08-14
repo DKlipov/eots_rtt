@@ -729,7 +729,7 @@ var cards = [
         "logistic": 6,
         "hq": [HQ_SEAC],
         "remove": true,
-        "name": "Slim`s Burma Offensive",
+        "name": "Slim's Burma Offensive",
     },
     {
         "num": 71,
@@ -1710,7 +1710,7 @@ var cards = [
         "ops": 3,
         "type": POLITICAL,
         "oc": 5,
-        "name": "Indian Worker`s Strike",
+        "name": "Indian Worker's Strike",
     },
     {
         "num": 83,
