@@ -214,6 +214,9 @@ function retrace_supply_path(location) {
 
 //could corrupt G, run only in safe context
 function battle_info_query(battle) {
+    if(!set_has(G.offensive.battle,battle)){
+        create_battle_hex(battle)
+    }
     G.log = []
     var result = {
         naval_cf: [],

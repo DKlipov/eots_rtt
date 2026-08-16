@@ -8552,7 +8552,8 @@ function get_naval_move(zoi_mask) {
                 set_add(marine_landed_islands, G.location[u])
             }
         })
-        us_army_unit_active = G.active_stack.map(u => pieces[u]).filter(p => p.class === "ground" && p.service === "army").length
+        us_army_unit_active = G.active_stack.map(u => pieces[u]).filter(p => p.class === "ground" && p.service === "army").length &&
+            !G.active_stack.map(u => pieces[u]).filter(p => p.class === "ground" && p.type === "marine").length
     }
     if (G.offensive.type === EC && G.offensive.offensive_card === KING_II) {
         us_army_unit_active = false
@@ -9093,8 +9094,6 @@ function current_pow(G) {
 }
 
 
-
-
 const MAIN_BOARD_INFO = {
     "LAST_BOARD_HEX": 1478,
     "COLUMN_HEX_NB": 29,
@@ -9353,8 +9352,14 @@ function on_init(scenario, game_options, static_view) {
                 send_query({name: "battle_info", index: evt.target.index})
             }
         })
-        define_marker("landing", i, "conflict landing top")
-            .element.innerText = String.fromCharCode(65 + i)
+        var landing = define_marker("landing", i, "conflict landing top")
+        landing.element.innerText = String.fromCharCode(65 + i)
+        landing.element.index = i
+        landing.element.addEventListener("mousedown", evt => {
+            if (world.focus !== (evt.target.parentElement.thing)) {
+                send_query({name: "battle_info", index: evt.target.index})
+            }
+        })
     }
     define_marker("divisions", 0, counters.divisions_china)
     for (let i = 1; i < pieces.length; ++i) {

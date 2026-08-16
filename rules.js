@@ -8556,7 +8556,8 @@ function get_naval_move(zoi_mask) {
                 set_add(marine_landed_islands, G.location[u])
             }
         })
-        us_army_unit_active = G.active_stack.map(u => pieces[u]).filter(p => p.class === "ground" && p.service === "army").length
+        us_army_unit_active = G.active_stack.map(u => pieces[u]).filter(p => p.class === "ground" && p.service === "army").length &&
+            !G.active_stack.map(u => pieces[u]).filter(p => p.class === "ground" && p.type === "marine").length
     }
     if (G.offensive.type === EC && G.offensive.offensive_card === KING_II) {
         us_army_unit_active = false
@@ -13242,6 +13243,7 @@ P.cancel_offensive = {
         }
         L.reactions_card = c
         G.offensive.active_cards.push(c)
+        remove_card(c)
     },
     done() {
         var offensive_card = G.offensive.offensive_card
@@ -19261,6 +19263,9 @@ function retrace_supply_path(location) {
 
 //could corrupt G, run only in safe context
 function battle_info_query(battle) {
+    if(!set_has(G.offensive.battle,battle)){
+        create_battle_hex(battle)
+    }
     G.log = []
     var result = {
         naval_cf: [],

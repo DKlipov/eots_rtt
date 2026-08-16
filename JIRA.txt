@@ -1,9 +1,11 @@
 Todo list:
+* log japan lack of resources death timer
+* fix vp counters
+* reaction skip should not show information
+* check destination point for move_units
+* check arrival pint zoi when move_units
+* restore check supply function
 * fizzbuzz fixes
 * bad supply line at crome
-* franciso async assign did not triggered
-* reaction skip should not show information
-japanese air could not move china
-* check destination point for move_units
-* fix vp counters
-* marine+army combined aa allowed
+* japanese air could not move trough china
+* no path could be traced trough GRAY hex or china for Japan

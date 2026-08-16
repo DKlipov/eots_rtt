@@ -2041,6 +2041,7 @@ P.cancel_offensive = {
         }
         L.reactions_card = c
         G.offensive.active_cards.push(c)
+        remove_card(c)
     },
     done() {
         var offensive_card = G.offensive.offensive_card

@@ -660,6 +660,7 @@ body.hex-clickable .action_hex { z-index: 50; }
 
 .marker.landing {
     background-color: yellow;
+    cursor: pointer;
 }
 
 .marker.distance {

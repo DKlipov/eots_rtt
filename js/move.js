@@ -453,7 +453,8 @@ function get_naval_move(zoi_mask) {
                 set_add(marine_landed_islands, G.location[u])
             }
         })
-        us_army_unit_active = G.active_stack.map(u => pieces[u]).filter(p => p.class === "ground" && p.service === "army").length
+        us_army_unit_active = G.active_stack.map(u => pieces[u]).filter(p => p.class === "ground" && p.service === "army").length &&
+            !G.active_stack.map(u => pieces[u]).filter(p => p.class === "ground" && p.type === "marine").length
     }
     if (G.offensive.type === EC && G.offensive.offensive_card === KING_II) {
         us_army_unit_active = false
