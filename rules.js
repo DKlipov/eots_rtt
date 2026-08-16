@@ -10422,10 +10422,11 @@ function victory_south_pacific() {
         won_text: "",
     }
 
-    adjust_vp(result, G.surrender[nations.CHINA.id] - 2, "China Government Front Status")
-    if (G.surrender[nations.CHINA.id] > 5) {
-        result.vp += 3
-        result.text.push(`+3 VP - China surrendered.`)
+    if (G.surrender[nations.CHINA.id] === 5) {
+        result.vp += 5
+        result.text.push(`+5 VP - China surrendered.`)
+    } else {
+        adjust_vp(result, G.surrender[nations.CHINA.id] - 2, "China Government Front Status")
     }
     binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
         "Townsville was not isolated", [hex_to_int(3727), OAHU])
@@ -10473,7 +10474,7 @@ function victory_south_pacific() {
         result.text.push(`0 VP - No one controls New Guinea.`)
     }
     G.original_control = []
-    var heb = NEW_HEBRIDES.map(h => get_map_data(h)).filter(md => md.region === "Hebrides" && md.port).length
+    var heb = NEW_HEBRIDES.filter(h => is_space_controlled(h, JP) && get_map_data(h).region === "Hebrides" && get_map_data(h).port).length
     binary_vp(result, heb, 1, "JP control of New Hebrides port",
         "No JP control of any New Hebrides port", G.original_control.filter(h => get_map_data(h).region === "Hebrides" && get_map_data(h).port))
     var aus = nations.AUSTRALIA.keys.filter(h => is_space_controlled(h, JP) && get_map_data(h).region === "Australia" && get_map_data(h).port).length
@@ -15084,6 +15085,9 @@ P.national_status_segment = function () {
         return
     }
     if (check_japan_resource_trace()) {
+        if(is_event_active(events.JAPAN_TRACE_RESOURCES)){
+            log(`JP mainland city traced path to resource hex. Capitulation timer reset.`)
+        }
         G.events[events.JAPAN_TRACE_RESOURCES.id] = 0
     } else if (is_event_active(events.JAPAN_TRACE_RESOURCES) && is_event_active(events.JAPAN_TRACE_RESOURCES) <= G.turn - 2) {
         finish("Allies", "Allies Victory by blockade")

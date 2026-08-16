@@ -1,5 +1,4 @@
 Todo list:
-* log japan lack of resources death timer
 * fix vp counters
 * reaction skip should not show information
 * check destination point for move_units

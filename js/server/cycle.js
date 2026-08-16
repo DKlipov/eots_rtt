@@ -300,6 +300,9 @@ P.national_status_segment = function () {
         return
     }
     if (check_japan_resource_trace()) {
+        if(is_event_active(events.JAPAN_TRACE_RESOURCES)){
+            log(`JP mainland city traced path to resource hex. Capitulation timer reset.`)
+        }
         G.events[events.JAPAN_TRACE_RESOURCES.id] = 0
     } else if (is_event_active(events.JAPAN_TRACE_RESOURCES) && is_event_active(events.JAPAN_TRACE_RESOURCES) <= G.turn - 2) {
         finish("Allies", "Allies Victory by blockade")
