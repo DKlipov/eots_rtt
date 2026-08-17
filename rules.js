@@ -8993,40 +8993,8 @@ function setup_scenario_burma() {
     call("burma_choose_offensive")
 }
 
-const BURMA_JAPANESE_OFF = [3, 8, 16, 40, 48, 50]
-
-P.burma_choose_offensive = {
-    _begin() {
-        G.active = JP
-        G.offensive.active_cards = []
-        BURMA_JAPANESE_OFF.forEach(c => {
-            c = find_card(JP, c)
-            G.offensive.active_cards.push(c)
-        })
-    },
-    prompt() {
-        if (L.confirm_card) {
-            prompt(`Confirm ` + card_get_log_str(L.confirm_card) + ` as Future Offensive?`)
-            button("done")
-        } else {
-            prompt(`Choose Military Event to use as Future Offensive.`)
-            BURMA_JAPANESE_OFF.forEach(c => {
-                c = find_card(JP, c)
-                if (!G.hand[JP].includes(c)) {
-                    action_card(c)
-                }
-            })
-        }
-    },
-    card(c) {
-        push_undo()
-        future_offencive_card(c, 5) //First turn is 6, card is playable immediatly so turn mark as being designated during turn 5
-        L.confirm_card = c
-    },
-    done() {
-        G.offensive.active_cards = []
-        goto("offensive_phase")
-    }
+function log_scenario() {
+    log(`!Empire of the Sun. ${scenario_data().name}`)
 }
 
 function setup_scenario_1941(options) {
@@ -9038,150 +9006,6 @@ function setup_scenario_1941(options) {
     prepare_game_log()
     log("!Empire of the Sun. The Pacific War 1941-1945")
     call("scenario_1941")
-}
-
-P.scenario_1941 = script(`
-    log ("@Turn 1 - December 7, 1941")
-    log ("#JJP Action. Operation Z")
-    set G.active JP
-    call operation_z
-    eval {
-        G.active = JP
-        reset_offensive()
-        G.offensive.attacker = JP
-    }
-    log ("#JJP Action. Operation No. 1")
-    set G.offensive.stage ATTACK_STAGE
-    call operation_no_1
-    call activate_units
-    call move_offensive_units
-    call commit_offensive
-    log ("#GOffensive reaction")
-    set G.active AP
-    call conquest_of_se_asia_reaction
-    set G.offensive.stage BATTLE_STAGE
-    set G.offensive.all_bh G.offensive.battle_hexes.slice()
-    log ("#GResolve battles")
-    log ("#IIntelligence condition: "+get_named_intelligence(G.offensive.intelligence))
-    set G.active G.offensive.attacker
-    call battle_sequence
-    eval {
-        capture_landing_hexes()
-    }
-    set G.offensive.stage POST_BATTLE_STAGE
-    log ("#GPost battle movement")
-    set G.active G.offensive.attacker
-    call move_offensive_units
-    set G.offensive.active_units[G.offensive.attacker] []
-    call commit_offensive
-    eval {
-        reset_offensive()
-        emergency_move_1942()
-    }
-    goto political_phase
-    `)
-
-P.operation_z = {
-    _begin() {
-    },
-    inactive: "start a war",
-    prompt() {
-        if (G.hand[JP].length === 2) {
-            prompt(`Play Operation Z.`)
-            action_card(find_card(JP, 1))
-        } else {
-            prompt(`Move activated units.`)
-            var hexes = [5506, 5507, 5508, 5509]
-            hexes.forEach(h => action_hex(hex_to_int(h)))
-        }
-    },
-    card(c) {
-        push_undo()
-        play_event(c)
-        G.offensive.naval_move_distance = 18
-        G.offensive.type = EC
-        set_add(G.offensive.active_units[JP], find_piece("akagi"))
-        set_add(G.offensive.active_units[JP], find_piece("soryu"))
-        set_add(G.offensive.active_units[JP], find_piece("shokaku"))
-        set_add(G.offensive.active_units[JP], find_piece("hiei"))
-        log(`${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(u => piece_get_log_str(u)))} activated.`)
-    },
-    action_hex(h) {
-        push_undo()
-        G.offensive.active_units[JP].forEach(u => {
-            set_location(u, h, true)
-        })
-        log(`${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(u => piece_get_log_str(u)))} moved to ${hex_get_log_str(h)}.`)
-        create_battle_hex(OAHU)
-        G.offensive.active_units[JP].forEach(u => commit_to_attack(u, OAHU))
-        goto("operation_z_battle")
-    },
-}
-
-P.operation_z_pbm = {
-    _begin() {
-        G.active_stack = G.offensive.active_units[JP]
-        L.allowed_hexes = []
-        update_move_hex()
-    },
-    inactive: "return units",
-    prompt() {
-        prompt(`${offensive_card_header()} Choose hex for post battle movement.`)
-        L.allowed_hexes.forEach(h => action_hex(h))
-    },
-    action_hex(h) {
-        push_undo()
-        G.active_stack.forEach(u => {
-            set_location(u, h, true)
-            map_set(G.offensive.paths, u, map_get(L.allowed_hexes, h))
-        })
-        log(`${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(u => piece_get_log_str(u)))} moved to ${hex_get_log_str(h)}.`)
-        G.active_stack = []
-        end()
-    },
-}
-
-P.operation_z_battle = script(`
-      call choose_battle
-      call prepare_battle
-      set G.offensive.battle.ground_stage 0
-      call execute_attack {active: JP}
-      call assign_hits
-      set G.offensive.battle {}
-      eval {
-        change_political_will(8, "Operation Z")
-      }
-      log ("#GPost battle movement")
-      set G.offensive.stage POST_BATTLE_STAGE
-      eval {
-        set_location(find_piece("lexington"), OAHU, true)
-        set_location(find_piece("enterprise"), OAHU, true)
-        log (piece_get_log_str(find_piece("lexington"))+", "+piece_get_log_str(find_piece("enterprise"))+" moved to "+hex_get_log_str(OAHU)+".")
-      }
-      set G.active JP
-      call operation_z_pbm
-      set G.offensive.active_units[G.offensive.attacker] []
-      call commit_offensive
-`)
-
-P.operation_no_1 = {
-    _begin() {
-
-    },
-    inactive: "start offensive",
-    prompt() {
-        prompt(`Play Operation No. 1.`)
-        action_card(find_card(JP, 2))
-    },
-    card(c) {
-        push_undo()
-        play_event(c)
-        G.offensive.type = EC
-        G.offensive.intelligence = SURPRISE
-        G.offensive.logistic = 20
-        G.offensive.active_hq = [HQ_YAMAMOTO, HQ_SOUTH_SEAS, HQ_JP_SOUTH]
-        end()
-    },
 }
 
 function setup_scenario_1942(options) {
@@ -9291,114 +9115,6 @@ function setup_scenario_1942(options) {
     log_scenario()
     log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
     call("scenario_1942")
-}
-
-function log_scenario() {
-    log(`!Empire of the Sun. ${scenario_data().name}`)
-}
-
-P.scenario_1942 = script(`
-    set G.active AP
-    eval {
-        emergency_move_1942()
-    }
-    call arcadia
-    set G.active JP
-    call japan_init_1942
-    call offensive_phase
-    `)
-
-P.arcadia = {
-    _begin() {
-        draw_specific_card(find_card(AP, 4))
-    },
-    inactive: "apply card effect",
-    prompt() {
-        if (G.hand[AP].length === 1) {
-            prompt(`Hold Arcadia or discard and replace with random card.`)
-            action("hold", find_card(AP, 4))
-            action("discard", find_card(AP, 4))
-        } else {
-            prompt(`Play Arcadia or pass.`)
-            if (G.hand[AP].includes(find_card(AP, 4))) {
-                action("event", find_card(AP, 4))
-            }
-            button("done")
-        }
-    },
-    hold() {
-        clear_undo()
-        log(`AP chooses Arcadia +4 random cards.`)
-        while (G.hand[AP].length < 5) {
-            draw_card(AP)
-        }
-    },
-    discard() {
-        G.hand[AP] = []
-        G.draw[AP].push(find_card(AP, 4))
-        log(`AP chooses 5 random cards.`)
-        clear_undo()
-        while (G.hand[AP].length < 5) {
-            draw_card(AP)
-        }
-        if (G.hand[AP].indexOf(find_card(AP, 4)) < 0) {
-            end()
-        }
-    },
-    event() {
-        push_undo()
-        G.offensive.offensive_card = find_card(AP, 4)
-        play_event(G.offensive.offensive_card)
-    },
-    done() {
-        end()
-    }
-}
-
-function draw_hist_cards() {
-    var hist = [find_card(JP, 3), find_card(JP, 47), find_card(JP, 59)]
-    log(`JP draws historical hand ${hist.map(c => card_get_log_str(c)).join(", ")}.`)
-    hist.forEach(c => draw_specific_card(c))
-}
-
-P.japan_init_1942 = {
-    _begin() {
-        if (G.options && G.options.historical) {
-            draw_hist_cards()
-            delete G.options['historical']
-        }
-        while (G.hand[JP].length < 7) {
-            draw_card(JP)
-        }
-        if (G.hand[JP].filter(c => cards[c].type === MILITARY).length) {
-            end()
-        }
-    },
-    inactive: "choose card",
-    prompt() {
-        prompt(`Discard one card to draw JP 47: VADM Kondo or pass.`)
-        if (G.hand[JP].includes(find_card(JP, 47))) {
-            button("done")
-        } else {
-            var has_3_ops = G.hand[JP].filter(c => cards[c].ops >= 3).length
-            G.hand[JP].filter(c => cards[c].ops >= 3 || !has_3_ops).forEach(c => action_card(c))
-            button("skip")
-        }
-    },
-    card(c) {
-        push_undo()
-        discard_card(c)
-        log(`JP discard ${card_get_log_str(c)} and draw ${card_get_log_str(find_card(JP, 47))}.`)
-        draw_specific_card(find_card(JP, 47))
-    },
-    skip() {
-        push_undo()
-        end()
-    },
-    done() {
-        push_undo()
-        end()
-    }
 }
 
 function emergency_move_1942() {
@@ -10374,13 +10090,13 @@ function adjust_vp(result, diff, message, hex_control) {
 function get_hex_control_log(hex_control) {
     var ap = []
     var jp = []
-    if (!hex_control || 1 == 1) {//todo: fix
+    if (!hex_control) {
         return ""
     }
     hex_control.forEach(h => {
-        var or = set_has(G.original_control, h)
+        var or = is_space_controlled_originally(h, JP)
         var curr = is_space_controlled(h, JP)
-        if (or !== curr && or) {
+        if ((or !== curr) && or) {
             ap.push(h)
         } else if (or !== curr) {
             jp.push(h)
@@ -10389,13 +10105,13 @@ function get_hex_control_log(hex_control) {
     })
     var hex_log = " (Unsupplied hexes count as "
     if (ap.length > 0) {
-        hex_log += "AP control: " + ap.map(h => hex_get_log_str(h)).join(",")
+        hex_log += "AP control: " + ap.map(h => hex_get_log_str(h)).join(", ")
         if (jp.length > 0) {
             hex_log += ", "
         }
     }
     if (jp.length > 0) {
-        hex_log += "JP control: " + jp.map(h => hex_get_log_str(h)).join(",")
+        hex_log += "JP control: " + jp.map(h => hex_get_log_str(h)).join(", ")
     }
     hex_log += ")"
     if (ap.length === 0 && jp.length === 0) {
@@ -10473,51 +10189,13 @@ function victory_south_pacific() {
     } else {
         result.text.push(`0 VP - No one controls New Guinea.`)
     }
-    G.original_control = []
     var heb = NEW_HEBRIDES.filter(h => is_space_controlled(h, JP) && get_map_data(h).region === "Hebrides" && get_map_data(h).port).length
     binary_vp(result, heb, 1, "JP control of New Hebrides port",
-        "No JP control of any New Hebrides port", G.original_control.filter(h => get_map_data(h).region === "Hebrides" && get_map_data(h).port))
+        "No JP control of any New Hebrides port", NEW_HEBRIDES.filter(h => is_space_controlled(h, JP)))
     var aus = nations.AUSTRALIA.keys.filter(h => is_space_controlled(h, JP) && get_map_data(h).region === "Australia" && get_map_data(h).port).length
     binary_vp(result, aus, 1, "JP control of Australia mainland port",
-        "No JP control of any Australia mainland port", G.original_control.filter(h => get_map_data(h).region === "Australia" && get_map_data(h).port))
+        "No JP control of any Australia mainland port", nations.AUSTRALIA.keys.filter(h => is_space_controlled(h, JP)))
     return result
-}
-
-
-SCENARIO_DATA[SOUTH_PACIFIC_SCENARIO].before_commit_offensive = function () {
-    if (G.turn === 3 && (set_has(G.offensive.battle_hexes, TRUK) ||
-        set_has(G.offensive.landing_hexes, TRUK) || is_faction_units(TRUK, AP))) {
-        return "The Allied player cannot declare Truk a battle hex during game turn 3."
-    }
-
-}
-
-SCENARIO_DATA[SOUTH_PACIFIC_SCENARIO].before_unit_activation = function () {
-    if (G.turn === 3) {
-        filter_activation_units((u) => G.location[u] !== TRUK, JP)
-    }
-    if (G.offensive.active_hq[G.active] === HQ_CENTRAL_PACIFIC) {
-        filter_activation_units((u) => G.location[u] === OAHU || get_map_data(G.location[u]).region === "Hebrides", AP)
-    }
-}
-
-SCENARIO_DATA[SOUTH_PACIFIC_SCENARIO].before_choose_hq = function () {
-    if (G.offensive.attacker === JP && G.offensive.battle_hexes.filter(h => get_map_data(h).region === "Hebrides").length <= 0) {
-        array_delete_item(L.possible_units, HQ_CENTRAL_PACIFIC)
-    }
-}
-
-SCENARIO_DATA[BURMA_SCENARIO].before_commit_offensive = function () {
-    // 17.11.9
-    if (set_has(G.offensive.battle_hexes, SAIGON)) {
-        // Saigon should not be able to be attacked due to 17.11.1, but putting a check here just in case
-        return "HQs cannot be attacked or removed from play (by either player) for any reason."
-    }
-}
-
-SCENARIO_DATA[BURMA_SCENARIO].before_unit_activation = function () {
-    filter_activation_units((u) => G.location[u] !== SINGAPORE || pieces[u].class !== "naval"
-        || G.offensive.stage === ATTACK_STAGE && G.offensive.type === EC && G.offensive.offensive_card === OPERATION_C, JP)
 }
 
 function deal_cards() {
@@ -10757,7 +10435,7 @@ function get_B_F_W_replacement_points() {
     return result
 }
 
-//setup_original_control()
+setup_original_control()
 
 function setup_original_control() {
     SCENARIO_DATA.forEach(s => {
@@ -10765,15 +10443,444 @@ function setup_original_control() {
             log: []
         }
         on_setup(s.name, {})
-        s.original_control = []//todo: fix
-        s.controllable = []
+        s.original_control = []
         for (var i = 1; i < LAST_BOARD_HEX; i++) {
             if (is_controllable_hex(i)) {
-                set_add(s.controllable, i)
+                map_set(s.original_control, i, is_space_controlled(i, JP))
             }
         }
     })
     G = null
+}
+
+function is_space_controlled_originally(hex, faction) {
+    return (!(G.original_control[hex] & JP_CONTROLLED) == faction) && (!G.non_control || !set_has(G.non_control, hex))
+}
+
+function set_supply_control() {
+    var data = scenario_data()
+    G.original_control = G.supply_cache
+    G.supply_cache = object_copy(G.supply_cache)
+    check_supply()
+    HQ_LIST.forEach(hq => {
+        if (G.location[hq] >= LAST_BOARD_HEX) {
+            return
+        }
+        if (!set_has(G.oos, hq)) {
+            mark_hexes_supplied_from([hq], is_controllable_hex)
+        }
+    })
+    if (G.burma_road < 2) {
+        mark_hexes_supplied_kunming()
+    }
+    for (var i = 0; i < data.original_control.length; i += 2) {
+        var hex = data.original_control[i]
+        var orig = data.original_control[i + 1]
+        var supply = is_space_controlled(hex, JP) ? JP_SUPPLIED_HEX : AP_SUPPLIED_HEX
+        if (!(G.supply_cache[hex] & supply)) {
+            G.supply_cache[hex] &= ~JP_CONTROLLED
+            if (orig) {
+                G.supply_cache[hex] |= JP_CONTROLLED
+            }
+        }
+    }
+}
+
+function restore_original_control() {
+    G.supply_cache = G.original_control
+    delete G.original_control
+}
+
+function get_victory() {
+    var data = scenario_data()
+    set_supply_control()
+    var vp = data.victory()
+    if (!vp.won_side && vp.vp <= 2) {
+        vp.won_side = "Allies"
+        vp.won_text = `Allied Decisive Victory`
+    } else if (!vp.won_side && vp.vp <= (G.sid != BURMA_SCENARIO ? 5 : 4)) {
+        vp.won_side = "Allies"
+        vp.won_text = `Allied Tactical Victory`
+    } else if (!vp.won_side && vp.vp <= (G.sid != BURMA_SCENARIO ? 9 : 8)) {
+        vp.won_side = "Japan"
+        vp.won_text = `Japanese Tactical Victory`
+    } else if (!vp.won_side) {
+        vp.won_side = "Japan"
+        vp.won_text = `Japanese Decisive Victory`
+    }
+    restore_original_control()
+    return vp
+}
+
+function before_victory_check() {
+    // 17.11.23. Progress of the War (PoW): Ignore the normal PoW rules. IfExpand commentComment on line R7494Resolved
+    //   the Allies do not capture at least one hex at the conclusion of
+    //   the game that began the game controlled by the Japanese, minus
+    //   1 US Political Will.
+
+    let no_capture = true
+    for (var i = 1; i < LAST_BOARD_HEX; i++) {
+        var hex_data = get_map_data(i)
+        // only hex 2006 begins with allied control
+        // we only check for burma as this is the only region the AP player can potentially take hexes from the JP player
+        // due to 17.11.1
+        if (!nations.BURMA.regions.includes(hex_data.region) || hex_data.id === 2006) {
+            continue
+        }
+        if (is_space_controlled(hex_to_int(hex_data.id), AP)) {
+            no_capture = false
+            break;
+        }
+    }
+    if (no_capture) {
+        change_political_will(-1, "no AP control of any hex originally controlled by the JP");
+    }
+    //17.11.26. At the end of the game if the War in Europe is in a box with a
+    //negative number the US PW is reduced by one prior to scoring.
+    //If positive, the US PW is increased by one. If zero, no effect
+    if (G.wie <= 2) {
+        change_political_will(1, "War in Europe positive")
+    } else if (G.wie > 3) {
+        change_political_will(-1, "War in Europe negative")
+    }
+}
+
+function victory_check() {
+    if (G.political_will <= 0) {
+        finish("Japan", "Japanese Victory by Treaty Negotiations")
+    }
+    if (G.sid == BURMA_SCENARIO && scenario_data().last_turn <= G.turn) {
+        before_victory_check()
+    }
+    var vp = get_victory()
+    if (scenario_data().last_turn <= G.turn && G.turn < 12) {
+        log("#GVP Scoring")
+        vp.text.forEach(t => log(t))
+        log(`#GTotal VP: ${vp.vp}`)
+    }
+    if (scenario_data().last_turn <= G.turn) {
+        finish(vp.won_side, vp.won_text)
+    }
+}
+
+const BURMA_JAPANESE_OFF = [3, 8, 16, 40, 48, 50]
+
+P.burma_choose_offensive = {
+    _begin() {
+        G.active = JP
+        G.offensive.active_cards = []
+        BURMA_JAPANESE_OFF.forEach(c => {
+            c = find_card(JP, c)
+            G.offensive.active_cards.push(c)
+        })
+    },
+    prompt() {
+        if (L.confirm_card) {
+            prompt(`Confirm ` + card_get_log_str(L.confirm_card) + ` as Future Offensive?`)
+            button("done")
+        } else {
+            prompt(`Choose Military Event to use as Future Offensive.`)
+            BURMA_JAPANESE_OFF.forEach(c => {
+                c = find_card(JP, c)
+                if (!G.hand[JP].includes(c)) {
+                    action_card(c)
+                }
+            })
+        }
+    },
+    card(c) {
+        push_undo()
+        future_offencive_card(c, 5) //First turn is 6, card is playable immediatly so turn mark as being designated during turn 5
+        L.confirm_card = c
+    },
+    done() {
+        G.offensive.active_cards = []
+        goto("offensive_phase")
+    }
+}
+
+P.scenario_1941 = script(`
+    log ("@Turn 1 - December 7, 1941")
+    log ("#JJP Action. Operation Z")
+    set G.active JP
+    call operation_z
+    eval {
+        G.active = JP
+        reset_offensive()
+        G.offensive.attacker = JP
+    }
+    log ("#JJP Action. Operation No. 1")
+    set G.offensive.stage ATTACK_STAGE
+    call operation_no_1
+    call activate_units
+    call move_offensive_units
+    call commit_offensive
+    log ("#GOffensive reaction")
+    set G.active AP
+    call conquest_of_se_asia_reaction
+    set G.offensive.stage BATTLE_STAGE
+    set G.offensive.all_bh G.offensive.battle_hexes.slice()
+    log ("#GResolve battles")
+    log ("#IIntelligence condition: "+get_named_intelligence(G.offensive.intelligence))
+    set G.active G.offensive.attacker
+    call battle_sequence
+    eval {
+        capture_landing_hexes()
+    }
+    set G.offensive.stage POST_BATTLE_STAGE
+    log ("#GPost battle movement")
+    set G.active G.offensive.attacker
+    call move_offensive_units
+    set G.offensive.active_units[G.offensive.attacker] []
+    call commit_offensive
+    eval {
+        reset_offensive()
+        emergency_move_1942()
+    }
+    goto political_phase
+    `)
+
+P.operation_z = {
+    _begin() {
+    },
+    inactive: "start a war",
+    prompt() {
+        if (G.hand[JP].length === 2) {
+            prompt(`Play Operation Z.`)
+            action_card(find_card(JP, 1))
+        } else {
+            prompt(`Move activated units.`)
+            var hexes = [5506, 5507, 5508, 5509]
+            hexes.forEach(h => action_hex(hex_to_int(h)))
+        }
+    },
+    card(c) {
+        push_undo()
+        play_event(c)
+        G.offensive.naval_move_distance = 18
+        G.offensive.type = EC
+        set_add(G.offensive.active_units[JP], find_piece("akagi"))
+        set_add(G.offensive.active_units[JP], find_piece("soryu"))
+        set_add(G.offensive.active_units[JP], find_piece("shokaku"))
+        set_add(G.offensive.active_units[JP], find_piece("hiei"))
+        log(`${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(u => piece_get_log_str(u)))} activated.`)
+    },
+    action_hex(h) {
+        push_undo()
+        G.offensive.active_units[JP].forEach(u => {
+            set_location(u, h, true)
+        })
+        log(`${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(u => piece_get_log_str(u)))} moved to ${hex_get_log_str(h)}.`)
+        create_battle_hex(OAHU)
+        G.offensive.active_units[JP].forEach(u => commit_to_attack(u, OAHU))
+        goto("operation_z_battle")
+    },
+}
+
+P.operation_z_pbm = {
+    _begin() {
+        G.active_stack = G.offensive.active_units[JP]
+        L.allowed_hexes = []
+        update_move_hex()
+    },
+    inactive: "return units",
+    prompt() {
+        prompt(`${offensive_card_header()} Choose hex for post battle movement.`)
+        L.allowed_hexes.forEach(h => action_hex(h))
+    },
+    action_hex(h) {
+        push_undo()
+        G.active_stack.forEach(u => {
+            set_location(u, h, true)
+            map_set(G.offensive.paths, u, map_get(L.allowed_hexes, h))
+        })
+        log(`${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(u => piece_get_log_str(u)))} moved to ${hex_get_log_str(h)}.`)
+        G.active_stack = []
+        end()
+    },
+}
+
+P.operation_z_battle = script(`
+      call choose_battle
+      call prepare_battle
+      set G.offensive.battle.ground_stage 0
+      call execute_attack {active: JP}
+      call assign_hits
+      set G.offensive.battle {}
+      eval {
+        change_political_will(8, "Operation Z")
+      }
+      log ("#GPost battle movement")
+      set G.offensive.stage POST_BATTLE_STAGE
+      eval {
+        set_location(find_piece("lexington"), OAHU, true)
+        set_location(find_piece("enterprise"), OAHU, true)
+        log (piece_get_log_str(find_piece("lexington"))+", "+piece_get_log_str(find_piece("enterprise"))+" moved to "+hex_get_log_str(OAHU)+".")
+      }
+      set G.active JP
+      call operation_z_pbm
+      set G.offensive.active_units[G.offensive.attacker] []
+      call commit_offensive
+`)
+
+P.operation_no_1 = {
+    _begin() {
+
+    },
+    inactive: "start offensive",
+    prompt() {
+        prompt(`Play Operation No. 1.`)
+        action_card(find_card(JP, 2))
+    },
+    card(c) {
+        push_undo()
+        play_event(c)
+        G.offensive.type = EC
+        G.offensive.intelligence = SURPRISE
+        G.offensive.logistic = 20
+        G.offensive.active_hq = [HQ_YAMAMOTO, HQ_SOUTH_SEAS, HQ_JP_SOUTH]
+        end()
+    },
+}
+
+P.scenario_1942 = script(`
+    set G.active AP
+    eval {
+        emergency_move_1942()
+    }
+    call arcadia
+    set G.active JP
+    call japan_init_1942
+    call offensive_phase
+    `)
+
+P.arcadia = {
+    _begin() {
+        draw_specific_card(find_card(AP, 4))
+    },
+    inactive: "apply card effect",
+    prompt() {
+        if (G.hand[AP].length === 1) {
+            prompt(`Hold Arcadia or discard and replace with random card.`)
+            action("hold", find_card(AP, 4))
+            action("discard", find_card(AP, 4))
+        } else {
+            prompt(`Play Arcadia or pass.`)
+            if (G.hand[AP].includes(find_card(AP, 4))) {
+                action("event", find_card(AP, 4))
+            }
+            button("done")
+        }
+    },
+    hold() {
+        clear_undo()
+        log(`AP chooses Arcadia +4 random cards.`)
+        while (G.hand[AP].length < 5) {
+            draw_card(AP)
+        }
+    },
+    discard() {
+        G.hand[AP] = []
+        G.draw[AP].push(find_card(AP, 4))
+        log(`AP chooses 5 random cards.`)
+        clear_undo()
+        while (G.hand[AP].length < 5) {
+            draw_card(AP)
+        }
+        if (G.hand[AP].indexOf(find_card(AP, 4)) < 0) {
+            end()
+        }
+    },
+    event() {
+        push_undo()
+        G.offensive.offensive_card = find_card(AP, 4)
+        play_event(G.offensive.offensive_card)
+    },
+    done() {
+        end()
+    }
+}
+
+function draw_hist_cards() {
+    var hist = [find_card(JP, 3), find_card(JP, 47), find_card(JP, 59)]
+    log(`JP draws historical hand ${hist.map(c => card_get_log_str(c)).join(", ")}.`)
+    hist.forEach(c => draw_specific_card(c))
+}
+
+P.japan_init_1942 = {
+    _begin() {
+        if (G.options && G.options.historical) {
+            draw_hist_cards()
+            delete G.options['historical']
+        }
+        while (G.hand[JP].length < 7) {
+            draw_card(JP)
+        }
+        if (G.hand[JP].filter(c => cards[c].type === MILITARY).length) {
+            end()
+        }
+    },
+    inactive: "choose card",
+    prompt() {
+        prompt(`Discard one card to draw JP 47: VADM Kondo or pass.`)
+        if (G.hand[JP].includes(find_card(JP, 47))) {
+            button("done")
+        } else {
+            var has_3_ops = G.hand[JP].filter(c => cards[c].ops >= 3).length
+            G.hand[JP].filter(c => cards[c].ops >= 3 || !has_3_ops).forEach(c => action_card(c))
+            button("skip")
+        }
+    },
+    card(c) {
+        push_undo()
+        discard_card(c)
+        log(`JP discard ${card_get_log_str(c)} and draw ${card_get_log_str(find_card(JP, 47))}.`)
+        draw_specific_card(find_card(JP, 47))
+    },
+    skip() {
+        push_undo()
+        end()
+    },
+    done() {
+        push_undo()
+        end()
+    }
+}
+
+SCENARIO_DATA[SOUTH_PACIFIC_SCENARIO].before_commit_offensive = function () {
+    if (G.turn === 3 && (set_has(G.offensive.battle_hexes, TRUK) ||
+        set_has(G.offensive.landing_hexes, TRUK) || is_faction_units(TRUK, AP))) {
+        return "The Allied player cannot declare Truk a battle hex during game turn 3."
+    }
+
+}
+
+SCENARIO_DATA[SOUTH_PACIFIC_SCENARIO].before_unit_activation = function () {
+    if (G.turn === 3) {
+        filter_activation_units((u) => G.location[u] !== TRUK, JP)
+    }
+    if (G.offensive.active_hq[G.active] === HQ_CENTRAL_PACIFIC) {
+        filter_activation_units((u) => G.location[u] === OAHU || get_map_data(G.location[u]).region === "Hebrides", AP)
+    }
+}
+
+SCENARIO_DATA[SOUTH_PACIFIC_SCENARIO].before_choose_hq = function () {
+    if (G.offensive.attacker === JP && G.offensive.battle_hexes.filter(h => get_map_data(h).region === "Hebrides").length <= 0) {
+        array_delete_item(L.possible_units, HQ_CENTRAL_PACIFIC)
+    }
+}
+
+SCENARIO_DATA[BURMA_SCENARIO].before_commit_offensive = function () {
+    // 17.11.9
+    if (set_has(G.offensive.battle_hexes, SAIGON)) {
+        // Saigon should not be able to be attacked due to 17.11.1, but putting a check here just in case
+        return "HQs cannot be attacked or removed from play (by either player) for any reason."
+    }
+}
+
+SCENARIO_DATA[BURMA_SCENARIO].before_unit_activation = function () {
+    filter_activation_units((u) => G.location[u] !== SINGAPORE || pieces[u].class !== "naval"
+        || G.offensive.stage === ATTACK_STAGE && G.offensive.type === EC && G.offensive.offensive_card === OPERATION_C, JP)
 }/** import server/scenario.js*/
 /** import server/game.js*/
 /** import server/cycle.js*/
@@ -15261,6 +15368,7 @@ P.attrition = {
     }
 }
 /** import server/cycle.js*/
+
 /** import server/actions.js*/
 function get_china_offensive_modifiers() {
     var result = {
@@ -18258,7 +18366,7 @@ function get_garrison_count() {
 }
 
 function on_view() {
-    is_space_controlled(OAHU,JP)//todo: remove
+    is_space_controlled(OAHU, JP)//todo: remove
     if (L.P && P[L.P] && P[L.P].on_view) {
         return P[L.P].on_view()
     }
@@ -18538,114 +18646,6 @@ function set_inter_service(faction, rivalry) {
     }
 }
 
-
-function set_supply_control() {
-    return//todo: remove
-    var data = scenario_data()
-    G.original_control = G.control
-    var adjusted_control = G.control.slice()
-    for (var i = 0; i < data.controllable.length; i++) {
-        var hex = data.controllable[i]
-        var orig = set_has(data.original_control, hex) ? set_add : set_delete
-        var supply = set_has(G.control, hex) ? JP_SUPPLIED_HEX : AP_SUPPLIED_HEX
-        if (!(G.supply_cache[hex] & supply)) {
-            orig(adjusted_control, hex)
-        }
-    }
-    G.control = adjusted_control
-}
-
-function restore_original_control() {
-    return//todo: remove
-    G.control = G.original_control
-    delete G.original_control
-}
-
-function get_victory() {
-    var data = scenario_data()
-    HQ_LIST.forEach(hq => {
-        var piece = pieces[hq]
-        if (G.location[hq] >= LAST_BOARD_HEX) {
-            return
-        }
-        if (!set_has(G.oos, hq)) {
-            mark_hexes_supplied_from([hq], is_controllable_hex)
-        }
-    })
-    if (G.burma_road < 2) {
-        mark_hexes_supplied_kunming()
-    }
-    set_supply_control()
-    var vp = data.victory()
-    if (!vp.won_side && vp.vp <= 2) {
-        vp.won_side = "Allies"
-        vp.won_text = `Allied Decisive Victory`
-    } else if (!vp.won_side && vp.vp <= (G.sid != BURMA_SCENARIO ? 5 : 4)) {
-        vp.won_side = "Allies"
-        vp.won_text = `Allied Tactical Victory`
-    } else if (!vp.won_side && vp.vp <= (G.sid != BURMA_SCENARIO ? 9 : 8)) {
-        vp.won_side = "Japan"
-        vp.won_text = `Japanese Tactical Victory`
-    } else if (!vp.won_side) {
-        vp.won_side = "Japan"
-        vp.won_text = `Japanese Decisive Victory`
-    }
-    restore_original_control()
-    return vp
-}
-
-function before_victory_check() {
-    // 17.11.23. Progress of the War (PoW): Ignore the normal PoW rules. IfExpand commentComment on line R7494Resolved
-    //   the Allies do not capture at least one hex at the conclusion of
-    //   the game that began the game controlled by the Japanese, minus
-    //   1 US Political Will.
-
-    let no_capture = true
-    for (var i = 1; i < LAST_BOARD_HEX; i++) {
-        var hex_data = get_map_data(i)
-        // only hex 2006 begins with allied control
-        // we only check for burma as this is the only region the AP player can potentially take hexes from the JP player
-        // due to 17.11.1
-        if (!nations.BURMA.regions.includes(hex_data.region) || hex_data.id === 2006) {
-            continue
-        }
-        if (is_space_controlled(hex_to_int(hex_data.id), AP)) {
-            no_capture = false
-            break;
-        }
-    }
-    if (no_capture) {
-        change_political_will(-1, "no AP control of any hex originally controlled by the JP");
-    }
-    //17.11.26. At the end of the game if the War in Europe is in a box with a
-    //negative number the US PW is reduced by one prior to scoring.
-    //If positive, the US PW is increased by one. If zero, no effect
-    if (G.wie <= 2) {
-        change_political_will(1, "War in Europe positive")
-    } else if (G.wie > 3) {
-        change_political_will(-1, "War in Europe negative")
-    }
-}
-
-function victory_check() {
-    if (G.political_will <= 0) {
-        finish("Japan", "Japanese Victory by Treaty Negotiations")
-    }
-    if (G.sid == BURMA_SCENARIO && scenario_data().last_turn <= G.turn) {
-        before_victory_check()
-    }
-    var vp = get_victory()
-    if (scenario_data().last_turn <= G.turn && G.turn < 12) {
-        log("#GVP Scoring")
-        vp.text.forEach(t => log(t))
-        log(`#GTotal VP: ${vp.vp}`)
-    }
-    if (scenario_data().last_turn <= G.turn) {
-        finish(vp.won_side, vp.won_text)
-    }
-}
-
-
 function reshuffle() {
     if (G.discard[AP].includes(SOVIET_INVADE)) {
         log(`AP deck reshuffled due to Soviet invasion discarded.`)
@@ -18843,7 +18843,6 @@ function commit_into_turn_draw() {
     G.offensive.draw[JP].forEach(c => G.hand[JP].push(c))
     G.offensive.draw = []
 }
-
 
 
 function is_controllable_hex(hex) {

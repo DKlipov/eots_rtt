@@ -1,5 +1,6 @@
 Todo list:
-* fix vp counters
+* Trace supply cache from client
+* More supply optimizations
 * reaction skip should not show information
 * check destination point for move_units
 * check arrival pint zoi when move_units

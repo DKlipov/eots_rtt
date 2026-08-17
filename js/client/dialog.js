@@ -330,7 +330,7 @@ function print_nation_status(response) {
     var control = [[], []]
     if (nation.keys) {
         nation.keys.forEach(k => {
-            if (is_space_controlled(hex_to_int(k))) {
+            if (is_space_controlled(hex_to_int(k), JP)) {
                 control[JP].push(hex_to_int(k))
             } else {
                 control[AP].push(hex_to_int(k))

@@ -1,4 +1,5 @@
 /** import server/cycle.js*/
+
 /** import server/actions.js*/
 /** import server/events.js*/
 
@@ -156,7 +157,7 @@ function get_garrison_count() {
 }
 
 function on_view() {
-    is_space_controlled(OAHU,JP)//todo: remove
+    is_space_controlled(OAHU, JP)//todo: remove
     if (L.P && P[L.P] && P[L.P].on_view) {
         return P[L.P].on_view()
     }
@@ -436,114 +437,6 @@ function set_inter_service(faction, rivalry) {
     }
 }
 
-
-function set_supply_control() {
-    return//todo: remove
-    var data = scenario_data()
-    G.original_control = G.control
-    var adjusted_control = G.control.slice()
-    for (var i = 0; i < data.controllable.length; i++) {
-        var hex = data.controllable[i]
-        var orig = set_has(data.original_control, hex) ? set_add : set_delete
-        var supply = set_has(G.control, hex) ? JP_SUPPLIED_HEX : AP_SUPPLIED_HEX
-        if (!(G.supply_cache[hex] & supply)) {
-            orig(adjusted_control, hex)
-        }
-    }
-    G.control = adjusted_control
-}
-
-function restore_original_control() {
-    return//todo: remove
-    G.control = G.original_control
-    delete G.original_control
-}
-
-function get_victory() {
-    var data = scenario_data()
-    HQ_LIST.forEach(hq => {
-        var piece = pieces[hq]
-        if (G.location[hq] >= LAST_BOARD_HEX) {
-            return
-        }
-        if (!set_has(G.oos, hq)) {
-            mark_hexes_supplied_from([hq], is_controllable_hex)
-        }
-    })
-    if (G.burma_road < 2) {
-        mark_hexes_supplied_kunming()
-    }
-    set_supply_control()
-    var vp = data.victory()
-    if (!vp.won_side && vp.vp <= 2) {
-        vp.won_side = "Allies"
-        vp.won_text = `Allied Decisive Victory`
-    } else if (!vp.won_side && vp.vp <= (G.sid != BURMA_SCENARIO ? 5 : 4)) {
-        vp.won_side = "Allies"
-        vp.won_text = `Allied Tactical Victory`
-    } else if (!vp.won_side && vp.vp <= (G.sid != BURMA_SCENARIO ? 9 : 8)) {
-        vp.won_side = "Japan"
-        vp.won_text = `Japanese Tactical Victory`
-    } else if (!vp.won_side) {
-        vp.won_side = "Japan"
-        vp.won_text = `Japanese Decisive Victory`
-    }
-    restore_original_control()
-    return vp
-}
-
-function before_victory_check() {
-    // 17.11.23. Progress of the War (PoW): Ignore the normal PoW rules. IfExpand commentComment on line R7494Resolved
-    //   the Allies do not capture at least one hex at the conclusion of
-    //   the game that began the game controlled by the Japanese, minus
-    //   1 US Political Will.
-
-    let no_capture = true
-    for (var i = 1; i < LAST_BOARD_HEX; i++) {
-        var hex_data = get_map_data(i)
-        // only hex 2006 begins with allied control
-        // we only check for burma as this is the only region the AP player can potentially take hexes from the JP player
-        // due to 17.11.1
-        if (!nations.BURMA.regions.includes(hex_data.region) || hex_data.id === 2006) {
-            continue
-        }
-        if (is_space_controlled(hex_to_int(hex_data.id), AP)) {
-            no_capture = false
-            break;
-        }
-    }
-    if (no_capture) {
-        change_political_will(-1, "no AP control of any hex originally controlled by the JP");
-    }
-    //17.11.26. At the end of the game if the War in Europe is in a box with a
-    //negative number the US PW is reduced by one prior to scoring.
-    //If positive, the US PW is increased by one. If zero, no effect
-    if (G.wie <= 2) {
-        change_political_will(1, "War in Europe positive")
-    } else if (G.wie > 3) {
-        change_political_will(-1, "War in Europe negative")
-    }
-}
-
-function victory_check() {
-    if (G.political_will <= 0) {
-        finish("Japan", "Japanese Victory by Treaty Negotiations")
-    }
-    if (G.sid == BURMA_SCENARIO && scenario_data().last_turn <= G.turn) {
-        before_victory_check()
-    }
-    var vp = get_victory()
-    if (scenario_data().last_turn <= G.turn && G.turn < 12) {
-        log("#GVP Scoring")
-        vp.text.forEach(t => log(t))
-        log(`#GTotal VP: ${vp.vp}`)
-    }
-    if (scenario_data().last_turn <= G.turn) {
-        finish(vp.won_side, vp.won_text)
-    }
-}
-
-
 function reshuffle() {
     if (G.discard[AP].includes(SOVIET_INVADE)) {
         log(`AP deck reshuffled due to Soviet invasion discarded.`)
@@ -741,7 +634,6 @@ function commit_into_turn_draw() {
     G.offensive.draw[JP].forEach(c => G.hand[JP].push(c))
     G.offensive.draw = []
 }
-
 
 
 function is_controllable_hex(hex) {
