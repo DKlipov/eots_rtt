@@ -882,6 +882,7 @@ P.move_offensive_units = {
         }
     },
     move(curr_path) {
+        var hex = curr_path[curr_path.length - 1]
         if (globalThis.RTT_FUZZER) {
             this.no_move()
             return

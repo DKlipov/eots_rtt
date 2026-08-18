@@ -176,8 +176,8 @@ function check_distance() {
 
 var original_send_action = send_action
 
-var send_action_with_oos = function (a, b) {
-    if (!validate_action(a, b)) {
+var send_action_with_oos = function (a, b, valid = false) {
+    if (!valid && !validate_action(a, b)) {
         return
     }
     var payload = {action: b, oos: G.oos, br: G.burma_road}
@@ -206,8 +206,7 @@ function proxy_send_action(a, b) {
     if (G.actions && G.actions.move && a === "action_hex") {
         var path = map_get(L.allowed_hexes, b)
         if (path) {
-            G.actions["move"] = [path]
-            send_action_with_oos("move", path)
+            send_action_with_oos("move", path, true)
         } else if (G.actions.action_hex && set_has(G.actions.action_hex, b)) {
             send_action_with_oos(a, b)
         }
