@@ -1,17 +1,9 @@
 Todo list:
-* More supply optimizations
 * reaction skip should not show information
 * check destination point for move_units
 * check arrival pint zoi when move_units
-* restore check supply function
-* fizzbuzz fixes
 * bad supply line at crome
 * japanese air could not move trough china
 * no path could be traced trough GRAY hex or china for Japan
-
-//top load
-mark_supply_ports_oversea
-get_hq_reinforcement_hexes
-fill_overstack
-get_activatable_units
-check_hq_in_supply
+* Check that supply updated before check activation units (and same cases
+* check supply query use client calculation)

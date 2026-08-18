@@ -177,15 +177,36 @@ function check_distance() {
 var original_send_action = send_action
 
 var send_action_with_oos = function (a, b) {
+    if (!validate_action(a, b)) {
+        return
+    }
     var payload = {action: b, oos: G.oos, br: G.burma_road}
     G.actions[a] = [payload]
     original_send_action(a, payload)
+}
+
+function validate_action(verb, noun) {
+    if (params.mode === "replay" || params.mode === "debug")
+        return false
+    // Reset action list here so we don't send more than one action per server prompt!
+    if (noun !== undefined) {
+        let realnoun = Array.isArray(noun) ? noun[0] : noun
+        if (view.actions && view.actions[verb] && view.actions[verb].includes(realnoun)) {
+            return true
+        }
+    } else {
+        if (view.actions && view.actions[verb]) {
+            return true
+        }
+    }
+    return false
 }
 
 function proxy_send_action(a, b) {
     if (G.actions && G.actions.move && a === "action_hex") {
         var path = map_get(L.allowed_hexes, b)
         if (path) {
+            G.actions["move"] = [path]
             send_action_with_oos("move", path)
         } else if (G.actions.action_hex && set_has(G.actions.action_hex, b)) {
             send_action_with_oos(a, b)
