@@ -1699,6 +1699,7 @@ function set_supply_control() {
     G.original_control = G.supply_cache
     G.supply_cache = object_copy(G.supply_cache)
     check_supply()
+    L.supply = {}
     HQ_LIST.forEach(hq => {
         if (G.location[hq] >= LAST_BOARD_HEX) {
             return
@@ -1721,6 +1722,7 @@ function set_supply_control() {
             }
         }
     }
+    L.supply = 0
 }
 
 function restore_original_control() {

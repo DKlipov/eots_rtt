@@ -26,7 +26,6 @@ function get_china_offensive_modifiers() {
 P.china_offensive = {
     inactive: "confirm China Offensive",
     _begin() {
-       check_supply()
     },
     prompt() {
         prompt(`China Offensive Roll.`)
@@ -72,9 +71,10 @@ P.displace_hq = {
 
 P.return_hq = {
     inactive: "choose HQ",
+    _begin(){
+        check_supplied_hexes()
+    },
     prompt() {
-        check_supply()
-        mark_supplied_hexes(G.active)
         if (!G.active_stack.length) {
             prompt(`Choose returning HQ.`)
             HQ_LIST.forEach(u => {

@@ -483,10 +483,12 @@ P.activate_units = {
             return
         }
         var piece = pieces[hq]
+        L.supply = {}
         if ((piece.service === "joint" || piece.service === "us") && !check_hq_in_supply(hq, piece, US_SUPPLIED_HEX)) {
             L.joint_disadvantage = 1
             log("-1 activation (US Line of Communication).")
         }
+        L.supply = 0
         L.possible_units = get_activatable_units(hq, pieces[hq].supply)
         L.kwai = get_kwai_modifier(pieces[hq])
         trigger_event("before_unit_activation")
@@ -1125,7 +1127,7 @@ function move_units(units, path) {
     var could_zoi_cross = !G.offensive.zoi_intelligence_modifier && G.offensive.stage === ATTACK_STAGE && pieces[units[0]].faction === G.offensive.attacker
     var could_zoi_change = G.active_stack.filter(u => pieces[u].zoi_generator).length
         || (path[0] & GROUND_MOVE) && G.active_stack.filter(u => pieces[u].class === "ground").length
-    var supply_checked = false
+    var supply_checked = CLIENT_SIDE_SUPPLY
     var faction = pieces[units[0]].faction
     var enemy_faction = 1 - pieces[units[0]].faction
     var point_to_point = []
@@ -1177,7 +1179,7 @@ function move_units(units, path) {
             log("#IReaction zoi violated! -2 to reaction intelligence rolls")
             G.offensive.zoi_intelligence_modifier = 1
             could_zoi_cross = 0
-        } else if (supply_checked && could_zoi_change) {
+        } else if (supply_checked && could_zoi_change && !CLIENT_SIDE_SUPPLY) {
             supply_checked = 0
         }
         if (path[0] & GROUND_MOVE && !is_faction_units(hex, 1 - R)) {
@@ -1195,7 +1197,7 @@ function move_units(units, path) {
 }
 
 function broken_hex_edge(move_type, from, to) {
-    if (from === to) {
+    if (from === to || from === CHINA_BOX || to === CHINA_BOX) {
         return false
     }
     var direction = get_map_data(from).nh.indexOf(to)
@@ -3047,7 +3049,7 @@ function prepare_battle() {
             set_add(battle.air_naval[piece.faction], u)
         } else if (location === hex && piece.class === "ground") {
             set_add(battle.ground[piece.faction], u)
-            if (attacker === piece.faction && map_get(G.offensive.paths, u)[0] & AMPH_MOVE) {
+            if (attacker === piece.faction && map_get(G.offensive.paths, u, [0, 0, 0])[0] & AMPH_MOVE) {
                 set_add(battle.amph_ground, u)
             }
         }

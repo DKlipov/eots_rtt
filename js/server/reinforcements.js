@@ -80,15 +80,13 @@ function get_hq_reinforcement_hexes() {
     const faction = G.active
     var supply = G.active === AP ? JOINT_SUPPLIED_HEX : JP_SUPPLIED_HEX
     let queue = []
-    const overland_set = []
-    const oversea_set = []
+    var overland_set = []
     var hqs = []
     HQ_LIST.forEach(u => set_add(hqs, G.location[u]))
     for (var i = 0; i < LAST_BOARD_HEX; i++) {
         if (get_map_data(i).supply_source & supply) {
             queue.push(i)
-            set_add(overland_set, i)
-            set_add(oversea_set, i)
+            overland_set[i] = 3
             if (get_map_data(i).port && is_space_controlled(i, faction) && !set_has(hqs, i) && !has_non_n_zoi(i, 1 - faction)) {
                 set_add(result, i)
             }
@@ -98,11 +96,11 @@ function get_hq_reinforcement_hexes() {
         let item = queue[i]
         let nh_list = get_near_hexes(item)
         const MD = get_map_data(item)
-        const overland = set_has(overland_set, item)
+        const overland = overland_set[item] & 1
         const non_neutral_zoi_s = has_non_n_zoi(item, 1 - faction)
         const enemy_port_s = (MD.port && is_space_controlled(item, 1 - faction))
         const occupied_land_s = G.supply_cache[item] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[item] & JP_GAH_UNITS << faction)
-        const oversea = set_has(oversea_set, item)
+        const oversea = overland_set[item] & 2
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
             if (nh <= 0) {
@@ -111,14 +109,14 @@ function get_hq_reinforcement_hexes() {
             var reachable = false
             const enemy_port = enemy_port_s || (MD.port && is_space_controlled(nh, 1 - faction))
             const occupied_land = occupied_land_s || G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
-            if (!set_has(overland_set, nh) && (overland || (MD.port && !enemy_port)) && MD.edges_int & GROUND << 5 * j && !occupied_land) {
+            if (!(overland_set[nh] & 1) && (overland || (MD.port && !enemy_port)) && MD.edges_int & GROUND << 5 * j && !occupied_land) {
                 reachable = true
-                set_add(overland_set, nh)
+                overland_set[nh] |= 1
             }
             const non_neutral_zoi = non_neutral_zoi_s || has_non_n_zoi(nh, 1 - faction)
-            if (!set_has(oversea_set, nh) && (oversea || (MD.port && !enemy_port)) && MD.edges_int & WATER << 5 * j && !non_neutral_zoi) {
+            if (!(overland_set[nh] & 2) && (oversea || (MD.port && !enemy_port)) && MD.edges_int & WATER << 5 * j && !non_neutral_zoi) {
                 reachable = true
-                set_add(oversea_set, nh)
+                overland_set[nh] |= 2
             }
             if (reachable) {
                 queue.push(nh)
@@ -148,8 +146,7 @@ function update_reinf_active() {
 
 P.reinforcement_segment = {
     _begin() {
-        check_supply()
-        mark_supplied_hexes(G.active)
+        check_supplied_hexes(G.active)
         if (G.wie <= 7 && G.active === AP && G.sid !== BURMA_SCENARIO) {
             change_asp(AP, 1)
         } else if (G.active === AP && G.wie >= 7) {
@@ -309,8 +306,7 @@ P.replacement_segment = {
         if (G.active === JP && L.replacement_points && L.replacement_points[AIR_REP]) {
             G.reinforcements[AIR_REP] += L.replacement_points[AIR_REP]
         }
-        check_supply()
-        mark_supplied_hexes(G.active)
+        check_supplied_hexes(G.active)
         if (L.scheduled_points) {
             scenario_data().replacement_points()
         }

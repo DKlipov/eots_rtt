@@ -180,6 +180,11 @@ exports.action = function (state, role, action, argument) {
 
     var this_state = P[L.P]
     if (this_state && typeof this_state[action] === "function") {
+        if (argument && argument.oos) {
+            G.oos = argument.oos
+            G.burma_road = argument.br
+            argument = argument.action
+        }
         this_state[action](argument)
         _run()
     } else if (action === "undo" && G.undo.length > 0) {

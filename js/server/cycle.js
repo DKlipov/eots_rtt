@@ -381,7 +381,7 @@ P.attrition_phase = script(`
     }
     log ("@Turn "+G.turn+". Attrition phase")
     eval {
-       check_supply()
+       //check_supply()
     }
     set G.active JP
     call attrition

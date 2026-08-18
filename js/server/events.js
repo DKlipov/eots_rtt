@@ -1154,6 +1154,10 @@ P.attack_b29_base = {
     }
 }
 
+cards[find_card(JP, 77)].can_play = function () {
+    return !globalThis.RTT_FUZZER
+}
+
 cards[find_card(JP, 77)].event = function () {
     call("fuel_shortage")
 }
@@ -1310,8 +1314,7 @@ cards[find_card(JP, 78)].event = function () {
 
 P.event_unit = {
     _begin() {
-        check_supply()
-        mark_supplied_hexes(G.active)
+        check_supplied_hexes(G.active)
     },
     inactive: "place unit",
     prompt() {
@@ -1451,11 +1454,9 @@ cards[find_card(AP, 4)].event = function () {
 
 P.place_abda = {
     _begin() {
-        check_supply()
-        mark_supplied_hexes(G.active)
+        check_supplied_hexes(G.active)
         var dei = ["Java", "Borneo", "Sumatra", "Celebes"]
         L.allowed_hexes = get_unit_reinforcement_hexes(HQ_ABDA).filter(h => dei.includes(get_map_data(h).region))
-
     },
     inactive: "place HQ",
     prompt() {
@@ -1594,8 +1595,7 @@ cards[find_card(AP, 17)].event = function () {
 
 P.repair_avg = {
     _begin() {
-        check_supply()
-        mark_supplied_hexes(G.active)
+        check_supplied_hexes(G.active)
         L.allowed_units = []
         var regions = ["NIndia", "Burma"]
         L.allowed_hexes = get_unit_reinforcement_hexes(ap_air(14)).filter(h => regions.includes(get_map_data(h).region))
@@ -2106,8 +2106,7 @@ cards[find_card(AP, 51)].before_activation = function () {
 
 P.place_14_air = {
     _begin() {
-        check_supply()
-        mark_supplied_hexes(G.active)
+        check_supplied_hexes(G.active)
         L.allowed_hexes = get_unit_reinforcement_hexes(AP_AIR_14).filter(h => h === CHINA_BOX || get_map_data(h).region === "NIndia")
         if (!L.allowed_hexes.length) {
             L.allowed_hexes = get_unit_reinforcement_hexes(AP_AIR_14)
@@ -2326,8 +2325,7 @@ cards[find_card(AP, 70)].before_activation = function () {
 
 P.place_armor = {
     _begin() {
-        check_supply()
-        mark_supplied_hexes(G.active)
+        check_supplied_hexes(G.active)
         var regions = ["NIndia", "Burma", "India", "Ceylon"]
         L.allowed_hexes = get_unit_reinforcement_hexes(ARMOR_BRIGADE).filter(h => regions.includes(get_map_data(h).region))
         set_delete(G.reduced, ARMOR_BRIGADE)
