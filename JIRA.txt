@@ -7,3 +7,9 @@ Todo list:
 * no path could be traced trough GRAY hex or china for Japan
 * Check that supply updated before check activation units (and same cases
 * check supply query use client calculation)
+* Remove AP zoi from 1205
+* Client side overstacking
+* 1138 game japan surrendedr did not logged
+* victory message did not dotted 1138
+* collapse in log surrender captured hexes.
+* Small stack should not overlap big stack (fix like pog)

@@ -2098,9 +2098,6 @@ cards[find_card(AP, 50)].after_unit_activation = function () {
 cards[find_card(AP, 46)].after_unit_activation = cards[find_card(AP, 50)].after_unit_activation
 
 cards[find_card(AP, 51)].before_activation = function () {
-    if (unit_on_board(ap_air("avg"))) {
-        eliminate_permanently(ap_air("avg"))
-    }
     call("place_14_air")
 }
 
@@ -2112,6 +2109,9 @@ P.place_14_air = {
             L.allowed_hexes = get_unit_reinforcement_hexes(AP_AIR_14)
         }
         set_delete(G.reduced, AP_AIR_14)
+        if (unit_on_board(ap_air("avg"))) {
+            eliminate_permanently(ap_air("avg"))
+        }
     },
     inactive: "place unit",
     prompt() {

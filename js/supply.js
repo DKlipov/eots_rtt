@@ -4,9 +4,11 @@ let count = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 function check_supplied_hexes(faction) {
     check_supply()
     L.supply = {}
+    mark_supply_eligable_ports(faction)
     mark_supplied_hexes(faction)
-    mark_supply_eligable_ports(AP)
-    mark_supply_eligable_ports(JP)
+    if (G.burma_road < 2 && faction === AP) {
+        mark_hexes_supplied_kunming()
+    }
     L.supply = 0
 }
 
