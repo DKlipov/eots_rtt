@@ -178,11 +178,11 @@ var original_send_action = send_action
 
 var send_action_with_oos = function (a, b, valid = false) {
     if (!valid && !validate_action(a, b)) {
-        return
+        return false
     }
     var payload = {action: b, oos: G.oos, br: G.burma_road}
     G.actions[a] = [payload]
-    original_send_action(a, payload)
+    return original_send_action(a, payload)
 }
 
 function validate_action(verb, noun) {
@@ -206,9 +206,9 @@ function proxy_send_action(a, b) {
     if (G.actions && G.actions.move && a === "action_hex") {
         var path = map_get(L.allowed_hexes, b)
         if (path) {
-            send_action_with_oos("move", path, true)
+            return send_action_with_oos("move", path, true)
         } else if (G.actions.action_hex && set_has(G.actions.action_hex, b)) {
-            send_action_with_oos(a, b)
+            return send_action_with_oos(a, b)
         }
     } else if (a === "play_card") {
         scroll_into_view(lookup_thing("card", G.actions.card[0]).element)
@@ -225,11 +225,11 @@ function proxy_send_action(a, b) {
         view = STORED_STATE
         update_header()
         on_update()
-        return
+        return true
     }
     if (LOCAL_STATUS) {
         if (!P[LOCAL_STATUS][a]) {
-            return
+            return true
         }
         var a = P[LOCAL_STATUS][a](b)
         update_header()
