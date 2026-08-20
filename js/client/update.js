@@ -156,6 +156,12 @@ function update_role_info() {
 function on_update() {
     begin_update()
     check_supply()
+    if (G.actions && !init_overstack_check(true)) {
+        L.hexes = []
+        L.allowed_units.forEach(u => set_add(L.hexes, G.location[u]))
+        G.violations = {overstack: L.hexes}
+        L.allowed_units = []
+    }
     if (G.actions && G.actions.move) {
         L.allowed_hexes = []
         L.move_type = G.move_type
@@ -295,6 +301,7 @@ function on_update() {
     }
 
     print_violations()
+    update_violations()
 
     world.things["card"].forEach(e => e.element.innerHTML = '')
     if (G.offensive.active_cards.length > 0) {
@@ -437,6 +444,19 @@ function print_violations() {
     }
     G.violations.overstack.forEach(h => lookup_thing("action_hex", h).element.classList.toggle("violation", true))
     world.violations = G.violations
+}
+
+function update_violations() {
+    var ui = document.getElementById("violations")
+    var list = (G.violations && G.violations.overstack) ? G.violations.overstack : []
+    if (list.length > 0) {
+        ui.replaceChildren()
+        let p = document.createElement("div")
+        p.innerHTML = `<u><b>Overstack Violations: ${escape_text(list.map(h => hex_get_log_str(h)).join(", "))}</b></u>`
+        ui.appendChild(p)
+    } else {
+        ui.replaceChildren()
+    }
 }
 
 function apply_conflict_marker(marker, hex) {

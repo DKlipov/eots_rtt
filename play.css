@@ -373,8 +373,8 @@ div[data-tooltip]:after {
 
 body.hex-clickable .action_hex { z-index: 50; }
 
-.action_hex.action { background-image: url(images/hex_action.svg); z-index: 50;}
 .action_hex.violation { background-image: url(images/hex_violation.svg); z-index: 999;pointer-events: none;}
+.action_hex.action { background-image: url(images/hex_action.svg); z-index: 50;pointer-events: auto;}
 .action_hex.tip { background-image: url(images/hex_highlight.svg); z-index: 1000; pointer-events: none;}
 
 

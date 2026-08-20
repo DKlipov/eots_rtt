@@ -8889,6 +8889,129 @@ function target_in_battle_range(range, location, targets) {
         }
     }
     return false
+}
+
+function is_overstack(hex, unit, multip = 1) {
+    var piece = pieces[unit]
+    fill_overstack(piece.faction)
+    var overstack = L.overstack[hex]
+    var multiplier = ((G.location[unit] === hex || G.location[piece.pair] === hex) ? 0 : 1) * multip
+    if (hex === CHINA_BOX && piece.b29) {
+        var count = 0
+        count += unit === B_29_1 ? G.location[B_29_2] === CHINA_BOX : 0
+        count += unit === B_29_2 ? G.location[B_29_1] === CHINA_BOX : 0
+        if (count) {
+            return false
+        }
+    }
+
+    if (piece.class === "hq") {
+        return overstack & 1
+    } else if (piece.class !== "naval") {
+        return ((overstack + 2 * multiplier) % (1 << 7)) > 7
+    } else {
+        return ((overstack + 128 * multiplier) >> 7) > 6
+    }
+}
+
+function fill_overstack(faction) {
+    if (L.overstack && L.overstack[0] === faction) {
+        return
+    }
+    L.overstack = []
+    L.overstack[0] = faction
+    for (var i = 0; i <= LAST_BOARD_HEX; i++) {
+        L.overstack[i] = 0
+    }
+    L.overstack[CHINA_BOX] = 2
+    for_each_unit((u, piece, location) => {
+        if (piece.faction !== faction) {
+            return
+        }
+        var pair_location = G.location[pieces[u].pair]
+        if (location <= LAST_BOARD_HEX && piece.class === "hq") {
+            L.overstack[location] |= 1
+        } else if (location <= LAST_BOARD_HEX && piece.class === "naval") {
+            L.overstack[location] += (1 << 7)
+        } else if (location === CHINA_BOX || (location <= LAST_BOARD_HEX && (piece.type !== "lrb" || pair_location !== location))) {
+            L.overstack[location] += (1 << 1)
+        }
+    })
+}
+
+function get_overstack_size(unit) {
+    var piece = pieces[unit]
+    if (piece.class === "hq") {
+        return 1
+    } else if (piece.class !== "naval") {
+        return 2
+    } else {
+        return 1 << 7
+    }
+}
+
+function init_overstack_check(ignore_movable) {
+    var positions = []
+    if (ignore_movable) {
+        G.offensive.active_units[G.active].forEach(u => {
+            var path = map_get(G.offensive.paths, u, [0])[0]
+            var piece = pieces[u]
+            var pbm_impossible = (path & STRAT_MOVE) || piece.class === "ground"
+            if (!pbm_impossible) {
+                map_set(positions, u, G.location[u])
+                G.location[u] = NON_PLACED_BOX
+            }
+        })
+    }
+    fill_overstack(G.active)
+    var result = count_units_stacking()
+    map_for_each(positions, (u, l) => G.location[u] = l)
+    return result
+}
+
+
+function count_units_stacking() {
+    L.allowed_units = []
+    L.ground_units = []
+    var overstack_naval = []
+    var overstack_land = []
+    for (var i = 0; i < LAST_BOARD_HEX; i++) {
+        if ((L.overstack[i] % (1 << 7)) > 7) {
+            set_add(overstack_land, i)
+        }
+        if ((L.overstack[i] >> 7) > 6) {
+            set_add(overstack_naval, i)
+        }
+    }
+    if (!overstack_naval.length && !overstack_land.length) {
+        return true
+    }
+    var air_hex = []
+    for_each_unit_on_map((u, piece, location) => {
+        if (piece.faction !== G.active) {
+            return false
+        }
+        if (piece.class === "naval" && set_has(overstack_naval, location)) {
+            set_add(L.allowed_units, u)
+        } else if (piece.class === "ground" && set_has(overstack_land, location)) {
+            set_add(L.ground_units, u)
+        } else if (piece.class === "air" && set_has(overstack_land, location)) {
+            set_add(L.allowed_units, u)
+            set_add(air_hex, location)
+        }
+    })
+    L.ground_units.forEach(u => {
+        if (pieces[u].faction !== G.active) {
+            return false
+        }
+        if (!set_has(air_hex, G.location[u])) {
+            set_add(L.allowed_units, u)
+        }
+    })
+    if (L.allowed_units.length === 0) {
+        return true
+    }
+    return false
 }/** import move.js*/
 
 /** import common/scenario.js*/
@@ -12724,108 +12847,10 @@ function get_move_type(type) {
     return ""
 }
 
-
-function is_overstack(hex, unit, multip = 1) {
-    var piece = pieces[unit]
-    fill_overstack(piece.faction)
-    var overstack = L.overstack[hex]
-    var multiplier = ((G.location[unit] === hex || G.location[piece.pair] === hex) ? 0 : 1) * multip
-    if (hex === CHINA_BOX && piece.b29) {
-        var count = 0
-        count += unit === B_29_1 ? G.location[B_29_2] === CHINA_BOX : 0
-        count += unit === B_29_2 ? G.location[B_29_1] === CHINA_BOX : 0
-        if (count) {
-            return false
-        }
-    }
-
-    if (piece.class === "hq") {
-        return overstack & 1
-    } else if (piece.class !== "naval") {
-        return ((overstack + 2 * multiplier) % (1 << 7)) > 7
-    } else {
-        return ((overstack + 128 * multiplier) >> 7) > 6
-    }
-}
-
-function get_overstack_size(unit) {
-    var piece = pieces[unit]
-    if (piece.class === "hq") {
-        return 1
-    } else if (piece.class !== "naval") {
-        return 2
-    } else {
-        return 1 << 7
-    }
-}
-
-function init_overstack_check(count_movable) {
-    var positions = []
-    if (!count_movable) {
-        G.offensive.active_units[G.active].forEach(u => {
-            var path = map_get(G.offensive.paths, u, [0])[0]
-            var piece = pieces[u]
-            var pbm_impossible = (path & STRAT_MOVE) || piece.class === "ground"
-            if (!pbm_impossible) {
-                map_set(positions, u, G.location[u])
-                G.location[u] = NON_PLACED_BOX
-            }
-        })
-    }
-    fill_overstack(G.active)
-    var result = count_units_stacking()
-    map_for_each(positions, (u, l) => G.location[u] = l)
-    return result
-}
-
-function count_units_stacking() {
-    L.allowed_units = []
-    L.ground_units = []
-    var overstack_naval = []
-    var overstack_land = []
-    for (var i = 0; i < LAST_BOARD_HEX; i++) {
-        if ((L.overstack[i] % (1 << 7)) > 7) {
-            set_add(overstack_land, i)
-        }
-        if ((L.overstack[i] >> 7) > 6) {
-            set_add(overstack_naval, i)
-        }
-    }
-    if (!overstack_naval.length && !overstack_land.length) {
-        return true
-    }
-    var air_hex = []
-    for_each_unit_on_map((u, piece, location) => {
-        if (piece.faction !== G.active) {
-            return false
-        }
-        if (piece.class === "naval" && set_has(overstack_naval, location)) {
-            set_add(L.allowed_units, u)
-        } else if (piece.class === "ground" && set_has(overstack_land, location)) {
-            set_add(L.ground_units, u)
-        } else if (piece.class === "air" && set_has(overstack_land, location)) {
-            set_add(L.allowed_units, u)
-            set_add(air_hex, location)
-        }
-    })
-    L.ground_units.forEach(u => {
-        if (pieces[u].faction !== G.active) {
-            return false
-        }
-        if (!set_has(air_hex, G.location[u])) {
-            set_add(L.allowed_units, u)
-        }
-    })
-    if (L.allowed_units.length === 0) {
-        return true
-    }
-    return false
-}
-
 P.check_overstacking = {
     _begin() {
         L.remove_flag = G.offensive.stage === EVENT_STAGE || G.offensive.stage === EMERGENCY_STAGE || G.offensive.stage === POST_BATTLE_STAGE && G.active === G.offensive.attacker
-        if (init_overstack_check(L.remove_flag)) {
+        if (!L.remove_flag || init_overstack_check(false)) {
             end()
             return
         }
@@ -12900,31 +12925,6 @@ function set_location(unit, location, no_logs) {
         L.overstack[location] += size
     }
     G.location[unit] = location
-}
-
-function fill_overstack(faction) {
-    if (L.overstack && L.overstack[0] === faction) {
-        return
-    }
-    L.overstack = []
-    L.overstack[0] = faction
-    for (var i = 0; i <= LAST_BOARD_HEX; i++) {
-        L.overstack[i] = 0
-    }
-    L.overstack[CHINA_BOX] = 2
-    for_each_unit((u, piece, location) => {
-        if (piece.faction !== faction) {
-            return
-        }
-        var pair_location = G.location[pieces[u].pair]
-        if (location <= LAST_BOARD_HEX && piece.class === "hq") {
-            L.overstack[location] |= 1
-        } else if (location <= LAST_BOARD_HEX && piece.class === "naval") {
-            L.overstack[location] += (1 << 7)
-        } else if (location === CHINA_BOX || (location <= LAST_BOARD_HEX && (piece.type !== "lrb" || pair_location !== location))) {
-            L.overstack[location] += (1 << 1)
-        }
-    })
 }
 
 

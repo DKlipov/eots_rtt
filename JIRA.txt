@@ -1,5 +1,4 @@
 Todo list:
-* Client side overstacking
 * Move trough zoi correction
 * check destination point for move_units
 * check arrival pint zoi when move_units

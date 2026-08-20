@@ -8,6 +8,18 @@ body.hide-markers .zoi_hex { display: none }
 body.hide-pieces .piece { display: none }
 body.hide-pieces .marker:not(.control) { display: none }
 
+#violations:empty {
+	display: none
+}
+
+#violations {
+	padding: 4px 8px;
+	background-color: wheat;
+	font-style: normal;
+	color: black;
+	border-bottom: 1px solid black;
+}
+
 .panel-body > * {
 	position: relative;
 }
