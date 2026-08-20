@@ -41,13 +41,13 @@ P.strategic_phase = script(`
 
 function set_pow() {
     G.pow = 0
-    if (scenario_data().id === BURMA_SCENARIO) {
+    if (G.sid === BURMA_SCENARIO) {
         return
     }
     if (G.turn >= 4) {
         G.pow = Math.min(4, G.asp[AP][0])
     }
-    if (scenario_data().id === SOUTH_PACIFIC_SCENARIO) {
+    if (G.sid === SOUTH_PACIFIC_SCENARIO) {
         G.pow = 2
     }
     if (G.pow) {
@@ -211,7 +211,7 @@ P.political_phase = script(`
 
 P.national_status_segment = function () {
     L.pw = 0
-    if (scenario_data().id === BURMA_SCENARIO) {
+    if (G.sid === BURMA_SCENARIO) {
         check_nation_surrender(nations.BURMA)
         //17.11.27. During the Game turn 9 Political Phase the India status can only
         //shift for India surrender, else do not move the India marker and
@@ -230,7 +230,7 @@ P.national_status_segment = function () {
     if (check_nation_surrender(nations.NEW_GUINEA)) {
         set_control_over_nation(nations.NEW_GUINEA, false)
     }
-    if (scenario_data().id === SOUTH_PACIFIC_SCENARIO) {
+    if (G.sid === SOUTH_PACIFIC_SCENARIO) {
         var surr = G.surrender[nations.AUSTRALIAN_MANDATES.id]
         if (nations.AUSTRALIAN_MANDATES.ports
             .filter(h => is_space_controlled(hex_to_int(h), surr ? JP : AP)).length === 0) {
@@ -385,12 +385,13 @@ P.attrition_phase = script(`
     }
     set G.active JP
     call attrition
-    set G.active AP
-    call attrition
     eval {
+        check_supply()
         check_occupation(events.HAWAII_OCCUPATION)
         check_occupation(events.ALASKA_OCCUPATION)
     }
+    set G.active AP
+    call attrition
     goto end_of_turn_phase
 `)
 

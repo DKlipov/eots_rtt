@@ -1,28 +1,3 @@
-function get_china_offensive_modifiers() {
-    var result = {
-        log: [],
-        burma_road: 0,
-        air_support: 0,
-        divisions: G.china_divisions
-    }
-    result.burma_road = (2 - G.burma_road) * 4
-    result.log.push(`Japanese divisions ${G.china_divisions}.`)
-    result.log.push(`+${result.burma_road} (Burma road).`)
-
-    if (scenario_data().id === SOUTH_PACIFIC_SCENARIO) {
-        result.air_support++
-        result.log.push(`+1 ${piece_get_log_str(ap_air("14_lrb"))}.`)
-    } else {
-        for_each_unit((u, piece, location) => {
-            if (location === CHINA_BOX && (piece.type !== "lrb" || u === LRB_14) && !set_has(G.oos, u)) {
-                result.log.push(`+1 ${piece_get_log_str(u)}.`)
-                result.air_support++
-            }
-        })
-    }
-    return result
-}
-
 P.china_offensive = {
     inactive: "confirm China Offensive",
     _begin() {
@@ -54,7 +29,7 @@ P.displace_hq = {
     prompt() {
         prompt(`Choose HQ to displace.`)
         HQ_LIST.forEach(u => {
-            if (unit_on_board(u) && pieces[u].faction === R && (scenario_data().id !== SOUTH_PACIFIC_SCENARIO || u !== HQ_CENTRAL_PACIFIC)) {
+            if (unit_on_board(u) && pieces[u].faction === R && (G.sid !== SOUTH_PACIFIC_SCENARIO || u !== HQ_CENTRAL_PACIFIC)) {
                 action_unit(u)
             }
         })

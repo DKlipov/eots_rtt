@@ -43,7 +43,7 @@ function finish(result, message) {
     G.result = ROLES[result] ?? result
     G.L = L = {message}
     log()
-    log(message)
+    log(message + ".")
 }
 
 function call_or_goto(pred, name, env) {

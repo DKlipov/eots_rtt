@@ -102,3 +102,68 @@ function get_distance(first_hex, second_hex) {
 function offensive_card_header() {
     return `${G.offensive.type === EC ? "EC" : "OC"}: ${cards[G.offensive.active_cards[0]].ops} Ops.`
 }
+
+function get_jp_resources() {
+    return RESOURCE_HEX.filter(h => is_space_controlled(h, JP) && get_map_data(h).resource).length
+}
+
+function get_china_offensive_modifiers() {
+    var result = {
+        log: [],
+        burma_road: 0,
+        air_support: 0,
+        divisions: G.china_divisions
+    }
+    result.burma_road = (2 - G.burma_road) * 4
+    result.log.push(`Japanese divisions ${G.china_divisions}.`)
+    result.log.push(`+${result.burma_road} (Burma road).`)
+
+    if (G.sid === SOUTH_PACIFIC_SCENARIO) {
+        result.air_support++
+        result.log.push(`+1 ${piece_get_log_str(ap_air("14_lrb"))}.`)
+    } else {
+        for_each_unit((u, piece, location) => {
+            if (location === CHINA_BOX && (piece.type !== "lrb" || u === LRB_14) && !set_has(G.oos, u)) {
+                result.log.push(`+1 ${piece_get_log_str(u)}.`)
+                result.air_support++
+            }
+        })
+    }
+    return result
+}
+
+/* log formatting helper functions*/
+
+// below are all functions for pretty formatting (tooltips, hover to piece on click etc) in the log
+
+function hex_get_log_str(h) {
+    return `H${h}`
+}
+
+function card_get_log_str(c) {
+    return `C${c}`
+}
+
+function piece_get_log_str(p) {
+    return `P${p}`
+}
+
+function dice_get_log_str(p, modifiers, faction = G.active) {
+    return `${faction === AP ? "B" : "R"}${p} ${modifiers > 0 ? "+" : ""}${modifiers ? modifiers : ""}`
+}
+
+function side_get_log_str(side) {
+    return `${side === AP ? "AP" : "JP"}`
+}
+
+function list_get_log_str(header, items) {
+    return `^${header}|${items.join(", ")}^`
+}
+
+function units_str(units) {
+    return list_get_log_str(`${piece_get_log_str(units[0])} with ${units.length - 1} units`, units.map(u => piece_get_log_str(u)))
+}
+
+function scenario_data() {
+    return SCENARIO_DATA[G.sid]
+}

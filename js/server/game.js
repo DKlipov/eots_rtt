@@ -143,10 +143,6 @@ function create_controllable_hex(hex) {
         || sid === BURMA_SCENARIO && map_data.region === "Burma" // need to check non named hexes for 17.11.23
 }
 
-function scenario_data() {
-    return SCENARIO_DATA[G.sid]
-}
-
 function get_garrison_count() {
     if (G.china_divisions > 8) {
         return 3
@@ -287,38 +283,6 @@ function reset_offensive() {
     }
 }
 
-/* log formatting helper functions*/
-
-// below are all functions for pretty formatting (tooltips, hover to piece on click etc) in the log
-
-function hex_get_log_str(h) {
-    return `H${h}`
-}
-
-function card_get_log_str(c) {
-    return `C${c}`
-}
-
-function piece_get_log_str(p) {
-    return `P${p}`
-}
-
-function dice_get_log_str(p, modifiers, faction = G.active) {
-    return `${faction === AP ? "B" : "R"}${p} ${modifiers > 0 ? "+" : ""}${modifiers ? modifiers : ""}`
-}
-
-function side_get_log_str(side) {
-    return `${side === AP ? "AP" : "JP"}`
-}
-
-function list_get_log_str(header, items) {
-    return `^${header}|${items.join(", ")}^`
-}
-
-function units_str(units) {
-    return list_get_log_str(`${piece_get_log_str(units[0])} with ${units.length - 1} units`, units.map(u => piece_get_log_str(u)))
-}
-
 
 function construct_decks() {
     G.draw = [[], []]
@@ -450,13 +414,10 @@ function reshuffle() {
     }
 }
 
-function get_jp_resources() {
-    return RESOURCE_HEX.filter(h => is_space_controlled(h, JP) && get_map_data(h).resource).length
-}
 
 
 function check_jp_resources_event() {
-    if (get_jp_resources() <= 3 && G.turn >= 5 && scenario_data().id !== SOUTH_PACIFIC_SCENARIO && G.sid !== BURMA_SCENARIO) {
+    if (get_jp_resources() <= 3 && G.turn >= 5 && G.sid !== SOUTH_PACIFIC_SCENARIO && G.sid !== BURMA_SCENARIO) {
         check_event(events.JAPAN_LACK_OF_RESOURCES)
     }
 }
@@ -554,7 +515,7 @@ function change_wie(diff, cause) {
         return
     }
     G.wie = Math.max(G.wie + diff, 0)
-    G.wie = Math.min(G.wie, scenario_data().id === SOUTH_PACIFIC_SCENARIO ? 7 : 10)
+    G.wie = Math.min(G.wie, G.sid === SOUTH_PACIFIC_SCENARIO ? 7 : 10)
     if (diff > 0) {
         diff = "+" + diff
     }
@@ -592,10 +553,10 @@ function check_sudden_death() {
         }
     })
     if (check[JP] <= 0) {
-        finish("Allies", "Allies Victory - All Japanese HQ displaced.")
+        finish("Allies", "Allies Victory - All Japanese HQ displaced")
         return true
     } else if (check[AP] <= 0) {
-        finish("Japan", "Japanese Victory - All Allies HQ displaced.")
+        finish("Japan", "Japanese Victory - All Allies HQ displaced")
         return true
     }
     return false

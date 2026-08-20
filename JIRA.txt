@@ -1,15 +1,12 @@
 Todo list:
-* reaction skip should not show information
+* collapse in log surrender captured hexes.
+* Small stack should not overlap big stack (fix like pog)
+* Remove AP zoi from 1205, hexes up to india ultimate supply source
+* Client side overstacking
+* check supply query use client calculation)
+* Check that supply updated before check activation units (and same cases
 * check destination point for move_units
 * check arrival pint zoi when move_units
 * japanese air could not move trough china
 * no path could be traced trough GRAY hex or china for Japan
-* Check that supply updated before check activation units (and same cases
-* check supply query use client calculation)
-* Remove AP zoi from 1205, hexes up to india ultimate supply source
-* Client side overstacking
-* 1138 game japan surrendedr did not logged
-* victory message did not dotted 1138
-* collapse in log surrender captured hexes.
-* Small stack should not overlap big stack (fix like pog)
 * bad supply line at crome

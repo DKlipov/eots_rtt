@@ -904,9 +904,10 @@ P.move_offensive_units = {
             G.asp[R][1] += 1
             G.offensive.r_asp = 1
         } else if (curr_path[0] & AMPH_MOVE && G.offensive.stage !== POST_BATTLE_STAGE &&
-            (!get_map_data(hex).port || !is_space_controlled(hex, R) || is_faction_units(hex, 1 - R) || (L.move_type === AMPH_MOVE))) {
+            (!get_map_data(hex).port || !is_space_controlled(hex, R) || is_faction_units(hex, 1 - R) || (L.move_type === AMPH_MOVE))
+            && L.move_data.asp_points) {
             G.asp[R][1] += L.move_data.asp_points
-            log(`${side_get_log_str(G.active)} ASP used ${L.move_data.asp_points} (${G.asp[R][1]}).`)
+            log(`${side_get_log_str(G.active)} ASP used ${L.move_data.asp_points} (${G.asp[R][1]}/${G.asp[R][0]}).`)
             if (G.offensive.stage === REACTION_STAGE) {
                 G.offensive.r_asp += L.move_data.asp_points
             }
@@ -3272,7 +3273,7 @@ P.emergency_move = {
                 set_add(L.unit_to_retreat, u)
             }
         })
-        if (scenario_data().id === SOUTH_PACIFIC_SCENARIO && check_sudden_death()) {
+        if (G.sid === SOUTH_PACIFIC_SCENARIO && check_sudden_death()) {
             return
         }
 

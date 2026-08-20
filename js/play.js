@@ -8,6 +8,8 @@
 /** import common/utils.js*/
 /** import supply.js*/
 /** import move.js*/
+/** import common/scenario.js*/
+
 
 /** import client/init.js*/
 /** import client/actions.js*/

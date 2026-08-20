@@ -98,6 +98,7 @@ function is_mobile() {
 }
 
 function show_card_list(id, response) {
+    id = response
     show_dialog(id, (body) => {
         let dl = document.createElement("dl")
         let append_header = (text) => {
@@ -126,14 +127,16 @@ function show_card_list(id, response) {
         G.removed[faction].forEach(append_card)
         append_header(`${faction_name} Discard Pile (${G.discard[faction].length})`)
         G.discard[faction].forEach(append_card)
-        append_header(`${faction_name} Deck and Hand (${response.hand[faction].length})`)
-        response.hand[faction].forEach(append_card)
+        var hand = draw_list().hand[faction]
+        append_header(`${faction_name} Deck and Hand (${hand.length})`)
+        hand.forEach(append_card)
 
         body.appendChild(dl)
     })
 }
 
 function pw_dialog(id, response) {
+    var response = pw_query()
     show_dialog(id, (body) => {
         let dl = document.createElement("dl")
         var header = document.createElement("dt");
@@ -509,4 +512,107 @@ function create_battle_box(faction, cf, rm, units, log) {
         result.appendChild(on_log(text))
     })
     return result
+}
+
+const FLOAT_SURRENDER = [
+    nations.PHILIPPINES, nations.MALAYA, nations.DEI, nations.BURMA,
+    nations.AUSTRALIA, nations.NEW_GUINEA, nations.MARSHALL,
+]
+
+function pw_query() {
+    var result = {
+        nations: [],
+    }
+    result.nations.push(get_china_info())
+    result.nations.push(get_nation_info(nations.AUSTRALIAN_MANDATES))
+    if (G.sid === SOUTH_PACIFIC_SCENARIO) {
+        result.nations.push(get_nation_info(nations.NEW_GUINEA))
+    } else {
+        result.nations.push(get_india_info())
+        FLOAT_SURRENDER.forEach(n => result.nations.push(get_nation_info(n)))
+        result.nations.push(get_japan_info())
+    }
+    return result
+}
+
+function get_china_info() {
+    var id = nations.CHINA.id
+    var surrender = G.surrender[id] >= 5
+    var offensive = G.events[events.CHINA_OFFENSIVE.id]
+    var mods = get_china_offensive_modifiers()
+    var info = []
+    var draw = draw_list().hand
+    var count = [0, 0]
+    draw[JP].forEach(c => {
+        if (cards[c].china) {
+            count[JP]++
+        }
+    })
+    draw[AP].forEach(c => {
+        if (cards[c].china) {
+            count[AP]++
+        }
+    })
+    if (!surrender) {
+        info.push(`Offensive ${(G.turn - offensive > 1) ? "" : "not "}possible${offensive > 0 ? ". Last launched turn " + offensive : ""}.`)
+        mods.log.forEach(l => info.push(l))
+        info.push(`Not played JP cards to China Government Front Status: ${count[JP]}.`)
+        info.push(`Not played AP cards to China Government Front Status: ${count[AP]}.`)
+    }
+    return {
+        id, control: surrender ? JP : AP, info,
+        status: `(${G.surrender[id] + 1}/5) ${nations.CHINA.statuses[G.surrender[id]]}.`
+    }
+}
+
+function get_india_info() {
+    var nation = nations.INDIA
+    var id = nation.id
+    var name = nation.name
+    var surrender = G.surrender[id] >= 5
+    return {
+        id, control: surrender ? JP : AP,
+        status: `(${Math.min(G.surrender[id] + 1, 5)}/5) ${nations.INDIA.statuses[G.surrender[id]]}.`
+    }
+}
+
+function get_japan_info() {
+    var info = get_nation_info(nations.JAPAN)
+    info.control = JP
+    var resource_trace = check_japan_resource_trace()
+    info.info = []
+    var resorce_event = is_event_active(events.JAPAN_TRACE_RESOURCES)
+    resorce_event = resorce_event > 0 ? G.turn - resorce_event + 1 : 0
+    var resorce_info = ` (${resorce_event}/3 turns)`
+    if (!resorce_event && resource_trace) {
+        resorce_info = ""
+    }
+    info.info.push(`Could ${resource_trace ? "" : "NOT "}trace path to Resource hex${resorce_info}.`)
+    var b29_in_range = get_distance(TOKYO, G.location[B_29_1]) <= 8 || get_distance(TOKYO, G.location[B_29_2]) <= 8
+    var resource_count = get_jp_resources()
+    var campaign = is_event_active(events.STRAT_BOMBING_CAMPAIGN) ? (G.turn - is_event_active(events.STRAT_BOMBING_CAMPAIGN) + 1) : 0
+    if (CAMPAIGN_SCENARIOS.includes(G.sid)) {
+        info.info.push(`Strategical Bombing Campaign: ${campaign}/4 turns.`)
+        info.info.push(b29_in_range ? "B-29 is in range of Tokyo." : "B-29 is not in range of Tokyo.")
+        info.info.push(`JP control ${resource_count} ${resource_count <= 1 ? "<=" : ">"} 1 resource spaces.`)
+    }
+    return info
+}
+
+function get_nation_info(nation) {
+    var id = nation.id
+    var surrender = G.surrender[id]
+    return {id, control: surrender ? JP : AP}
+}
+
+function draw_list() {
+    var data = scenario_data()
+    var hand = [[], []]
+    for_each_card((id, card) => {
+        var faction = card.faction
+        if (data.has_card(id) && !set_has(G.removed[faction], id) && !set_has(G.discard[faction], id)) {
+            hand[faction].push(id)
+        }
+    })
+    return {hand}
 }

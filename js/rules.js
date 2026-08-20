@@ -16,7 +16,8 @@ if(CLIENT_SIDE_SUPPLY){
 }
 /** import move.js*/
 
-/** import server/scenario.js*/
+/** import common/scenario.js*/
+/** import server/scenario_setup.js*/
 /** import server/game.js*/
 /** import server/query.js*/
 /** import server/framework.js*/

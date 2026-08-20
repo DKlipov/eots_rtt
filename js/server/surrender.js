@@ -45,7 +45,7 @@ P.india_surrender = {
             log("#GVP Scoring")
             vp.text.forEach(t => log(t))
             log(`#GTotal VP: ${vp.vp}`)
-            finish("Japan", "Japanese Victory - India Surrender.")
+            finish("Japan", "Japanese Victory - India Surrender")
             return;
         }
     },
@@ -179,55 +179,6 @@ function degrade_india(could_revolt = false) {
             L.pw -= nations.INDIA.pw
         }
     }
-}
-
-
-function check_japan_resource_trace() {
-    const faction = JP
-    let queue = []
-    const overland_set = []
-    const oversea_set = []
-    events.JAPAN_TRACE_RESOURCES.keys.forEach(hh => {
-        var h = hex_to_int(hh)
-        set_add(queue, h)
-        set_add(overland_set, h)
-        set_add(oversea_set, h)
-    })
-    for (var i = 0; i < queue.length; i++) {
-        let item = queue[i]
-        let nh_list = get_near_hexes(item)
-        const MD = get_map_data(item)
-        const overland = set_has(overland_set, item)
-        const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))
-        const enemy_port_s = (MD.port && is_space_controlled(item, 1 - faction))
-        const occupied_land_s = G.supply_cache[item] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[item] & JP_GAH_UNITS << faction)
-        const oversea = set_has(oversea_set, item)
-        for (let j = 0; j < nh_list.length; j++) {
-            let nh = nh_list[j]
-            if (nh <= 0) {
-                continue
-            }
-            var reachable = false
-            const enemy_port = enemy_port_s || (MD.port && is_space_controlled(nh, 1 - faction))
-            const occupied_land = occupied_land_s || G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
-            if (!set_has(overland_set, nh) && (overland || (MD.port && !enemy_port)) && MD.edges_int & GROUND << 5 * j && !occupied_land) {
-                reachable = true
-                set_add(overland_set, nh)
-            }
-            const non_neutral_zoi = non_neutral_zoi_s || G.supply_cache[nh] & JP_ZOI << (1 - faction) && !(G.supply_cache[nh] & JP_ZOI_NTRL << (1 - faction))
-            if (!set_has(oversea_set, nh) && (oversea || (MD.port && !enemy_port)) && MD.edges_int & WATER << 5 * j && !non_neutral_zoi) {
-                reachable = true
-                set_add(oversea_set, nh)
-            }
-            if (reachable) {
-                if (get_map_data(nh).resource && is_space_controlled(nh, JP)) {
-                    return true
-                }
-                queue.push(nh)
-            }
-        }
-    }
-    return false
 }
 
 function india_stable() {
