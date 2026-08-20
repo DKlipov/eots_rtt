@@ -491,26 +491,34 @@ cards[find_card(JP, 28)].before_activation = function () {
 P.tokyo_express = {
     _begin() {
         check_units()
+        L.first = 1
     },
     inactive: "place Tokyo Express marker",
     prompt() {
         prompt(`Place Tokyo Express marker.`)
-        for_each_unit_on_map((u, piece, location) => {
-            if (piece.class === "hq" && piece.faction === JP && !set_has(G.oos, u)) {
-                for_each_hex_in_range(location, piece.cr, h => {
-                    if (get_map_data(h).terrain > OCEAN && !is_faction_units(h, AP)) {
-                        action_hex(h)
-                    }
-                })
-            }
-        })
+        if (L.first) {
+            for_each_unit_on_map((u, piece, location) => {
+                if (piece.class === "hq" && piece.faction === JP && !set_has(G.oos, u)) {
+                    for_each_hex_in_range(location, piece.cr, h => {
+                        if (get_map_data(h).terrain > OCEAN && !is_faction_units(h, AP)) {
+                            action_hex(h)
+                        }
+                    })
+                }
+            })
+        }
+        button("done")
     },
     action_hex(h) {
-        push_undo()
+        if (L.first) {
+            L.first = 0
+        }
         log(`Tokyo Express placed: ${hex_get_log_str(h)}.`)
         G.events[events.TOKYO_EXPRESS.id] = h
+    },
+    done() {
         end()
-    }
+    },
 }
 
 cards[find_card(JP, 29)].before_unit_activation = function () {
@@ -1141,16 +1149,24 @@ P.attack_b29_base = {
             return
         }
         prompt(`Attack to B-29 base. Choose unit.`)
-        L.allowed_units.forEach(u => action_unit(u))
+        if (L.hits) {
+            L.allowed_units.forEach(u => action_unit(u))
+        } else {
+            button("done")
+        }
     },
     skip() {
+        push_undo()
+        end()
+    },
+    done() {
         push_undo()
         end()
     },
     unit(u) {
         push_undo()
         damage_unit(u)
-        end()
+        L.hits = 0
     }
 }
 
@@ -1319,12 +1335,19 @@ P.event_unit = {
     inactive: "place unit",
     prompt() {
         prompt(`Choose hex to place ${piece_get_log_str(L.unit)}.`)
-        get_unit_reinforcement_hexes(L.unit).forEach(h => action_hex(h))
+        if (L.done) {
+            button("done")
+        } else {
+            get_unit_reinforcement_hexes(L.unit).forEach(h => action_hex(h))
+        }
+    },
+    done() {
+        end()
     },
     action_hex(h) {
         push_undo()
         set_location(L.unit, h)
-        end()
+        L.done = 1
     }
 }
 
@@ -1903,27 +1926,34 @@ P.build_road = {
             return
         }
         prompt(`Choose hex to build CBI.`)
-        get_infrastructure_actions().map(h => {
-            if (h === "jarhat") {
-                return JARHAT
-            } else if (h === "imphal") {
-                return IMPHAL
-            } else {
-                return LEDO
-            }
-        }).forEach(h => action_hex(h))
-        button("skip")
+        if (L.done) {
+            button("done")
+        } else {
+            get_infrastructure_actions().map(h => {
+                if (h === "jarhat") {
+                    return JARHAT
+                } else if (h === "imphal") {
+                    return IMPHAL
+                } else {
+                    return LEDO
+                }
+            }).forEach(h => action_hex(h))
+            button("skip")
+        }
     },
     action_hex(h) {
         push_undo()
         var event = ROAD_EVENTS.filter(e => e.keys[0] === h)[0]
         check_event(event)
         log(`CBI infrastructure built - ${hex_get_log_str(event.keys[0])}.`)
-        end()
+        L.done = 1
     },
     skip() {
         push_undo()
         log("CBI build skipped.")
+        end()
+    },
+    done() {
         end()
     }
 }
@@ -2116,14 +2146,21 @@ P.place_14_air = {
     inactive: "place unit",
     prompt() {
         prompt(`Choose hex to place ${piece_get_log_str(AP_AIR_14)}.`)
-        L.allowed_hexes.forEach(h => action_hex(h))
         if (L.allowed_hexes.length === 0) {
             button("eliminate")
+        }
+        if (L.done) {
+            button("done")
+        } else {
+            L.allowed_hexes.forEach(h => action_hex(h))
         }
     },
     action_hex(h) {
         push_undo()
         set_location(AP_AIR_14, h)
+        L.done = 1
+    },
+    done() {
         end()
     },
     eliminate() {
@@ -2339,11 +2376,18 @@ P.place_armor = {
             return
         }
         prompt(`Choose hex to place ${piece_get_log_str(ARMOR_BRIGADE)}.`)
-        L.allowed_hexes.forEach(h => action_hex(h))
+        if (L.done) {
+            button("done")
+        } else {
+            L.allowed_hexes.forEach(h => action_hex(h))
+        }
     },
     action_hex(h) {
         push_undo()
         set_location(ARMOR_BRIGADE, h)
+        L.done = 1
+    },
+    done() {
         end()
     },
     eliminate() {
