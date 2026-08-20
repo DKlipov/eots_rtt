@@ -26,14 +26,16 @@ P.check_unit_supply = {
     },
     unit(u) {
         LOCAL_STATE.unit = u
-        send_query({name: "check_unit_supply", u})
+        var result = with_unmodified_supply(() => supply_query(u))
+        this.show_supply(result)
     },
     action_hex(h) {
         if (h !== CHINA_BOX) {
             return
         }
         LOCAL_STATE.unit = 1
-        send_query({name: "check_unit_supply", u: h})
+        var result = with_unmodified_supply(() => supply_query(h))
+        this.show_supply(result)
     },
     show_supply(supply_data) {
         LOCAL_STATE.unit = supply_data.unit
@@ -240,3 +242,128 @@ function proxy_send_action(a, b) {
 }
 
 var send_action = proxy_send_action
+
+function with_unmodified_supply(R) {
+    var cache = object_copy(G.supply_cache)
+    var result = R()
+    G.supply_cache = cache
+    return result
+}
+
+function supply_query(unit) {
+    L = {supply: {}}
+
+    var result = {unit, path: {}}
+    var piece = pieces[unit]
+    var location = G.location[unit]
+    result.oos = set_has(G.oos, unit)
+    if (unit === CHINA_BOX) {
+        piece = pieces[ap_army("5_cn")]
+        location = KUNMING
+        result.oos = G.burma_road === 2
+        result.hq = -1
+    }
+    clear_supply_cache(CLEAN_ALL_MASK)
+    if (result.oos) {
+        G.oos = []
+        for (var i = 1; i < LAST_BOARD_HEX; i++) {
+            G.supply_cache[i] = piece.faction ? (G.supply_cache[i] & ~JP_CONTROLLED) : (G.supply_cache[i] | JP_CONTROLLED)
+        }
+    }
+    for_each_unit_on_map((i, p) => (!result.oos || p.faction === piece.faction) ? mark_unit(i, p) : null)
+    place_virtual_units()
+    check_infrastructure()
+    for_each_unit_on_map((i, p) => (!result.oos || p.faction === piece.faction) ? set_zoi(i, p, [G.oos, G.oos]) : null)
+    indian_zoi_hack()
+    var hq = HQ_LIST.filter(hq => {
+        return (piece.faction === pieces[hq].faction && G.location[hq] < LAST_BOARD_HEX)
+    })
+    mark_supply_ports_oversea(hq)
+    L.supply_ports = L.supply
+    L.supply = {}
+    mark_supply_ports_overland(hq)
+    L.supply_ports.queue.push(...L.supply.queue)
+    L.supply_ports.retracing.push(...L.supply.retracing)
+    L.supply = {}
+    if (unit === CHINA_BOX) {
+        trace_kunming(result)
+        return result
+    }
+    if (piece.class === "hq") {
+        result.hq = unit
+    }
+    HQ_LIST.forEach(hq => {
+        var hq_piece = pieces[hq]
+        if (result.hq || G.location[hq] >= LAST_BOARD_HEX || !(hq_piece.supply & piece.supply) || get_distance(location, G.location[hq]) > hq_piece.cr
+            || set_has(G.oos, hq) || piece.faction !== hq_piece.faction) {
+            return
+        }
+        mark_hexes_supplied_from([hq], l => l === location)
+        if (G.supply_cache[location] & piece.supply) {
+            result.hq = hq
+            L.supply.queue = L.supply.queue.slice(0, L.supply.queue.indexOf(location) + 1)
+            result.path.to_hq = retrace_supply_path(location)
+            if (L.supply.port_queue) {
+                L.supply.queue = L.supply.port_queue
+                L.supply.retracing = L.supply.port_retracing
+                result.path.to_port = retrace_supply_path(L.supply.queue[L.supply.queue.length - 1])
+                result.supply_port = result.path.to_port[0]
+                L.supply.queue = L.supply_ports.queue
+                L.supply.retracing = L.supply_ports.retracing
+                result.path.from_port = retrace_supply_path(result.supply_port)
+            }
+        }
+    })
+    L.supply = {}
+    if (result.hq) {
+        check_hq_in_supply(result.hq, pieces[result.hq], piece.faction === AP ? JOINT_SUPPLIED_HEX : JP_SUPPLIED_HEX)
+        result.path.to_source = retrace_supply_path(L.supply.queue[L.supply.queue.length - 1])
+    } else if (piece.faction === AP && (G.burma_road < 2 || result.oos)) {
+        mark_hexes_supplied_kunming()
+        if (G.supply_cache[location] & piece.supply) {
+            result.path.to_hq = retrace_supply_path(location)
+            trace_kunming(result)
+        }
+    }
+    return result
+}
+
+function trace_kunming(result) {
+    if (G.burma_road === 0 || result.oos) {
+        if (result.oos) {
+            var uncontrol = ~JP_CONTROLLED
+            clear_supply_cache(uncontrol)
+        }
+        check_burma_road()
+        result.path.to_source = retrace_supply_path(L.supply.queue[L.supply.queue.length - 1])
+    } else {
+        var airfields = [DACCA, JARHAT].filter(h => G.supply_cache[h] & AP_SUPPLY_AIRFIELD)
+        if (airfields.length) {
+            L.supply.queue = L.supply_ports.queue
+            L.supply.retracing = L.supply_ports.retracing
+            result.path.from_port = retrace_supply_path(airfields[0])
+            result.path.to_port = [KUNMING, airfields[0]]
+        }
+    }
+}
+
+function retrace_supply_path(location) {
+    var queue_i = L.supply.queue.length - 1
+    while (L.supply.queue[queue_i] !== location && queue_i > 0 || L.supply.retracing[queue_i] === 0) {
+        queue_i -= 1
+    }
+    var result = [L.supply.queue[queue_i]]
+    var parent = L.supply.retracing[queue_i]
+    while (queue_i > 0) {
+        if (L.supply.queue[queue_i] === parent && L.supply.retracing[queue_i] !== 0) {
+            result.push(parent)
+            parent = L.supply.retracing[queue_i]
+        }
+        if (L.supply.retracing[queue_i] === L.supply.queue[queue_i] && parent === L.supply.queue[queue_i]) {
+            return result
+        }
+        queue_i -= 1
+    }
+    result.push(L.supply.queue[0])
+    return result
+}

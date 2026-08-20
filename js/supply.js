@@ -352,9 +352,6 @@ function mark_supply_ports_oversea(hq) {
                 distance_map[nh] = 1
                 L.supply.queue.push(nh)
                 L.supply.retracing.push(item)
-                if (G.supply_cache[nh] & JP_SUPPLY_PORT << faction || nh > LAST_BOARD_HEX) {
-                    return
-                }
                 if (get_map_data(nh).port && is_space_controlled(nh, faction)) {
                     G.supply_cache[nh] = G.supply_cache[nh] | JP_SUPPLY_PORT << faction
                 }

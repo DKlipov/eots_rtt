@@ -552,10 +552,15 @@ function on_init(scenario, game_options, static_view) {
     define_s_loc(ELIMINATED_BOX, map_layout.box_eliminated)
     define_s_loc(AP_REINF, map_layout.box_ap_reinf)
     define_s_loc(JP_REINF, map_layout.box_jp_reinf)
-    if (SID != BURMA_SCENARIO) {
+    if (SID !== BURMA_SCENARIO) {
         define_s_loc(DELAYED_BOX, map_layout.box_delayed_reinf)
     }
-    define_s_loc(CHINA_BOX, map_layout.box_air_unit_in_china)
+    define_stack("s-loc", CHINA_BOX,
+        map_layout.box_air_unit_in_china,
+        ...TRACK_STACK_PARAMS,
+        sort_unit_stack,
+        0.22,
+    )
 
     define_space("action_hex", CHINA_BOX, map_layout.box_air_unit_in_china, "china_box")
 

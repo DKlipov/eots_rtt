@@ -1,8 +1,7 @@
 Todo list:
-* Remove AP zoi from 1205, hexes up to india ultimate supply source
+* Client side check VP
+* Check that supply updated before check activation units (and same cases)
 * Client side overstacking
-* check supply query use client calculation)
-* Check that supply updated before check activation units (and same cases
 * check destination point for move_units
 * check arrival pint zoi when move_units
 * japanese air could not move trough china
