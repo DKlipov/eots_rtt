@@ -415,7 +415,6 @@ function reshuffle() {
 }
 
 
-
 function check_jp_resources_event() {
     if (get_jp_resources() <= 3 && G.turn >= 5 && G.sid !== SOUTH_PACIFIC_SCENARIO && G.sid !== BURMA_SCENARIO) {
         check_event(events.JAPAN_LACK_OF_RESOURCES)
@@ -601,7 +600,7 @@ function is_controllable_hex(hex) {
     return G.supply_cache[hex] & HEX_CONTROLLABLE
 }
 
-function capture_hex(hex, side = G.active) {
+function capture_hex(hex, side = G.active, no_log = false) {
     if (side === AP && is_event_active(events.TOKYO_EXPRESS) === hex) {
         log(`Tokyo express marker removed.`)
         G.events[events.TOKYO_EXPRESS.id] = 0
@@ -611,11 +610,15 @@ function capture_hex(hex, side = G.active) {
     }
     if (G.non_control) {
         set_delete(G.non_control, hex)
-        log(`AP captured ${int_to_hex(hex)}.`)
+        if (!no_log) {
+            log(`AP captured ${int_to_hex(hex)}.`)
+        }
     }
     var md = get_map_data(hex)
     if (side && !is_space_controlled(hex, AP)) {
-        log(`AP captured ${hex_get_log_str(hex)}.`)
+        if (!no_log) {
+            log(`AP captured ${hex_get_log_str(hex)}.`)
+        }
         G.supply_cache[hex] -= JP_CONTROLLED
         if (md.region === "NIndia") {
             india_stable()
@@ -626,7 +629,10 @@ function capture_hex(hex, side = G.active) {
             check_jp_resources_event()
         }
     } else if (!side && !is_space_controlled(hex, JP)) {
-        log(`JP captured ${hex_get_log_str(hex)}.`)
+        if (!no_log) {
+
+            log(`JP captured ${hex_get_log_str(hex)}.`)
+        }
         G.supply_cache[hex] += JP_CONTROLLED
     } else {
         return

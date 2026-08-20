@@ -14818,7 +14818,6 @@ function capture_landing_hexes() {
 }
 /** import server/offensive.js*/
 /** import server/surrender.js*/
-
 function china_surrender() {
     log(`China surrenders!`)
     var units = [ap_army("5_cn"), ap_army("6_cn"), ap_army("66_cn")]
@@ -14959,6 +14958,7 @@ function set_control_over_nation(nation, only_ground = true) {
     clear_supply_cache(CLEAN_UNITS_MASK)
     for_each_unit_on_map(mark_unit)
     var faction = G.surrender[nation.id] ? JP : AP
+    var captured = []
     for (var i = 1; i < LAST_BOARD_HEX; i++) {
         var hex_data = get_map_data(i)
         if (!nation.regions.includes(hex_data.region)) {
@@ -14966,11 +14966,13 @@ function set_control_over_nation(nation, only_ground = true) {
         }
         var no_enemy_units = (only_ground && !is_faction_ground_units(i, 1 - faction)) || !is_faction_units(i, 1 - faction)
         var control_changed = is_controllable_hex(i) && no_enemy_units
-        if (control_changed && faction === JP) {
-            capture_hex(i, JP)
-        } else if (control_changed && faction === AP) {
-            capture_hex(i, AP)
+        if (control_changed) {
+            capture_hex(i, faction, true)
+            captured.push(i)
         }
+    }
+    if (captured.length) {
+        log(`${side_get_log_str(faction)} captured: ${list_get_log_str(captured.length + " hexes", captured.map(u => hex_get_log_str(u)))}.`)
     }
 }
 
@@ -18714,7 +18716,6 @@ function reshuffle() {
 }
 
 
-
 function check_jp_resources_event() {
     if (get_jp_resources() <= 3 && G.turn >= 5 && G.sid !== SOUTH_PACIFIC_SCENARIO && G.sid !== BURMA_SCENARIO) {
         check_event(events.JAPAN_LACK_OF_RESOURCES)
@@ -18900,7 +18901,7 @@ function is_controllable_hex(hex) {
     return G.supply_cache[hex] & HEX_CONTROLLABLE
 }
 
-function capture_hex(hex, side = G.active) {
+function capture_hex(hex, side = G.active, no_log = false) {
     if (side === AP && is_event_active(events.TOKYO_EXPRESS) === hex) {
         log(`Tokyo express marker removed.`)
         G.events[events.TOKYO_EXPRESS.id] = 0
@@ -18910,11 +18911,15 @@ function capture_hex(hex, side = G.active) {
     }
     if (G.non_control) {
         set_delete(G.non_control, hex)
-        log(`AP captured ${int_to_hex(hex)}.`)
+        if (!no_log) {
+            log(`AP captured ${int_to_hex(hex)}.`)
+        }
     }
     var md = get_map_data(hex)
     if (side && !is_space_controlled(hex, AP)) {
-        log(`AP captured ${hex_get_log_str(hex)}.`)
+        if (!no_log) {
+            log(`AP captured ${hex_get_log_str(hex)}.`)
+        }
         G.supply_cache[hex] -= JP_CONTROLLED
         if (md.region === "NIndia") {
             india_stable()
@@ -18925,7 +18930,10 @@ function capture_hex(hex, side = G.active) {
             check_jp_resources_event()
         }
     } else if (!side && !is_space_controlled(hex, JP)) {
-        log(`JP captured ${hex_get_log_str(hex)}.`)
+        if (!no_log) {
+
+            log(`JP captured ${hex_get_log_str(hex)}.`)
+        }
         G.supply_cache[hex] += JP_CONTROLLED
     } else {
         return

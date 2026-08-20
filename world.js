@@ -848,7 +848,8 @@ function _layout_stacks() {
         }
         var dx = stack.my_stack.dx
         var dy = stack.my_stack.dy
-        if (stack.element.children.length <= stack.my_stack.small_threshold) {
+        var wide_stack = stack.element.children.length <= stack.my_stack.small_threshold
+        if (wide_stack) {
             dx = stack.my_stack.small_dx
             dy = stack.my_stack.small_dy
         }
@@ -896,7 +897,7 @@ function _layout_stacks() {
             var y = start_y + major_dy * i + minor_dy * k + (stack_h - h) * grav_y
             child.style.left = x + "px"
             child.style.top = y + "px"
-            child.style.zIndex = z + i
+            child.style.zIndex = z + (wide_stack ? i * 3 : i)
             if (++i === wrap) {
                 i = 0
                 sh = 0

@@ -429,7 +429,7 @@ body.hex-clickable .action_hex { z-index: 50; }
     position: absolute;
     /*background-size: auto 100%;*/
     background-repeat: no-repeat;
-    /*border-radius: 5px;*/
+    border-radius: 5px;
     width: 35px;
     height: 35px;
     background-size: 35px 35px;
