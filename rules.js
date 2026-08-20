@@ -8130,6 +8130,10 @@ function get_ground_move_cost(from, to, faction) {
     }
 }
 
+function is_controllable_hex(hex) {
+    return G.supply_cache[hex] & HEX_CONTROLLABLE
+}
+
 function is_space_controlled(hex, faction) {
     if (G.control) {
         var mask = ~(JP_CONTROLLED | HEX_CONTROLLABLE)
@@ -9066,13 +9070,11 @@ function victory_burma() {
 
 function victory_1942() {
     var hawaii = [hex_to_int(5708), hex_to_int(5808), hex_to_int(5908)]
-    if (get_hand(AP).length === 0 && get_hand(JP).length === 0) {
-        hawaii.forEach(h => {
-            if (is_faction_units(h, JP)) {
-                set_add(G.captured_once, h)
-            }
-        })
-    }
+    hawaii.forEach(h => {
+        if (is_faction_units(h, JP)) {
+            set_add(G.captured_once, h)
+        }
+    })
     var result = {
         vp: 0,
         text: [],
@@ -9197,13 +9199,11 @@ function check_supply_line(hex1, hex2, faction) {
 
 function victory_1943() {
     var hawaii = [hex_to_int(5708), hex_to_int(5808), hex_to_int(5908)]
-    if (get_hand(AP).length === 0 && get_hand(JP).length === 0) {
-        hawaii.forEach(h => {
-            if (is_faction_units(h, JP)) {
-                set_add(G.captured_once, h)
-            }
-        })
-    }
+    hawaii.forEach(h => {
+        if (is_faction_units(h, JP)) {
+            set_add(G.captured_once, h)
+        }
+    })
     var result = {
         vp: 0,
         text: [],
@@ -9299,13 +9299,11 @@ function victory_1943() {
 
 function victory_1944() {
     var hawaii = [hex_to_int(5708), hex_to_int(5808), hex_to_int(5908)]
-    if (get_hand(AP).length === 0 && get_hand(JP).length === 0) {
-        hawaii.forEach(h => {
-            if (is_faction_units(h, JP)) {
-                set_add(G.captured_once, h)
-            }
-        })
-    }
+    hawaii.forEach(h => {
+        if (is_faction_units(h, JP)) {
+            set_add(G.captured_once, h)
+        }
+    })
     var result = {
         vp: 0,
         text: [],
@@ -9629,6 +9627,15 @@ function victory_check() {
     if (scenario_data().last_turn <= G.turn) {
         finish(vp.won_side, vp.won_text)
     }
+}
+
+function check_nation_controlled(nation, faction) {
+    for (var i = 0; i < nation.keys.length; i++) {
+        if (is_space_controlled(hex_to_int(nation.keys[i]), 1 - faction)) {
+            return false
+        }
+    }
+    return true
 }/** import common/scenario.js*/
 /** import server/scenario_setup.js*/
 const SCENARIO_SETUP = [
@@ -14945,15 +14952,6 @@ P.india_surrender = {
     }
 }
 
-function check_nation_controlled(nation, faction) {
-    for (var i = 0; i < nation.keys.length; i++) {
-        if (is_space_controlled(hex_to_int(nation.keys[i]), 1 - faction)) {
-            return false
-        }
-    }
-    return true
-}
-
 function check_nation_surrender(nation) {
     if (!check_nation_controlled(nation, G.surrender[nation.id] ? AP : JP)) {
         return false
@@ -18487,6 +18485,7 @@ function create_view() {
     V.wie = G.wie
     V.passes = G.passes
     V.asp = G.asp
+    V.captured_once = G.captured_once
     V.violations = L.violations
 
     V.non_control = G.non_control
@@ -18909,11 +18908,6 @@ function commit_into_turn_draw() {
     G.offensive.draw = []
 }
 
-
-function is_controllable_hex(hex) {
-    return G.supply_cache[hex] & HEX_CONTROLLABLE
-}
-
 function capture_hex(hex, side = G.active, no_log = false) {
     if (side === AP && is_event_active(events.TOKYO_EXPRESS) === hex) {
         log(`Tokyo express marker removed.`)
@@ -19126,14 +19120,8 @@ function on_query(q, params, b) {
     if (q.name === "battle_info") {
         return battle_info_query(q.index)
     }
-    if (q.name === "check_unit_supply") {
-        return supply_query(q.u)
-    } else if (q.startsWith("event_cards")) {
-        return draw_list()
-    } else if (q === "vp_check") {
-        return vp_query()
-    } else if (q === "pw_check") {
-        return pw_query()
+    if (q === "original_control") {
+        return scenario_data().original_control
     }
 }
 

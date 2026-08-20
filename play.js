@@ -8126,6 +8126,10 @@ function get_ground_move_cost(from, to, faction) {
     }
 }
 
+function is_controllable_hex(hex) {
+    return G.supply_cache[hex] & HEX_CONTROLLABLE
+}
+
 function is_space_controlled(hex, faction) {
     if (G.control) {
         var mask = ~(JP_CONTROLLED | HEX_CONTROLLABLE)
@@ -9058,13 +9062,11 @@ function victory_burma() {
 
 function victory_1942() {
     var hawaii = [hex_to_int(5708), hex_to_int(5808), hex_to_int(5908)]
-    if (get_hand(AP).length === 0 && get_hand(JP).length === 0) {
-        hawaii.forEach(h => {
-            if (is_faction_units(h, JP)) {
-                set_add(G.captured_once, h)
-            }
-        })
-    }
+    hawaii.forEach(h => {
+        if (is_faction_units(h, JP)) {
+            set_add(G.captured_once, h)
+        }
+    })
     var result = {
         vp: 0,
         text: [],
@@ -9189,13 +9191,11 @@ function check_supply_line(hex1, hex2, faction) {
 
 function victory_1943() {
     var hawaii = [hex_to_int(5708), hex_to_int(5808), hex_to_int(5908)]
-    if (get_hand(AP).length === 0 && get_hand(JP).length === 0) {
-        hawaii.forEach(h => {
-            if (is_faction_units(h, JP)) {
-                set_add(G.captured_once, h)
-            }
-        })
-    }
+    hawaii.forEach(h => {
+        if (is_faction_units(h, JP)) {
+            set_add(G.captured_once, h)
+        }
+    })
     var result = {
         vp: 0,
         text: [],
@@ -9291,13 +9291,11 @@ function victory_1943() {
 
 function victory_1944() {
     var hawaii = [hex_to_int(5708), hex_to_int(5808), hex_to_int(5908)]
-    if (get_hand(AP).length === 0 && get_hand(JP).length === 0) {
-        hawaii.forEach(h => {
-            if (is_faction_units(h, JP)) {
-                set_add(G.captured_once, h)
-            }
-        })
-    }
+    hawaii.forEach(h => {
+        if (is_faction_units(h, JP)) {
+            set_add(G.captured_once, h)
+        }
+    })
     var result = {
         vp: 0,
         text: [],
@@ -9621,6 +9619,15 @@ function victory_check() {
     if (scenario_data().last_turn <= G.turn) {
         finish(vp.won_side, vp.won_text)
     }
+}
+
+function check_nation_controlled(nation, faction) {
+    for (var i = 0; i < nation.keys.length; i++) {
+        if (is_space_controlled(hex_to_int(nation.keys[i]), 1 - faction)) {
+            return false
+        }
+    }
+    return true
 }/** import common/scenario.js*/
 
 
@@ -10658,7 +10665,10 @@ function toggle_dialog(id, response) {
     // if (document.getElementById(name).classList.contains("show")) {
     //     hide_dialog(name)
     // }
-    if (name.startsWith("event_cards")) {
+    if (name.startsWith("original_control")) {
+        scenario_data().original_control = response
+        vp_dialog("vp_check", response)
+    } else if (name.startsWith("event_cards")) {
         show_card_list(name, response)
     } else if (name === "vp_check") {
         vp_dialog(name, response)
@@ -11045,6 +11055,11 @@ function print_winner(side, text) {
 }
 
 function vp_dialog(id, response) {
+    if (!scenario_data().original_control) {
+        send_query('original_control')
+        return
+    }
+    response = get_victory()
     show_dialog(id, (body) => {
         let dl = document.createElement("dl")
         if (response.won_side === "Japan") {

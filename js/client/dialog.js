@@ -10,7 +10,10 @@ function toggle_dialog(id, response) {
     // if (document.getElementById(name).classList.contains("show")) {
     //     hide_dialog(name)
     // }
-    if (name.startsWith("event_cards")) {
+    if (name.startsWith("original_control")) {
+        scenario_data().original_control = response
+        vp_dialog("vp_check", response)
+    } else if (name.startsWith("event_cards")) {
         show_card_list(name, response)
     } else if (name === "vp_check") {
         vp_dialog(name, response)
@@ -397,6 +400,11 @@ function print_winner(side, text) {
 }
 
 function vp_dialog(id, response) {
+    if (!scenario_data().original_control) {
+        send_query('original_control')
+        return
+    }
+    response = get_victory()
     show_dialog(id, (body) => {
         let dl = document.createElement("dl")
         if (response.won_side === "Japan") {

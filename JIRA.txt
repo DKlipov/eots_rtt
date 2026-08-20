@@ -1,7 +1,7 @@
 Todo list:
-* Client side check VP
 * Check that supply updated before check activation units (and same cases)
 * Client side overstacking
+* Move trough zoi correction
 * check destination point for move_units
 * check arrival pint zoi when move_units
 * japanese air could not move trough china

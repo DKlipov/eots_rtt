@@ -173,6 +173,7 @@ function create_view() {
     V.wie = G.wie
     V.passes = G.passes
     V.asp = G.asp
+    V.captured_once = G.captured_once
     V.violations = L.violations
 
     V.non_control = G.non_control
@@ -593,11 +594,6 @@ function commit_into_turn_draw() {
     G.offensive.draw[AP].forEach(c => G.hand[AP].push(c))
     G.offensive.draw[JP].forEach(c => G.hand[JP].push(c))
     G.offensive.draw = []
-}
-
-
-function is_controllable_hex(hex) {
-    return G.supply_cache[hex] & HEX_CONTROLLABLE
 }
 
 function capture_hex(hex, side = G.active, no_log = false) {

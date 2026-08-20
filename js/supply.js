@@ -706,6 +706,10 @@ function get_ground_move_cost(from, to, faction) {
     }
 }
 
+function is_controllable_hex(hex) {
+    return G.supply_cache[hex] & HEX_CONTROLLABLE
+}
+
 function is_space_controlled(hex, faction) {
     if (G.control) {
         var mask = ~(JP_CONTROLLED | HEX_CONTROLLABLE)

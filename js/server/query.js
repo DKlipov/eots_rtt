@@ -2,14 +2,8 @@ function on_query(q, params, b) {
     if (q.name === "battle_info") {
         return battle_info_query(q.index)
     }
-    if (q.name === "check_unit_supply") {
-        return supply_query(q.u)
-    } else if (q.startsWith("event_cards")) {
-        return draw_list()
-    } else if (q === "vp_check") {
-        return vp_query()
-    } else if (q === "pw_check") {
-        return pw_query()
+    if (q === "original_control") {
+        return scenario_data().original_control
     }
 }
 

@@ -112,15 +112,6 @@ P.india_surrender = {
     }
 }
 
-function check_nation_controlled(nation, faction) {
-    for (var i = 0; i < nation.keys.length; i++) {
-        if (is_space_controlled(hex_to_int(nation.keys[i]), 1 - faction)) {
-            return false
-        }
-    }
-    return true
-}
-
 function check_nation_surrender(nation) {
     if (!check_nation_controlled(nation, G.surrender[nation.id] ? AP : JP)) {
         return false
