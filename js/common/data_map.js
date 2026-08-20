@@ -22,13 +22,12 @@ const UNPLAYABLE_LAND = 16
 //N,NE,SE,S,SW,NW
 var map = [
     {id: 1004, terrain: OCEAN, edges: [0, 1, 1, 1, 0, 0]},
-    {id: 1103, terrain: OCEAN, edges: [0, 0, 1, 1, 1, 0]},
-    {id: 1204, terrain: OCEAN, edges: [0, 1, 1, 1, 1, 1]},
-    {id: 1303, terrain: OCEAN, edges: [0, 0, 0, 1, 1, 0]},
+    {id: 1103, terrain: OCEAN, edges: [0, 0, 1, 1, 1, 0], supply_source: JOINT_SUPPLIED_HEX},
+    {id: 1204, terrain: OCEAN, edges: [0, 1, 1, 1, 1, 1], supply_source: JOINT_SUPPLIED_HEX},
+    {id: 1303, terrain: OCEAN, edges: [0, 0, 0, 1, 1, 0], supply_source: JOINT_SUPPLIED_HEX},
     {id: 1304, terrain: OCEAN, edges: [1, 0, 0, 0, 1, 1]},
     {id: 1205, terrain: OCEAN, edges: [1, 1, 0, 1, 1, 1]},
     {id: 1010, terrain: OCEAN, edges: [1, 1, 1, 0, 0, 0]},
-    {id: 1103, terrain: OCEAN, edges: [0, 0, 1, 1, 1, 0]},
     {id: 1110, terrain: OCEAN, edges: [1, 1, 1, 0, 0, 1], supply_source: JOINT_SUPPLIED_HEX},
     {id: 1211, terrain: OCEAN, edges: [1, 1, 1, 0, 0, 1], supply_source: JOINT_SUPPLIED_HEX},
     {id: 1311, terrain: OCEAN, edges: [1, 1, 1, 0, 0, 1], supply_source: JOINT_SUPPLIED_HEX},
