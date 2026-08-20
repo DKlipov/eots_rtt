@@ -36,6 +36,7 @@ function supply_query(unit) {
     place_virtual_units()
     check_infrastructure()
     for_each_unit_on_map((i, p) => (!result.oos || p.faction === piece.faction) ? set_zoi(i, p, [G.oos, G.oos]) : null)
+    indian_zoi_hack()
     mark_supply_eligable_ports(piece.faction)
     L.supply_ports = L.supply
     L.supply = {}

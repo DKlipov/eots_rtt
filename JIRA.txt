@@ -1,5 +1,4 @@
 Todo list:
-* Small stack should not overlap big stack (fix like pog)
 * Remove AP zoi from 1205, hexes up to india ultimate supply source
 * Client side overstacking
 * check supply query use client calculation)

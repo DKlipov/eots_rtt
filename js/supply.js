@@ -54,7 +54,7 @@ function fast_check_supply() {
     place_virtual_units()
     check_infrastructure()
     for_each_unit_on_map((i, p) => set_zoi(i, p, [G.oos, G.oos]))
-
+    indian_zoi_hack()
     if (G.sid === SOUTH_PACIFIC_SCENARIO && G.turn === 3) {
         var mask = G.supply_cache[TRUK] & JP_UNITS
         G.supply_cache[TRUK] ^= (mask)
@@ -63,6 +63,22 @@ function fast_check_supply() {
         G.supply_cache[SINGAPORE] ^= (mask)
     }
     L.supply = 0
+}
+
+function indian_zoi_hack() {
+    remove_zoi(hex_to_int(1304))
+    if(!(G.supply_cache[hex_to_int(1005)] & AP_ZOI)){
+        remove_zoi(hex_to_int(1205))
+    }
+}
+
+function remove_zoi(hex) {
+    if (G.supply_cache[hex] & AP_ZOI) {
+        G.supply_cache[hex] -= AP_ZOI
+    }
+    if (G.supply_cache[hex] & JP_ZOI_NTRL) {
+        G.supply_cache[hex] -= JP_ZOI_NTRL
+    }
 }
 
 function check_units() {
@@ -618,6 +634,7 @@ function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
         return true
     }
     for_each_unit_on_map((i, p) => both_sides_zoi || p.faction === faction ? set_zoi(i, p, oos_units) : null)
+    indian_zoi_hack()
     mark_supply_eligable_ports(faction)
     var size = oos_units[faction].filter(u => pieces[u].zoi_generator).length
     oos_units[faction] = []
