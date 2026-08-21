@@ -156,7 +156,7 @@ function update_role_info() {
 function on_update() {
     begin_update()
     check_supply()
-    if (G.actions && !init_overstack_check(true)) {
+    if (G.actions && !init_overstack_check(true, R)) {
         L.hexes = []
         L.allowed_units.forEach(u => set_add(L.hexes, G.location[u]))
         G.violations = {overstack: L.hexes}

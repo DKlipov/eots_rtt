@@ -1236,13 +1236,12 @@ function get_move_type(type) {
 P.check_overstacking = {
     _begin() {
         L.remove_flag = G.offensive.stage === EVENT_STAGE || G.offensive.stage === EMERGENCY_STAGE || G.offensive.stage === POST_BATTLE_STAGE && G.active === G.offensive.attacker
-        if (!L.remove_flag || init_overstack_check(false)) {
+        if (!L.remove_flag || init_overstack_check(false, G.active)) {
             end()
             return
         }
         L.hexes = []
         L.allowed_units.forEach(u => set_add(L.hexes, G.location[u]))
-        L.violations = {overstack: L.hexes}
         if (L.remove_flag && L.allowed_units.length) {
             log(`#G${side_get_log_str(G.active)} Check stacking`)
         }
