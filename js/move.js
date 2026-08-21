@@ -496,7 +496,10 @@ function get_naval_move(zoi_mask) {
     map_for_each(distance_map, (nh, v) => {
         var naval_attack = is_amph_attack_possible(nh) && (!us_army_unit_active || set_has(marine_landed_islands, nh) || !get_map_data(nh).island || G.offensive.stage === REACTION_STAGE)
         var port_transport = (get_map_data(nh).port && is_space_controlled(nh, R) && (!move_data.is_ground_present || !move_data.is_naval_present || G.offensive.stage === POST_BATTLE_STAGE || (L.move_type === AMPH_MOVE)))
-        var ground_pbm = G.offensive.stage === POST_BATTLE_STAGE && !move_data.is_naval_present && (get_map_data(nh).named && is_space_controlled(nh, R) || is_faction_units(nh, R)) && (!is_space_controlled(nh, 1 - G.active) || !is_controllable_hex(nh))
+        var ground_pbm = G.offensive.stage === POST_BATTLE_STAGE && !move_data.is_naval_present
+            && get_map_data(nh).terrain > OCEAN
+            && (get_map_data(nh).named && is_space_controlled(nh, R) || is_faction_units(nh, R))
+            && (!is_space_controlled(nh, 1 - G.active) || !is_controllable_hex(nh))
         var aa_landing = move_data.move_type & AMPH_MOVE
             && is_hex_asp_capable(nh)
             && (!move_data.is_naval_present || move_data.move_type & ORGANIC_ONLY)
