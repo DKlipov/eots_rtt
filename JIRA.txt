@@ -1,5 +1,5 @@
 Todo list:
-* failed AA to friendly airfields
 * update server, check extra payload function
+* Unversal move units(or fix ground move)
 * Fix CLIENT_SIDE_SUPPLY flag
 * bad supply line at crome

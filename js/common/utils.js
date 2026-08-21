@@ -101,15 +101,16 @@ function get_distance(first_hex, second_hex) {
 
 function in_range_on_map(first_hex, range, hexes, faction = AP) {
     var result = []
-    if (get_map_data(first_hex).sw) {
-        slow_in_range(first_hex, range, hexes, faction)
-    }
     for (var i = 0; i < hexes.length; i++) {
         var hex = hexes[i]
-        if (get_map_data(hex)) {
+        if (get_map_data(hex).sw) {
             return slow_in_range(first_hex, range, hexes, faction)
         }
-        if (get_distance(first_hex, hexes) <= range) {
+        if (get_distance(first_hex, hexes) > range) {
+            //nothing
+        } else if (get_map_data(hex).sw || get_map_data(first_hex).sw) {
+            return slow_in_range(first_hex, range, hexes, faction)
+        } else {
             set_add(result, hex)
         }
     }
@@ -134,10 +135,11 @@ function slow_in_range(first_hex, range, hexes, faction) {
             if (nh <= 0) {
                 continue
             }
-            if (distance <= range + 1 && !(distance_map[nh] < distance) && ((MD.edges_int >> 5 * j) % 32) > 0) {
-                distance_map[nh] = distance
-                queue.push(nh)
+            if (distance > range + 1 || (distance_map[nh] <= distance) || ((MD.edges_int >> 5 * j) % 32) === 0) {
+                continue
             }
+            distance_map[nh] = distance
+            queue.push(nh)
         }
     }
     hexes.forEach(h => {

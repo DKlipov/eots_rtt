@@ -7358,15 +7358,16 @@ function get_distance(first_hex, second_hex) {
 
 function in_range_on_map(first_hex, range, hexes, faction = AP) {
     var result = []
-    if (get_map_data(first_hex).sw) {
-        slow_in_range(first_hex, range, hexes, faction)
-    }
     for (var i = 0; i < hexes.length; i++) {
         var hex = hexes[i]
-        if (get_map_data(hex)) {
+        if (get_map_data(hex).sw) {
             return slow_in_range(first_hex, range, hexes, faction)
         }
-        if (get_distance(first_hex, hexes) <= range) {
+        if (get_distance(first_hex, hexes) > range) {
+            //nothing
+        } else if (get_map_data(hex).sw || get_map_data(first_hex).sw) {
+            return slow_in_range(first_hex, range, hexes, faction)
+        } else {
             set_add(result, hex)
         }
     }
@@ -7391,10 +7392,11 @@ function slow_in_range(first_hex, range, hexes, faction) {
             if (nh <= 0) {
                 continue
             }
-            if (distance <= range + 1 && !(distance_map[nh] < distance) && ((MD.edges_int >> 5 * j) % 32) > 0) {
-                distance_map[nh] = distance
-                queue.push(nh)
+            if (distance > range + 1 || (distance_map[nh] <= distance) || ((MD.edges_int >> 5 * j) % 32) === 0) {
+                continue
             }
+            distance_map[nh] = distance
+            queue.push(nh)
         }
     }
     hexes.forEach(h => {
@@ -8783,13 +8785,14 @@ function get_naval_move(zoi_mask) {
     map_for_each(distance_map, (nh, v) => {
         var naval_attack = is_amph_attack_possible(nh) && (!us_army_unit_active || set_has(marine_landed_islands, nh) || !get_map_data(nh).island || G.offensive.stage === REACTION_STAGE)
         var port_transport = (get_map_data(nh).port && is_space_controlled(nh, R) && (!move_data.is_ground_present || !move_data.is_naval_present || G.offensive.stage === POST_BATTLE_STAGE || (L.move_type === AMPH_MOVE)))
+        var ground_pbm = G.offensive.stage === POST_BATTLE_STAGE && !move_data.is_naval_present && (get_map_data(nh).named && is_space_controlled(nh, R) || is_faction_units(nh, R)) && (!is_space_controlled(nh, 1 - G.active) || !is_controllable_hex(nh))
         var aa_landing = move_data.move_type & AMPH_MOVE
             && is_hex_asp_capable(nh)
             && (!move_data.is_naval_present || move_data.move_type & ORGANIC_ONLY)
             && !pbm
         var no_enemy_units = !is_faction_units(nh, 1 - R)
         var landing = port_transport && (no_enemy_units || G.offensive.stage === POST_BATTLE_STAGE) || aa_landing && no_enemy_units
-        if ((naval_attack || landing && G.offensive.stage !== REACTION_STAGE) && (!L.move_data.is_ground_present || !ground_move_denied(nh))) {
+        if ((naval_attack || landing && G.offensive.stage !== REACTION_STAGE || ground_pbm) && (!L.move_data.is_ground_present || !ground_move_denied(nh))) {
             map_set(result, nh, v)
         }
     })
@@ -8938,7 +8941,7 @@ function process_china_box_move(hex, base_path, move_type) {
 }
 
 function target_in_battle_range(range, location, targets) {
-    return in_range_on_map(location, range, targets,G.active).length
+    return in_range_on_map(location, range, targets, G.active).length
 }
 
 function is_overstack(hex, unit, multip = 1) {
