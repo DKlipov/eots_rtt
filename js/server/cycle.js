@@ -300,7 +300,7 @@ P.national_status_segment = function () {
         return
     }
     if (check_japan_resource_trace()) {
-        if(is_event_active(events.JAPAN_TRACE_RESOURCES)){
+        if (is_event_active(events.JAPAN_TRACE_RESOURCES)) {
             log(`JP mainland city traced path to resource hex. Capitulation timer reset.`)
         }
         G.events[events.JAPAN_TRACE_RESOURCES.id] = 0
@@ -374,7 +374,6 @@ function check_naval_situation() {
 }
 
 
-
 P.attrition_phase = script(`
     if (G.turn ===1) {
         goto end_of_turn_phase
@@ -435,7 +434,7 @@ P.attrition = {
                 } else if (location !== CHINA_BOX) {
                     for (var i = 0; i < hq_list.length; i++) {
                         var hq = hq_list[i]
-                        if (get_distance(location, G.location[hq]) <= pieces[hq].cr
+                        if (in_range_on_map(location, pieces[hq].cr, [G.location[hq]], G.active).length
                             && (G.sid !== SOUTH_PACIFIC_SCENARIO || hq !== HQ_CENTRAL_PACIFIC || get_map_data(location).region === "Hebrides")//hack for cpac in south pacific map
                         ) {
                             return

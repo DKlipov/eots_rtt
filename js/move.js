@@ -651,12 +651,7 @@ function process_china_box_move(hex, base_path, move_type) {
 }
 
 function target_in_battle_range(range, location, targets) {
-    for (var i = 0; i < targets.length; i++) {
-        if (get_distance(location, targets[i]) <= range) {
-            return true
-        }
-    }
-    return false
+    return in_range_on_map(location, range, targets,G.active).length
 }
 
 function is_overstack(hex, unit, multip = 1) {

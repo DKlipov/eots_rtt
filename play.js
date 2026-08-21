@@ -6406,11 +6406,14 @@ for (var i = 0; i < sp_map.length; i++) {
 
 for (let i = 0; i <= LAST_BOARD_HEX; ++i) {
     let hex = MAP_DATA[i]
+    var x = Math.floor(i / 29)
+    var y = i % 29
+    var sw = (x <= 17 && y <= 12) ? 1 : 0
     if (!hex) {
-        hex = {id: int_to_hex(i), terrain: OCEAN, region: "Ocean", nh: get_edge_hexes(i)}
+        hex = {id: int_to_hex(i), terrain: OCEAN, region: "Ocean", nh: get_edge_hexes(i), sw}
         MAP_DATA[i] = hex
     }
-
+    hex.sw = sw
     hex.edges_int = 0
     hex.coastal = false
     let nh = get_edge_hexes(i)
@@ -7350,6 +7353,55 @@ function get_distance(first_hex, second_hex) {
     return rx + ry - (rx >> 1)
 }
 
+function in_range_on_map(first_hex, range, hexes, faction = AP) {
+    var result = []
+    if (get_map_data(first_hex).sw) {
+        slow_in_range(first_hex, range, hexes, faction)
+    }
+    for (var i = 0; i < hexes.length; i++) {
+        var hex = hexes[i]
+        if (get_map_data(hex)) {
+            return slow_in_range(first_hex, range, hexes, faction)
+        }
+        if (get_distance(first_hex, hexes) <= range) {
+            set_add(result, hex)
+        }
+    }
+    return result
+}
+
+function slow_in_range(first_hex, range, hexes, faction) {
+    var queue = [first_hex]
+    var distance_map = []
+    var result = []
+    distance_map[first_hex] = 1
+    for (var i = 0; i < queue.length; i++) {
+        let item = queue[i]
+        var distance = distance_map[item] + 1
+        var MD = get_map_data(item)
+        if (faction === JP && MD.region === "IChina") {
+            continue
+        }
+        let nh_list = get_near_hexes(item)
+        for (let j = 0; j < nh_list.length; j++) {
+            let nh = nh_list[j]
+            if (nh <= 0) {
+                continue
+            }
+            if (distance <= range + 1 && !(distance_map[nh] < distance) && ((MD.edges_int >> 5 * j) % 32) > 0) {
+                distance_map[nh] = distance
+                queue.push(nh)
+            }
+        }
+    }
+    hexes.forEach(h => {
+        if (distance_map[h]) {
+            set_add(result, h)
+        }
+    })
+    return result
+}
+
 function offensive_card_header() {
     return `${G.offensive.type === EC ? "EC" : "OC"}: ${cards[G.offensive.active_cards[0]].ops} Ops.`
 }
@@ -7721,7 +7773,7 @@ function mark_supply_ports_overland(hq, piece) {
         map_set(distance_map, location, 0)
         distance_map[location] = 1
     })
-    for (var i = L.supply.queue.length - 1; i < L.supply.queue.length; i++) {
+    for (var i = 0; i < L.supply.queue.length; i++) {
         let item = L.supply.queue[i]
         let base_distance = map_get(distance_map, item)
         let nh_list = get_near_hexes(item)
@@ -7763,7 +7815,7 @@ function mark_supply_ports_oversea(hq) {
         G.supply_cache[location] = G.supply_cache[location] | JP_SUPPLY_PORT << faction
         distance_map[location] = 1
     })
-    for (var i = L.supply.queue.length - 1; i < L.supply.queue.length; i++) {
+    for (var i = 0; i < L.supply.queue.length; i++) {
         let item = L.supply.queue[i]
         let nh_list = get_near_hexes(item)
         const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))
@@ -8883,12 +8935,7 @@ function process_china_box_move(hex, base_path, move_type) {
 }
 
 function target_in_battle_range(range, location, targets) {
-    for (var i = 0; i < targets.length; i++) {
-        if (get_distance(location, targets[i]) <= range) {
-            return true
-        }
-    }
-    return false
+    return in_range_on_map(location, range, targets,G.active).length
 }
 
 function is_overstack(hex, unit, multip = 1) {

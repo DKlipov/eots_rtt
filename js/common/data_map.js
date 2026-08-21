@@ -1284,11 +1284,14 @@ for (var i = 0; i < sp_map.length; i++) {
 
 for (let i = 0; i <= LAST_BOARD_HEX; ++i) {
     let hex = MAP_DATA[i]
+    var x = Math.floor(i / 29)
+    var y = i % 29
+    var sw = (x <= 17 && y <= 12) ? 1 : 0
     if (!hex) {
-        hex = {id: int_to_hex(i), terrain: OCEAN, region: "Ocean", nh: get_edge_hexes(i)}
+        hex = {id: int_to_hex(i), terrain: OCEAN, region: "Ocean", nh: get_edge_hexes(i), sw}
         MAP_DATA[i] = hex
     }
-
+    hex.sw = sw
     hex.edges_int = 0
     hex.coastal = false
     let nh = get_edge_hexes(i)

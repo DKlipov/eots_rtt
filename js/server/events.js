@@ -558,13 +558,13 @@ cards[find_card(JP, 32)].before_battle_roll = function (faction) {
         return
     }
     var battle = G.offensive.battle.battle_hex
-    var cv_present = false
+    var cv_hex = []
     for_each_unit_on_map((u, piece, location) => {
-        if (piece.faction === JP && (piece.type === "cv" || piece.type === "cvl") && get_distance(battle, location) <= 6) {
-            cv_present = true
+        if (piece.faction === JP && (piece.type === "cv" || piece.type === "cvl")) {
+            set_add(cv_hex, location)
         }
     })
-    if (cv_present) {
+    if (in_range_on_map(battle, 6, cv_hex, JP).length) {
         G.offensive.battle.roll_modifiers += 1
         log(`+1 Air Shuttle.`)
     }
@@ -821,10 +821,10 @@ function set_kamikaze_able_battles() {
     var battles = []
     for_each_unit_on_map((u, piece, location) => {
         if (piece.faction === JP && piece.class === "air") {
-            G.offensive.battle_hexes
+            in_range_on_map(location, piece.ebr, G.offensive.battle_hexes
                 .filter(h => get_distance(h, TOKYO) <= 11
-                    && set_has(ap_naval_commited, h)
-                    && get_distance(h, location) <= piece.ebr)
+                    && set_has(ap_naval_commited, h)),
+                JP)
                 .forEach(h => set_add(battles, h))
         }
     })
@@ -840,6 +840,7 @@ P.kamikaze_attack = {
                 set_add(L.allowed_units, u)
             }
         })
+        L.allowed_units = L.allowed_units.filter(u => in_range_on_map(G.location[u], pieces[u].ebr, G.offensive.kamikaze, JP).length)
         L.stage = 1
     },
     inactive: "launch kamikaze attack",
@@ -901,10 +902,10 @@ P.kamikaze_attack = {
             log(`${piece_get_log_str(u)} launch kamikaze attack.`)
             damage_unit(u)
             L.allowed_units = []
+            var hexes_range = in_range_on_map(G.location[u], pieces[u].ebr, G.offensive.kamikaze, JP)
             G.offensive.active_units[AP].forEach(ap => {
                     var bh = get_unit_battle_hex(ap)
-                    if (pieces[ap].faction === AP && pieces[ap].class === "naval" && unit_on_board(ap) && set_has(G.offensive.kamikaze, bh)
-                        && get_distance(bh, location) <= pieces[u].ebr) {
+                    if (pieces[ap].faction === AP && pieces[ap].class === "naval" && unit_on_board(ap) && set_has(hexes_range, bh)) {
                         set_add(L.allowed_units, ap)
                     }
                 }

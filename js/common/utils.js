@@ -99,6 +99,55 @@ function get_distance(first_hex, second_hex) {
     return rx + ry - (rx >> 1)
 }
 
+function in_range_on_map(first_hex, range, hexes, faction = AP) {
+    var result = []
+    if (get_map_data(first_hex).sw) {
+        slow_in_range(first_hex, range, hexes, faction)
+    }
+    for (var i = 0; i < hexes.length; i++) {
+        var hex = hexes[i]
+        if (get_map_data(hex)) {
+            return slow_in_range(first_hex, range, hexes, faction)
+        }
+        if (get_distance(first_hex, hexes) <= range) {
+            set_add(result, hex)
+        }
+    }
+    return result
+}
+
+function slow_in_range(first_hex, range, hexes, faction) {
+    var queue = [first_hex]
+    var distance_map = []
+    var result = []
+    distance_map[first_hex] = 1
+    for (var i = 0; i < queue.length; i++) {
+        let item = queue[i]
+        var distance = distance_map[item] + 1
+        var MD = get_map_data(item)
+        if (faction === JP && MD.region === "IChina") {
+            continue
+        }
+        let nh_list = get_near_hexes(item)
+        for (let j = 0; j < nh_list.length; j++) {
+            let nh = nh_list[j]
+            if (nh <= 0) {
+                continue
+            }
+            if (distance <= range + 1 && !(distance_map[nh] < distance) && ((MD.edges_int >> 5 * j) % 32) > 0) {
+                distance_map[nh] = distance
+                queue.push(nh)
+            }
+        }
+    }
+    hexes.forEach(h => {
+        if (distance_map[h]) {
+            set_add(result, h)
+        }
+    })
+    return result
+}
+
 function offensive_card_header() {
     return `${G.offensive.type === EC ? "EC" : "OC"}: ${cards[G.offensive.active_cards[0]].ops} Ops.`
 }

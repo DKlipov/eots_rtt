@@ -300,7 +300,7 @@ function mark_supply_ports_overland(hq, piece) {
         map_set(distance_map, location, 0)
         distance_map[location] = 1
     })
-    for (var i = L.supply.queue.length - 1; i < L.supply.queue.length; i++) {
+    for (var i = 0; i < L.supply.queue.length; i++) {
         let item = L.supply.queue[i]
         let base_distance = map_get(distance_map, item)
         let nh_list = get_near_hexes(item)
@@ -342,7 +342,7 @@ function mark_supply_ports_oversea(hq) {
         G.supply_cache[location] = G.supply_cache[location] | JP_SUPPLY_PORT << faction
         distance_map[location] = 1
     })
-    for (var i = L.supply.queue.length - 1; i < L.supply.queue.length; i++) {
+    for (var i = 0; i < L.supply.queue.length; i++) {
         let item = L.supply.queue[i]
         let nh_list = get_near_hexes(item)
         const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))

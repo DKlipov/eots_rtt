@@ -124,7 +124,7 @@ P.choose_hq = {
             if (piece.faction === G.active && piece.class === "hq" &&
                 (!set_has(G.oos, u) || L.card === GENERAL_ADACHI)
                 && (G.active === G.offensive.attacker
-                    || G.offensive.battle_hexes.filter(bh => get_distance(bh, G.location[u]) <= piece.cr).length)
+                    || in_range_on_map(G.location[u], piece.cr, G.offensive.battle_hexes, G.active).length)
                 && (hq_list.length <= 0 || hq_list.includes(u))
             ) {
                 L.possible_units.push(u)
@@ -1243,12 +1243,13 @@ function compute_air_commit_hexes() {
     }
     if (move_data.is_new_battle_allowed) {
         for (i = 0; i < G.supply_cache.length; i++) {
-            if ((G.supply_cache[i] & JP_UNITS << (1 - R)) && get_distance(i, location) <= range
+            if ((G.supply_cache[i] & JP_UNITS << (1 - G.active)) && get_distance(i, location) <= range
                 && get_map_data(i).region !== "IChina") {
                 set_add(result, i)
             }
         }
     }
+    result = in_range_on_map(location, range, result, G.active)
     return result
 }
 
@@ -1548,14 +1549,12 @@ P.declare_battle_hexes = {
             L.possible_units.forEach(u => action_unit(u))
             button("done")
         } else {
-            const location = G.location[G.active_stack[0]]
-            var piece = pieces[G.active_stack[0]]
-            var range = piece.parenthetical ? piece.br : piece.ebr
-            L.possible_hexes.filter(loc => get_distance(loc, location) <= range).forEach(loc => action_hex(loc))
+            L.actual_hexes.forEach(loc => action_hex(loc))
         }
     },
     action_hex(hex) {
         push_undo()
+        L.actual_hexes = []
         commit_to_attack(G.active_stack[0], hex)
         if (!set_has(G.offensive.battle_hexes, hex) && is_faction_units(hex, 1 - G.active)) {
             create_battle_hex(hex)
@@ -1574,6 +1573,10 @@ P.declare_battle_hexes = {
         push_undo()
         G.active_stack = [u]
         set_delete(L.possible_units, u)
+        const location = G.location[G.active_stack[0]]
+        var piece = pieces[G.active_stack[0]]
+        var range = piece.parenthetical ? piece.br : piece.ebr
+        L.actual_hexes = in_range_on_map(location, range, L.possible_hexes, G.active)
     },
     done() {
         push_undo()
@@ -1695,8 +1698,8 @@ P.special_reaction = {
                 return false
             }
             for (var i = 1; i < hq_list.length; i += 2) {
-                if (get_distance(h, hq_list[i - 1]) <= hq_list[i]
-                    && (G.sid !== SOUTH_PACIFIC_SCENARIO || hq_list[i] !== 25 || get_map_data(h).region === "Hebrides")//hack for cpac in south pacific map
+                if ((G.active === AP && G.sid === SOUTH_PACIFIC_SCENARIO && get_map_data(h).region === "Hebrides")//hack for cpac in south pacific map
+                    || in_range_on_map(hq_list[i - 1], hq_list[i], [h], G.active).length
                 ) {
                     return true
                 }

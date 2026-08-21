@@ -6409,11 +6409,14 @@ for (var i = 0; i < sp_map.length; i++) {
 
 for (let i = 0; i <= LAST_BOARD_HEX; ++i) {
     let hex = MAP_DATA[i]
+    var x = Math.floor(i / 29)
+    var y = i % 29
+    var sw = (x <= 17 && y <= 12) ? 1 : 0
     if (!hex) {
-        hex = {id: int_to_hex(i), terrain: OCEAN, region: "Ocean", nh: get_edge_hexes(i)}
+        hex = {id: int_to_hex(i), terrain: OCEAN, region: "Ocean", nh: get_edge_hexes(i), sw}
         MAP_DATA[i] = hex
     }
-
+    hex.sw = sw
     hex.edges_int = 0
     hex.coastal = false
     let nh = get_edge_hexes(i)
@@ -7353,6 +7356,55 @@ function get_distance(first_hex, second_hex) {
     return rx + ry - (rx >> 1)
 }
 
+function in_range_on_map(first_hex, range, hexes, faction = AP) {
+    var result = []
+    if (get_map_data(first_hex).sw) {
+        slow_in_range(first_hex, range, hexes, faction)
+    }
+    for (var i = 0; i < hexes.length; i++) {
+        var hex = hexes[i]
+        if (get_map_data(hex)) {
+            return slow_in_range(first_hex, range, hexes, faction)
+        }
+        if (get_distance(first_hex, hexes) <= range) {
+            set_add(result, hex)
+        }
+    }
+    return result
+}
+
+function slow_in_range(first_hex, range, hexes, faction) {
+    var queue = [first_hex]
+    var distance_map = []
+    var result = []
+    distance_map[first_hex] = 1
+    for (var i = 0; i < queue.length; i++) {
+        let item = queue[i]
+        var distance = distance_map[item] + 1
+        var MD = get_map_data(item)
+        if (faction === JP && MD.region === "IChina") {
+            continue
+        }
+        let nh_list = get_near_hexes(item)
+        for (let j = 0; j < nh_list.length; j++) {
+            let nh = nh_list[j]
+            if (nh <= 0) {
+                continue
+            }
+            if (distance <= range + 1 && !(distance_map[nh] < distance) && ((MD.edges_int >> 5 * j) % 32) > 0) {
+                distance_map[nh] = distance
+                queue.push(nh)
+            }
+        }
+    }
+    hexes.forEach(h => {
+        if (distance_map[h]) {
+            set_add(result, h)
+        }
+    })
+    return result
+}
+
 function offensive_card_header() {
     return `${G.offensive.type === EC ? "EC" : "OC"}: ${cards[G.offensive.active_cards[0]].ops} Ops.`
 }
@@ -7724,7 +7776,7 @@ function mark_supply_ports_overland(hq, piece) {
         map_set(distance_map, location, 0)
         distance_map[location] = 1
     })
-    for (var i = L.supply.queue.length - 1; i < L.supply.queue.length; i++) {
+    for (var i = 0; i < L.supply.queue.length; i++) {
         let item = L.supply.queue[i]
         let base_distance = map_get(distance_map, item)
         let nh_list = get_near_hexes(item)
@@ -7766,7 +7818,7 @@ function mark_supply_ports_oversea(hq) {
         G.supply_cache[location] = G.supply_cache[location] | JP_SUPPLY_PORT << faction
         distance_map[location] = 1
     })
-    for (var i = L.supply.queue.length - 1; i < L.supply.queue.length; i++) {
+    for (var i = 0; i < L.supply.queue.length; i++) {
         let item = L.supply.queue[i]
         let nh_list = get_near_hexes(item)
         const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))
@@ -8886,12 +8938,7 @@ function process_china_box_move(hex, base_path, move_type) {
 }
 
 function target_in_battle_range(range, location, targets) {
-    for (var i = 0; i < targets.length; i++) {
-        if (get_distance(location, targets[i]) <= range) {
-            return true
-        }
-    }
-    return false
+    return in_range_on_map(location, range, targets,G.active).length
 }
 
 function is_overstack(hex, unit, multip = 1) {
@@ -11895,7 +11942,7 @@ P.choose_hq = {
             if (piece.faction === G.active && piece.class === "hq" &&
                 (!set_has(G.oos, u) || L.card === GENERAL_ADACHI)
                 && (G.active === G.offensive.attacker
-                    || G.offensive.battle_hexes.filter(bh => get_distance(bh, G.location[u]) <= piece.cr).length)
+                    || in_range_on_map(G.location[u], piece.cr, G.offensive.battle_hexes, G.active).length)
                 && (hq_list.length <= 0 || hq_list.includes(u))
             ) {
                 L.possible_units.push(u)
@@ -13014,12 +13061,13 @@ function compute_air_commit_hexes() {
     }
     if (move_data.is_new_battle_allowed) {
         for (i = 0; i < G.supply_cache.length; i++) {
-            if ((G.supply_cache[i] & JP_UNITS << (1 - R)) && get_distance(i, location) <= range
+            if ((G.supply_cache[i] & JP_UNITS << (1 - G.active)) && get_distance(i, location) <= range
                 && get_map_data(i).region !== "IChina") {
                 set_add(result, i)
             }
         }
     }
+    result = in_range_on_map(location, range, result, G.active)
     return result
 }
 
@@ -13319,14 +13367,12 @@ P.declare_battle_hexes = {
             L.possible_units.forEach(u => action_unit(u))
             button("done")
         } else {
-            const location = G.location[G.active_stack[0]]
-            var piece = pieces[G.active_stack[0]]
-            var range = piece.parenthetical ? piece.br : piece.ebr
-            L.possible_hexes.filter(loc => get_distance(loc, location) <= range).forEach(loc => action_hex(loc))
+            L.actual_hexes.forEach(loc => action_hex(loc))
         }
     },
     action_hex(hex) {
         push_undo()
+        L.actual_hexes = []
         commit_to_attack(G.active_stack[0], hex)
         if (!set_has(G.offensive.battle_hexes, hex) && is_faction_units(hex, 1 - G.active)) {
             create_battle_hex(hex)
@@ -13345,6 +13391,10 @@ P.declare_battle_hexes = {
         push_undo()
         G.active_stack = [u]
         set_delete(L.possible_units, u)
+        const location = G.location[G.active_stack[0]]
+        var piece = pieces[G.active_stack[0]]
+        var range = piece.parenthetical ? piece.br : piece.ebr
+        L.actual_hexes = in_range_on_map(location, range, L.possible_hexes, G.active)
     },
     done() {
         push_undo()
@@ -13466,8 +13516,8 @@ P.special_reaction = {
                 return false
             }
             for (var i = 1; i < hq_list.length; i += 2) {
-                if (get_distance(h, hq_list[i - 1]) <= hq_list[i]
-                    && (G.sid !== SOUTH_PACIFIC_SCENARIO || hq_list[i] !== 25 || get_map_data(h).region === "Hebrides")//hack for cpac in south pacific map
+                if ((G.active === AP && G.sid === SOUTH_PACIFIC_SCENARIO && get_map_data(h).region === "Hebrides")//hack for cpac in south pacific map
+                    || in_range_on_map(hq_list[i - 1], hq_list[i], [h], G.active).length
                 ) {
                     return true
                 }
@@ -15332,7 +15382,7 @@ P.national_status_segment = function () {
         return
     }
     if (check_japan_resource_trace()) {
-        if(is_event_active(events.JAPAN_TRACE_RESOURCES)){
+        if (is_event_active(events.JAPAN_TRACE_RESOURCES)) {
             log(`JP mainland city traced path to resource hex. Capitulation timer reset.`)
         }
         G.events[events.JAPAN_TRACE_RESOURCES.id] = 0
@@ -15406,7 +15456,6 @@ function check_naval_situation() {
 }
 
 
-
 P.attrition_phase = script(`
     if (G.turn ===1) {
         goto end_of_turn_phase
@@ -15467,7 +15516,7 @@ P.attrition = {
                 } else if (location !== CHINA_BOX) {
                     for (var i = 0; i < hq_list.length; i++) {
                         var hq = hq_list[i]
-                        if (get_distance(location, G.location[hq]) <= pieces[hq].cr
+                        if (in_range_on_map(location, pieces[hq].cr, [G.location[hq]], G.active).length
                             && (G.sid !== SOUTH_PACIFIC_SCENARIO || hq !== HQ_CENTRAL_PACIFIC || get_map_data(location).region === "Hebrides")//hack for cpac in south pacific map
                         ) {
                             return
@@ -16439,13 +16488,13 @@ cards[find_card(JP, 32)].before_battle_roll = function (faction) {
         return
     }
     var battle = G.offensive.battle.battle_hex
-    var cv_present = false
+    var cv_hex = []
     for_each_unit_on_map((u, piece, location) => {
-        if (piece.faction === JP && (piece.type === "cv" || piece.type === "cvl") && get_distance(battle, location) <= 6) {
-            cv_present = true
+        if (piece.faction === JP && (piece.type === "cv" || piece.type === "cvl")) {
+            set_add(cv_hex, location)
         }
     })
-    if (cv_present) {
+    if (in_range_on_map(battle, 6, cv_hex, JP).length) {
         G.offensive.battle.roll_modifiers += 1
         log(`+1 Air Shuttle.`)
     }
@@ -16702,10 +16751,10 @@ function set_kamikaze_able_battles() {
     var battles = []
     for_each_unit_on_map((u, piece, location) => {
         if (piece.faction === JP && piece.class === "air") {
-            G.offensive.battle_hexes
+            in_range_on_map(location, piece.ebr, G.offensive.battle_hexes
                 .filter(h => get_distance(h, TOKYO) <= 11
-                    && set_has(ap_naval_commited, h)
-                    && get_distance(h, location) <= piece.ebr)
+                    && set_has(ap_naval_commited, h)),
+                JP)
                 .forEach(h => set_add(battles, h))
         }
     })
@@ -16721,6 +16770,7 @@ P.kamikaze_attack = {
                 set_add(L.allowed_units, u)
             }
         })
+        L.allowed_units = L.allowed_units.filter(u => in_range_on_map(G.location[u], pieces[u].ebr, G.offensive.kamikaze, JP).length)
         L.stage = 1
     },
     inactive: "launch kamikaze attack",
@@ -16782,10 +16832,10 @@ P.kamikaze_attack = {
             log(`${piece_get_log_str(u)} launch kamikaze attack.`)
             damage_unit(u)
             L.allowed_units = []
+            var hexes_range = in_range_on_map(G.location[u], pieces[u].ebr, G.offensive.kamikaze, JP)
             G.offensive.active_units[AP].forEach(ap => {
                     var bh = get_unit_battle_hex(ap)
-                    if (pieces[ap].faction === AP && pieces[ap].class === "naval" && unit_on_board(ap) && set_has(G.offensive.kamikaze, bh)
-                        && get_distance(bh, location) <= pieces[u].ebr) {
+                    if (pieces[ap].faction === AP && pieces[ap].class === "naval" && unit_on_board(ap) && set_has(hexes_range, bh)) {
                         set_add(L.allowed_units, ap)
                     }
                 }

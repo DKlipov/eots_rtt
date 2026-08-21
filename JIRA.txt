@@ -1,5 +1,5 @@
 Todo list:
-* no path could be traced trough GRAY hex or china for Japan
+* failed AA to friendly airfields
 * update server, check extra payload function
 * Fix CLIENT_SIDE_SUPPLY flag
 * bad supply line at crome
