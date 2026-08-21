@@ -126,10 +126,10 @@ function slow_in_range(first_hex, range, hexes, faction) {
         let item = queue[i]
         var distance = distance_map[item] + 1
         var MD = get_map_data(item)
-        if (faction === JP && MD.region === "IChina") {
+        let nh_list = get_near_hexes(item)
+        if (faction === JP && MD.region === "IChina" || !nh_list) {
             continue
         }
-        let nh_list = get_near_hexes(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
             if (nh <= 0) {

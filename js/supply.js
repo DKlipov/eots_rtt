@@ -288,6 +288,9 @@ function check_hq_in_supply(hq, piece, supply) {
 }
 
 function mark_supply_ports_overland(hq, piece) {
+    if (!hq.length) {
+        return
+    }
     const faction = pieces[hq[0]].faction
     L.supply.queue = []
     L.supply.retracing = []
@@ -331,6 +334,9 @@ function mark_supply_ports_overland(hq, piece) {
 }
 
 function mark_supply_ports_oversea(hq) {
+    if (!hq.length) {
+        return
+    }
     const faction = pieces[hq[0]].faction
     L.supply.queue = []
     L.supply.retracing = []

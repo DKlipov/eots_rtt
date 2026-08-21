@@ -885,11 +885,11 @@ P.move_offensive_units = {
         }
     },
     move(curr_path) {
-        var hex = curr_path[curr_path.length - 1]
         if (globalThis.RTT_FUZZER) {
             this.no_move()
             return
         }
+        var hex = curr_path[curr_path.length - 1]
         if (L.move_type === BARGES_MOVE) {
             G.offensive.barges = 1
             log(`Barges ability used.`)

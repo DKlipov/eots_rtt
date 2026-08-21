@@ -7380,10 +7380,10 @@ function slow_in_range(first_hex, range, hexes, faction) {
         let item = queue[i]
         var distance = distance_map[item] + 1
         var MD = get_map_data(item)
-        if (faction === JP && MD.region === "IChina") {
+        let nh_list = get_near_hexes(item)
+        if (faction === JP && MD.region === "IChina" || !nh_list) {
             continue
         }
-        let nh_list = get_near_hexes(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
             if (nh <= 0) {
@@ -7763,6 +7763,9 @@ function check_hq_in_supply(hq, piece, supply) {
 }
 
 function mark_supply_ports_overland(hq, piece) {
+    if (!hq.length) {
+        return
+    }
     const faction = pieces[hq[0]].faction
     L.supply.queue = []
     L.supply.retracing = []
@@ -7806,6 +7809,9 @@ function mark_supply_ports_overland(hq, piece) {
 }
 
 function mark_supply_ports_oversea(hq) {
+    if (!hq.length) {
+        return
+    }
     const faction = pieces[hq[0]].faction
     L.supply.queue = []
     L.supply.retracing = []

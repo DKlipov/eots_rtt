@@ -7383,10 +7383,10 @@ function slow_in_range(first_hex, range, hexes, faction) {
         let item = queue[i]
         var distance = distance_map[item] + 1
         var MD = get_map_data(item)
-        if (faction === JP && MD.region === "IChina") {
+        let nh_list = get_near_hexes(item)
+        if (faction === JP && MD.region === "IChina" || !nh_list) {
             continue
         }
-        let nh_list = get_near_hexes(item)
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
             if (nh <= 0) {
@@ -7766,6 +7766,9 @@ function check_hq_in_supply(hq, piece, supply) {
 }
 
 function mark_supply_ports_overland(hq, piece) {
+    if (!hq.length) {
+        return
+    }
     const faction = pieces[hq[0]].faction
     L.supply.queue = []
     L.supply.retracing = []
@@ -7809,6 +7812,9 @@ function mark_supply_ports_overland(hq, piece) {
 }
 
 function mark_supply_ports_oversea(hq) {
+    if (!hq.length) {
+        return
+    }
     const faction = pieces[hq[0]].faction
     L.supply.queue = []
     L.supply.retracing = []
@@ -12706,11 +12712,11 @@ P.move_offensive_units = {
         }
     },
     move(curr_path) {
-        var hex = curr_path[curr_path.length - 1]
         if (globalThis.RTT_FUZZER) {
             this.no_move()
             return
         }
+        var hex = curr_path[curr_path.length - 1]
         if (L.move_type === BARGES_MOVE) {
             G.offensive.barges = 1
             log(`Barges ability used.`)
