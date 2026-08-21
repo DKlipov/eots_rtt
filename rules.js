@@ -8432,10 +8432,12 @@ function compute_air_move_hexes() {
             nh_list = china_result
             distance = L.move_data.extended_battle_range
         }
-
+        if (G.active === JP && MD.region === "IChina" || MD.region === "Manchuria") {
+            nh_list = []
+        }
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0 || nh === HARBIN || nh === MUKDEN) {
+            if (nh <= 0) {
                 continue
             }
             var cached = map_get(distance_map, nh, [9])[0]
@@ -12061,6 +12063,9 @@ function get_activatable_units(hq, hq_supply_type) {
         let item = queue[i]
         let nh_list = get_near_hexes(item)
         const MD = get_map_data(item)
+        if (G.active === JP && MD.region === "IChina") {
+            continue
+        }
         const distance = map_get(distance_map, item) + 1
         const non_neutral_zoi = has_non_n_zoi(item, 1 - faction)
         const occupied_land = solely_occupied_land(item, 1 - faction)

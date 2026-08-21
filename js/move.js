@@ -197,10 +197,12 @@ function compute_air_move_hexes() {
             nh_list = china_result
             distance = L.move_data.extended_battle_range
         }
-
+        if (G.active === JP && MD.region === "IChina" || MD.region === "Manchuria") {
+            nh_list = []
+        }
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
-            if (nh <= 0 || nh === HARBIN || nh === MUKDEN) {
+            if (nh <= 0) {
                 continue
             }
             var cached = map_get(distance_map, nh, [9])[0]

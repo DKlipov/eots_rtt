@@ -292,6 +292,9 @@ function get_activatable_units(hq, hq_supply_type) {
         let item = queue[i]
         let nh_list = get_near_hexes(item)
         const MD = get_map_data(item)
+        if (G.active === JP && MD.region === "IChina") {
+            continue
+        }
         const distance = map_get(distance_map, item) + 1
         const non_neutral_zoi = has_non_n_zoi(item, 1 - faction)
         const occupied_land = solely_occupied_land(item, 1 - faction)
