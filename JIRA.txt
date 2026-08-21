@@ -1,8 +1,6 @@
 Todo list:
-* Move trough zoi correction
-* check destination point for move_units
-* check arrival pint zoi when move_units
 * japanese air could not move trough china
 * no path could be traced trough GRAY hex or china for Japan
-* bad supply line at crome
+* update server, check extra payload function
 * Fix CLIENT_SIDE_SUPPLY flag
+* bad supply line at crome

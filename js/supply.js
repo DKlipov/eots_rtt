@@ -65,9 +65,13 @@ function fast_check_supply() {
     L.supply = 0
 }
 
+if (CLIENT_SIDE_SUPPLY) {
+    check_supply = fast_check_supply
+}
+
 function indian_zoi_hack() {
     remove_zoi(hex_to_int(1304))
-    if(!(G.supply_cache[hex_to_int(1005)] & AP_ZOI)){
+    if (!(G.supply_cache[hex_to_int(1005)] & AP_ZOI)) {
         remove_zoi(hex_to_int(1205))
     }
 }

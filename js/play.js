@@ -1,9 +1,10 @@
 /** main*/
 "use strict"
 
-
+function log(){}
 
 /** import common/constants.js*/
+CLIENT_SIDE_SUPPLY = 0
 /** import common/data.js*/
 /** import common/utils.js*/
 /** import supply.js*/

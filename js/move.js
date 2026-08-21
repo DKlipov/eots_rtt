@@ -17,7 +17,6 @@ function update_move_hex() {
     }
 }
 
-
 function get_move_data() {
     let result = {
         is_new_battle_allowed: false,
@@ -245,7 +244,9 @@ function compute_air_move_hexes() {
         }
     }
     map_delete(L.allowed_hexes, location)
-    check_china_box_restriction()
+    if (check_china_box_restricted()) {
+        map_delete(L.allowed_hexes, CHINA_BOX)
+    }
 }
 
 function compute_ground_naval_move_hexes() {
@@ -608,16 +609,15 @@ function get_ground_move(avoid_zoi) {
 }
 
 
-function check_china_box_restriction() {
+function check_china_box_restricted() {
     var count = 0
     for (var i = 0; i < pieces.length; i++) {
         if (G.location[i] === CHINA_BOX) {
             count++
         }
     }
-    if (count >= 2 || pieces[G.active_stack[0]].b29 && (G.location[B_29_1] === CHINA_BOX || G.location[B_29_2] === CHINA_BOX)) {
-        map_delete(L.allowed_hexes, CHINA_BOX)
-    }
+    return !!(count >= 2 || pieces[G.active_stack[0]].b29 && (G.location[B_29_1] === CHINA_BOX || G.location[B_29_2] === CHINA_BOX));
+
 }
 
 function process_china_box_move(hex, base_path, move_type) {
@@ -778,4 +778,158 @@ function count_units_stacking(faction) {
         return true
     }
     return false
+}
+
+function move_units(units, path) {
+    check_units()
+    const prev_path = map_get(G.offensive.paths, units[0])
+    var full_path = [path[0], path[1]]
+    if (prev_path) {
+        full_path.push(...prev_path.slice(2))
+    } else {
+        full_path.push(G.location[units[0]])
+    }
+    full_path.push(...path.slice(3))
+    units.forEach(u => {
+        map_set(G.offensive.paths, u, full_path.slice())
+    })
+    var units_list = units_str(units)
+    if (path.length === 3) {
+        log(`${units_list} skipped move.`)
+        return
+    }
+    var i = 2
+    var zoi_cross_denied = path[0] & STRAT_MOVE || path[0] & AMPH_MOVE && !L.move_data.battle_range
+    var zoi_cross_declared = !zoi_cross_denied && path[0] & VIOLATE_ZOI
+    var could_zoi_cross = !G.offensive.zoi_intelligence_modifier && G.offensive.stage === ATTACK_STAGE && pieces[units[0]].faction === G.offensive.attacker
+    var could_zoi_change = G.active_stack.filter(u => pieces[u].zoi_generator).length
+        || (path[0] & GROUND_MOVE) && G.active_stack.filter(u => pieces[u].class === "ground").length
+    var supply_checked = CLIENT_SIDE_SUPPLY || zoi_cross_declared
+    var faction = pieces[units[0]].faction
+    var enemy_faction = 1 - pieces[units[0]].faction
+    var point_to_point = []
+    var last = null
+    for (; i < path.length; i++) {
+        var hex = path[i]
+        if (last !== hex) {
+            point_to_point.push(hex_get_log_str(hex))
+        } else if (last) {
+            point_to_point[point_to_point.length - 1] = "rebase " + hex_get_log_str(hex)
+        }
+        last = hex
+    }
+    var distance = 0
+    var legs = 1
+    i = 2
+    var destination = path[path.length - 1]
+    log(`${units_list} moved to ${list_get_log_str(hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
+    if (zoi_cross_declared && could_zoi_cross) {
+        zoi_crossed()
+        could_zoi_cross = false
+        supply_checked = true
+    }
+    for (; i < path.length; i++) {
+        var hex = path[i]
+        if (i > 2 && !(path[0] & GROUND_DISENGAGEMENT) && path[0] & GROUND_MOVE) {
+            distance += get_ground_move_cost(path[i - 1], path[i], faction)
+        } else if (i > 2 && path[i - 1] !== path[i]) {
+            distance++
+        }
+        if (i > 2 && path[0] & AIR_MOVE && path[i - 1] === path[i]) {
+            if (distance > L.move_data.extended_battle_range) {
+                throw new Error("Bad move paths")
+            }
+            legs++
+            distance = 0
+        }
+        if (i > 2 && broken_hex_edge(path[0], path[i - 1], path[i])) {
+            throw new Error("Bad move paths")
+        }
+        if (could_zoi_cross && !supply_checked && (G.supply_cache[hex] & (POSSIBLE_ZOI << enemy_faction))) {
+            units.forEach(u => set_location(u, hex, 1))
+            check_supply()
+            supply_checked = 1
+        }
+        if (could_zoi_cross && has_zoi(hex, enemy_faction)) {
+            if (zoi_cross_denied && has_non_n_zoi(hex, enemy_faction)) {
+                throw new Error("Bad move paths")
+            }
+            zoi_crossed()
+            could_zoi_cross = 0
+        } else if (supply_checked && could_zoi_change && !CLIENT_SIDE_SUPPLY) {
+            supply_checked = 0
+        }
+        if (path[0] & GROUND_MOVE && !is_faction_units(hex, 1 - R)) {
+            capture_hex(hex)
+        }
+    }
+    if (path[0] & AIR_MOVE && (distance > L.move_data.extended_battle_range || legs > L.move_data.air_move_legs)
+        || path[0] & GROUND_DISENGAGEMENT && distance > 1
+        || path[0] & GROUND_MOVE && !(path[0] & GROUND_DISENGAGEMENT) && distance > L.move_data.ground_move_distance
+        || path[0] & NAVAL_MOVE && distance > L.move_data.naval_move_distance
+    ) {
+        throw new Error("Bad move path")
+    }
+    units.forEach(u => set_location(u, destination, true))
+}
+
+function zoi_crossed() {
+    log("#IReaction zoi violated! -2 to reaction intelligence rolls")
+    G.offensive.zoi_intelligence_modifier = 1
+}
+
+function broken_hex_edge(move_type, from, to) {
+    if (from === to || from === CHINA_BOX || to === CHINA_BOX) {
+        return false
+    }
+    var direction = get_map_data(from).nh.indexOf(to)
+    if (direction < 0) {
+        return 1
+    }
+    if (move_type & GROUND_MOVE) {
+        return !(get_map_data(from).edges_int & GROUND << 5 * direction)
+    }
+    if (move_type & AIR_MOVE) {
+        return !((get_map_data(from).edges_int >> 5 * direction) % 32)
+    }
+    return !(get_map_data(from).edges_int & WATER << 5 * direction)
+}
+
+function get_move_type(type) {
+    if (G.offensive.stage !== ATTACK_STAGE) {
+        return ""
+    }
+    if (type & STRAT_MOVE) {
+        return " (Strategic move)"
+    } else if (type & AIR_EXTENDED_MOVE) {
+        return " (Extended range)"
+    } else if (type & GROUND_DISENGAGEMENT) {
+        return " (Disengagement)"
+    } else if (type & BARGES_MOVE) {
+        return " (Barges)"
+    } else if (type & GROUND_MOVE) {
+        return " (Ground move)"
+    }
+    return ""
+}
+
+
+function set_location(unit, location, no_logs) {
+    var prev_location = G.location[unit]
+    var prev_out = prev_location > LAST_BOARD_HEX && prev_location !== CHINA_BOX
+    var current_on_map = location <= LAST_BOARD_HEX || location === CHINA_BOX
+    if (!no_logs && prev_out && current_on_map) {
+        log(`${piece_get_log_str(unit)} placed to ${hex_get_log_str(location)}.`)
+    } else if (!no_logs && current_on_map) {
+        log(`${piece_get_log_str(unit)} moved to ${hex_get_log_str(location)}.`)
+    }
+    var pair_location = G.location[pieces[unit].pair]
+    var size = get_overstack_size(unit)
+    if (L.overstack && (prev_location <= LAST_BOARD_HEX || prev_location === CHINA_BOX) && pair_location !== prev_location) {
+        L.overstack[prev_location] -= size
+    }
+    if (L.overstack && (location <= LAST_BOARD_HEX || location === CHINA_BOX) && pair_location !== location) {
+        L.overstack[location] += size
+    }
+    G.location[unit] = location
 }

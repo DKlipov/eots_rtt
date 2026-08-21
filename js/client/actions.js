@@ -208,6 +208,12 @@ function proxy_send_action(a, b) {
     if (G.actions && G.actions.move && a === "action_hex") {
         var path = map_get(L.allowed_hexes, b)
         if (path) {
+            if (G.offensive.stage === ATTACK_STAGE && !G.offensive.zoi_intelligence_modifier) {
+                move_units(G.active_stack, path)
+                if (G.offensive.zoi_intelligence_modifier) {
+                    path[0] |= VIOLATE_ZOI
+                }
+            }
             return send_action_with_oos("move", path, true)
         } else if (G.actions.action_hex && set_has(G.actions.action_hex, b)) {
             return send_action_with_oos(a, b)

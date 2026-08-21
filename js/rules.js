@@ -11,9 +11,6 @@ exports.default_scenario = "South Pacific"
 /** import common/data.js*/
 /** import common/utils.js*/
 /** import supply.js*/
-if(CLIENT_SIDE_SUPPLY){
-    check_supply = fast_check_supply
-}
 /** import move.js*/
 
 /** import common/scenario.js*/
