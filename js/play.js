@@ -2,6 +2,7 @@
 "use strict"
 
 function log(){}
+function capture_hex(){}
 
 /** import common/constants.js*/
 CLIENT_SIDE_SUPPLY = 0

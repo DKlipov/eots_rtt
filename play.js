@@ -2,6 +2,7 @@
 "use strict"
 
 function log(){}
+function capture_hex(){}
 
 /** import common/constants.js*/
 const SOUTH_PACIFIC_SCENARIO = 0
@@ -7357,13 +7358,13 @@ function in_range_on_map(first_hex, range, hexes, faction = AP) {
     var result = []
     for (var i = 0; i < hexes.length; i++) {
         var hex = hexes[i]
-        // if (get_map_data(hex).sw) {
-        //     return slow_in_range(first_hex, range, hexes, faction)
-        // }
+        if (get_map_data(hex).sw) {
+            return slow_in_range(first_hex, range, hexes, faction)
+        }
         if (get_distance(first_hex, hexes) > range) {
             //nothing
-        // } else if (get_map_data(hex).sw || get_map_data(first_hex).sw) {
-        //     return slow_in_range(first_hex, range, hexes, faction)
+        } else if (get_map_data(hex).sw || get_map_data(first_hex).sw) {
+            return slow_in_range(first_hex, range, hexes, faction)
         } else {
             set_add(result, hex)
         }
