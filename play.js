@@ -10588,7 +10588,7 @@ function on_init(scenario, game_options, static_view) {
     define_marker("divisions", 0, counters.divisions_china)
     for (let i = 1; i < pieces.length; ++i) {
         let piece = pieces[i]
-        piece.element = define_piece("unit", i, piece.counter).tooltip_image(unit_tooltip_image)
+        piece.element = define_piece("unit", i, (piece.faction ? "ap " : "jp ") + piece.counter).tooltip_image(unit_tooltip_image)
     }
     for (let i = 1; i < cards.length; ++i) {
         let card = cards[i]
@@ -11729,7 +11729,7 @@ function place_unit(u, location) {
         unit = populate("s-loc", location, "unit", u)
         unit.classList.toggle("reduced", (set_has(G.reduced, u) && !one_step) || location === ELIMINATED_BOX
             || pieces[u].class === "hq" && G.inter_service[pieces[u].faction])
-        unit.classList.toggle(piece.faction ? "activated_blue" : "activated_red", set_has(G.offensive.active_units[piece.faction], u))
+        unit.classList.toggle("activated", set_has(G.offensive.active_units[piece.faction], u))
         unit.classList.toggle("selected", G.active_stack.includes(u))
         unit.innerHTML = '';
         var battle = map_get(G.offensive.committed, u)

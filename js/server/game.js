@@ -135,11 +135,11 @@ function create_controllable_hex(hex) {
     var sid = G.sid
     var map_data = get_map_data(hex)
     return map_data.named || hex === WEST_HONSHU
-        || hex === KWAI_BRIDGE// && !is_event_active(events.KWAI_RIVER_BRIDGE)
-        || hex === KWAI_BRIDGE_1// && !is_event_active(events.KWAI_RIVER_BRIDGE)
+        || hex === KWAI_BRIDGE && !is_event_active(events.KWAI_RIVER_BRIDGE)// && !is_event_active(events.KWAI_RIVER_BRIDGE)
+        || hex === KWAI_BRIDGE_1 && !is_event_active(events.KWAI_RIVER_BRIDGE)// && !is_event_active(events.KWAI_RIVER_BRIDGE)
         || hex === CHINA_BOX
         || hex === ATTU && sid === YEAR_1942_SCENARIO
-        || map_data.region === "AMandates" && (sid === YEAR_1943_SCENARIO || sid === YEAR_1942_1943_SCENARIO)// && G.surrender[nations.AUSTRALIAN_MANDATES.id]
+        // || map_data.region === "AMandates" && (sid === YEAR_1943_SCENARIO || sid === YEAR_1942_1943_SCENARIO)// && G.surrender[nations.AUSTRALIAN_MANDATES.id]
         || sid === BURMA_SCENARIO && map_data.region === "Burma" // need to check non named hexes for 17.11.23
 }
 

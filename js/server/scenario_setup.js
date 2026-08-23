@@ -177,7 +177,8 @@ function setup_scenario_burma() {
     //port routes.
     G.events[events.JARHAT_ROAD.id] = 1
     G.events[events.HUMP.id] = 1 //Burma Road: Hump Closed
-    G.events[events.KWAI_RIVER_BRIDGE.id] = 2// 17.11.13. Kwai Bridge Event has been played, note impact on Japanese activations.
+    cards[find_card(JP, 18)].event()
+    G.events[events.KWAI_RIVER_BRIDGE.id] = 2
     G.events[events.DOOLITLE] = 2// 17.11.22. Doolittle Raid has occurred meeting the condition for the Doolittle Reprisal card.
 
     prepare_game_log()
@@ -504,6 +505,7 @@ function setup_scenario_1943() {
     G.events[events.HUMP.id] = 1
     G.events[events.JARHAT_ROAD.id] = 1
     G.events[events.BARGES.id] = 1
+    cards[find_card(JP, 18)].event()
     G.events[events.KWAI_RIVER_BRIDGE.id] = 2
     G.events[events.ALASKA_OCCUPATION.id] = 3
     G.events[events.ALASKA_OCCUPATION_HEXES.id] = 3
@@ -696,6 +698,7 @@ function setup_scenario_1944() {
     G.events[events.PT_BOATS.id] = 5
     G.events[events.HUMP.id] = 1
     G.events[events.JARHAT_ROAD.id] = 1
+    cards[find_card(JP, 18)].event()
     G.events[events.KWAI_RIVER_BRIDGE.id] = 2
 
 

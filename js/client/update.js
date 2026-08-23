@@ -97,7 +97,7 @@ function place_unit(u, location) {
         unit = populate("s-loc", location, "unit", u)
         unit.classList.toggle("reduced", (set_has(G.reduced, u) && !one_step) || location === ELIMINATED_BOX
             || pieces[u].class === "hq" && G.inter_service[pieces[u].faction])
-        unit.classList.toggle(piece.faction ? "activated_blue" : "activated_red", set_has(G.offensive.active_units[piece.faction], u))
+        unit.classList.toggle("activated", set_has(G.offensive.active_units[piece.faction], u))
         unit.classList.toggle("selected", G.active_stack.includes(u))
         unit.innerHTML = '';
         var battle = map_get(G.offensive.committed, u)

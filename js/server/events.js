@@ -340,6 +340,8 @@ cards[find_card(JP, 18)].can_play = function () {
 
 cards[find_card(JP, 18)].event = function () {
     check_event(events.KWAI_RIVER_BRIDGE)
+    G.supply_cache[KWAI_BRIDGE] -= HEX_CONTROLLABLE
+    G.supply_cache[KWAI_BRIDGE_1] -= HEX_CONTROLLABLE
 }
 
 cards[find_card(JP, 20)].before_commit_offensive = function () {
@@ -822,8 +824,8 @@ function set_kamikaze_able_battles() {
     for_each_unit_on_map((u, piece, location) => {
         if (piece.faction === JP && piece.class === "air") {
             in_range_on_map(location, piece.ebr, G.offensive.battle_hexes
-                .filter(h => get_distance(h, TOKYO) <= 11
-                    && set_has(ap_naval_commited, h)),
+                    .filter(h => get_distance(h, TOKYO) <= 11
+                        && set_has(ap_naval_commited, h)),
                 JP)
                 .forEach(h => set_add(battles, h))
         }

@@ -58,18 +58,31 @@ body.hide-pieces .marker:not(.control) { display: none }
     transform: rotate(22.5deg);
 }
 
-.piece.activated_red,.piece.activated_blue {
+.piece.activated {
     box-shadow: 0 0 1px black, inset 0 0 1px black;
-    border-width: 3px;
+    border-width: 4px;
     border-style: solid;
 }
 
-.piece.activated_red, .piece.unselect.action.activated_red {
+.piece.activated.jp {
 	border-color: red;
 }
 
-.piece.activated_blue, .piece.unselect.action.activated_blue {
+.piece.activated.ap {
 	border-color: blue;
+}
+
+.piece.action, .marker.action, .piece.activated.action, .piece.activated.action:not(.unselect) {
+	pointer-events: auto;
+	border-color: yellow;
+	box-shadow: 0 0 0 1px black, inset 0 0 0 1px black;
+	/*box-shadow: 0 0 2px black, inset 0 0 2px black;*/
+	border-width: 4px;
+	/*box-shadow: 0 0 0 3px lime; border-color: #000;*/
+	/*border-color: transparent;*/
+	/*box-shadow: none;*/
+	border-style: solid;
+	/*box-sizing: border-box;*/
 }
 
 .marker {
