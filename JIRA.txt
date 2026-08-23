@@ -1,5 +1,3 @@
 Todo list:
-* update server, check extra payload function
 * Unversal move units(or fix ground move)
-* Fix CLIENT_SIDE_SUPPLY flag
 * bad supply line at crome

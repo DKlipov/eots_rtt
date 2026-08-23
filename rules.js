@@ -11459,6 +11459,9 @@ function sent_to_europe(u) {
 }
 
 function get_unit_reinforcement_hexes(u) {
+    if (L.oos) {
+        G.oos = L.oos
+    }
     var piece = pieces[u]
     var faction = piece.faction
     var result = []
@@ -11487,6 +11490,9 @@ function get_unit_reinforcement_hexes(u) {
 }
 
 function get_hq_reinforcement_hexes() {
+    if (L.oos) {
+        G.oos = L.oos
+    }
     let result = []
     const faction = G.active
     var supply = G.active === AP ? JOINT_SUPPLIED_HEX : JP_SUPPLIED_HEX
@@ -11558,6 +11564,7 @@ function update_reinf_active() {
 P.reinforcement_segment = {
     _begin() {
         check_supplied_hexes(G.active)
+        L.oos = object_copy(G.oos)
         if (G.wie <= 7 && G.active === AP && G.sid !== BURMA_SCENARIO) {
             change_asp(AP, 1)
         } else if (G.active === AP && G.wie >= 7) {
@@ -11718,6 +11725,7 @@ P.replacement_segment = {
             G.reinforcements[AIR_REP] += L.replacement_points[AIR_REP]
         }
         check_supplied_hexes(G.active)
+        L.oos = object_copy(G.oos)
         if (L.scheduled_points) {
             scenario_data().replacement_points()
         }
@@ -15582,6 +15590,9 @@ P.china_offensive = {
     },
     roll() {
         log(`JP started China offensive.`)
+        if(!CLIENT_SIDE_SUPPLY){
+            check_supply()
+        }
         let result = random(10)
         G.events[events.CHINA_OFFENSIVE.id] = G.turn
         var mods = get_china_offensive_modifiers()
@@ -19492,8 +19503,10 @@ exports.action = function (state, role, action, argument) {
     var this_state = P[L.P]
     if (this_state && typeof this_state[action] === "function") {
         if (argument && argument.oos) {
-            G.oos = argument.oos
-            G.burma_road = argument.br
+            if (CLIENT_SIDE_SUPPLY) {
+                G.oos = argument.oos
+                G.burma_road = argument.br
+            }
             argument = argument.action
         }
         this_state[action](argument)

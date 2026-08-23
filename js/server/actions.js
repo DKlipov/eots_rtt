@@ -8,6 +8,9 @@ P.china_offensive = {
     },
     roll() {
         log(`JP started China offensive.`)
+        if(!CLIENT_SIDE_SUPPLY){
+            check_supply()
+        }
         let result = random(10)
         G.events[events.CHINA_OFFENSIVE.id] = G.turn
         var mods = get_china_offensive_modifiers()
