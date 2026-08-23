@@ -7361,7 +7361,7 @@ function in_range_on_map(first_hex, range, hexes, faction = AP) {
         if (get_map_data(hex).sw) {
             return slow_in_range(first_hex, range, hexes, faction)
         }
-        if (get_distance(first_hex, hexes) > range) {
+        if (get_distance(first_hex, hex) > range) {
             //nothing
         } else if (get_map_data(hex).sw || get_map_data(first_hex).sw) {
             return slow_in_range(first_hex, range, hexes, faction)
