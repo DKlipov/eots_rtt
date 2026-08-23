@@ -530,7 +530,7 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
             L.supply.queue.push(nh)
             L.supply.retracing.push(item)
             const friendly_port = (md1.port && (is_space_controlled(nh, faction)))
-            if (friendly_port && !md1.island && overland_set[nh] < distance) {
+            if (friendly_port && !md1.island && !(overland_set[nh] >= distance)) {
                 overland_set[nh] = distance
                 overland_ports.push(nh)
             }
