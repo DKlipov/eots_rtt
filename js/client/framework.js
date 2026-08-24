@@ -55,6 +55,9 @@ function on_prompt(text) {
 }
 
 function on_log(text) {
+    if (!text) {
+        return document.createElement("span")
+    }
     var p = document.createElement("div")
 
     switch (text[0]) {

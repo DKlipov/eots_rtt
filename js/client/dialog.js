@@ -2,7 +2,12 @@
 // still not completely integrated. commented out code should be looked at
 
 function on_reply(q, response) {
-    toggle_dialog(q, response)
+    if (q === "log") {
+        game_log = response
+        update_log(0, game_log.length)
+    } else {
+        toggle_dialog(q, response)
+    }
 }
 
 function toggle_dialog(id, response) {

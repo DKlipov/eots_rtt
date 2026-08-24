@@ -161,6 +161,10 @@ function on_view() {
 }
 
 function create_view() {
+    V.log = []
+    for (var i = G.log.length - 100; i < G.log.length; i++) {
+        V.log[i] = G.log[i]
+    }
     V.active = G.active
     V.turn = G.turn
     V.sid = G.sid

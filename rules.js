@@ -17167,6 +17167,10 @@ function on_view() {
 }
 
 function create_view() {
+    V.log = []
+    for (var i = G.log.length - 100; i < G.log.length; i++) {
+        V.log[i] = G.log[i]
+    }
     V.active = G.active
     V.turn = G.turn
     V.sid = G.sid
@@ -17816,12 +17820,15 @@ function on_query(q, params, b) {
     }
     if (q === "original_control") {
         return scenario_data().original_control
+    } else if (q === "log") {
+        return G.log
     }
 }
 
 function vp_query() {
     return get_victory()
 }
+
 //could corrupt G, run only in safe context
 function battle_info_query(battle) {
     if (!set_has(G.offensive.battle, battle)) {
