@@ -277,7 +277,7 @@ function compute_ground_naval_move_hexes() {
 
     L.allowed_hexes = []
     var mt = 0
-    if (L.move_data.move_type & NAVAL_MOVE && !enemy_non_n_zoi) {
+    if (L.move_data.move_type & NAVAL_MOVE && !enemy_non_n_zoi && L.move_type !== GROUND_MOVE) {
         var zoi_mask = 0
         if (move_data.is_ground_present && !move_data.is_naval_present) {
             zoi_mask = zoi_mask | JP_NAVAL_UNITS << (1 - R)
@@ -611,6 +611,12 @@ function get_ground_move(avoid_zoi) {
             }
         }
     }
+    for (var nh of get_map_data(location).nh) {
+        var move_cost = get_ground_move_cost(location, nh, G.active)
+        if (move_cost <= max_distance - spent_distance && !ground_move_denied(nh)) {
+            map_set(distance_map, nh, [spent_distance + move_cost, location, nh])
+        }
+    }
     return distance_map
 }
 
@@ -781,9 +787,8 @@ function count_units_stacking(faction) {
     return false
 }
 
-function move_units(units, path) {
-    check_units()
-    const prev_path = map_get(G.offensive.paths, units[0])
+function append_path(unit, path) {
+    const prev_path = map_get(G.offensive.paths, unit)
     var full_path = [path[0], path[1]]
     if (prev_path) {
         full_path.push(...prev_path.slice(2))
@@ -791,6 +796,13 @@ function move_units(units, path) {
         full_path.push(G.location[units[0]])
     }
     full_path.push(...path.slice(3))
+    return full_path
+}
+
+function move_units(units, path) {
+    check_units()
+
+    var full_path = append_path(units[0], path)
     units.forEach(u => {
         map_set(G.offensive.paths, u, full_path.slice())
     })

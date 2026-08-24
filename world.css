@@ -64,15 +64,17 @@ body.hide-pieces .marker:not(.control) { display: none }
     border-style: solid;
 }
 
-.piece.activated.jp {
+.piece.activated.jp, .piece.activated.jp.unselect {
 	border-color: red;
+	border-width: 3px;
 }
 
-.piece.activated.ap {
+.piece.activated.ap, .piece.activated.ap.unselect {
 	border-color: blue;
+	border-width: 3px;
 }
 
-.piece.action, .marker.action, .piece.activated.action, .piece.activated.action:not(.unselect) {
+.piece.action, .marker.action, .piece.activated.action, .piece.activated.action {
 	pointer-events: auto;
 	border-color: yellow;
 	box-shadow: 0 0 0 1px black, inset 0 0 0 1px black;

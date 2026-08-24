@@ -913,8 +913,10 @@ function get_child_size(child) {
     if (child.classList.contains("big")) {
         size = 47
     }
-    if (child.classList.contains("action") || child.classList.contains("activated")) {
+    if (child.classList.contains("action")) {
         size += 8
+    }else if (child.classList.contains("activated")) {
+        size += 6
     }
     return [size, size]
 }
