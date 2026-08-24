@@ -11321,10 +11321,10 @@ P.move_offensive_units = {
         }
         var hex = curr_path[curr_path.length - 1]
         if (L.move_type === GROUND_MOVE) {
-            var log = G.log.length
+            var log_l = G.log.length
             move_units(G.active_stack, curr_path)
-            L.log.push(...G.log.slice(log + 1))
-            G.log.length = log
+            L.log.push(...G.log.slice(log_l + 1))
+            G.log.length = log_l
             if (ground_move_completed(hex, G.active)) {
                 this.stop()
             }
