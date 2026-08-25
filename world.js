@@ -102,6 +102,7 @@ const world = {
     range: [0, 0],
     log_boxes: [],
     violations: [],
+    amph: [],
     window_list: [],
     list_id: 0,
     focus: null,

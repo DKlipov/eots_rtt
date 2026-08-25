@@ -11945,6 +11945,7 @@ function on_update() {
 
     print_violations()
     update_violations()
+    highlight_aa()
 
     world.things["card"].forEach(e => e.element.innerHTML = '')
     if (G.offensive.active_cards.length > 0) {
@@ -11959,7 +11960,8 @@ function on_update() {
     update_hand(JP)
 
     G.offensive.battle_hexes.forEach(h => populate("s-loc", h, "battle", G.offensive.battle_names.indexOf(h)))
-    G.offensive.landing_hexes.forEach(h => populate("s-loc", h, "landing", G.offensive.battle_names.indexOf(h)))
+    G.offensive.landing_hexes.filter(h => get_map_data(h).named && is_space_controlled(h, G.offensive.attacker - 1) && has_zoi(h, G.offensive.attacker - 1))
+        .forEach(h => populate("s-loc", h, "landing", G.offensive.battle_names.indexOf(h)))
     var isr_marker = (v, i) => {
         if (v && i === AP) {
             return counters.rivalry_ap
@@ -12087,6 +12089,17 @@ function print_violations() {
     }
     G.violations.overstack.forEach(h => lookup_thing("action_hex", h).element.classList.toggle("violation", true))
     world.violations = G.violations
+}
+
+function highlight_aa() {
+    world.amph.forEach(h => lookup_thing("action_hex", h).element.classList.remove("amph"))
+    G.offensive.active_units[G.offensive.attacker].forEach(u => {
+        var piece = pieces[u]
+        if (G.offensive.stage !== POST_BATTLE_STAGE && piece.class === "ground" && map_get(G.offensive.paths, u, [0])[0] & AMPH_MOVE) {
+            set_add(world.amph, G.location[u])
+            lookup_thing("action_hex", G.location[u]).element.classList.add("amph")
+        }
+    })
 }
 
 function update_violations() {
