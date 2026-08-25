@@ -653,7 +653,7 @@ function get_move_buttons() {
     if (L.move_type === GROUND_MOVE && map_get(G.offensive.paths, G.active_stack[0], [0]).length > 3) {
         result.push("stop")
     }
-    if ((no_move_p) && (L.move_type === ANY_MOVE && !L.spec_move || L.allowed_hexes.length === 0)) {
+    if ((no_move_p) && (L.move_type === ANY_MOVE && !L.spec_move)) {
         result.push("no_move")
     }
     if (G.offensive.stage === ATTACK_STAGE && G.offensive.barges && L.move_type !== BARGES_MOVE && G.offensive.barges > 1 && G.active_stack.filter(u => pieces[u].class === "ground").length === 1) {
@@ -734,12 +734,11 @@ P.move_offensive_units = {
     inactive: "move units",
     prompt() {
         prompt(`${offensive_card_header()} Move units.`)
-        if (L.spec_move) {
-
-        } else if (G.offensive.stage === ATTACK_STAGE
-            || G.offensive.stage === POST_BATTLE_STAGE && !G.active_stack.length && L.movable_units.filter(u => !could_unit_stop_here(u)).length === 0
-            || G.offensive.stage === REACTION_STAGE && !G.active_stack.length && L.movable_units.filter(u => !set_has(G.offensive.battle_hexes, G.location[u])).length === 0
-        ) {
+        if (G.active_stack.length === 0 &&
+            (G.offensive.stage === ATTACK_STAGE
+                || G.offensive.stage === POST_BATTLE_STAGE && !G.active_stack.length && L.movable_units.filter(u => !could_unit_stop_here(u)).length === 0
+                || G.offensive.stage === REACTION_STAGE && !G.active_stack.length && L.movable_units.filter(u => !set_has(G.offensive.battle_hexes, G.location[u])).length === 0
+            )) {
             button("done")
         }
 
