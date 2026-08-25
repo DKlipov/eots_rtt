@@ -1092,7 +1092,11 @@ function attack_hex(hex) {
 P.check_overstacking = {
     _begin() {
         L.remove_flag = G.offensive.stage === EVENT_STAGE || G.offensive.stage === EMERGENCY_STAGE || G.offensive.stage === POST_BATTLE_STAGE && G.active === G.offensive.attacker
-        if (!L.remove_flag || init_overstack_check(false, G.active)) {
+        if (!L.remove_flag) {
+            goto("notify_overstacking")
+            return;
+        }
+        if (init_overstack_check(false, G.active)) {
             end()
             return
         }
@@ -1146,6 +1150,26 @@ P.check_overstacking = {
             }
         }
     }
+}
+
+P.notify_overstacking = {
+    _begin() {
+        init_overstack_check(false, G.active)
+        L.hexes = []
+        L.allowed_units.forEach(u => set_add(L.hexes, G.location[u]))
+        if (!L.hexes.length) {
+            end()
+        }
+    },
+    inactive: "check stacking",
+    prompt() {
+        prompt(`Review overstacked units. Hexes: ${L.hexes.map(h => hex_get_log_str(h)).join(", ")}.`)
+        button("done")
+    },
+    done() {
+        push_undo()
+        end()
+    },
 }
 
 

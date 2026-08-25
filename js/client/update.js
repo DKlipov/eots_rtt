@@ -159,7 +159,7 @@ function on_update() {
     if (G.actions && !init_overstack_check(true, R)) {
         L.hexes = []
         L.allowed_units.forEach(u => set_add(L.hexes, G.location[u]))
-        G.violations = {overstack: L.hexes}
+        G.violations = L.hexes
         L.allowed_units = []
     }
     if (G.actions && G.actions.move) {
@@ -437,14 +437,11 @@ function on_update() {
 }
 
 function print_violations() {
-    if (world.violations && world.violations.overstack) {
-        world.violations.overstack.forEach(h => lookup_thing("action_hex", h).element.classList.toggle("violation", false))
-        world.violations = {}
+    if (world.violations) {
+        world.violations.forEach(h => lookup_thing("action_hex", h).element.classList.toggle("violation", false))
+        world.violations = []
     }
-    if (!G.violations || !G.violations.overstack) {
-        return
-    }
-    G.violations.overstack.forEach(h => lookup_thing("action_hex", h).element.classList.toggle("violation", true))
+    G.violations.forEach(h => lookup_thing("action_hex", h).element.classList.toggle("violation", true))
     world.violations = G.violations
 }
 
@@ -464,7 +461,7 @@ function highlight_aa() {
 
 function update_violations() {
     var ui = document.getElementById("violations")
-    var list = (G.violations && G.violations.overstack) ? G.violations.overstack : []
+    var list = G.violations
     if (list.length > 0) {
         ui.replaceChildren()
         let p = document.createElement("div")

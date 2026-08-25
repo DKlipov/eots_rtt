@@ -174,7 +174,7 @@ function create_view() {
     V.passes = G.passes
     V.asp = G.asp
     V.captured_once = G.captured_once
-    V.violations = L.violations
+    V.violations = []
 
     V.non_control = G.non_control
     V.capture = G.capture
