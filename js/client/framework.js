@@ -54,10 +54,30 @@ function on_prompt(text) {
     }
 }
 
-function on_log(text) {
-    if (!text) {
-        return document.createElement("span")
+var original_update_log = update_log
+
+update_log = update_log_proxy
+
+var LOG_SIZE = 100
+
+function update_log_proxy(change_start, end) {
+    var div = document.getElementById("log")
+    var to_fill = game_log.length - LOG_SIZE - div.children.length
+    if (to_fill > 0) {
+        div.appendChild(on_log(`Logs hidden: ${to_fill}.`))
+        to_fill--
     }
+    while (to_fill-- > 0) {
+        div.appendChild(document.createElement("span"))
+    }
+    original_update_log(Math.max(game_log.length - LOG_SIZE, 0), end)
+}
+
+function show_full_log() {
+    original_update_log(0, game_log.length)
+}
+
+function on_log(text) {
     var p = document.createElement("div")
 
     switch (text[0]) {

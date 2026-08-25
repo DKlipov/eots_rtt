@@ -509,7 +509,7 @@ P.activate_units = {
         if (too_much > 0) {
             hint = "Too many units selected"
         }
-        if (G.offensive.active_units[R].length === (G.offensive.logistic + L.hq_bonus)) {
+        if (G.offensive.active_units[R].length === (G.offensive.logistic + L.hq_bonus) || L.allowed_units.length === 0) {
             hint = "Done"
         }
         prompt(`${offensive_card_header()} Activate units: ${G.offensive.active_units[R].length} of  ${G.offensive.logistic + L.hq_bonus} (${hint}).`)
@@ -733,7 +733,7 @@ P.move_offensive_units = {
     },
     inactive: "move units",
     prompt() {
-        prompt(`${offensive_card_header()} Move units.`)
+        prompt(`${offensive_card_header()} Move units (${G.offensive.active_units[R].length - L.movable_units.length}/${G.offensive.active_units[R].length}).`)
         if (G.active_stack.length === 0 &&
             (G.offensive.stage === ATTACK_STAGE
                 || G.offensive.stage === POST_BATTLE_STAGE && !G.active_stack.length && L.movable_units.filter(u => !could_unit_stop_here(u)).length === 0
