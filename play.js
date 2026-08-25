@@ -12248,30 +12248,22 @@ function on_prompt(text) {
     }
 }
 
-var original_update_log = update_log
-
-update_log = update_log_proxy
-
-var LOG_SIZE = 100
-
-function update_log_proxy(change_start, end) {
-    var div = document.getElementById("log")
-    var to_fill = game_log.length - LOG_SIZE - div.children.length
-    if (to_fill > 0) {
-        div.appendChild(on_log(`Logs hidden: ${to_fill}.`))
-        to_fill--
-    }
-    while (to_fill-- > 0) {
-        div.appendChild(document.createElement("span"))
-    }
-    original_update_log(Math.max(game_log.length - LOG_SIZE, 0), end)
-}
+var SHOW_FULL_LOG = 0
 
 function show_full_log() {
-    original_update_log(0, game_log.length)
+    SHOW_FULL_LOG = 1
+    update_log(0, game_log.length)
 }
 
-function on_log(text) {
+function on_log(text, i) {
+    var total = game_log.length
+    if (!SHOW_FULL_LOG && total > 100 && i === 0) {
+        var p = document.createElement("div")
+        p.innerHTML = `Logs hidden: ${total - 100}.`
+        return p
+    } else if (!SHOW_FULL_LOG && total - i > 100) {
+        return document.createElement("span")
+    }
     var p = document.createElement("div")
 
     switch (text[0]) {
