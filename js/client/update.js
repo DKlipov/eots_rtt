@@ -452,9 +452,12 @@ function highlight_aa() {
     world.amph.forEach(h => lookup_thing("action_hex", h).element.classList.remove("amph"))
     G.offensive.active_units[G.offensive.attacker].forEach(u => {
         var piece = pieces[u]
-        if (G.offensive.stage !== POST_BATTLE_STAGE && piece.class === "ground" && map_get(G.offensive.paths, u, [0])[0] & AMPH_MOVE) {
-            set_add(world.amph, G.location[u])
-            lookup_thing("action_hex", G.location[u]).element.classList.add("amph")
+        var location = G.location[u]
+        if (G.offensive.stage !== POST_BATTLE_STAGE && piece.class === "ground"
+            && (!get_map_data(location).port || !is_space_controlled(location, G.offensive.attacker))
+            && map_get(G.offensive.paths, u, [0])[0] & AMPH_MOVE) {
+            set_add(world.amph, location)
+            lookup_thing("action_hex", location).element.classList.add("amph")
         }
     })
 }
