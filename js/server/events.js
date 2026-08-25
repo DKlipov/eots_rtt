@@ -904,7 +904,7 @@ P.kamikaze_attack = {
             log(`${piece_get_log_str(u)} launch kamikaze attack.`)
             damage_unit(u)
             L.allowed_units = []
-            var hexes_range = in_range_on_map(G.location[u], pieces[u].ebr, G.offensive.kamikaze, JP)
+            var hexes_range = in_range_on_map(location, pieces[u].ebr, G.offensive.kamikaze, JP)
             G.offensive.active_units[AP].forEach(ap => {
                     var bh = get_unit_battle_hex(ap)
                     if (pieces[ap].faction === AP && pieces[ap].class === "naval" && unit_on_board(ap) && set_has(hexes_range, bh)) {
