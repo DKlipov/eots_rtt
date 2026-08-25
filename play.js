@@ -7777,7 +7777,6 @@ function mark_supply_ports_overland(hq, piece) {
         L.supply.retracing.push(location)
         G.supply_cache[location] = G.supply_cache[location] | JP_SUPPLY_PORT << faction
         map_set(distance_map, location, 0)
-        distance_map[location] = 1
     })
     for (var i = 0; i < L.supply.queue.length; i++) {
         let item = L.supply.queue[i]
