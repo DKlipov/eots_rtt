@@ -12353,7 +12353,7 @@ P.attack_reaction_cards = {
     inactive: "react",
     prompt() {
         var played_cards = G.offensive.active_cards.filter(c => cards[c].faction === R).length
-        prompt(`${offensive_card_header()} Play reaction cards.${played_cards >= 3 ? " (No more than 3 reaction cards allowed)." : ""}`)
+        prompt(`${offensive_card_header()} Play reaction cards.${played_cards >= 3 ? " (No more than 3 reaction cards may be played per Offensive)." : ""}`)
         if (played_cards < 3) {
             get_hand(G.active).filter(c => cards[c].type === REACTION && cards[c].can_play()).forEach(c => action_card(c))
         }
