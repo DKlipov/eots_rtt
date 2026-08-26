@@ -10508,6 +10508,10 @@ function on_init(scenario, game_options, static_view) {
             set_map_size(2550, 1650)
         }
     }
+    var href = document.getElementsByClassName("deck_href")
+    for (var i = 0; i < href.length; i++) {
+        href[i].href += `&sid=${SID}`
+    }
 
     // used hexes
     var used_hex = []

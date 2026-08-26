@@ -59,7 +59,7 @@
 
 
 /* CARDS (1x) */
-.card_ap_0{background-image:url(cards/card_ap_85.100.avif)}
+.card_ap_0{background-image:url(cards/card_ap_00.100.avif)}
 .card_ap_1{background-image:url(cards/card_ap_01.100.avif)}
 .card_ap_2{background-image:url(cards/card_ap_02.100.avif)}
 .card_ap_3{background-image:url(cards/card_ap_03.100.avif)}
@@ -144,7 +144,7 @@
 .card_ap_82{background-image:url(cards/card_ap_82.100.avif)}
 .card_ap_83{background-image:url(cards/card_ap_83.100.avif)}
 .card_ap_84{background-image:url(cards/card_ap_84.100.avif)}
-.card_jp_0{background-image:url(cards/card_jp_88.100.avif)}
+.card_jp_0{background-image:url(cards/card_jp_00.100.avif)}
 .card_jp_1{background-image:url(cards/card_jp_01.100.avif)}
 .card_jp_2{background-image:url(cards/card_jp_02.100.avif)}
 .card_jp_3{background-image:url(cards/card_jp_03.100.avif)}
@@ -234,7 +234,7 @@
 
 /* CARDS (2X) */
 @media (min-resolution: 97dpi) {
-.card_ap_0{background-image:url(cards/card_ap_85.200.avif)}
+.card_ap_0{background-image:url(cards/card_ap_00.200.avif)}
 .card_ap_1{background-image:url(cards/card_ap_01.200.avif)}
 .card_ap_2{background-image:url(cards/card_ap_02.200.avif)}
 .card_ap_3{background-image:url(cards/card_ap_03.200.avif)}
@@ -319,7 +319,7 @@
 .card_ap_82{background-image:url(cards/card_ap_82.200.avif)}
 .card_ap_83{background-image:url(cards/card_ap_83.200.avif)}
 .card_ap_84{background-image:url(cards/card_ap_84.200.avif)}
-.card_jp_0{background-image:url(cards/card_jp_88.200.avif)}
+.card_jp_0{background-image:url(cards/card_jp_00.200.avif)}
 .card_jp_1{background-image:url(cards/card_jp_01.200.avif)}
 .card_jp_2{background-image:url(cards/card_jp_02.200.avif)}
 .card_jp_3{background-image:url(cards/card_jp_03.200.avif)}

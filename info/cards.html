@@ -1,0 +1,81 @@
+<!doctype html>
+<meta name="viewport" content="width=1000">
+<title>EotS - Cards Deck</title>
+<style>
+    html {
+        background-color: slategray;
+        margin: 20px;
+    }
+
+    body {
+        text-align: center;
+        margin: 0 auto;
+    }
+
+    img {
+        border-radius: 12px;
+        border: 1px solid black;
+        box-shadow: 1px 1px 4px #0004;
+        margin: 8px;
+    }
+</style>
+
+<body>
+<div id="cards">
+</div>
+<script>
+    const SOUTH_PACIFIC_SCENARIO = 0
+    const BURMA_SCENARIO = 10
+
+    function S_P_deck(f) {
+        var ap_draw = [8, 13, 20, 21, 23, 24, 25, 27, 28, 29, 31, 32, 36, 40, 43, 44, 46, 50, 52, 56, 64, 66, 81, 82]
+        var jp_draw = [9, 13, 16, 17, 20, 23, 25, 27, 28, 29, 32, 33, 34, 35, 42, 44, 48, 49, 51, 52, 73, 75, 84, 85]
+        return f === "jp" ? jp_draw : ap_draw
+    }
+
+    function B_F_W_deck(f) {
+        var ap_draw = [2, 7, 18, 19, 22, 26, 33, 34, 38, 39, 41, 42, 48, 49, 52, 57, 58, 59, 60, 77, 78, 81, 82, 83]
+        var jp_draw = [3, 4, 5, 6, 7, 8, 15, 16, 21, 22, 26, 33, 39, 40, 41, 42, 48, 49, 25, 50, 53, 54, 67, 82, 86]
+        return f === "jp" ? jp_draw : ap_draw
+    }
+
+    var factions = {
+        ap: {
+            deck: 84,
+            name: "EotS - Allied Deck"
+        },
+        jp: {
+            deck: 86,
+            name: "EotS - Japanese Deck"
+        }
+    }
+    let params = new URLSearchParams(window.location.search);
+    var faction = params.get("faction")
+    if (!faction || !factions[faction]) {
+        faction = "ap"
+    }
+    var data = factions[faction]
+    document.title = data.name
+    var deck = []
+    if (params.get("sid") == SOUTH_PACIFIC_SCENARIO) {
+        deck = S_P_deck(faction)
+    } else if (params.get("sid") == BURMA_SCENARIO) {
+        deck = B_F_W_deck(faction)
+    } else {
+        for (var i = 1; i <= data.deck; i++) {
+            deck.push(i)
+        }
+    }
+    deck.unshift(0)
+
+    var list = document.getElementById("cards")
+    for (var i = 0; i < deck.length; i++) {
+        var id = deck[i]
+        if (i < 10) {
+            id = id < 10 ? '0' + id : id
+        }
+        var img = document.createElement("img")
+        img.src = `../cards/card_${faction}_${id}.100.avif`
+        list.appendChild(img)
+    }
+</script>
