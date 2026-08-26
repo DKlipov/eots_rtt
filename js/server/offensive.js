@@ -1006,7 +1006,7 @@ function get_air_attack_hex() {
 
 P.choose_attack_hex = {
     _begin() {
-        if (!G.active_stack) {
+        if (!G.active_stack || G.active_stack.filter(u => pieces[u].class === "ground").length) {
             end()
             return
         }

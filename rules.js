@@ -8591,11 +8591,16 @@ function compute_ground_naval_move_hexes() {
             mark_participate_attack_hex()
         }
         map_for_each(get_naval_move(zoi_mask), (k, v) => {
-            if (move_data.is_ground_present) {
-                v.unshift(mt | AMPH_MOVE)
-            } else {
-                v.unshift(mt)
+            var m_mt = mt
+            var hex = v[v.length - 1]
+            if (move_data.is_ground_present
+                && G.offensive.stage === ATTACK_STAGE && L.move_type !== AMPH_MOVE
+                && get_map_data(hex).port && is_space_controlled(hex, G.active)) {
+                m_mt |= STRAT_MOVE
+            } else if (move_data.is_ground_present) {
+                m_mt |= AMPH_MOVE
             }
+            v.unshift(m_mt)
             if (!move_data.is_ground_present || L.move_type === AMPH_MOVE || L.move_type === BARGES_MOVE || get_distance(move_data.location, k) > 1 || G.offensive.stage !== ATTACK_STAGE) {
                 map_set(L.allowed_hexes, k, v)
             }
@@ -11424,7 +11429,7 @@ function get_air_attack_hex() {
 
 P.choose_attack_hex = {
     _begin() {
-        if (!G.active_stack) {
+        if (!G.active_stack || G.active_stack.filter(u => pieces[u].class === "ground").length) {
             end()
             return
         }
