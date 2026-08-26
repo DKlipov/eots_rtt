@@ -12097,7 +12097,7 @@ function highlight_aa() {
     G.offensive.active_units[G.offensive.attacker].forEach(u => {
         var piece = pieces[u]
         var location = G.location[u]
-        if (G.offensive.stage !== POST_BATTLE_STAGE && piece.class === "ground"
+        if (G.offensive.stage !== POST_BATTLE_STAGE && piece.class === "ground" && location < LAST_BOARD_HEX
             && (!get_map_data(location).port || !is_space_controlled(location, G.offensive.attacker))
             && map_get(G.offensive.paths, u, [0])[0] & AMPH_MOVE) {
             set_add(world.amph, location)
