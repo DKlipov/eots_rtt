@@ -97,7 +97,7 @@ function setup_scenario_burma() {
     }
     remove_card(DOOLITLE_RAID)
 
-    for_each_unit(u => G.location[u] = PERM_ELIMINATED)
+    for_each_unit(u => G.location[u] = NOT_USED)
 
     //17.11.5. Burma has already surrendered; India and China have not yet surrendered.
     var surrender = [nations.BURMA]
@@ -109,8 +109,6 @@ function setup_scenario_burma() {
     capture_hex(hex_to_int(1809), JP)
     capture_hex(hex_to_int(2112), JP)
     G.reduced = []
-
-    for_each_unit(u => G.location[u] = PERM_ELIMINATED)
 
     //AP Setup  (same order as the setup table found in the rules p44)
     setup_jp_unit(ap_air("14"), 2104)
@@ -220,11 +218,11 @@ function setup_scenario_1942(options) {
         }
     }
     //ap setup
-    G.location[find_piece("mdca")] = ELIMINATED_BOX
-    G.location[M_CORPS] = ELIMINATED_BOX
-    G.location[HK_DIVISION] = ELIMINATED_BOX
-    G.location[find_piece("forcez")] = ELIMINATED_BOX
-    G.location[NL_CORPS] = ELIMINATED_BOX
+    G.location[find_piece("mdca")] = NOT_USED
+    G.location[M_CORPS] = NOT_USED
+    G.location[HK_DIVISION] = NOT_USED
+    G.location[find_piece("forcez")] = NOT_USED
+    G.location[NL_CORPS] = NOT_USED
     G.location[HQ_SEAC] = hex_to_int(1805)
     G.location[US_FEAF] = hex_to_int(2813)
     set_add(G.reduced, US_FEAF)
@@ -328,10 +326,7 @@ function setup_scenario_1943() {
     for (var i = 1; i < pieces.length; i++) {
         var piece = pieces[i]
         if (piece.faction === AP && (piece.start || piece.reinforcement < 5)) {
-            G.location[i] = ELIMINATED_BOX
-            if (piece.class === "hq" || piece.notreplaceable) {
-                G.location[i] = PERM_ELIMINATED
-            }
+            G.location[i] = NOT_USED
         }
     }
     for (let i = 1; i < pieces.length; i++) {
@@ -406,12 +401,12 @@ function setup_scenario_1943() {
 
 
     //jp setup
-    G.location[find_piece("kongo")] = ELIMINATED_BOX
-    G.location[find_piece("akagi")] = ELIMINATED_BOX
-    G.location[find_piece("soryu")] = ELIMINATED_BOX
-    G.location[find_piece("ryujo")] = ELIMINATED_BOX
-    G.location[find_piece("tenyru")] = ELIMINATED_BOX
-    G.location[jp_air("t")] = ELIMINATED_BOX
+    G.location[find_piece("kongo")] = NOT_USED
+    G.location[find_piece("akagi")] = NOT_USED
+    G.location[find_piece("soryu")] = NOT_USED
+    G.location[find_piece("ryujo")] = NOT_USED
+    G.location[find_piece("tenyru")] = NOT_USED
+    G.location[jp_air("t")] = NOT_USED
     setup_jp_unit(jp_air(3), 1916, true)
     setup_jp_unit(jp_army(25), 1916, true)
     setup_jp_unit(jp_army(28), 2008)
@@ -539,10 +534,7 @@ function setup_scenario_1944() {
     //ap setup
     for_each_unit((u, piece) => {
         if (piece.start || piece.reinforcement <= 8) {
-            G.location[u] = ELIMINATED_BOX
-            if (piece.class === "hq" || piece.start) {
-                G.location[u] = PERM_ELIMINATED
-            }
+            G.location[u] = NOT_USED
         }
     })
     G.location[find_piece("indomitable")] = hex_to_int(1005)
@@ -672,7 +664,7 @@ function setup_scenario_1944() {
     setup_jp_unit(jp_army("4sn"), 4612, true)
     setup_jp_unit(jp_army("3sn"), 4715)
     setup_jp_unit(jp_air("24"), 4715, true)
-    G.location[jp_air("t")] = ELIMINATED_BOX
+    G.location[jp_air("t")] = NOT_USED
 
     var surrender = [nations.MALAYA, nations.PHILIPPINES, nations.DEI, nations.BURMA, nations.AUSTRALIAN_MANDATES]
     surrender.forEach(n => {
@@ -764,7 +756,7 @@ function setup_scenario_south_pacific() {
     capture_hex(hex_to_int(3017), JP)
     G.reduced = []
 
-    for_each_unit(u => G.location[u] = PERM_ELIMINATED)
+    for_each_unit(u => G.location[u] = NOT_USED)
 
     setup_jp_unit(ap_air(5), 3626)
     setup_jp_unit(ap_air("5_lrb"), 3626)

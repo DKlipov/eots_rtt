@@ -130,6 +130,7 @@ const CHINA_BOX = 1484
 const PERM_ELIMINATED = 1485
 const AP_REINF = 1486
 const JP_REINF = 1487
+const NOT_USED = 1488
 const TURN_BOX = 1490
 const TUNNEL_BOX = 1600
 

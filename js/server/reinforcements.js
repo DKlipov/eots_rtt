@@ -169,12 +169,11 @@ P.reinforcement_segment = {
         var reinforcement_hex = G.active === AP ? AP_REINF : JP_REINF
         var delayed_units = false
         for_each_unit((u, piece, location) => {
-            if (piece.faction !== G.active || !(
-                    piece.reinforcement === G.turn
+            var fine = piece.faction === G.active
+                && (piece.reinforcement === G.turn && location === NON_PLACED_BOX
                     || location === DELAYED_BOX
-                    || location === TURN_BOX + G.turn
-                )
-                || location === PERM_ELIMINATED) {
+                    || location === TURN_BOX + G.turn)
+            if (!fine) {
                 return
             }
             if (piece.reinforcement === G.turn && piece.start_reduced) {

@@ -192,7 +192,7 @@ function elim_dialog(name, response) {
         var elim = [[], [], [], []]
         for (let i = 1; i < pieces.length; i++) {
             const piece = pieces[i]
-            if ((G.location[i] === ELIMINATED_BOX || (G.location[i] === PERM_ELIMINATED && (G.sid !== SOUTH_PACIFIC_SCENARIO && G.sid !== BURMA_SCENARIO)))) {
+            if (G.location[i] === ELIMINATED_BOX || G.location[i] === PERM_ELIMINATED) {
                 if (piece.notreplaceable || G.location[i] === PERM_ELIMINATED) {
                     elim[piece.faction * 2 + 1].push(i)
                 } else {
