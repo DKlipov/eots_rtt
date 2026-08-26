@@ -1293,7 +1293,7 @@ var pieces = [
         "class": "naval",
         "counter": "big_units_white big unit_ix_9",
         "type": "cv",
-        "cf": 19,
+        "cf": 10,
         "lf": 12,
         "br": 3,
         "rcf": 7,
