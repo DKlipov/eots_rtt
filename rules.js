@@ -7730,6 +7730,9 @@ function check_hq_in_supply(hq, piece, supply) {
         let item = L.supply.queue[i]
         let nh_list = get_near_hexes(item)
         const MD = get_map_data(item)
+        if (faction === JP && MD.region === "IChina" || !nh_list) {
+            continue
+        }
         const overland = overland_set[item] & 1
         const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))
         const enemy_port_s = (MD.port && is_space_controlled(item, 1 - faction))
@@ -7783,6 +7786,9 @@ function mark_supply_ports_overland(hq, piece) {
         let item = L.supply.queue[i]
         let base_distance = map_get(distance_map, item)
         let nh_list = get_near_hexes(item)
+        if (faction === JP && get_map_data(item).region === "IChina" || !nh_list) {
+            continue
+        }
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
             if (nh <= 0) {
@@ -7827,6 +7833,9 @@ function mark_supply_ports_oversea(hq) {
     for (var i = 0; i < L.supply.queue.length; i++) {
         let item = L.supply.queue[i]
         let nh_list = get_near_hexes(item)
+        if (faction === JP && get_map_data(item).region === "IChina" || !nh_list) {
+            continue
+        }
         const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
@@ -7952,6 +7961,9 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
         let item = L.supply.queue[i]
         let nh_list = get_near_hexes(item)
         const MD = get_map_data(item)
+        if (faction === JP && MD.region === "IChina" || !nh_list) {
+            continue
+        }
         const distance = overland_set[item] - 1
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
@@ -7989,6 +8001,9 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
         let nh_list = MD.nh
         const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))
         const distance = oversea_set[item] - 1
+        if (faction === JP && MD.region === "IChina" || !nh_list) {
+            continue
+        }
         if (non_neutral_zoi_s || distance < 0) {
             continue;
         }
@@ -8023,6 +8038,9 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
         let item = L.supply.queue[i]
         let nh_list = get_near_hexes(item)
         const MD = get_map_data(item)
+        if (faction === JP && MD.region === "IChina" || !nh_list) {
+            continue
+        }
         const distance = overland_set[item] - 1
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
@@ -8047,6 +8065,9 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
         let item = L.supply.queue[i]
         let nh_list = get_near_hexes(item)
         const MD = get_map_data(item)
+        if (faction === JP && MD.region === "IChina" || !nh_list) {
+            continue
+        }
         const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))
         const distance = oversea_set[item] - 1
         for (let j = 0; j < nh_list.length; j++) {
@@ -8258,6 +8279,9 @@ function check_japan_resource_trace() {
         let item = queue[i]
         let nh_list = get_near_hexes(item)
         const MD = get_map_data(item)
+        if (faction === JP && MD.region === "IChina" || !nh_list) {
+            continue
+        }
         const overland = set_has(overland_set, item)
         const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))
         const enemy_port_s = (MD.port && is_space_controlled(item, 1 - faction))
