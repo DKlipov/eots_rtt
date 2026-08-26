@@ -12268,11 +12268,15 @@ var SHOW_FULL_LOG = 0
 
 function show_full_log() {
     SHOW_FULL_LOG = 1
-    update_log(0, game_log.length)
+    var len = Number.isInteger(view.log) ? view.log : game_log.length
+    update_log(0, len)
 }
 
 function on_log(text, i) {
     var total = game_log.length
+    if (Number.isInteger(view.log)) {
+        total = view.log
+    }
     if (!SHOW_FULL_LOG && total > 100 && i === 0) {
         var p = document.createElement("div")
         p.innerHTML = `Logs hidden: ${total - 100}.`
