@@ -11601,7 +11601,7 @@ P.check_overstacking = {
 
 P.notify_overstacking = {
     _begin() {
-        init_overstack_check(false, G.active)
+        init_overstack_check(true, G.active)
         L.hexes = []
         L.allowed_units.forEach(u => set_add(L.hexes, G.location[u]))
         if (!L.hexes.length) {
@@ -12048,9 +12048,9 @@ P.commit_offensive = script(`
     if ( G.offensive.stage === ATTACK_STAGE && G.offensive.disengagement && G.offensive.disengagement.length ){
         call disengagement_confirm
     }
+    call check_overstacking
     call declare_battle_hexes
     set L.verify_error trigger_event("before_commit_offensive")
-    call check_overstacking
     call commit_offensive_confirm
     `)
 
