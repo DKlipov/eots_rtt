@@ -1879,15 +1879,54 @@ cards[find_card(AP, 28)].before_commit_offensive = function () {
     if (G.offensive.stage !== ATTACK_STAGE) {
         return
     }
-    G.offensive.landing_hexes.forEach(l => {
-        if (get_map_data(l).island && !set_has(G.offensive.chronicle, l) && !is_faction_units(l, JP)) {
-            for_each_hex_in_range(l, 1, h => {
-                if (h !== l && get_map_data(h).island && !is_faction_units(h, JP)) {
-                    capture_hex(h, AP)
-                }
-            })
+    call("chronicle")
+
+}
+
+P.chronicle = {
+    inactive: "capture unoccupied islands",
+    _begin() {
+        L.allowed_hexes = []
+        var landing_hexes = []
+        map_for_each(G.offensive.paths, (u, path) => {
+            var piece = pieces[u]
+            if (piece.faction === AP && piece.class === "ground" && path[0] & AMPH_MOVE) {
+                set_add(landing_hexes, path[path.length - 1])
+            }
+        })
+        landing_hexes.filter(l => get_map_data(l).island && !set_has(G.offensive.chronicle, l) && !is_faction_units(l, JP)
+            && get_map_data(l).nh.filter(nh => this.condition(nh)).length
+        ).forEach(l => set_add(L.allowed_hexes, l))
+    },
+    prompt() {
+        if (L.allowed_hexes.length) {
+            prompt("Choose hex to apply offensive card bonus.")
+        } else {
+            prompt("Offensive card bonus could not be applied.")
         }
-    })
+        button("skip")
+        L.allowed_hexes.forEach(h => action_hex(h))
+    },
+    condition(h) {
+        return get_map_data(h).island && !is_faction_units(h, JP) && is_controllable_hex(h) && is_space_controlled(h, JP)
+    },
+    action_hex(hex) {
+        push_undo()
+        var captured = []
+        for_each_hex_in_range(hex, 1, h => {
+            if (h !== hex && this.condition(h)) {
+                capture_hex(h, AP, true)
+                set_add(captured, h)
+            }
+        })
+        log(`Offensive card bonus used for ${hex_get_log_str(hex)}, AP captured: ${list_get_log_str(captured.length + " hexes", captured.map(u => hex_get_log_str(u)))}.`)
+        end()
+    },
+    skip() {
+        push_undo()
+        log("Offensive card bonus skipped.")
+        end()
+    },
 }
 
 cards[find_card(AP, 29)].before_battle_roll = function (faction) {
