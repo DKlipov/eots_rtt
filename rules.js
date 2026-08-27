@@ -10761,6 +10761,7 @@ function get_reaction_able_units() {
 }
 
 function get_activatable_units(hq, hq_supply_type) {
+    var faction = pieces[hq].faction
     const result = []
     L.reaction_able_units = []
     L.asp_ground_units = []
