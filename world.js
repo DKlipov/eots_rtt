@@ -99,6 +99,7 @@ const world = {
     animate_list: [],
     keyword_list: [],
     text_list: [],
+    hq: 0,
     range: [0, 0],
     log_boxes: [],
     violations: [],

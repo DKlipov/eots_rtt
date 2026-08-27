@@ -261,6 +261,7 @@ function unit_tooltip_image(a, onoff) {
 }
 
 function on_focus_unit_tip(a) {
+    world.hq = 0
     world.tip.hidden = false//is_mobile()
     const piece = pieces[a]
     // Show BOTH sides of the marker
@@ -272,8 +273,11 @@ function on_focus_unit_tip(a) {
     var prev = world.range[0]
     if (piece.class === "hq" && G.location[a] < LAST_BOARD_HEX) {
         world.range = [G.location[a], pieces[a].cr]
+        world.hq = a
         if (a === HQ_CENTRAL_PACIFIC && G.sid === SOUTH_PACIFIC_SCENARIO) {
             world.range = [hex_to_int(5226), 5]
+        } else {
+
         }
     } else {
         world.range = [0, 0]
@@ -287,6 +291,7 @@ function on_blur_tip() {
     world.tip.hidden = true
     world.tip.innerHTML = ""
     world.tip.classList = ''
+    world.hq = 0
     if (world.range[0]) {
         world.range = [0, 0]
         on_update()

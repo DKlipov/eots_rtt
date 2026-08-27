@@ -74,8 +74,24 @@ P.check_unit_supply = {
                 CANVAS_CTX.stroke();
             }
         })
+        var focused = []
+        if (LOCAL_STATE.unit && pieces[LOCAL_STATE.unit].class === "hq" && G.location[LOCAL_STATE.unit] < LAST_BOARD_HEX) {
+            L.supply={}
+            var sup_type = pieces[LOCAL_STATE.unit].supply
+            clear_supply_cache(~sup_type)
+            mark_hexes_supplied_from([LOCAL_STATE.unit], () => 1)
+            for_each_hex_in_range(G.location[LOCAL_STATE.unit], pieces[LOCAL_STATE.unit].cr, hex => {
+                if (G.supply_cache[hex] & sup_type) {
+                    set_add(focused, hex)
+                }
+            })
+        }
+        for (var hex of ALL_BOARD_HEXES) {
+            update_keyword("zoi_hex", hex, "yellow", set_has(focused, hex))
+        }
     },
 }
+
 
 P.check_distance = {
     _begin() {

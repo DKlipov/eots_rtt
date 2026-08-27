@@ -7399,7 +7399,7 @@ function slow_in_range(first_hex, range, hexes, faction) {
         }
     }
     hexes.forEach(h => {
-        if (distance_map[h]) {
+        if (distance_map[h] && (faction !== JP || get_map_data(h).region !== "IChina")) {
             set_add(result, h)
         }
     })
@@ -10746,8 +10746,24 @@ P.check_unit_supply = {
                 CANVAS_CTX.stroke();
             }
         })
+        var focused = []
+        if (LOCAL_STATE.unit && pieces[LOCAL_STATE.unit].class === "hq" && G.location[LOCAL_STATE.unit] < LAST_BOARD_HEX) {
+            L.supply={}
+            var sup_type = pieces[LOCAL_STATE.unit].supply
+            clear_supply_cache(~sup_type)
+            mark_hexes_supplied_from([LOCAL_STATE.unit], () => 1)
+            for_each_hex_in_range(G.location[LOCAL_STATE.unit], pieces[LOCAL_STATE.unit].cr, hex => {
+                if (G.supply_cache[hex] & sup_type) {
+                    set_add(focused, hex)
+                }
+            })
+        }
+        for (var hex of ALL_BOARD_HEXES) {
+            update_keyword("zoi_hex", hex, "yellow", set_has(focused, hex))
+        }
     },
 }
+
 
 P.check_distance = {
     _begin() {
@@ -11971,7 +11987,13 @@ function on_update() {
     }
 
     var focused = []
-    for_each_hex_in_range(world.range[0], world.range[1], hex => set_add(focused, hex))
+    if (world.range[0] && world.hq && G.location[world.hq] < LAST_BOARD_HEX) {
+        for_each_hex_in_range(G.location[world.hq], pieces[world.hq].cr, hex => set_add(focused, hex))
+        focused = in_range_on_map(G.location[world.hq], pieces[world.hq].cr, focused, pieces[world.hq].faction)
+    } else {
+        for_each_hex_in_range(world.range[0], world.range[1], hex => set_add(focused, hex))
+        focused = in_range_on_map(world.range[0], world.range[1], focused, AP)
+    }
     for (var hex of ALL_BOARD_HEXES) {
         update_keyword("zoi_hex", hex, "yellow", set_has(focused, hex))
     }
@@ -12500,6 +12522,7 @@ function unit_tooltip_image(a, onoff) {
 }
 
 function on_focus_unit_tip(a) {
+    world.hq = 0
     world.tip.hidden = false//is_mobile()
     const piece = pieces[a]
     // Show BOTH sides of the marker
@@ -12511,8 +12534,11 @@ function on_focus_unit_tip(a) {
     var prev = world.range[0]
     if (piece.class === "hq" && G.location[a] < LAST_BOARD_HEX) {
         world.range = [G.location[a], pieces[a].cr]
+        world.hq = a
         if (a === HQ_CENTRAL_PACIFIC && G.sid === SOUTH_PACIFIC_SCENARIO) {
             world.range = [hex_to_int(5226), 5]
+        } else {
+
         }
     } else {
         world.range = [0, 0]
@@ -12526,6 +12552,7 @@ function on_blur_tip() {
     world.tip.hidden = true
     world.tip.innerHTML = ""
     world.tip.classList = ''
+    world.hq = 0
     if (world.range[0]) {
         world.range = [0, 0]
         on_update()

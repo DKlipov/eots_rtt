@@ -7401,7 +7401,7 @@ function slow_in_range(first_hex, range, hexes, faction) {
         }
     }
     hexes.forEach(h => {
-        if (distance_map[h]) {
+        if (distance_map[h] && (faction !== JP || get_map_data(h).region !== "IChina")) {
             set_add(result, h)
         }
     })

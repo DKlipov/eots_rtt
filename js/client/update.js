@@ -295,7 +295,13 @@ function on_update() {
     }
 
     var focused = []
-    for_each_hex_in_range(world.range[0], world.range[1], hex => set_add(focused, hex))
+    if (world.range[0] && world.hq && G.location[world.hq] < LAST_BOARD_HEX) {
+        for_each_hex_in_range(G.location[world.hq], pieces[world.hq].cr, hex => set_add(focused, hex))
+        focused = in_range_on_map(G.location[world.hq], pieces[world.hq].cr, focused, pieces[world.hq].faction)
+    } else {
+        for_each_hex_in_range(world.range[0], world.range[1], hex => set_add(focused, hex))
+        focused = in_range_on_map(world.range[0], world.range[1], focused, AP)
+    }
     for (var hex of ALL_BOARD_HEXES) {
         update_keyword("zoi_hex", hex, "yellow", set_has(focused, hex))
     }
