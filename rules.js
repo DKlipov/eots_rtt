@@ -14218,7 +14218,7 @@ P.china_offensive = {
     },
     roll() {
         log(`JP started China offensive.`)
-        if(!CLIENT_SIDE_SUPPLY){
+        if (!CLIENT_SIDE_SUPPLY) {
             check_supply()
         }
         let result = random(10)
@@ -14229,7 +14229,7 @@ P.china_offensive = {
         log(`${dice_get_log_str(result, mods.burma_road + mods.air_support, JP)} <= ${mods.divisions} (${success ? "SUCCESS" : "FAILED"})`)
         if (success) {
             update_china_status(1)
-        } else {
+        } else if (mods.air_support) {
             update_china_status(-1)
         }
         clear_undo()
@@ -14259,7 +14259,7 @@ P.displace_hq = {
 
 P.return_hq = {
     inactive: "choose HQ",
-    _begin(){
+    _begin() {
         check_supplied_hexes()
     },
     prompt() {
