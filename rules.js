@@ -10776,37 +10776,51 @@ function get_activatable_units(hq, hq_supply_type) {
     } else {
         G.supply_cache[CHINA_BOX] &= CLEAN_ATTACK_ZONE_MASK
     }
+    var reaction_escort = []
+    var reaction_cv = []
     for (let i = 1; i < pieces.length; i++) {
         let piece = pieces[i]
         var loc = G.location[i]
-        if (piece.supply & hq_supply_type
+        var allowed_to_act = piece.supply & hq_supply_type
             && G.supply_cache[loc] & HEX_TEMP_FLAG3
             && piece.class !== "hq"
             && (piece.class !== "ground" || !set_has(G.offensive.battle_hexes, loc))
             && !set_has(G.offensive.active_units[R], i)
             && (!set_has(G.oos, i) || L.card === GENERAL_ADACHI)
-            && (!reaction_movement || is_unit_reaction_able(i) && (!is_b29_bombed(piece) || is_faction_units(loc, JP)))
-        ) {
+        //||
+        if (allowed_to_act && (!reaction_movement || is_unit_reaction_able(i) && !is_b29_bombed(piece))) {
             set_add(result, i)
+            if (is_cv_unit(piece)) {
+                reaction_cv.push(i)
+            }
+        } else if (allowed_to_act && piece.class === "naval" && is_cv_reaction_able(i)) {
+            if (is_cv_unit(piece)) {
+                set_add(result, i)
+                reaction_cv.push(i)
+            } else {
+                reaction_escort.push(i)
+            }
         }
+    }
+    if (reaction_cv.length && reaction_escort.length) {
+        reaction_escort.forEach(u => set_add(result, u))
     }
     return result
 }
 
 function is_b29_bombed(piece) {
-    return piece.b29 && (G.b29u & (B29_BOMBED << piece.b29))
+    return piece.b29 && (G.b29u & (B29_BOMBED << piece.b29)) && !is_faction_units(G.location[piece.u], JP)
 }
 
 function is_unit_reaction_able(i) {
     return set_has(L.reaction_able_units, i)
         || set_has(L.asp_ground_units, i) && (pieces[i].asp === 1 || set_has(G.reduced, i) && pieces[i].aspr === 1)
-        || is_cv_reaction_able(i)
         || is_air_reaction_able(i)
 }
 
 function is_cv_reaction_able(u) {
     const piece = pieces[u]
-    if (piece.class !== "naval" || !piece.br) {
+    if (piece.class !== "naval") {
         return false
     }
     const location = G.location[u]
