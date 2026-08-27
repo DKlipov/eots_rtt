@@ -7473,6 +7473,10 @@ function units_str(units) {
 
 function scenario_data() {
     return SCENARIO_DATA[G.sid]
+}
+
+function solely_occupied_land(hex, faction) {
+    return G.supply_cache[hex] & JP_GAH_UNITS << (faction) && !(G.supply_cache[hex] & JP_GAH_UNITS << (1 - faction))
 }/** import common/utils.js*/
 /** import supply.js*/
 let last = Date.now()
@@ -8312,6 +8316,44 @@ function check_japan_resource_trace() {
         }
     }
     return false
+}
+
+function mark_activation_zone(hq) {
+    clear_supply_cache(CLEAN_ATTACK_ZONE_MASK)
+    const location = G.location[hq]
+    G.supply_cache[location] |= HEX_TEMP_FLAG3
+    const range = pieces[hq].cr
+    const faction = pieces[hq].faction
+    let queue = [location]
+    const distance_map = [location, 0]
+    for (var i = 0; i < queue.length; i++) {
+        let item = queue[i]
+        let nh_list = get_near_hexes(item)
+        const MD = get_map_data(item)
+        if (faction === JP && MD.region === "IChina") {
+            continue
+        }
+        const distance = map_get(distance_map, item) + 1
+        const non_neutral_zoi = has_non_n_zoi(item, 1 - faction)
+        const occupied_land = solely_occupied_land(item, 1 - faction)
+        for (let j = 0; j < nh_list.length; j++) {
+            let nh = nh_list[j]
+            if (nh <= 0) {
+                continue
+            }
+            if (map_get(distance_map, nh, 100) > distance
+                && (
+                    (MD.edges_int & UNPLAYABLE_LAND << 5 * j && !occupied_land && !solely_occupied_land(nh, 1 - faction)) ||
+                    (MD.edges_int & UNPLAYABLE_WATER << 5 * j && !non_neutral_zoi && !has_non_n_zoi(nh, 1 - faction))
+                )) {
+                map_set(distance_map, nh, distance)
+                G.supply_cache[nh] |= HEX_TEMP_FLAG3
+                if (distance < range) {
+                    queue.push(nh)
+                }
+            }
+        }
+    }
 }/** import supply.js*/
 /** import move.js*/
 function update_move_hex() {
@@ -10748,15 +10790,8 @@ P.check_unit_supply = {
         })
         var focused = []
         if (LOCAL_STATE.unit && pieces[LOCAL_STATE.unit].class === "hq" && G.location[LOCAL_STATE.unit] < LAST_BOARD_HEX) {
-            L.supply={}
-            var sup_type = pieces[LOCAL_STATE.unit].supply
-            clear_supply_cache(~sup_type)
-            mark_hexes_supplied_from([LOCAL_STATE.unit], () => 1)
-            for_each_hex_in_range(G.location[LOCAL_STATE.unit], pieces[LOCAL_STATE.unit].cr, hex => {
-                if (G.supply_cache[hex] & sup_type) {
-                    set_add(focused, hex)
-                }
-            })
+            for_each_hex_in_range(G.location[LOCAL_STATE.unit], pieces[LOCAL_STATE.unit].cr, hex => set_add(focused, hex))
+            focused = in_range_on_map(G.location[LOCAL_STATE.unit], pieces[LOCAL_STATE.unit].cr, focused, pieces[LOCAL_STATE.unit].faction)
         }
         for (var hex of ALL_BOARD_HEXES) {
             update_keyword("zoi_hex", hex, "yellow", set_has(focused, hex))
@@ -11988,8 +12023,12 @@ function on_update() {
 
     var focused = []
     if (world.range[0] && world.hq && G.location[world.hq] < LAST_BOARD_HEX) {
-        for_each_hex_in_range(G.location[world.hq], pieces[world.hq].cr, hex => set_add(focused, hex))
-        focused = in_range_on_map(G.location[world.hq], pieces[world.hq].cr, focused, pieces[world.hq].faction)
+        mark_activation_zone(world.hq)
+        for_each_hex_in_range(G.location[world.hq], pieces[world.hq].cr, hex => {
+            if (G.supply_cache[hex] & HEX_TEMP_FLAG3) {
+                set_add(focused, hex)
+            }
+        })
     } else {
         for_each_hex_in_range(world.range[0], world.range[1], hex => set_add(focused, hex))
         focused = in_range_on_map(world.range[0], world.range[1], focused, AP)

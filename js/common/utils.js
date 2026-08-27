@@ -218,3 +218,7 @@ function units_str(units) {
 function scenario_data() {
     return SCENARIO_DATA[G.sid]
 }
+
+function solely_occupied_land(hex, faction) {
+    return G.supply_cache[hex] & JP_GAH_UNITS << (faction) && !(G.supply_cache[hex] & JP_GAH_UNITS << (1 - faction))
+}

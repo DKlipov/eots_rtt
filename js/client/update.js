@@ -296,8 +296,12 @@ function on_update() {
 
     var focused = []
     if (world.range[0] && world.hq && G.location[world.hq] < LAST_BOARD_HEX) {
-        for_each_hex_in_range(G.location[world.hq], pieces[world.hq].cr, hex => set_add(focused, hex))
-        focused = in_range_on_map(G.location[world.hq], pieces[world.hq].cr, focused, pieces[world.hq].faction)
+        mark_activation_zone(world.hq)
+        for_each_hex_in_range(G.location[world.hq], pieces[world.hq].cr, hex => {
+            if (G.supply_cache[hex] & HEX_TEMP_FLAG3) {
+                set_add(focused, hex)
+            }
+        })
     } else {
         for_each_hex_in_range(world.range[0], world.range[1], hex => set_add(focused, hex))
         focused = in_range_on_map(world.range[0], world.range[1], focused, AP)
