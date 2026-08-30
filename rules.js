@@ -13839,6 +13839,7 @@ P.submarine_warfare = {
 
 P.strategic_bombing = {
     _begin() {
+        check_supplied_hexes(AP)
         L.allowed_units = []
         var units = [B_29_1, B_29_2]
         units.forEach(u => {
