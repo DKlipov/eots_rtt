@@ -156,7 +156,7 @@ function update_role_info() {
 function on_update() {
     begin_update()
     check_supply()
-    if (G.actions && !init_overstack_check(true, R)) {
+    if (G.actions && R >= 0 && !init_overstack_check(true, R)) {
         L.hexes = []
         L.allowed_units.forEach(u => set_add(L.hexes, G.location[u]))
         G.violations = L.hexes
@@ -406,7 +406,7 @@ function on_update() {
     action_button("event", "Play Event")
     action_button("ops", "Play for Operations")
     action_button("hold", "Hold")
-    action_button("advanced_move", "Advanced move")
+    action_button("advanced_move", "More options")
     action_button("no_move", "No move")
     action_button("eliminate", "Eliminate")
     action_button("stop", "Stop")

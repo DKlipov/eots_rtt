@@ -616,10 +616,11 @@ function get_move_buttons() {
     if (G.offensive.stage === ATTACK_STAGE && pieces[G.active_stack[0]].parenthetical && L.move_type === ANY_MOVE) {
         result.push("extended_air")
     }
-    if (G.offensive.stage === ATTACK_STAGE && !G.offensive.zoi_intelligence_modifier && L.move_type === ANY_MOVE) {
+    if (G.offensive.stage === ATTACK_STAGE && !G.offensive.zoi_intelligence_modifier && L.move_type === ANY_MOVE
+        && get_map_data(L.move_data.location).coastal) {
         result.push("avoid_zoi")
     }
-    if (G.offensive.stage === ATTACK_STAGE && L.move_data.sm_possible && L.move_type === ANY_MOVE) {
+    if (G.offensive.stage === ATTACK_STAGE && (L.move_data.move_type & STRAT_MOVE) && L.move_type === ANY_MOVE) {
         result.push("strat_move")
     }
     if (G.offensive.stage === ATTACK_STAGE && (L.move_data.move_type & AMPH_MOVE) && L.move_type === ANY_MOVE) {
@@ -634,7 +635,9 @@ function get_move_buttons() {
     if ((no_move_p) && (L.move_type === ANY_MOVE && !L.spec_move)) {
         result.push("no_move")
     }
-    if (G.offensive.stage === ATTACK_STAGE && G.offensive.barges && L.move_type !== BARGES_MOVE && G.offensive.barges > 1 && G.active_stack.filter(u => pieces[u].class === "ground").length === 1) {
+    if (G.offensive.stage === ATTACK_STAGE && get_map_data(L.move_data.location).coastal
+        && G.offensive.barges && L.move_type !== BARGES_MOVE
+        && G.offensive.barges > 1 && G.active_stack.filter(u => pieces[u].class === "ground").length === 1) {
         result.push("barges")
     }
 

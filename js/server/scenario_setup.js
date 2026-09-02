@@ -836,7 +836,7 @@ function setup_scenario_south_pacific() {
     G.asp[JP] = [7, 0]
     G.asp[AP] = [2, 0]
     G.wie = 2
-    G.pow = 1
+    G.pow = 0
     G.reinforcements = [2, 2]
     G.surrender[nations.CHINA.id] = 2
     G.inter_service = [1, 1]
