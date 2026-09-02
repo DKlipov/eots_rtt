@@ -30,7 +30,7 @@ function toggle_dialog(id, response) {
 
 function show_dialog(id, dialog_generator) {
     document.getElementById(id).classList.add("show")
-    let body = document.getElementById(id).querySelector(".dialog_body")
+    var body = document.getElementById(id).querySelector(".dialog_body")
     body.replaceChildren()
     if (dialog_generator) {
         dialog_generator(body)
@@ -44,8 +44,8 @@ function hide_dialog(id) {
 }
 
 function toggle_dialog_collapse(id) {
-    let dialog_body = document.getElementById(id).querySelector(".dialog_body")
-    let dialog_x = document.getElementById(id).querySelector(".dialog_x")
+    var dialog_body = document.getElementById(id).querySelector(".dialog_body")
+    var dialog_x = document.getElementById(id).querySelector(".dialog_x")
     if (dialog_body.className.includes("hide")) {
         dialog_body.classList.remove("hide")
         dialog_x.textContent = "A"
@@ -103,14 +103,14 @@ function is_mobile() {
 function show_card_list(id, response) {
     id = response
     show_dialog(id, (body) => {
-        let dl = document.createElement("dl")
-        let append_header = (text) => {
-            let header = document.createElement("dt")
+        var dl = document.createElement("dl")
+        var append_header = (text) => {
+            var header = document.createElement("dt")
             header.textContent = text
             dl.appendChild(header)
         }
-        let append_card = (c) => {
-            let p = document.createElement("dd")
+        var append_card = (c) => {
+            var p = document.createElement("dd")
             p.className = "cardtip"
             p.onmouseenter = () => on_focus_card_tip(c)
             p.onmouseleave = () => on_blur_tip()
@@ -141,7 +141,7 @@ function show_card_list(id, response) {
 function pw_dialog(id, response) {
     var response = pw_query()
     show_dialog(id, (body) => {
-        let dl = document.createElement("dl")
+        var dl = document.createElement("dl")
         var header = document.createElement("dt");
         header.appendChild(create_icon(...counters.pw.split(" ")))
         header.innerHTML += ` Current Political Will: ${G.political_will}.`
@@ -163,7 +163,7 @@ function pw_dialog(id, response) {
 
 function create_unit_display(data_id) {
     const piece = pieces[data_id]
-    let p = document.createElement("div")
+    var p = document.createElement("div")
     p.classList.add(...piece.counter.split(' '))
     p.classList.add("d-piece", "unit", "piece")
     //adapted the world.js tooltip_image to work here,
@@ -190,7 +190,7 @@ function elim_dialog(name, response) {
 
     show_dialog(name, (body) => {
         var elim = [[], [], [], []]
-        for (let i = 1; i < pieces.length; i++) {
+        for (var i = 1; i < pieces.length; i++) {
             const piece = pieces[i]
             if (G.location[i] === ELIMINATED_BOX || G.location[i] === PERM_ELIMINATED) {
                 if (piece.notreplaceable || G.location[i] === PERM_ELIMINATED) {
@@ -200,7 +200,7 @@ function elim_dialog(name, response) {
                 }
             }
         }
-        let create_sub_container = (parent, text, units) => {
+        var create_sub_container = (parent, text, units) => {
             let small_sub_cont = document.createElement("div")
             let big_sub_cont = document.createElement("div")
             let header = document.createElement("dt")

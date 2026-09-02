@@ -377,8 +377,8 @@ const BURMA_BOARD_INFO = {
     "TURN_STACK_PARAMS": VERTICAL_TURN_STACK_PARAMS,
     "TRACK_STACK_PARAMS": VERTICAL_TURN_STACK_PARAMS,
     "hex_check": (i) => {
-        let x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
-        let y = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
+        var x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
+        var y = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
 
 
         if (x == 15 && y > 9) {
@@ -413,8 +413,8 @@ const SOUTH_PAC_BOARD_INFO = {
         if (int_to_hex(i) === 4818 || int_to_hex(i) === 4918) {
             return true
         }
-        let x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
-        let y = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
+        var x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
+        var y = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
 
         if (SP_BORDER[x] && y < SP_BORDER[x]) {
             return false

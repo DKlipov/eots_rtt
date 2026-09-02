@@ -1,5 +1,5 @@
-let last = Date.now()
-let count = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+var last = Date.now()
+var count = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 function check_supplied_hexes(faction) {
     check_supply()

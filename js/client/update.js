@@ -4,7 +4,7 @@ function push_stack(stk, elt) {
 }
 
 function is_active_card(card) {
-    for (let a of CARD_ACTIONS) {
+    for (var a of CARD_ACTIONS) {
         if (G.actions && G.actions[a] && set_has(G.actions[a], card)) {
             return true
         }
@@ -27,12 +27,12 @@ function update_hand(side) {
     }
 
     if (!Array.isArray(G.hand[side])) {
-        for (let i = 0; i < G.hand[side]; i++) {
+        for (var i = 0; i < G.hand[side]; i++) {
             populate_generic("hand", side, side === JP ? "card card_jp_0" : "card card_ap_0").innerHTML = ''
         }
     } else {
-        for (let i = 0; i < G.hand[side].length; i++) {
-            let card = G.hand[side][i]
+        for (var i = 0; i < G.hand[side].length; i++) {
+            var card = G.hand[side][i]
             populate("hand", side, "card", card)
         }
     }
@@ -142,7 +142,7 @@ function get_control_marker(h) {
 }
 
 function update_role_info() {
-    for (let who = JP; who <= AP; who++) {
+    for (var who = JP; who <= AP; who++) {
         var hand_size = Number.isInteger(G.hand[who]) ? G.hand[who] : G.hand[who].length
         var fo = G.events[events.FUTURE_OFFENSIVE_JP.id + who]
         roles[who].stat.innerHTML = `${hand_size} cards${fo && fo < G.turn ? " + FO" : ""}${G.passes[who] ? ", " + G.passes[who] + " passes" : ""}`
@@ -277,7 +277,7 @@ function on_update() {
     }
     var oos_hex_set = []
     for (i = 0; i < G.oos.length; i++) {
-        let hex = G.location[G.oos[i]]
+        var hex = G.location[G.oos[i]]
         if (!set_has(oos_hex_set, hex) && hex <= LAST_BOARD_HEX && !set_has(supplied_hex, hex)) {
             populate_generic("s-loc", hex, counters.oos)
             set_add(oos_hex_set, hex)

@@ -189,11 +189,11 @@ function mark_ground_reaction_hexes(location) {
     const queue = [location]
     const distance_map = [location, 0]
     for (var i = 0; i < queue.length; i++) {
-        let item = queue[i]
-        let base_distance = map_get(distance_map, item)
-        let nh_list = get_near_hexes(item)
-        for (let j = 0; j < nh_list.length; j++) {
-            let nh = nh_list[j]
+        var item = queue[i]
+        var base_distance = map_get(distance_map, item)
+        var nh_list = get_near_hexes(item)
+        for (var j = 0; j < nh_list.length; j++) {
+            var nh = nh_list[j]
             if (nh <= 0) {
                 continue
             }
@@ -225,11 +225,11 @@ function mark_asp_reaction_hexes(hex) {
     const distance_map = [location, 0]
     const range = G.offensive.naval_move_distance
     for (var i = 0; i < queue.length; i++) {
-        let item = queue[i]
+        var item = queue[i]
         const distance = map_get(distance_map, item) + 1
-        let nh_list = get_near_hexes(item)
-        for (let j = 0; j < nh_list.length; j++) {
-            let nh = nh_list[j]
+        var nh_list = get_near_hexes(item)
+        for (var j = 0; j < nh_list.length; j++) {
+            var nh = nh_list[j]
             if (nh <= 0) {
                 continue
             }
@@ -295,8 +295,8 @@ function get_activatable_units(hq, hq_supply_type) {
     }
     var reaction_escort = []
     var reaction_cv = []
-    for (let i = 1; i < pieces.length; i++) {
-        let piece = pieces[i]
+    for (var i = 1; i < pieces.length; i++) {
+        var piece = pieces[i]
         var loc = G.location[i]
         var allowed_to_act = piece.supply & hq_supply_type
             && G.supply_cache[loc] & HEX_TEMP_FLAG3
@@ -350,11 +350,11 @@ function is_cv_reaction_able(u) {
     const distance_map = [location, 0]
     const range = G.offensive.naval_move_distance
     for (var i = 0; i < queue.length; i++) {
-        let item = queue[i]
+        var item = queue[i]
         const distance = map_get(distance_map, item) + 1
-        let nh_list = get_near_hexes(item)
-        for (let j = 0; j < nh_list.length; j++) {
-            let nh = nh_list[j]
+        var nh_list = get_near_hexes(item)
+        for (var j = 0; j < nh_list.length; j++) {
+            var nh = nh_list[j]
             if (nh <= 0) {
                 continue
             }
@@ -395,15 +395,15 @@ function is_air_reaction_able(u) {
     var selected = [location]
 
     var leg_limit = G.offensive.air_move_distance
-    let queue = [location]
-    let leg_distance = 1
-    let distance_incr_i = 0
+    var queue = [location]
+    var leg_distance = 1
+    var distance_incr_i = 0
     for (var i = 0; i < queue.length; i++) {
-        let item = queue[i]
-        let nh_list = map_get(AIRFIELD_LINKS, item, [])
-        let j = 1;
+        var item = queue[i]
+        var nh_list = map_get(AIRFIELD_LINKS, item, [])
+        var j = 1;
         while (j < nh_list.length && nh_list[j] <= range) {
-            let nh = nh_list[j - 1]
+            var nh = nh_list[j - 1]
             if (set_has(selected, nh) || !(is_space_controlled(nh, G.active))) {
                 j += 2
                 continue
@@ -493,10 +493,13 @@ P.activate_units = {
             button("skip")
         }
         prompt(`${offensive_card_header()} Activate units: ${G.offensive.active_units[G.active].length} of  ${G.offensive.logistic + L.hq_bonus} (${hint}).`)
-        if (!globalThis.RTT_FUZZER || too_much < -1) {
-            L.allowed_units.forEach(u => action_unit(u))
+        if (!globalThis.RTT_FUZZER) {
+            if (too_much < -1) {
+                L.allowed_units.forEach(u => action_unit(u))
+            }
+            G.offensive.active_units[G.active].forEach(u => unselect_unit(u))
         }
-        G.offensive.active_units[G.active].forEach(u => unselect_unit(u))
+
     },
     update_possible_units() {
         L.allowed_units = L.possible_units.filter(u => !set_has(G.offensive.active_units[G.active], u))
@@ -882,7 +885,7 @@ P.move_offensive_units = {
         call("move_to", {hex})
     },
     move(curr_path) {
-        if (globalThis.RTT_FUZZER) {
+        if (!curr_path) {
             this.no_move()
             return
         }
@@ -942,7 +945,7 @@ P.move_offensive_units = {
     no_move() {
         call("move_to", {hex: G.location[G.active_stack[0]]})
     },
-    skip(){
+    skip() {
         this.done()
     },
     done() {

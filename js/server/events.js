@@ -85,11 +85,11 @@ function mark_hexes_in_move_range(hex, range) {
     const queue = [location]
     const distance_map = [location, 0]
     for (var i = 0; i < queue.length; i++) {
-        let item = queue[i]
+        var item = queue[i]
         const distance = map_get(distance_map, item) + 1
-        let nh_list = get_near_hexes(item)
-        for (let j = 0; j < nh_list.length; j++) {
-            let nh = nh_list[j]
+        var nh_list = get_near_hexes(item)
+        for (var j = 0; j < nh_list.length; j++) {
+            var nh = nh_list[j]
             if (nh <= 0) {
                 continue
             }
@@ -713,10 +713,10 @@ function get_guadalcanal_evacuation_destination(location) {
     const distance_map = [location, 0]
     const result = []
     for (var i = 0; i < queue.length; i++) {
-        let item = queue[i]
+        var item = queue[i]
         const distance = map_get(distance_map, item) + 1
-        let nh_list = get_near_hexes(item)
-        for (let j = 0; j < nh_list.length; j++) {
+        var nh_list = get_near_hexes(item)
+        for (var j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
             if (nh <= 0) {
                 continue

@@ -137,10 +137,10 @@ function victory_burma() {
         result.text.push(`1 VP - War in Europe < 0`)
     }
     //F. For controlling each hex of Northern India, +1 VP per hex
-    let india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
+    var india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
     adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
     //G. For India Unrest or Strikes, +1 Victory Point (awarded on the last game turn)
-    let india_status = G.surrender[nations.INDIA.id]
+    var india_status = G.surrender[nations.INDIA.id]
     if (india_status > 0 && india_status <= 2) {
         result.vp += 1
         result.text.push(`+1 VP - India ${nations.INDIA.statuses[india_status]}.`)
@@ -254,7 +254,7 @@ function victory_1942() {
 }
 
 function check_supply_line(hex1, hex2, faction) {
-    let queue = [hex1]
+    var queue = [hex1]
     const overland_set = []
     const oversea_set = []
     if (!is_space_controlled(hex1, faction) || !is_space_controlled(hex2, faction)) {
@@ -267,8 +267,8 @@ function check_supply_line(hex1, hex2, faction) {
         oversea_set.push(hex1)
     }
     for (var i = 0; i < queue.length; i++) {
-        let item = queue[i]
-        let nh_list = get_near_hexes(item)
+        var item = queue[i]
+        var nh_list = get_near_hexes(item)
         const MD = get_map_data(item)
         const overland = set_has(overland_set, item)
         const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))

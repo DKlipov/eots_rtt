@@ -204,7 +204,7 @@ function validate_action(verb, noun) {
         return false
     // Reset action list here so we don't send more than one action per server prompt!
     if (noun !== undefined) {
-        let realnoun = Array.isArray(noun) ? noun[0] : noun
+        var realnoun = Array.isArray(noun) ? noun[0] : noun
         if (view.actions && view.actions[verb] && view.actions[verb].includes(realnoun)) {
             return true
         }

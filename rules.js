@@ -7289,12 +7289,12 @@ function get_direction(from, to) {
 }
 
 function get_edge_hexes(hex) {
-    let y = hex % 29
-    let x = (hex - y) / 29
+    var y = hex % 29
+    var x = (hex - y) / 29
 
-    let y_diff = 1 - (x % 2)
-    let y1_diff = 1 - y_diff
-    let result = []
+    var y_diff = 1 - (x % 2)
+    var y1_diff = 1 - y_diff
+    var result = []
     result.push((-y >> 31) * hex * -1 - 1)                                                                          //N or -1
     result.push((-((x - 50 >> 31) & (-y1_diff | -hex % 29 >> 31)) - 1) * (hex + 30 - y_diff) + hex + 29 - y_diff)   //NE or -1
     result.push((-((x - 50 >> 31) & ((-hex - 1) % 29 >> 31)) - 1) * (hex + 30 + y1_diff) + hex + 29 + y1_diff)      //SE or -1
@@ -7381,15 +7381,15 @@ function slow_in_range(first_hex, range, hexes, faction) {
     var result = []
     distance_map[first_hex] = 1
     for (var i = 0; i < queue.length; i++) {
-        let item = queue[i]
+        var item = queue[i]
         var distance = distance_map[item] + 1
         var MD = get_map_data(item)
-        let nh_list = get_near_hexes(item)
+        var nh_list = get_near_hexes(item)
         if (faction === JP && MD.region === "IChina" || !nh_list) {
             continue
         }
-        for (let j = 0; j < nh_list.length; j++) {
-            let nh = nh_list[j]
+        for (var j = 0; j < nh_list.length; j++) {
+            var nh = nh_list[j]
             if (nh <= 0) {
                 continue
             }
@@ -7493,8 +7493,8 @@ function array_equals(a, b) {
     return true
 }/** import common/utils.js*/
 /** import supply.js*/
-let last = Date.now()
-let count = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+var last = Date.now()
+var count = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 function check_supplied_hexes(faction) {
     check_supply()
@@ -8391,7 +8391,7 @@ function update_move_hex() {
 }
 
 function get_move_data() {
-    let result = {
+    var result = {
         is_new_battle_allowed: false,
         is_ground_present: false,
         is_air_present: false,
@@ -8413,7 +8413,7 @@ function get_move_data() {
         result.move_type |= REACTION_MOVE
     }
     G.active_stack.forEach(u => {
-        let piece = pieces[u]
+        var piece = pieces[u]
         if (piece.class === "ground") {
             result.is_ground_present = true
         } else if (piece.class === "naval") {
@@ -9464,10 +9464,10 @@ function victory_burma() {
         result.text.push(`1 VP - War in Europe < 0`)
     }
     //F. For controlling each hex of Northern India, +1 VP per hex
-    let india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
+    var india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
     adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
     //G. For India Unrest or Strikes, +1 Victory Point (awarded on the last game turn)
-    let india_status = G.surrender[nations.INDIA.id]
+    var india_status = G.surrender[nations.INDIA.id]
     if (india_status > 0 && india_status <= 2) {
         result.vp += 1
         result.text.push(`+1 VP - India ${nations.INDIA.statuses[india_status]}.`)
@@ -9581,7 +9581,7 @@ function victory_1942() {
 }
 
 function check_supply_line(hex1, hex2, faction) {
-    let queue = [hex1]
+    var queue = [hex1]
     const overland_set = []
     const oversea_set = []
     if (!is_space_controlled(hex1, faction) || !is_space_controlled(hex2, faction)) {
@@ -9594,8 +9594,8 @@ function check_supply_line(hex1, hex2, faction) {
         oversea_set.push(hex1)
     }
     for (var i = 0; i < queue.length; i++) {
-        let item = queue[i]
-        let nh_list = get_near_hexes(item)
+        var item = queue[i]
+        var nh_list = get_near_hexes(item)
         const MD = get_map_data(item)
         const overland = set_has(overland_set, item)
         const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))
@@ -10157,10 +10157,10 @@ function get_hq_reinforcement_hexes() {
     if (L.oos) {
         G.oos = L.oos
     }
-    let result = []
+    var result = []
     const faction = G.active
     var supply = G.active === AP ? JOINT_SUPPLIED_HEX : JP_SUPPLIED_HEX
-    let queue = []
+    var queue = []
     var overland_set = []
     var hqs = []
     HQ_LIST.forEach(u => set_add(hqs, G.location[u]))
@@ -10174,16 +10174,16 @@ function get_hq_reinforcement_hexes() {
         }
     }
     for (var i = 0; i < queue.length; i++) {
-        let item = queue[i]
-        let nh_list = get_near_hexes(item)
+        var item = queue[i]
+        var nh_list = get_near_hexes(item)
         const MD = get_map_data(item)
         const overland = overland_set[item] & 1
         const non_neutral_zoi_s = has_non_n_zoi(item, 1 - faction)
         const enemy_port_s = (MD.port && is_space_controlled(item, 1 - faction))
         const occupied_land_s = G.supply_cache[item] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[item] & JP_GAH_UNITS << faction)
         const oversea = overland_set[item] & 2
-        for (let j = 0; j < nh_list.length; j++) {
-            let nh = nh_list[j]
+        for (var j = 0; j < nh_list.length; j++) {
+            var nh = nh_list[j]
             if (nh <= 0) {
                 continue
             }
@@ -10690,11 +10690,11 @@ function mark_ground_reaction_hexes(location) {
     const queue = [location]
     const distance_map = [location, 0]
     for (var i = 0; i < queue.length; i++) {
-        let item = queue[i]
-        let base_distance = map_get(distance_map, item)
-        let nh_list = get_near_hexes(item)
-        for (let j = 0; j < nh_list.length; j++) {
-            let nh = nh_list[j]
+        var item = queue[i]
+        var base_distance = map_get(distance_map, item)
+        var nh_list = get_near_hexes(item)
+        for (var j = 0; j < nh_list.length; j++) {
+            var nh = nh_list[j]
             if (nh <= 0) {
                 continue
             }
@@ -10726,11 +10726,11 @@ function mark_asp_reaction_hexes(hex) {
     const distance_map = [location, 0]
     const range = G.offensive.naval_move_distance
     for (var i = 0; i < queue.length; i++) {
-        let item = queue[i]
+        var item = queue[i]
         const distance = map_get(distance_map, item) + 1
-        let nh_list = get_near_hexes(item)
-        for (let j = 0; j < nh_list.length; j++) {
-            let nh = nh_list[j]
+        var nh_list = get_near_hexes(item)
+        for (var j = 0; j < nh_list.length; j++) {
+            var nh = nh_list[j]
             if (nh <= 0) {
                 continue
             }
@@ -10796,8 +10796,8 @@ function get_activatable_units(hq, hq_supply_type) {
     }
     var reaction_escort = []
     var reaction_cv = []
-    for (let i = 1; i < pieces.length; i++) {
-        let piece = pieces[i]
+    for (var i = 1; i < pieces.length; i++) {
+        var piece = pieces[i]
         var loc = G.location[i]
         var allowed_to_act = piece.supply & hq_supply_type
             && G.supply_cache[loc] & HEX_TEMP_FLAG3
@@ -10851,11 +10851,11 @@ function is_cv_reaction_able(u) {
     const distance_map = [location, 0]
     const range = G.offensive.naval_move_distance
     for (var i = 0; i < queue.length; i++) {
-        let item = queue[i]
+        var item = queue[i]
         const distance = map_get(distance_map, item) + 1
-        let nh_list = get_near_hexes(item)
-        for (let j = 0; j < nh_list.length; j++) {
-            let nh = nh_list[j]
+        var nh_list = get_near_hexes(item)
+        for (var j = 0; j < nh_list.length; j++) {
+            var nh = nh_list[j]
             if (nh <= 0) {
                 continue
             }
@@ -10896,15 +10896,15 @@ function is_air_reaction_able(u) {
     var selected = [location]
 
     var leg_limit = G.offensive.air_move_distance
-    let queue = [location]
-    let leg_distance = 1
-    let distance_incr_i = 0
+    var queue = [location]
+    var leg_distance = 1
+    var distance_incr_i = 0
     for (var i = 0; i < queue.length; i++) {
-        let item = queue[i]
-        let nh_list = map_get(AIRFIELD_LINKS, item, [])
-        let j = 1;
+        var item = queue[i]
+        var nh_list = map_get(AIRFIELD_LINKS, item, [])
+        var j = 1;
         while (j < nh_list.length && nh_list[j] <= range) {
-            let nh = nh_list[j - 1]
+            var nh = nh_list[j - 1]
             if (set_has(selected, nh) || !(is_space_controlled(nh, G.active))) {
                 j += 2
                 continue
@@ -10994,10 +10994,13 @@ P.activate_units = {
             button("skip")
         }
         prompt(`${offensive_card_header()} Activate units: ${G.offensive.active_units[G.active].length} of  ${G.offensive.logistic + L.hq_bonus} (${hint}).`)
-        if (!globalThis.RTT_FUZZER || too_much < -1) {
-            L.allowed_units.forEach(u => action_unit(u))
+        if (!globalThis.RTT_FUZZER) {
+            if (too_much < -1) {
+                L.allowed_units.forEach(u => action_unit(u))
+            }
+            G.offensive.active_units[G.active].forEach(u => unselect_unit(u))
         }
-        G.offensive.active_units[G.active].forEach(u => unselect_unit(u))
+
     },
     update_possible_units() {
         L.allowed_units = L.possible_units.filter(u => !set_has(G.offensive.active_units[G.active], u))
@@ -11383,7 +11386,7 @@ P.move_offensive_units = {
         call("move_to", {hex})
     },
     move(curr_path) {
-        if (globalThis.RTT_FUZZER) {
+        if (!curr_path) {
             this.no_move()
             return
         }
@@ -11443,7 +11446,7 @@ P.move_offensive_units = {
     no_move() {
         call("move_to", {hex: G.location[G.active_stack[0]]})
     },
-    skip(){
+    skip() {
         this.done()
     },
     done() {
@@ -14257,7 +14260,7 @@ P.china_offensive = {
         if (!CLIENT_SIDE_SUPPLY) {
             check_supply()
         }
-        let result = random(10)
+        var result = random(10)
         G.events[events.CHINA_OFFENSIVE.id] = G.turn
         var mods = get_china_offensive_modifiers()
         mods.log.forEach(l => log(l))
@@ -14356,8 +14359,8 @@ P.offensive_segment = {
             button("pass")
         }
         var hand = get_hand(R)
-        for (let i = 0; i < hand.length; i++) {
-            let card = hand[i]
+        for (var i = 0; i < hand.length; i++) {
+            var card = hand[i]
             action_card(card)
         }
     },
@@ -14567,7 +14570,7 @@ function get_event_infrastructure_actions() {
 }
 
 function get_allowed_actions(num) {
-    let card = cards[num]
+    var card = cards[num]
     var result = []
 
     if (!card.reshuffle) {
@@ -14702,11 +14705,11 @@ function mark_hexes_in_move_range(hex, range) {
     const queue = [location]
     const distance_map = [location, 0]
     for (var i = 0; i < queue.length; i++) {
-        let item = queue[i]
+        var item = queue[i]
         const distance = map_get(distance_map, item) + 1
-        let nh_list = get_near_hexes(item)
-        for (let j = 0; j < nh_list.length; j++) {
-            let nh = nh_list[j]
+        var nh_list = get_near_hexes(item)
+        for (var j = 0; j < nh_list.length; j++) {
+            var nh = nh_list[j]
             if (nh <= 0) {
                 continue
             }
@@ -15330,10 +15333,10 @@ function get_guadalcanal_evacuation_destination(location) {
     const distance_map = [location, 0]
     const result = []
     for (var i = 0; i < queue.length; i++) {
-        let item = queue[i]
+        var item = queue[i]
         const distance = map_get(distance_map, item) + 1
-        let nh_list = get_near_hexes(item)
-        for (let j = 0; j < nh_list.length; j++) {
+        var nh_list = get_near_hexes(item)
+        for (var j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
             if (nh <= 0) {
                 continue
@@ -17189,7 +17192,7 @@ function discard_card(card) {
 }
 
 function setup_jp_unit(piece, hex_id, reduced = false) {
-    let hex = hex_to_int(hex_id)
+    var hex = hex_to_int(hex_id)
     if (hex < LAST_BOARD_HEX && is_controllable_hex(hex) && pieces[piece].faction === JP) {
         capture_hex(hex, JP)
     } else if (hex < LAST_BOARD_HEX && is_controllable_hex(hex) && pieces[piece].faction === AP) {
@@ -17253,7 +17256,7 @@ function on_setup(scenario, options) {
     if (options.experienced) {
         G.async = 1
     }
-    for (let i = 1; i < LAST_BOARD_HEX; i++) {
+    for (var i = 1; i < LAST_BOARD_HEX; i++) {
         if (is_controllable_hex(i) && ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Caroline", "Marshall", "Japan"].includes(get_map_data(i).region)) {
             capture_hex(i, JP)
         }
@@ -17262,7 +17265,7 @@ function on_setup(scenario, options) {
     capture_hex(hex_to_int(2709), JP)
     reset_offensive()
     construct_decks()
-    for (let i = 1; i < pieces.length; i++) {
+    for (var i = 1; i < pieces.length; i++) {
         var piece = pieces[i]
         G.location[i] = NON_PLACED_BOX
         if (piece.start) {
@@ -17298,7 +17301,6 @@ function get_garrison_count() {
 }
 
 function on_view() {
-    is_space_controlled(OAHU, JP)//todo: remove
     if (L.P && P[L.P] && P[L.P].on_view) {
         return P[L.P].on_view()
     }
@@ -17433,7 +17435,7 @@ function reset_offensive() {
 function construct_decks() {
     G.draw = [[], []]
 
-    for (let c = 1; c < cards.length; ++c) {
+    for (var c = 1; c < cards.length; ++c) {
         if (cards[c].faction) {
             G.draw[AP].push(c)
         } else {
@@ -18233,7 +18235,7 @@ function setup_scenario_1942(options) {
         G.options = {historical: true}
     }
 
-    for (let i = 1; i < pieces.length; i++) {
+    for (var i = 1; i < pieces.length; i++) {
         var piece = pieces[i]
         if (piece.reinforcement !== 2) {
             continue
@@ -18357,7 +18359,7 @@ function setup_scenario_1943() {
             G.location[i] = NOT_USED
         }
     }
-    for (let i = 1; i < pieces.length; i++) {
+    for (var i = 1; i < pieces.length; i++) {
         var piece = pieces[i]
         if (piece.reinforcement !== 5) {
             continue

@@ -82,10 +82,10 @@ function get_hq_reinforcement_hexes() {
     if (L.oos) {
         G.oos = L.oos
     }
-    let result = []
+    var result = []
     const faction = G.active
     var supply = G.active === AP ? JOINT_SUPPLIED_HEX : JP_SUPPLIED_HEX
-    let queue = []
+    var queue = []
     var overland_set = []
     var hqs = []
     HQ_LIST.forEach(u => set_add(hqs, G.location[u]))
@@ -99,16 +99,16 @@ function get_hq_reinforcement_hexes() {
         }
     }
     for (var i = 0; i < queue.length; i++) {
-        let item = queue[i]
-        let nh_list = get_near_hexes(item)
+        var item = queue[i]
+        var nh_list = get_near_hexes(item)
         const MD = get_map_data(item)
         const overland = overland_set[item] & 1
         const non_neutral_zoi_s = has_non_n_zoi(item, 1 - faction)
         const enemy_port_s = (MD.port && is_space_controlled(item, 1 - faction))
         const occupied_land_s = G.supply_cache[item] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[item] & JP_GAH_UNITS << faction)
         const oversea = overland_set[item] & 2
-        for (let j = 0; j < nh_list.length; j++) {
-            let nh = nh_list[j]
+        for (var j = 0; j < nh_list.length; j++) {
+            var nh = nh_list[j]
             if (nh <= 0) {
                 continue
             }

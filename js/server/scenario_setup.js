@@ -205,7 +205,7 @@ function setup_scenario_1942(options) {
         G.options = {historical: true}
     }
 
-    for (let i = 1; i < pieces.length; i++) {
+    for (var i = 1; i < pieces.length; i++) {
         var piece = pieces[i]
         if (piece.reinforcement !== 2) {
             continue
@@ -329,7 +329,7 @@ function setup_scenario_1943() {
             G.location[i] = NOT_USED
         }
     }
-    for (let i = 1; i < pieces.length; i++) {
+    for (var i = 1; i < pieces.length; i++) {
         var piece = pieces[i]
         if (piece.reinforcement !== 5) {
             continue

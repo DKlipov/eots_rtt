@@ -18,7 +18,7 @@ function update_move_hex() {
 }
 
 function get_move_data() {
-    let result = {
+    var result = {
         is_new_battle_allowed: false,
         is_ground_present: false,
         is_air_present: false,
@@ -40,7 +40,7 @@ function get_move_data() {
         result.move_type |= REACTION_MOVE
     }
     G.active_stack.forEach(u => {
-        let piece = pieces[u]
+        var piece = pieces[u]
         if (piece.class === "ground") {
             result.is_ground_present = true
         } else if (piece.class === "naval") {

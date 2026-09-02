@@ -11,7 +11,7 @@ P.china_offensive = {
         if (!CLIENT_SIDE_SUPPLY) {
             check_supply()
         }
-        let result = random(10)
+        var result = random(10)
         G.events[events.CHINA_OFFENSIVE.id] = G.turn
         var mods = get_china_offensive_modifiers()
         mods.log.forEach(l => log(l))
@@ -110,8 +110,8 @@ P.offensive_segment = {
             button("pass")
         }
         var hand = get_hand(R)
-        for (let i = 0; i < hand.length; i++) {
-            let card = hand[i]
+        for (var i = 0; i < hand.length; i++) {
+            var card = hand[i]
             action_card(card)
         }
     },
@@ -321,7 +321,7 @@ function get_event_infrastructure_actions() {
 }
 
 function get_allowed_actions(num) {
-    let card = cards[num]
+    var card = cards[num]
     var result = []
 
     if (!card.reshuffle) {

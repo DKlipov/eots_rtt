@@ -137,7 +137,7 @@ function on_log(text, i) {
 }
 
 function format_card_info(c) {
-    let text = "C" + c
+    var text = "C" + c
     return escape_text(text)
 }
 
@@ -215,14 +215,14 @@ function escaped_list(match, p1) {
 }
 
 function on_focus_list(parent) {
-    for (let el of parent.children[1].children) {
+    for (var el of parent.children[1].children) {
         el.onmouseenter();
     }
     on_blur_tip() //prevent unit tooltip from showing
 }
 
 function on_blur_list(parent) {
-    for (let el of parent.children[1].children) {
+    for (var el of parent.children[1].children) {
         el.onmouseleave();
     }
 }

@@ -39,7 +39,7 @@ function create_by_template(target, filename) {
 
 function insert_into(target, stream) {
     var content = fs.readFileSync(target, "utf-8").split("\n")
-    for (let i = 0; i < content.length; i++) {
+    for (var i = 0; i < content.length; i++) {
         var line = content[i]
         if (line.startsWith("/** import")) {
             stream.write(line);

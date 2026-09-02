@@ -7287,12 +7287,12 @@ function get_direction(from, to) {
 }
 
 function get_edge_hexes(hex) {
-    let y = hex % 29
-    let x = (hex - y) / 29
+    var y = hex % 29
+    var x = (hex - y) / 29
 
-    let y_diff = 1 - (x % 2)
-    let y1_diff = 1 - y_diff
-    let result = []
+    var y_diff = 1 - (x % 2)
+    var y1_diff = 1 - y_diff
+    var result = []
     result.push((-y >> 31) * hex * -1 - 1)                                                                          //N or -1
     result.push((-((x - 50 >> 31) & (-y1_diff | -hex % 29 >> 31)) - 1) * (hex + 30 - y_diff) + hex + 29 - y_diff)   //NE or -1
     result.push((-((x - 50 >> 31) & ((-hex - 1) % 29 >> 31)) - 1) * (hex + 30 + y1_diff) + hex + 29 + y1_diff)      //SE or -1
@@ -7379,15 +7379,15 @@ function slow_in_range(first_hex, range, hexes, faction) {
     var result = []
     distance_map[first_hex] = 1
     for (var i = 0; i < queue.length; i++) {
-        let item = queue[i]
+        var item = queue[i]
         var distance = distance_map[item] + 1
         var MD = get_map_data(item)
-        let nh_list = get_near_hexes(item)
+        var nh_list = get_near_hexes(item)
         if (faction === JP && MD.region === "IChina" || !nh_list) {
             continue
         }
-        for (let j = 0; j < nh_list.length; j++) {
-            let nh = nh_list[j]
+        for (var j = 0; j < nh_list.length; j++) {
+            var nh = nh_list[j]
             if (nh <= 0) {
                 continue
             }
@@ -7491,8 +7491,8 @@ function array_equals(a, b) {
     return true
 }/** import common/utils.js*/
 /** import supply.js*/
-let last = Date.now()
-let count = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+var last = Date.now()
+var count = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 function check_supplied_hexes(faction) {
     check_supply()
@@ -8389,7 +8389,7 @@ function update_move_hex() {
 }
 
 function get_move_data() {
-    let result = {
+    var result = {
         is_new_battle_allowed: false,
         is_ground_present: false,
         is_air_present: false,
@@ -8411,7 +8411,7 @@ function get_move_data() {
         result.move_type |= REACTION_MOVE
     }
     G.active_stack.forEach(u => {
-        let piece = pieces[u]
+        var piece = pieces[u]
         if (piece.class === "ground") {
             result.is_ground_present = true
         } else if (piece.class === "naval") {
@@ -9461,10 +9461,10 @@ function victory_burma() {
         result.text.push(`1 VP - War in Europe < 0`)
     }
     //F. For controlling each hex of Northern India, +1 VP per hex
-    let india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
+    var india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
     adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
     //G. For India Unrest or Strikes, +1 Victory Point (awarded on the last game turn)
-    let india_status = G.surrender[nations.INDIA.id]
+    var india_status = G.surrender[nations.INDIA.id]
     if (india_status > 0 && india_status <= 2) {
         result.vp += 1
         result.text.push(`+1 VP - India ${nations.INDIA.statuses[india_status]}.`)
@@ -9578,7 +9578,7 @@ function victory_1942() {
 }
 
 function check_supply_line(hex1, hex2, faction) {
-    let queue = [hex1]
+    var queue = [hex1]
     const overland_set = []
     const oversea_set = []
     if (!is_space_controlled(hex1, faction) || !is_space_controlled(hex2, faction)) {
@@ -9591,8 +9591,8 @@ function check_supply_line(hex1, hex2, faction) {
         oversea_set.push(hex1)
     }
     for (var i = 0; i < queue.length; i++) {
-        let item = queue[i]
-        let nh_list = get_near_hexes(item)
+        var item = queue[i]
+        var nh_list = get_near_hexes(item)
         const MD = get_map_data(item)
         const overland = set_has(overland_set, item)
         const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))
@@ -10449,8 +10449,8 @@ const BURMA_BOARD_INFO = {
     "TURN_STACK_PARAMS": VERTICAL_TURN_STACK_PARAMS,
     "TRACK_STACK_PARAMS": VERTICAL_TURN_STACK_PARAMS,
     "hex_check": (i) => {
-        let x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
-        let y = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
+        var x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
+        var y = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
 
 
         if (x == 15 && y > 9) {
@@ -10485,8 +10485,8 @@ const SOUTH_PAC_BOARD_INFO = {
         if (int_to_hex(i) === 4818 || int_to_hex(i) === 4918) {
             return true
         }
-        let x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
-        let y = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
+        var x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
+        var y = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
 
         if (SP_BORDER[x] && y < SP_BORDER[x]) {
             return false
@@ -10938,7 +10938,7 @@ function validate_action(verb, noun) {
         return false
     // Reset action list here so we don't send more than one action per server prompt!
     if (noun !== undefined) {
-        let realnoun = Array.isArray(noun) ? noun[0] : noun
+        var realnoun = Array.isArray(noun) ? noun[0] : noun
         if (view.actions && view.actions[verb] && view.actions[verb].includes(realnoun)) {
             return true
         }
@@ -11153,7 +11153,7 @@ function toggle_dialog(id, response) {
 
 function show_dialog(id, dialog_generator) {
     document.getElementById(id).classList.add("show")
-    let body = document.getElementById(id).querySelector(".dialog_body")
+    var body = document.getElementById(id).querySelector(".dialog_body")
     body.replaceChildren()
     if (dialog_generator) {
         dialog_generator(body)
@@ -11167,8 +11167,8 @@ function hide_dialog(id) {
 }
 
 function toggle_dialog_collapse(id) {
-    let dialog_body = document.getElementById(id).querySelector(".dialog_body")
-    let dialog_x = document.getElementById(id).querySelector(".dialog_x")
+    var dialog_body = document.getElementById(id).querySelector(".dialog_body")
+    var dialog_x = document.getElementById(id).querySelector(".dialog_x")
     if (dialog_body.className.includes("hide")) {
         dialog_body.classList.remove("hide")
         dialog_x.textContent = "A"
@@ -11226,14 +11226,14 @@ function is_mobile() {
 function show_card_list(id, response) {
     id = response
     show_dialog(id, (body) => {
-        let dl = document.createElement("dl")
-        let append_header = (text) => {
-            let header = document.createElement("dt")
+        var dl = document.createElement("dl")
+        var append_header = (text) => {
+            var header = document.createElement("dt")
             header.textContent = text
             dl.appendChild(header)
         }
-        let append_card = (c) => {
-            let p = document.createElement("dd")
+        var append_card = (c) => {
+            var p = document.createElement("dd")
             p.className = "cardtip"
             p.onmouseenter = () => on_focus_card_tip(c)
             p.onmouseleave = () => on_blur_tip()
@@ -11264,7 +11264,7 @@ function show_card_list(id, response) {
 function pw_dialog(id, response) {
     var response = pw_query()
     show_dialog(id, (body) => {
-        let dl = document.createElement("dl")
+        var dl = document.createElement("dl")
         var header = document.createElement("dt");
         header.appendChild(create_icon(...counters.pw.split(" ")))
         header.innerHTML += ` Current Political Will: ${G.political_will}.`
@@ -11286,7 +11286,7 @@ function pw_dialog(id, response) {
 
 function create_unit_display(data_id) {
     const piece = pieces[data_id]
-    let p = document.createElement("div")
+    var p = document.createElement("div")
     p.classList.add(...piece.counter.split(' '))
     p.classList.add("d-piece", "unit", "piece")
     //adapted the world.js tooltip_image to work here,
@@ -11313,7 +11313,7 @@ function elim_dialog(name, response) {
 
     show_dialog(name, (body) => {
         var elim = [[], [], [], []]
-        for (let i = 1; i < pieces.length; i++) {
+        for (var i = 1; i < pieces.length; i++) {
             const piece = pieces[i]
             if (G.location[i] === ELIMINATED_BOX || G.location[i] === PERM_ELIMINATED) {
                 if (piece.notreplaceable || G.location[i] === PERM_ELIMINATED) {
@@ -11323,7 +11323,7 @@ function elim_dialog(name, response) {
                 }
             }
         }
-        let create_sub_container = (parent, text, units) => {
+        var create_sub_container = (parent, text, units) => {
             let small_sub_cont = document.createElement("div")
             let big_sub_cont = document.createElement("div")
             let header = document.createElement("dt")
@@ -11754,7 +11754,7 @@ function push_stack(stk, elt) {
 }
 
 function is_active_card(card) {
-    for (let a of CARD_ACTIONS) {
+    for (var a of CARD_ACTIONS) {
         if (G.actions && G.actions[a] && set_has(G.actions[a], card)) {
             return true
         }
@@ -11777,12 +11777,12 @@ function update_hand(side) {
     }
 
     if (!Array.isArray(G.hand[side])) {
-        for (let i = 0; i < G.hand[side]; i++) {
+        for (var i = 0; i < G.hand[side]; i++) {
             populate_generic("hand", side, side === JP ? "card card_jp_0" : "card card_ap_0").innerHTML = ''
         }
     } else {
-        for (let i = 0; i < G.hand[side].length; i++) {
-            let card = G.hand[side][i]
+        for (var i = 0; i < G.hand[side].length; i++) {
+            var card = G.hand[side][i]
             populate("hand", side, "card", card)
         }
     }
@@ -11892,7 +11892,7 @@ function get_control_marker(h) {
 }
 
 function update_role_info() {
-    for (let who = JP; who <= AP; who++) {
+    for (var who = JP; who <= AP; who++) {
         var hand_size = Number.isInteger(G.hand[who]) ? G.hand[who] : G.hand[who].length
         var fo = G.events[events.FUTURE_OFFENSIVE_JP.id + who]
         roles[who].stat.innerHTML = `${hand_size} cards${fo && fo < G.turn ? " + FO" : ""}${G.passes[who] ? ", " + G.passes[who] + " passes" : ""}`
@@ -12027,7 +12027,7 @@ function on_update() {
     }
     var oos_hex_set = []
     for (i = 0; i < G.oos.length; i++) {
-        let hex = G.location[G.oos[i]]
+        var hex = G.location[G.oos[i]]
         if (!set_has(oos_hex_set, hex) && hex <= LAST_BOARD_HEX && !set_has(supplied_hex, hex)) {
             populate_generic("s-loc", hex, counters.oos)
             set_add(oos_hex_set, hex)
@@ -12298,8 +12298,8 @@ function hex_center(i) {
         var box = map_layout.box_air_unit_in_china
         return center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
     }
-    let row = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
-    let column = (Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB))
+    var row = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
+    var column = (Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB))
     if (SID == BURMA_SCENARIO) {
         if (i == SINGAPORE) {
             const box = map_layout.label_singapore
@@ -12308,7 +12308,7 @@ function hex_center(i) {
         if (i > TUNNEL_BOX) {
             // display TUNNEL_BOX directly to the left of the blue singapore label
             const box = map_layout.label_singapore
-            let sing_left_coord = center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
+            var sing_left_coord = center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
             sing_left_coord[0] -= 47;
             return sing_left_coord;
         }
@@ -12461,7 +12461,7 @@ function on_log(text, i) {
 }
 
 function format_card_info(c) {
-    let text = "C" + c
+    var text = "C" + c
     return escape_text(text)
 }
 
@@ -12539,14 +12539,14 @@ function escaped_list(match, p1) {
 }
 
 function on_focus_list(parent) {
-    for (let el of parent.children[1].children) {
+    for (var el of parent.children[1].children) {
         el.onmouseenter();
     }
     on_blur_tip() //prevent unit tooltip from showing
 }
 
 function on_blur_list(parent) {
-    for (let el of parent.children[1].children) {
+    for (var el of parent.children[1].children) {
         el.onmouseleave();
     }
 }
