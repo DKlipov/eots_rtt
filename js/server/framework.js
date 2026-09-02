@@ -180,7 +180,7 @@ exports.action = function (state, role, action, argument) {
 
     var this_state = P[L.P]
     if (this_state && typeof this_state[action] === "function") {
-        if (argument && argument.br) {
+        if (argument && (argument.action || argument.action === 0)) {
             if (CLIENT_SIDE_SUPPLY) {
                 if (argument.oos) {
                     G.oos = argument.oos
