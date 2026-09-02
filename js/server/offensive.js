@@ -1529,6 +1529,8 @@ P.declare_battle_hexes = {
         if (L.possible_units.length <= 0 && G.offensive.battle_hexes.length <= 0) {
             log("No battle hexes declared.")
             end()
+        } else if (L.possible_units.length <= 0) {
+            end()
         }
     },
     inactive: "assign units to battle",

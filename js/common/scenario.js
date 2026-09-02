@@ -210,7 +210,7 @@ function victory_1942() {
     }
     binary_vp(result, G.surrender[nations.AUSTRALIAN_MANDATES.id], 1, "JP Control of Australian Mandates", `AP Control of Australian Mandates`)
     var new_guinea = 0
-    nations.NEW_GUINEA.keys.forEach(h => {
+    nations.NEW_GUINEA.keys.map(k=>hex_to_int(k)).forEach(h => {
         if (is_space_controlled(h, JP) && get_map_data(h).port && get_map_data(h).region === "Guinea") {
             new_guinea++
         }
@@ -614,12 +614,12 @@ function victory_south_pacific() {
     } else {
         result.text.push(`0 VP - No one controls New Guinea.`)
     }
-    var heb = NEW_HEBRIDES.filter(h => is_space_controlled(h, JP) && get_map_data(h).region === "Hebrides" && get_map_data(h).port).length
+    var heb = NEW_HEBRIDES.filter(h => is_space_controlled(h, JP) && get_map_data(h).port).length
     binary_vp(result, heb, 1, "JP control of New Hebrides port",
         "No JP control of any New Hebrides port", NEW_HEBRIDES.filter(h => is_space_controlled(h, JP)))
-    var aus = nations.AUSTRALIA.keys.filter(h => is_space_controlled(h, JP) && get_map_data(h).region === "Australia" && get_map_data(h).port).length
+    var aus = nations.AUSTRALIA.keys.map(k => hex_to_int(k)).filter(h => is_space_controlled(h, JP) && get_map_data(h).port).length
     binary_vp(result, aus, 1, "JP control of Australia mainland port",
-        "No JP control of any Australia mainland port", nations.AUSTRALIA.keys.filter(h => is_space_controlled(h, JP)))
+        "No JP control of any Australia mainland port", nations.AUSTRALIA.keys.map(k => hex_to_int(k)).filter(h => is_space_controlled(h, JP)))
     return result
 }
 
