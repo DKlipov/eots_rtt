@@ -8679,9 +8679,7 @@ function compute_ground_naval_move_hexes() {
                 m_mt |= AMPH_MOVE
             }
             v.unshift(m_mt)
-            if (!move_data.is_ground_present || L.move_type === AMPH_MOVE || L.move_type === BARGES_MOVE || get_distance(move_data.location, k) > 1 || G.offensive.stage !== ATTACK_STAGE) {
-                map_set(L.allowed_hexes, k, v)
-            }
+            map_set(L.allowed_hexes, k, v)
         })
     }
     if ((L.move_data.move_type & GROUND_MOVE) && (L.move_type !== AMPH_MOVE) && (L.move_type !== AVOID_ZOI)) {
@@ -8874,7 +8872,7 @@ function get_naval_move(zoi_mask) {
         var port_transport = (get_map_data(nh).port && is_space_controlled(nh, R) && (!move_data.is_ground_present || !move_data.is_naval_present || G.offensive.stage === POST_BATTLE_STAGE || (L.move_type === AMPH_MOVE)))
         var ground_pbm = G.offensive.stage === POST_BATTLE_STAGE && !move_data.is_naval_present
             && get_map_data(nh).terrain > OCEAN
-            && (get_map_data(nh).named && is_space_controlled(nh, R) || is_faction_units(nh, R))
+            && (get_map_data(nh).named && is_space_controlled(nh, R) || is_faction_ground_units(nh, R))
             && (!is_space_controlled(nh, 1 - G.active) || !is_controllable_hex(nh))
         var aa_landing = move_data.move_type & AMPH_MOVE
             && is_hex_asp_capable(nh)
