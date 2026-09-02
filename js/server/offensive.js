@@ -182,7 +182,6 @@ function apply_inter_service() {
 }
 
 
-
 function mark_ground_reaction_hexes(location) {
     if (get_map_data(location).island) {
         return
@@ -2452,6 +2451,15 @@ P.jp_cv_reassign = {
     }
 }
 
+function get_ground_bomb_units() {
+    var no_gar = L.allowed_units.filter(u => !pieces[u].garrison)
+    if (no_gar.length) {
+        return no_gar
+    } else {
+        return L.allowed_units
+    }
+}
+
 P.ground_bombardment = {
     _begin() {
         G.active = (1 - G.offensive.attacker)
@@ -2467,8 +2475,9 @@ P.ground_bombardment = {
             end()
             return
         }
-        while (G.async && (L.garrison_present || L.allowed_units.length === 1)) {
-            this.unit(L.allowed_units[0])
+        while (G.async && (L.garrison_present || L.allowed_units.length === 1) && get_ground_bomb_units().length > 0) {
+            var unit = get_ground_bomb_units()[0]
+            this.unit(unit)
         }
         if (!L.allowed_units.length) {
             this.done()
@@ -2476,13 +2485,7 @@ P.ground_bombardment = {
     },
     inactive: "assign hits (the Reaction player chooses which reduced unit will be the last ground step)",
     prompt() {
-        var no_gar = L.allowed_units.filter(u => !pieces[u].garrison)
-        if (no_gar.length) {
-            no_gar.forEach(u => action_unit(u))
-        } else {
-            L.allowed_units.forEach(u => action_unit(u))
-        }
-
+        get_ground_bomb_units().forEach(u => action_unit(u))
         prompt(`Assign hits. (One step should survive).`)
         if (!L.allowed_units.length) {
             button("done")
