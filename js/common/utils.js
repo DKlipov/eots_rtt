@@ -222,3 +222,15 @@ function scenario_data() {
 function solely_occupied_land(hex, faction) {
     return G.supply_cache[hex] & JP_GAH_UNITS << (faction) && !(G.supply_cache[hex] & JP_GAH_UNITS << (1 - faction))
 }
+
+function array_equals(a, b) {
+    if (a.length !== b.length) {
+        return false
+    }
+    for (var i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) {
+            return false
+        }
+    }
+    return true
+}

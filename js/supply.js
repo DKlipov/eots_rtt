@@ -12,7 +12,7 @@ function check_supplied_hexes(faction) {
     L.supply = 0
 }
 
-function check_supply() {
+function basic_check_supply() {
     L.supply = {}
     clear_supply_cache(CLEAN_ALL_MASK)
     G.burma_road = 0
@@ -64,6 +64,7 @@ function fast_check_supply() {
     L.supply = 0
 }
 
+var check_supply = basic_check_supply
 if (CLIENT_SIDE_SUPPLY) {
     check_supply = fast_check_supply
 }

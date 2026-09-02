@@ -191,7 +191,10 @@ var send_action_with_oos = function (a, b, valid = false) {
     if (!valid && !validate_action(a, b)) {
         return false
     }
-    var payload = {action: b, oos: G.oos, br: G.burma_road}
+    var payload = {action: b, br: G.burma_road}
+    if (!array_equals(world.original_oos, G.oos)) {
+        payload.oos = G.oos
+    }
     G.actions[a] = [payload]
     return original_send_action(a, payload)
 }

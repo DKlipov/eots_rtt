@@ -7479,6 +7479,18 @@ function scenario_data() {
 
 function solely_occupied_land(hex, faction) {
     return G.supply_cache[hex] & JP_GAH_UNITS << (faction) && !(G.supply_cache[hex] & JP_GAH_UNITS << (1 - faction))
+}
+
+function array_equals(a, b) {
+    if (a.length !== b.length) {
+        return false
+    }
+    for (var i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) {
+            return false
+        }
+    }
+    return true
 }/** import common/utils.js*/
 /** import supply.js*/
 let last = Date.now()
@@ -7495,7 +7507,7 @@ function check_supplied_hexes(faction) {
     L.supply = 0
 }
 
-function check_supply() {
+function basic_check_supply() {
     L.supply = {}
     clear_supply_cache(CLEAN_ALL_MASK)
     G.burma_road = 0
@@ -7547,6 +7559,7 @@ function fast_check_supply() {
     L.supply = 0
 }
 
+var check_supply = basic_check_supply
 if (CLIENT_SIDE_SUPPLY) {
     check_supply = fast_check_supply
 }
@@ -10652,11 +10665,11 @@ P.choose_hq = {
 }
 
 function apply_inter_service() {
-    if (!G.inter_service[R]) {
+    if (!G.inter_service[G.active]) {
         return
     }
     var service = null
-    G.offensive.active_units[R].forEach(u => {
+    G.offensive.active_units[G.active].forEach(u => {
         var piece = pieces[u]
         if (piece.service === "army" || piece.service === "navy") {
             service = piece.service
@@ -10685,7 +10698,7 @@ function mark_ground_reaction_hexes(location) {
             if (nh <= 0) {
                 continue
             }
-            var distance = base_distance + get_ground_move_cost(nh, item, R)//to correct distance processing with backward tracing
+            var distance = base_distance + get_ground_move_cost(nh, item, G.active)//to correct distance processing with backward tracing
             if (distance > G.offensive.ground_move_distance
                 || distance >= map_get(distance_map, nh, 100)
                 || (G.supply_cache[nh] & ((JP_GROUND_UNITS | JP_HQ_UNITS | JP_AIR_UNITS) << G.offensive.attacker))
@@ -10744,15 +10757,15 @@ function get_reaction_able_units() {
         mark_asp_reaction_hexes(hex)
         mark_ground_reaction_hexes(hex)
     })
-    const has_asp = get_asp_limit(R) && G.offensive.counter_offensive_card !== MATADOR
+    const has_asp = get_asp_limit(G.active) && G.offensive.counter_offensive_card !== MATADOR
     for_each_unit_on_map((u, piece) => {
-        if (piece.faction === R && piece.class === "ground" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG3 && !globalThis.RTT_FUZZER) {
+        if (piece.faction === G.active && piece.class === "ground" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG3 && !globalThis.RTT_FUZZER) {
             set_add(L.reaction_able_units, u)
-        } else if (piece.faction === R && piece.class === "ground" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG2 && has_asp && !piece.organic && !globalThis.RTT_FUZZER) {
+        } else if (piece.faction === G.active && piece.class === "ground" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG2 && has_asp && !piece.organic && !globalThis.RTT_FUZZER) {
             set_add(L.asp_ground_units, u)
-        } else if (piece.faction === R && piece.class === "naval" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG1) {
+        } else if (piece.faction === G.active && piece.class === "naval" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG1) {
             set_add(L.reaction_able_units, u)
-        } else if (piece.faction === R && piece.class === "ground" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG2 && piece.organic && !globalThis.RTT_FUZZER) {
+        } else if (piece.faction === G.active && piece.class === "ground" && G.supply_cache[G.location[u]] & HEX_TEMP_FLAG2 && piece.organic && !globalThis.RTT_FUZZER) {
             set_add(L.reaction_able_units, u)
         }
     })
@@ -10771,7 +10784,7 @@ function get_activatable_units(hq, hq_supply_type) {
     L.cv_reaction_hex_map = []
     L.air_reaction_hex_map = []
     L.move_data = {}
-    G.offensive.battle_hexes.forEach(h => mark_attack_zone(h, R === AP ? 2 : 3))
+    G.offensive.battle_hexes.forEach(h => mark_attack_zone(h, G.active === AP ? 2 : 3))
     var hump = is_event_active(events.HUMP)
     if (faction === AP && (G.supply_cache[KUNMING] & HEX_TEMP_FLAG3
             || hump && (G.supply_cache[JARHAT] & HEX_TEMP_FLAG3)
@@ -10790,9 +10803,8 @@ function get_activatable_units(hq, hq_supply_type) {
             && G.supply_cache[loc] & HEX_TEMP_FLAG3
             && piece.class !== "hq"
             && (piece.class !== "ground" || !set_has(G.offensive.battle_hexes, loc))
-            && !set_has(G.offensive.active_units[R], i)
+            && !set_has(G.offensive.active_units[G.active], i)
             && (!set_has(G.oos, i) || L.card === GENERAL_ADACHI)
-        //||
         if (allowed_to_act && (!reaction_movement || is_unit_reaction_able(i) && !is_b29_bombed(piece))) {
             set_add(result, i)
             if (is_cv_unit(piece)) {
@@ -10893,12 +10905,12 @@ function is_air_reaction_able(u) {
         let j = 1;
         while (j < nh_list.length && nh_list[j] <= range) {
             let nh = nh_list[j - 1]
-            if (set_has(selected, nh) || !(is_space_controlled(nh, R))) {
+            if (set_has(selected, nh) || !(is_space_controlled(nh, G.active))) {
                 j += 2
                 continue
             }
             set_add(selected, nh)
-            if (nh !== AIR_FERRY && !is_faction_units(nh, 1 - R) && !set_has(G.offensive.battle_hexes, nh) &&
+            if (nh !== AIR_FERRY && !is_faction_units(nh, 1 - G.active) && !set_has(G.offensive.battle_hexes, nh) &&
                 target_in_battle_range(range, nh, G.offensive.battle_hexes)) {
                 map_set(L.air_reaction_hex_map, location, range)
                 return true
@@ -10928,10 +10940,10 @@ function get_kwai_modifier(hq) {
 }
 
 function log_units_activated() {
-    var activated = G.offensive.active_units[R].length
+    var activated = G.offensive.active_units[G.active].length
     var limit = G.offensive.logistic + L.hq_bonus
     if (activated) {
-        log(`Activated ^${activated} units|${G.offensive.active_units[R].map(u => piece_get_log_str(u)).join(", ")}^, ${limit} limit.`)
+        log(`Activated ^${activated} units|${G.offensive.active_units[G.active].map(u => piece_get_log_str(u)).join(", ")}^, ${limit} limit.`)
     } else {
         log(`No units activated.`)
     }
@@ -10939,9 +10951,9 @@ function log_units_activated() {
 
 P.activate_units = {
     _begin() {
-        if (R === G.offensive.attacker && G.offensive.type === EC && cards[G.offensive.offensive_card].hq) {
+        if (G.active === G.offensive.attacker && G.offensive.type === EC && cards[G.offensive.offensive_card].hq) {
             L.card = G.offensive.offensive_card
-        } else if (R !== G.offensive.attacker && G.offensive.counter_offensive_card > 0 && cards[G.offensive.counter_offensive_card].hq) {
+        } else if (G.active !== G.offensive.attacker && G.offensive.counter_offensive_card > 0 && cards[G.offensive.counter_offensive_card].hq) {
             L.card = G.offensive.counter_offensive_card
         }
 
@@ -10970,34 +10982,34 @@ P.activate_units = {
     },
     inactive: "activate units",
     prompt() {
-        var too_much = G.offensive.active_units[R].length - (G.offensive.logistic + L.hq_bonus)
+        var too_much = G.offensive.active_units[G.active].length - (G.offensive.logistic + L.hq_bonus)
         var hint = `${G.offensive.logistic} + ${L.hq_bonus}`
         if (too_much > 0) {
             hint = "Too many units selected"
         }
-        if (G.offensive.active_units[R].length === (G.offensive.logistic + L.hq_bonus) || L.allowed_units.length === 0) {
+        if (too_much === 0 || L.allowed_units.length === 0) {
             hint = "Done"
+            button("done")
+        } else if (too_much <= 0) {
+            button("skip")
         }
-        prompt(`${offensive_card_header()} Activate units: ${G.offensive.active_units[R].length} of  ${G.offensive.logistic + L.hq_bonus} (${hint}).`)
+        prompt(`${offensive_card_header()} Activate units: ${G.offensive.active_units[G.active].length} of  ${G.offensive.logistic + L.hq_bonus} (${hint}).`)
         if (!globalThis.RTT_FUZZER || too_much < -1) {
             L.allowed_units.forEach(u => action_unit(u))
         }
-        G.offensive.active_units[R].forEach(u => unselect_unit(u))
-        if (too_much <= 0) {
-            button("done")
-        }
+        G.offensive.active_units[G.active].forEach(u => unselect_unit(u))
     },
     update_possible_units() {
-        L.allowed_units = L.possible_units.filter(u => !set_has(G.offensive.active_units[R], u))
+        L.allowed_units = L.possible_units.filter(u => !set_has(G.offensive.active_units[G.active], u))
         L.hq_bonus = pieces[G.offensive.active_hq[G.active]].cm
         if (L.joint_disadvantage) {
             L.hq_bonus -= 1
         }
-        if (L.kwai && G.offensive.active_units[R].filter(u => KWAI_HQ_MOD.includes(get_map_data(G.location[u]).region)).length) {
+        if (L.kwai && G.offensive.active_units[G.active].filter(u => KWAI_HQ_MOD.includes(get_map_data(G.location[u]).region)).length) {
             L.hq_bonus += L.kwai
         }
         if (G.offensive.stage === REACTION_STAGE && L.asp_ground_units) {
-            var asp_used = G.offensive.active_units[R].filter(u => set_has(L.asp_ground_units, u)).length
+            var asp_used = G.offensive.active_units[G.active].filter(u => set_has(L.asp_ground_units, u)).length
             if (asp_used) {
                 L.allowed_units = L.allowed_units.filter(u => !set_has(L.asp_ground_units, u))
             }
@@ -11006,16 +11018,19 @@ P.activate_units = {
         trigger_event("after_unit_activation")
     },
     unit(u) {
-        if (set_has(G.offensive.active_units[R], u)) {
-            set_delete(G.offensive.active_units[R], u)
+        if (set_has(G.offensive.active_units[G.active], u)) {
+            set_delete(G.offensive.active_units[G.active], u)
         } else {
-            set_add(G.offensive.active_units[R], u)
+            set_add(G.offensive.active_units[G.active], u)
         }
         this.update_possible_units()
     },
+    skip() {
+        this.done()
+    },
     done() {
         push_undo()
-        if (L.kwai && G.offensive.active_units[R].filter(u => KWAI_HQ_MOD.includes(get_map_data(G.location[u]).region)).length) {
+        if (L.kwai && G.offensive.active_units[G.active].filter(u => KWAI_HQ_MOD.includes(get_map_data(G.location[u]).region)).length) {
             log(`${L.kwai > 0 ? "+" : ""}${L.kwai} activation (Bridge over the River Kwai).`)
         }
         log_units_activated()
@@ -11046,7 +11061,7 @@ function could_stack_stop_here() {
     if (!L.move_data.battle_range && G.offensive.stage === REACTION_STAGE) {
         return set_has(G.offensive.battle_hexes, location)
     }
-    return set_has(G.offensive.battle_hexes, location) || set_has(G.offensive.landing_hexes, location) || is_space_controlled(location, R) && get_map_data(location).port
+    return set_has(G.offensive.battle_hexes, location) || set_has(G.offensive.landing_hexes, location) || is_space_controlled(location, G.active) && get_map_data(location).port
 }
 
 function could_air_stop_here() {
@@ -11054,7 +11069,7 @@ function could_air_stop_here() {
         return false
     }
     var location = G.location[G.active_stack[0]]
-    return set_has(G.offensive.battle_hexes, location) || is_space_controlled(location, R) && get_map_data(location).airfield
+    return set_has(G.offensive.battle_hexes, location) || is_space_controlled(location, G.active) && get_map_data(location).airfield
 }
 
 
@@ -11148,7 +11163,7 @@ function after_unit_move() {
     }
     if (is_faction_units(hex, 1 - G.active) && G.active === G.offensive.attacker && G.offensive.stage === ATTACK_STAGE) {
         create_battle_hex(hex)
-    } else if (!is_space_controlled(hex, R) && curr_path[0] & AMPH_MOVE) {
+    } else if (!is_space_controlled(hex, G.active) && curr_path[0] & AMPH_MOVE) {
         create_landing_hex(hex)
     }
 }
@@ -11193,6 +11208,7 @@ P.move_offensive_units = {
             }
             return true
         }).forEach(u => set_add(L.movable_units, u))
+        L.max_movable = L.movable_units.length
         if (L.movable_units.length <= 0) {
             end()
         }
@@ -11202,13 +11218,17 @@ P.move_offensive_units = {
     },
     inactive: "move units",
     prompt() {
-        prompt(`${offensive_card_header()} Move units (${G.offensive.active_units[R].length - L.movable_units.length}/${G.offensive.active_units[R].length}).`)
+        prompt(`${offensive_card_header()} Move units (${L.max_movable - L.movable_units.length}/${L.max_movable}).`)
         if (G.active_stack.length === 0 &&
             (G.offensive.stage === ATTACK_STAGE
                 || G.offensive.stage === POST_BATTLE_STAGE && !G.active_stack.length && L.movable_units.filter(u => !could_unit_stop_here(u)).length === 0
                 || G.offensive.stage === REACTION_STAGE && !G.active_stack.length && L.movable_units.filter(u => !set_has(G.offensive.battle_hexes, G.location[u])).length === 0
             )) {
-            button("done")
+            if (L.movable_units.length) {
+                button("skip")
+            } else {
+                button("done")
+            }
         }
 
         if (G.active_stack.length === 0) {
@@ -11423,6 +11443,9 @@ P.move_offensive_units = {
     no_move() {
         call("move_to", {hex: G.location[G.active_stack[0]]})
     },
+    skip(){
+        this.done()
+    },
     done() {
         G.offensive.active_units[R].filter(u => !map_has(G.offensive.paths, u))
             .forEach(u => map_set(G.offensive.paths, u, [ANY_MOVE, 0, G.location[u]]))
@@ -11457,7 +11480,7 @@ function get_air_attack_hex() {
     }
     L.move_data = get_move_data()
     if (!L.move_data.battle_range) {
-        G.offensive.active_units[R].forEach(u => {
+        G.offensive.active_units[G.active].forEach(u => {
             var piece = pieces[u]
             var bh = map_get(G.offensive.committed, u)
             if (G.location[u] === L.move_data.location && piece.br && piece.class === "naval" && bh) {
@@ -11480,7 +11503,7 @@ P.choose_attack_hex = {
             return
         }
         var hex = G.location[G.active_stack[0]]
-        var escort = G.offensive.active_units[R].filter(u => {
+        var escort = G.offensive.active_units[G.active].filter(u => {
             var piece = pieces[u]
             return G.location[u] === hex && piece.br && piece.class === "naval"
         }).length
@@ -11516,13 +11539,13 @@ P.choose_attack_hex = {
         }
 
         if (could_pass || globalThis.RTT_FUZZER) {
-            button("pass")
+            button("skip")
         }
         for (let i = 0; i < L.allowed_hexes.length; i += 1) {
             action_hex(L.allowed_hexes[i])
         }
     },
-    pass() {
+    skip() {
         L.allowed_hexes = []
         G.active_stack = []
         end()
@@ -11538,7 +11561,7 @@ P.choose_attack_hex = {
 }
 
 function attack_hex(hex) {
-    if (is_faction_units(hex, 1 - R)) {
+    if (is_faction_units(hex, 1 - G.active)) {
         create_battle_hex(hex)
     }
     var path_to_bh = map_get(L.move_hexes ? L.move_hexes : [], hex, 0)
@@ -11649,7 +11672,7 @@ function compute_possible_battle_hexes() {
     L.possible_hexes = selected_hexes
     L.possible_units = selected_units
     const new_battle_allowed = G.offensive.type === EC || G.offensive.battle_hexes.length <= 0
-    G.offensive.active_units[R].filter(u => pieces[u].br).forEach(u => {
+    G.offensive.active_units[G.active].filter(u => pieces[u].br).forEach(u => {
         const location = G.location[u]
         var piece = pieces[u]
         var path = map_get(G.offensive.paths, u)
@@ -11672,7 +11695,7 @@ function compute_possible_battle_hexes() {
         map_set(unit_ranges, location, saved_value)
     })
     map_for_each(unit_ranges, (attacker_stack_hex, value) => for_each_hex_in_range(attacker_stack_hex, value[0], (h) => {
-        if (new_battle_allowed && is_faction_units(h, 1 - R) && get_map_data(h).region !== "IChina"
+        if (new_battle_allowed && is_faction_units(h, 1 - G.active) && get_map_data(h).region !== "IChina"
             || set_has(G.offensive.battle_hexes, h) || set_has(G.offensive.landing_hexes, h)) {
             set_add(selected_hexes, h)
             var has_not_selected = false
@@ -11952,7 +11975,7 @@ function get_disengagement_hexes(hex, just_entered) {
     var nh_array = get_near_hexes(hex)
     for (var i = 0; i < nh_array.length; i++) {
         var nh = nh_array[i]
-        var distance = get_ground_move_cost(hex, nh, R)
+        var distance = get_ground_move_cost(hex, nh, G.active)
         if (nh > 0 && !set_has(just_entered, nh) && !is_faction_units(nh, G.offensive.attacker) && distance < 10) {
             set_add(result, nh)
         }
@@ -12012,16 +12035,16 @@ P.declare_battle_hexes = {
             end()
         }
     },
-    inactive: "declare battle hexes",
+    inactive: "assign units to battle",
     prompt() {
         if (G.active_stack.length === 0 && L.possible_units.length === 0) {
             prompt(`${offensive_card_header()} Confirm declared battle hexes.`)
         } else {
-            prompt(`${offensive_card_header()} Declare battle hexes.`)
+            prompt(`${offensive_card_header()} Assign units to battle.`)
         }
         if (G.active_stack.length === 0) {
             L.possible_units.forEach(u => action_unit(u))
-            button("done")
+            button("skip")
         } else {
             L.actual_hexes.forEach(loc => action_hex(loc))
         }
@@ -12052,7 +12075,7 @@ P.declare_battle_hexes = {
         var range = piece.parenthetical ? piece.br : piece.ebr
         L.actual_hexes = in_range_on_map(location, range, L.possible_hexes, G.active)
     },
-    done() {
+    skip() {
         push_undo()
         if (G.offensive.battle_hexes.length <= 0) {
             log("No battle hexes declared.")
@@ -12108,12 +12131,12 @@ P.commit_offensive_confirm = {
         }
         if (!L.L.verify_error || globalThis.RTT_FUZZER) {
             prompt(`${offensive_card_header()} Confirm ${action}.`)
-            button("next")
+            button("confirm")
         } else {
             prompt(`${offensive_card_header()} Confirm ${action}. ` + L.L.verify_error)
         }
     },
-    next() {
+    confirm() {
         resolve_into_turn_draw(JP)
         resolve_into_turn_draw(AP)
         end()
@@ -12359,7 +12382,7 @@ P.define_intelligence_condition = {
             log(`#IIntelligence condition changed to ${get_named_intelligence(G.offensive.intelligence)}`)
         }
         L.rolled = 1
-        if (success || !get_hand(R).includes(JN_25_SPECIAL)) {
+        if (success || !get_hand(G.active).includes(JN_25_SPECIAL)) {
             end()
         }
     }
@@ -12374,7 +12397,7 @@ P.attack_reaction_cards = {
     },
     inactive: "react",
     prompt() {
-        var played_cards = G.offensive.active_cards.filter(c => cards[c].faction === R).length
+        var played_cards = G.offensive.active_cards.filter(c => cards[c].faction === G.active).length
         prompt(`${offensive_card_header()} Play reaction cards.${played_cards >= 3 ? " (No more than 3 reaction cards allowed)." : ""}`)
         if (played_cards < 3) {
             get_hand(G.active).filter(c => cards[c].type === REACTION && cards[c].can_play()).forEach(c => action_card(c))
@@ -19610,9 +19633,11 @@ exports.action = function (state, role, action, argument) {
 
     var this_state = P[L.P]
     if (this_state && typeof this_state[action] === "function") {
-        if (argument && argument.oos) {
+        if (argument && argument.br) {
             if (CLIENT_SIDE_SUPPLY) {
-                G.oos = argument.oos
+                if (argument.oos) {
+                    G.oos = argument.oos
+                }
                 G.burma_road = argument.br
             }
             argument = argument.action

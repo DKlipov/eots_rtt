@@ -430,6 +430,7 @@ function on_update() {
     action_button("skip", "Skip")
     action_button("range", "Range")
 
+    action_button("confirm", "Confirm")
     action_button("next", "Next")
     action_button("done", "Done")
     action_button("delay", "Delay")

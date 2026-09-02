@@ -7477,6 +7477,18 @@ function scenario_data() {
 
 function solely_occupied_land(hex, faction) {
     return G.supply_cache[hex] & JP_GAH_UNITS << (faction) && !(G.supply_cache[hex] & JP_GAH_UNITS << (1 - faction))
+}
+
+function array_equals(a, b) {
+    if (a.length !== b.length) {
+        return false
+    }
+    for (var i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) {
+            return false
+        }
+    }
+    return true
 }/** import common/utils.js*/
 /** import supply.js*/
 let last = Date.now()
@@ -7493,7 +7505,7 @@ function check_supplied_hexes(faction) {
     L.supply = 0
 }
 
-function check_supply() {
+function basic_check_supply() {
     L.supply = {}
     clear_supply_cache(CLEAN_ALL_MASK)
     G.burma_road = 0
@@ -7545,6 +7557,7 @@ function fast_check_supply() {
     L.supply = 0
 }
 
+var check_supply = basic_check_supply
 if (CLIENT_SIDE_SUPPLY) {
     check_supply = fast_check_supply
 }
@@ -10512,6 +10525,14 @@ function set_map_size(w, h) {
     update_map_size(w, h)
 }
 
+check_supply = function () {
+    if (!G.client_supply) {
+        world.original_oos = G.oos
+    }
+    basic_check_supply()
+    G.client_supply = 1
+}
+
 function on_init(scenario, game_options, static_view) {
     init_canvas(scenario)
 
@@ -10904,7 +10925,10 @@ var send_action_with_oos = function (a, b, valid = false) {
     if (!valid && !validate_action(a, b)) {
         return false
     }
-    var payload = {action: b, oos: G.oos, br: G.burma_road}
+    var payload = {action: b, br: G.burma_road}
+    if (!array_equals(world.original_oos, G.oos)) {
+        payload.oos = G.oos
+    }
     G.actions[a] = [payload]
     return original_send_action(a, payload)
 }
@@ -12156,6 +12180,7 @@ function on_update() {
     action_button("skip", "Skip")
     action_button("range", "Range")
 
+    action_button("confirm", "Confirm")
     action_button("next", "Next")
     action_button("done", "Done")
     action_button("delay", "Delay")

@@ -453,6 +453,14 @@ function set_map_size(w, h) {
     update_map_size(w, h)
 }
 
+check_supply = function () {
+    if (!G.client_supply) {
+        world.original_oos = G.oos
+    }
+    basic_check_supply()
+    G.client_supply = 1
+}
+
 function on_init(scenario, game_options, static_view) {
     init_canvas(scenario)
 

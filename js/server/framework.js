@@ -180,9 +180,11 @@ exports.action = function (state, role, action, argument) {
 
     var this_state = P[L.P]
     if (this_state && typeof this_state[action] === "function") {
-        if (argument && argument.oos) {
+        if (argument && argument.br) {
             if (CLIENT_SIDE_SUPPLY) {
-                G.oos = argument.oos
+                if (argument.oos) {
+                    G.oos = argument.oos
+                }
                 G.burma_road = argument.br
             }
             argument = argument.action
