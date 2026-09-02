@@ -10,7 +10,7 @@ function update_move_hex() {
         return compute_barges_pbm()
     } else if (L.move_data.is_air_present) {
         compute_air_move_hexes()
-    } else if (L.move_data.move_type & STRAT_MOVE) {
+    } else if (L.move_type & STRAT_MOVE) {
         compute_ground_naval_strat_move()
     } else {
         compute_ground_naval_move_hexes()
@@ -96,7 +96,7 @@ function get_move_data() {
     if (G.offensive.stage === REACTION_STAGE) {
         asp_total = Math.min(asp_total, 1 - G.offensive.r_asp)
     }
-    if (result.sm_possible && L.move_type & STRAT_MOVE && (result.is_air_present || get_map_data(result.location).coastal)) {
+    if (result.sm_possible && (result.is_air_present || get_map_data(result.location).coastal)) {
         result.move_type |= STRAT_MOVE
     }
     if (L.move_type & AVOID_ZOI && !has_zoi(result.location, 1 - G.active)) {

@@ -8383,7 +8383,7 @@ function update_move_hex() {
         return compute_barges_pbm()
     } else if (L.move_data.is_air_present) {
         compute_air_move_hexes()
-    } else if (L.move_data.move_type & STRAT_MOVE) {
+    } else if (L.move_type & STRAT_MOVE) {
         compute_ground_naval_strat_move()
     } else {
         compute_ground_naval_move_hexes()
@@ -8469,7 +8469,7 @@ function get_move_data() {
     if (G.offensive.stage === REACTION_STAGE) {
         asp_total = Math.min(asp_total, 1 - G.offensive.r_asp)
     }
-    if (result.sm_possible && L.move_type & STRAT_MOVE && (result.is_air_present || get_map_data(result.location).coastal)) {
+    if (result.sm_possible && (result.is_air_present || get_map_data(result.location).coastal)) {
         result.move_type |= STRAT_MOVE
     }
     if (L.move_type & AVOID_ZOI && !has_zoi(result.location, 1 - G.active)) {
@@ -10994,10 +10994,11 @@ P.activate_units = {
             button("skip")
         }
         prompt(`${offensive_card_header()} Activate units: ${G.offensive.active_units[G.active].length} of  ${G.offensive.logistic + L.hq_bonus} (${hint}).`)
+
+        if (!globalThis.RTT_FUZZER || too_much < 0) {
+            L.allowed_units.forEach(u => action_unit(u))
+        }
         if (!globalThis.RTT_FUZZER) {
-            if (too_much < -1) {
-                L.allowed_units.forEach(u => action_unit(u))
-            }
             G.offensive.active_units[G.active].forEach(u => unselect_unit(u))
         }
 
@@ -11238,7 +11239,7 @@ P.move_offensive_units = {
             L.movable_units.forEach(u => action_unit(u))
         } else {
             var buttons = get_move_buttons()
-            if (buttons.length > 3 && !L.spec_move) {
+            if (buttons.filter(b => !ALWAYS_SHOW_BUTTONS.includes(b)).length > 3 && !L.spec_move) {
                 button("advanced_move")
             } else if (buttons.length) {
                 buttons.forEach(b => button(b))

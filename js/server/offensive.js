@@ -493,10 +493,11 @@ P.activate_units = {
             button("skip")
         }
         prompt(`${offensive_card_header()} Activate units: ${G.offensive.active_units[G.active].length} of  ${G.offensive.logistic + L.hq_bonus} (${hint}).`)
+
+        if (!globalThis.RTT_FUZZER || too_much < 0) {
+            L.allowed_units.forEach(u => action_unit(u))
+        }
         if (!globalThis.RTT_FUZZER) {
-            if (too_much < -1) {
-                L.allowed_units.forEach(u => action_unit(u))
-            }
             G.offensive.active_units[G.active].forEach(u => unselect_unit(u))
         }
 
@@ -737,7 +738,7 @@ P.move_offensive_units = {
             L.movable_units.forEach(u => action_unit(u))
         } else {
             var buttons = get_move_buttons()
-            if (buttons.length > 3 && !L.spec_move) {
+            if (buttons.filter(b => !ALWAYS_SHOW_BUTTONS.includes(b)).length > 3 && !L.spec_move) {
                 button("advanced_move")
             } else if (buttons.length) {
                 buttons.forEach(b => button(b))
