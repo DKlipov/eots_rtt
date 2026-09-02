@@ -12788,7 +12788,7 @@ P.apply_hits = {
         var hits = G.offensive.battle.hits[R]
         var could_eliminate_all = hits >= G.offensive.battle.total_lf[R]
         var battle = G.offensive.battle
-        while (battle.hit_able_units[R].length && (could_eliminate_all || battle.hit_able_units[R].length === 1)) {
+        while (battle.hit_able_units[R].length && (could_eliminate_all || battle.hit_able_units[R].length === 2)) {
             this.unit(battle.hit_able_units[R][0])
         }
         if (!battle.hit_able_units[R].length) {
