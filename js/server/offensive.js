@@ -622,10 +622,6 @@ function get_move_buttons() {
     if (G.offensive.stage === ATTACK_STAGE && pieces[G.active_stack[0]].parenthetical && L.move_type === ANY_MOVE) {
         result.push("extended_air")
     }
-    if (G.offensive.stage === ATTACK_STAGE && !G.offensive.zoi_intelligence_modifier && L.move_type === ANY_MOVE
-        && get_map_data(L.move_data.location).coastal) {
-        result.push("avoid_zoi")
-    }
     if (G.offensive.stage === ATTACK_STAGE && (L.move_data.move_type & STRAT_MOVE) && L.move_type === ANY_MOVE) {
         result.push("strat_move")
     }
@@ -815,9 +811,6 @@ P.move_offensive_units = {
     },
     ground_move() {
         set_mt(GROUND_MOVE)
-    },
-    avoid_zoi() {
-        set_mt(AVOID_ZOI)
     },
     unit(u) {
         var piece = pieces[u]

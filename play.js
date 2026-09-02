@@ -8470,9 +8470,6 @@ function get_move_data() {
     if (result.sm_possible && (result.is_air_present || get_map_data(result.location).coastal)) {
         result.move_type |= STRAT_MOVE
     }
-    if (L.move_type & AVOID_ZOI && !has_zoi(result.location, 1 - G.active)) {
-        result.move_type |= AVOID_ZOI
-    }
     if (G.offensive.counter_offensive_card === MATADOR) {
         result.asp_points = 0
     }
@@ -8542,8 +8539,8 @@ function compute_air_move_hexes() {
     if ((L.move_type === STRAT_MOVE) && has_non_n_zoi(location, 1 - R)) {
         return []
     }
-    var avoid_zoi_flag = L.move_type === AVOID_ZOI
-    if ((L.move_type === AVOID_ZOI) && has_zoi(location, 1 - R)) {
+    var avoid_zoi_flag = L.avoid_zoi
+    if ((avoid_zoi_flag) && has_zoi(location, 1 - R)) {
         return []
     }
     const distance_map = [move_data.location, [0, 1, move_data.location]]
@@ -8657,7 +8654,7 @@ function compute_ground_naval_move_hexes() {
         if (L.move_type & BARGES_MOVE) {
             mt |= BARGES_MOVE
         }
-        if (L.move_type & AVOID_ZOI) {
+        if (L.avoid_zoi) {
             zoi_mask |= JP_ZOI << (1 - G.active)
             mt |= AVOID_ZOI
         }
@@ -8682,7 +8679,7 @@ function compute_ground_naval_move_hexes() {
             map_set(L.allowed_hexes, k, v)
         })
     }
-    if ((L.move_data.move_type & GROUND_MOVE) && (L.move_type !== AMPH_MOVE) && (L.move_type !== AVOID_ZOI)) {
+    if ((L.move_data.move_type & GROUND_MOVE) && (L.move_type !== AMPH_MOVE)) {
         compute_ground_move_hexes()
     }
     if (G.offensive.stage !== POST_BATTLE_STAGE) {
@@ -8696,10 +8693,7 @@ function compute_ground_naval_move_hexes() {
 
 function compute_ground_move_hexes() {
     var mt = GROUND_MOVE
-    if (L.move_data.move_type & AVOID_ZOI) {
-        mt |= AVOID_ZOI
-    }
-    map_for_each(get_ground_move(L.move_data.move_type & AVOID_ZOI), (k, v) => {
+    map_for_each(get_ground_move(), (k, v) => {
         v.unshift(mt)
         if (G.offensive.stage === ATTACK_STAGE && (L.move_data.is_new_battle_allowed || !is_faction_units(k, 1 - G.active))
             || set_has(G.offensive.battle_hexes, k)) {
@@ -8945,7 +8939,7 @@ function ground_move_denied(hex) {
     }
 }
 
-function get_ground_move(avoid_zoi) {
+function get_ground_move() {
     const location = L.move_data.location
     const move_data = L.move_data
     var max_distance = move_data.ground_move_distance
@@ -8953,9 +8947,6 @@ function get_ground_move(avoid_zoi) {
     var path = map_get(G.offensive.paths, G.active_stack[0])
     if (path) {
         spent_distance = path[1]
-    }
-    if (avoid_zoi && G.supply_cache[location] & JP_ZOI << (1 - G.active)) {
-        return []
     }
     const queue = [location]
     const distance_map = [location, [spent_distance, location]]
@@ -8969,7 +8960,7 @@ function get_ground_move(avoid_zoi) {
                 continue
             }
             var distance = base_distance[0] + get_ground_move_cost(item, nh, G.active)
-            if ((avoid_zoi && G.supply_cache[nh] & JP_ZOI << (1 - G.active)) || distance > max_distance || distance >= map_get(distance_map, nh, [100])[0]
+            if (distance > max_distance || distance >= map_get(distance_map, nh, [100])[0]
                 || ground_move_denied(nh)) {
                 continue
             }
@@ -10948,11 +10939,25 @@ function validate_action(verb, noun) {
     return false
 }
 
+function try_to_avoid_zoi(hex) {
+    if (G.offensive.zoi_intelligence_modifier || G.offensive.stage !== ATTACK_STAGE) {
+        return 0
+    }
+    L.avoid_zoi = true
+    L.allowed_hexes = []
+    update_move_hex()
+    return map_get(L.allowed_hexes, hex)
+}
+
 function proxy_send_action(a, b) {
     if (G.actions && G.actions.move && a === "action_hex") {
         var path = map_get(L.allowed_hexes, b)
         if (path) {
             if (G.offensive.stage === ATTACK_STAGE && !G.offensive.zoi_intelligence_modifier) {
+                var avoid_path = try_to_avoid_zoi(b)
+                if (avoid_path) {
+                    path = avoid_path
+                }
                 move_units(G.active_stack, path)
                 if (G.offensive.zoi_intelligence_modifier) {
                     path[0] |= VIOLATE_ZOI
