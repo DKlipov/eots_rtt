@@ -158,16 +158,16 @@ function compute_air_move_hexes() {
     L.allowed_hexes = []
     let move_data = L.move_data
     var move_type = AIR_MOVE
-    if (move_data.move_type & STRAT_MOVE) {
+    if (L.move_type & STRAT_MOVE) {
         move_type |= STRAT_MOVE
     }
-    if (move_data.move_type & AIR_EXTENDED_MOVE) {
+    if (L.move_type & AIR_EXTENDED_MOVE) {
         move_type |= AIR_EXTENDED_MOVE
     }
     if (L.move_type === STRAT_MOVE) {
         check_supply()
     }
-    var strat_flag = move_data.move_type & STRAT_MOVE
+    var strat_flag = L.move_type & STRAT_MOVE
     if ((L.move_type === STRAT_MOVE) && has_non_n_zoi(location, 1 - R)) {
         return []
     }
