@@ -59,8 +59,8 @@ function hex_center(i) {
         var box = map_layout.box_air_unit_in_china
         return center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
     }
-    let row = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
-    let column = (Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB))
+    var row = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
+    var column = (Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB))
     if (SID == BURMA_SCENARIO) {
         if (i == SINGAPORE) {
             const box = map_layout.label_singapore
@@ -69,7 +69,7 @@ function hex_center(i) {
         if (i > TUNNEL_BOX) {
             // display TUNNEL_BOX directly to the left of the blue singapore label
             const box = map_layout.label_singapore
-            let sing_left_coord = center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
+            var sing_left_coord = center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
             sing_left_coord[0] -= 47;
             return sing_left_coord;
         }

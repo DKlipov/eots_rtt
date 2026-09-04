@@ -4,7 +4,7 @@ function push_stack(stk, elt) {
 }
 
 function is_active_card(card) {
-    for (let a of CARD_ACTIONS) {
+    for (var a of CARD_ACTIONS) {
         if (G.actions && G.actions[a] && set_has(G.actions[a], card)) {
             return true
         }
@@ -27,12 +27,12 @@ function update_hand(side) {
     }
 
     if (!Array.isArray(G.hand[side])) {
-        for (let i = 0; i < G.hand[side]; i++) {
+        for (var i = 0; i < G.hand[side]; i++) {
             populate_generic("hand", side, side === JP ? "card card_jp_0" : "card card_ap_0").innerHTML = ''
         }
     } else {
-        for (let i = 0; i < G.hand[side].length; i++) {
-            let card = G.hand[side][i]
+        for (var i = 0; i < G.hand[side].length; i++) {
+            var card = G.hand[side][i]
             populate("hand", side, "card", card)
         }
     }
@@ -142,7 +142,7 @@ function get_control_marker(h) {
 }
 
 function update_role_info() {
-    for (let who = JP; who <= AP; who++) {
+    for (var who = JP; who <= AP; who++) {
         var hand_size = Number.isInteger(G.hand[who]) ? G.hand[who] : G.hand[who].length
         var fo = G.events[events.FUTURE_OFFENSIVE_JP.id + who]
         roles[who].stat.innerHTML = `${hand_size} cards${fo && fo < G.turn ? " + FO" : ""}${G.passes[who] ? ", " + G.passes[who] + " passes" : ""}`
@@ -156,7 +156,7 @@ function update_role_info() {
 function on_update() {
     begin_update()
     check_supply()
-    if (G.actions && !init_overstack_check(true, R)) {
+    if (G.actions && R >= 0 && !init_overstack_check(true, R)) {
         L.hexes = []
         L.allowed_units.forEach(u => set_add(L.hexes, G.location[u]))
         G.violations = L.hexes
@@ -277,7 +277,7 @@ function on_update() {
     }
     var oos_hex_set = []
     for (i = 0; i < G.oos.length; i++) {
-        let hex = G.location[G.oos[i]]
+        var hex = G.location[G.oos[i]]
         if (!set_has(oos_hex_set, hex) && hex <= LAST_BOARD_HEX && !set_has(supplied_hex, hex)) {
             populate_generic("s-loc", hex, counters.oos)
             set_add(oos_hex_set, hex)
@@ -295,7 +295,17 @@ function on_update() {
     }
 
     var focused = []
-    for_each_hex_in_range(world.range[0], world.range[1], hex => set_add(focused, hex))
+    if (world.range[0] && world.hq && G.location[world.hq] < LAST_BOARD_HEX) {
+        mark_activation_zone(world.hq)
+        for_each_hex_in_range(G.location[world.hq], pieces[world.hq].cr, hex => {
+            if (G.supply_cache[hex] & HEX_TEMP_FLAG3) {
+                set_add(focused, hex)
+            }
+        })
+    } else {
+        for_each_hex_in_range(world.range[0], world.range[1], hex => set_add(focused, hex))
+        focused = in_range_on_map(world.range[0], world.range[1], focused, AP)
+    }
     for (var hex of ALL_BOARD_HEXES) {
         update_keyword("zoi_hex", hex, "yellow", set_has(focused, hex))
     }
@@ -396,7 +406,7 @@ function on_update() {
     action_button("event", "Play Event")
     action_button("ops", "Play for Operations")
     action_button("hold", "Hold")
-    action_button("advanced_move", "Advanced move")
+    action_button("advanced_move", "More options")
     action_button("no_move", "No move")
     action_button("eliminate", "Eliminate")
     action_button("stop", "Stop")
@@ -420,6 +430,7 @@ function on_update() {
     action_button("skip", "Skip")
     action_button("range", "Range")
 
+    action_button("confirm", "Confirm")
     action_button("next", "Next")
     action_button("done", "Done")
     action_button("delay", "Delay")

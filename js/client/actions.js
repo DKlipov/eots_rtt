@@ -74,8 +74,17 @@ P.check_unit_supply = {
                 CANVAS_CTX.stroke();
             }
         })
+        var focused = []
+        if (LOCAL_STATE.unit && pieces[LOCAL_STATE.unit].class === "hq" && G.location[LOCAL_STATE.unit] < LAST_BOARD_HEX) {
+            for_each_hex_in_range(G.location[LOCAL_STATE.unit], pieces[LOCAL_STATE.unit].cr, hex => set_add(focused, hex))
+            focused = in_range_on_map(G.location[LOCAL_STATE.unit], pieces[LOCAL_STATE.unit].cr, focused, pieces[LOCAL_STATE.unit].faction)
+        }
+        for (var hex of ALL_BOARD_HEXES) {
+            update_keyword("zoi_hex", hex, "yellow", set_has(focused, hex))
+        }
     },
 }
+
 
 P.check_distance = {
     _begin() {
@@ -182,7 +191,10 @@ var send_action_with_oos = function (a, b, valid = false) {
     if (!valid && !validate_action(a, b)) {
         return false
     }
-    var payload = {action: b, oos: G.oos, br: G.burma_road}
+    var payload = {action: b, br: G.burma_road}
+    if (!array_equals(world.original_oos, G.oos)) {
+        payload.oos = G.oos
+    }
     G.actions[a] = [payload]
     return original_send_action(a, payload)
 }
@@ -192,7 +204,7 @@ function validate_action(verb, noun) {
         return false
     // Reset action list here so we don't send more than one action per server prompt!
     if (noun !== undefined) {
-        let realnoun = Array.isArray(noun) ? noun[0] : noun
+        var realnoun = Array.isArray(noun) ? noun[0] : noun
         if (view.actions && view.actions[verb] && view.actions[verb].includes(realnoun)) {
             return true
         }
@@ -204,11 +216,25 @@ function validate_action(verb, noun) {
     return false
 }
 
+function try_to_avoid_zoi(hex) {
+    if (G.offensive.zoi_intelligence_modifier || G.offensive.stage !== ATTACK_STAGE) {
+        return 0
+    }
+    L.avoid_zoi = true
+    L.allowed_hexes = []
+    update_move_hex()
+    return map_get(L.allowed_hexes, hex)
+}
+
 function proxy_send_action(a, b) {
     if (G.actions && G.actions.move && a === "action_hex") {
         var path = map_get(L.allowed_hexes, b)
         if (path) {
             if (G.offensive.stage === ATTACK_STAGE && !G.offensive.zoi_intelligence_modifier) {
+                var avoid_path = try_to_avoid_zoi(b)
+                if (avoid_path) {
+                    path = avoid_path
+                }
                 move_units(G.active_stack, path)
                 if (G.offensive.zoi_intelligence_modifier) {
                     path[0] |= VIOLATE_ZOI

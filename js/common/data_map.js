@@ -745,8 +745,8 @@ var map = [
         edges: [1, 1, 8, 1, 3, 1]
     },
     {id: 2818, region: "Celebes", terrain: MIXED, edges: [8, 3, 1, 1, 17, 3]},
-    {id: 2717, region: "Celebes", terrain: MIXED, edges: [8, 1, 3, 8, 2, 8]},
-    {id: 2618, region: "Celebes", terrain: MIXED, edges: [1, 2, 2, 2, 1, 1]},
+    {id: 2717, region: "Celebes", terrain: MIXED, edges: [8, 8, 3, 8, 10, 8]},
+    {id: 2618, region: "Celebes", terrain: MIXED, edges: [1, 10, 10, 2, 1, 1]},
     {id: 2718, region: "Celebes", terrain: MIXED, edges: [8, 17, 1, 3, 18, 2]},
     {id: 2619, region: "Celebes", terrain: MIXED, edges: [2, 18, 17, 3, 8, 8]},
     {

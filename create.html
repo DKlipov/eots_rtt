@@ -107,7 +107,7 @@
     <p> * Submarine warfare and B29 rolls automated.
 </div>
 <script>
-    let scenario = document.querySelector("select[name='scenario']");
+    var scenario = document.querySelector("select[name='scenario']");
     scenario.onchange = function (evt) {
         document.querySelectorAll(".scenario_info").forEach(e => e.hidden = true);
         document.getElementById(scenario.value).hidden = false;

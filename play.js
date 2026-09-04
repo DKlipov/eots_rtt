@@ -5869,8 +5869,8 @@ var map = [
         edges: [1, 1, 8, 1, 3, 1]
     },
     {id: 2818, region: "Celebes", terrain: MIXED, edges: [8, 3, 1, 1, 17, 3]},
-    {id: 2717, region: "Celebes", terrain: MIXED, edges: [8, 1, 3, 8, 2, 8]},
-    {id: 2618, region: "Celebes", terrain: MIXED, edges: [1, 2, 2, 2, 1, 1]},
+    {id: 2717, region: "Celebes", terrain: MIXED, edges: [8, 8, 3, 8, 10, 8]},
+    {id: 2618, region: "Celebes", terrain: MIXED, edges: [1, 10, 10, 2, 1, 1]},
     {id: 2718, region: "Celebes", terrain: MIXED, edges: [8, 17, 1, 3, 18, 2]},
     {id: 2619, region: "Celebes", terrain: MIXED, edges: [2, 18, 17, 3, 8, 8]},
     {
@@ -7287,12 +7287,12 @@ function get_direction(from, to) {
 }
 
 function get_edge_hexes(hex) {
-    let y = hex % 29
-    let x = (hex - y) / 29
+    var y = hex % 29
+    var x = (hex - y) / 29
 
-    let y_diff = 1 - (x % 2)
-    let y1_diff = 1 - y_diff
-    let result = []
+    var y_diff = 1 - (x % 2)
+    var y1_diff = 1 - y_diff
+    var result = []
     result.push((-y >> 31) * hex * -1 - 1)                                                                          //N or -1
     result.push((-((x - 50 >> 31) & (-y1_diff | -hex % 29 >> 31)) - 1) * (hex + 30 - y_diff) + hex + 29 - y_diff)   //NE or -1
     result.push((-((x - 50 >> 31) & ((-hex - 1) % 29 >> 31)) - 1) * (hex + 30 + y1_diff) + hex + 29 + y1_diff)      //SE or -1
@@ -7379,15 +7379,15 @@ function slow_in_range(first_hex, range, hexes, faction) {
     var result = []
     distance_map[first_hex] = 1
     for (var i = 0; i < queue.length; i++) {
-        let item = queue[i]
+        var item = queue[i]
         var distance = distance_map[item] + 1
         var MD = get_map_data(item)
-        let nh_list = get_near_hexes(item)
+        var nh_list = get_near_hexes(item)
         if (faction === JP && MD.region === "IChina" || !nh_list) {
             continue
         }
-        for (let j = 0; j < nh_list.length; j++) {
-            let nh = nh_list[j]
+        for (var j = 0; j < nh_list.length; j++) {
+            var nh = nh_list[j]
             if (nh <= 0) {
                 continue
             }
@@ -7399,7 +7399,7 @@ function slow_in_range(first_hex, range, hexes, faction) {
         }
     }
     hexes.forEach(h => {
-        if (distance_map[h]) {
+        if (distance_map[h] && (faction !== JP || get_map_data(h).region !== "IChina")) {
             set_add(result, h)
         }
     })
@@ -7473,10 +7473,26 @@ function units_str(units) {
 
 function scenario_data() {
     return SCENARIO_DATA[G.sid]
+}
+
+function solely_occupied_land(hex, faction) {
+    return G.supply_cache[hex] & JP_GAH_UNITS << (faction) && !(G.supply_cache[hex] & JP_GAH_UNITS << (1 - faction))
+}
+
+function array_equals(a, b) {
+    if (a.length !== b.length) {
+        return false
+    }
+    for (var i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) {
+            return false
+        }
+    }
+    return true
 }/** import common/utils.js*/
 /** import supply.js*/
-let last = Date.now()
-let count = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+var last = Date.now()
+var count = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 function check_supplied_hexes(faction) {
     check_supply()
@@ -7489,7 +7505,7 @@ function check_supplied_hexes(faction) {
     L.supply = 0
 }
 
-function check_supply() {
+function basic_check_supply() {
     L.supply = {}
     clear_supply_cache(CLEAN_ALL_MASK)
     G.burma_road = 0
@@ -7541,6 +7557,7 @@ function fast_check_supply() {
     L.supply = 0
 }
 
+var check_supply = basic_check_supply
 if (CLIENT_SIDE_SUPPLY) {
     check_supply = fast_check_supply
 }
@@ -8312,6 +8329,44 @@ function check_japan_resource_trace() {
         }
     }
     return false
+}
+
+function mark_activation_zone(hq) {
+    clear_supply_cache(CLEAN_ATTACK_ZONE_MASK)
+    const location = G.location[hq]
+    G.supply_cache[location] |= HEX_TEMP_FLAG3
+    const range = pieces[hq].cr
+    const faction = pieces[hq].faction
+    let queue = [location]
+    const distance_map = [location, 0]
+    for (var i = 0; i < queue.length; i++) {
+        let item = queue[i]
+        let nh_list = get_near_hexes(item)
+        const MD = get_map_data(item)
+        if (faction === JP && MD.region === "IChina") {
+            continue
+        }
+        const distance = map_get(distance_map, item) + 1
+        const non_neutral_zoi = has_non_n_zoi(item, 1 - faction)
+        const occupied_land = solely_occupied_land(item, 1 - faction)
+        for (let j = 0; j < nh_list.length; j++) {
+            let nh = nh_list[j]
+            if (nh <= 0) {
+                continue
+            }
+            if (map_get(distance_map, nh, 100) > distance
+                && (
+                    (MD.edges_int & UNPLAYABLE_LAND << 5 * j && !occupied_land && !solely_occupied_land(nh, 1 - faction)) ||
+                    (MD.edges_int & UNPLAYABLE_WATER << 5 * j && !non_neutral_zoi && !has_non_n_zoi(nh, 1 - faction))
+                )) {
+                map_set(distance_map, nh, distance)
+                G.supply_cache[nh] |= HEX_TEMP_FLAG3
+                if (distance < range) {
+                    queue.push(nh)
+                }
+            }
+        }
+    }
 }/** import supply.js*/
 /** import move.js*/
 function update_move_hex() {
@@ -8326,7 +8381,7 @@ function update_move_hex() {
         return compute_barges_pbm()
     } else if (L.move_data.is_air_present) {
         compute_air_move_hexes()
-    } else if (L.move_data.move_type & STRAT_MOVE) {
+    } else if (L.move_type & STRAT_MOVE) {
         compute_ground_naval_strat_move()
     } else {
         compute_ground_naval_move_hexes()
@@ -8334,7 +8389,7 @@ function update_move_hex() {
 }
 
 function get_move_data() {
-    let result = {
+    var result = {
         is_new_battle_allowed: false,
         is_ground_present: false,
         is_air_present: false,
@@ -8356,7 +8411,7 @@ function get_move_data() {
         result.move_type |= REACTION_MOVE
     }
     G.active_stack.forEach(u => {
-        let piece = pieces[u]
+        var piece = pieces[u]
         if (piece.class === "ground") {
             result.is_ground_present = true
         } else if (piece.class === "naval") {
@@ -8412,16 +8467,13 @@ function get_move_data() {
     if (G.offensive.stage === REACTION_STAGE) {
         asp_total = Math.min(asp_total, 1 - G.offensive.r_asp)
     }
-    if (result.sm_possible && L.move_type & STRAT_MOVE) {
+    if (result.sm_possible && (result.is_air_present || get_map_data(result.location).coastal)) {
         result.move_type |= STRAT_MOVE
-    }
-    if (L.move_type & AVOID_ZOI) {
-        result.move_type |= AVOID_ZOI
     }
     if (G.offensive.counter_offensive_card === MATADOR) {
         result.asp_points = 0
     }
-    if (result.is_ground_present && asp_move && result.asp_points <= asp_total) {
+    if (result.is_ground_present && asp_move && result.asp_points <= asp_total && get_map_data(result.location).coastal) {
         result.move_type |= AMPH_MOVE
         if (organic_only_ships) {
             result.move_type |= ORGANIC_ONLY
@@ -8474,21 +8526,21 @@ function compute_air_move_hexes() {
     L.allowed_hexes = []
     let move_data = L.move_data
     var move_type = AIR_MOVE
-    if (move_data.move_type & STRAT_MOVE) {
+    if (L.move_type & STRAT_MOVE) {
         move_type |= STRAT_MOVE
     }
-    if (move_data.move_type & AIR_EXTENDED_MOVE) {
+    if (L.move_type & AIR_EXTENDED_MOVE) {
         move_type |= AIR_EXTENDED_MOVE
     }
     if (L.move_type === STRAT_MOVE) {
         check_supply()
     }
-    var strat_flag = move_data.move_type & STRAT_MOVE
+    var strat_flag = L.move_type & STRAT_MOVE
     if ((L.move_type === STRAT_MOVE) && has_non_n_zoi(location, 1 - R)) {
         return []
     }
-    var avoid_zoi_flag = L.move_type === AVOID_ZOI
-    if ((L.move_type === AVOID_ZOI) && has_zoi(location, 1 - R)) {
+    var avoid_zoi_flag = L.avoid_zoi
+    if ((avoid_zoi_flag) && has_zoi(location, 1 - R)) {
         return []
     }
     const distance_map = [move_data.location, [0, 1, move_data.location]]
@@ -8599,11 +8651,11 @@ function compute_ground_naval_move_hexes() {
             zoi_mask = zoi_mask | JP_NAVAL_UNITS << (1 - R)
         }
         mt = NAVAL_MOVE
-        if (move_data.move_type & BARGES_MOVE) {
+        if (L.move_type & BARGES_MOVE) {
             mt |= BARGES_MOVE
         }
-        if (move_data.move_type & AVOID_ZOI) {
-            zoi_mask = zoi_mask | JP_ZOI << (1 - R)
+        if (L.avoid_zoi) {
+            zoi_mask |= JP_ZOI << (1 - G.active)
             mt |= AVOID_ZOI
         }
         if (G.offensive.stage === POST_BATTLE_STAGE && move_data.is_ground_present) {
@@ -8624,9 +8676,7 @@ function compute_ground_naval_move_hexes() {
                 m_mt |= AMPH_MOVE
             }
             v.unshift(m_mt)
-            if (!move_data.is_ground_present || L.move_type === AMPH_MOVE || L.move_type === BARGES_MOVE || get_distance(move_data.location, k) > 1 || G.offensive.stage !== ATTACK_STAGE) {
-                map_set(L.allowed_hexes, k, v)
-            }
+            map_set(L.allowed_hexes, k, v)
         })
     }
     if ((L.move_data.move_type & GROUND_MOVE) && (L.move_type !== AMPH_MOVE)) {
@@ -8643,10 +8693,7 @@ function compute_ground_naval_move_hexes() {
 
 function compute_ground_move_hexes() {
     var mt = GROUND_MOVE
-    if (L.move_data.move_type & AVOID_ZOI) {
-        mt |= AVOID_ZOI
-    }
-    map_for_each(get_ground_move(L.move_data.move_type & AVOID_ZOI), (k, v) => {
+    map_for_each(get_ground_move(), (k, v) => {
         v.unshift(mt)
         if (G.offensive.stage === ATTACK_STAGE && (L.move_data.is_new_battle_allowed || !is_faction_units(k, 1 - G.active))
             || set_has(G.offensive.battle_hexes, k)) {
@@ -8819,7 +8866,7 @@ function get_naval_move(zoi_mask) {
         var port_transport = (get_map_data(nh).port && is_space_controlled(nh, R) && (!move_data.is_ground_present || !move_data.is_naval_present || G.offensive.stage === POST_BATTLE_STAGE || (L.move_type === AMPH_MOVE)))
         var ground_pbm = G.offensive.stage === POST_BATTLE_STAGE && !move_data.is_naval_present
             && get_map_data(nh).terrain > OCEAN
-            && (get_map_data(nh).named && is_space_controlled(nh, R) || is_faction_units(nh, R))
+            && (get_map_data(nh).named && is_space_controlled(nh, R) || is_faction_ground_units(nh, R))
             && (!is_space_controlled(nh, 1 - G.active) || !is_controllable_hex(nh))
         var aa_landing = move_data.move_type & AMPH_MOVE
             && is_hex_asp_capable(nh)
@@ -8892,7 +8939,7 @@ function ground_move_denied(hex) {
     }
 }
 
-function get_ground_move(avoid_zoi) {
+function get_ground_move() {
     const location = L.move_data.location
     const move_data = L.move_data
     var max_distance = move_data.ground_move_distance
@@ -8900,9 +8947,6 @@ function get_ground_move(avoid_zoi) {
     var path = map_get(G.offensive.paths, G.active_stack[0])
     if (path) {
         spent_distance = path[1]
-    }
-    if (avoid_zoi && G.supply_cache[location] & JP_ZOI << (1 - G.active)) {
-        return []
     }
     const queue = [location]
     const distance_map = [location, [spent_distance, location]]
@@ -8916,7 +8960,7 @@ function get_ground_move(avoid_zoi) {
                 continue
             }
             var distance = base_distance[0] + get_ground_move_cost(item, nh, G.active)
-            if ((avoid_zoi && G.supply_cache[nh] & JP_ZOI << (1 - G.active)) || distance > max_distance || distance >= map_get(distance_map, nh, [100])[0]
+            if (distance > max_distance || distance >= map_get(distance_map, nh, [100])[0]
                 || ground_move_denied(nh)) {
                 continue
             }
@@ -9122,7 +9166,6 @@ function append_path(unit, path) {
 
 function move_units(units, path) {
     check_units()
-
     var full_path = append_path(units[0], path)
     units.forEach(u => {
         map_set(G.offensive.paths, u, full_path.slice())
@@ -9134,7 +9177,7 @@ function move_units(units, path) {
     }
     var i = 2
     var zoi_cross_denied = path[0] & STRAT_MOVE || path[0] & AMPH_MOVE && !L.move_data.battle_range
-    var zoi_cross_declared = !zoi_cross_denied && path[0] & VIOLATE_ZOI
+    var zoi_cross_declared = path[0] & VIOLATE_ZOI
     var could_zoi_cross = !G.offensive.zoi_intelligence_modifier && G.offensive.stage === ATTACK_STAGE && pieces[units[0]].faction === G.offensive.attacker
     var could_zoi_change = G.active_stack.filter(u => pieces[u].zoi_generator).length
         || (path[0] & GROUND_MOVE) && G.active_stack.filter(u => pieces[u].class === "ground").length
@@ -9157,7 +9200,7 @@ function move_units(units, path) {
     i = 2
     var destination = path[path.length - 1]
     log(`${units_list} moved to ${list_get_log_str(hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
-    if (zoi_cross_declared && could_zoi_cross) {
+    if (could_zoi_cross && zoi_cross_declared) {
         zoi_crossed()
         could_zoi_cross = false
         supply_checked = true
@@ -9407,10 +9450,10 @@ function victory_burma() {
         result.text.push(`1 VP - War in Europe < 0`)
     }
     //F. For controlling each hex of Northern India, +1 VP per hex
-    let india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
+    var india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
     adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
     //G. For India Unrest or Strikes, +1 Victory Point (awarded on the last game turn)
-    let india_status = G.surrender[nations.INDIA.id]
+    var india_status = G.surrender[nations.INDIA.id]
     if (india_status > 0 && india_status <= 2) {
         result.vp += 1
         result.text.push(`+1 VP - India ${nations.INDIA.statuses[india_status]}.`)
@@ -9480,7 +9523,7 @@ function victory_1942() {
     }
     binary_vp(result, G.surrender[nations.AUSTRALIAN_MANDATES.id], 1, "JP Control of Australian Mandates", `AP Control of Australian Mandates`)
     var new_guinea = 0
-    nations.NEW_GUINEA.keys.forEach(h => {
+    nations.NEW_GUINEA.keys.map(k=>hex_to_int(k)).forEach(h => {
         if (is_space_controlled(h, JP) && get_map_data(h).port && get_map_data(h).region === "Guinea") {
             new_guinea++
         }
@@ -9524,7 +9567,7 @@ function victory_1942() {
 }
 
 function check_supply_line(hex1, hex2, faction) {
-    let queue = [hex1]
+    var queue = [hex1]
     const overland_set = []
     const oversea_set = []
     if (!is_space_controlled(hex1, faction) || !is_space_controlled(hex2, faction)) {
@@ -9537,8 +9580,8 @@ function check_supply_line(hex1, hex2, faction) {
         oversea_set.push(hex1)
     }
     for (var i = 0; i < queue.length; i++) {
-        let item = queue[i]
-        let nh_list = get_near_hexes(item)
+        var item = queue[i]
+        var nh_list = get_near_hexes(item)
         const MD = get_map_data(item)
         const overland = set_has(overland_set, item)
         const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))
@@ -9884,12 +9927,12 @@ function victory_south_pacific() {
     } else {
         result.text.push(`0 VP - No one controls New Guinea.`)
     }
-    var heb = NEW_HEBRIDES.filter(h => is_space_controlled(h, JP) && get_map_data(h).region === "Hebrides" && get_map_data(h).port).length
+    var heb = NEW_HEBRIDES.filter(h => is_space_controlled(h, JP) && get_map_data(h).port).length
     binary_vp(result, heb, 1, "JP control of New Hebrides port",
         "No JP control of any New Hebrides port", NEW_HEBRIDES.filter(h => is_space_controlled(h, JP)))
-    var aus = nations.AUSTRALIA.keys.filter(h => is_space_controlled(h, JP) && get_map_data(h).region === "Australia" && get_map_data(h).port).length
+    var aus = nations.AUSTRALIA.keys.map(k => hex_to_int(k)).filter(h => is_space_controlled(h, JP) && get_map_data(h).port).length
     binary_vp(result, aus, 1, "JP control of Australia mainland port",
-        "No JP control of any Australia mainland port", nations.AUSTRALIA.keys.filter(h => is_space_controlled(h, JP)))
+        "No JP control of any Australia mainland port", nations.AUSTRALIA.keys.map(k => hex_to_int(k)).filter(h => is_space_controlled(h, JP)))
     return result
 }
 
@@ -10395,8 +10438,8 @@ const BURMA_BOARD_INFO = {
     "TURN_STACK_PARAMS": VERTICAL_TURN_STACK_PARAMS,
     "TRACK_STACK_PARAMS": VERTICAL_TURN_STACK_PARAMS,
     "hex_check": (i) => {
-        let x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
-        let y = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
+        var x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
+        var y = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
 
 
         if (x == 15 && y > 9) {
@@ -10431,8 +10474,8 @@ const SOUTH_PAC_BOARD_INFO = {
         if (int_to_hex(i) === 4818 || int_to_hex(i) === 4918) {
             return true
         }
-        let x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
-        let y = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
+        var x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
+        var y = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
 
         if (SP_BORDER[x] && y < SP_BORDER[x]) {
             return false
@@ -10469,6 +10512,14 @@ for (var i = 0; i < sp_map.length; i++) {
 
 function set_map_size(w, h) {
     update_map_size(w, h)
+}
+
+check_supply = function () {
+    if (!G.client_supply) {
+        world.original_oos = G.oos
+    }
+    basic_check_supply()
+    G.client_supply = 1
 }
 
 function on_init(scenario, game_options, static_view) {
@@ -10746,8 +10797,17 @@ P.check_unit_supply = {
                 CANVAS_CTX.stroke();
             }
         })
+        var focused = []
+        if (LOCAL_STATE.unit && pieces[LOCAL_STATE.unit].class === "hq" && G.location[LOCAL_STATE.unit] < LAST_BOARD_HEX) {
+            for_each_hex_in_range(G.location[LOCAL_STATE.unit], pieces[LOCAL_STATE.unit].cr, hex => set_add(focused, hex))
+            focused = in_range_on_map(G.location[LOCAL_STATE.unit], pieces[LOCAL_STATE.unit].cr, focused, pieces[LOCAL_STATE.unit].faction)
+        }
+        for (var hex of ALL_BOARD_HEXES) {
+            update_keyword("zoi_hex", hex, "yellow", set_has(focused, hex))
+        }
     },
 }
+
 
 P.check_distance = {
     _begin() {
@@ -10854,7 +10914,10 @@ var send_action_with_oos = function (a, b, valid = false) {
     if (!valid && !validate_action(a, b)) {
         return false
     }
-    var payload = {action: b, oos: G.oos, br: G.burma_road}
+    var payload = {action: b, br: G.burma_road}
+    if (!array_equals(world.original_oos, G.oos)) {
+        payload.oos = G.oos
+    }
     G.actions[a] = [payload]
     return original_send_action(a, payload)
 }
@@ -10864,7 +10927,7 @@ function validate_action(verb, noun) {
         return false
     // Reset action list here so we don't send more than one action per server prompt!
     if (noun !== undefined) {
-        let realnoun = Array.isArray(noun) ? noun[0] : noun
+        var realnoun = Array.isArray(noun) ? noun[0] : noun
         if (view.actions && view.actions[verb] && view.actions[verb].includes(realnoun)) {
             return true
         }
@@ -10876,11 +10939,25 @@ function validate_action(verb, noun) {
     return false
 }
 
+function try_to_avoid_zoi(hex) {
+    if (G.offensive.zoi_intelligence_modifier || G.offensive.stage !== ATTACK_STAGE) {
+        return 0
+    }
+    L.avoid_zoi = true
+    L.allowed_hexes = []
+    update_move_hex()
+    return map_get(L.allowed_hexes, hex)
+}
+
 function proxy_send_action(a, b) {
     if (G.actions && G.actions.move && a === "action_hex") {
         var path = map_get(L.allowed_hexes, b)
         if (path) {
             if (G.offensive.stage === ATTACK_STAGE && !G.offensive.zoi_intelligence_modifier) {
+                var avoid_path = try_to_avoid_zoi(b)
+                if (avoid_path) {
+                    path = avoid_path
+                }
                 move_units(G.active_stack, path)
                 if (G.offensive.zoi_intelligence_modifier) {
                     path[0] |= VIOLATE_ZOI
@@ -11079,7 +11156,7 @@ function toggle_dialog(id, response) {
 
 function show_dialog(id, dialog_generator) {
     document.getElementById(id).classList.add("show")
-    let body = document.getElementById(id).querySelector(".dialog_body")
+    var body = document.getElementById(id).querySelector(".dialog_body")
     body.replaceChildren()
     if (dialog_generator) {
         dialog_generator(body)
@@ -11093,8 +11170,8 @@ function hide_dialog(id) {
 }
 
 function toggle_dialog_collapse(id) {
-    let dialog_body = document.getElementById(id).querySelector(".dialog_body")
-    let dialog_x = document.getElementById(id).querySelector(".dialog_x")
+    var dialog_body = document.getElementById(id).querySelector(".dialog_body")
+    var dialog_x = document.getElementById(id).querySelector(".dialog_x")
     if (dialog_body.className.includes("hide")) {
         dialog_body.classList.remove("hide")
         dialog_x.textContent = "A"
@@ -11152,14 +11229,14 @@ function is_mobile() {
 function show_card_list(id, response) {
     id = response
     show_dialog(id, (body) => {
-        let dl = document.createElement("dl")
-        let append_header = (text) => {
-            let header = document.createElement("dt")
+        var dl = document.createElement("dl")
+        var append_header = (text) => {
+            var header = document.createElement("dt")
             header.textContent = text
             dl.appendChild(header)
         }
-        let append_card = (c) => {
-            let p = document.createElement("dd")
+        var append_card = (c) => {
+            var p = document.createElement("dd")
             p.className = "cardtip"
             p.onmouseenter = () => on_focus_card_tip(c)
             p.onmouseleave = () => on_blur_tip()
@@ -11190,7 +11267,7 @@ function show_card_list(id, response) {
 function pw_dialog(id, response) {
     var response = pw_query()
     show_dialog(id, (body) => {
-        let dl = document.createElement("dl")
+        var dl = document.createElement("dl")
         var header = document.createElement("dt");
         header.appendChild(create_icon(...counters.pw.split(" ")))
         header.innerHTML += ` Current Political Will: ${G.political_will}.`
@@ -11212,7 +11289,7 @@ function pw_dialog(id, response) {
 
 function create_unit_display(data_id) {
     const piece = pieces[data_id]
-    let p = document.createElement("div")
+    var p = document.createElement("div")
     p.classList.add(...piece.counter.split(' '))
     p.classList.add("d-piece", "unit", "piece")
     //adapted the world.js tooltip_image to work here,
@@ -11239,7 +11316,7 @@ function elim_dialog(name, response) {
 
     show_dialog(name, (body) => {
         var elim = [[], [], [], []]
-        for (let i = 1; i < pieces.length; i++) {
+        for (var i = 1; i < pieces.length; i++) {
             const piece = pieces[i]
             if (G.location[i] === ELIMINATED_BOX || G.location[i] === PERM_ELIMINATED) {
                 if (piece.notreplaceable || G.location[i] === PERM_ELIMINATED) {
@@ -11249,7 +11326,7 @@ function elim_dialog(name, response) {
                 }
             }
         }
-        let create_sub_container = (parent, text, units) => {
+        var create_sub_container = (parent, text, units) => {
             let small_sub_cont = document.createElement("div")
             let big_sub_cont = document.createElement("div")
             let header = document.createElement("dt")
@@ -11680,7 +11757,7 @@ function push_stack(stk, elt) {
 }
 
 function is_active_card(card) {
-    for (let a of CARD_ACTIONS) {
+    for (var a of CARD_ACTIONS) {
         if (G.actions && G.actions[a] && set_has(G.actions[a], card)) {
             return true
         }
@@ -11703,12 +11780,12 @@ function update_hand(side) {
     }
 
     if (!Array.isArray(G.hand[side])) {
-        for (let i = 0; i < G.hand[side]; i++) {
+        for (var i = 0; i < G.hand[side]; i++) {
             populate_generic("hand", side, side === JP ? "card card_jp_0" : "card card_ap_0").innerHTML = ''
         }
     } else {
-        for (let i = 0; i < G.hand[side].length; i++) {
-            let card = G.hand[side][i]
+        for (var i = 0; i < G.hand[side].length; i++) {
+            var card = G.hand[side][i]
             populate("hand", side, "card", card)
         }
     }
@@ -11818,7 +11895,7 @@ function get_control_marker(h) {
 }
 
 function update_role_info() {
-    for (let who = JP; who <= AP; who++) {
+    for (var who = JP; who <= AP; who++) {
         var hand_size = Number.isInteger(G.hand[who]) ? G.hand[who] : G.hand[who].length
         var fo = G.events[events.FUTURE_OFFENSIVE_JP.id + who]
         roles[who].stat.innerHTML = `${hand_size} cards${fo && fo < G.turn ? " + FO" : ""}${G.passes[who] ? ", " + G.passes[who] + " passes" : ""}`
@@ -11832,7 +11909,7 @@ function update_role_info() {
 function on_update() {
     begin_update()
     check_supply()
-    if (G.actions && !init_overstack_check(true, R)) {
+    if (G.actions && R >= 0 && !init_overstack_check(true, R)) {
         L.hexes = []
         L.allowed_units.forEach(u => set_add(L.hexes, G.location[u]))
         G.violations = L.hexes
@@ -11953,7 +12030,7 @@ function on_update() {
     }
     var oos_hex_set = []
     for (i = 0; i < G.oos.length; i++) {
-        let hex = G.location[G.oos[i]]
+        var hex = G.location[G.oos[i]]
         if (!set_has(oos_hex_set, hex) && hex <= LAST_BOARD_HEX && !set_has(supplied_hex, hex)) {
             populate_generic("s-loc", hex, counters.oos)
             set_add(oos_hex_set, hex)
@@ -11971,7 +12048,17 @@ function on_update() {
     }
 
     var focused = []
-    for_each_hex_in_range(world.range[0], world.range[1], hex => set_add(focused, hex))
+    if (world.range[0] && world.hq && G.location[world.hq] < LAST_BOARD_HEX) {
+        mark_activation_zone(world.hq)
+        for_each_hex_in_range(G.location[world.hq], pieces[world.hq].cr, hex => {
+            if (G.supply_cache[hex] & HEX_TEMP_FLAG3) {
+                set_add(focused, hex)
+            }
+        })
+    } else {
+        for_each_hex_in_range(world.range[0], world.range[1], hex => set_add(focused, hex))
+        focused = in_range_on_map(world.range[0], world.range[1], focused, AP)
+    }
     for (var hex of ALL_BOARD_HEXES) {
         update_keyword("zoi_hex", hex, "yellow", set_has(focused, hex))
     }
@@ -12072,7 +12159,7 @@ function on_update() {
     action_button("event", "Play Event")
     action_button("ops", "Play for Operations")
     action_button("hold", "Hold")
-    action_button("advanced_move", "Advanced move")
+    action_button("advanced_move", "More options")
     action_button("no_move", "No move")
     action_button("eliminate", "Eliminate")
     action_button("stop", "Stop")
@@ -12096,6 +12183,7 @@ function on_update() {
     action_button("skip", "Skip")
     action_button("range", "Range")
 
+    action_button("confirm", "Confirm")
     action_button("next", "Next")
     action_button("done", "Done")
     action_button("delay", "Delay")
@@ -12213,8 +12301,8 @@ function hex_center(i) {
         var box = map_layout.box_air_unit_in_china
         return center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
     }
-    let row = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
-    let column = (Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB))
+    var row = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
+    var column = (Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB))
     if (SID == BURMA_SCENARIO) {
         if (i == SINGAPORE) {
             const box = map_layout.label_singapore
@@ -12223,7 +12311,7 @@ function hex_center(i) {
         if (i > TUNNEL_BOX) {
             // display TUNNEL_BOX directly to the left of the blue singapore label
             const box = map_layout.label_singapore
-            let sing_left_coord = center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
+            var sing_left_coord = center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
             sing_left_coord[0] -= 47;
             return sing_left_coord;
         }
@@ -12376,7 +12464,7 @@ function on_log(text, i) {
 }
 
 function format_card_info(c) {
-    let text = "C" + c
+    var text = "C" + c
     return escape_text(text)
 }
 
@@ -12454,14 +12542,14 @@ function escaped_list(match, p1) {
 }
 
 function on_focus_list(parent) {
-    for (let el of parent.children[1].children) {
+    for (var el of parent.children[1].children) {
         el.onmouseenter();
     }
     on_blur_tip() //prevent unit tooltip from showing
 }
 
 function on_blur_list(parent) {
-    for (let el of parent.children[1].children) {
+    for (var el of parent.children[1].children) {
         el.onmouseleave();
     }
 }
@@ -12500,6 +12588,7 @@ function unit_tooltip_image(a, onoff) {
 }
 
 function on_focus_unit_tip(a) {
+    world.hq = 0
     world.tip.hidden = false//is_mobile()
     const piece = pieces[a]
     // Show BOTH sides of the marker
@@ -12511,8 +12600,11 @@ function on_focus_unit_tip(a) {
     var prev = world.range[0]
     if (piece.class === "hq" && G.location[a] < LAST_BOARD_HEX) {
         world.range = [G.location[a], pieces[a].cr]
+        world.hq = a
         if (a === HQ_CENTRAL_PACIFIC && G.sid === SOUTH_PACIFIC_SCENARIO) {
             world.range = [hex_to_int(5226), 5]
+        } else {
+
         }
     } else {
         world.range = [0, 0]
@@ -12526,6 +12618,7 @@ function on_blur_tip() {
     world.tip.hidden = true
     world.tip.innerHTML = ""
     world.tip.classList = ''
+    world.hq = 0
     if (world.range[0]) {
         world.range = [0, 0]
         on_update()

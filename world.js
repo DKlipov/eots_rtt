@@ -99,6 +99,7 @@ const world = {
     animate_list: [],
     keyword_list: [],
     text_list: [],
+    hq: 0,
     range: [0, 0],
     log_boxes: [],
     violations: [],
@@ -495,7 +496,7 @@ function define_track(action, a, b, layout, type_func, orientation = "auto", gap
             orientation = "h"
         }
     }
-    let total_length, layout_func;
+    var total_length, layout_func;
     switch (orientation) {
         case "v":
             total_length = h
@@ -509,13 +510,13 @@ function define_track(action, a, b, layout, type_func, orientation = "auto", gap
             throw new Error(`Invalid parameter: ${orientation} valid parameter: "auto", "v", "h"`)
     }
     const cell_length = (total_length - gap * (n - 1)) / n
-    let id_arr;
+    var id_arr;
     if (a < b) {
         id_arr = Array.from({length: n}, (x, i) => i + a)
     } else {
         id_arr = Array.from({length: n}, (x, i) => a - i)
     }
-    for (let i = 0; i < n; ++i) {
+    for (var i = 0; i < n; ++i) {
         type_func(action, id_arr[i], layout_func(i), ...args)
     }
 }
@@ -838,7 +839,7 @@ function _layout_stacks() {
         return (typeof x === "function") ? x(n, stack) : x
     }
 
-    let cache = []
+    var cache = []
     for (var stack of world.stack_list) {
         var padding = stack.element.parentElement.my_padding
 
@@ -889,8 +890,8 @@ function _layout_stacks() {
         // use stack-local coords for children
         start_x -= stack.element.offsetLeft
         start_y -= stack.element.offsetTop
-        let sub_cache = []
-        let i = 0, k = 0, sh = 0
+        var sub_cache = []
+        var i = 0, k = 0, sh = 0
         var childs = stack.my_stack.sort_children(stack.element.children, world.focus === stack)
         for (var child of childs) {
             var [w, h] = get_child_size(child)

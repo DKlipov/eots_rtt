@@ -31,12 +31,12 @@ function get_direction(from, to) {
 }
 
 function get_edge_hexes(hex) {
-    let y = hex % 29
-    let x = (hex - y) / 29
+    var y = hex % 29
+    var x = (hex - y) / 29
 
-    let y_diff = 1 - (x % 2)
-    let y1_diff = 1 - y_diff
-    let result = []
+    var y_diff = 1 - (x % 2)
+    var y1_diff = 1 - y_diff
+    var result = []
     result.push((-y >> 31) * hex * -1 - 1)                                                                          //N or -1
     result.push((-((x - 50 >> 31) & (-y1_diff | -hex % 29 >> 31)) - 1) * (hex + 30 - y_diff) + hex + 29 - y_diff)   //NE or -1
     result.push((-((x - 50 >> 31) & ((-hex - 1) % 29 >> 31)) - 1) * (hex + 30 + y1_diff) + hex + 29 + y1_diff)      //SE or -1
@@ -123,15 +123,15 @@ function slow_in_range(first_hex, range, hexes, faction) {
     var result = []
     distance_map[first_hex] = 1
     for (var i = 0; i < queue.length; i++) {
-        let item = queue[i]
+        var item = queue[i]
         var distance = distance_map[item] + 1
         var MD = get_map_data(item)
-        let nh_list = get_near_hexes(item)
+        var nh_list = get_near_hexes(item)
         if (faction === JP && MD.region === "IChina" || !nh_list) {
             continue
         }
-        for (let j = 0; j < nh_list.length; j++) {
-            let nh = nh_list[j]
+        for (var j = 0; j < nh_list.length; j++) {
+            var nh = nh_list[j]
             if (nh <= 0) {
                 continue
             }
@@ -143,7 +143,7 @@ function slow_in_range(first_hex, range, hexes, faction) {
         }
     }
     hexes.forEach(h => {
-        if (distance_map[h]) {
+        if (distance_map[h] && (faction !== JP || get_map_data(h).region !== "IChina")) {
             set_add(result, h)
         }
     })
@@ -217,4 +217,20 @@ function units_str(units) {
 
 function scenario_data() {
     return SCENARIO_DATA[G.sid]
+}
+
+function solely_occupied_land(hex, faction) {
+    return G.supply_cache[hex] & JP_GAH_UNITS << (faction) && !(G.supply_cache[hex] & JP_GAH_UNITS << (1 - faction))
+}
+
+function array_equals(a, b) {
+    if (a.length !== b.length) {
+        return false
+    }
+    for (var i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) {
+            return false
+        }
+    }
+    return true
 }

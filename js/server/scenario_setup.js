@@ -205,7 +205,7 @@ function setup_scenario_1942(options) {
         G.options = {historical: true}
     }
 
-    for (let i = 1; i < pieces.length; i++) {
+    for (var i = 1; i < pieces.length; i++) {
         var piece = pieces[i]
         if (piece.reinforcement !== 2) {
             continue
@@ -329,7 +329,7 @@ function setup_scenario_1943() {
             G.location[i] = NOT_USED
         }
     }
-    for (let i = 1; i < pieces.length; i++) {
+    for (var i = 1; i < pieces.length; i++) {
         var piece = pieces[i]
         if (piece.reinforcement !== 5) {
             continue
@@ -836,7 +836,7 @@ function setup_scenario_south_pacific() {
     G.asp[JP] = [7, 0]
     G.asp[AP] = [2, 0]
     G.wie = 2
-    G.pow = 1
+    G.pow = 0
     G.reinforcements = [2, 2]
     G.surrender[nations.CHINA.id] = 2
     G.inter_service = [1, 1]

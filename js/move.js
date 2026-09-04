@@ -10,7 +10,7 @@ function update_move_hex() {
         return compute_barges_pbm()
     } else if (L.move_data.is_air_present) {
         compute_air_move_hexes()
-    } else if (L.move_data.move_type & STRAT_MOVE) {
+    } else if (L.move_type & STRAT_MOVE) {
         compute_ground_naval_strat_move()
     } else {
         compute_ground_naval_move_hexes()
@@ -18,7 +18,7 @@ function update_move_hex() {
 }
 
 function get_move_data() {
-    let result = {
+    var result = {
         is_new_battle_allowed: false,
         is_ground_present: false,
         is_air_present: false,
@@ -40,7 +40,7 @@ function get_move_data() {
         result.move_type |= REACTION_MOVE
     }
     G.active_stack.forEach(u => {
-        let piece = pieces[u]
+        var piece = pieces[u]
         if (piece.class === "ground") {
             result.is_ground_present = true
         } else if (piece.class === "naval") {
@@ -96,16 +96,13 @@ function get_move_data() {
     if (G.offensive.stage === REACTION_STAGE) {
         asp_total = Math.min(asp_total, 1 - G.offensive.r_asp)
     }
-    if (result.sm_possible && L.move_type & STRAT_MOVE) {
+    if (result.sm_possible && (result.is_air_present || get_map_data(result.location).coastal)) {
         result.move_type |= STRAT_MOVE
-    }
-    if (L.move_type & AVOID_ZOI) {
-        result.move_type |= AVOID_ZOI
     }
     if (G.offensive.counter_offensive_card === MATADOR) {
         result.asp_points = 0
     }
-    if (result.is_ground_present && asp_move && result.asp_points <= asp_total) {
+    if (result.is_ground_present && asp_move && result.asp_points <= asp_total && get_map_data(result.location).coastal) {
         result.move_type |= AMPH_MOVE
         if (organic_only_ships) {
             result.move_type |= ORGANIC_ONLY
@@ -158,21 +155,21 @@ function compute_air_move_hexes() {
     L.allowed_hexes = []
     let move_data = L.move_data
     var move_type = AIR_MOVE
-    if (move_data.move_type & STRAT_MOVE) {
+    if (L.move_type & STRAT_MOVE) {
         move_type |= STRAT_MOVE
     }
-    if (move_data.move_type & AIR_EXTENDED_MOVE) {
+    if (L.move_type & AIR_EXTENDED_MOVE) {
         move_type |= AIR_EXTENDED_MOVE
     }
     if (L.move_type === STRAT_MOVE) {
         check_supply()
     }
-    var strat_flag = move_data.move_type & STRAT_MOVE
+    var strat_flag = L.move_type & STRAT_MOVE
     if ((L.move_type === STRAT_MOVE) && has_non_n_zoi(location, 1 - R)) {
         return []
     }
-    var avoid_zoi_flag = L.move_type === AVOID_ZOI
-    if ((L.move_type === AVOID_ZOI) && has_zoi(location, 1 - R)) {
+    var avoid_zoi_flag = L.avoid_zoi
+    if ((avoid_zoi_flag) && has_zoi(location, 1 - R)) {
         return []
     }
     const distance_map = [move_data.location, [0, 1, move_data.location]]
@@ -283,11 +280,11 @@ function compute_ground_naval_move_hexes() {
             zoi_mask = zoi_mask | JP_NAVAL_UNITS << (1 - R)
         }
         mt = NAVAL_MOVE
-        if (move_data.move_type & BARGES_MOVE) {
+        if (L.move_type & BARGES_MOVE) {
             mt |= BARGES_MOVE
         }
-        if (move_data.move_type & AVOID_ZOI) {
-            zoi_mask = zoi_mask | JP_ZOI << (1 - R)
+        if (L.avoid_zoi) {
+            zoi_mask |= JP_ZOI << (1 - G.active)
             mt |= AVOID_ZOI
         }
         if (G.offensive.stage === POST_BATTLE_STAGE && move_data.is_ground_present) {
@@ -308,9 +305,7 @@ function compute_ground_naval_move_hexes() {
                 m_mt |= AMPH_MOVE
             }
             v.unshift(m_mt)
-            if (!move_data.is_ground_present || L.move_type === AMPH_MOVE || L.move_type === BARGES_MOVE || get_distance(move_data.location, k) > 1 || G.offensive.stage !== ATTACK_STAGE) {
-                map_set(L.allowed_hexes, k, v)
-            }
+            map_set(L.allowed_hexes, k, v)
         })
     }
     if ((L.move_data.move_type & GROUND_MOVE) && (L.move_type !== AMPH_MOVE)) {
@@ -327,10 +322,7 @@ function compute_ground_naval_move_hexes() {
 
 function compute_ground_move_hexes() {
     var mt = GROUND_MOVE
-    if (L.move_data.move_type & AVOID_ZOI) {
-        mt |= AVOID_ZOI
-    }
-    map_for_each(get_ground_move(L.move_data.move_type & AVOID_ZOI), (k, v) => {
+    map_for_each(get_ground_move(), (k, v) => {
         v.unshift(mt)
         if (G.offensive.stage === ATTACK_STAGE && (L.move_data.is_new_battle_allowed || !is_faction_units(k, 1 - G.active))
             || set_has(G.offensive.battle_hexes, k)) {
@@ -503,7 +495,7 @@ function get_naval_move(zoi_mask) {
         var port_transport = (get_map_data(nh).port && is_space_controlled(nh, R) && (!move_data.is_ground_present || !move_data.is_naval_present || G.offensive.stage === POST_BATTLE_STAGE || (L.move_type === AMPH_MOVE)))
         var ground_pbm = G.offensive.stage === POST_BATTLE_STAGE && !move_data.is_naval_present
             && get_map_data(nh).terrain > OCEAN
-            && (get_map_data(nh).named && is_space_controlled(nh, R) || is_faction_units(nh, R))
+            && (get_map_data(nh).named && is_space_controlled(nh, R) || is_faction_ground_units(nh, R))
             && (!is_space_controlled(nh, 1 - G.active) || !is_controllable_hex(nh))
         var aa_landing = move_data.move_type & AMPH_MOVE
             && is_hex_asp_capable(nh)
@@ -576,7 +568,7 @@ function ground_move_denied(hex) {
     }
 }
 
-function get_ground_move(avoid_zoi) {
+function get_ground_move() {
     const location = L.move_data.location
     const move_data = L.move_data
     var max_distance = move_data.ground_move_distance
@@ -584,9 +576,6 @@ function get_ground_move(avoid_zoi) {
     var path = map_get(G.offensive.paths, G.active_stack[0])
     if (path) {
         spent_distance = path[1]
-    }
-    if (avoid_zoi && G.supply_cache[location] & JP_ZOI << (1 - G.active)) {
-        return []
     }
     const queue = [location]
     const distance_map = [location, [spent_distance, location]]
@@ -600,7 +589,7 @@ function get_ground_move(avoid_zoi) {
                 continue
             }
             var distance = base_distance[0] + get_ground_move_cost(item, nh, G.active)
-            if ((avoid_zoi && G.supply_cache[nh] & JP_ZOI << (1 - G.active)) || distance > max_distance || distance >= map_get(distance_map, nh, [100])[0]
+            if (distance > max_distance || distance >= map_get(distance_map, nh, [100])[0]
                 || ground_move_denied(nh)) {
                 continue
             }
@@ -806,7 +795,6 @@ function append_path(unit, path) {
 
 function move_units(units, path) {
     check_units()
-
     var full_path = append_path(units[0], path)
     units.forEach(u => {
         map_set(G.offensive.paths, u, full_path.slice())
@@ -818,7 +806,7 @@ function move_units(units, path) {
     }
     var i = 2
     var zoi_cross_denied = path[0] & STRAT_MOVE || path[0] & AMPH_MOVE && !L.move_data.battle_range
-    var zoi_cross_declared = !zoi_cross_denied && path[0] & VIOLATE_ZOI
+    var zoi_cross_declared = path[0] & VIOLATE_ZOI
     var could_zoi_cross = !G.offensive.zoi_intelligence_modifier && G.offensive.stage === ATTACK_STAGE && pieces[units[0]].faction === G.offensive.attacker
     var could_zoi_change = G.active_stack.filter(u => pieces[u].zoi_generator).length
         || (path[0] & GROUND_MOVE) && G.active_stack.filter(u => pieces[u].class === "ground").length
@@ -841,7 +829,7 @@ function move_units(units, path) {
     i = 2
     var destination = path[path.length - 1]
     log(`${units_list} moved to ${list_get_log_str(hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
-    if (zoi_cross_declared && could_zoi_cross) {
+    if (could_zoi_cross && zoi_cross_declared) {
         zoi_crossed()
         could_zoi_cross = false
         supply_checked = true

@@ -44,7 +44,7 @@ function discard_card(card) {
 }
 
 function setup_jp_unit(piece, hex_id, reduced = false) {
-    let hex = hex_to_int(hex_id)
+    var hex = hex_to_int(hex_id)
     if (hex < LAST_BOARD_HEX && is_controllable_hex(hex) && pieces[piece].faction === JP) {
         capture_hex(hex, JP)
     } else if (hex < LAST_BOARD_HEX && is_controllable_hex(hex) && pieces[piece].faction === AP) {
@@ -108,7 +108,7 @@ function on_setup(scenario, options) {
     if (options.experienced) {
         G.async = 1
     }
-    for (let i = 1; i < LAST_BOARD_HEX; i++) {
+    for (var i = 1; i < LAST_BOARD_HEX; i++) {
         if (is_controllable_hex(i) && ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Caroline", "Marshall", "Japan"].includes(get_map_data(i).region)) {
             capture_hex(i, JP)
         }
@@ -117,7 +117,7 @@ function on_setup(scenario, options) {
     capture_hex(hex_to_int(2709), JP)
     reset_offensive()
     construct_decks()
-    for (let i = 1; i < pieces.length; i++) {
+    for (var i = 1; i < pieces.length; i++) {
         var piece = pieces[i]
         G.location[i] = NON_PLACED_BOX
         if (piece.start) {
@@ -153,7 +153,6 @@ function get_garrison_count() {
 }
 
 function on_view() {
-    is_space_controlled(OAHU, JP)//todo: remove
     if (L.P && P[L.P] && P[L.P].on_view) {
         return P[L.P].on_view()
     }
@@ -288,7 +287,7 @@ function reset_offensive() {
 function construct_decks() {
     G.draw = [[], []]
 
-    for (let c = 1; c < cards.length; ++c) {
+    for (var c = 1; c < cards.length; ++c) {
         if (cards[c].faction) {
             G.draw[AP].push(c)
         } else {
