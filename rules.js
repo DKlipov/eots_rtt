@@ -11430,6 +11430,7 @@ P.move_offensive_units = {
         call("move_to", {hex: G.location[G.active_stack[0]]})
     },
     skip() {
+        push_undo()
         this.done()
     },
     done() {
