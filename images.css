@@ -1,61 +1,61 @@
 /*MARKERS*/
 /*special markers*/
-.scenario_start { background-image: url(pieces150/start.png);  }
-.scenario_end { background-image: url(pieces150/end.png);  }
+.scenario_start { background-image: url(pieces150/start.webp);  }
+.scenario_end { background-image: url(pieces150/end.webp);  }
 .marker.oos { background-image: url(pieces150/ap_oos.webp);  }
-.marker.no_garrison { background-image: url(pieces150/no_garrison.png);  }
-.garrison_jp { background-image: url(pieces150/garrison_jp.png);  }
-.garrison_cn { background-image: url(pieces150/garrison_cn.png);  }
-.marker.organic_small { background-image: url(pieces150/organic_small.png); }
-.marker.aa_small { background-image: url(pieces150/aa_small.png); }
-.marker.strat_small { background-image: url(pieces150/strat_small.png); }
-.marker.strat_air_small { background-image: url(pieces150/strat_air_small.png); }
-.marker.barges_small { background-image: url(pieces150/barges_small.png); }
+.marker.no_garrison { background-image: url(pieces150/no_garrison.webp);  }
+.garrison_jp { background-image: url(pieces150/garrison_jp.webp);  }
+.garrison_cn { background-image: url(pieces150/garrison_cn.webp);  }
+.marker.organic_small { background-image: url(pieces150/organic_small.webp); }
+.marker.aa_small { background-image: url(pieces150/aa_small.webp); }
+.marker.strat_small { background-image: url(pieces150/strat_small.webp); }
+.marker.strat_air_small { background-image: url(pieces150/strat_air_small.webp); }
+.marker.barges_small { background-image: url(pieces150/barges_small.webp); }
 .marker.oos_small { background-image: url(pieces150/oos_small.webp); }
-.marker.ng_surrender { background-image: url(pieces150/ng_sur.png);background-size: 45px 45px; }
-.marker.am_surrender { background-image: url(pieces150/am_sur.png);background-size: 45px 45px; }
-.marker.mi_surrender { background-image: url(pieces150/mi_sur.png);background-size: 45px 45px; }
-.road_ledo { background-image: url(pieces150/road_ledo.png); background-size: 50px 55px;background-repeat: no-repeat; }
-.road_imphal { background-image: url(pieces150/road_imphal.png);background-size: 50px 55px;background-repeat: no-repeat; }
-.road_jarhat { background-image: url(pieces150/road_jarhat.png); background-size: 55px 45px;background-repeat: no-repeat;}
-.road_kwai { background-image: url(pieces150/road_kwai.png); background-size: 50px 95px;background-repeat: no-repeat; }
+.marker.ng_surrender { background-image: url(pieces150/ng_sur.webp);background-size: 45px 45px; }
+.marker.am_surrender { background-image: url(pieces150/am_sur.webp);background-size: 45px 45px; }
+.marker.mi_surrender { background-image: url(pieces150/mi_sur.webp);background-size: 45px 45px; }
+.road_ledo { background-image: url(pieces150/road_ledo.webp); background-size: 50px 55px;background-repeat: no-repeat; }
+.road_imphal { background-image: url(pieces150/road_imphal.webp);background-size: 50px 55px;background-repeat: no-repeat; }
+.road_jarhat { background-image: url(pieces150/road_jarhat.webp); background-size: 55px 45px;background-repeat: no-repeat;}
+.road_kwai { background-image: url(pieces150/road_kwai.webp); background-size: 50px 95px;background-repeat: no-repeat; }
 
 /*marker_stripes*/
-.big_markers_blue { background-image: url(pieces150/big_markers_blue.150.png); background-size: 225px 90px; }
-.big_markers_dkblue { background-image: url(pieces150/big_markers_dkblue.150.png); background-size: 45px 90px; }
-.big_markers_white { background-image: url(pieces150/big_markers_white.150.png); background-size: 495px 90px; }
+.big_markers_blue { background-image: url(pieces150/big_markers_blue.150.webp); background-size: 225px 90px; }
+.big_markers_dkblue { background-image: url(pieces150/big_markers_dkblue.150.webp); background-size: 45px 90px; }
+.big_markers_white { background-image: url(pieces150/big_markers_white.150.webp); background-size: 495px 90px; }
 .card > .big_markers_white {
     background-size: 990px 180px;
 }
-.big_markers_yellow { background-image: url(pieces150/big_markers_yellow.150.png); background-size: 135px 90px; }
-.small_markers_dkblue { background-image: url(pieces150/small_markers_dkblue.150.png); background-size: 140px 70px; }
-.small_markers_green { background-image: url(pieces150/small_markers_green.150.png); background-size: 105px 70px; }
-.small_markers_red { background-image: url(pieces150/small_markers_red.150.png); background-size: 70px 70px; }
-.small_markers_black { background-image: url(pieces150/small_units_black.150.png); background-size: 280px 70px; }
-.small_markers_brown { background-image: url(pieces150/small_units_brown.150.png); background-size: 140px 70px; }
-.small_markers_yellow { background-image: url(pieces150/small_markers_yellow.150.png); background-size: 420px 70px; }
+.big_markers_yellow { background-image: url(pieces150/big_markers_yellow.150.webp); background-size: 135px 90px; }
+.small_markers_dkblue { background-image: url(pieces150/small_markers_dkblue.150.webp); background-size: 140px 70px; }
+.small_markers_green { background-image: url(pieces150/small_markers_green.150.webp); background-size: 105px 70px; }
+.small_markers_red { background-image: url(pieces150/small_markers_red.150.webp); background-size: 70px 70px; }
+.small_markers_black { background-image: url(pieces150/small_units_black.150.webp); background-size: 280px 70px; }
+.small_markers_brown { background-image: url(pieces150/small_units_brown.150.webp); background-size: 140px 70px; }
+.small_markers_yellow { background-image: url(pieces150/small_markers_yellow.150.webp); background-size: 420px 70px; }
 
 
 /* PIECES */
-.big_units_blue { background-image: url(pieces150/big_units_blue.150.png); background-size: 1440px 90px; }
-.big_units_white { background-image: url(pieces150/big_units_white.150.png); background-size: 855px 90px; }
-.big_units_beige { background-image: url(pieces150/big_units_beige.150.png); background-size: 405px 90px; }
-.big_units_orange { background-image: url(pieces150/big_units_orange.150.png); background-size: 45px 90px; }
-.small_units_beige { background-image: url(pieces150/small_units_beige.150.png); background-size: 700px 70px; }
-.small_units_beige_air { background-image: url(pieces150/small_units_beige_air.150.png); background-size: 175px 70px; }
-.small_units_blue { background-image: url(pieces150/small_units_blue.150.png); background-size: 420px 70px; }
-.small_units_dkblue { background-image: url(pieces150/small_units_dkblue.150.png); background-size: 70px 70px; }
-.small_units_green { background-image: url(pieces150/small_units_green.150.png); background-size: 420px 70px; }
-.small_units_green_air { background-image: url(pieces150/small_units_green_air.150.png); background-size: 560px 70px; }
-.small_units_ltyellow { background-image: url(pieces150/small_units_ltyellow.150.png); background-size: 140px 70px; }
-.small_units_orange { background-image: url(pieces150/small_units_orange.150.png); background-size: 350px 70px; }
-.small_units_red { background-image: url(pieces150/small_units_red.150.png); background-size: 105px 70px; }
-.small_units_turquoise { background-image: url(pieces150/small_units_turquoise.150.png); background-size: 140px 70px; }
-.small_units_white { background-image: url(pieces150/small_units_white.150.png); background-size: 700px 70px; }
-.small_units_yellow { background-image: url(pieces150/small_units_yellow.150.png); background-size: 735px 70px; }
-.small_units_yellow_air { background-image: url(pieces150/small_units_yellow_air.150.png); background-size: 455px 70px; }
-.small_markers_white { background-image: url(pieces150/small_markers_white.150.png); background-size: 70px 70px; }
-.small_markers_white.transparent { background-image: url(pieces150/transparent_markers_white.150.png); background-size: 70px 70px; }
+.big_units_blue { background-image: url(pieces150/big_units_blue.150.webp); background-size: 1440px 90px; }
+.big_units_white { background-image: url(pieces150/big_units_white.150.webp); background-size: 855px 90px; }
+.big_units_beige { background-image: url(pieces150/big_units_beige.150.webp); background-size: 405px 90px; }
+.big_units_orange { background-image: url(pieces150/big_units_orange.150.webp); background-size: 45px 90px; }
+.small_units_beige { background-image: url(pieces150/small_units_beige.150.webp); background-size: 700px 70px; }
+.small_units_beige_air { background-image: url(pieces150/small_units_beige_air.150.webp); background-size: 175px 70px; }
+.small_units_blue { background-image: url(pieces150/small_units_blue.150.webp); background-size: 420px 70px; }
+.small_units_dkblue { background-image: url(pieces150/small_units_dkblue.150.webp); background-size: 70px 70px; }
+.small_units_green { background-image: url(pieces150/small_units_green.150.webp); background-size: 420px 70px; }
+.small_units_green_air { background-image: url(pieces150/small_units_green_air.150.webp); background-size: 560px 70px; }
+.small_units_ltyellow { background-image: url(pieces150/small_units_ltyellow.150.webp); background-size: 140px 70px; }
+.small_units_orange { background-image: url(pieces150/small_units_orange.150.webp); background-size: 350px 70px; }
+.small_units_red { background-image: url(pieces150/small_units_red.150.webp); background-size: 105px 70px; }
+.small_units_turquoise { background-image: url(pieces150/small_units_turquoise.150.webp); background-size: 140px 70px; }
+.small_units_white { background-image: url(pieces150/small_units_white.150.webp); background-size: 700px 70px; }
+.small_units_yellow { background-image: url(pieces150/small_units_yellow.150.webp); background-size: 735px 70px; }
+.small_units_yellow_air { background-image: url(pieces150/small_units_yellow_air.150.webp); background-size: 455px 70px; }
+.small_markers_white { background-image: url(pieces150/small_markers_white.150.webp); background-size: 70px 70px; }
+.small_markers_white.transparent { background-image: url(pieces150/transparent_markers_white.150.webp); background-size: 70px 70px; }
 
 
 /* CARDS (1x) */
