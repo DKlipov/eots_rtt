@@ -182,6 +182,7 @@ const CALCUTTA = hex_to_int(1805)
 
 const NEW_HEBRIDES = [4825, 4826, 4828, 4926].map(h => hex_to_int(h))
 const COM_REPLACEMENT_POINTS = [1307, 1308, 2114, 2709, 3727].map(h => hex_to_int(h))
+const CHINA_COAST = [2508, 2609, 2709, 2809, 2908, 3007, 3105, 3104, 3305, 3306].map(h => hex_to_int(h))
 
 const HEX_DIRECTION = []
 HEX_DIRECTION[31] = 0
@@ -14234,11 +14235,22 @@ P.attrition = {
 /** import server/cycle.js*/
 
 /** import server/actions.js*/
+function is_china_coast_captured() {
+    return CHINA_COAST.filter(h => is_space_controlled(h, JP)).length === 0
+}
+
 P.china_offensive = {
     inactive: "confirm China Offensive",
     _begin() {
+        if (is_china_coast_captured()) {
+            L.impossible = 1
+        }
     },
     prompt() {
+        if (L.impossible) {
+            prompt(`China Offensive is not allowed. All ports AP captured.`)
+            return
+        }
         prompt(`China Offensive Roll.`)
         button("roll")
     },
@@ -19023,6 +19035,9 @@ function get_replacement_points() {
         result[NAVAl_REP] = G.reinforcements[NAVAl_REP]
         result[AIR_REP] = G.reinforcements[AIR_REP]
         L.divisions = Math.min(2, G.china_divisions)
+        if (is_china_coast_captured()) {
+            L.divisions = 0
+        }
         return result
     }
     L.divisions = undefined

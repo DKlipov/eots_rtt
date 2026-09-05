@@ -1,8 +1,19 @@
+function is_china_coast_captured() {
+    return CHINA_COAST.filter(h => is_space_controlled(h, JP)).length === 0
+}
+
 P.china_offensive = {
     inactive: "confirm China Offensive",
     _begin() {
+        if (is_china_coast_captured()) {
+            L.impossible = 1
+        }
     },
     prompt() {
+        if (L.impossible) {
+            prompt(`China Offensive is not allowed. All ports AP captured.`)
+            return
+        }
         prompt(`China Offensive Roll.`)
         button("roll")
     },

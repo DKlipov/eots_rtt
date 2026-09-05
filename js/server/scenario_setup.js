@@ -1006,6 +1006,9 @@ function get_replacement_points() {
         result[NAVAl_REP] = G.reinforcements[NAVAl_REP]
         result[AIR_REP] = G.reinforcements[AIR_REP]
         L.divisions = Math.min(2, G.china_divisions)
+        if (is_china_coast_captured()) {
+            L.divisions = 0
+        }
         return result
     }
     L.divisions = undefined

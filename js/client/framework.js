@@ -72,7 +72,9 @@ function on_log(text, i) {
         p.innerHTML = `Logs hidden: ${total - 100}.`
         return p
     } else if (!SHOW_FULL_LOG && total - i > 100) {
-        return document.createElement("span")
+        var empty = document.createElement("div")
+        empty.classList.add("blank")
+        return empty
     }
     var p = document.createElement("div")
 

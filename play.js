@@ -179,6 +179,7 @@ const CALCUTTA = hex_to_int(1805)
 
 const NEW_HEBRIDES = [4825, 4826, 4828, 4926].map(h => hex_to_int(h))
 const COM_REPLACEMENT_POINTS = [1307, 1308, 2114, 2709, 3727].map(h => hex_to_int(h))
+const CHINA_COAST = [2508, 2609, 2709, 2809, 2908, 3007, 3105, 3104, 3305, 3306].map(h => hex_to_int(h))
 
 const HEX_DIRECTION = []
 HEX_DIRECTION[31] = 0
@@ -12399,7 +12400,9 @@ function on_log(text, i) {
         p.innerHTML = `Logs hidden: ${total - 100}.`
         return p
     } else if (!SHOW_FULL_LOG && total - i > 100) {
-        return document.createElement("span")
+        var empty = document.createElement("div")
+        empty.classList.add("blank")
+        return empty
     }
     var p = document.createElement("div")
 
