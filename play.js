@@ -12119,7 +12119,7 @@ function on_update() {
         if (marker && turns[value] && value) {
             populate_generic("turn", value, marker)
         }
-        if (marker && hex && value) {
+        if (marker && hex && value && !vassal_control) {
             populate_generic("s-loc", hex_to_int(hex), marker)
         }
     }
