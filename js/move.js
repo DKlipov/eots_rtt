@@ -787,7 +787,7 @@ function append_path(unit, path) {
     if (prev_path) {
         full_path.push(...prev_path.slice(2))
     } else {
-        full_path.push(G.location[units[0]])
+        full_path.push(G.location[unit])
     }
     full_path.push(...path.slice(3))
     return full_path
