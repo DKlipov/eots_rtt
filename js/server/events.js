@@ -502,7 +502,7 @@ P.tokyo_express = {
             for_each_unit_on_map((u, piece, location) => {
                 if (piece.class === "hq" && piece.faction === JP && !set_has(G.oos, u)) {
                     for_each_hex_in_range(location, piece.cr, h => {
-                        if (get_map_data(h).terrain > OCEAN && !is_faction_units(h, AP)) {
+                        if (is_faction_units(h, JP) || get_map_data(h).named && is_space_controlled(h, JP)) {
                             action_hex(h)
                         }
                     })

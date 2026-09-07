@@ -499,7 +499,7 @@ function victory_1945() {
     if (japan_surrenders) {
         result.won_side = "Allies"
         result.won_text = `Japan surrenders by strategic bombing campaign`
-        finish("Allies", "Japan surrenders by strategic bombing campaign")
+        finish("Allies", "Japan surrenders by strategic bombing campaign.")
     } else {
         result.won_side = "Japan"
         result.won_text = `Japan did not surrender`
@@ -719,7 +719,7 @@ function before_victory_check() {
 
 function victory_check() {
     if (G.political_will <= 0) {
-        finish("Japan", "Japanese Victory by Treaty Negotiations")
+        finish("Japan", "Japanese Victory by Treaty Negotiations.")
     }
     if (G.sid == BURMA_SCENARIO && scenario_data().last_turn <= G.turn) {
         before_victory_check()

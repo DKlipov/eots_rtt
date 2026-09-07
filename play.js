@@ -6630,7 +6630,8 @@ var counters = {
     oos_small: "oos_small",
     pow: "small_markers_dkblue unit_ix_2",
     pow_target: "small_markers_dkblue unit_ix_4",
-    strat_bombing: "strat_air_small",
+    strat_bombing: "small_markers_black unit_ix_3",
+    strat_bombing_small: "strat_air_small",
     agreement_jp: "small_markers_yellow unit_ix_2 reduced",
     agreement_ap: "small_markers_green unit_ix_3 reduced",
     rivalry_ap: "small_markers_green unit_ix_3",
@@ -10033,7 +10034,7 @@ function before_victory_check() {
 
 function victory_check() {
     if (G.political_will <= 0) {
-        finish("Japan", "Japanese Victory by Treaty Negotiations")
+        finish("Japan", "Japanese Victory by Treaty Negotiations.")
     }
     if (G.sid == BURMA_SCENARIO && scenario_data().last_turn <= G.turn) {
         before_victory_check()
@@ -10238,7 +10239,7 @@ const UNIT_MOVEMENT_MARKERS = [
     },
     {
         condition: (u, piece, path) => piece.b29 && G.b29u & 2 << piece.b29,
-        counter: counters.strat_bombing,
+        counter: counters.strat_bombing_small,
     },
 
 ]
@@ -11402,7 +11403,7 @@ function print_resources() {
 function print_casualties() {
     let main = document.createElement("div")
     var completed = G.events[events.US_CASUALTIES.id]
-    main.appendChild(create_icon(...((completed ? "gray " : "") + pieces[US_MARINE_UNIT].counter).split(" ")))
+    main.appendChild(create_icon(...((completed ? "gray " : "") + pieces[US_MARINE_UNIT].counter + " unit piece").split(" ")))
     main.innerHTML += ` US Casualties ${completed ? "triggered (-1 PW)." : "not triggered."}`
     return main
 }
@@ -11420,9 +11421,9 @@ function print_naval_situation() {
     }
     let main = document.createElement("div")
 
-    main.appendChild(print_ship_counter(counter[0], pieces[US_BB_UNIT].counter, "Strategic naval situation - US naval units"))
+    main.appendChild(print_ship_counter(counter[0], pieces[US_BB_UNIT].counter + " unit piece", "Strategic naval situation - US naval units"))
     if (G.sid !== SOUTH_PACIFIC_SCENARIO) {
-        main.appendChild(print_ship_counter(counter[1], pieces[US_CV_UNIT].counter, "Strategic naval situation - US carrier units"))
+        main.appendChild(print_ship_counter(counter[1], pieces[US_CV_UNIT].counter + " unit piece", "Strategic naval situation - US carrier units"))
     }
     return main
 }
@@ -11638,7 +11639,7 @@ function create_battle_box(faction, cf, rm, units, log) {
             result.appendChild(text)
         }
         var piece = pieces[i]
-        populate_generic_to_parent(result, "icon piece " + piece.counter + (set_has(G.reduced, i) && !(piece.notreplaceable && piece.start_reduced) ? " reduced" : ""))
+        populate_generic_to_parent(result, "icon piece unit " + piece.counter + (set_has(G.reduced, i) && !(piece.notreplaceable && piece.start_reduced) ? " reduced" : ""))
     }
     if (log.length) {
         append_header("Modifiers:", result)

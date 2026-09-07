@@ -275,7 +275,7 @@ function print_resources() {
 function print_casualties() {
     let main = document.createElement("div")
     var completed = G.events[events.US_CASUALTIES.id]
-    main.appendChild(create_icon(...((completed ? "gray " : "") + pieces[US_MARINE_UNIT].counter).split(" ")))
+    main.appendChild(create_icon(...((completed ? "gray " : "") + pieces[US_MARINE_UNIT].counter + " unit piece").split(" ")))
     main.innerHTML += ` US Casualties ${completed ? "triggered (-1 PW)." : "not triggered."}`
     return main
 }
@@ -293,9 +293,9 @@ function print_naval_situation() {
     }
     let main = document.createElement("div")
 
-    main.appendChild(print_ship_counter(counter[0], pieces[US_BB_UNIT].counter, "Strategic naval situation - US naval units"))
+    main.appendChild(print_ship_counter(counter[0], pieces[US_BB_UNIT].counter + " unit piece", "Strategic naval situation - US naval units"))
     if (G.sid !== SOUTH_PACIFIC_SCENARIO) {
-        main.appendChild(print_ship_counter(counter[1], pieces[US_CV_UNIT].counter, "Strategic naval situation - US carrier units"))
+        main.appendChild(print_ship_counter(counter[1], pieces[US_CV_UNIT].counter + " unit piece", "Strategic naval situation - US carrier units"))
     }
     return main
 }
@@ -511,7 +511,7 @@ function create_battle_box(faction, cf, rm, units, log) {
             result.appendChild(text)
         }
         var piece = pieces[i]
-        populate_generic_to_parent(result, "icon piece " + piece.counter + (set_has(G.reduced, i) && !(piece.notreplaceable && piece.start_reduced) ? " reduced" : ""))
+        populate_generic_to_parent(result, "icon piece unit " + piece.counter + (set_has(G.reduced, i) && !(piece.notreplaceable && piece.start_reduced) ? " reduced" : ""))
     }
     if (log.length) {
         append_header("Modifiers:", result)

@@ -297,7 +297,7 @@ P.national_status_segment = function () {
         log("AP captured Marshall islands.")
     }
     if (check_nation_controlled(nations.JAPAN, AP)) {
-        finish("Allies", "Allies Victory - Japanese mainland islands captured")
+        finish("Allies", "Allies Victory - Japanese mainland islands captured.")
         return
     }
     if (check_japan_resource_trace()) {
@@ -306,7 +306,7 @@ P.national_status_segment = function () {
         }
         G.events[events.JAPAN_TRACE_RESOURCES.id] = 0
     } else if (is_event_active(events.JAPAN_TRACE_RESOURCES) && is_event_active(events.JAPAN_TRACE_RESOURCES) <= G.turn - 2) {
-        finish("Allies", "Allies Victory by blockade")
+        finish("Allies", "Allies Victory by blockade.")
         return
     } else {
         check_event(events.JAPAN_TRACE_RESOURCES)

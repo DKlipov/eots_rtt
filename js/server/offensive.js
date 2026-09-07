@@ -1890,6 +1890,7 @@ P.define_intelligence_condition = {
 
 P.attack_reaction_cards = {
     _begin() {
+        L.logged = 0
         if (get_hand(G.active).filter(c => cards[c].type === REACTION && cards[c].can_play()).length <= 0) {
             end()
             return
@@ -1912,6 +1913,10 @@ P.attack_reaction_cards = {
     },
     card(c) {
         push_undo()
+        if (!L.logged) {
+            L.logged = 1
+            log("#GOffensive reaction cards")
+        }
         play_event(c)
     }
 }
@@ -2374,6 +2379,7 @@ P.apply_hits = {
 
 P.jp_cv_reassign = {
     _begin() {
+        L.logged = 0
         L.allowed_hexes = []
         G.offensive.battle.jp_cv_damaged = 0
         L.to_repair = []
@@ -2388,7 +2394,6 @@ P.jp_cv_reassign = {
             end()
             return;
         } else {
-            log("Japanese naval aircraft range advantage:")
             G.active = JP
             L.stage = 0
             L.hits = 0
@@ -2418,6 +2423,10 @@ P.jp_cv_reassign = {
     },
     unit(u) {
         push_undo()
+        if (!L.logged) {
+            L.logged = 1
+            log("Japanese naval aircraft range advantage:")
+        }
         if (L.stage === 0) {
             L.hits += 1
             map_delete(L.to_repair, u)

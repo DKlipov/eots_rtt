@@ -176,6 +176,7 @@ function setup_scenario_burma() {
     G.events[events.JARHAT_ROAD.id] = 1
     G.events[events.HUMP.id] = 1 //Burma Road: Hump Closed
     cards[find_card(JP, 18)].event()
+    G.supply_cache[KWAI_BRIDGE] += HEX_CONTROLLABLE
     G.events[events.KWAI_RIVER_BRIDGE.id] = 2
     G.events[events.DOOLITLE] = 2// 17.11.22. Doolittle Raid has occurred meeting the condition for the Doolittle Reprisal card.
 

@@ -176,7 +176,7 @@ const UNIT_MOVEMENT_MARKERS = [
     },
     {
         condition: (u, piece, path) => piece.b29 && G.b29u & 2 << piece.b29,
-        counter: counters.strat_bombing,
+        counter: counters.strat_bombing_small,
     },
 
 ]
