@@ -10331,7 +10331,7 @@ P.reinforcement_segment = {
         G.active_stack = [u]
         if (pieces[u].class !== "hq") {
             L.allowed_hexes = get_unit_reinforcement_hexes(u)
-            if (G.sid === BURMA_SCENARIO) {
+            if (G.sid === BURMA_SCENARIO && (G.turn === 8 && u === jp_army(29) || G.turn === 9 && u === B_29_1)) {
                 // 17.11.17. Turn 8 Japanese reinforcements: 29th Army (reduced) arrives
                 //in Rangoon if it is Japanese controlled else it is lost.
                 // 17.11.18. Turn 9 Allied reinforcements: US B29. If China has not
