@@ -9814,7 +9814,7 @@ function victory_1945() {
     if (japan_surrenders) {
         result.won_side = "Allies"
         result.won_text = `Japan surrenders by strategic bombing campaign`
-        finish("Allies", "Japan surrenders by strategic bombing campaign")
+        finish("Allies", "Japan surrenders by strategic bombing campaign.")
     } else {
         result.won_side = "Japan"
         result.won_text = `Japan did not surrender`
