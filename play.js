@@ -11925,6 +11925,9 @@ function on_update() {
             G.actions.action_hex = []
         }
         map_for_each(L.allowed_hexes, h => set_add(G.actions.action_hex, h))
+        if (L.allowed_hexes) {
+            delete G.actions.con_eliminate
+        }
     }
     document.body.classList.remove("hex-clickable")
     world.log_boxes = []
@@ -12164,6 +12167,7 @@ function on_update() {
     action_button("advanced_move", "More options")
     action_button("no_move", "No move")
     action_button("eliminate", "Eliminate")
+    action_button("con_eliminate", "Eliminate")
     action_button("stop", "Stop")
     action_button("displace", "Displace")
     action_button("divisions_button", "Reduce divisions track")

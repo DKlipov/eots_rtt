@@ -614,7 +614,7 @@ function create_landing_hex(hex) {
     set_add(G.offensive.landing_hexes, hex)
 }
 
-const ALWAYS_SHOW_BUTTONS = ["no_move", "eliminate"]
+const ALWAYS_SHOW_BUTTONS = ["no_move", "con_eliminate"]
 
 function get_move_buttons() {
     var result = []
@@ -645,7 +645,7 @@ function get_move_buttons() {
     }
 
     if (!no_move_p && eliminate_p) {
-        result.push("eliminate")
+        result.push("con_eliminate")
     }
     return result
 }
@@ -781,7 +781,7 @@ P.move_offensive_units = {
         G.offensive.organic.pop()
         // update_move_hex()
     },
-    eliminate() {
+    con_eliminate() {
         push_undo()
         G.active_stack.forEach(u => eliminate(u))
         G.active_stack = []
