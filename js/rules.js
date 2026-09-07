@@ -16,7 +16,9 @@ exports.default_scenario = "South Pacific"
 /** import common/scenario.js*/
 /** import server/game.js*/
 /** import server/query.js*/
+/** import server/rules_query.js*/
 /** import server/scenario_setup.js*/
+/** import server/bots/erasmus.js*/
 /** import server/framework.js*/
 
 

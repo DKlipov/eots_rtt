@@ -108,6 +108,20 @@ function build_road(card, event) {
     goto("end_action")
 }
 
+// 在打出一张会启动攻势序列(offensive_sequence)的卡前保存可回退快照。
+// Before playing a card that starts an offensive sequence, save a rollback snapshot.
+// 若该卡的 before_commit_offensive 限制未被满足, P.commit_offensive_confirm 会把确认窗
+// If the card's before_commit_offensive restriction is unmet, P.commit_offensive_confirm leaves the confirm window
+// 卡死为“仅剩 undo”。此快照让 cancel() 能把牌退回“Select action”窗口重新决策,
+// stuck with only "undo". This snapshot lets cancel() return the card to the "Select action" window to re-decide,
+// 并把该卡标记为本次出牌禁止再以攻势(OC/事件)打出, 避免确定性 AI 原地死循环。
+// and marks the card as not playable offensively (OC/event) this turn, avoiding a deterministic AI infinite loop.
+function snapshot_offensive_card_action() {
+    push_undo()
+    G.offensive.card_undo_len = G.undo ? G.undo.length : 0
+    G.offensive.card_rollback = copy_state()
+}
+
 P.offensive_segment = {
     _begin() {
         if (G.active === AP) {
@@ -145,18 +159,19 @@ P.offensive_segment_card_action = {
         get_allowed_actions(L.c).forEach(a => button(a))
     },
     ops() {
-        push_undo()
+        snapshot_offensive_card_action()
         activate_card(L.c)
         G.offensive.type = OC
         log(`${card_get_log_str(L.c)} played as operation card.`)
         goto("offensive_sequence")
     },
     event() {
-        push_undo()
         if (cards[L.c].type === MILITARY) {
+            snapshot_offensive_card_action()
             play_event(L.c)
             goto("offensive_sequence")
         } else {
+            push_undo()
             G.offensive.offensive_card = L.c
             goto("end_action")
             play_event(G.offensive.offensive_card)
@@ -253,13 +268,17 @@ P.future_offensive = {
         prompt("Play future offensive card or pass.")
         if (L.pass) {
             button("done")
+        } else if (G.offensive.oc_denied && G.offensive.oc_denied[G.future_offensive[G.active]]) {
+            // FO 卡本回合不能以事件启动其攻势(限制未满足): 只能跳过。
+            // The FO card cannot start its offensive as an event this turn (restriction unmet): only skip is possible.
+            button("done")
         } else {
             button("pass")
             action("event", G.future_offensive[G.active])
         }
     },
     event() {
-        push_undo()
+        snapshot_offensive_card_action()
         play_event(G.future_offensive[G.active])
         goto("offensive_sequence")
     },
@@ -369,6 +388,16 @@ function get_allowed_actions(num) {
 
     if (G.future_offensive[R] <= 0 && !card.reshuffle) {
         result.push("future_offensive")
+    }
+    // 若该卡曾因 before_commit_offensive 限制不满足而被退回, 本回合禁止再以攻势方式打出,
+    // If this card was returned earlier for failing the before_commit_offensive restriction, it may not be played offensively again this turn,
+    // 否则确定性 AI 会原地反复(打出攻势 → 限制失败 → 退回)死循环。
+    // otherwise a deterministic AI would loop in place (play offensive → restriction fails → returned).
+    if (G.offensive.oc_denied && G.offensive.oc_denied[num]) {
+        array_delete_item(result, "ops")
+        if (card.type === MILITARY) {
+            array_delete_item(result, "event")
+        }
     }
     return result
 }

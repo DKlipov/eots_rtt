@@ -9800,6 +9800,56 @@ function victory_1944() {
     return result
 }
 
+// 伊拉斯谟图表 09「原子弹战略标准」。
+// Erasmus chart 09 "Atomic Bomb Strategy" standard.
+// STRAT_BOMBING_CAMPAIGN 保存当前连续成功轰炸序列的起始回合：从第 9 回合到当前回合
+// 每回合至少成功一次时，其值恒为 9；任一回合失败/未轰炸会清零，之后再成功则会以更晚
+// 回合重新起算。
+// STRAT_BOMBING_CAMPAIGN records the start turn of the current streak of successful
+// strategic bombing runs: if every turn from 9 through the current turn succeeds, it
+// stays 9; any failure/absence resets it, and a later success restarts from a later turn.
+//
+// 此函数是引擎和机器人共用的唯一判据，避免 bot 缓存与存档/回放结算发生分歧。
+// This is the single criterion shared by the engine and the bot, so the bot's cached
+// judgment never diverges from save/replay settlement.
+function atomic_bomb_strategy_status() {
+    var campaign_start = is_event_active(events.STRAT_BOMBING_CAMPAIGN) || 0
+    var bombing_required = G.turn >= 9
+    var no_strategic_bombing_failure = !bombing_required || campaign_start === 9
+    var soviet_occurred = !!(G.removed && G.removed[AP] && set_has(G.removed[AP], SOVIET_INVADE))
+    var soviet_in_hand = !!(G.hand && G.hand[AP] && set_has(G.hand[AP], SOVIET_INVADE))
+    var soviet_playable = false
+    if (!soviet_occurred && soviet_in_hand) {
+        try { soviet_playable = !!cards[SOVIET_INVADE].can_play() } catch (e) { /* false */ }
+    }
+    // get_victory() 会临时按补给重算控制。原子弹图表使用棋盘上实际控制权，因此结算期间
+    // 必须读取重算前保存在 G.original_control 的状态，才能与回合内 AI 谓词完全一致。
+    // get_victory() temporarily recomputes control by supply. The atomic-bomb chart uses
+    // actual board control, so during settlement we must read the pre-recompute state saved
+    // in G.original_control to stay consistent with the in-turn AI predicates.
+    var jp_controls = h => G.original_control ? is_space_controlled_originally(h, JP) : is_space_controlled(h, JP)
+    var jp_resource_hexes = RESOURCE_HEX.filter(h => jp_controls(h) && get_map_data(h).resource)
+    var jp_resources = jp_resource_hexes.length
+    var resource_limit = soviet_occurred ? 3 : 5
+    var soviet_ready = soviet_occurred || soviet_playable
+    return {
+        met: no_strategic_bombing_failure && soviet_ready && jp_resources <= resource_limit,
+        turn: G.turn,
+        noStrategicBombingFailure: no_strategic_bombing_failure,
+        bombingCampaignStart: campaign_start,
+        bombingRequiredFromTurn: 9,
+        sovietOccurred: soviet_occurred,
+        sovietCardId: SOVIET_INVADE,
+        sovietInHand: soviet_in_hand,
+        sovietPlayable: soviet_playable,
+        sovietReady: soviet_ready,
+        jpResources: jp_resources,
+        jpResourceHexes: jp_resource_hexes,
+        resourceLimit: resource_limit,
+        resourcesSatisfied: jp_resources <= resource_limit,
+    }
+}
+
 function victory_1945() {
     var japan_surrenders = is_event_active(events.STRAT_BOMBING_CAMPAIGN) > 0 && is_event_active(events.STRAT_BOMBING_CAMPAIGN) <= 9
         && get_jp_resources() <= 1 && (get_distance(G.location[B_29_1], TOKYO) <= 6 || G.location[B_29_1] === CHINA_BOX
