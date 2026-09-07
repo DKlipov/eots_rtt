@@ -175,7 +175,7 @@ P.offensive_phase = script(`
     log ("@Turn "+ G.turn+". Offensives phase")
     call initiative_segment
     eval {
-        commit_into_turn_draw()
+        end_of_offensive_check()
         G.active = G.first_active 
         reset_offensive()
         G.offensive.attacker = G.active

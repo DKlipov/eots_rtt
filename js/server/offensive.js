@@ -1907,8 +1907,6 @@ P.attack_reaction_cards = {
     },
     done() {
         push_undo()
-        resolve_into_turn_draw(AP)
-        resolve_into_turn_draw(JP)
         end()
     },
     card(c) {

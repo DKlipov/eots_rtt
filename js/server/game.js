@@ -208,17 +208,17 @@ function create_view() {
 
 
     if (R !== JP) {
-        V.hand[JP] = G.hand[JP].length + G.offensive.draw[JP].filter(c => c >= 0 && cards[c].faction === JP).length
+        V.hand[JP] = G.hand[JP].length + G.offensive.draw[JP].length
     } else {
         V.hand[JP] = G.hand[JP].slice()
-        G.offensive.draw[JP].filter(c => c >= 0 && cards[c].faction === JP).forEach(c => V.hand[JP].push(c))
+        G.offensive.draw[JP].forEach(c => V.hand[JP].push(c))
         V.future_offensive[JP] = G.future_offensive[JP]
     }
     if (R !== AP) {
-        V.hand[AP] = G.hand[AP].length + G.offensive.draw[AP].filter(c => c >= 0 && cards[c].faction === AP).length
+        V.hand[AP] = G.hand[AP].length + G.offensive.draw[AP].length
     } else {
         V.hand[AP] = G.hand[AP].slice()
-        G.offensive.draw[AP].filter(c => c >= 0 && cards[c].faction === AP).forEach(c => V.hand[AP].push(c))
+        G.offensive.draw[AP].forEach(c => V.hand[AP].push(c))
         V.future_offensive[AP] = G.future_offensive[AP]
     }
 }
@@ -638,7 +638,7 @@ function capture_hex(hex, side = G.active, no_log = false) {
 }
 
 function get_hand(side) {
-    if (G.events[events.FUTURE_OFFENSIVE_JP.id + side] < G.turn && G.future_offensive[side] > 0 && G.hand[side].length) {
+    if (G.events[events.FUTURE_OFFENSIVE_JP.id + side] < G.turn && G.future_offensive[side] > 0 && (G.hand[side].length || G.offensive.draw[side].length > 0)) {
         var result = G.hand[side].slice()
         result.push(G.future_offensive[side])
         return result

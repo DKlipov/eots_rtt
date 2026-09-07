@@ -11787,8 +11787,12 @@ function update_hand(side) {
         }
     } else {
         for (var i = 0; i < G.hand[side].length; i++) {
-            var card = G.hand[side][i]
-            populate("hand", side, "card", card)
+            if (G.hand[side][i] <= 0) {
+                populate_generic("hand", side, side === JP ? "card card_jp_0" : "card card_ap_0").innerHTML = ''
+            } else {
+                var card = G.hand[side][i]
+                populate("hand", side, "card", card)
+            }
         }
     }
 }
