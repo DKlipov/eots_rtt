@@ -1238,6 +1238,9 @@ function check_fuel_shortage_data() {
     })
     L.moved.forEach(u => set_delete(result, u))
     G.active_stack.forEach(u => set_delete(result, u))
+    // 本次燃料短缺事件里被判“无可落位”的单位, 不再进入候选。
+    // Units marked "no valid destination" in this fuel-shortage event are excluded from candidates.
+    if (Array.isArray(L.unmovable)) L.unmovable.forEach(u => set_delete(result, u))
     L.allowed_hexes = []
     if (G.active_stack.length && L.target && G.supply_cache[L.target] & HEX_TEMP_FLAG1) {
         L.allowed_hexes = [L.target]
@@ -1288,11 +1291,35 @@ P.fuel_shortage = {
             }
         })
         L.moved = []
+        // 本次燃料短缺事件中“被选中却无可落位目的地”的单位, 不再重新候选。
+        // Units selected but left with no valid destination in this event are not re-offered.
+        L.unmovable = []
         L.stage = 0
     },
     inactive: "apply card effect",
     prompt() {
         prompt(`Move units. Units could be selected: ${5 - L.moved.length}.`)
+        // 引擎死锁出口(无头自对弈在 1942-1945 多种子复现): 已选单位/编队但 allowed_hexes 为空——
+        // 目标港已超编、不可达, 或该单位本就在目标港, 窗口只剩 undo(真人会撤销该次选择, 确定性
+        // bot 不会)。等价地自动丢弃本次选择、把该单位标记为本次事件不可搬迁(不重复候选), 回到
+        // 选择状态继续; 若已无任何可搬迁单位则由 check_fuel_shortage_data 依既有逻辑自动结束窗口。
+        // Deadlock exit (headless self-play, reproduced across 1942-1945 seeds): a stack is selected but
+        // allowed_hexes is empty — the destination port is overstacked/unreachable, or the unit is already
+        // there, so only "undo" remains (a human would undo; a deterministic bot will not). Drop the
+        // selection, mark the unit non-movable for this event (not re-offered), and return to selecting;
+        // if no movable unit remains, check_fuel_shortage_data ends the window as before.
+        if (G.active_stack.length && L.allowed_hexes.length === 0) {
+            G.active_stack.forEach(u => {
+                var idx = L.moved.indexOf(u)
+                if (idx >= 0) L.moved.splice(idx, 1)
+                if (L.unmovable.indexOf(u) < 0) L.unmovable.push(u)
+            })
+            G.active_stack = []
+            check_fuel_shortage_data()
+            // 若内部已 end() 并渲染新窗口, 直接返回, 不再重复渲染本窗口。
+            // If the inner call already ended and rendered a new window, return without re-rendering.
+            if (L.P !== "fuel_shortage") return
+        }
         L.allowed_units.forEach(u => action_unit(u))
         L.allowed_hexes.forEach(h => action_hex(h))
         if (L.moved.length && !G.active_stack.length) {

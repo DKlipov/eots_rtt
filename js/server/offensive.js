@@ -730,6 +730,10 @@ P.move_offensive_units = {
                 button("done")
             }
         }
+        const headlessKind = G.headless_moves && G.active_stack.length === 0 ? headless_stage_kind() : null
+        if (headlessKind && headless_advance_has_candidates(headlessKind)) {
+            button("advance")
+        }
 
         if (G.active_stack.length === 0) {
             L.movable_units.forEach(u => action_unit(u))
@@ -940,6 +944,16 @@ P.move_offensive_units = {
     no_move() {
         call("move_to", {hex: G.location[G.active_stack[0]]})
     },
+    advance(targetPlan) {
+        const kind = G.headless_moves && G.active_stack.length === 0 ? headless_stage_kind() : null
+        if (!kind) {
+            return
+        }
+        const r = headless_advance_one(this, kind, targetPlan)
+        if (r.type === "none") {
+            this.done()
+        }
+    },
     skip() {
         push_undo()
         this.done()
@@ -970,6 +984,542 @@ function set_mt(mt) {
     L.move_type = mt
     L.move_data = get_move_data()
 }
+
+/* 无头自对打推进/收拢:
+   Headless self-play advance/consolidate:
+   地面/海上移动的目标路径仅由客户端(move(path))提供, 服务端不暴露路径参数, 因此无头
+   Ground/naval target paths are only supplied by the client (move(path)); the server does not expose path arguments, so a headless
+   bot 永远只能空中打击, 无法把地面/登陆部队推进到敌占格、也无法在战后/反应窗把部队移走。
+   bot could only ever perform air strikes, never advancing ground/landing units into enemy hexes nor moving them away in the post-battle/reaction window.
+   这里补上服务端等价物: 当 G.headless_moves 时在移动窗展示 advance 按钮, 引擎按与客户端
+   This adds the server-side equivalent: when G.headless_moves is set, show an "advance" button in the movement window, and the engine computes
+   完全相同的 update_move_hex() 合法格计算, 选一个目标并沿该窗既有 move(path) 语义完成推进。
+   legal hexes using exactly the same update_move_hex() as the client, picks a target, and completes the advance via the window's existing move(path) semantics.
+   三个阶段语义不同:
+   The three stages differ:
+     - ATTACK_STAGE(攻击方): 推进向敌。敌单位占格(攻击, 防御方地面越少越优) > 敌控空置格(夺取)。
+     - ATTACK_STAGE (attacker): advance on the enemy. Enemy-occupied hex (attack, preferring fewer defender ground units) > enemy-controlled empty hex (capture).
+       纯海军编成只主动迎击敌舰队(敌 naval>0 格), 不冲陆地/机场, 避免裸舰队撞岸空耗。
+       Pure naval task forces only actively seek enemy fleets (hexes with enemy naval>0), never charging land/airfields, to avoid bare fleets wasting effort on landings.
+     - REACTION_STAGE: 反应部队须进入会战格支援; 只移需要动(不在会战格)的单位。
+     - REACTION_STAGE: reaction units must enter a battle hex to support; only move units that need to move (i.e. not already in a battle hex).
+     - POST_BATTLE_STAGE: 战后须收拢到可落脚格; 只移“在此不能停(could_unit_stop_here 失败)”的单位。
+     - POST_BATTLE_STAGE: after combat, must consolidate to a hex where they can stop; only move units that cannot stop here (could_unit_stop_here fails).
+   每个 advance 只处理最低格一个编成; 若全无可动/无可达目标则返回 none(由调用方 done)。
+   Each advance handles only the lowest-hex task force; if nothing can move or no target is reachable, return none (the caller calls done). */
+
+function headless_stage_kind() {
+    if (G.offensive.stage === ATTACK_STAGE && G.active === G.offensive.attacker) return "attack"
+    if (G.offensive.stage === POST_BATTLE_STAGE) return "pbm"
+    if (G.offensive.stage === REACTION_STAGE) return "reaction"
+    return null
+}
+
+function headless_enemy_units_at(hex, faction) {
+    let count = 0, ground = 0, naval = 0
+    for (let u = 1; u < pieces.length; u++) {
+        const p = pieces[u]
+        if (!p || p.faction !== faction) continue
+        const h = G.location[u]
+        if (h !== hex) continue
+        count++
+        if (p.class === "ground" || p.class === "hq") ground++
+        else if (p.class === "naval") naval++
+    }
+    return { count, ground, naval }
+}
+
+function headless_nearest_enemy_dist(hex, faction) {
+    let best = 99
+    for (let u = 1; u < pieces.length; u++) {
+        const p = pieces[u]
+        if (!p || p.faction !== faction) continue
+        const h = G.location[u]
+        if (!(h >= 0 && h <= LAST_BOARD_HEX)) continue
+        const d = get_distance(hex, h)
+        if (d < best) best = d
+    }
+    return best
+}
+
+// 分数: [类别, ...次键, hex], 越小越优; 只在 allowed_hexes(引擎合法落点)上评比。
+// Score: [category, ...sub-keys, hex], smaller is better; only scored over allowed_hexes (the engine's legal destinations).
+// zh.6: 攻击方若有“操作层主轴焦点”(erasmus_ops), 只有能渡海的编成(含 naval 单位,
+// zh.6: if the attacker has an "operational main-axis focus" (erasmus_ops), only sea-crossing task forces (with naval units,
+// 可两栖/海运跳岛)才用离焦点的距离作同等目标内的次级键 —— 引导登陆沿主轴线夺格;
+// i.e. able to island-hop via amphibious/sea transport) use distance-to-focus as the sub-key within equal targets — steering landings to capture along the main axis;
+// 纯地面/纯陆路编成不能渡海, 若也朝海外焦点转向, 会把地面军拖去跨大陆绕路(如经
+// pure ground/overland task forces cannot cross the sea; if they too turned toward an overseas focus, they would drag ground units on cross-continent detours (e.g. via
+// 缅甸→中国直趋中太平洋), 故仍按原“距最近敌军”就近推进。无焦点/非渡海编成时行为逐位不变。
+// Burma → China straight toward the Central Pacific), so they still advance by the original "nearest enemy" distance. Behavior is bit-for-bit unchanged when there is no focus or for non-sea-crossing task forces.
+function headless_units_at(hex, faction) {
+    const r = { air:0, naval:0, ground:0, hq:0, strongestAir:0 }
+    for (let u=1; u<pieces.length; ++u) {
+        const p=pieces[u]
+        if (!p || p.faction!==faction || G.location[u]!==hex) continue
+        if (p.class === "air") { r.air++; r.strongestAir=Math.max(r.strongestAir, Number(p.cf)||0) }
+        else if (p.class === "naval") r.naval++
+        else if (p.class === "ground") r.ground++
+        else if (p.class === "hq") r.hq++
+    }
+    return r
+}
+
+// 第6/12页航空 PBM 六级目标、海上 PBM 三级目标、AA PBM 两级目标。
+// Page 6/12 six-tier air PBM targets, three-tier naval PBM targets, two-tier AA PBM targets.
+// 这里的 candidates 已经过引擎 update_move_hex() 合法性过滤，因此评分只决定图表优先级，
+// The candidates here have already passed the engine's update_move_hex() legality filter, so the score only determines chart priority,
+// 不会绕过航程、地形、控制、叠放或移动规则。
+// and never bypasses range, terrain, control, stacking, or movement rules.
+function erasmus_pbm_target_score(hex, faction, piece, source, targetPlan) {
+    const md=get_map_data(hex), own=headless_units_at(hex,faction), enemy=headless_units_at(hex,1-faction)
+    const enemyZoi=typeof has_zoi === "function" && has_zoi(hex,1-faction)
+    const dist=typeof get_distance === "function" ? get_distance(source,hex) : Math.abs(source-hex)
+    const hasRecordedPlan=!!targetPlan&&Object.prototype.hasOwnProperty.call(targetPlan,"focus")
+    let focus=targetPlan&&Number.isInteger(targetPlan.focus)?targetPlan.focus:null
+    if(!hasRecordedPlan&&focus===null&&typeof eop_focus_faction==="function")try{focus=eop_focus_faction(faction)}catch(e){focus=null}
+    const goalDist=focus!==null&&typeof get_distance==="function"?get_distance(hex,focus):99
+    if (piece.class === "air") {
+        if (!md.airfield) return null
+        // 脚注[12]/[11]：每机场不超过一个空中单位；当前移动单位原地不计为冲突。
+        // Footnote [12]/[11]: no more than one air unit per airfield; the current moving unit staying in place is not counted as a conflict.
+        const resident=own.air-(hex===source?1:0)
+        if (resident>0) return null
+        // 双方图表同构：无敌 ZOI 的己方 HQ → 敌 HQ → 敌 AZOI 下己港 → 己机场 → 己地面 → 最近资源格。
+        // Both charts share structure: own HQ free of enemy ZOI → enemy HQ → own port under enemy AZOI → own airfield → own ground → nearest resource hex.
+        // 日本图表排除日本本土 HQ；盟军没有对应本土排除。
+        // The Japanese chart excludes home-island HQs; the Allies have no corresponding home-island exclusion.
+        const nonHomeHq=own.hq>0 && !enemyZoi && !(faction===JP && md.region==="Japan")
+        if (nonHomeHq) return [0,-(Number(piece.cf)||0),dist,hex]
+        if (enemy.hq>0) return [1,-(Number(piece.cf)||0),dist,hex]
+        if (md.port && enemyZoi) return [2,-(Number(piece.cf)||0),dist,hex]
+        if (enemyZoi) return [3,-(Number(piece.cf)||0),dist,hex]
+        if (own.ground>0 && enemyZoi) return [4,-(Number(piece.cf)||0),dist,hex]
+        if (md.resource) return [5,dist,hex]
+        // 六级表均不命中时才用战略前推作为平分键，避免参战航空每次 PBM 都退回
+        // Only when none of the six tiers match do we use strategic advance as the tie-break key, to avoid participating air units retreating
+        // 最近后方机场；图表列明的 HQ/敌 HQ/AZOI/资源优先级仍严格在它之前。
+        // to the nearest rear airfield every PBM; the chart-listed HQ/enemy HQ/AZOI/resource priorities still strictly precede it.
+        return [6,goalDist,dist,hex]
+    }
+    if (piece.class === "naval") {
+        if (!md.port) return null
+        // 日本首选南方HQ缺舰；盟军首选任一可落脚HQ港。真实可达性已由移动器保证。
+        // Japan prefers southern HQs lacking naval; the Allies prefer any landable HQ port. Real reachability is already guaranteed by the mover.
+        const hqPriority=own.hq>0 && (faction===AP || (md.name||"").toLowerCase().includes("south"))
+        if (hqPriority && own.naval-(hex===source?1:0)<=0) return [0,dist,hex]
+        if (own.ground>0 && own.naval-(hex===source?1:0)<=0 && own.air===0) return [1,dist,hex]
+        return [2,goalDist,dist,hex]
+    }
+    if (piece.class === "ground") {
+        if (!md.port) return null
+        if (own.naval>0) return [0,dist,hex]
+        return [1,dist,hex]
+    }
+    return null
+}
+
+function headless_target_score(hex, hasGround, faction, kind, steer, movingPiece, source, targetPlan) {
+    const eu = headless_enemy_units_at(hex, 1 - faction)
+    let strategicFocus = null, strategicMeta = null, strategicAxis = null
+    if (targetPlan && Object.prototype.hasOwnProperty.call(targetPlan,"focus")) {
+        strategicFocus = Number.isInteger(targetPlan.focus) ? targetPlan.focus : null
+        strategicMeta = strategicFocus === null ? null : targetPlan
+        strategicAxis = { kind: targetPlan.axisKind || null }
+    } else if (typeof eop_focus_faction === "function") {
+        try {
+            strategicFocus = eop_focus_faction(faction)
+            strategicMeta = strategicFocus === null ? null : eop_target_meta(faction === JP ? "Japan" : "Allies", strategicFocus)
+            strategicAxis = eop_axis(faction === JP ? "Japan" : "Allies")
+        } catch (e) { strategicFocus = strategicMeta = strategicAxis = null }
+    }
+    // 第5/11页任务部队注释：EC 为每个目标各编一支任务部队。首要目标已经
+    // Page 5/11 task force note: an EC forms one task force per target. When the primary target has already
+    // 宣告会战时，后续移动组按图表链寻找下一目标，避免所有启动点重复堆入
+    // declared a battle, subsequent movement groups look for the next target along the chart chain, avoiding every launch point piling into
+    // 同一战斗格。远程航空/航母在稍后的 choose_attack_hex 窗仍可选择并支援
+    // the same battle hex. Long-range air/carriers can still select and support the already-declared primary battle hex in the later choose_attack_hex window,
+    // 已宣告的首要战斗格，不要求进入该格。
+    // without being required to enter it.
+    if(kind==="attack"&&strategicFocus!==null&&G.offensive&&
+        set_has(G.offensive.battle_hexes,strategicFocus)&&typeof eop_next_focus_faction==="function"){
+        const next=eop_next_focus_faction(faction,G.offensive.battle_hexes,targetPlan)
+        if(next){strategicFocus=next.hex;strategicMeta=next.meta}
+    }
+    const approach = steer && strategicFocus !== null
+        ? get_distance(hex, strategicFocus)
+        : steer && typeof eop_advance_tiebreak === "function" ? eop_advance_tiebreak(hex, faction) : -1
+    const nearKey = hex => approach >= 0 ? approach : headless_nearest_enemy_dist(hex, 1 - faction)
+    if (kind === "attack") {
+        // 驻军和指定撤离的终点是己方位置；不能把这些激活改成就近攻击。
+        // Garrison and designated-withdrawal destinations are own-side locations; these activations must not be turned into nearby attacks.
+        if (strategicMeta && (strategicMeta.kind === "REDEPLOY" || strategicMeta.kind === "GARRISON" || strategicMeta.kind === "PORTS")) {
+            if (!is_space_controlled(hex, faction) || eu.count > 0) return null
+            const md = get_map_data(hex)
+            if (movingPiece?.class === "air" && !md?.airfield) return null
+            if (movingPiece?.class === "naval" && !md?.port) return null
+            const d = get_distance(hex, strategicFocus)
+            if (hex !== strategicFocus && d >= get_distance(source, strategicFocus)) return null
+            return [hex === strategicFocus ? -5 : 2, d, get_distance(source, hex), hex]
+        }
+        // 盟军开局的事件/撤退战略可能没有地图焦点。旧的通用“最近敌军”退化会让
+        // Allied opening event/withdrawal strategies may have no map focus. The old generic "nearest enemy" fallback would make
+        // 夏威夷舰机跨海选择日本本土，形成图表外自杀攻势。只有当前实际战略焦点
+        // Hawaiian ships/planes cross the sea to pick the Japanese home islands, forming an off-chart suicide offensive. Only when the current actual strategic focus
+        // 本身位于日本区域时，盟军才可把日本本土列为战斗格。
+        // itself lies in the Japan region may the Allies list the Japanese home islands as a battle hex.
+        const targetMd = get_map_data(hex)
+        const focusMd = strategicFocus !== null ? get_map_data(strategicFocus) : null
+        if (faction === AP && targetMd && targetMd.region === "Japan" && (!focusMd || focusMd.region !== "Japan")) return null
+        // 航空单位可从战斗格外参战。若后方基地不在目标战斗航程内，本次攻势先把
+        // Air units can join combat from outside the battle hex. If the rear base is not within battle range of the target, this offensive first moves
+        // 它移动到更靠前的合法机场；到达后 choose_attack_hex 仍按 br/ebr 决定能否
+        // it to a more forward legal airfield; after arrival choose_attack_hex still decides via br/ebr whether it can
+        // 承诺到会战，不绕过任何移动或战斗航程检查。
+        // commit to the battle, bypassing no movement or battle-range checks.
+        if (movingPiece && movingPiece.class === "air") {
+            const md = get_map_data(hex)
+            if (!md || !md.airfield || !is_space_controlled(hex, faction) || eu.count > 0) return null
+            const range = Math.max(1, Number(movingPiece.br) || Number(movingPiece.ebr) || 1)
+            const d = strategicFocus !== null ? get_distance(hex, strategicFocus) : headless_nearest_enemy_dist(hex, 1 - faction)
+            return [strategicFocus !== null && d <= range ? -4 : 3, d, get_distance(source, hex), hex]
+        }
+        // 最终国防圈不是进攻目标表：只向己控驻军焦点移动；不可达时仅在己控格内
+        // The final defense perimeter is not an attack-target table: only move toward a friendly-controlled garrison focus; when unreachable, only approach
+        // 向焦点靠近。禁止纯海军落回“最近敌舰”而从本土远征南方资源区。
+        // the focus within friendly-controlled hexes. Pure naval forces are forbidden from falling back to "nearest enemy fleet" and sailing from home waters to the southern resource area.
+        if (strategicMeta && strategicMeta.kind === "GARRISON") {
+            if (!is_space_controlled(hex, faction)) return null
+            const d = get_distance(hex, strategicFocus)
+            return [hex === strategicFocus ? 0 : 1, d, hex]
+        }
+        // 最终防御[4]-[8]只围绕本州盟军地面单位。允许地面、空中/海军支援进入
+        // Final defense [4]-[8] only centers on Allied ground units in Honshu. Ground, air/naval support may enter
+        // 当前本州焦点；不可直接到达时，只在日本区域己控格内集结。
+        // the current Honshu focus; when not directly reachable, only rally within friendly-controlled hexes in the Japan region.
+        if (strategicMeta && strategicMeta.kind === "DEFEND_HONSHU") {
+            if (hex === strategicFocus && eu.count > 0) return [0, hasGround ? 0 : 1, eu.ground, hex]
+            const md = get_map_data(hex)
+            if (!md || md.region !== "Japan" || !is_space_controlled(hex, faction)) return null
+            return [1, get_distance(hex, strategicFocus), hex]
+        }
+        // GARRISON/DEFEND 显式战略即使暂时无焦点，也不得使用通用远征目标。
+        // GARRISON/DEFEND explicit strategies must not use generic expedition targets even when temporarily without a focus.
+        if (strategicAxis && (strategicAxis.kind === "GARRISON" || strategicAxis.kind === "DEFEND")) return null
+        // 决策轴的当前目标是硬优先级，不是距离平分键。旧逻辑先比较守军数量，导致
+        // The decision axis's current target is a hard priority, not a distance tie-break key. The old logic compared garrison count first, causing
+        // 马尼拉可达时仍把登陆编队送往守军更弱的婆罗洲/小岛。占领目标必须有地面
+        // landings to be sent to weaker-defended Borneo/small islands even when Manila was reachable. Occupation targets must have ground
+        // 单位；压制目标则允许空海编队。其余可达目标只在当前编队到不了焦点时接手。
+        // units; suppression targets allow air/naval task forces. Other reachable targets only take over when the current task force cannot reach the focus.
+        if (strategicMeta && hex === strategicFocus) {
+            if (strategicMeta.requiresOccupation && !hasGround) {
+                // 登陆军与护航舰队可以从不同基地出发。若本攻势已经激活地面登陆军，
+                // Landing units and the escort fleet can depart from different bases. If this offensive has already activated ground landing units,
+                // 允许纯海军编队进入同一目标格，最终合并会战，避免错误的“无护航”。
+                // a pure naval task force may enter the same target hex and later merge into the battle, avoiding a false "no escort".
+                const active=(G.offensive&&G.offensive.active_units&&G.offensive.active_units[faction])||[]
+                const ids=typeof active.flat==="function"?active.flat():active
+                const hasLandingGround=ids.some(u=>pieces[u]&&pieces[u].class==="ground")
+                if (!(movingPiece && movingPiece.class === "naval" && hasLandingGround)) return null
+                return [-3, eu.naval, eu.count, hex]
+            }
+            return [-2, eu.ground, eu.count, hex]
+        }
+        // 硬串行目标和明确的前进部署分支只准接近当前目标，不能绕路夺下一岛。
+        // Hard serial targets and the explicit advance-deployment branch only allow approaching the current target, not detouring to capture the next island.
+        if (strategicMeta?.strictSequential || strategicMeta?.advanceBaseIfUnreachable || targetPlan?.strictSequential) {
+            if (!is_space_controlled(hex, faction) || eu.count > 0) return null
+            const d = get_distance(hex, strategicFocus)
+            if (d >= get_distance(source, strategicFocus)) return null
+            return [3, d, get_distance(source, hex), hex]
+        }
+        if (eu.count > 0) {
+            if (hasGround) return [0, eu.ground, eu.count, nearKey(hex), hex]
+            if (eu.naval > 0) return [0, eu.naval, eu.count, nearKey(hex), hex]
+            return null
+        }
+        if (is_space_controlled(hex, 1 - faction)) {
+            if (!hasGround) return null
+            return [1, nearKey(hex), hex]
+        }
+        return null
+    }
+    if (kind === "reaction") {
+        // 反应: 支援会战(格内是敌人进攻部队); 选我方风险最低的会战格。
+        // Reaction: support the battle (the hex holds the enemy's attacking force); choose our lowest-risk battle hex.
+        // 落点必须能被后续 choose_attack_hex 真正分配, 否则反应阶段不自动收尾, 分配窗仅剩 undo 卡死:
+        // The destination must be truly assignable by the later choose_attack_hex; otherwise the reaction stage never auto-finishes and the assignment window deadlocks with only undo left:
+        //  1) 航母编成(extended_battle_range>0): 落点须在某会战格 battle_range 内可达, 或直接进会战格。
+        //  1) CV task force (extended_battle_range>0): the destination must be reachable within some battle hex's battle_range, or enter the battle hex directly.
+        //  2) 纯护航(无航母海军): 只能进会战格自动投入(escort 窗靠"同格已投入航母"才给格,
+        //  2) Pure escort (naval without CV): can only enter the battle hex to auto-commit (the escort window only grants a hex when a CV has already committed there,
+        //     无航母时不进会战格就没有合法分配格)。
+        //     with no CV present there is no legal assignment hex unless entering the battle hex).
+        // 地面反应维持原"就近"推进(mark_ground_reaction_hexes 本身就是非会战格)。
+        // Ground reaction keeps the original "nearest" advance (mark_ground_reaction_hexes itself marks non-battle hexes).
+        const inBattle = set_has(G.offensive.battle_hexes, hex)
+        const range = (L.move_data && L.move_data.extended_battle_range) || 0
+        if (range) {
+            // 用与 compute_air_commit_hexes 相同的收尾口径判可达: in_range_on_map 在西南象限 sw 格
+            // Use the same finalization criterion as compute_air_commit_hexes to judge reachability: in_range_on_map, for southwest-quadrant sw hexes,
+            // 走 slow_in_range 按真实地图邻接 BFS, 而非 get_distance 的理想六角距离(会漏判)。
+            // runs slow_in_range as a BFS over real map adjacency, not get_distance's ideal hex distance (which would misjudge).
+            const reachable = inBattle || in_range_on_map(hex, range, G.offensive.battle_hexes, G.active).length > 0
+            if (!reachable) return null
+        } else if (L.move_data && L.move_data.is_naval_present && !L.move_data.is_ground_present) {
+            if (!inBattle) return null
+        }
+        return [eu.count, eu.ground, hex]
+    }
+    // PBM 严格使用双方图表的专属落点表；无匹配落点才用安全/距离次序，且会在轨迹中
+    // PBM strictly uses each side's chart-specific destination table; only with no matching destination does it use the safe/distance order, and it lands in
+    // 落到具体 JP06/AP12 PBM 节点，不再伪装成通用 reaction 排序。
+    // specific JP06/AP12 PBM nodes, no longer masquerading as a generic reaction ordering.
+    const chartScore=movingPiece&&source!==undefined?erasmus_pbm_target_score(hex,faction,movingPiece,source,targetPlan):null
+    if(chartScore)return chartScore
+    const controlled = is_space_controlled(hex, faction)
+    return [20,eu.count > 0 ? 2 : (controlled ? 0 : 1),eu.count,source===undefined?0:get_distance(source,hex),hex]
+}
+
+function headless_score_lt(a, b) {
+    for (let i = 0; i < a.length && i < b.length; i++) {
+        if (a[i] !== b[i]) return a[i] < b[i]
+    }
+    return a.length < b.length
+}
+
+// 该移动窗是否还有“需要 advance 处理的”非空中单位(不同阶段的可动/必动条件)。
+// Whether this movement window still has non-air units "needing advance handling" (movable/must-move conditions per stage).
+function headless_advance_has_candidates(kind) {
+    for (const u of L.movable_units) {
+        const p = pieces[u]
+        if (!p || (p.class === "air" && kind !== "pbm" && kind !== "attack")) continue
+        const h = G.location[u]
+        if (!(h >= 0 && h <= LAST_BOARD_HEX)) continue
+        if (kind === "attack" && p.class === "air" && typeof eop_focus_faction === "function") {
+            let f = null
+            try { f = eop_focus_faction(G.active) } catch (e) { f = null }
+            const br = p.parenthetical ? Number(p.br) : Number(p.ebr || p.br)
+            const meta = f !== null && typeof eop_target_meta === "function" ? eop_target_meta(G.active===JP?"Japan":"Allies",f) : null
+            const relocation = meta && (meta.kind === "REDEPLOY" || meta.kind === "GARRISON" || meta.kind === "PORTS")
+            if (!relocation && f !== null && get_distance(h, f) <= Math.max(1, br || 1)) continue
+        }
+        if (kind === "attack") return true
+        if (kind === "pbm" && (p.class === "air" || !could_unit_stop_here(u))) return true
+        if (kind === "reaction" && !set_has(G.offensive.battle_hexes, h)) return true
+    }
+    return false
+}
+
+// 尝试推进/收拢一个编成(同一格未移动、非空中可移动单位)。调用方在空 active_stack 下进入。
+// Try to advance/consolidate one task force (same-hex, not-yet-moved, non-air movable units). Caller enters with an empty active_stack.
+// 返回 {type:"move"} 已排定一次移动(子窗随后运行), {type:"decline"} 放弃一组单位, {type:"none"} 无候选。
+// Returns {type:"move"} one move scheduled (a sub-window runs next), {type:"decline"} a group abandoned, {type:"none"} no candidates.
+function headless_advance_one(self, kind, targetPlan) {
+    if (G.active_stack.length) return { type: "decline" }
+    // 同一张牌可激活多个指定调动任务。每次移动重新从保存的任务表绑定可移动单位，
+    // One card can activate multiple designated transfer tasks. Each move re-binds movable units from the saved task list,
+    // 例如 SL 与 FEAF 均到 Manila，而 P 旅仍应独立到 Biak。
+    // e.g. SL and FEAF both go to Manila, while the P brigade should still go independently to Biak.
+    if (kind === "attack" && targetPlan?.targetMeta?.some(m=>m.requiredUnits || m.escortPairs)) {
+        const role=G.active===JP?"Japan":"Allies"
+        for (const h of targetPlan.chain || []) {
+            const meta=targetPlan.targetMeta.find(m=>m.hex===h)
+            if(!meta || typeof eop_target_pending!=="function" || !eop_target_pending(role,h,meta))continue
+            const matching=L.movable_units.some(u=>G.location[u]!==h && eop_unit_matches_target(u,role,meta,h))
+            if(matching){targetPlan={...targetPlan,...meta,focus:h};break}
+            if(meta.strictSequential)break
+        }
+    }
+    const need = u => {
+        const p = pieces[u]
+        if (!p || (p.class === "air" && kind !== "pbm" && kind !== "attack")) return false
+        const h = G.location[u]
+        if (!(h >= 0 && h <= LAST_BOARD_HEX)) return false
+        if(kind==="attack" && targetPlan?.kind==="REDEPLOY" && h===targetPlan.focus)return false
+        if (kind === "attack" && p.class === "air") {
+            let f = targetPlan && Number.isInteger(targetPlan.focus) ? targetPlan.focus : null
+            if (f === null && typeof eop_focus_faction === "function") {
+                try { f = eop_focus_faction(G.active) } catch (e) { f = null }
+            }
+            const br = p.parenthetical ? Number(p.br) : Number(p.ebr || p.br)
+            const relocation = targetPlan && (targetPlan.kind === "REDEPLOY" || targetPlan.kind === "GARRISON" || targetPlan.kind === "PORTS")
+            if (!relocation && f !== null && get_distance(h, f) <= Math.max(1, br || 1)) return false
+        }
+        if (kind === "attack") return true
+        if (kind === "pbm") return p.class === "air" || !could_unit_stop_here(u)
+        if (kind === "reaction") return !set_has(G.offensive.battle_hexes, h)
+        return false
+    }
+    let loc = -1, lead = -1, leadScore = null
+    for (const u of L.movable_units) {
+        if (!need(u)) continue
+        if (kind === "attack" && targetPlan && typeof eop_unit_matches_target === "function"
+            && !eop_unit_matches_target(u, G.active === JP ? "Japan" : "Allies", targetPlan, targetPlan.focus)) continue
+        const h = G.location[u]
+        const p=pieces[u]
+        // PBM 按图表 A/B/C：航空先、海上次、失败两栖地面最后；航空同类先处理最强单位。
+        // PBM follows chart A/B/C: air first, naval second, failed-amphibious ground last; among air of the same class process the strongest unit first.
+        const cls=kind==="pbm"?(p.class==="air"?0:p.class==="naval"?1:2):0
+        const strength=Number(p.cf)||0
+        const score=[cls,kind==="pbm"&&p.class==="air"?-strength:0,h,u]
+        if(leadScore===null||headless_score_lt(score,leadScore)){leadScore=score;loc=h;lead=u}
+    }
+    if (loc < 0) return { type: "none" }
+    const leadPiece=pieces[lead]
+    const group = L.movable_units.filter(u => {
+        const p = pieces[u]
+        if(!p||G.location[u]!==loc)return false
+        if(kind==="attack" && targetPlan && typeof eop_unit_matches_target === "function"
+            && !eop_unit_matches_target(u,G.active===JP?"Japan":"Allies",targetPlan,targetPlan.focus))return false
+        if(kind==="attack" && targetPlan?.escortPairs?.length){
+            const pair=targetPlan.escortPairs.find(x=>x.ground===lead||x.carrier===lead)
+            if(!pair || (u!==pair.ground&&u!==pair.carrier))return false
+        }
+        // 航空 PBM 每机场最多一机，逐个移动；海军/失败地面仍按同格同类编组。
+        // Air PBM moves at most one plane per airfield, moving one at a time; naval/failed ground still group by same hex and class.
+        if((kind==="pbm"||kind==="attack")&&leadPiece.class==="air")return u===lead
+        if(kind==="pbm")return p.class===leadPiece.class
+        return p.class!=="air"
+    })
+    if (!group.length) return { type: "none" }
+    if(kind==="attack" && targetPlan?.escortRequired && targetPlan.escortPairs?.length
+        && !targetPlan.escortPairs.some(p=>group.includes(p.ground)&&group.includes(p.carrier)))return {type:"none"}
+    // 逐个真实选入(获得 organic 配对/移动路径语义, 并从 movable 移除以保证单窗只走一次)
+    // Select each unit in for real (gaining organic pairing/movement-path semantics, and removing from movable so the window only processes them once)
+    group.forEach(u => self.unit(u))
+    L.move_data = get_move_data()
+    update_move_hex()
+    // 后方前推：只使用引擎本来会显示的扩展航程/战略移动资格。扩展航程用于无法以
+    // Rear advance: only use the extended-range/strategic-movement qualifications the engine would itself show. Extended range is for parenthetical air units that cannot
+    // 正常战斗航程接近当前轴的括号航空单位；战略移动用于距目标很远、且引擎判定
+    // approach the current axis within normal battle range; strategic movement is for non-air task forces very far from the target and judged
+    // sm_possible 的非航空编队。两者都通过原 update_move_hex 重新计算合法落点。
+    // sm_possible by the engine. Both recompute legal destinations via the original update_move_hex.
+    let plannedMoveType = ANY_MOVE
+    let plannedFocus = targetPlan && Number.isInteger(targetPlan.focus) ? targetPlan.focus : null
+    if (plannedFocus === null && typeof eop_focus_faction === "function") {
+        try { plannedFocus = eop_focus_faction(G.active) } catch (e) { plannedFocus = null }
+    }
+    const focusDistance = plannedFocus !== null ? get_distance(loc, plannedFocus) : 0
+    const farFromFocus = plannedFocus !== null && focusDistance > 8
+    const semanticModes = kind === "attack" && Array.isArray(targetPlan?.movementModes) ? targetPlan.movementModes : []
+    if (semanticModes.includes("STRATEGIC") || semanticModes.includes("SR")) {
+        plannedMoveType = STRAT_MOVE
+    } else if (kind === "attack" && leadPiece.class === "air" && leadPiece.parenthetical && farFromFocus) {
+        plannedMoveType = AIR_EXTENDED_MOVE
+    } else if (kind === "attack" && leadPiece.class !== "air" && L.move_data.sm_possible && focusDistance > 12) {
+        plannedMoveType = STRAT_MOVE
+    }
+    if (plannedMoveType !== ANY_MOVE) {
+        L.move_type = plannedMoveType
+        L.move_data = get_move_data()
+        update_move_hex()
+        if (!L.allowed_hexes.length && !semanticModes.includes("STRATEGIC") && !semanticModes.includes("SR")) {
+            plannedMoveType = ANY_MOVE
+            L.move_type = ANY_MOVE
+            L.move_data = get_move_data()
+            update_move_hex()
+        }
+    }
+    const hasGround = group.some(u => pieces[u] && pieces[u].class === "ground")
+    // 记录在 advance 参数中的明确图表目标同样约束纯地面前推（例如仰光/印度陆路）。
+    // An explicit chart target recorded in the advance parameter likewise constrains pure ground advances (e.g. the Rangoon/India overland route).
+    // 没有显式目标时仍仅让可跨海编成使用旧主轴转向，避免普通地面部队无目的横穿大陆。
+    // Without an explicit target, still only let sea-crossing task forces use the old main-axis steering, avoiding ordinary ground units aimlessly crossing the continent.
+    const steer = kind === "attack" && ((targetPlan && Number.isInteger(targetPlan.focus))
+        || group.some(u => pieces[u] && pieces[u].class === "naval"))
+    let best = null, bestScore = null
+    let bestPath = null, bestMoveType = plannedMoveType
+    const movementOptions = semanticModes.length && hasGround
+        ? semanticModes.map(m=>m==="GROUND"?GROUND_MOVE:m==="AA"?AMPH_MOVE:(m==="STRATEGIC"||m==="SR")?STRAT_MOVE:ANY_MOVE)
+        : [plannedMoveType]
+    for (let modeIndex=0; modeIndex<movementOptions.length; ++modeIndex) {
+        const mode=movementOptions[modeIndex]
+        L.move_type=mode
+        L.move_data=get_move_data()
+        update_move_hex()
+        map_for_each(L.allowed_hexes, (h) => {
+        const path=map_get(L.allowed_hexes,h)
+        if (hasGround && mode===GROUND_MOVE && !(path[0]&GROUND_MOVE)) return
+        if (hasGround && mode===AMPH_MOVE && !(path[0]&AMPH_MOVE)) return
+        if (mode===STRAT_MOVE && !(path[0]&STRAT_MOVE)) return
+        const sc = headless_target_score(h, hasGround, G.active, kind, steer, leadPiece, loc, targetPlan)
+        if (!sc) return
+        // 优先方式只在同样能完成目标时优先；不能因陆路只够前进一步而压过可直接登陆。
+        // A preferred mode is only preferred when it can equally complete the goal; it must not override a direct landing merely because an overland route can advance one step.
+        sc.splice(1,0,modeIndex)
+        if (!best || headless_score_lt(sc, bestScore)) {
+            bestScore = sc
+            best = h
+            bestPath=object_copy(path)
+            bestMoveType=mode
+        }
+        })
+    }
+    if (best === null && kind === "attack" && hasGround && L.move_data && (L.move_data.move_type & AMPH_MOVE)
+        && !semanticModes.length && !targetPlan?.strictSequential
+        && ((typeof process === "undefined") || process.env.B_CRUISE !== "0")) {
+        // B: 两栖编成“空海巡航”。焦点是敌占/待夺格但本激活够不着(允许落点里没有任何敌控
+        // B: amphibious task force "sea-air cruise". The focus is an enemy-held/to-capture hex but this activation cannot reach it (no enemy-controlled
+        // 格)时, 原实现直接放弃该组 → 海军陆战队永远停在原地, 无法把跨洋远征拉近目标;
+        // hex among the allowed destinations), the old implementation abandoned the group → marines stuck in place forever, unable to pull the trans-ocean expedition toward the target;
+        // 这里改向“离焦点最近的合法落点”移动一格(逐激活/逐回合推进), 使登岛链条得以闭合。
+        // here we instead move one step toward the "nearest legal destination to the focus" (advancing activation-by-activation/turn-by-turn), closing the island-hopping chain.
+        let foc = null
+        if (targetPlan && Object.prototype.hasOwnProperty.call(targetPlan,"focus"))
+            foc = Number.isInteger(targetPlan.focus) ? targetPlan.focus : null
+        else if (typeof eop_focus_faction === "function") { try { foc = eop_focus_faction(G.active) } catch (e) { foc = null } }
+        if (foc !== null && foc >= 0 && foc <= LAST_BOARD_HEX && typeof get_distance === "function") {
+            let appr = null, apprD = Infinity
+            map_for_each(L.allowed_hexes, (h) => {
+                const d = get_distance(h, foc)
+                if (d < apprD || (d === apprD && (appr === null || h < appr))) { apprD = d; appr = h }
+            })
+            if (appr !== null) {
+                best = appr; bestScore = [10, apprD, appr]
+            }
+        }
+    }
+    if (best === null) {
+        // 无可达落点: 放弃该组(单位已退出 movable, 视为本窗未移动)
+        // No reachable destination: abandon this group (units already removed from movable, treated as not moved this window)
+        G.offensive.organic = G.offensive.organic.filter(u => !set_has(group, u))
+        G.active_stack = []
+        L.allowed_hexes = []
+        L.move_data = {}
+        L.move_type = ANY_MOVE
+        return { type: "decline" }
+    }
+    const path = bestPath || object_copy(map_get(L.allowed_hexes, best))
+    L.move_type = bestMoveType
+    L.move_data = get_move_data()
+    L.allowed_hexes = []
+    G.offensive.organic = G.offensive.organic.filter(u => !set_has(group, u))
+    push_undo()
+    try {
+        self.move(path)
+    } catch (e) {
+        // 地面/海军"离海"路径距离被低估: compute_ground_naval_move_hexes 为算海运路径会临时
+        // Ground/naval "leaving sea" path distance is underestimated: to compute sea-transport paths, compute_ground_naval_move_hexes temporarily
+        // 移除地面单位重算供应, 使陆路路径在"单位不在场"时按畅通道路算出更短距离; 而 move_units
+        // removes ground units and recomputes supply, so overland paths get a shorter distance along clear roads "when the unit is absent"; while move_units
+        // 用单位在场供应校验, 距离超限 → "Bad move path"。此时放弃该组(单位留在原地, 同 decline),
+        // validates with the unit present, and the over-limit distance → "Bad move path". Then abandon the group (units stay in place, same as decline),
+        // 避免无头推进整局崩溃。pop_undo 还原 move_units 已写入的半程 paths 与临时供应。
+        // avoiding a full-game crash in headless advance. pop_undo restores the half-written paths and temporary supply that move_units had already written.
+        pop_undo()
+        G.offensive.organic = G.offensive.organic.filter(u => !set_has(group, u))
+        G.active_stack = []
+        L.allowed_hexes = []
+        L.move_data = {}
+        return { type: "decline" }
+    }
+    return { type: "move" }
+}
+
+
 
 function get_air_attack_hex() {
     var result = []
@@ -1021,7 +1571,11 @@ P.choose_attack_hex = {
         L.allowed_hexes = get_air_attack_hex()
         if (G.offensive.stage === REACTION_STAGE && set_has(G.offensive.battle_hexes, path[2])) {
             this.attack_hex(path[2])
-        } else if (L.allowed_hexes.length <= 0 && G.offensive.stage !== REACTION_STAGE) {
+        } else if (L.allowed_hexes.length <= 0) {
+            // 无法到达任何已宣告会战格的反应单位不能满足图表反应部队需求,
+            // A reaction unit that cannot reach any declared battle hex cannot satisfy
+            // 退回反应池继续下一个候选, 而非卡成只剩 undo 的死窗。
+            // the chart's reaction-force requirement; return it to the reaction pool and continue with the next candidate instead of an undo-only dead window.
             G.active_stack = []
             end()
         }
@@ -1037,13 +1591,13 @@ P.choose_attack_hex = {
         }
 
         if (could_pass || globalThis.RTT_FUZZER) {
-            button("skip")
+            button("pass")
         }
         for (let i = 0; i < L.allowed_hexes.length; i += 1) {
             action_hex(L.allowed_hexes[i])
         }
     },
-    skip() {
+    pass() {
         L.allowed_hexes = []
         G.active_stack = []
         end()
@@ -1631,12 +2185,49 @@ P.commit_offensive_confirm = {
         }
         if (!L.L.verify_error || globalThis.RTT_FUZZER) {
             prompt(`${offensive_card_header()} Confirm ${action}.`)
-            button("confirm")
+            button("next")
         } else {
             prompt(`${offensive_card_header()} Confirm ${action}. ` + L.L.verify_error)
+            // 卡牌 before_commit_offensive 限制未满足: 该攻势无法提交。给行动方一个
+            // The card's before_commit_offensive restriction is unmet: this offensive cannot be committed. Give the acting side an
+            // 显式的“放弃攻势”出口(等价于人工多次 undo 回到 Select action 窗口),
+            // explicit "abandon offensive" exit (equivalent to a human undoing several times back to the Select action window),
+            // 避免确认窗只提供 undo 而让确定性 bot 无合法动作可选。
+            // so a confirmation window offering only undo doesn't leave a deterministic bot with no legal action to choose.
+            button("cancel")
         }
     },
-    confirm() {
+    cancel() {
+        var c = G.offensive.offensive_card
+        var rollback = G.offensive.card_rollback
+        var len = G.offensive.card_undo_len
+        if (rollback) {
+            restore_state(rollback)
+            if (len !== undefined && len !== null && G.undo && G.undo.length > len) {
+                G.undo.length = len // 丢弃本次攻势过程中压入的 undo 点
+                // discard the undo points pushed during this offensive
+            }
+            G.offensive = G.offensive || {}
+            G.offensive.oc_denied = G.offensive.oc_denied || {}
+            if (c >= 0) {
+                G.offensive.oc_denied[c] = true
+            }
+            log(`#GCard restriction unsatisfied; offensive abandoned and card ${c} kept.`)
+        } else if (G.undo && G.undo.length > 0) {
+            pop_undo()
+            G.offensive = G.offensive || {}
+            G.offensive.oc_denied = G.offensive.oc_denied || {}
+            if (c >= 0) {
+                G.offensive.oc_denied[c] = true
+            }
+        } else {
+            log("Card offensive restriction unsatisfied and no rollback available; proceeding anyway.")
+            resolve_into_turn_draw(JP)
+            resolve_into_turn_draw(AP)
+            end()
+        }
+    },
+    next() {
         resolve_into_turn_draw(JP)
         resolve_into_turn_draw(AP)
         end()

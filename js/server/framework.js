@@ -73,6 +73,7 @@ function end(result) {
 }
 
 exports.roles ??= ROLES
+exports.bots ??= (typeof EOTS_BOTS !== "undefined") ? EOTS_BOTS : {}
 
 exports.scenarios ??= (typeof SCENARIOS !== "undefined") ? SCENARIOS : ["Standard"]
 
