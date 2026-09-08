@@ -214,8 +214,7 @@ P.offensive_segment_card_action = {
 
 function end_of_offensive_check() {
     commit_into_turn_draw()
-    check_occupation(events.HAWAII_OCCUPATION)
-    check_occupation(events.ALASKA_OCCUPATION)
+    check_occupation()
 }
 
 P.initiative_segment = script(`

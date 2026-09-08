@@ -334,8 +334,7 @@ P.political_will_segment = function () {
         G.surrender[nations.INDIA.id] >= 4 && G.surrender[nations.CHINA.id] >= 5) {
         check_event(events.ALLIED_NATIONS_SURRENDERS)
     }
-    check_occupation(events.HAWAII_OCCUPATION, true)
-    check_occupation(events.ALASKA_OCCUPATION, true)
+    check_occupation( true)
     check_jp_resources_event()
     check_naval_situation()
     check_progress_of_war()
@@ -387,8 +386,7 @@ P.attrition_phase = script(`
     call attrition
     eval {
         check_supply()
-        check_occupation(events.HAWAII_OCCUPATION)
-        check_occupation(events.ALASKA_OCCUPATION)
+        check_occupation()
     }
     set G.active AP
     call attrition

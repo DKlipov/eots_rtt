@@ -432,7 +432,13 @@ function check_event(event) {
     return true
 }
 
-function check_occupation(event, apply_pw = false) {
+function check_occupation(apply_pw = false) {
+    check_units()
+    check_occupation_region(events.ALASKA_OCCUPATION, apply_pw)
+    check_occupation_region(events.HAWAII_OCCUPATION, apply_pw)
+}
+
+function check_occupation_region(event, apply_pw = false) {
     var result = event.keys.filter(k => is_faction_units(hex_to_int(k), JP)).length
     var map_value = G.events[event.id]
     var occupied_for = (G.turn - map_value) + 1

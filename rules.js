@@ -14102,8 +14102,7 @@ P.political_will_segment = function () {
         G.surrender[nations.INDIA.id] >= 4 && G.surrender[nations.CHINA.id] >= 5) {
         check_event(events.ALLIED_NATIONS_SURRENDERS)
     }
-    check_occupation(events.HAWAII_OCCUPATION, true)
-    check_occupation(events.ALASKA_OCCUPATION, true)
+    check_occupation( true)
     check_jp_resources_event()
     check_naval_situation()
     check_progress_of_war()
@@ -14155,8 +14154,7 @@ P.attrition_phase = script(`
     call attrition
     eval {
         check_supply()
-        check_occupation(events.HAWAII_OCCUPATION)
-        check_occupation(events.ALASKA_OCCUPATION)
+        check_occupation()
     }
     set G.active AP
     call attrition
@@ -14463,8 +14461,7 @@ P.offensive_segment_card_action = {
 
 function end_of_offensive_check() {
     commit_into_turn_draw()
-    check_occupation(events.HAWAII_OCCUPATION)
-    check_occupation(events.ALASKA_OCCUPATION)
+    check_occupation()
 }
 
 P.initiative_segment = script(`
@@ -17591,7 +17588,13 @@ function check_event(event) {
     return true
 }
 
-function check_occupation(event, apply_pw = false) {
+function check_occupation(apply_pw = false) {
+    check_units()
+    check_occupation_region(events.ALASKA_OCCUPATION, apply_pw)
+    check_occupation_region(events.HAWAII_OCCUPATION, apply_pw)
+}
+
+function check_occupation_region(event, apply_pw = false) {
     var result = event.keys.filter(k => is_faction_units(hex_to_int(k), JP)).length
     var map_value = G.events[event.id]
     var occupied_for = (G.turn - map_value) + 1
