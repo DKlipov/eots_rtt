@@ -17717,6 +17717,9 @@ function displace_to_turn(unit, turns, not_delayed) {
 }
 
 function check_sudden_death() {
+    if (G.sid !== SOUTH_PACIFIC_SCENARIO) {
+        return
+    }
     var check = [0, 0]
     HQ_LIST.forEach(u => {
         if (unit_on_board(u) && u !== HQ_CENTRAL_PACIFIC) {
