@@ -7585,7 +7585,6 @@ function remove_zoi(hex) {
 
 function check_units() {
     clear_supply_cache(CLEAN_ALL_MASK)
-    G.burma_road = 0
     for_each_unit_on_map(mark_unit)
     place_virtual_units()
     check_infrastructure()

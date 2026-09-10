@@ -326,6 +326,7 @@ P.replacement_segment = {
                 && !piece.notreplaceable
                 && !is_reinforcement_denied(piece)
                 && !set_has(G.oos, u)
+                && !has_non_n_zoi(location, 1 - piece.faction)
                 && (location === ELIMINATED_BOX || set_has(G.reduced, u) && (location === CHINA_BOX || location < LAST_BOARD_HEX))
                 && (location !== ELIMINATED_BOX || piece.service !== "ch" || G.burma_road < 2)
             ) {

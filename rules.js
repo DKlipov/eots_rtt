@@ -7587,7 +7587,6 @@ function remove_zoi(hex) {
 
 function check_units() {
     clear_supply_cache(CLEAN_ALL_MASK)
-    G.burma_road = 0
     for_each_unit_on_map(mark_unit)
     place_virtual_units()
     check_infrastructure()
@@ -10405,6 +10404,7 @@ P.replacement_segment = {
                 && !piece.notreplaceable
                 && !is_reinforcement_denied(piece)
                 && !set_has(G.oos, u)
+                && !has_non_n_zoi(location, 1 - piece.faction)
                 && (location === ELIMINATED_BOX || set_has(G.reduced, u) && (location === CHINA_BOX || location < LAST_BOARD_HEX))
                 && (location !== ELIMINATED_BOX || piece.service !== "ch" || G.burma_road < 2)
             ) {
@@ -19665,7 +19665,7 @@ exports.action = function (state, role, action, argument) {
 
     var this_state = P[L.P]
     if (this_state && typeof this_state[action] === "function") {
-        if (argument && (argument.action || argument.action === 0)) {
+        if (argument && (argument.br || argument.br === 0)) {
             if (CLIENT_SIDE_SUPPLY) {
                 if (argument.oos) {
                     G.oos = argument.oos
