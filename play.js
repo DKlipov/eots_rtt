@@ -10541,6 +10541,7 @@ function on_init(scenario, game_options, static_view) {
     init_canvas(scenario)
 
     init_preference_checkbox("noroad", false)
+    init_preference_checkbox("full_log", false)
     init_preference_checkbox("nopath", false)
     init_preference_checkbox("fullcontrol", false)
     init_preference_checkbox("hidezoi", false)
@@ -12404,11 +12405,12 @@ function on_prompt(text) {
     }
 }
 
-var SHOW_FULL_LOG = 0
+var SHOW_FULL_LOG = get_preference("full_log", false)
 
 function show_full_log() {
-    SHOW_FULL_LOG = 1
+    SHOW_FULL_LOG = !get_preference("full_log", false)
     var len = Number.isInteger(view.log) ? view.log : game_log.length
+    update_log(0, 0)
     update_log(0, len)
 }
 

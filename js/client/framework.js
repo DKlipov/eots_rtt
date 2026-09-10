@@ -54,11 +54,12 @@ function on_prompt(text) {
     }
 }
 
-var SHOW_FULL_LOG = 0
+var SHOW_FULL_LOG = get_preference("full_log", false)
 
 function show_full_log() {
-    SHOW_FULL_LOG = 1
+    SHOW_FULL_LOG = !get_preference("full_log", false)
     var len = Number.isInteger(view.log) ? view.log : game_log.length
+    update_log(0, 0)
     update_log(0, len)
 }
 

@@ -465,6 +465,7 @@ function on_init(scenario, game_options, static_view) {
     init_canvas(scenario)
 
     init_preference_checkbox("noroad", false)
+    init_preference_checkbox("full_log", false)
     init_preference_checkbox("nopath", false)
     init_preference_checkbox("fullcontrol", false)
     init_preference_checkbox("hidezoi", false)
