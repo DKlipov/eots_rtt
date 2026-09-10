@@ -13829,7 +13829,7 @@ function set_pow() {
         G.pow = 2
     }
     if (G.pow) {
-        log(`Progress of war target - ${G.pow}.`)
+        log(`Progress of war required - ${G.pow}.`)
     } else {
         log(`No progress of war required.`)
     }
@@ -18908,17 +18908,19 @@ function setup_scenario_south_pacific() {
 
 function deal_cards() {
     var jp_cards = 7
+    var source = ""
     if (G.turn > 4) {
         var jp_resources = get_jp_resources()
         jp_cards = Math.max(Math.ceil(jp_resources / 2), 4)
-        log(`JP resources - ${jp_resources} (${jp_cards} cards).`)
+        source = `(${jp_resources} resources)`
     } else {
-        log(`JP use strategic reserves (${jp_cards} cards).`)
+        source = `(Strategic reserves)`
     }
     if (G.strategic_warfare) {
         jp_cards = Math.max(jp_cards - G.strategic_warfare, 4)
-        log(`Strategic warfare reduces JP draw to ${jp_cards} (-${G.strategic_warfare}).`)
+        log(`Strategic warfare reduces JP draw (-${G.strategic_warfare}).`)
     }
+    log(`JP draw ${jp_cards} cards ${source}.`)
     G.passes[JP] = 0
     if (jp_cards === 6) {
         G.passes[JP] = 1
@@ -18926,7 +18928,7 @@ function deal_cards() {
         G.passes[JP] = 2
     }
     if (G.passes[JP]) {
-        log(`JP receives ${G.passes[JP]} passes.`)
+        log(`JP receive ${G.passes[JP]} passes.`)
     }
     while (G.hand[JP].length < jp_cards) {
         draw_card(JP)
@@ -18982,7 +18984,7 @@ function S_P_deal_cards() {
         log(`Strategic warfare reduces JP draw to ${jp_cards} (-${G.strategic_warfare}).`)
         G.passes[JP] = 1
     }
-    log(`JP receive ${jp_cards} cards.`)
+    log(`JP draw ${jp_cards} cards.`)
     if (G.passes[JP]) {
         log(`JP receive ${G.passes[JP]} passes.`)
     }
@@ -19012,9 +19014,9 @@ function B_F_W_deal_cards() {
     if (G.strategic_warfare) {
         jp_cards -= G.strategic_warfare
         log(`Strategic warfare reduces JP draw to ${jp_cards} (-${G.strategic_warfare}).`)
-        G.passes[JP] = 1
+        G.passes[JP] = G.strategic_warfare
     }
-    log(`JP receive ${jp_cards} cards.`)
+    log(`JP draw ${jp_cards} cards.`)
     if (G.passes[JP]) {
         log(`JP receive ${G.passes[JP]} passes.`)
     }

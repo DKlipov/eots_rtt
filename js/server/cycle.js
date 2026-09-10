@@ -51,7 +51,7 @@ function set_pow() {
         G.pow = 2
     }
     if (G.pow) {
-        log(`Progress of war target - ${G.pow}.`)
+        log(`Progress of war required - ${G.pow}.`)
     } else {
         log(`No progress of war required.`)
     }
