@@ -157,7 +157,7 @@ function check_burma_road() {
             }
             const occupied_land = G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
             var distance = get_ground_mp_cost(item, nh, faction)
-            if (distance > 1 || map_has(distance_map, nh) || occupied_land || is_space_controlled(nh, JP)) {
+            if (distance > 1 || map_has(distance_map, nh) || occupied_land) {
                 continue
             }
             map_set(distance_map, nh, distance)

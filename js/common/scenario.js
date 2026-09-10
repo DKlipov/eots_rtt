@@ -174,6 +174,15 @@ function victory_burma() {
     return result
 }
 
+function get_mandate_control() {
+    if (is_space_controlled(RABAUL, JP) && is_space_controlled(GUADALCANAL, JP)) {
+        return JP
+    } else if (is_space_controlled(RABAUL, AP) && is_space_controlled(GUADALCANAL, AP)) {
+        return AP
+    }
+    return G.surrender[nations.AUSTRALIAN_MANDATES.id] ? JP : AP
+}
+
 function victory_1942() {
     var hawaii = [hex_to_int(5708), hex_to_int(5808), hex_to_int(5908)]
     hawaii.forEach(h => {
@@ -208,9 +217,9 @@ function victory_1942() {
     } else {
         result.text.push(`0 VP - India ${nations.INDIA.statuses[india_status]}.`)
     }
-    binary_vp(result, G.surrender[nations.AUSTRALIAN_MANDATES.id], 1, "JP Control of Australian Mandates", `AP Control of Australian Mandates`)
+    binary_vp(result, get_mandate_control() === JP, 1, "JP Control of Australian Mandates", `AP Control of Australian Mandates`)
     var new_guinea = 0
-    nations.NEW_GUINEA.keys.map(k=>hex_to_int(k)).forEach(h => {
+    nations.NEW_GUINEA.keys.map(k => hex_to_int(k)).forEach(h => {
         if (is_space_controlled(h, JP) && get_map_data(h).port && get_map_data(h).region === "Guinea") {
             new_guinea++
         }
@@ -334,20 +343,20 @@ function victory_1943() {
         result.text.push(`0 VP - India ${nations.INDIA.statuses[india_status]}.`)
     }
     var mandate_diff = 0
-    if (G.surrender[nations.AUSTRALIAN_MANDATES.id]) {
+    if (get_mandate_control() === JP) {
         mandate_diff = 3
     } else {
         mandate_diff = -3
     }
-    adjust_vp(result, mandate_diff, "JP Control of Australian Mandates")
-    if (!G.surrender[nations.AUSTRALIAN_MANDATES.id]) {
+    adjust_vp(result, mandate_diff, "Control of Australian Mandates")
+    if (mandate_diff >= 3) {
         var mandate_count = 0
         var mandate_hexes = []
         for_each_hex_in_range(RABAUL, 5, h => {
             if (get_map_data(h).region === "AMandates") {
                 mandate_hexes.push(h)
             }
-            if (is_space_controlled(h, AP) && get_map_data(h).region === "AMandates") {
+            if (is_space_controlled(h, AP) && get_map_data(h).region === "AMandates" && get_map_data(h).named) {
                 mandate_count++
             }
         })
@@ -433,7 +442,7 @@ function victory_1944() {
     } else {
         result.text.push(`0 VP - India ${nations.INDIA.statuses[india_status]}.`)
     }
-    binary_vp(result, G.surrender[nations.AUSTRALIAN_MANDATES.id], 1, "JP Control of the Australian Mandates",
+    binary_vp(result, get_mandate_control() === JP, 1, "JP Control of the Australian Mandates",
         "JP don't control the Australian Mandates")
     if (G.political_will <= 5) {
         result.vp += 6 - G.political_will

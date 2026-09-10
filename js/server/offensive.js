@@ -638,7 +638,7 @@ function get_move_buttons() {
     if ((no_move_p) && (L.move_type === ANY_MOVE && !L.spec_move)) {
         result.push("no_move")
     }
-    if (G.offensive.stage === ATTACK_STAGE && get_map_data(L.move_data.location).coastal
+    if (G.offensive.stage === ATTACK_STAGE && L.move_data.location && get_map_data(L.move_data.location).coastal
         && G.offensive.barges && L.move_type !== BARGES_MOVE
         && G.offensive.barges > 1 && G.active_stack.filter(u => pieces[u].class === "ground").length === 1) {
         result.push("barges")
