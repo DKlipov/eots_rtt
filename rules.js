@@ -14986,7 +14986,7 @@ cards[find_card(JP, 17)].after_unit_activation = function (u) {
 const SAVO_RULE = 0
 
 const VIOLATIONS = [
-    `Carrier units could not be activated. Check 1.3 "Naval".`
+    `Carriers can't be activated with this card. Check 1.3 "Naval.`
 ]
 P.rule_violation = {
     inactive: "undo wrong action",
