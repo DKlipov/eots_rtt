@@ -666,6 +666,9 @@ function after_unit_move() {
     } else if (!is_space_controlled(hex, G.active) && curr_path[0] & AMPH_MOVE) {
         create_landing_hex(hex)
     }
+    if (G.offensive.stage === POST_BATTLE_STAGE) {
+        G.active_stack.forEach(u => set_delete(G.offensive.active_units[pieces[u].faction], u))
+    }
 }
 
 P.move_to = script(`
@@ -703,7 +706,8 @@ P.move_offensive_units = {
         G.offensive.active_units[G.active].filter(u => {
             if (!unit_on_board(u) && G.location[u] !== CHINA_BOX
                 || G.offensive.stage === POST_BATTLE_STAGE && (pieces[u].class === "ground" && !set_has(G.offensive.ground_pbm, u) || map_get(G.offensive.paths, u, [0])[0] & STRAT_MOVE)
-                || G.offensive.stage === REACTION_STAGE && set_has(G.offensive.battle_hexes, G.location[u]) && !pieces[u].br) {
+                || G.offensive.stage === REACTION_STAGE && set_has(G.offensive.battle_hexes, G.location[u]) && !pieces[u].br
+                || G.offensive.stage === ATTACK_STAGE && map_has(G.offensive.paths, u)) {
                 return false
             }
             return true
@@ -908,18 +912,20 @@ P.move_offensive_units = {
                 }
             })
         }
-        move_units(G.active_stack, curr_path)
+
         if (curr_path[0] & AMPH_MOVE && G.offensive.stage === REACTION_STAGE) {
+            L.move_type = AMPH_MOVE
             G.asp[R][1] += 1
             G.offensive.r_asp = 1
         } else if (curr_path[0] & AMPH_MOVE && G.offensive.stage !== POST_BATTLE_STAGE &&
             (!get_map_data(hex).port || !is_space_controlled(hex, R) || is_faction_units(hex, 1 - R) || (L.move_type === AMPH_MOVE))
             && L.move_data.asp_points) {
+            L.move_type = AMPH_MOVE
             G.asp[R][1] += L.move_data.asp_points
+        }
+        move_units(G.active_stack, curr_path)
+        if (L.move_type === AMPH_MOVE) {
             log(`${side_get_log_str(G.active)} ASP used ${L.move_data.asp_points} (${G.asp[R][1]}/${G.asp[R][0]}).`)
-            if (G.offensive.stage === REACTION_STAGE) {
-                G.offensive.r_asp += L.move_data.asp_points
-            }
         }
         L.move_type = ANY_MOVE
         L.spec_move = 0
@@ -1383,11 +1389,11 @@ P.retro_disengagement = {
         var active_stack = L.active
 
         if (L.P === "move_to" && !set_has(G.offensive.battle_hexes, G.location[active_stack[0]])) {
+            call("move_offensive_units")
             set_mt(GROUND_MOVE)
             L.allowed_hexes = []
             L.spec_move = 1
             G.active_stack = active_stack
-            call("move_offensive_units")
         }
     },
     skip() {

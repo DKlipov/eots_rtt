@@ -828,7 +828,7 @@ function move_units(units, path) {
     var legs = 1
     i = 2
     var destination = path[path.length - 1]
-    log(`${units_list} moved to ${list_get_log_str(hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
+    log(`${units_list} moved ${list_get_log_str(hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
     if (could_zoi_cross && zoi_cross_declared) {
         zoi_crossed()
         could_zoi_cross = false
@@ -915,6 +915,8 @@ function get_move_type(type) {
         return " (Barges)"
     } else if (type & GROUND_MOVE) {
         return " (Ground move)"
+    } else if (type & AMPH_MOVE) {
+        return " (Amphibious Assault)"
     }
     return ""
 }

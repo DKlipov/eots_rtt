@@ -148,7 +148,7 @@ P.offensive_segment_card_action = {
         push_undo()
         activate_card(L.c)
         G.offensive.type = OC
-        log(`${card_get_log_str(L.c)} played as operation card.`)
+        log(`${card_get_log_str(L.c)} (${cards[L.c].ops} OV) played as operation card.`)
         goto("offensive_sequence")
     },
     event() {

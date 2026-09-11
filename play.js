@@ -3442,7 +3442,7 @@ var cards = [
         "remove": true,
         "cause": "Minor allied victory",
         "wie": [-1, -1, -2, -3],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 12,
@@ -3473,7 +3473,7 @@ var cards = [
         "remove": true,
         "cause": "Minor allied victory",
         "wie": [-1, -1, -2, -3],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 15,
@@ -3745,7 +3745,7 @@ var cards = [
         "remove": true,
         "cause": "Minor allied victory",
         "wie": [-1, -1, -2, -3],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 42,
@@ -3756,7 +3756,7 @@ var cards = [
         "remove": true,
         "cause": "Minor allied victory",
         "wie": [-1, -1, -2, -3],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 43,
@@ -3810,7 +3810,7 @@ var cards = [
         "remove": true,
         "cause": "Major allied victory",
         "wie": [-1, -2, -3, -3],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 48,
@@ -4016,7 +4016,7 @@ var cards = [
         "remove": true,
         "cause": "Major allied victory",
         "wie": [-1, -2, -3, -3],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 67,
@@ -4092,7 +4092,7 @@ var cards = [
         "remove": true,
         "cause": "Major allied victory",
         "wie": [-1, -2, -3, -3],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 74,
@@ -4716,7 +4716,7 @@ var cards = [
         "remove": true,
         "cause": "Minor axis victory",
         "wie": [2, 1],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 52,
@@ -4727,7 +4727,7 @@ var cards = [
         "remove": true,
         "cause": "Minor axis victory",
         "wie": [2, 1],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 53,
@@ -4738,7 +4738,7 @@ var cards = [
         "remove": true,
         "cause": "Minor axis victory",
         "wie": [2, 1],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 54,
@@ -4749,7 +4749,7 @@ var cards = [
         "remove": true,
         "cause": "Minor axis victory",
         "wie": [2, 1],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 55,
@@ -4760,7 +4760,7 @@ var cards = [
         "remove": true,
         "wie": [3, 2, 1],
         "cause": "Major axis victory",
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 56,
@@ -4771,7 +4771,7 @@ var cards = [
         "remove": true,
         "cause": "Minor axis victory",
         "wie": [2, 1],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 57,
@@ -4782,7 +4782,7 @@ var cards = [
         "remove": true,
         "cause": "Minor axis victory",
         "wie": [2, 1],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 58,
@@ -9205,7 +9205,7 @@ function move_units(units, path) {
     var legs = 1
     i = 2
     var destination = path[path.length - 1]
-    log(`${units_list} moved to ${list_get_log_str(hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
+    log(`${units_list} moved ${list_get_log_str(hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
     if (could_zoi_cross && zoi_cross_declared) {
         zoi_crossed()
         could_zoi_cross = false
@@ -9292,6 +9292,8 @@ function get_move_type(type) {
         return " (Barges)"
     } else if (type & GROUND_MOVE) {
         return " (Ground move)"
+    } else if (type & AMPH_MOVE) {
+        return " (Amphibious Assault)"
     }
     return ""
 }
@@ -11045,7 +11047,7 @@ function supply_query(unit) {
     place_virtual_units()
     check_infrastructure()
     for_each_unit_on_map((i, p) => (!result.oos || p.faction === piece.faction) ? set_zoi(i, p, [G.oos, G.oos]) : null)
-    indian_zoi_hack()
+    indian_zoi_hack((i, p) => (!result.oos || p.faction === piece.faction) ? set_zoi(i, p, [G.oos, G.oos]) : null)
     var hq = HQ_LIST.filter(hq => {
         return (piece.faction === pieces[hq].faction && G.location[hq] < LAST_BOARD_HEX)
     })

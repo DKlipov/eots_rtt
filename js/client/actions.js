@@ -306,7 +306,7 @@ function supply_query(unit) {
     place_virtual_units()
     check_infrastructure()
     for_each_unit_on_map((i, p) => (!result.oos || p.faction === piece.faction) ? set_zoi(i, p, [G.oos, G.oos]) : null)
-    indian_zoi_hack()
+    indian_zoi_hack((i, p) => (!result.oos || p.faction === piece.faction) ? set_zoi(i, p, [G.oos, G.oos]) : null)
     var hq = HQ_LIST.filter(hq => {
         return (piece.faction === pieces[hq].faction && G.location[hq] < LAST_BOARD_HEX)
     })

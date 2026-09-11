@@ -702,7 +702,7 @@ function play_event(c) {
     if (G.future_offensive[faction] === c) {
         log(`${side_get_log_str(faction)} played FO card.`)
     }
-    log(`${card_get_log_str(c)} played as event.`)
+    log(`${card_get_log_str(c)} (${cards[c].ops} OV) played as event.`)
     if (cards[c].draw) {
         into_turn_draw(faction)
     }

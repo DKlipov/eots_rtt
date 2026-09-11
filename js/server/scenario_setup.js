@@ -1123,7 +1123,7 @@ P.burma_choose_offensive = {
     prompt() {
         if (L.confirm_card) {
             prompt(`Confirm ` + card_get_log_str(L.confirm_card) + ` as Future Offensive?`)
-            button("done")
+            button("confirm")
         } else {
             prompt(`Choose Military Event to use as Future Offensive.`)
             BURMA_JAPANESE_OFF.forEach(c => {
@@ -1139,7 +1139,7 @@ P.burma_choose_offensive = {
         future_offencive_card(c, 5) //First turn is 6, card is playable immediatly so turn mark as being designated during turn 5
         L.confirm_card = c
     },
-    done() {
+    confirm() {
         G.offensive.active_cards = []
         goto("offensive_phase")
     }

@@ -3444,7 +3444,7 @@ var cards = [
         "remove": true,
         "cause": "Minor allied victory",
         "wie": [-1, -1, -2, -3],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 12,
@@ -3475,7 +3475,7 @@ var cards = [
         "remove": true,
         "cause": "Minor allied victory",
         "wie": [-1, -1, -2, -3],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 15,
@@ -3747,7 +3747,7 @@ var cards = [
         "remove": true,
         "cause": "Minor allied victory",
         "wie": [-1, -1, -2, -3],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 42,
@@ -3758,7 +3758,7 @@ var cards = [
         "remove": true,
         "cause": "Minor allied victory",
         "wie": [-1, -1, -2, -3],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 43,
@@ -3812,7 +3812,7 @@ var cards = [
         "remove": true,
         "cause": "Major allied victory",
         "wie": [-1, -2, -3, -3],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 48,
@@ -4018,7 +4018,7 @@ var cards = [
         "remove": true,
         "cause": "Major allied victory",
         "wie": [-1, -2, -3, -3],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 67,
@@ -4094,7 +4094,7 @@ var cards = [
         "remove": true,
         "cause": "Major allied victory",
         "wie": [-1, -2, -3, -3],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 74,
@@ -4718,7 +4718,7 @@ var cards = [
         "remove": true,
         "cause": "Minor axis victory",
         "wie": [2, 1],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 52,
@@ -4729,7 +4729,7 @@ var cards = [
         "remove": true,
         "cause": "Minor axis victory",
         "wie": [2, 1],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 53,
@@ -4740,7 +4740,7 @@ var cards = [
         "remove": true,
         "cause": "Minor axis victory",
         "wie": [2, 1],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 54,
@@ -4751,7 +4751,7 @@ var cards = [
         "remove": true,
         "cause": "Minor axis victory",
         "wie": [2, 1],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 55,
@@ -4762,7 +4762,7 @@ var cards = [
         "remove": true,
         "wie": [3, 2, 1],
         "cause": "Major axis victory",
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 56,
@@ -4773,7 +4773,7 @@ var cards = [
         "remove": true,
         "cause": "Minor axis victory",
         "wie": [2, 1],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 57,
@@ -4784,7 +4784,7 @@ var cards = [
         "remove": true,
         "cause": "Minor axis victory",
         "wie": [2, 1],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 58,
@@ -9207,7 +9207,7 @@ function move_units(units, path) {
     var legs = 1
     i = 2
     var destination = path[path.length - 1]
-    log(`${units_list} moved to ${list_get_log_str(hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
+    log(`${units_list} moved ${list_get_log_str(hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
     if (could_zoi_cross && zoi_cross_declared) {
         zoi_crossed()
         could_zoi_cross = false
@@ -9294,6 +9294,8 @@ function get_move_type(type) {
         return " (Barges)"
     } else if (type & GROUND_MOVE) {
         return " (Ground move)"
+    } else if (type & AMPH_MOVE) {
+        return " (Amphibious Assault)"
     }
     return ""
 }
@@ -11172,6 +11174,9 @@ function after_unit_move() {
     } else if (!is_space_controlled(hex, G.active) && curr_path[0] & AMPH_MOVE) {
         create_landing_hex(hex)
     }
+    if (G.offensive.stage === POST_BATTLE_STAGE) {
+        G.active_stack.forEach(u => set_delete(G.offensive.active_units[pieces[u].faction], u))
+    }
 }
 
 P.move_to = script(`
@@ -11209,7 +11214,8 @@ P.move_offensive_units = {
         G.offensive.active_units[G.active].filter(u => {
             if (!unit_on_board(u) && G.location[u] !== CHINA_BOX
                 || G.offensive.stage === POST_BATTLE_STAGE && (pieces[u].class === "ground" && !set_has(G.offensive.ground_pbm, u) || map_get(G.offensive.paths, u, [0])[0] & STRAT_MOVE)
-                || G.offensive.stage === REACTION_STAGE && set_has(G.offensive.battle_hexes, G.location[u]) && !pieces[u].br) {
+                || G.offensive.stage === REACTION_STAGE && set_has(G.offensive.battle_hexes, G.location[u]) && !pieces[u].br
+                || G.offensive.stage === ATTACK_STAGE && map_has(G.offensive.paths, u)) {
                 return false
             }
             return true
@@ -11414,18 +11420,20 @@ P.move_offensive_units = {
                 }
             })
         }
-        move_units(G.active_stack, curr_path)
+
         if (curr_path[0] & AMPH_MOVE && G.offensive.stage === REACTION_STAGE) {
+            L.move_type = AMPH_MOVE
             G.asp[R][1] += 1
             G.offensive.r_asp = 1
         } else if (curr_path[0] & AMPH_MOVE && G.offensive.stage !== POST_BATTLE_STAGE &&
             (!get_map_data(hex).port || !is_space_controlled(hex, R) || is_faction_units(hex, 1 - R) || (L.move_type === AMPH_MOVE))
             && L.move_data.asp_points) {
+            L.move_type = AMPH_MOVE
             G.asp[R][1] += L.move_data.asp_points
+        }
+        move_units(G.active_stack, curr_path)
+        if (L.move_type === AMPH_MOVE) {
             log(`${side_get_log_str(G.active)} ASP used ${L.move_data.asp_points} (${G.asp[R][1]}/${G.asp[R][0]}).`)
-            if (G.offensive.stage === REACTION_STAGE) {
-                G.offensive.r_asp += L.move_data.asp_points
-            }
         }
         L.move_type = ANY_MOVE
         L.spec_move = 0
@@ -11889,11 +11897,11 @@ P.retro_disengagement = {
         var active_stack = L.active
 
         if (L.P === "move_to" && !set_has(G.offensive.battle_hexes, G.location[active_stack[0]])) {
+            call("move_offensive_units")
             set_mt(GROUND_MOVE)
             L.allowed_hexes = []
             L.spec_move = 1
             G.active_stack = active_stack
-            call("move_offensive_units")
         }
     },
     skip() {
@@ -14405,7 +14413,7 @@ P.offensive_segment_card_action = {
         push_undo()
         activate_card(L.c)
         G.offensive.type = OC
-        log(`${card_get_log_str(L.c)} played as operation card.`)
+        log(`${card_get_log_str(L.c)} (${cards[L.c].ops} OV) played as operation card.`)
         goto("offensive_sequence")
     },
     event() {
@@ -17868,7 +17876,7 @@ function play_event(c) {
     if (G.future_offensive[faction] === c) {
         log(`${side_get_log_str(faction)} played FO card.`)
     }
-    log(`${card_get_log_str(c)} played as event.`)
+    log(`${card_get_log_str(c)} (${cards[c].ops} OV) played as event.`)
     if (cards[c].draw) {
         into_turn_draw(faction)
     }
@@ -19180,7 +19188,7 @@ P.burma_choose_offensive = {
     prompt() {
         if (L.confirm_card) {
             prompt(`Confirm ` + card_get_log_str(L.confirm_card) + ` as Future Offensive?`)
-            button("done")
+            button("confirm")
         } else {
             prompt(`Choose Military Event to use as Future Offensive.`)
             BURMA_JAPANESE_OFF.forEach(c => {
@@ -19196,7 +19204,7 @@ P.burma_choose_offensive = {
         future_offencive_card(c, 5) //First turn is 6, card is playable immediatly so turn mark as being designated during turn 5
         L.confirm_card = c
     },
-    done() {
+    confirm() {
         G.offensive.active_cards = []
         goto("offensive_phase")
     }

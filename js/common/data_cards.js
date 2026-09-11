@@ -112,7 +112,7 @@ var cards = [
         "remove": true,
         "cause": "Minor allied victory",
         "wie": [-1, -1, -2, -3],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 12,
@@ -143,7 +143,7 @@ var cards = [
         "remove": true,
         "cause": "Minor allied victory",
         "wie": [-1, -1, -2, -3],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 15,
@@ -415,7 +415,7 @@ var cards = [
         "remove": true,
         "cause": "Minor allied victory",
         "wie": [-1, -1, -2, -3],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 42,
@@ -426,7 +426,7 @@ var cards = [
         "remove": true,
         "cause": "Minor allied victory",
         "wie": [-1, -1, -2, -3],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 43,
@@ -480,7 +480,7 @@ var cards = [
         "remove": true,
         "cause": "Major allied victory",
         "wie": [-1, -2, -3, -3],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 48,
@@ -686,7 +686,7 @@ var cards = [
         "remove": true,
         "cause": "Major allied victory",
         "wie": [-1, -2, -3, -3],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 67,
@@ -762,7 +762,7 @@ var cards = [
         "remove": true,
         "cause": "Major allied victory",
         "wie": [-1, -2, -3, -3],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 74,
@@ -1386,7 +1386,7 @@ var cards = [
         "remove": true,
         "cause": "Minor axis victory",
         "wie": [2, 1],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 52,
@@ -1397,7 +1397,7 @@ var cards = [
         "remove": true,
         "cause": "Minor axis victory",
         "wie": [2, 1],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 53,
@@ -1408,7 +1408,7 @@ var cards = [
         "remove": true,
         "cause": "Minor axis victory",
         "wie": [2, 1],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 54,
@@ -1419,7 +1419,7 @@ var cards = [
         "remove": true,
         "cause": "Minor axis victory",
         "wie": [2, 1],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 55,
@@ -1430,7 +1430,7 @@ var cards = [
         "remove": true,
         "wie": [3, 2, 1],
         "cause": "Major axis victory",
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 56,
@@ -1441,7 +1441,7 @@ var cards = [
         "remove": true,
         "cause": "Minor axis victory",
         "wie": [2, 1],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 57,
@@ -1452,7 +1452,7 @@ var cards = [
         "remove": true,
         "cause": "Minor axis victory",
         "wie": [2, 1],
-        "name": "War in europe",
+        "name": "War in Europe",
     },
     {
         "num": 58,
