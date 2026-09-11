@@ -6617,6 +6617,7 @@ function get_near_hexes(hex) {
 
 var counters = {
     oos: "oos top",
+    isolated: "isolated top",
     control_jp: "small_markers_white unit_ix_2 control",
     capture_jp: "small_markers_white unit_ix_2 gray control",
     control_us: "small_markers_white unit_ix_2 reduced control",
@@ -12057,7 +12058,13 @@ function on_update() {
     for (i = 0; i < G.oos.length; i++) {
         var hex = G.location[G.oos[i]]
         if (!set_has(oos_hex_set, hex) && hex <= LAST_BOARD_HEX && !set_has(supplied_hex, hex)) {
-            populate_generic("s-loc", hex, counters.oos)
+            var counter = counters.isolated
+            if (HQ_LIST.filter(hq => G.location[hq] < LAST_BOARD_HEX && hex < LAST_BOARD_HEX
+                && pieces[hq].faction === pieces[G.oos[i]].faction
+                && in_range_on_map(G.location[hq], pieces[hq].cr, [hex], pieces[hq].faction).length).length) {
+                counter = counters.oos
+            }
+            populate_generic("s-loc", hex, counter)
             set_add(oos_hex_set, hex)
         }
     }

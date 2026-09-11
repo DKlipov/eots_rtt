@@ -4,6 +4,7 @@
 
 var counters = {
     oos: "oos top",
+    isolated: "isolated top",
     control_jp: "small_markers_white unit_ix_2 control",
     capture_jp: "small_markers_white unit_ix_2 gray control",
     control_us: "small_markers_white unit_ix_2 reduced control",

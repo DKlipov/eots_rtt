@@ -2,7 +2,8 @@
 /*special markers*/
 .scenario_start { background-image: url(pieces150/start.webp);  }
 .scenario_end { background-image: url(pieces150/end.webp);  }
-.marker.oos { background-image: url(pieces150/ap_oos.webp);  }
+.marker.oos { background-image: url(pieces150/ap_oos.png);  }
+.marker.isolated { background-image: url(pieces150/isolated.png);  }
 .marker.no_garrison { background-image: url(pieces150/no_garrison.webp);  }
 .garrison_jp { background-image: url(pieces150/garrison_jp.webp);  }
 .garrison_cn { background-image: url(pieces150/garrison_cn.webp);  }
