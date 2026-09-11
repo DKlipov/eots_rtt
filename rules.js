@@ -10419,6 +10419,11 @@ P.replacement_segment = {
     },
     inactive: "use replacements",
     prompt() {
+        if (L.skip) {
+            prompt("Confirm skip replacements.")
+            button("confirm")
+            return;
+        }
         var ru = L.replacable_units.filter(u => L.replacement_points[pieces[u].replacement] > 0)
         var not_used_unground = L.divisions_used <= 0 || L.replacement_points[GROUND_REP] <= 0
         var first_replacable = ru.filter(u => G.location[u] === ELIMINATED_BOX)[0]
@@ -10499,6 +10504,10 @@ P.replacement_segment = {
         }
     },
     skip() {
+        push_undo()
+        L.skip = 1
+    },
+    confirm() {
         this.done()
     },
     done() {
@@ -13909,9 +13918,6 @@ P.strategic_bombing = {
             end()
             return
         }
-        if (G.async) {
-            this.all()
-        }
     },
     inactive: "roll to strategic bombing",
     prompt() {
@@ -14510,12 +14516,16 @@ P.future_offensive = {
         log("#" + (G.active === JP ? "JJP" : "AAP") + " Future Offensive")
         var card = cards[G.future_offensive[G.active] > 0 ? G.future_offensive[G.active] : 0]
         if (card.type !== MILITARY || !event_hq_check(card)) {
-            L.pass = true
+            L.impossible = true
         }
     },
     inactive: "play future offensive card",
     prompt() {
         prompt("Play future offensive card or pass.")
+        if (L.impossible) {
+            button("pass")
+            return
+        }
         if (L.pass) {
             button("done")
         } else {
@@ -14529,6 +14539,10 @@ P.future_offensive = {
         goto("offensive_sequence")
     },
     pass() {
+        if (L.impossible) {
+            end()
+            return
+        }
         push_undo()
         log(`${side_get_log_str(G.active)} pass.`)
         L.pass = true
@@ -14949,12 +14963,16 @@ cards[find_card(JP, 16)].before_unit_activation = function () {
 }
 
 cards[find_card(JP, 17)].before_unit_activation = function () {
-    filter_activation_units((u, piece) => piece.class !== "ground" && (piece.class !== "naval" || !piece.br), JP)
+    filter_activation_units((u, piece) => piece.class !== "ground", JP)
 }
 
 cards[find_card(JP, 17)].after_unit_activation = function (u) {
     if (G.active !== JP) {
         return
+    }
+    if (G.offensive.active_units[JP].filter(u=>is_cv_unit(pieces[u])).length) {
+        call("rule_violation", {rule: SAVO_RULE})
+        return;
     }
     var service = null
     G.offensive.active_units[R].forEach(u => service = pieces[u].class)
@@ -14964,6 +14982,19 @@ cards[find_card(JP, 17)].after_unit_activation = function (u) {
         return (service === null || p_service === service) && p_service !== "ground"
     })
 }
+
+const SAVO_RULE = 0
+
+const VIOLATIONS = [
+    `Carrier units could not be activated. Check 1.3 "Naval".`
+]
+P.rule_violation = {
+    inactive: "undo wrong action",
+    prompt() {
+        prompt(VIOLATIONS[L.rule])
+    },
+}
+
 
 cards[find_card(JP, 17)].before_battle_roll = function (faction) {
     if (faction === AP || G.offensive.battle.ground_stage) {

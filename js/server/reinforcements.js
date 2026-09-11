@@ -337,6 +337,11 @@ P.replacement_segment = {
     },
     inactive: "use replacements",
     prompt() {
+        if (L.skip) {
+            prompt("Confirm skip replacements.")
+            button("confirm")
+            return;
+        }
         var ru = L.replacable_units.filter(u => L.replacement_points[pieces[u].replacement] > 0)
         var not_used_unground = L.divisions_used <= 0 || L.replacement_points[GROUND_REP] <= 0
         var first_replacable = ru.filter(u => G.location[u] === ELIMINATED_BOX)[0]
@@ -417,6 +422,10 @@ P.replacement_segment = {
         }
     },
     skip() {
+        push_undo()
+        L.skip = 1
+    },
+    confirm() {
         this.done()
     },
     done() {

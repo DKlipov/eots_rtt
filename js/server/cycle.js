@@ -122,9 +122,6 @@ P.strategic_bombing = {
             end()
             return
         }
-        if (G.async) {
-            this.all()
-        }
     },
     inactive: "roll to strategic bombing",
     prompt() {

@@ -244,12 +244,16 @@ P.future_offensive = {
         log("#" + (G.active === JP ? "JJP" : "AAP") + " Future Offensive")
         var card = cards[G.future_offensive[G.active] > 0 ? G.future_offensive[G.active] : 0]
         if (card.type !== MILITARY || !event_hq_check(card)) {
-            L.pass = true
+            L.impossible = true
         }
     },
     inactive: "play future offensive card",
     prompt() {
         prompt("Play future offensive card or pass.")
+        if (L.impossible) {
+            button("pass")
+            return
+        }
         if (L.pass) {
             button("done")
         } else {
@@ -263,6 +267,10 @@ P.future_offensive = {
         goto("offensive_sequence")
     },
     pass() {
+        if (L.impossible) {
+            end()
+            return
+        }
         push_undo()
         log(`${side_get_log_str(G.active)} pass.`)
         L.pass = true

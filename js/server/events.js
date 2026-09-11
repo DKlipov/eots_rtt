@@ -302,12 +302,16 @@ cards[find_card(JP, 16)].before_unit_activation = function () {
 }
 
 cards[find_card(JP, 17)].before_unit_activation = function () {
-    filter_activation_units((u, piece) => piece.class !== "ground" && (piece.class !== "naval" || !piece.br), JP)
+    filter_activation_units((u, piece) => piece.class !== "ground", JP)
 }
 
 cards[find_card(JP, 17)].after_unit_activation = function (u) {
     if (G.active !== JP) {
         return
+    }
+    if (G.offensive.active_units[JP].filter(u=>is_cv_unit(pieces[u])).length) {
+        call("rule_violation", {rule: SAVO_RULE})
+        return;
     }
     var service = null
     G.offensive.active_units[R].forEach(u => service = pieces[u].class)
@@ -317,6 +321,19 @@ cards[find_card(JP, 17)].after_unit_activation = function (u) {
         return (service === null || p_service === service) && p_service !== "ground"
     })
 }
+
+const SAVO_RULE = 0
+
+const VIOLATIONS = [
+    `Carrier units could not be activated. Check 1.3 "Naval".`
+]
+P.rule_violation = {
+    inactive: "undo wrong action",
+    prompt() {
+        prompt(VIOLATIONS[L.rule])
+    },
+}
+
 
 cards[find_card(JP, 17)].before_battle_roll = function (faction) {
     if (faction === AP || G.offensive.battle.ground_stage) {
