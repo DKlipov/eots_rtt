@@ -782,12 +782,8 @@ cards[find_card(JP, 39)].event = function () {
 }
 
 cards[find_card(JP, 39)].before_replacement = function () {
-    L.replacable_units = []
-    for_each_unit_on_map((u, piece, location) => {
-        if (piece.class === "ground" && piece.faction === JP && set_has(G.reduced, u) && get_distance(RANGOON, location) <= 3) {
-            set_add(L.replacable_units, u)
-        }
-    })
+    L.replacable_units = L.replacable_units.filter(u => pieces[u].class === "ground"
+        && pieces[u].faction === JP && set_has(G.reduced, u) && get_distance(RANGOON, G.location[u]) <= 3)
 }
 
 cards[find_card(JP, 40)].before_unit_activation = function () {

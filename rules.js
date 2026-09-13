@@ -7576,6 +7576,12 @@ function indian_zoi_hack(apply) {
         remove_zoi(hex_to_int(1205))
     }
     G.offensive.active_units[AP].filter(u => G.location[u] !== MADRAS).forEach(u => apply(u, pieces[u]))
+    for_each_hex_in_range(KUNMING, 1, h => {
+        if (has_zoi(h, JP)) {
+            G.supply_cache[h] -= JP_ZOI
+            G.supply_cache[h] -= AP_ZOI_NTRL
+        }
+    })
 }
 
 function remove_zoi(hex) {
@@ -8687,6 +8693,21 @@ function compute_ground_naval_move_hexes() {
             v.unshift(m_mt)
             map_set(L.allowed_hexes, k, v)
         })
+        if (G.offensive.offensive_card === OPERATION_NO_1) {
+            clear_supply_cache(CLEAN_ATTACK_ZONE_MASK)
+            for_each_hex_in_range(TOKYO, 16, h => {
+                if (get_map_data(h).port && is_space_controlled(h, JP)) {
+                    for_each_hex_in_range(h, 5, h => G.supply_cache[h] |= HEX_TEMP_FLAG1)
+                }
+            })
+            var r = []
+            map_for_each(L.allowed_hexes, (k, v) => {
+                if (v[0] & AMPH_MOVE && !(G.supply_cache[k] & HEX_TEMP_FLAG1)) {
+                    r.push(k)
+                }
+            })
+            r.forEach(h => map_delete(L.allowed_hexes, h))
+        }
     }
     if ((L.move_data.move_type & GROUND_MOVE) && (L.move_type !== AMPH_MOVE)) {
         compute_ground_move_hexes()
@@ -15443,12 +15464,8 @@ cards[find_card(JP, 39)].event = function () {
 }
 
 cards[find_card(JP, 39)].before_replacement = function () {
-    L.replacable_units = []
-    for_each_unit_on_map((u, piece, location) => {
-        if (piece.class === "ground" && piece.faction === JP && set_has(G.reduced, u) && get_distance(RANGOON, location) <= 3) {
-            set_add(L.replacable_units, u)
-        }
-    })
+    L.replacable_units = L.replacable_units.filter(u => pieces[u].class === "ground"
+        && pieces[u].faction === JP && set_has(G.reduced, u) && get_distance(RANGOON, G.location[u]) <= 3)
 }
 
 cards[find_card(JP, 40)].before_unit_activation = function () {

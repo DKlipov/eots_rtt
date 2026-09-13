@@ -307,6 +307,21 @@ function compute_ground_naval_move_hexes() {
             v.unshift(m_mt)
             map_set(L.allowed_hexes, k, v)
         })
+        if (G.offensive.offensive_card === OPERATION_NO_1) {
+            clear_supply_cache(CLEAN_ATTACK_ZONE_MASK)
+            for_each_hex_in_range(TOKYO, 16, h => {
+                if (get_map_data(h).port && is_space_controlled(h, JP)) {
+                    for_each_hex_in_range(h, 5, h => G.supply_cache[h] |= HEX_TEMP_FLAG1)
+                }
+            })
+            var r = []
+            map_for_each(L.allowed_hexes, (k, v) => {
+                if (v[0] & AMPH_MOVE && !(G.supply_cache[k] & HEX_TEMP_FLAG1)) {
+                    r.push(k)
+                }
+            })
+            r.forEach(h => map_delete(L.allowed_hexes, h))
+        }
     }
     if ((L.move_data.move_type & GROUND_MOVE) && (L.move_type !== AMPH_MOVE)) {
         compute_ground_move_hexes()

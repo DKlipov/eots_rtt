@@ -75,6 +75,12 @@ function indian_zoi_hack(apply) {
         remove_zoi(hex_to_int(1205))
     }
     G.offensive.active_units[AP].filter(u => G.location[u] !== MADRAS).forEach(u => apply(u, pieces[u]))
+    for_each_hex_in_range(KUNMING, 1, h => {
+        if (has_zoi(h, JP)) {
+            G.supply_cache[h] -= JP_ZOI
+            G.supply_cache[h] -= AP_ZOI_NTRL
+        }
+    })
 }
 
 function remove_zoi(hex) {
