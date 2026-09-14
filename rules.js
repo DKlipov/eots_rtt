@@ -17337,7 +17337,7 @@ function on_setup(scenario, options) {
         }
     }
     capture_hex(hex_to_int(3606), JP)
-    capture_hex(hex_to_int(2709), JP)
+    capture_hex(hex_to_int(2709), AP)
     reset_offensive()
     construct_decks()
     for (var i = 1; i < pieces.length; i++) {

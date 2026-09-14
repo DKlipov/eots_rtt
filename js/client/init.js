@@ -132,6 +132,7 @@ for (var i = 0; i < map.length; i++) {
         set_add(JP_BOUNDARY_HEX, hex)
     }
 }
+HEX_BY_NATION[hex_to_int(2709)] = -3
 
 const CARD_ACTIONS = ["card"]
 
