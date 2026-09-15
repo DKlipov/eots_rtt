@@ -240,7 +240,7 @@ body.Allies #jp_hand {
 
 #canvas {
     position: absolute;
-    z-index: 1;
+    z-index: 45;
     pointer-events: none;
 }
 
