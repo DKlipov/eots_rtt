@@ -9267,7 +9267,7 @@ function move_units(units, path) {
             supply_checked = 0
         }
         if (path[0] & GROUND_MOVE && !is_faction_units(hex, 1 - R)) {
-            capture_hex(hex)
+            capture_hex(hex, faction)
         }
     }
     if (path[0] & AIR_MOVE && (distance > L.move_data.extended_battle_range || legs > L.move_data.air_move_legs)
@@ -11014,9 +11014,11 @@ P.activate_units = {
         if (!L.possible_units.length) {
             log_units_activated()
             end()
+            return;
         } else {
             this.update_possible_units()
         }
+        L.undo = 0
     },
     inactive: "activate units",
     prompt() {
@@ -11060,6 +11062,10 @@ P.activate_units = {
         trigger_event("after_unit_activation")
     },
     unit(u) {
+        if (!L.undo) {
+            push_undo()
+            L.undo = 1
+        }
         if (set_has(G.offensive.active_units[G.active], u)) {
             set_delete(G.offensive.active_units[G.active], u)
         } else {
@@ -11975,9 +11981,7 @@ P.retro_disengagement = {
             }
         })
         remove_battle_hex_without_def(G.location[L.allowed_units[0]])
-        if (!set_has(G.offensive.battle_hexes, G.location[L.allowed_units[0]])) {
-            capture_hex(G.location[L.allowed_units[0]], G.offensive.attacker)
-        }
+
         L.move_log.push(L.allowed_units, path)
         move_units(L.allowed_units, path)
         if (!L.conflicted) {
@@ -12010,6 +12014,9 @@ function remove_battle_hex_without_def(loc) {
     var non_ground = JP_UNITS - JP_GROUND_UNITS
     if (set_has(G.offensive.battle_hexes, loc) && !(G.supply_cache[loc] & (non_ground << defender)) && !get_garrison(loc).length) {
         set_delete(G.offensive.battle_hexes, loc)
+    }
+    if (!is_faction_units(1 - G.offensive.attacker)) {
+        capture_hex(loc, G.offensive.attacker)
     }
 }
 

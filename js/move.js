@@ -881,7 +881,7 @@ function move_units(units, path) {
             supply_checked = 0
         }
         if (path[0] & GROUND_MOVE && !is_faction_units(hex, 1 - R)) {
-            capture_hex(hex)
+            capture_hex(hex, faction)
         }
     }
     if (path[0] & AIR_MOVE && (distance > L.move_data.extended_battle_range || legs > L.move_data.air_move_legs)
