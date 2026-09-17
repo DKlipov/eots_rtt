@@ -14201,7 +14201,10 @@ P.attrition_phase = script(`
     }
     log ("@Turn "+G.turn+". Attrition phase")
     eval {
-       //check_supply()
+        if(G.oos.length){
+            basic_check_supply()
+            G.attrition=G.oos.slice()
+        }
     }
     set G.active JP
     call attrition
@@ -14211,6 +14214,7 @@ P.attrition_phase = script(`
     }
     set G.active AP
     call attrition
+    set G.attrition []
     goto end_of_turn_phase
 `)
 
@@ -14248,7 +14252,7 @@ P.attrition = {
             if (location > LAST_BOARD_HEX && location !== CHINA_BOX || piece.faction !== G.active || pieces[u].class === "naval" || pieces[u].class === "hq") {
                 return;
             }
-            if (set_has(G.oos, u)) {
+            if (set_has(G.attrition, u)) {
                 if (!set_has(G.reduced, u)) {
                     set_add(L.unit_to_attrition, u)
                 } else if (location !== CHINA_BOX) {
