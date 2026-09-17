@@ -368,7 +368,9 @@ function get_allowed_actions(num) {
         if (G.inter_service[card.faction] && scenario_data().one_year) {
             result.push("inter_service")
         }
-        get_infrastructure_actions().forEach(a => result.push(a))
+        if (G.sid !== SOUTH_PACIFIC_SCENARIO) {
+            get_infrastructure_actions().forEach(a => result.push(a))
+        }
         if (R === JP && G.turn - G.events[events.CHINA_OFFENSIVE.id] > 1 && G.surrender[nations.CHINA.id] < 5) {
             result.push("china_offensive")
         }
