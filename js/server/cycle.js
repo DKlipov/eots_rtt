@@ -331,7 +331,7 @@ P.political_will_segment = function () {
         G.surrender[nations.INDIA.id] >= 4 && G.surrender[nations.CHINA.id] >= 5) {
         check_event(events.ALLIED_NATIONS_SURRENDERS)
     }
-    check_occupation( true)
+    check_occupation(true)
     check_jp_resources_event()
     check_naval_situation()
     check_progress_of_war()
@@ -379,7 +379,9 @@ P.attrition_phase = script(`
     eval {
         if(G.oos.length){
             basic_check_supply()
-            G.attrition=G.oos.slice()
+            G.attrition = G.oos.slice()
+        } else {
+            G.attrition = []
         }
     }
     set G.active JP
@@ -417,6 +419,10 @@ P.end_of_turn_phase = script(`
 
 P.attrition = {
     _begin() {
+        if (!G.attrition) {
+            G.attrition = G.oos
+            //todo: remove
+        }
         L.unit_to_attrition = []
         var hq_list = []
         for_each_unit_on_map((u, piece) => {
