@@ -151,7 +151,7 @@ function update_role_info() {
         var fo = G.events[events.FUTURE_OFFENSIVE_JP.id + who]
         roles[who].stat.innerHTML = `${hand_size} cards${fo && fo < G.turn ? " + FO" : ""}${G.passes[who] ? ", " + G.passes[who] + " passes" : ""}`
         if (!hand_size) {
-            roles[who].stat.innerHTML = `Pass`
+            roles[who].stat.innerHTML = `0 cards`
         }
     }
 }

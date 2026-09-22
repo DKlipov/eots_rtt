@@ -6249,7 +6249,7 @@ var map = [
     {id: 4727, region: "Hebrides", terrain: MIXED, edges: [1, 1, 3, 8, 1, 3]},
     {
         id: 4828,
-        name: "Moumea",
+        name: "Noumea",
         city: CITY,
         airfield: true,
         port: true,

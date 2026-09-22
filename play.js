@@ -6247,7 +6247,7 @@ var map = [
     {id: 4727, region: "Hebrides", terrain: MIXED, edges: [1, 1, 3, 8, 1, 3]},
     {
         id: 4828,
-        name: "Moumea",
+        name: "Noumea",
         city: CITY,
         airfield: true,
         port: true,
@@ -11945,7 +11945,7 @@ function update_role_info() {
         var fo = G.events[events.FUTURE_OFFENSIVE_JP.id + who]
         roles[who].stat.innerHTML = `${hand_size} cards${fo && fo < G.turn ? " + FO" : ""}${G.passes[who] ? ", " + G.passes[who] + " passes" : ""}`
         if (!hand_size) {
-            roles[who].stat.innerHTML = `Pass`
+            roles[who].stat.innerHTML = `0 cards`
         }
     }
 }
