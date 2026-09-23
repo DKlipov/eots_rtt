@@ -12441,7 +12441,6 @@ var SHOW_FULL_LOG = get_preference("full_log", false)
 function show_full_log() {
     SHOW_FULL_LOG = !get_preference("full_log", false)
     var len = Number.isInteger(view.log) ? view.log : game_log.length
-    update_log(0, 0)
     update_log(0, len)
 }
 
@@ -12451,12 +12450,16 @@ function on_log(text, i) {
         total = view.log
     }
     if (!SHOW_FULL_LOG && total > 100 && i === 0) {
-        var p = document.createElement("div")
-        p.innerHTML = `Logs hidden: ${total - 100}.`
-        return p
+        var d = document.createElement("div")
+        d.classList.add("full_log")
+        var b = document.createElement("button")
+        b.onclick = () => show_full_log()
+        b.textContent = "Show full log"
+        d.append(b)
+        return d
     } else if (!SHOW_FULL_LOG && total - i > 100) {
         var empty = document.createElement("div")
-        empty.classList.add("blank")
+        empty.hidden = true
         return empty
     }
     var p = document.createElement("div")
