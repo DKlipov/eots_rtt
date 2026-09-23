@@ -276,7 +276,7 @@ P.national_status_segment = function () {
         india_stable()
     }
 
-    if (!is_event_active(events.AUSTRALIA_SURRENDER) && check_nation_surrender(nations.AUSTRALIA)) {
+    if (check_nation_surrender(nations.AUSTRALIA) && !is_event_active(events.AUSTRALIA_SURRENDER)) {
         check_event(events.AUSTRALIA_SURRENDER)
         for_each_unit((u, piece, location) => {
             if (piece.service === "au" && location >= LAST_BOARD_HEX) {

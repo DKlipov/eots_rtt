@@ -329,6 +329,10 @@ function eliminate_permanently(unit) {
 
 function eliminate(unit, no_log = false) {
     var piece = pieces[unit]
+    if (is_event_active(events.AUSTRALIA_SURRENDER) && piece.service === "au") {
+        eliminate_permanently(unit)
+        return;
+    }
     var size = get_overstack_size(unit)
     var location = G.location[unit]
     if (L.overstack && (location <= LAST_BOARD_HEX || location === CHINA_BOX)) {
