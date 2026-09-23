@@ -249,15 +249,15 @@ P.future_offensive = {
     },
     inactive: "play future offensive card",
     prompt() {
-        prompt("Play future offensive card or pass.")
+        prompt("Play future offensive card or skip.")
         if (L.impossible) {
-            button("pass")
+            button("skip")
             return
         }
         if (L.pass) {
             button("done")
         } else {
-            button("pass")
+            button("skip")
             action("event", G.future_offensive[G.active])
         }
     },
@@ -266,7 +266,7 @@ P.future_offensive = {
         play_event(G.future_offensive[G.active])
         goto("offensive_sequence")
     },
-    pass() {
+    skip() {
         if (L.impossible) {
             end()
             return
