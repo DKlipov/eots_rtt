@@ -111,7 +111,7 @@ exports.static_view = function (game) {
     return SV
 }
 
-exports.view = function (state, role) {
+exports.view = function (state, role, sherlock) {
     G = state
     L = G.L
     R = role
@@ -122,7 +122,7 @@ exports.view = function (state, role) {
 
     if ((Array.isArray(G.active) && G.active.includes(R)) || G.active === R) {
         _load()
-        on_view()
+        on_view(sherlock)
 
         V.actions = {}
 
@@ -144,7 +144,7 @@ exports.view = function (state, role) {
         _save()
     } else {
         _load()
-        on_view()
+        on_view(sherlock)
         _save()
 
         if (G.active === "None") {

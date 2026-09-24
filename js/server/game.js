@@ -152,14 +152,14 @@ function get_garrison_count() {
     return 1
 }
 
-function on_view() {
+function on_view(sherlock) {
     if (L.P && P[L.P] && P[L.P].on_view) {
         return P[L.P].on_view()
     }
-    return create_view()
+    return create_view(sherlock)
 }
 
-function create_view() {
+function create_view(sherlock) {
     V.active = G.active
     V.turn = G.turn
     V.sid = G.sid
@@ -207,14 +207,14 @@ function create_view() {
     })
 
 
-    if (R !== JP) {
+    if (sherlock || R !== JP) {
         V.hand[JP] = G.hand[JP].length + G.offensive.draw[JP].length
     } else {
         V.hand[JP] = G.hand[JP].slice()
         G.offensive.draw[JP].forEach(c => V.hand[JP].push(c))
         V.future_offensive[JP] = G.future_offensive[JP]
     }
-    if (R !== AP) {
+    if (sherlock ||R !== AP) {
         V.hand[AP] = G.hand[AP].length + G.offensive.draw[AP].length
     } else {
         V.hand[AP] = G.hand[AP].slice()
