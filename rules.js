@@ -17449,14 +17449,14 @@ function create_view(sherlock) {
     })
 
 
-    if (sherlock || R !== JP) {
+    if (!sherlock || R !== JP) {
         V.hand[JP] = G.hand[JP].length + G.offensive.draw[JP].length
     } else {
         V.hand[JP] = G.hand[JP].slice()
         G.offensive.draw[JP].forEach(c => V.hand[JP].push(c))
         V.future_offensive[JP] = G.future_offensive[JP]
     }
-    if (sherlock ||R !== AP) {
+    if (!sherlock ||R !== AP) {
         V.hand[AP] = G.hand[AP].length + G.offensive.draw[AP].length
     } else {
         V.hand[AP] = G.hand[AP].slice()
