@@ -4233,7 +4233,7 @@ var cards = [
         "oc": 4,
         "logistic": 3,
         "intelligence": SURPRISE,
-        "name": "Col. Tsuji, Unit 82",
+        "name": "Col. Tsuji",
     },
     {
         "num": 4,

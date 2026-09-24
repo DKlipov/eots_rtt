@@ -4235,7 +4235,7 @@ var cards = [
         "oc": 4,
         "logistic": 3,
         "intelligence": SURPRISE,
-        "name": "Col. Tsuji, Unit 82",
+        "name": "Col. Tsuji",
     },
     {
         "num": 4,
@@ -19486,7 +19486,7 @@ P.arcadia = {
 
 function draw_hist_cards() {
     var hist = [find_card(JP, 3), find_card(JP, 47), find_card(JP, 59)]
-    log(`JP draws historical hand ${hist.map(c => card_get_log_str(c)).join(", ")}.`)
+    log(`JP draws historical hand ${hist.map(c => card_get_log_str(c)).join(", ")} + 4 random cards.`)
     hist.forEach(c => draw_specific_card(c))
 }
 
