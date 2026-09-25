@@ -7713,13 +7713,18 @@ function check_burma_road() {
             map_set(distance_map, nh, 1)
             L.supply.queue.push(nh)
             L.supply.retracing.push(item)
-            if (nh === MADRAS || get_map_data(nh).supply_source & JOINT_SUPPLIED_HEX) {
+            if (nh === MADRAS || is_supply_source(nh, JOINT_SUPPLIED_HEX, AP)) {
                 G.burma_road = 0
                 return
             }
         }
     }
     check_hump()
+}
+
+function is_supply_source(hex, supply, faction) {
+    var md = get_map_data(hex)
+    return md.supply_source & supply && (md.region === "Australia" || md.region === "Japan" || !has_non_n_zoi(hex, 1 - faction))
 }
 
 function for_each_unit(apply) {
@@ -7765,7 +7770,7 @@ function check_hq_in_supply(hq, piece, supply) {
     L.supply.queue = [location]
     var overland_set = []
     overland_set[location] = 3
-    if (get_map_data(location).supply_source & supply) {
+    if (is_supply_source(location, supply, faction)) {
         return true
     }
     for (var i = 0; i < L.supply.queue.length; i++) {
@@ -7800,7 +7805,7 @@ function check_hq_in_supply(hq, piece, supply) {
             if (reachable) {
                 L.supply.queue.push(nh)
                 L.supply.retracing.push(item)
-                if (get_map_data(nh).supply_source & supply) {
+                if (is_supply_source(nh, supply, faction)) {
                     return true
                 }
             }
@@ -10205,7 +10210,7 @@ function get_hq_reinforcement_hexes() {
     var hqs = []
     HQ_LIST.forEach(u => set_add(hqs, G.location[u]))
     for (var i = 0; i < LAST_BOARD_HEX; i++) {
-        if (get_map_data(i).supply_source & supply) {
+        if (is_supply_source(i, supply, faction)) {
             queue.push(i)
             overland_set[i] = 3
             if (get_map_data(i).port && is_space_controlled(i, faction) && !set_has(hqs, i) && !has_non_n_zoi(i, 1 - faction)) {
@@ -15021,7 +15026,7 @@ cards[find_card(JP, 17)].after_unit_activation = function (u) {
     if (G.active !== JP) {
         return
     }
-    if (G.offensive.active_units[JP].filter(u=>is_cv_unit(pieces[u])).length) {
+    if (G.offensive.active_units[JP].filter(u => is_cv_unit(pieces[u])).length) {
         call("rule_violation", {rule: SAVO_RULE})
         return;
     }
@@ -16737,7 +16742,7 @@ for (var i = 1; i < cards.length; i++) {
     if (!card.can_play && card.hq) {
         card.can_play = () => event_hq_check(card)
     } else if (!card.can_play && card.china < 0) {
-        card.can_play = () =>  G.events[events.CHINA_STATUS.id] > 1
+        card.can_play = () =>  G.events[events.CHINA_STATUS.id] > 1 && G.events[events.CHINA_STATUS.id] < 5
     } else if (!card.can_play && card.china > 0) {
         card.can_play = () =>  G.events[events.CHINA_STATUS.id] < 5
     } else if (!card.can_play) {

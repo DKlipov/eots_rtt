@@ -90,7 +90,7 @@ function get_hq_reinforcement_hexes() {
     var hqs = []
     HQ_LIST.forEach(u => set_add(hqs, G.location[u]))
     for (var i = 0; i < LAST_BOARD_HEX; i++) {
-        if (get_map_data(i).supply_source & supply) {
+        if (is_supply_source(i, supply, faction)) {
             queue.push(i)
             overland_set[i] = 3
             if (get_map_data(i).port && is_space_controlled(i, faction) && !set_has(hqs, i) && !has_non_n_zoi(i, 1 - faction)) {

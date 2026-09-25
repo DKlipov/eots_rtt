@@ -200,13 +200,18 @@ function check_burma_road() {
             map_set(distance_map, nh, 1)
             L.supply.queue.push(nh)
             L.supply.retracing.push(item)
-            if (nh === MADRAS || get_map_data(nh).supply_source & JOINT_SUPPLIED_HEX) {
+            if (nh === MADRAS || is_supply_source(nh, JOINT_SUPPLIED_HEX, AP)) {
                 G.burma_road = 0
                 return
             }
         }
     }
     check_hump()
+}
+
+function is_supply_source(hex, supply, faction) {
+    var md = get_map_data(hex)
+    return md.supply_source & supply && (md.region === "Australia" || md.region === "Japan" || !has_non_n_zoi(hex, 1 - faction))
 }
 
 function for_each_unit(apply) {
@@ -252,7 +257,7 @@ function check_hq_in_supply(hq, piece, supply) {
     L.supply.queue = [location]
     var overland_set = []
     overland_set[location] = 3
-    if (get_map_data(location).supply_source & supply) {
+    if (is_supply_source(location, supply, faction)) {
         return true
     }
     for (var i = 0; i < L.supply.queue.length; i++) {
@@ -287,7 +292,7 @@ function check_hq_in_supply(hq, piece, supply) {
             if (reachable) {
                 L.supply.queue.push(nh)
                 L.supply.retracing.push(item)
-                if (get_map_data(nh).supply_source & supply) {
+                if (is_supply_source(nh, supply, faction)) {
                     return true
                 }
             }

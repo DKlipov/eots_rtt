@@ -309,7 +309,7 @@ cards[find_card(JP, 17)].after_unit_activation = function (u) {
     if (G.active !== JP) {
         return
     }
-    if (G.offensive.active_units[JP].filter(u=>is_cv_unit(pieces[u])).length) {
+    if (G.offensive.active_units[JP].filter(u => is_cv_unit(pieces[u])).length) {
         call("rule_violation", {rule: SAVO_RULE})
         return;
     }
@@ -2025,7 +2025,7 @@ for (var i = 1; i < cards.length; i++) {
     if (!card.can_play && card.hq) {
         card.can_play = () => event_hq_check(card)
     } else if (!card.can_play && card.china < 0) {
-        card.can_play = () =>  G.events[events.CHINA_STATUS.id] > 1
+        card.can_play = () =>  G.events[events.CHINA_STATUS.id] > 1 && G.events[events.CHINA_STATUS.id] < 5
     } else if (!card.can_play && card.china > 0) {
         card.can_play = () =>  G.events[events.CHINA_STATUS.id] < 5
     } else if (!card.can_play) {
