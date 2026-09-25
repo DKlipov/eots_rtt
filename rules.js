@@ -6688,6 +6688,8 @@ var counters = {
     pt_boats: "big_markers_blue big unit_ix_2",
     us_sub: "big_markers_blue big unit_ix_5",
     australia_surrender: "big_markers_white big unit_ix_3",
+    china_surrender: "big_markers_white big unit_ix_2",
+    india_surrender: "big_markers_white big unit_ix_11",
     burma_surrender: "big_markers_white big unit_ix_10",
     dei_surrender: "big_markers_white big unit_ix_9",
     malaya_surrender: "big_markers_white big unit_ix_8",
@@ -6741,6 +6743,8 @@ var nations = {
         name: "India",
         regions: ["India"],
         statuses: ["Stable", "Unrest", "Strikes", "Unstable", "Revolts"],
+        counter: counters.india_surrender,
+        counter_hex: 1606,
         pw: 2,
         retreat_hexes: [1005, 1307, 1308, 1208],
         keys: [1905, 2005, 2104, 2105, 2205],
@@ -6759,7 +6763,7 @@ var nations = {
         id: 6,
         name: "Australian Mandates",
         counter: counters.mandates_surrender,
-        counter_hex: 3920,
+        counter_hex: 4320,
         regions: ["AMandates"],
         keys: [4021, 4423],
         ports: [4423, 4222, 4021, 4020, 3820]
@@ -6801,6 +6805,8 @@ var nations = {
     CHINA: {
         id: 12,
         pw: 2,
+        counter: counters.china_surrender,
+        counter_hex: KUNMING,
         statuses: ["Stable Front", "Unstable Front", "Major Breakthrough", "Threat to Chunking", "Chunking Falls", "Government Collapsed"],
         name: "China",
         no_full_control: true,
@@ -6812,7 +6818,7 @@ var events = {
         id: 1,
         cause: "allied nations surrendered [16.41]",
         pw: -2,
-        nations: [nations.AUSTRALIA, nations.BURMA, nations.DEI, nations.MALAYA, nations.PHILIPPINES]
+        nations: [nations.AUSTRALIA, nations.BURMA, nations.DEI, nations.MALAYA, nations.PHILIPPINES, nations.CHINA, nations.INDIA]
             .map(n => n.id)
     },
     ALASKA_OCCUPATION: {
@@ -6941,6 +6947,12 @@ var events = {
     },
     ALASKA_OCCUPATION_HEXES: {
         id: 30
+    },
+    CHINA_STATUS: {
+        id: 31
+    },
+    INDIA_STATUS: {
+        id: 32
     },
 }
 
@@ -9450,8 +9462,8 @@ function victory_burma() {
     // Breakthrough Box. If China Surrenders, receive a bonus +3
     // victory points for a total of +5 VP and the China track can no
     // longer be altered for the rest of the game.
-    adjust_vp(result, G.surrender[nations.CHINA.id] - 2, "China government status")
-    if (G.surrender[nations.CHINA.id] > 5) {
+    adjust_vp(result,  G.events[events.CHINA_STATUS.id] - 2, "China government status")
+    if ( G.events[events.CHINA_STATUS.id] > 5) {
         result.vp += 3
         result.text.push(`+3 VP - China surrendered.`)
     }
@@ -9486,7 +9498,7 @@ function victory_burma() {
     var india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
     adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
     //G. For India Unrest or Strikes, +1 Victory Point (awarded on the last game turn)
-    var india_status = G.surrender[nations.INDIA.id]
+    var india_status =  G.events[events.INDIA_STATUS.id]
     if (india_status > 0 && india_status <= 2) {
         result.vp += 1
         result.text.push(`+1 VP - India ${nations.INDIA.statuses[india_status]}.`)
@@ -9542,8 +9554,8 @@ function victory_1942() {
         won_side: "",
         won_text: "",
     }
-    adjust_vp(result, G.surrender[nations.CHINA.id], "China Government Front Status")
-    if (G.surrender[nations.CHINA.id] > 5) {
+    adjust_vp(result,  G.events[events.CHINA_STATUS.id], "China Government Front Status")
+    if ( G.events[events.CHINA_STATUS.id] > 5) {
         result.vp += 5
         result.text.push(`+5 VP - China surrendered`)
     }
@@ -9553,7 +9565,7 @@ function victory_1942() {
 
     var india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
     adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
-    var india_status = G.surrender[nations.INDIA.id]
+    var india_status =  G.events[events.INDIA_STATUS.id]
     if (india_status > 0 && india_status <= 2) {
         result.vp += 1
         result.text.push(`+1 VP - India ${nations.INDIA.statuses[india_status]}.`)
@@ -9671,14 +9683,14 @@ function victory_1943() {
         won_side: "",
         won_text: "",
     }
-    binary_vp(result, G.surrender[nations.CHINA.id] >= 5, 5, "China surrendered", `China did not surrender`)
+    binary_vp(result,  G.events[events.CHINA_STATUS.id] >= 5, 5, "China surrendered", `China did not surrender`)
     binary_vp(result, G.burma_road >= 1, 1, "The Burma Road is closed", `The Burma Road is open`)
     binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
         "Townsville was not isolated", [hex_to_int(3727), OAHU])
 
     var india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
     adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
-    var india_status = G.surrender[nations.INDIA.id]
+    var india_status =  G.events[events.INDIA_STATUS.id]
     if (india_status > 0 && india_status <= 2) {
         result.vp += 1
         result.text.push(`+1 VP - India ${nations.INDIA.statuses[india_status]}.`)
@@ -9771,14 +9783,14 @@ function victory_1944() {
         won_side: "",
         won_text: "",
     }
-    binary_vp(result, G.surrender[nations.CHINA.id] >= 5, 5, "China surrendered", `China did not surrender`)
+    binary_vp(result,  G.events[events.CHINA_STATUS.id] >= 5, 5, "China surrendered", `China did not surrender`)
     binary_vp(result, G.burma_road >= 1, 1, "The Burma Road is closed", `The Burma Road is open`)
     binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
         "Townsville was not isolated", [hex_to_int(3727), OAHU])
 
     var india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
     adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
-    var india_status = G.surrender[nations.INDIA.id]
+    var india_status =  G.events[events.INDIA_STATUS.id]
     if (india_status > 0 && india_status <= 2) {
         result.vp += 1
         result.text.push(`+1 VP - India ${nations.INDIA.statuses[india_status]}.`)
@@ -9918,11 +9930,11 @@ function victory_south_pacific() {
         won_text: "",
     }
 
-    if (G.surrender[nations.CHINA.id] === 5) {
+    if ( G.events[events.CHINA_STATUS.id] === 5) {
         result.vp += 5
         result.text.push(`+5 VP - China surrendered.`)
     } else {
-        adjust_vp(result, G.surrender[nations.CHINA.id] - 2, "China Government Front Status")
+        adjust_vp(result,  G.events[events.CHINA_STATUS.id] - 2, "China Government Front Status")
     }
     binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
         "Townsville was not isolated", [hex_to_int(3727), OAHU])
@@ -10171,7 +10183,7 @@ function get_unit_reinforcement_hexes(u) {
             set_add(result, i)
         }
     }
-    if (faction === AP && piece.class === "air" && G.burma_road < 2 && G.surrender[nations.CHINA.id] < 5 && !is_overstack(CHINA_BOX, u)
+    if (faction === AP && piece.class === "air" && G.burma_road < 2 && G.events[events.CHINA_STATUS.id] < 5 && !is_overstack(CHINA_BOX, u)
         && (!piece.b29 || G.location[B_29_1] !== CHINA_BOX && G.location[B_29_2] !== CHINA_BOX)) {
         set_add(result, CHINA_BOX)
     }
@@ -10240,7 +10252,7 @@ function get_hq_reinforcement_hexes() {
 
 function is_reinforcement_denied(piece) {
     return (piece.service === "au" && is_event_active(events.AUSTRALIA_SURRENDER) && !set_has(G.reduced, piece.u))
-        || (piece.service === "ind" && G.surrender[nations.INDIA.id] >= 4)
+        || (piece.service === "ind" && G.surrender[nations.INDIA.id])
         || (L.INDEPENDENCE_CAMPAIGN && piece.class === "ground" &&
             (piece.service === "ind" || piece.service === "au" || piece.service === "br"));
 }
@@ -10286,7 +10298,7 @@ P.reinforcement_segment = {
                 log(`Unit eliminated due to Australia surrender.`)
                 eliminate_permanently(u)
                 return;
-            } else if (piece.service === "ind" && G.surrender[nations.INDIA.id] >= 4) {
+            } else if (piece.service === "ind" && G.surrender[nations.INDIA.id]) {
                 log(`Unit eliminated due to India surrender.`)
                 eliminate_permanently(u)
                 return;
@@ -13642,7 +13654,7 @@ function capture_landing_hexes() {
 /** import server/offensive.js*/
 /** import server/surrender.js*/
 function china_surrender() {
-    log(`China surrenders!`)
+    change_political_will(-nations.CHINA.pw, "China surrenders")
     var units = [ap_army("5_cn"), ap_army("6_cn"), ap_army("66_cn")]
     units.forEach(u => {
         eliminate_permanently(u)
@@ -13652,16 +13664,15 @@ function china_surrender() {
             displace_to_turn(u, 1, true)
         }
     })
-    change_political_will(-nations.CHINA.pw, "")
-    if (!events.ALLIED_NATIONS_SURRENDERS.nations.filter(n => !G.surrender[n]).length &&
-        G.surrender[nations.INDIA.id] >= 4 && G.surrender[nations.CHINA.id] >= 5) {
+    if (!events.ALLIED_NATIONS_SURRENDERS.nations.filter(n => !G.surrender[n]).length) {
         check_event(events.ALLIED_NATIONS_SURRENDERS)
     }
+    G.surrender[nations.CHINA.id] = G.turn
 }
 
 P.india_surrender = {
     _begin() {
-        if (G.surrender[nations.INDIA.id] !== 4) {
+        if (G.events[events.INDIA_STATUS.id] !== 4) {
             end()//stable or already executed
             return
         }
@@ -13678,7 +13689,8 @@ P.india_surrender = {
                 eliminate_permanently(u)
             }
         })
-        G.surrender[nations.INDIA.id] = 5
+        G.events[events.INDIA_STATUS.id] = 5
+        G.surrender[nations.INDIA.id] = G.turn
         if (!L.unit_to_retreat.length) {
             this.update_control()
         }
@@ -13791,38 +13803,38 @@ function set_control_over_nation(nation, only_ground = true) {
 }
 
 function update_china_status(diff, to_stable = false) {
-    if (G.surrender[nations.CHINA.id] >= 5) {
+    if (G.events[events.CHINA_STATUS.id] >= 5) {
         return
     }
-    var prev = G.surrender[nations.CHINA.id]
-    G.surrender[nations.CHINA.id] = Math.min(Math.max(prev + diff, 0), 5)
+    var prev = G.events[events.CHINA_STATUS.id]
+    G.events[events.CHINA_STATUS.id] = Math.min(Math.max(prev + diff, 0), 5)
 
-    if (!to_stable && prev > 0 && G.surrender[nations.CHINA.id] === 0) {
-        G.surrender[nations.CHINA.id] = 1
+    if (!to_stable && prev > 0 && G.events[events.CHINA_STATUS.id] === 0) {
+        G.events[events.CHINA_STATUS.id] = 1
     }
-    if (G.surrender[nations.CHINA.id] === 5) {
+    if (G.events[events.CHINA_STATUS.id] === 5) {
         china_surrender()
-    } else if (prev !== G.surrender[nations.CHINA.id]) {
-        log(`China status changed to ${nations.CHINA.statuses[G.surrender[nations.CHINA.id]]}.`)
+    } else if (prev !== G.events[events.CHINA_STATUS.id]) {
+        log(`China status changed to ${nations.CHINA.statuses[G.events[events.CHINA_STATUS.id]]}.`)
     }
 }
 
 function degrade_india(could_revolt = false) {
-    if (G.surrender[nations.INDIA.id] < (could_revolt ? 4 : 3)) {
-        G.surrender[nations.INDIA.id] += 1
-        log(`India status changed to ${nations.INDIA.statuses[G.surrender[nations.INDIA.id]]}.`)
-        if (G.surrender[nations.INDIA.id] === 4) {
+    if (G.events[events.INDIA_STATUS.id] < (could_revolt ? 4 : 3)) {
+        G.events[events.INDIA_STATUS.id] += 1
+        log(`India status changed to ${nations.INDIA.statuses[G.events[events.INDIA_STATUS.id]]}.`)
+        if (G.events[events.CHINA_STATUS.id] === 4) {
             L.pw -= nations.INDIA.pw
         }
     }
 }
 
 function india_stable() {
-    if (G.surrender[nations.INDIA.id] === 0) {
+    if (G.events[events.INDIA_STATUS.id] === 0) {
         return
-    } else if (G.surrender[nations.INDIA.id] < 4) {
+    } else if (G.events[events.INDIA_STATUS.id] < 4) {
         log(`India returned to stable.`)
-        G.surrender[nations.INDIA.id] = 0
+        G.events[events.INDIA_STATUS.id] = 0
     }
 }/** import server/surrender.js*/
 
@@ -14039,7 +14051,7 @@ P.national_status_segment = function () {
         //shift for India surrender, else do not move the India marker and
         //score any VP based on its location during the last Political Phase.
         var ind_control = check_nation_controlled(nations.INDIA, JP)
-        if (ind_control && G.turn < 9 || G.surrender[nations.INDIA.id] === 3) {
+        if (ind_control && G.turn < 9 ||  G.events[events.INDIA_STATUS.id] === 3) {
             degrade_india(true)
         } else if (!ind_control && G.turn < 9) {
             //17.11.27.
@@ -14151,8 +14163,7 @@ P.political_will_segment = function () {
         end()
         return
     }
-    if (!events.ALLIED_NATIONS_SURRENDERS.nations.filter(n => !G.surrender[n]).length &&
-        G.surrender[nations.INDIA.id] >= 4 && G.surrender[nations.CHINA.id] >= 5) {
+    if (!events.ALLIED_NATIONS_SURRENDERS.nations.filter(n => !G.surrender[n]).length) {
         check_event(events.ALLIED_NATIONS_SURRENDERS)
     }
     check_occupation(true)
@@ -14681,7 +14692,7 @@ function get_allowed_actions(num) {
         if (G.sid !== SOUTH_PACIFIC_SCENARIO) {
             get_infrastructure_actions().forEach(a => result.push(a))
         }
-        if (R === JP && G.turn - G.events[events.CHINA_OFFENSIVE.id] > 1 && G.surrender[nations.CHINA.id] < 5) {
+        if (R === JP && G.turn - G.events[events.CHINA_OFFENSIVE.id] > 1 &&  G.events[events.CHINA_STATUS.id] < 5) {
             result.push("china_offensive")
         }
     }
@@ -16726,9 +16737,9 @@ for (var i = 1; i < cards.length; i++) {
     if (!card.can_play && card.hq) {
         card.can_play = () => event_hq_check(card)
     } else if (!card.can_play && card.china < 0) {
-        card.can_play = () => G.surrender[nations.CHINA.id] > 1
+        card.can_play = () =>  G.events[events.CHINA_STATUS.id] > 1
     } else if (!card.can_play && card.china > 0) {
-        card.can_play = () => G.surrender[nations.CHINA.id] < 5
+        card.can_play = () =>  G.events[events.CHINA_STATUS.id] < 5
     } else if (!card.can_play) {
         card.can_play = always_true
     }
@@ -17395,6 +17406,12 @@ function get_garrison_count() {
 }
 
 function on_view(sherlock) {
+    if (G.events[events.CHINA_STATUS.id] == undefined) {
+        G.events[events.CHINA_STATUS.id] = G.surrender[nations.CHINA.id]
+        G.events[events.INDIA_STATUS.id] = G.surrender[nations.INDIA.id]
+        G.surrender[nations.CHINA.id] = 0
+        G.surrender[nations.INDIA.id] = 0
+    }
     if (L.P && P[L.P] && P[L.P].on_view) {
         return P[L.P].on_view()
     }
@@ -17561,7 +17578,7 @@ function draw_specific_card(card) {
 }
 
 function eliminate_permanently(unit) {
-    if (G.location[unit] !== NON_PLACED_BOX) {
+    if (G.location[unit] !== PERM_ELIMINATED && G.location[unit] !== NOT_USED) {
         log(`${piece_get_log_str(unit)} removed from game.`)
     }
     set_location(unit, PERM_ELIMINATED)
@@ -18303,7 +18320,7 @@ function setup_scenario_burma() {
     //replacements, 1 Ground taken from China per turn (optional)
     //plus Air steps per event card, no naval replacements
     G.reinforcements = [0, 2]
-    G.surrender[nations.CHINA.id] = 2
+    G.events[events.CHINA_STATUS.id] = 2
     G.inter_service = [1, 1]
     G.china_divisions = 8
 
@@ -18631,7 +18648,7 @@ function setup_scenario_1943() {
     G.political_will = 6
     G.china_divisions = 7
     G.burma_road = 1
-    G.surrender[nations.CHINA.id] = 2
+    G.events[events.CHINA_STATUS.id] = 2
     G.reinforcements = [1, 2]
     G.wie = 4
     G.inter_service = [1, 1]
@@ -18818,7 +18835,7 @@ function setup_scenario_1944() {
     G.asp[JP] = [5, 0]
     G.china_divisions = 5
     G.asp[AP] = [8, 0]
-    G.surrender[nations.CHINA.id] = 2
+    G.events[events.CHINA_STATUS.id] = 2
     G.events[events.NEW_OPERATION_PLAN.id] = 4
     G.pow = 4
     G.political_will = 5
@@ -18976,7 +18993,7 @@ function setup_scenario_south_pacific() {
     G.wie = 2
     G.pow = 0
     G.reinforcements = [2, 2]
-    G.surrender[nations.CHINA.id] = 2
+    G.events[events.CHINA_STATUS.id] = 2
     G.inter_service = [1, 1]
     G.china_divisions = 9
 
@@ -19025,12 +19042,12 @@ function deal_cards() {
         ap_cards = 6
         G.passes[AP] = 1
     }
-    if (G.surrender[nations.CHINA.id] >= 5) {
+    if (G.surrender[nations.CHINA.id]) {
         ap_cards -= 1
         G.passes[AP]++
         log(`AP draw reduced by 1 due to China's surrender.`)
     }
-    if (G.surrender[nations.INDIA.id] >= 4) {
+    if (G.surrender[nations.INDIA.id]) {
         ap_cards -= 1
         G.passes[AP]++
         log(`AP draw reduced by 1 due to India's surrender.`)
@@ -19074,7 +19091,7 @@ function S_P_deal_cards() {
 
     let ap_cards = 4
     G.passes[AP] = 0
-    if (G.surrender[nations.CHINA.id] >= 5) {
+    if (G.surrender[nations.CHINA.id]) {
         ap_cards -= 1
         G.passes[AP]++
         log(`AP draw reduced by 1 due to China's surrender.`)
@@ -19106,12 +19123,12 @@ function B_F_W_deal_cards() {
 
     let ap_cards = 4
     G.passes[AP] = 0
-    if (G.surrender[nations.CHINA.id] >= 5) {
+    if (G.surrender[nations.CHINA.id]) {
         ap_cards -= 1
         G.passes[AP]++
         log(`AP draw reduced by 1 due to China's surrender.`)
     }
-    if (G.surrender[nations.INDIA.id] >= 4) {
+    if (G.surrender[nations.INDIA.id]) {
         ap_cards -= 1
         G.passes[AP]++
         log(`AP draw reduced by 1 due to India surrender.`)

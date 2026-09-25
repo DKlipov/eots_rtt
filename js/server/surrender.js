@@ -1,5 +1,5 @@
 function china_surrender() {
-    log(`China surrenders!`)
+    change_political_will(-nations.CHINA.pw, "China surrenders")
     var units = [ap_army("5_cn"), ap_army("6_cn"), ap_army("66_cn")]
     units.forEach(u => {
         eliminate_permanently(u)
@@ -9,16 +9,15 @@ function china_surrender() {
             displace_to_turn(u, 1, true)
         }
     })
-    change_political_will(-nations.CHINA.pw, "")
-    if (!events.ALLIED_NATIONS_SURRENDERS.nations.filter(n => !G.surrender[n]).length &&
-        G.surrender[nations.INDIA.id] >= 4 && G.surrender[nations.CHINA.id] >= 5) {
+    if (!events.ALLIED_NATIONS_SURRENDERS.nations.filter(n => !G.surrender[n]).length) {
         check_event(events.ALLIED_NATIONS_SURRENDERS)
     }
+    G.surrender[nations.CHINA.id] = G.turn
 }
 
 P.india_surrender = {
     _begin() {
-        if (G.surrender[nations.INDIA.id] !== 4) {
+        if (G.events[events.INDIA_STATUS.id] !== 4) {
             end()//stable or already executed
             return
         }
@@ -35,7 +34,8 @@ P.india_surrender = {
                 eliminate_permanently(u)
             }
         })
-        G.surrender[nations.INDIA.id] = 5
+        G.events[events.INDIA_STATUS.id] = 5
+        G.surrender[nations.INDIA.id] = G.turn
         if (!L.unit_to_retreat.length) {
             this.update_control()
         }
@@ -148,37 +148,37 @@ function set_control_over_nation(nation, only_ground = true) {
 }
 
 function update_china_status(diff, to_stable = false) {
-    if (G.surrender[nations.CHINA.id] >= 5) {
+    if (G.events[events.CHINA_STATUS.id] >= 5) {
         return
     }
-    var prev = G.surrender[nations.CHINA.id]
-    G.surrender[nations.CHINA.id] = Math.min(Math.max(prev + diff, 0), 5)
+    var prev = G.events[events.CHINA_STATUS.id]
+    G.events[events.CHINA_STATUS.id] = Math.min(Math.max(prev + diff, 0), 5)
 
-    if (!to_stable && prev > 0 && G.surrender[nations.CHINA.id] === 0) {
-        G.surrender[nations.CHINA.id] = 1
+    if (!to_stable && prev > 0 && G.events[events.CHINA_STATUS.id] === 0) {
+        G.events[events.CHINA_STATUS.id] = 1
     }
-    if (G.surrender[nations.CHINA.id] === 5) {
+    if (G.events[events.CHINA_STATUS.id] === 5) {
         china_surrender()
-    } else if (prev !== G.surrender[nations.CHINA.id]) {
-        log(`China status changed to ${nations.CHINA.statuses[G.surrender[nations.CHINA.id]]}.`)
+    } else if (prev !== G.events[events.CHINA_STATUS.id]) {
+        log(`China status changed to ${nations.CHINA.statuses[G.events[events.CHINA_STATUS.id]]}.`)
     }
 }
 
 function degrade_india(could_revolt = false) {
-    if (G.surrender[nations.INDIA.id] < (could_revolt ? 4 : 3)) {
-        G.surrender[nations.INDIA.id] += 1
-        log(`India status changed to ${nations.INDIA.statuses[G.surrender[nations.INDIA.id]]}.`)
-        if (G.surrender[nations.INDIA.id] === 4) {
+    if (G.events[events.INDIA_STATUS.id] < (could_revolt ? 4 : 3)) {
+        G.events[events.INDIA_STATUS.id] += 1
+        log(`India status changed to ${nations.INDIA.statuses[G.events[events.INDIA_STATUS.id]]}.`)
+        if (G.events[events.CHINA_STATUS.id] === 4) {
             L.pw -= nations.INDIA.pw
         }
     }
 }
 
 function india_stable() {
-    if (G.surrender[nations.INDIA.id] === 0) {
+    if (G.events[events.INDIA_STATUS.id] === 0) {
         return
-    } else if (G.surrender[nations.INDIA.id] < 4) {
+    } else if (G.events[events.INDIA_STATUS.id] < 4) {
         log(`India returned to stable.`)
-        G.surrender[nations.INDIA.id] = 0
+        G.events[events.INDIA_STATUS.id] = 0
     }
 }

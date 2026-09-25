@@ -73,6 +73,8 @@ var counters = {
     pt_boats: "big_markers_blue big unit_ix_2",
     us_sub: "big_markers_blue big unit_ix_5",
     australia_surrender: "big_markers_white big unit_ix_3",
+    china_surrender: "big_markers_white big unit_ix_2",
+    india_surrender: "big_markers_white big unit_ix_11",
     burma_surrender: "big_markers_white big unit_ix_10",
     dei_surrender: "big_markers_white big unit_ix_9",
     malaya_surrender: "big_markers_white big unit_ix_8",
@@ -126,6 +128,8 @@ var nations = {
         name: "India",
         regions: ["India"],
         statuses: ["Stable", "Unrest", "Strikes", "Unstable", "Revolts"],
+        counter: counters.india_surrender,
+        counter_hex: 1606,
         pw: 2,
         retreat_hexes: [1005, 1307, 1308, 1208],
         keys: [1905, 2005, 2104, 2105, 2205],
@@ -144,7 +148,7 @@ var nations = {
         id: 6,
         name: "Australian Mandates",
         counter: counters.mandates_surrender,
-        counter_hex: 3920,
+        counter_hex: 4320,
         regions: ["AMandates"],
         keys: [4021, 4423],
         ports: [4423, 4222, 4021, 4020, 3820]
@@ -186,6 +190,8 @@ var nations = {
     CHINA: {
         id: 12,
         pw: 2,
+        counter: counters.china_surrender,
+        counter_hex: KUNMING,
         statuses: ["Stable Front", "Unstable Front", "Major Breakthrough", "Threat to Chunking", "Chunking Falls", "Government Collapsed"],
         name: "China",
         no_full_control: true,
@@ -197,7 +203,7 @@ var events = {
         id: 1,
         cause: "allied nations surrendered [16.41]",
         pw: -2,
-        nations: [nations.AUSTRALIA, nations.BURMA, nations.DEI, nations.MALAYA, nations.PHILIPPINES]
+        nations: [nations.AUSTRALIA, nations.BURMA, nations.DEI, nations.MALAYA, nations.PHILIPPINES, nations.CHINA, nations.INDIA]
             .map(n => n.id)
     },
     ALASKA_OCCUPATION: {
@@ -326,6 +332,12 @@ var events = {
     },
     ALASKA_OCCUPATION_HEXES: {
         id: 30
+    },
+    CHINA_STATUS: {
+        id: 31
+    },
+    INDIA_STATUS: {
+        id: 32
     },
 }
 

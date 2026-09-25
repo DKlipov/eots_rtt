@@ -68,7 +68,7 @@ function get_unit_reinforcement_hexes(u) {
             set_add(result, i)
         }
     }
-    if (faction === AP && piece.class === "air" && G.burma_road < 2 && G.surrender[nations.CHINA.id] < 5 && !is_overstack(CHINA_BOX, u)
+    if (faction === AP && piece.class === "air" && G.burma_road < 2 && G.events[events.CHINA_STATUS.id] < 5 && !is_overstack(CHINA_BOX, u)
         && (!piece.b29 || G.location[B_29_1] !== CHINA_BOX && G.location[B_29_2] !== CHINA_BOX)) {
         set_add(result, CHINA_BOX)
     }
@@ -137,7 +137,7 @@ function get_hq_reinforcement_hexes() {
 
 function is_reinforcement_denied(piece) {
     return (piece.service === "au" && is_event_active(events.AUSTRALIA_SURRENDER) && !set_has(G.reduced, piece.u))
-        || (piece.service === "ind" && G.surrender[nations.INDIA.id] >= 4)
+        || (piece.service === "ind" && G.surrender[nations.INDIA.id])
         || (L.INDEPENDENCE_CAMPAIGN && piece.class === "ground" &&
             (piece.service === "ind" || piece.service === "au" || piece.service === "br"));
 }
@@ -183,7 +183,7 @@ P.reinforcement_segment = {
                 log(`Unit eliminated due to Australia surrender.`)
                 eliminate_permanently(u)
                 return;
-            } else if (piece.service === "ind" && G.surrender[nations.INDIA.id] >= 4) {
+            } else if (piece.service === "ind" && G.surrender[nations.INDIA.id]) {
                 log(`Unit eliminated due to India surrender.`)
                 eliminate_permanently(u)
                 return;

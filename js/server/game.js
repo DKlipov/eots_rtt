@@ -153,6 +153,12 @@ function get_garrison_count() {
 }
 
 function on_view(sherlock) {
+    if (G.events[events.CHINA_STATUS.id] == undefined) {
+        G.events[events.CHINA_STATUS.id] = G.surrender[nations.CHINA.id]
+        G.events[events.INDIA_STATUS.id] = G.surrender[nations.INDIA.id]
+        G.surrender[nations.CHINA.id] = 0
+        G.surrender[nations.INDIA.id] = 0
+    }
     if (L.P && P[L.P] && P[L.P].on_view) {
         return P[L.P].on_view()
     }
@@ -319,7 +325,7 @@ function draw_specific_card(card) {
 }
 
 function eliminate_permanently(unit) {
-    if (G.location[unit] !== NON_PLACED_BOX) {
+    if (G.location[unit] !== PERM_ELIMINATED && G.location[unit] !== NOT_USED) {
         log(`${piece_get_log_str(unit)} removed from game.`)
     }
     set_location(unit, PERM_ELIMINATED)

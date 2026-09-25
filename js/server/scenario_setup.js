@@ -166,7 +166,7 @@ function setup_scenario_burma() {
     //replacements, 1 Ground taken from China per turn (optional)
     //plus Air steps per event card, no naval replacements
     G.reinforcements = [0, 2]
-    G.surrender[nations.CHINA.id] = 2
+    G.events[events.CHINA_STATUS.id] = 2
     G.inter_service = [1, 1]
     G.china_divisions = 8
 
@@ -494,7 +494,7 @@ function setup_scenario_1943() {
     G.political_will = 6
     G.china_divisions = 7
     G.burma_road = 1
-    G.surrender[nations.CHINA.id] = 2
+    G.events[events.CHINA_STATUS.id] = 2
     G.reinforcements = [1, 2]
     G.wie = 4
     G.inter_service = [1, 1]
@@ -681,7 +681,7 @@ function setup_scenario_1944() {
     G.asp[JP] = [5, 0]
     G.china_divisions = 5
     G.asp[AP] = [8, 0]
-    G.surrender[nations.CHINA.id] = 2
+    G.events[events.CHINA_STATUS.id] = 2
     G.events[events.NEW_OPERATION_PLAN.id] = 4
     G.pow = 4
     G.political_will = 5
@@ -839,7 +839,7 @@ function setup_scenario_south_pacific() {
     G.wie = 2
     G.pow = 0
     G.reinforcements = [2, 2]
-    G.surrender[nations.CHINA.id] = 2
+    G.events[events.CHINA_STATUS.id] = 2
     G.inter_service = [1, 1]
     G.china_divisions = 9
 
@@ -888,12 +888,12 @@ function deal_cards() {
         ap_cards = 6
         G.passes[AP] = 1
     }
-    if (G.surrender[nations.CHINA.id] >= 5) {
+    if (G.surrender[nations.CHINA.id]) {
         ap_cards -= 1
         G.passes[AP]++
         log(`AP draw reduced by 1 due to China's surrender.`)
     }
-    if (G.surrender[nations.INDIA.id] >= 4) {
+    if (G.surrender[nations.INDIA.id]) {
         ap_cards -= 1
         G.passes[AP]++
         log(`AP draw reduced by 1 due to India's surrender.`)
@@ -937,7 +937,7 @@ function S_P_deal_cards() {
 
     let ap_cards = 4
     G.passes[AP] = 0
-    if (G.surrender[nations.CHINA.id] >= 5) {
+    if (G.surrender[nations.CHINA.id]) {
         ap_cards -= 1
         G.passes[AP]++
         log(`AP draw reduced by 1 due to China's surrender.`)
@@ -969,12 +969,12 @@ function B_F_W_deal_cards() {
 
     let ap_cards = 4
     G.passes[AP] = 0
-    if (G.surrender[nations.CHINA.id] >= 5) {
+    if (G.surrender[nations.CHINA.id]) {
         ap_cards -= 1
         G.passes[AP]++
         log(`AP draw reduced by 1 due to China's surrender.`)
     }
-    if (G.surrender[nations.INDIA.id] >= 4) {
+    if (G.surrender[nations.INDIA.id]) {
         ap_cards -= 1
         G.passes[AP]++
         log(`AP draw reduced by 1 due to India surrender.`)

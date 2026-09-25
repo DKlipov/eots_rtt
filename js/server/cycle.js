@@ -215,7 +215,7 @@ P.national_status_segment = function () {
         //shift for India surrender, else do not move the India marker and
         //score any VP based on its location during the last Political Phase.
         var ind_control = check_nation_controlled(nations.INDIA, JP)
-        if (ind_control && G.turn < 9 || G.surrender[nations.INDIA.id] === 3) {
+        if (ind_control && G.turn < 9 ||  G.events[events.INDIA_STATUS.id] === 3) {
             degrade_india(true)
         } else if (!ind_control && G.turn < 9) {
             //17.11.27.
@@ -327,8 +327,7 @@ P.political_will_segment = function () {
         end()
         return
     }
-    if (!events.ALLIED_NATIONS_SURRENDERS.nations.filter(n => !G.surrender[n]).length &&
-        G.surrender[nations.INDIA.id] >= 4 && G.surrender[nations.CHINA.id] >= 5) {
+    if (!events.ALLIED_NATIONS_SURRENDERS.nations.filter(n => !G.surrender[n]).length) {
         check_event(events.ALLIED_NATIONS_SURRENDERS)
     }
     check_occupation(true)

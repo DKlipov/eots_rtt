@@ -358,13 +358,13 @@ function on_update() {
     populate_generic("wie", G.wie, counters.wie)
 
     if (G.sid !== SOUTH_PACIFIC_SCENARIO) {
-        populate_generic("india", Math.max(0, 4 - G.surrender[nations.INDIA.id]),
-            (G.surrender[nations.INDIA.id] >= 5) ? counters.india_status_surrender : counters.india_status)
+        populate_generic("india", Math.max(0, 4 - G.events[events.INDIA_STATUS.id]),
+            (G.events[events.INDIA_STATUS.id] >= 5) ? counters.india_status_surrender : counters.india_status)
         populate_generic("burma", 2 - G.burma_road, G.events[events.HUMP.id] ? counters.burma_road_hump : counters.burma_road)
         populate("divisions", G.china_divisions + 1, `divisions`, 0)
     }
 
-    populate_generic("china", Math.min(5, G.surrender[nations.CHINA.id]), counters.china)
+    populate_generic("china", Math.min(5,  G.events[events.CHINA_STATUS.id]), counters.china)
 
     var turns = world.things["turn"]
     for (var key of Object.keys(nations)) {
@@ -378,7 +378,7 @@ function on_update() {
         if (marker && turns[value] && value) {
             populate_generic("turn", value, marker)
         }
-        if (marker && hex && value && !vassal_control) {
+        if (marker && hex && value && !vassal_control && map_info.hex_check(hex_to_int(hex))) {
             populate_generic("s-loc", hex_to_int(hex), marker)
         }
     }

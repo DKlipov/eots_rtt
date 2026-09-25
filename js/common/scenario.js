@@ -104,8 +104,8 @@ function victory_burma() {
     // Breakthrough Box. If China Surrenders, receive a bonus +3
     // victory points for a total of +5 VP and the China track can no
     // longer be altered for the rest of the game.
-    adjust_vp(result, G.surrender[nations.CHINA.id] - 2, "China government status")
-    if (G.surrender[nations.CHINA.id] > 5) {
+    adjust_vp(result,  G.events[events.CHINA_STATUS.id] - 2, "China government status")
+    if ( G.events[events.CHINA_STATUS.id] > 5) {
         result.vp += 3
         result.text.push(`+3 VP - China surrendered.`)
     }
@@ -140,7 +140,7 @@ function victory_burma() {
     var india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
     adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
     //G. For India Unrest or Strikes, +1 Victory Point (awarded on the last game turn)
-    var india_status = G.surrender[nations.INDIA.id]
+    var india_status =  G.events[events.INDIA_STATUS.id]
     if (india_status > 0 && india_status <= 2) {
         result.vp += 1
         result.text.push(`+1 VP - India ${nations.INDIA.statuses[india_status]}.`)
@@ -196,8 +196,8 @@ function victory_1942() {
         won_side: "",
         won_text: "",
     }
-    adjust_vp(result, G.surrender[nations.CHINA.id], "China Government Front Status")
-    if (G.surrender[nations.CHINA.id] > 5) {
+    adjust_vp(result,  G.events[events.CHINA_STATUS.id], "China Government Front Status")
+    if ( G.events[events.CHINA_STATUS.id] > 5) {
         result.vp += 5
         result.text.push(`+5 VP - China surrendered`)
     }
@@ -207,7 +207,7 @@ function victory_1942() {
 
     var india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
     adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
-    var india_status = G.surrender[nations.INDIA.id]
+    var india_status =  G.events[events.INDIA_STATUS.id]
     if (india_status > 0 && india_status <= 2) {
         result.vp += 1
         result.text.push(`+1 VP - India ${nations.INDIA.statuses[india_status]}.`)
@@ -325,14 +325,14 @@ function victory_1943() {
         won_side: "",
         won_text: "",
     }
-    binary_vp(result, G.surrender[nations.CHINA.id] >= 5, 5, "China surrendered", `China did not surrender`)
+    binary_vp(result,  G.events[events.CHINA_STATUS.id] >= 5, 5, "China surrendered", `China did not surrender`)
     binary_vp(result, G.burma_road >= 1, 1, "The Burma Road is closed", `The Burma Road is open`)
     binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
         "Townsville was not isolated", [hex_to_int(3727), OAHU])
 
     var india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
     adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
-    var india_status = G.surrender[nations.INDIA.id]
+    var india_status =  G.events[events.INDIA_STATUS.id]
     if (india_status > 0 && india_status <= 2) {
         result.vp += 1
         result.text.push(`+1 VP - India ${nations.INDIA.statuses[india_status]}.`)
@@ -425,14 +425,14 @@ function victory_1944() {
         won_side: "",
         won_text: "",
     }
-    binary_vp(result, G.surrender[nations.CHINA.id] >= 5, 5, "China surrendered", `China did not surrender`)
+    binary_vp(result,  G.events[events.CHINA_STATUS.id] >= 5, 5, "China surrendered", `China did not surrender`)
     binary_vp(result, G.burma_road >= 1, 1, "The Burma Road is closed", `The Burma Road is open`)
     binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
         "Townsville was not isolated", [hex_to_int(3727), OAHU])
 
     var india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
     adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
-    var india_status = G.surrender[nations.INDIA.id]
+    var india_status =  G.events[events.INDIA_STATUS.id]
     if (india_status > 0 && india_status <= 2) {
         result.vp += 1
         result.text.push(`+1 VP - India ${nations.INDIA.statuses[india_status]}.`)
@@ -572,11 +572,11 @@ function victory_south_pacific() {
         won_text: "",
     }
 
-    if (G.surrender[nations.CHINA.id] === 5) {
+    if ( G.events[events.CHINA_STATUS.id] === 5) {
         result.vp += 5
         result.text.push(`+5 VP - China surrendered.`)
     } else {
-        adjust_vp(result, G.surrender[nations.CHINA.id] - 2, "China Government Front Status")
+        adjust_vp(result,  G.events[events.CHINA_STATUS.id] - 2, "China Government Front Status")
     }
     binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
         "Townsville was not isolated", [hex_to_int(3727), OAHU])

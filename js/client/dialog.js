@@ -545,7 +545,7 @@ function pw_query() {
 
 function get_china_info() {
     var id = nations.CHINA.id
-    var surrender = G.surrender[id] >= 5
+    var surrender = G.events[events.CHINA_STATUS.id] >= 5
     var offensive = G.events[events.CHINA_OFFENSIVE.id]
     var mods = get_china_offensive_modifiers()
     var info = []
@@ -569,7 +569,7 @@ function get_china_info() {
     }
     return {
         id, control: surrender ? JP : AP, info,
-        status: `(${G.surrender[id] + 1}/5) ${nations.CHINA.statuses[G.surrender[id]]}.`
+        status: `(${G.events[events.CHINA_STATUS.id] + 1}/5) ${nations.CHINA.statuses[G.events[events.CHINA_STATUS.id]]}.`
     }
 }
 
@@ -577,10 +577,10 @@ function get_india_info() {
     var nation = nations.INDIA
     var id = nation.id
     var name = nation.name
-    var surrender = G.surrender[id] >= 5
+    var surrender = G.events[events.INDIA_STATUS.id] >= 5
     return {
         id, control: surrender ? JP : AP,
-        status: `(${Math.min(G.surrender[id] + 1, 5)}/5) ${nations.INDIA.statuses[G.surrender[id]]}.`
+        status: `(${Math.min(G.events[events.INDIA_STATUS.id] + 1, 5)}/5) ${nations.INDIA.statuses[G.events[events.INDIA_STATUS.id]]}.`
     }
 }
 

@@ -2025,9 +2025,9 @@ for (var i = 1; i < cards.length; i++) {
     if (!card.can_play && card.hq) {
         card.can_play = () => event_hq_check(card)
     } else if (!card.can_play && card.china < 0) {
-        card.can_play = () => G.surrender[nations.CHINA.id] > 1
+        card.can_play = () =>  G.events[events.CHINA_STATUS.id] > 1
     } else if (!card.can_play && card.china > 0) {
-        card.can_play = () => G.surrender[nations.CHINA.id] < 5
+        card.can_play = () =>  G.events[events.CHINA_STATUS.id] < 5
     } else if (!card.can_play) {
         card.can_play = always_true
     }
