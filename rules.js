@@ -13808,6 +13808,13 @@ function set_control_over_nation(nation, only_ground = true) {
 }
 
 function update_china_status(diff, to_stable = false) {
+    //todo: remove
+    if (G.events[events.CHINA_STATUS.id] == undefined) {
+        G.events[events.CHINA_STATUS.id] = G.surrender[nations.CHINA.id]
+        G.events[events.INDIA_STATUS.id] = G.surrender[nations.INDIA.id]
+        G.surrender[nations.CHINA.id] = 0
+        G.surrender[nations.INDIA.id] = 0
+    }
     if (G.events[events.CHINA_STATUS.id] >= 5) {
         return
     }
@@ -17411,6 +17418,7 @@ function get_garrison_count() {
 }
 
 function on_view(sherlock) {
+    //todo: remove
     if (G.events[events.CHINA_STATUS.id] == undefined) {
         G.events[events.CHINA_STATUS.id] = G.surrender[nations.CHINA.id]
         G.events[events.INDIA_STATUS.id] = G.surrender[nations.INDIA.id]

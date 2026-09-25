@@ -153,6 +153,7 @@ function get_garrison_count() {
 }
 
 function on_view(sherlock) {
+    //todo: remove
     if (G.events[events.CHINA_STATUS.id] == undefined) {
         G.events[events.CHINA_STATUS.id] = G.surrender[nations.CHINA.id]
         G.events[events.INDIA_STATUS.id] = G.surrender[nations.INDIA.id]
