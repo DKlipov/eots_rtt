@@ -11148,24 +11148,10 @@ function create_battle_hex(hex) {
     }
     set_delete(G.offensive.landing_hexes, hex)
     set_add(G.offensive.battle_hexes, hex)
-    // call("confirm_bh")
 }
 
 function get_bh_str(hex) {
     return `${String.fromCharCode(65 + G.offensive.battle_names.indexOf(hex))} (${hex_get_log_str(hex)})`
-}
-
-P.confirm_bh = {
-    inactive: "declare battle hex",
-    prompt() {
-        var hex = G.offensive.battle_names[G.offensive.battle_names.length - 1]
-        prompt(`New battle hex declared ${get_bh_str(hex)}.`)
-        button("done")
-    },
-    done() {
-        push_undo()
-        end()
-    },
 }
 
 function create_landing_hex(hex) {
@@ -12153,6 +12139,71 @@ P.declare_battle_hexes = {
     },
 }
 
+P.assign_escort = {
+    _begin() {
+        if (G.offensive.stage !== ATTACK_STAGE) {
+            end()
+            return
+        }
+        L.possible_units = []
+        var cv_hexes = []
+        G.offensive.active_units[G.active].forEach(u => {
+            var piece = pieces[u]
+            if (is_cv_unit(piece) && map_get(G.offensive.committed, u)) {
+                set_add(cv_hexes, G.location[u])
+            }
+        })
+        G.offensive.active_units[G.active].forEach(u => {
+            var piece = pieces[u]
+            var location = G.location[u]
+            if (piece.class === "naval" && !piece.br && set_has(cv_hexes, location)) {
+                set_add(L.possible_units, u)
+            }
+        })
+        if (L.possible_units.length <= 0) {
+            end()
+            return;
+        }
+    },
+    inactive: "assign units to escorting",
+    prompt() {
+        if (G.active_stack.length === 0) {
+            prompt(`${offensive_card_header()} Select unit to escorting.`)
+            L.possible_units.forEach(u => action_unit(u))
+        } else {
+            prompt(`${offensive_card_header()} Assign units to battle hex.`)
+            L.possible_units.filter(u => G.location[u] === G.location[G.active_stack[0]]).forEach(u => action_unit(u))
+            L.possible_hexes.forEach(h => action_hex(h))
+        }
+    },
+    action_hex(hex) {
+        G.active_stack.forEach(u => {
+            commit_to_attack(u, hex)
+        })
+        log(`${units_str(G.active_stack)} assigned to attack to ${hex_get_log_str(hex)}.`)
+        G.active_stack = []
+        L.possible_hexes = []
+        if (L.possible_units.length === 0) {
+            end()
+        }
+    },
+    unit(unit) {
+        if (G.active_stack.length === 0) {
+            push_undo()
+            L.possible_hexes = []
+            G.offensive.active_units[G.active].forEach(u => {
+                var piece = pieces[u]
+                var commited = map_get(G.offensive.committed, u)
+                if (is_cv_unit(piece) && commited && G.location[unit] === G.location[u]) {
+                    set_add(L.possible_hexes, commited)
+                }
+            })
+        }
+        G.active_stack.push(unit)
+        set_delete(L.possible_units, unit)
+    },
+}
+
 P.commit_offensive = script(`
     eval {
         if (get_hand(AP).includes(SKIP_BOMBING)) {
@@ -12164,6 +12215,7 @@ P.commit_offensive = script(`
     }
     call check_overstacking
     call declare_battle_hexes
+    call assign_escort
     set L.verify_error trigger_event("before_commit_offensive")
     call commit_offensive_confirm
     `)
