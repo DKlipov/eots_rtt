@@ -153,13 +153,6 @@ function get_garrison_count() {
 }
 
 function on_view(sherlock) {
-    //todo: remove
-    if (G.events[events.CHINA_STATUS.id] == undefined) {
-        G.events[events.CHINA_STATUS.id] = G.surrender[nations.CHINA.id]
-        G.events[events.INDIA_STATUS.id] = G.surrender[nations.INDIA.id]
-        G.surrender[nations.CHINA.id] = 0
-        G.surrender[nations.INDIA.id] = 0
-    }
     if (L.P && P[L.P] && P[L.P].on_view) {
         return P[L.P].on_view()
     }
@@ -167,6 +160,21 @@ function on_view(sherlock) {
 }
 
 function create_view(sherlock) {
+    //todo: remove
+    if (!G.events[events.CHINA_STATUS.id]) {
+        G.events[events.CHINA_STATUS.id] = G.surrender[nations.CHINA.id]
+        if (G.events[events.CHINA_STATUS.id] == undefined) {
+            G.events[events.CHINA_STATUS.id] = 0
+        }
+        G.surrender[nations.CHINA.id] = 0
+    }
+    if (!G.events[events.INDIA_STATUS.id]) {
+        G.events[events.INDIA_STATUS.id] = G.surrender[nations.INDIA.id]
+        if (!G.events[events.INDIA_STATUS.id]) {
+            G.events[events.INDIA_STATUS.id] = 0
+        }
+        G.surrender[nations.INDIA.id] = 0
+    }
     V.active = G.active
     V.turn = G.turn
     V.sid = G.sid

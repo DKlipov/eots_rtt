@@ -149,10 +149,18 @@ function set_control_over_nation(nation, only_ground = true) {
 
 function update_china_status(diff, to_stable = false) {
     //todo: remove
-    if (G.events[events.CHINA_STATUS.id] == undefined) {
+    if (!G.events[events.CHINA_STATUS.id]) {
         G.events[events.CHINA_STATUS.id] = G.surrender[nations.CHINA.id]
-        G.events[events.INDIA_STATUS.id] = G.surrender[nations.INDIA.id]
+        if (G.events[events.CHINA_STATUS.id] == undefined) {
+            G.events[events.CHINA_STATUS.id] = 0
+        }
         G.surrender[nations.CHINA.id] = 0
+    }
+    if (!G.events[events.INDIA_STATUS.id]) {
+        G.events[events.INDIA_STATUS.id] = G.surrender[nations.INDIA.id]
+        if (!G.events[events.INDIA_STATUS.id]) {
+            G.events[events.INDIA_STATUS.id] = 0
+        }
         G.surrender[nations.INDIA.id] = 0
     }
     if (G.events[events.CHINA_STATUS.id] >= 5) {
@@ -172,6 +180,20 @@ function update_china_status(diff, to_stable = false) {
 }
 
 function degrade_india(could_revolt = false) {
+    if (!G.events[events.CHINA_STATUS.id]) {
+        G.events[events.CHINA_STATUS.id] = G.surrender[nations.CHINA.id]
+        if (G.events[events.CHINA_STATUS.id] == undefined) {
+            G.events[events.CHINA_STATUS.id] = 0
+        }
+        G.surrender[nations.CHINA.id] = 0
+    }
+    if (!G.events[events.INDIA_STATUS.id]) {
+        G.events[events.INDIA_STATUS.id] = G.surrender[nations.INDIA.id]
+        if (!G.events[events.INDIA_STATUS.id]) {
+            G.events[events.INDIA_STATUS.id] = 0
+        }
+        G.surrender[nations.INDIA.id] = 0
+    }
     if (G.events[events.INDIA_STATUS.id] < (could_revolt ? 4 : 3)) {
         G.events[events.INDIA_STATUS.id] += 1
         log(`India status changed to ${nations.INDIA.statuses[G.events[events.INDIA_STATUS.id]]}.`)
@@ -182,6 +204,20 @@ function degrade_india(could_revolt = false) {
 }
 
 function india_stable() {
+    if (!G.events[events.CHINA_STATUS.id]) {
+        G.events[events.CHINA_STATUS.id] = G.surrender[nations.CHINA.id]
+        if (G.events[events.CHINA_STATUS.id] == undefined) {
+            G.events[events.CHINA_STATUS.id] = 0
+        }
+        G.surrender[nations.CHINA.id] = 0
+    }
+    if (!G.events[events.INDIA_STATUS.id]) {
+        G.events[events.INDIA_STATUS.id] = G.surrender[nations.INDIA.id]
+        if (!G.events[events.INDIA_STATUS.id]) {
+            G.events[events.INDIA_STATUS.id] = 0
+        }
+        G.surrender[nations.INDIA.id] = 0
+    }
     if (G.events[events.INDIA_STATUS.id] === 0) {
         return
     } else if (G.events[events.INDIA_STATUS.id] < 4) {
