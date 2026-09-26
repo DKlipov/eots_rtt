@@ -2496,7 +2496,6 @@ cards[find_card(AP, 76)].before_unit_activation = function () {
     if (G.active === JP) {
         return
     }
-    L.possible_units = get_activatable_units(G.offensive.active_hq[G.active], pieces[HQ_ANZAC].supply)
     filter_activation_units((u, piece) => piece.class !== "ground" || piece.service === "au", AP)
 }
 
