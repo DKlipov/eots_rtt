@@ -14,10 +14,11 @@ for (var i = 0; i < output.length - 1; i += 2) {
 function read_dir(dir) {
     fs.readdirSync(dir, {withFileTypes: true})
         .forEach(item => {
-            var full_name=item.path + "/" + item.name
+            var full_name=item.parentPath + "/" + item.name
             if (item.isDirectory()) {
                 read_dir(full_name)
             } else {
+                console.log("Read:", full_name)
                 var content = fs.readFileSync(full_name, "utf-8").split("\n")[0]
                 if (content.includes("/** main*/")) {
                     output.push(full_name, item.name)
@@ -31,6 +32,7 @@ function read_dir(dir) {
 function create_by_template(target, filename) {
     var stream = fs.createWriteStream(filename);
     stream.once('open', function (fd) {
+        stream.write("// THIS FILE IS GENERATED! DO NOT EDIT!\n\n");
         insert_into(target, stream)
         stream.end();
     });
@@ -42,16 +44,17 @@ function insert_into(target, stream) {
     for (var i = 0; i < content.length; i++) {
         var line = content[i]
         if (line.startsWith("/** import")) {
-            stream.write(line);
+            stream.write(line.replace("* import", "{{{ import"));
             stream.write("\n");
             var file_name=inlined[templates.indexOf(line.trim())]
             if(!file_name){
                 console.log(`Failed read: ${file_name}(${line})`)
             }
             insert_into(file_name, stream)
-        }
-        stream.write(line);
-        if (i < content.length - 1) {
+            stream.write(line.replace("* import", "}}} import"));
+            stream.write("\n");
+        } else {
+            stream.write(line);
             stream.write("\n");
         }
     }
