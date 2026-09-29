@@ -213,7 +213,6 @@ function on_update() {
     }
 
     document.getElementById("vp_check_button").classList.toggle("disabled", CAMPAIGN_SCENARIOS.includes(G.sid))
-    document.getElementById("pw_check_button").classList.toggle("disabled", G.sid === BURMA_SCENARIO)
     if (G.pow <= 0) {
         G.capture = []
     }

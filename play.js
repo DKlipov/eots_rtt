@@ -11330,6 +11330,11 @@ function pw_dialog(id, response) {
         header.appendChild(create_icon(...counters.pw.split(" ")))
         header.innerHTML += ` Current Political Will: ${G.political_will}.`
         dl.appendChild(header)
+        if (SID === BURMA_SCENARIO) {
+            burma_pw(dl)
+            body.appendChild(dl)
+            return
+        }
         dl.appendChild(print_pow())
         dl.appendChild(print_naval_situation())
         if (G.sid !== SOUTH_PACIFIC_SCENARIO) {
@@ -11343,6 +11348,12 @@ function pw_dialog(id, response) {
         }
         body.appendChild(dl)
     })
+}
+
+function burma_pw(dl) {
+    dl.appendChild(print_nation_status(get_nation_info(nations.BURMA)))
+    dl.appendChild(print_nation_status(get_china_info()))
+    dl.appendChild(print_nation_status(get_india_info()))
 }
 
 function create_unit_display(data_id) {
@@ -12024,7 +12035,6 @@ function on_update() {
     }
 
     document.getElementById("vp_check_button").classList.toggle("disabled", CAMPAIGN_SCENARIOS.includes(G.sid))
-    document.getElementById("pw_check_button").classList.toggle("disabled", G.sid === BURMA_SCENARIO)
     if (G.pow <= 0) {
         G.capture = []
     }
