@@ -1,8 +1,6 @@
 default: rules.js
 
-watch:
-	$(MAKE)
-	@ while ! inotifywait -q -e modify rules.txt tools/compile.js ; do $(MAKE) ; done
+JS := $(shell find js -type f -name '*.js')
 
-gdl-rules.js: gdl-rules.txt tools/compile.js ../common/util.js
-	cpp gdl-rules.txt | node tools/compile.js /dev/stdin > $@
+rules.js: tools/inline.js $(JS)
+	node tools/inline.js

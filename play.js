@@ -1,10 +1,12 @@
+// THIS FILE IS GENERATED! DO NOT EDIT!
+
 /** main*/
 "use strict"
 
 function log(){}
 function capture_hex(){}
 
-/** import common/constants.js*/
+/*{{{ import common/constants.js*/
 const SOUTH_PACIFIC_SCENARIO = 0
 const FULL_CAMPAIGN_SCENARIO = 1
 const YEAR_1942_SCENARIO = 2
@@ -193,10 +195,11 @@ HEX_DIRECTION[11] = 1
 HEX_DIRECTION[10] = 2
 HEX_DIRECTION[39] = 3
 HEX_DIRECTION[68] = 4
-HEX_DIRECTION[69] = 5/** import common/constants.js*/
+HEX_DIRECTION[69] = 5
+/*}}} import common/constants.js*/
 CLIENT_SIDE_SUPPLY = 0
-/** import common/data.js*/
-/** import common/data_pieces.js*/
+/*{{{ import common/data.js*/
+/*{{{ import common/data_pieces.js*/
 var pieces = [
     {},
     {
@@ -3326,8 +3329,9 @@ function get_unit_supply_type(piece) {
         return JOINT_SUPPLIED_HEX
     }
     throw new Error("Invalid piece supply: " + piece.name)
-}/** import common/data_pieces.js*/
-/** import common/data_cards.js*/
+}
+/*}}} import common/data_pieces.js*/
+/*{{{ import common/data_cards.js*/
 var cards = [
     {},
     {
@@ -5121,8 +5125,9 @@ function for_each_card(apply) {
         }
 
     }
-}/** import common/data_cards.js*/
-/** import common/data_map.js*/
+}
+/*}}} import common/data_cards.js*/
+/*{{{ import common/data_map.js*/
 //hex data
 const CITY = 1
 const JAPANESE_CITY = 2
@@ -6613,7 +6618,8 @@ function create_tonnel(data) {
 
 function get_near_hexes(hex) {
     return get_map_data(hex).nh
-}/** import common/data_map.js*/
+}
+/*}}} import common/data_map.js*/
 
 var counters = {
     oos: "oos top",
@@ -6963,9 +6969,10 @@ const ROAD_EVENTS = Object.keys(events).filter(k => events[k].road).map(k => {
 
 function is_event_active(event) {
     return G.events[event.id]
-}/** import common/data.js*/
-/** import common/utils.js*/
-/** import common/library.js*/
+}
+/*}}} import common/data.js*/
+/*{{{ import common/utils.js*/
+/*{{{ import common/library.js*/
 
 // Fast deep copy for objects without cycles
 function object_copy(original) {
@@ -7272,7 +7279,8 @@ function map_group_by(items, callback) {
         }
     }
     return groups
-}/** import common/library.js*/
+}
+/*}}} import common/library.js*/
 
 function hex_to_int(i) {
     return (Math.floor(i / 100) - 10) * 29 + i % 100
@@ -7507,8 +7515,9 @@ function array_equals(a, b) {
         }
     }
     return true
-}/** import common/utils.js*/
-/** import supply.js*/
+}
+/*}}} import common/utils.js*/
+/*{{{ import supply.js*/
 var last = Date.now()
 var count = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
@@ -8397,8 +8406,9 @@ function mark_activation_zone(hq) {
             }
         }
     }
-}/** import supply.js*/
-/** import move.js*/
+}
+/*}}} import supply.js*/
+/*{{{ import move.js*/
 function update_move_hex() {
     if (G.active_stack.length === 0) {
         L.allowed_hexes = []
@@ -9356,8 +9366,9 @@ function set_location(unit, location, no_logs) {
         L.overstack[location] += size
     }
     G.location[unit] = location
-}/** import move.js*/
-/** import common/scenario.js*/
+}
+/*}}} import move.js*/
+/*{{{ import common/scenario.js*/
 const S_P_DECK = S_P_deck()
 const B_F_W_DECK = B_F_W_deck()
 
@@ -10111,10 +10122,11 @@ function check_nation_controlled(nation, faction) {
         }
     }
     return true
-}/** import common/scenario.js*/
+}
+/*}}} import common/scenario.js*/
 
 
-/** import client/init.js*/
+/*{{{ import client/init.js*/
 function clear_paths() {
     CANVAS_CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
 }
@@ -10777,8 +10789,9 @@ function init_canvas(scenario) {
     CANVAS.height = sizeY * scale
 
     CANVAS_CTX.scale(scale, scale)
-}/** import client/init.js*/
-/** import client/actions.js*/
+}
+/*}}} import client/init.js*/
+/*{{{ import client/actions.js*/
 var LOCAL_STATUS = 0
 var LOCAL_STATE = null
 var STORED_STATE = null
@@ -11180,8 +11193,9 @@ function retrace_supply_path(location) {
     result.push(L.supply.queue[0])
     return result
 }
-/** import client/actions.js*/
-/** import client/dialog.js*/
+
+/*}}} import client/actions.js*/
+/*{{{ import client/dialog.js*/
 // Below is code imported from Imperial struggle for dialog windows etc
 // still not completely integrated. commented out code should be looked at
 
@@ -11818,8 +11832,9 @@ function draw_list() {
         }
     })
     return {hand}
-}/** import client/dialog.js*/
-/** import client/update.js*/
+}
+/*}}} import client/dialog.js*/
+/*{{{ import client/update.js*/
 function push_stack(stk, elt) {
     stk.unshift(elt)
     elt.my_stack = stk
@@ -12320,8 +12335,9 @@ function update_violations() {
 
 function apply_conflict_marker(marker, hex) {
     marker.innerText = String.fromCharCode(65 + G.offensive.battle_names.indexOf(hex))
-}/** import client/update.js*/
-/** import client/utils.js*/
+}
+/*}}} import client/update.js*/
+/*{{{ import client/utils.js*/
 function center_rect([x, y], w, h) {
     return [x - w / 2, y - h / 2, w, h]
 }
@@ -12405,8 +12421,9 @@ function hex_center(i) {
         (map_info.display_x_offset) + (column - map_info.grid_x_offset) * HEX_X_SIZE,
         (map_info.display_y_offset) + (row - map_info.grid_y_offset) * HEX_Y_SIZE + (column & 1) * 27.625
     ]
-}/** import client/utils.js*/
-/** import client/framework.js*/
+}
+/*}}} import client/utils.js*/
+/*{{{ import client/framework.js*/
 const ICONS = {
     B0: '<span class="dice B d0"></span>',
     B1: '<span class="dice B d1"></span>',
@@ -12718,4 +12735,6 @@ function on_focus_card_tip(c) {
     world.tip.innerHTML = ""
     const card = cards[c]
     world.tip.classList = `card card_${card.faction ? "ap" : "jp"}_${card.num}`
-}/** import client/framework.js*/
+}
+/*}}} import client/framework.js*/
+
