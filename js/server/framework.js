@@ -185,15 +185,21 @@ exports.action = function (state, role, action, argument) {
     if (this_state && typeof this_state[action] === "function") {
         var extra = null
         if (Array.isArray(argument)) {
-            if (CLIENT_SIDE_SUPPLY) {
-                G.burma_road = argument[1]
-                if (argument.length > 2) {
-                    G.oos = argument.slice(2)
-                }
-                if (G.oos.indexOf("T") > 0) {
-                    extra = G.oos.slice(G.oos.indexOf("T") + 1)
-                    G.oos = G.oos.slice(0, G.oos.indexOf("T"))
-                }
+            var type = argument[1]
+            var d = 2
+            if (CLIENT_SIDE_SUPPLY && (type & 1)) {
+                G.burma_road = argument[d]
+                d++
+            }
+            var oos_i = (type % (1 << 8)) >> 1
+            if (CLIENT_SIDE_SUPPLY && oos_i > 0) {
+                G.oos = argument.slice(d, oos_i + d)
+                d += oos_i
+            }
+            var ex_i = type >> 8
+            if (ex_i > 0) {
+                extra = argument.slice(d, ex_i + d)
+                d += ex_i
             }
             argument = argument[0]
         }

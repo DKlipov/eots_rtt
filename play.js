@@ -10983,17 +10983,24 @@ function check_distance() {
 var original_send_action = send_action
 
 var send_action_with_oos = function (a, b, valid = false, extra) {
-    var payload = undefined
-    var changed_oos = !array_equals(world.original_oos, G.oos)
-    if (extra || world.original_br !== G.br || changed_oos) {
-        payload = [G.burma_road]
+    var type = 0
+    var payload = [0]
+    if (world.original_br !== G.br) {
         payload.push(G.burma_road)
-        if (changed_oos) {
-            payload.push(...G.oos)
-        }
+        type += 1
+    }
+    check_supply()
+    if (!array_equals(world.original_oos, G.oos)) {
+        payload.push(...G.oos)
+        type += G.oos.length << 1
     }
     if (extra) {
-        payload.push("T", ...extra)
+        payload.push(...extra)
+        type += extra.length << 8
+    }
+    payload[0] = type
+    if (payload.length === 1) {
+        payload = undefined
     }
     return original_send_action(a, b, payload)
 }
