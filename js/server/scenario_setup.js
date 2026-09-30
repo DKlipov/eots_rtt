@@ -1308,8 +1308,8 @@ P.arcadia = {
     prompt() {
         if (G.hand[AP].length === 1) {
             prompt(`Hold Arcadia or discard and replace with random card.`)
-            action("hold", find_card(AP, 4))
-            action("discard", find_card(AP, 4))
+            button("hold")
+            button("discard")
         } else {
             prompt(`Play Arcadia or pass.`)
             if (G.hand[AP].includes(find_card(AP, 4))) {
