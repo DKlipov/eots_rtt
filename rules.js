@@ -19595,7 +19595,7 @@ P.arcadia = {
         } else {
             prompt(`Play Arcadia or pass.`)
             if (G.hand[AP].includes(find_card(AP, 4))) {
-                action("event", find_card(AP, 4))
+                button("event")
             }
             button("done")
         }
