@@ -188,12 +188,8 @@ function check_distance() {
 var original_send_action = send_action
 
 var send_action_with_oos = function (a, b, valid = false, extra) {
-    // if (!valid && !validate_action(a, b)) {
-    //     return false
-    // }
     var payload = undefined
     var changed_oos = !array_equals(world.original_oos, G.oos)
-    changed_oos = true
     if (extra || world.original_br !== G.br || changed_oos) {
         payload = [G.burma_road]
         payload.push(G.burma_road)

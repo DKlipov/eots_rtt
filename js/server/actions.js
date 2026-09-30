@@ -258,7 +258,7 @@ P.future_offensive = {
             button("done")
         } else {
             button("skip")
-            action("event", G.future_offensive[G.active])
+            button("event")
         }
     },
     event() {
