@@ -10586,6 +10586,7 @@ function set_map_size(w, h) {
 check_supply = function () {
     if (!G.client_supply) {
         world.original_oos = G.oos
+        world.original_br = G.br
     }
     basic_check_supply()
     G.client_supply = 1
@@ -10981,16 +10982,24 @@ function check_distance() {
 
 var original_send_action = send_action
 
-var send_action_with_oos = function (a, b, valid = false) {
-    if (!valid && !validate_action(a, b)) {
-        return false
+var send_action_with_oos = function (a, b, valid = false, extra) {
+    // if (!valid && !validate_action(a, b)) {
+    //     return false
+    // }
+    var payload = undefined
+    var changed_oos = !array_equals(world.original_oos, G.oos)
+    changed_oos = true
+    if (extra || world.original_br !== G.br || changed_oos) {
+        payload = [G.burma_road]
+        payload.push(G.burma_road)
+        if (changed_oos) {
+            payload.push(...G.oos)
+        }
     }
-    var payload = {action: b, br: G.burma_road}
-    if (!array_equals(world.original_oos, G.oos)) {
-        payload.oos = G.oos
+    if (extra) {
+        payload.push("T", ...extra)
     }
-    G.actions[a] = [payload]
-    return original_send_action(a, payload)
+    return original_send_action(a, b, payload)
 }
 
 function validate_action(verb, noun) {
@@ -11034,7 +11043,7 @@ function proxy_send_action(a, b) {
                     path[0] |= VIOLATE_ZOI
                 }
             }
-            return send_action_with_oos("move", path, true)
+            return send_action_with_oos("move", null, true, path)
         } else if (G.actions.action_hex && set_has(G.actions.action_hex, b)) {
             return send_action_with_oos(a, b)
         }

@@ -875,7 +875,7 @@ P.move_offensive_units = {
         L.spec_move = 0
         call("move_to", {hex})
     },
-    move(curr_path) {
+    move(nul, curr_path) {
         if (!curr_path) {
             this.no_move()
             return

@@ -11444,7 +11444,7 @@ P.move_offensive_units = {
         L.spec_move = 0
         call("move_to", {hex})
     },
-    move(curr_path) {
+    move(nul, curr_path) {
         if (!curr_path) {
             this.no_move()
             return
@@ -19897,16 +19897,21 @@ exports.action = function (state, role, action, argument) {
 
     var this_state = P[L.P]
     if (this_state && typeof this_state[action] === "function") {
-        if (argument && (argument.br || argument.br === 0)) {
+        var extra = null
+        if (Array.isArray(argument)) {
             if (CLIENT_SIDE_SUPPLY) {
-                if (argument.oos) {
-                    G.oos = argument.oos
+                G.burma_road = argument[1]
+                if (argument.length > 2) {
+                    G.oos = argument.slice(2)
                 }
-                G.burma_road = argument.br
+                if (G.oos.indexOf("T") > 0) {
+                    extra = G.oos.slice(G.oos.indexOf("T") + 1)
+                    G.oos = G.oos.slice(0, G.oos.indexOf("T"))
+                }
             }
-            argument = argument.action
+            argument = argument[0]
         }
-        this_state[action](argument)
+        this_state[action](argument, extra)
         _run()
     } else if (action === "undo" && G.undo.length > 0) {
         pop_undo()
