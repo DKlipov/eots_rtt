@@ -363,7 +363,7 @@ function on_update() {
         populate("divisions", G.china_divisions + 1, `divisions`, 0)
     }
 
-    populate_generic("china", Math.min(5,  G.events[events.CHINA_STATUS.id]), counters.china)
+    populate_generic("china", Math.min(5, G.events[events.CHINA_STATUS.id]), counters.china)
 
     var turns = world.things["turn"]
     for (var key of Object.keys(nations)) {
@@ -385,9 +385,10 @@ function on_update() {
         const marker = TURN_MARKERS[i]
         var value = marker.value(G)
         var counter = (typeof marker.counter === 'function') ? marker.counter(G) : marker.counter
-        if (value > 0 && turns[value]) {
-            populate_generic("turn", value, counter)
+        if (!Array.isArray(value)) {
+            value = [value]
         }
+        value.filter(v => v > 0 && turns[v]).forEach(v => populate_generic("turn", v, counter))
     }
 
     for (i = 0; i < TRACK_MARKERS.length; i++) {

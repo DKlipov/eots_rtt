@@ -285,7 +285,7 @@ function print_resources() {
 
 function print_casualties() {
     let main = document.createElement("div")
-    var completed = G.events[events.US_CASUALTIES.id]
+    var completed = is_event_active(events.US_CASUALTIES)
     main.appendChild(create_icon(...((completed ? "gray " : "") + pieces[US_MARINE_UNIT].counter + " unit piece").split(" ")))
     main.innerHTML += ` US Casualties ${completed ? "triggered (-1 PW)." : "not triggered."}`
     return main

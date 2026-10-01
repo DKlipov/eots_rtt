@@ -362,10 +362,10 @@ function check_naval_situation() {
         }
     })
     if (!us_ship_count) {
-        change_political_will(-1, "no US naval units")
+        track_event(events.LACK_US_BB)
     }
     if (!us_cv_count && G.sid !== SOUTH_PACIFIC_SCENARIO) {
-        change_political_will(-1, "no US CV units")
+        track_event(events.LACK_US_CV)
     }
 }
 

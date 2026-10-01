@@ -84,6 +84,9 @@ var counters = {
     marshall_surrender: "big mi_surrender",
     scenario_start: "scenario_start",
     scenario_end: "scenario_end",
+    pw_casualties: "pw_casualties",
+    pw_bb: "pw_bb",
+    pw_cv: "pw_cv",
 }
 
 var nations = {
@@ -233,7 +236,6 @@ var events = {
         id: 5,
         pw: 1,
         cause: "successful strategic bombing",
-        once_per_turn: true,
     },
     STRAT_BOMBING_CAMPAIGN: {
         id: 6,
@@ -242,8 +244,8 @@ var events = {
     US_CASUALTIES: {
         id: 7,
         cause: "US Casualties [16.45]",
+        counter: counters.pw_casualties,
         pw: -1,
-        once_per_turn: true,
     },
     FUTURE_OFFENSIVE_JP: {
         id: 8,
@@ -339,6 +341,18 @@ var events = {
     INDIA_STATUS: {
         id: 32
     },
+    LACK_US_BB: {
+        id: 33,
+        cause: "no US naval units",
+        counter: counters.pw_bb,
+        pw: -1,
+    },
+    LACK_US_CV: {
+        id: 34,
+        cause: "no US CV units",
+        counter: counters.pw_cv,
+        pw: -1,
+    },
 }
 
 const ROAD_EVENTS = Object.keys(events).filter(k => events[k].road).map(k => {
@@ -349,5 +363,9 @@ const ROAD_EVENTS = Object.keys(events).filter(k => events[k].road).map(k => {
 
 
 function is_event_active(event) {
+    var data = G.events[event.id]
+    if (Array.isArray(data)) {
+        return data[data.length - 1] === G.turn
+    }
     return G.events[event.id]
 }

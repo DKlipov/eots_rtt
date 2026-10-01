@@ -6705,6 +6705,9 @@ var counters = {
     marshall_surrender: "big mi_surrender",
     scenario_start: "scenario_start",
     scenario_end: "scenario_end",
+    pw_casualties: "pw_casualties",
+    pw_bb: "pw_bb",
+    pw_cv: "pw_cv",
 }
 
 var nations = {
@@ -6854,7 +6857,6 @@ var events = {
         id: 5,
         pw: 1,
         cause: "successful strategic bombing",
-        once_per_turn: true,
     },
     STRAT_BOMBING_CAMPAIGN: {
         id: 6,
@@ -6863,8 +6865,8 @@ var events = {
     US_CASUALTIES: {
         id: 7,
         cause: "US Casualties [16.45]",
+        counter: counters.pw_casualties,
         pw: -1,
-        once_per_turn: true,
     },
     FUTURE_OFFENSIVE_JP: {
         id: 8,
@@ -6960,6 +6962,18 @@ var events = {
     INDIA_STATUS: {
         id: 32
     },
+    LACK_US_BB: {
+        id: 33,
+        cause: "no US naval units",
+        counter: counters.pw_bb,
+        pw: -1,
+    },
+    LACK_US_CV: {
+        id: 34,
+        cause: "no US CV units",
+        counter: counters.pw_cv,
+        pw: -1,
+    },
 }
 
 const ROAD_EVENTS = Object.keys(events).filter(k => events[k].road).map(k => {
@@ -6970,6 +6984,10 @@ const ROAD_EVENTS = Object.keys(events).filter(k => events[k].road).map(k => {
 
 
 function is_event_active(event) {
+    var data = G.events[event.id]
+    if (Array.isArray(data)) {
+        return data[data.length - 1] === G.turn
+    }
     return G.events[event.id]
 }
 /*}}} import common/data.js*/
@@ -13394,10 +13412,13 @@ function check_us_casualties() {
         return piece.faction === AP && piece.class === "ground" && (piece.service === "army" || piece.service === "navy") && piece.size > 1
     }).length
     if (!survived_attacker_ground && div_corp_size_unit) {
-        check_event(events.US_CASUALTIES)
-        if (G.sid === SOUTH_PACIFIC_SCENARIO) {
-            G.events[events.US_CASUALTIES.id] = 0
+        if (G.sid === SOUTH_PACIFIC_SCENARIO && is_event_active(events.US_CASUALTIES) && Array.isArray(G.events[events.US_CASUALTIES.id])) {
+            G.events[events.US_CASUALTIES.id].push(G.turn)
+            change_political_will(events.US_CASUALTIES.pw, events.US_CASUALTIES.cause)
+        } else {
+            track_event(events.US_CASUALTIES)
         }
+        console.log(G.events[events.US_CASUALTIES.id])
     }
 }
 
@@ -14313,10 +14334,10 @@ function check_naval_situation() {
         }
     })
     if (!us_ship_count) {
-        change_political_will(-1, "no US naval units")
+        track_event(events.LACK_US_BB)
     }
     if (!us_cv_count && G.sid !== SOUTH_PACIFIC_SCENARIO) {
-        change_political_will(-1, "no US CV units")
+        track_event(events.LACK_US_CV)
     }
 }
 
@@ -17821,6 +17842,23 @@ function check_event(event) {
     return true
 }
 
+function track_event(event) {
+    if (is_event_active(event)) {
+        return false
+    }
+    if (!G.events[event.id]) {
+        G.events[event.id] = [G.turn]
+    } else if (!Array.isArray(G.events[event.id])) {
+        G.events[event.id] = [G.events[event.id], G.turn]
+    } else {
+        G.events[event.id].push(G.turn)
+    }
+    if (event.pw) {
+        change_political_will(event.pw, event.cause)
+    }
+    return true
+}
+
 function check_occupation(apply_pw = false) {
     check_units()
     check_occupation_region(events.ALASKA_OCCUPATION, apply_pw)
@@ -18147,7 +18185,7 @@ function bombing(u, close_air_base) {
     G.b29u |= B29_BOMBED << pieces[u].b29
     if (success) {
         G.strategic_warfare++
-        check_event(events.STRAT_BOMBING)
+        track_event(events.STRAT_BOMBING)
         check_event(events.STRAT_BOMBING_CAMPAIGN)
     }
     clear_undo()
@@ -19928,9 +19966,16 @@ exports.action = function (state, role, action, argument) {
     }
 
     _save()
-
-    if (old_active !== G.active)
+    var active = G.active
+    if (Array.isArray(G.active)) {
+        active = G.active.map(r => ROLES.indexOf(r))
+    } else {
+        active = ROLES.indexOf(G.active)
+    }
+    if (old_active !== G.active || G.undo && G.undo.filter(s => s.active !== active).length) {
         clear_undo()
+    }
+
 
     return G
 }

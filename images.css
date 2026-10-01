@@ -20,6 +20,9 @@
 .road_imphal { background-image: url(pieces150/road_imphal.webp);background-size: 50px 55px;background-repeat: no-repeat; }
 .road_jarhat { background-image: url(pieces150/road_jarhat.webp); background-size: 55px 45px;background-repeat: no-repeat;}
 .road_kwai { background-image: url(pieces150/road_kwai.webp); background-size: 50px 95px;background-repeat: no-repeat; }
+.pw_casualties { background-image: url(pieces150/army_lost.png); background-size: 35px 35px;background-repeat: no-repeat; }
+.pw_bb { background-image: url(pieces150/navy_lost.png); background-size: 35px 35px;background-repeat: no-repeat; }
+.pw_cv { background-image: url(pieces150/cv_lost.png); background-size: 35px 35px;background-repeat: no-repeat; }
 
 /*marker_stripes*/
 .big_markers_blue { background-image: url(pieces150/big_markers_blue.150.webp); background-size: 225px 90px; }

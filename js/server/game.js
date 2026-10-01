@@ -451,6 +451,23 @@ function check_event(event) {
     return true
 }
 
+function track_event(event) {
+    if (is_event_active(event)) {
+        return false
+    }
+    if (!G.events[event.id]) {
+        G.events[event.id] = [G.turn]
+    } else if (!Array.isArray(G.events[event.id])) {
+        G.events[event.id] = [G.events[event.id], G.turn]
+    } else {
+        G.events[event.id].push(G.turn)
+    }
+    if (event.pw) {
+        change_political_will(event.pw, event.cause)
+    }
+    return true
+}
+
 function check_occupation(apply_pw = false) {
     check_units()
     check_occupation_region(events.ALASKA_OCCUPATION, apply_pw)
@@ -777,7 +794,7 @@ function bombing(u, close_air_base) {
     G.b29u |= B29_BOMBED << pieces[u].b29
     if (success) {
         G.strategic_warfare++
-        check_event(events.STRAT_BOMBING)
+        track_event(events.STRAT_BOMBING)
         check_event(events.STRAT_BOMBING_CAMPAIGN)
     }
     clear_undo()

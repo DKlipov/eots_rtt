@@ -2825,10 +2825,13 @@ function check_us_casualties() {
         return piece.faction === AP && piece.class === "ground" && (piece.service === "army" || piece.service === "navy") && piece.size > 1
     }).length
     if (!survived_attacker_ground && div_corp_size_unit) {
-        check_event(events.US_CASUALTIES)
-        if (G.sid === SOUTH_PACIFIC_SCENARIO) {
-            G.events[events.US_CASUALTIES.id] = 0
+        if (G.sid === SOUTH_PACIFIC_SCENARIO && is_event_active(events.US_CASUALTIES) && Array.isArray(G.events[events.US_CASUALTIES.id])) {
+            G.events[events.US_CASUALTIES.id].push(G.turn)
+            change_political_will(events.US_CASUALTIES.pw, events.US_CASUALTIES.cause)
+        } else {
+            track_event(events.US_CASUALTIES)
         }
+        console.log(G.events[events.US_CASUALTIES.id])
     }
 }
 

@@ -6703,6 +6703,9 @@ var counters = {
     marshall_surrender: "big mi_surrender",
     scenario_start: "scenario_start",
     scenario_end: "scenario_end",
+    pw_casualties: "pw_casualties",
+    pw_bb: "pw_bb",
+    pw_cv: "pw_cv",
 }
 
 var nations = {
@@ -6852,7 +6855,6 @@ var events = {
         id: 5,
         pw: 1,
         cause: "successful strategic bombing",
-        once_per_turn: true,
     },
     STRAT_BOMBING_CAMPAIGN: {
         id: 6,
@@ -6861,8 +6863,8 @@ var events = {
     US_CASUALTIES: {
         id: 7,
         cause: "US Casualties [16.45]",
+        counter: counters.pw_casualties,
         pw: -1,
-        once_per_turn: true,
     },
     FUTURE_OFFENSIVE_JP: {
         id: 8,
@@ -6958,6 +6960,18 @@ var events = {
     INDIA_STATUS: {
         id: 32
     },
+    LACK_US_BB: {
+        id: 33,
+        cause: "no US naval units",
+        counter: counters.pw_bb,
+        pw: -1,
+    },
+    LACK_US_CV: {
+        id: 34,
+        cause: "no US CV units",
+        counter: counters.pw_cv,
+        pw: -1,
+    },
 }
 
 const ROAD_EVENTS = Object.keys(events).filter(k => events[k].road).map(k => {
@@ -6968,6 +6982,10 @@ const ROAD_EVENTS = Object.keys(events).filter(k => events[k].road).map(k => {
 
 
 function is_event_active(event) {
+    var data = G.events[event.id]
+    if (Array.isArray(data)) {
+        return data[data.length - 1] === G.turn
+    }
     return G.events[event.id]
 }
 /*}}} import common/data.js*/
@@ -10435,6 +10453,18 @@ const TURN_MARKERS = [
         value: G => G.events[events.PT_BOATS.id]
     },
     {
+        counter: counters.pw_casualties,
+        value: G => G.events[events.US_CASUALTIES.id]
+    },
+    {
+        counter: counters.pw_bb,
+        value: G => G.events[events.LACK_US_BB.id]
+    },
+    {
+        counter: counters.pw_cv,
+        value: G => G.events[events.LACK_US_CV.id]
+    },
+    {
         counter: counters.us_sub,
         value: G => G.events[events.SUBMARINE_DOCTRINE.id]
     },
@@ -11495,7 +11525,7 @@ function print_resources() {
 
 function print_casualties() {
     let main = document.createElement("div")
-    var completed = G.events[events.US_CASUALTIES.id]
+    var completed = is_event_active(events.US_CASUALTIES)
     main.appendChild(create_icon(...((completed ? "gray " : "") + pieces[US_MARINE_UNIT].counter + " unit piece").split(" ")))
     main.innerHTML += ` US Casualties ${completed ? "triggered (-1 PW)." : "not triggered."}`
     return main
@@ -12212,7 +12242,7 @@ function on_update() {
         populate("divisions", G.china_divisions + 1, `divisions`, 0)
     }
 
-    populate_generic("china", Math.min(5,  G.events[events.CHINA_STATUS.id]), counters.china)
+    populate_generic("china", Math.min(5, G.events[events.CHINA_STATUS.id]), counters.china)
 
     var turns = world.things["turn"]
     for (var key of Object.keys(nations)) {
@@ -12234,9 +12264,10 @@ function on_update() {
         const marker = TURN_MARKERS[i]
         var value = marker.value(G)
         var counter = (typeof marker.counter === 'function') ? marker.counter(G) : marker.counter
-        if (value > 0 && turns[value]) {
-            populate_generic("turn", value, counter)
+        if (!Array.isArray(value)) {
+            value = [value]
         }
+        value.filter(v => v > 0 && turns[v]).forEach(v => populate_generic("turn", v, counter))
     }
 
     for (i = 0; i < TRACK_MARKERS.length; i++) {

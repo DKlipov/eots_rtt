@@ -214,9 +214,16 @@ exports.action = function (state, role, action, argument) {
     }
 
     _save()
-
-    if (old_active !== G.active)
+    var active = G.active
+    if (Array.isArray(G.active)) {
+        active = G.active.map(r => ROLES.indexOf(r))
+    } else {
+        active = ROLES.indexOf(G.active)
+    }
+    if (old_active !== G.active || G.undo && G.undo.filter(s => s.active !== active).length) {
         clear_undo()
+    }
+
 
     return G
 }

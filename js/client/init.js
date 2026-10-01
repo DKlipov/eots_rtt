@@ -306,6 +306,18 @@ const TURN_MARKERS = [
         value: G => G.events[events.PT_BOATS.id]
     },
     {
+        counter: counters.pw_casualties,
+        value: G => G.events[events.US_CASUALTIES.id]
+    },
+    {
+        counter: counters.pw_bb,
+        value: G => G.events[events.LACK_US_BB.id]
+    },
+    {
+        counter: counters.pw_cv,
+        value: G => G.events[events.LACK_US_CV.id]
+    },
+    {
         counter: counters.us_sub,
         value: G => G.events[events.SUBMARINE_DOCTRINE.id]
     },
