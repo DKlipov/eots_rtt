@@ -8784,7 +8784,7 @@ function compute_ground_naval_strat_move() {
     let location = L.move_data.location
     let move_data = L.move_data
     L.allowed_hexes = []
-    if (has_non_n_zoi(location, 1 - R)) {
+    if (has_non_n_zoi(location, 1 - R) || L.avoid_zoi && has_zoi(location, 1 - R)) {
         return
     }
     // to check when depart of ground unit could change zoi
@@ -8815,6 +8815,7 @@ function compute_ground_naval_strat_move() {
                 continue
             }
             if (has_non_n_zoi(nh, 1 - R)
+                || L.avoid_zoi && has_zoi(nh, 1 - R)
                 || set_has(nh, G.offensive.battle_hexes)
                 || distance > move_data.naval_move_distance
                 || !(get_map_data(item).edges_int & WATER << 5 * j)
