@@ -640,7 +640,7 @@ function set_supply_control() {
     var data = scenario_data()
     G.original_control = G.supply_cache
     G.supply_cache = object_copy(G.supply_cache)
-    check_supply()
+    basic_check_supply()
     L.supply = {}
     HQ_LIST.forEach(hq => {
         if (G.location[hq] >= LAST_BOARD_HEX) {
@@ -679,10 +679,10 @@ function get_victory() {
     if (!vp.won_side && vp.vp <= 2) {
         vp.won_side = "Allies"
         vp.won_text = `Allied Decisive Victory`
-    } else if (!vp.won_side && vp.vp <= (G.sid != BURMA_SCENARIO ? 5 : 4)) {
+    } else if (!vp.won_side && vp.vp <= (G.sid !== BURMA_SCENARIO ? 5 : 4)) {
         vp.won_side = "Allies"
         vp.won_text = `Allied Tactical Victory`
-    } else if (!vp.won_side && vp.vp <= (G.sid != BURMA_SCENARIO ? 9 : 8)) {
+    } else if (!vp.won_side && vp.vp <= (G.sid !== BURMA_SCENARIO ? 9 : 8)) {
         vp.won_side = "Japan"
         vp.won_text = `Japanese Tactical Victory`
     } else if (!vp.won_side) {
