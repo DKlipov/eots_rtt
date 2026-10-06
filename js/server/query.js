@@ -13,8 +13,9 @@ function vp_query() {
 
 //could corrupt G, run only in safe context
 function battle_info_query(battle) {
-    if (!set_has(G.offensive.battle, battle)) {
-        create_battle_hex(battle)
+    var battle_hex = G.offensive.battle_names[battle]
+    if (!set_has(G.offensive.battle_hexes, battle_hex)) {
+        create_battle_hex(battle_hex)
     }
     G.log = []
     var result = {
@@ -28,7 +29,7 @@ function battle_info_query(battle) {
         battle_hex: G.offensive.battle_names[battle],
         battle_name: battle,
     }
-    var battle_hex = G.offensive.battle_names[battle]
+
     G.offensive.battle = {battle_hex}
     prepare_battle()
     result.air_naval = G.offensive.battle.air_naval

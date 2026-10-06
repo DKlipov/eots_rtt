@@ -9800,7 +9800,7 @@ function victory_1943() {
     binary_vp(result, tokyo_ports, -3, `AP control a port that is 11 or less hexes from Tokyo`,
         `AP do not control a port that is 11 or less hexes from Tokyo`,
         tokyo_ports_list)
-    adjust_vp(result, 14 - get_jp_resources(), "AP controlled resource hexes",
+    adjust_vp(result, -(14 - get_jp_resources()), "AP controlled resource hexes",
         RESOURCE_HEX)
     return result
 }
@@ -18256,8 +18256,9 @@ function vp_query() {
 
 //could corrupt G, run only in safe context
 function battle_info_query(battle) {
-    if (!set_has(G.offensive.battle, battle)) {
-        create_battle_hex(battle)
+    var battle_hex = G.offensive.battle_names[battle]
+    if (!set_has(G.offensive.battle_hexes, battle_hex)) {
+        create_battle_hex(battle_hex)
     }
     G.log = []
     var result = {
@@ -18271,7 +18272,7 @@ function battle_info_query(battle) {
         battle_hex: G.offensive.battle_names[battle],
         battle_name: battle,
     }
-    var battle_hex = G.offensive.battle_names[battle]
+
     G.offensive.battle = {battle_hex}
     prepare_battle()
     result.air_naval = G.offensive.battle.air_naval

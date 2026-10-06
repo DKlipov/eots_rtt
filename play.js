@@ -9797,7 +9797,7 @@ function victory_1943() {
     binary_vp(result, tokyo_ports, -3, `AP control a port that is 11 or less hexes from Tokyo`,
         `AP do not control a port that is 11 or less hexes from Tokyo`,
         tokyo_ports_list)
-    adjust_vp(result, 14 - get_jp_resources(), "AP controlled resource hexes",
+    adjust_vp(result, -(14 - get_jp_resources()), "AP controlled resource hexes",
         RESOURCE_HEX)
     return result
 }
