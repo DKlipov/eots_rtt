@@ -15072,7 +15072,7 @@ cards[find_card(JP, 5)].event = function () {
 }
 
 cards[find_card(JP, 6)].can_play = function () {
-    return set_has(G.removed[AP], DOOLITLE_RAID)
+    return G.sid === BURMA_SCENARIO || set_has(G.removed[AP], DOOLITLE_RAID)
 }
 
 cards[find_card(JP, 8)].before_unit_activation = function () {
