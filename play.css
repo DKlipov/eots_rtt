@@ -405,6 +405,21 @@ body.hex-clickable .action_hex { z-index: 50; }
     /*z-index: 3;*/
 }
 
+/* STACK SHADOW */
+
+.stack.shadow:before {
+    content: "";
+    position: absolute;
+    background-color: #0006;
+    border-radius: 8px;
+    pointer-events: none;
+    left: var(--shadow-x);
+    top: var(--shadow-y);
+    width: var(--shadow-w);
+    height: var(--shadow-h);
+    z-index: 51;
+}
+
 /* PIECES */
 
 .transparent {

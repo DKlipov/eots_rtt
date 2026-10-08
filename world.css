@@ -105,6 +105,13 @@ body.hide-pieces .marker:not(.control) { display: none }
 	pointer-events: auto;
 }
 
+.stack.shadow {
+	--shadow-x: 0px;
+	--shadow-y: 0px;
+	--shadow-w: 0px;
+	--shadow-h: 0px;
+}
+
 /* TIP (ENGLARGED COMPONENT VIEW) */
 
 #tip {

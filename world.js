@@ -325,6 +325,7 @@ class Thing {
             wrap,
             gravity_x, gravity_y,
             small_dx, small_dy, small_threshold, // overrided for small stacks,
+            shadow: 8,
             sort_children
         }
 
@@ -857,7 +858,7 @@ function _layout_stacks() {
         }
 
         var expand = (world.focus === stack || n <= _(stack.my_stack.threshold))
-        var z = (world.focus === stack ? 51 : 0)
+        var z = (world.focus === stack ? 52 : 0)
         var major_dx = expand ? _(stack.my_stack.major_dx) : _(dx)
         var major_dy = expand ? _(stack.my_stack.major_dy) : _(dy)
         var minor_dx = expand ? _(stack.my_stack.minor_dx) : _(0)
@@ -892,11 +893,23 @@ function _layout_stacks() {
         start_y -= stack.element.offsetTop
         var sub_cache = []
         var i = 0, k = 0, sh = 0
+
+        // shadow box size
+        var x0, y0, x1, y1
+        x0 = y0 = start_x
+        x1 = y1 = start_y
+
         var childs = stack.my_stack.sort_children(stack.element.children, world.focus === stack)
         for (var child of childs) {
             var [w, h] = get_child_size(child)
             var x = start_x + major_dx * i + minor_dx * k + (stack_w - w) * grav_x
             var y = start_y + major_dy * i + minor_dy * k + (stack_h - h) * grav_y
+
+            x0 = Math.min(x0, x)
+            y0 = Math.min(y0, y)
+            x1 = Math.max(x1, x + w)
+            y1 = Math.max(y1, y + h)
+
             child.style.left = x + "px"
             child.style.top = y + "px"
             child.style.zIndex = z + (wide_stack ? i * 3 : i)
@@ -906,6 +919,18 @@ function _layout_stacks() {
                 ++k
             }
         }
+
+        var shadow = stack.my_stack.shadow
+        if (shadow) {
+            stack.element.classList.toggle("shadow", world.focus === stack)
+            if (world.focus === stack) {
+                stack.element.style.setProperty("--shadow-x", (x0-shadow) + "px")
+                stack.element.style.setProperty("--shadow-y", (y0-shadow) + "px")
+                stack.element.style.setProperty("--shadow-w", (2*shadow+(x1-x0)) + "px")
+                stack.element.style.setProperty("--shadow-h", (2*shadow+(y1-y0)) + "px")
+            }
+        }
+
         cache.push(sub_cache)
     }
 }
