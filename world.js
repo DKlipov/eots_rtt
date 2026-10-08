@@ -896,8 +896,8 @@ function _layout_stacks() {
 
         // shadow box size
         var x0, y0, x1, y1
-        x0 = y0 = start_x
-        x1 = y1 = start_y
+        x0 = y0 = Infinity
+        x1 = y1 = -Infinity
 
         var childs = stack.my_stack.sort_children(stack.element.children, world.focus === stack)
         for (var child of childs) {
