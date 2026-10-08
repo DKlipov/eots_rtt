@@ -11979,10 +11979,20 @@ function place_unit(u, location) {
     } else if (location === ELIMINATED_BOX && (!pieces[u].notreplaceable || is_action("unit", u))
         || (location !== ELIMINATED_BOX && slocs[location])) {
         unit = populate("s-loc", location, "unit", u)
-        unit.classList.toggle("reduced", (set_has(G.reduced, u) && !one_step) || location === ELIMINATED_BOX
-            || pieces[u].class === "hq" && G.inter_service[pieces[u].faction])
-        unit.classList.toggle("activated", set_has(G.offensive.active_units[piece.faction], u))
-        unit.classList.toggle("selected", G.active_stack.includes(u))
+
+        update_keyword("unit", u, "reduced",
+            (set_has(G.reduced, u) && !one_step) || location === ELIMINATED_BOX
+            || pieces[u].class === "hq" && G.inter_service[pieces[u].faction]
+        )
+
+        if (set_has(G.offensive.active_units[piece.faction], u))
+            update_keyword("unit", u, "activated")
+        if (G.active_stack.includes(u)) {
+            update_keyword("unit", u, "selected")
+            update_rotation("unit", u, 22.5)
+            console.log("rotate", u)
+        }
+
         unit.innerHTML = '';
         var battle = map_get(G.offensive.committed, u)
         var path = map_get(G.offensive.paths, u, [0])[0]
@@ -12380,6 +12390,7 @@ function update_violations() {
 function apply_conflict_marker(marker, hex) {
     marker.innerText = String.fromCharCode(65 + G.offensive.battle_names.indexOf(hex))
 }
+
 /*}}} import client/update.js*/
 /*{{{ import client/utils.js*/
 function center_rect([x, y], w, h) {
