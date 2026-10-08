@@ -941,9 +941,9 @@ function get_child_size(child) {
         size = 47
     }
     if (child.classList.contains("action")) {
-        size += 8
+        size += 4
     }else if (child.classList.contains("activated")) {
-        size += 6
+        size += 4
     }
     return [size, size]
 }
