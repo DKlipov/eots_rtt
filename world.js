@@ -2,7 +2,8 @@
 
 "use strict"
 
-var G, V, R, L // convenient aliases so that we can share bits of code verbatim from rules.js
+var G, V, R // convenient aliases so that we can share bits of code verbatim from rules.js
+var L // XXX (marks customizations)
 
 /* MISC */
 
@@ -41,7 +42,7 @@ function toggle_markers_and_pieces() {
     } else {
         document.body.classList.add("hide-pieces")
     }
-    on_update()
+    // XXX: on_update()
 }
 
 function is_disabled_button(action, id) {
@@ -64,21 +65,21 @@ function is_action(action, id) {
 }
 
 function resize_rect(rect, w, h) {
-    var x = rect[0] + rect[2] / 2
-    var y = rect[1] + rect[3] / 2
-    return [x - w / 2, y - h / 2, w, h]
+    var x = rect[0] + rect[2]/2
+    var y = rect[1] + rect[3]/2
+    return [ x - w/2, y - h/2, w, h ]
 }
 
 function translate_rect(rect, dx, dy) {
-    var x = rect[0] + rect[2] / 2
-    var y = rect[1] + rect[3] / 2
-    return [rect[0] + dx, rect[1] + dy, rect[2], rect[3]]
+    var x = rect[0] + rect[2]/2
+    var y = rect[1] + rect[3]/2
+    return [ rect[0] + dx, rect[1] + dy, rect[2], rect[3] ]
 }
 
 function expand_rect(rect, dx, dy) {
-    var x = rect[0] + rect[2] / 2
-    var y = rect[1] + rect[3] / 2
-    return [rect[0] - dx, rect[1] - dy, rect[2] + dx * 2, rect[3] + dy * 2]
+    var x = rect[0] + rect[2]/2
+    var y = rect[1] + rect[3]/2
+    return [ rect[0] - dx, rect[1] - dy, rect[2] + dx * 2, rect[3] + dy * 2 ]
 }
 
 /* WORLD */
@@ -88,6 +89,7 @@ const world = {
     favicon: $("link[rel='icon']"),
     header: $("header"),
     status: $("#status"),
+    status_nest: [],
     mapwrap: $("#mapwrap"),
     panzoom: $("#pan_zoom_main"),
     tip: $("#tip"),
@@ -97,15 +99,11 @@ const world = {
     action_list: [],
     button_list: [],
     animate_list: [],
+    rotate_list: [],
     keyword_list: [],
     text_list: [],
-    hq: 0,
-    range: [0, 0],
     log_boxes: [],
-    violations: [],
-    amph: [],
     window_list: [],
-    list_id: 0,
     focus: null,
     mouse_focus: false,
     last_focus: null,
@@ -115,6 +113,13 @@ const world = {
     parent: $("#map"),
     parent_w: 1920,
     parent_h: 1080,
+
+    // XXX: added properties
+    hq: 0,
+    range: [0, 0],
+    violations: [],
+    amph: [],
+    list_id: 0,
 }
 
 class Thing {
@@ -214,10 +219,26 @@ class Thing {
             this.is_rotate = true
             this.my_old_angle = 0
             this.my_new_angle = 0
+            world.rotate_list.push(this)
         }
         return this
     }
 
+    /// XXX: not used
+    XXX_tooltip(tip) {
+        var id = this.my_id
+        this.element.addEventListener("mouseenter", function () {
+            try {
+                _push_status((typeof tip === "function") ? tip(id) : tip)
+            } catch (err) {
+                _push_status(err.toString())
+            }
+        })
+        this.element.addEventListener("mouseleave", _pop_status)
+        return this
+    }
+
+    // XXX: modified
     tooltip(tip) {
         var id = this.my_id
         this.element.addEventListener("mouseenter", function () {
@@ -233,6 +254,7 @@ class Thing {
         return this
     }
 
+    // XXX: added
     tooltip_image(tip) {
         var id = this.my_id
         if (is_mobile()) {
@@ -269,9 +291,9 @@ class Thing {
         this.keyword(keywords)
 
         if (Array.isArray(rect))
-            var [x, y, w, h] = rect
+            var [ x, y, w, h ] = rect
         else
-            var {x, y, w, h} = rect
+            var { x, y, w, h } = rect
         x = Math.round(x)
         y = Math.round(y)
         w = Math.round(w ?? 0)
@@ -279,9 +301,7 @@ class Thing {
 
         var r = world.parent_w - (x + w)
         var b = world.parent_h - (y + h)
-        //TEMP TODO
-        // for some reason, the layout gets completly broken if we don't corrupt these two values
-        r = b = NaN
+
         var grow_n = this.my_keywords.includes("grow-n")
         var grow_e = this.my_keywords.includes("grow-e")
         var grow_s = this.my_keywords.includes("grow-s")
@@ -300,21 +320,23 @@ class Thing {
         return this
     }
 
+    // XXX: modified (small_dx, small_dy, small_threshold, sort_children)
     stack(rect, dx, dy, major_dx, major_dy, minor_dx, minor_dy, threshold, wrap, gravity_x, gravity_y, small_dx, small_dy, small_threshold, sort_children) {
         world.parent.appendChild(this.element)
 
+        // XXX
+        if (!sort_children)
+            sort_children = a => a
+
         if (Array.isArray(rect))
-            var [x, y, w, h] = rect
+            var [ x, y, w, h ] = rect
         else
-            var {x, y, w, h} = rect
+            var { x, y, w, h } = rect
         this.element.style.left = Math.round(x) + "px"
         this.element.style.top = Math.round(y) + "px"
         this.element.style.width = Math.round(w) + "px"
         this.element.style.height = Math.round(h) + "px"
 
-        if (!sort_children) {
-            sort_children = a => a
-        }
         this.is_stack = true
         this.my_stack = {
             w, h,
@@ -374,8 +396,10 @@ class Thing {
     }
 }
 
+// XXX: added
 var long_tap_timer
 
+// XXX: added
 function long_tap(callback, timeout = 200) {
     long_tap_timer = setTimeout(() => {
         callback()
@@ -384,6 +408,7 @@ function long_tap(callback, timeout = 200) {
     document.body.style.webkitUserSelect = "none";
 }
 
+// XXX: added
 function long_tap_cancel() {
     clearTimeout(long_tap_timer)
     document.body.style.userSelect = null;
@@ -402,9 +427,9 @@ function lookup_thing(action, id) {
 
 function _on_click_thing(evt) {
     if (evt.button === 0) {
-        var thing = evt.target.thing
+        var thing = evt.currentTarget.thing
         evt.stopPropagation()
-        if (_focus_stack(evt.target.parentElement.thing))
+        if (_focus_stack(thing.element.parentElement.thing))
             if (!send_action(thing.my_action, thing.my_id))
                 _blur_stack()
     }
@@ -425,6 +450,20 @@ function _on_focus_stackable(evt) {
     }
 }
 
+function _push_status(text) {
+    world.status_nest.push(text)
+    world.status.innerHTML = world.status_nest[world.status_nest.length-1]
+}
+
+function _pop_status() {
+    if (world.status_nest.length > 0)
+        world.status_nest.pop()
+    if (world.status_nest.length > 0)
+        world.status.innerHTML = world.status_nest[world.status_nest.length-1]
+    else
+        world.status.innerHTML = ""
+}
+
 /* DEFINE THINGS */
 
 function define_thing(action, id) {
@@ -435,7 +474,7 @@ function define_html_thing(selector, action, id) {
     return new Thing($(selector), action, id)
 }
 
-function define_board(selector, w, h, padding = [0, 0, 0, 0]) {
+function define_board(selector, w, h, padding=[0,0,0,0]) {
     world.parent = $(selector)
     world.parent.my_padding = padding
     assert(world.parent, "board not found: " + selector)
@@ -451,7 +490,7 @@ function define_board(selector, w, h, padding = [0, 0, 0, 0]) {
 function sort_board(x_weight = 1, y_weight = 2) {
     var parent = world.parent
     var list = Array.from(parent.childNodes).filter(node => node instanceof Element)
-    list.sort((a, b) => {
+    list.sort((a,b) => {
         // svg at the start
         if ((a instanceof SVGElement) && !(b instanceof SVGElement)) return -1
         if (!(a instanceof SVGElement) && (b instanceof SVGElement)) return 1
@@ -472,6 +511,7 @@ function sort_board(x_weight = 1, y_weight = 2) {
         parent.appendChild(e)
 }
 
+// XXX: modified
 function define_stack(action, id, rect, dx = -12, dy = -12, major_dx = dx, major_dy = dy, minor_dx = 0, minor_dy = 0, threshold = 1, wrap = 1000, small_dx,
                       small_dy, small_treshhold, sort_children, gravity_x = 0.5, gravity_y = 0.5) {
     return define_thing(action, id)
@@ -573,7 +613,6 @@ function define_piece(action, id, keywords) {
         .action()
         .animate()
         .keyword(keywords)
-        .stackable()
 }
 
 function define_marker(action, id, keywords) {
@@ -582,7 +621,6 @@ function define_marker(action, id, keywords) {
         .action()
         .animate()
         .keyword(keywords)
-        .stackable()
 }
 
 function define_card(action, id, keywords) {
@@ -629,7 +667,7 @@ function populate(parent_action, arg2, arg3, arg4) {
     var child = lookup_thing(child_action, child_id)
     parent.ensure_parent()
     parent.element.appendChild(child.element)
-    return child.element
+    return child.element /// XXX: TODO - remove need for this return
 }
 
 // populate_with_list(parent_action, [parent_id], child_action, child_id_list, fallback)
@@ -669,8 +707,8 @@ function _create_generic(keywords) {
         e.className = keywords
     }
     used.push(e)
-    e.addEventListener("mousedown", _on_click_thing)
-    e.thing = {element: e}
+    e.addEventListener("mousedown", _on_click_thing) // XXX: TODO - remove
+    e.thing = {element: e} // XXX: TODO - remove
     return e
 }
 
@@ -689,11 +727,19 @@ function populate_generic(parent_action, arg2, arg3, arg4) {
     n = n ?? 1
     var parent = lookup_thing(parent_action, parent_id)
     parent.ensure_parent()
-    var child = _create_generic(keywords)
-    parent.element.appendChild(child)
-    return child
+    if (false) {
+        // XXX: TODO - use this instead
+        while (n-- > 0)
+            parent.element.appendChild(_create_generic(keywords))
+    } else {
+        // XXX: TODO - don't use this!
+        var child = _create_generic(keywords)
+        parent.element.appendChild(child)
+        return child
+    }
 }
 
+// XXX: TODO - remove
 function populate_generic_to_parent(parent, keywords) {
     var child = _create_generic(keywords)
     child.className = keywords
@@ -705,50 +751,6 @@ function update_position(action, id, x, y) {
     var thing = lookup_thing(action, id)
     thing.element.style.left = Math.round(x) + "px"
     thing.element.style.top = Math.round(y) + "px"
-}
-
-function set_add(set, item) {
-    var a = 0
-    var b = set.length - 1
-    // optimize fast case of appending items in order
-    if (item > set[b]) {
-        set[b + 1] = item
-        return
-    }
-    while (a <= b) {
-        var m = (a + b) >> 1
-        var x = set[m]
-        if (item < x)
-            b = m - 1
-        else if (item > x)
-            a = m + 1
-        else
-            return
-    }
-    array_insert(set, a, item)
-}
-
-function array_insert(array, index, item) {
-    for (var i = array.length; i > index; --i)
-        array[i] = array[i - 1]
-    array[index] = item
-}
-
-function set_delete(set, item) {
-    var a = 0
-    var b = set.length - 1
-    while (a <= b) {
-        var m = (a + b) >> 1
-        var x = set[m]
-        if (item < x)
-            b = m - 1
-        else if (item > x)
-            a = m + 1
-        else {
-            array_delete(set, m)
-            return
-        }
-    }
 }
 
 function update_size(action, id, w, h) {
@@ -806,14 +808,12 @@ function _focus_stack(stack) {
             return true
 
         world.focus = stack
-        if (world.focus.element.children.length <= world.focus.my_stack.threshold)
-            return true
-
         _animate_begin()
         _layout_stacks()
         _animate_end(200)
 
-        return false
+        // click through if expanded without having focus
+        return (stack.element.children.length <= stack.my_stack.threshold)
     }
     return true
 }
@@ -836,19 +836,15 @@ function focus_stack_with_thing(action, id) {
 }
 
 function _layout_stacks() {
-    function _(x) {
-        return (typeof x === "function") ? x(n, stack) : x
-    }
-
-    var cache = []
+    function _(x) { return (typeof x === "function") ? x(n, stack) : x }
     for (var stack of world.stack_list) {
         var padding = stack.element.parentElement.my_padding
 
         var n = stack.element.children.length
-        if (n === 0) {
-            cache.push(null)
+        if (n === 0)
             continue
-        }
+
+        // XXX: new
         var dx = stack.my_stack.dx
         var dy = stack.my_stack.dy
         var wide_stack = stack.element.children.length <= stack.my_stack.small_threshold
@@ -857,10 +853,11 @@ function _layout_stacks() {
             dy = stack.my_stack.small_dy
         }
 
-        var expand = (world.focus === stack || n <= _(stack.my_stack.threshold))
-        var z = (world.focus === stack ? 52 : 0)
-        var major_dx = expand ? _(stack.my_stack.major_dx) : _(dx)
-        var major_dy = expand ? _(stack.my_stack.major_dy) : _(dy)
+	var always_expand = n <= _(stack.my_stack.threshold)
+	var expand = world.focus === stack || always_expand
+        var z = (world.focus === stack ? 51 : null) // XXX: 51 instead of 1
+        var major_dx = expand ? _(stack.my_stack.major_dx) : _(dx) // XXX: dx instead of my_stack.dx
+        var major_dy = expand ? _(stack.my_stack.major_dy) : _(dy) // XXX: dy instead of my_stack.dy
         var minor_dx = expand ? _(stack.my_stack.minor_dx) : _(0)
         var minor_dy = expand ? _(stack.my_stack.minor_dy) : _(0)
         var wrap = expand ? _(stack.my_stack.wrap) : n
@@ -891,61 +888,44 @@ function _layout_stacks() {
         // use stack-local coords for children
         start_x -= stack.element.offsetLeft
         start_y -= stack.element.offsetTop
-        var sub_cache = []
-        var i = 0, k = 0, sh = 0
 
-        // shadow box size
-        var x0, y0, x1, y1
-        x0 = y0 = Infinity
-        x1 = y1 = -Infinity
+        // XXX: custom sort stack elements
+        var children = stack.my_stack.sort_children(Array.from(stack.element.children), world.focus)
 
-        var childs = stack.my_stack.sort_children(stack.element.children, world.focus === stack)
-        for (var child of childs) {
-            var [w, h] = get_child_size(child)
-            var x = start_x + major_dx * i + minor_dx * k + (stack_w - w) * grav_x
-            var y = start_y + major_dy * i + minor_dy * k + (stack_h - h) * grav_y
-
-            x0 = Math.min(x0, x)
-            y0 = Math.min(y0, y)
-            x1 = Math.max(x1, x + w)
-            y1 = Math.max(y1, y + h)
-
-            child.style.left = x + "px"
-            child.style.top = y + "px"
-            child.style.zIndex = z + (wide_stack ? i * 3 : i)
+        var i = 0, k = 0
+        var bounds = [ Infinity, Infinity, -Infinity, -Infinity ]
+        for (var child of children) {
+            var w = child.thing.stack_w ??= child.offsetWidth
+            var h = child.thing.stack_h ??= child.offsetHeight
+            var x = child.thing.stack_x = start_x + major_dx * i + minor_dx * k + (stack_w - w) * grav_x
+            var y = child.thing.stack_y = start_y + major_dy * i + minor_dy * k + (stack_h - h) * grav_y
+            bounds[0] = Math.min(bounds[0], x)
+            bounds[1] = Math.min(bounds[1], y)
+            bounds[2] = Math.max(bounds[2], x + w)
+            bounds[3] = Math.max(bounds[3], y + h)
             if (++i === wrap) {
                 i = 0
-                sh = 0
                 ++k
             }
         }
 
-        var shadow = stack.my_stack.shadow
-        if (shadow) {
-            stack.element.classList.toggle("shadow", world.focus === stack)
-            if (world.focus === stack) {
-                stack.element.style.setProperty("--shadow-x", (x0-shadow) + "px")
-                stack.element.style.setProperty("--shadow-y", (y0-shadow) + "px")
-                stack.element.style.setProperty("--shadow-w", (2*shadow+(x1-x0)) + "px")
-                stack.element.style.setProperty("--shadow-h", (2*shadow+(y1-y0)) + "px")
-            }
+        for (var child of children) {
+            child.style.left = child.thing.stack_x + "px"
+            child.style.top = child.thing.stack_y + "px"
+            child.style.zIndex = z++ // XXX: increasing z because of sort order
         }
 
-        cache.push(sub_cache)
+        var shadow = stack.my_stack.shadow
+        if (shadow) {
+            stack.element.classList.toggle("shadow", world.focus === stack && !always_expand)
+            if (world.focus === stack) {
+                stack.element.style.setProperty("--shadow-x", (bounds[0]-shadow) + "px")
+                stack.element.style.setProperty("--shadow-y", (bounds[1]-shadow) + "px")
+                stack.element.style.setProperty("--shadow-w", (2*shadow+(bounds[2]-bounds[0])) + "px")
+                stack.element.style.setProperty("--shadow-h", (2*shadow+(bounds[3]-bounds[1])) + "px")
+            }
+        }
     }
-}
-
-function get_child_size(child) {
-    var size = 37
-    if (child.classList.contains("big")) {
-        size = 47
-    }
-    if (child.classList.contains("action")) {
-        size += 4
-    }else if (child.classList.contains("activated")) {
-        size += 4
-    }
-    return [size, size]
 }
 
 function _reset_stacks() {
@@ -1024,18 +1004,18 @@ function _animate_position(thing, inv_scale, max_duration) {
             if (thing.is_rotate) {
                 e.animate(
                     [
-                        {transform: `translate(${dx}px, ${dy}px) rotate(${thing.my_old_angle}deg)`,},
-                        {transform: `translate(0, 0) rotate(${thing.my_new_angle}deg)`,},
+                        { transform: `translate(${dx}px, ${dy}px) rotate(${thing.my_old_angle}deg)`, },
+                        { transform: `translate(0, 0) rotate(${thing.my_new_angle}deg)`, },
                     ],
-                    {duration, easing: "ease"}
+                    { duration, easing: "ease" }
                 )
             } else {
                 e.animate(
                     [
-                        {transform: `translate(${dx}px, ${dy}px)`,},
-                        {transform: `translate(0, 0)`,},
+                        { transform: `translate(${dx}px, ${dy}px)`, },
+                        { transform: `translate(0, 0)`, },
                     ],
-                    {duration, easing: "ease"}
+                    { duration, easing: "ease" }
                 )
             }
         }
@@ -1046,8 +1026,13 @@ function _animate_position(thing, inv_scale, max_duration) {
 
 function begin_update() {
     G = V = view
-    L = {}
     R = roles[player]?.index ?? -1
+
+    L = {} // XXX: added
+
+    // reset status text nesting tracker
+    world.status_nest.length = 0
+    world.status.textContent = ""
 
     // reset unused element cache
     for (var key in world.generic_used) {
@@ -1065,6 +1050,10 @@ function begin_update() {
         thing.element.replaceChildren()
     for (var thing of world.keyword_list)
         thing.my_dynamic_keywords = []
+    for (var thing of world.rotate_list) {
+        thing.my_new_angle = 0
+        thing.element.style.transform = "rotate(0deg)"
+    }
     for (var thing of world.text_list)
         thing.my_text = thing.my_text_html = null
 
@@ -1082,7 +1071,7 @@ function end_update() {
         e.hidden = (e.querySelector(".panel-body").children.length === 0)
 
     for (thing of world.keyword_list)
-        thing.element.setAttribute("class", [...thing.my_keywords, ...thing.my_dynamic_keywords].join(" "))
+        thing.element.setAttribute("class", [ ...thing.my_keywords, ...thing.my_dynamic_keywords ].join(" "))
 
     for (thing of world.text_list) {
         if (thing.my_text_html !== null)
@@ -1119,6 +1108,7 @@ function end_update() {
                 thing.body.innerHTML = text
         }
     }
+
     _layout_stacks()
 
     _animate_end()
@@ -1129,8 +1119,9 @@ function end_update() {
 /* FIXME: workaround WebKit bug with :has(:empty) selectors */
 document.querySelectorAll(".panel.autohide").forEach(e => e.hidden = true)
 
-function create_panel(parent, action, id, text) {
+function create_panel(parent, html_id, action, id, text) {
     var panel = document.createElement("div")
+    panel.id = html_id
     var head = document.createElement("div")
     var body = document.createElement("div")
     panel.className = "panel"
@@ -1163,7 +1154,6 @@ function update_panel_text(action, id, text) {
     var thing = lookup_thing(action, id)
     assert(thing.my_panel, "not a panel")
     thing.my_panel_head.textContent = text
-
 }
 
 function update_panel_text_html(action, id, text) {
@@ -1231,7 +1221,7 @@ function update_overlay_show(action, id, show = true) {
 }
 
 // position overlay to be aligned with gravity on x/y but still fit parent board within margins
-function update_overlay_position(action, id, x, y, grav_x = 0.5, grav_y = 0.5, top = 12, right = 12, bottom = top, left = right) {
+function update_overlay_position(action, id, x, y, grav_x=0.5, grav_y=0.5, top=12, right=12, bottom=top, left=right) {
     var overlay = lookup_overlay(action, id)
     if (overlay.my_last_x !== x || overlay.my_last_y !== y) {
         // remember so we don't need to redo every update
@@ -1292,9 +1282,7 @@ function create_window(html_id, title, auto_update, should_resize) {
     var wind_close = document.createElement("div")
     wind_close.className = "window-close"
     wind_close.textContent = "\u2716"
-    wind_close.onclick = function () {
-        element.hidden = true
-    }
+    wind_close.onclick = function () { element.hidden = true }
     element.append(wind_close)
 
     var wind_body = document.createElement("div")
@@ -1326,11 +1314,14 @@ document.body.addEventListener("keydown", function (e) {
                 wind.element.hidden = true
             }
         }
-    } else if (world.focused && (e.key === "Control")) {
+    }
+    // XXX: added
+    else if (world.focused && (e.key === "Control")) {
         world.focused[0](world.focused[1], true)
     }
 })
 
+// XXX: added
 document.body.addEventListener("keyup", function (e) {
     if ("Control") {
         on_blur_tip()
@@ -1410,11 +1401,25 @@ function escape_html(text) {
 
 function escape_typography(text) {
     text = String(text)
-    // TODO: smart quotes
+
+    // smart quotes
+    text = text.replace(/^'/, "\u2018")
+    text = text.replace(/^"/, "\u201c")
+    text = text.replace(/([\n (\[{<])"/g, "$1\u201c")
+    text = text.replace(/([\n (\[{<])'/g, "$1\u2018")
+    text = text.replace(/'/g, "\u2019")
+    text = text.replace(/"/g, "\u201d")
+
+    // dashes
     text = text.replace(/---/g, "\u2014")
     text = text.replace(/--/g, "\u2013")
+
+    // arrows
     text = text.replace(/->/g, "\u2192")
+
+    // mathematical minus
     text = text.replace(/-( ?[\d])/g, "\u2212$1")
+
     return text
 }
 
@@ -1467,39 +1472,39 @@ function _tip_click_light(action, id) {
 }
 
 function escape_tip_light(text, re, log_className, action, names) {
-    return text.replace(re, (m, x) => `<span
-		class="${log_className}"
-		onmouseenter="_tip_focus_light('${action}',${x})"
-		onmouseleave="_tip_blur_light('${action}',${x})"
-		onmousedown="_tip_click_light('${action}',${x})"
-		>${escape_typography(names[x])}</span>`
+    return text.replace(re, (m,x) => `<span
+        class="${log_className}"
+        onmouseenter="_tip_focus_light('${action}',${x})"
+        onmouseleave="_tip_blur_light('${action}',${x})"
+        onmousedown="_tip_click_light('${action}',${x})"
+        >${escape_typography(names[x])}</span>`
     )
 }
 
 function escape_tip_class(text, re, log_className, tip_classNames, names) {
-    return text.replace(re, (m, x) => `<span
-		class="${log_className}"
-		onmouseenter="_tip_focus_class('${tip_classNames[x]}')"
-		onmouseleave="_tip_blur_class()"
-		>${escape_typography(names[x])}</span>`
+    return text.replace(re, (m,x) => `<span
+        class="${log_className}"
+        onmouseenter="_tip_focus_class('${tip_classNames[x]}')"
+        onmouseleave="_tip_blur_class()"
+        >${escape_typography(names[x])}</span>`
     )
 }
 
 function escape_tip_class_sub(text, re, log_className, tip_className, names) {
-    return text.replace(re, (m, x) => `<span
-		class="${log_className}"
-		onmouseenter="_tip_focus_class('${tip_className.replace("$1", x)}')"
-		onmouseleave="_tip_blur_class()"
-		>${escape_typography(names[x])}</span>`
+    return text.replace(re, (m,x) => `<span
+        class="${log_className}"
+        onmouseenter="_tip_focus_class('${tip_className.replace("$1",x)}')"
+        onmouseleave="_tip_blur_class()"
+        >${escape_typography(names[x])}</span>`
     )
 }
 
 function escape_tip_clone(text, re, log_className, action, names) {
-    return text.replace(re, (m, x) => `<span
-		class="${log_className}"
-		onmouseenter="_tip_focus_clone('${action}',${x})"
-		onmouseleave="_tip_blur_clone()"
-		>${escape_typography(names[x])}</span>`
+    return text.replace(re, (m,x) => `<span
+        class="${log_className}"
+        onmouseenter="_tip_focus_clone('${action}',${x})"
+        onmouseleave="_tip_blur_clone()"
+        >${escape_typography(names[x])}</span>`
     )
 }
 
@@ -1518,7 +1523,7 @@ function update_log_boxes(ix) {
 }
 
 function open_log_box(ix, keyword) {
-    world.log_boxes.push({open: ix, close: -1, keyword})
+    world.log_boxes.push({ open: ix, close: -1, keyword })
 }
 
 function close_log_box(ix) {
@@ -1600,93 +1605,205 @@ function init_preference_radio(name, initial, onchange) {
 
 /* LIBRARY */
 
-function set_has(set, item) {
-    if (set === item)
-        return true
-    if (!set)
-        return false
-    var a = 0
-    var b = set.length - 1
-    while (a <= b) {
-        var m = (a + b) >> 1
-        var x = set[m]
-        if (item < x)
-            b = m - 1
-        else if (item > x)
-            a = m + 1
-        else
-            return true
-    }
-    return false
+// Array remove and insert (faster than splice)
+
+function array_delete(array, index) {
+	var i, n = array.length
+	for (i = index + 1; i < n; ++i)
+		array[i - 1] = array[i]
+	array.length = n - 1
 }
 
-function map_get(map, key, missing) {
-    if (!map)
-        return missing
-    var a = 0
-    var b = (map.length >> 1) - 1
-    while (a <= b) {
-        var m = (a + b) >> 1
-        var x = map[m << 1]
-        if (key < x)
-            b = m - 1
-        else if (key > x)
-            a = m + 1
-        else
-            return map[(m << 1) + 1]
-    }
-    return missing
+function array_delete_item(array, item) {
+	var i, n = array.length
+	for (i = 0; i < n; ++i)
+		if (array[i] === item)
+			return array_delete(array, i)
 }
 
-function map_for_each(map, f) {
-    for (var i = 0; i < map.length; i += 2)
-        f(map[i], map[i + 1])
+function array_insert(array, index, item) {
+	for (var i = array.length; i > index; --i)
+		array[i] = array[i - 1]
+	array[index] = item
 }
 
-function map_set(map, key, value) {
-    var a = 0
-    var b = (map.length >> 1) - 1
-    while (a <= b) {
-        var m = (a + b) >> 1
-        var x = map[m << 1]
-        if (key < x)
-            b = m - 1
-        else if (key > x)
-            a = m + 1
-        else {
-            map[(m << 1) + 1] = value
-            return
-        }
-    }
-    array_insert_pair(map, a << 1, key, value)
-}
-
-
-function set_toggle(set, item) {
-    var a = 0
-    var b = set.length - 1
-    while (a <= b) {
-        var m = (a + b) >> 1
-        var x = set[m]
-        if (item < x)
-            b = m - 1
-        else if (item > x)
-            a = m + 1
-        else {
-            array_delete(set, m)
-            return
-        }
-    }
-    array_insert(set, a, item)
+function array_delete_pair(array, index) {
+	var i, n = array.length
+	for (i = index + 2; i < n; ++i)
+		array[i - 2] = array[i]
+	array.length = n - 2
 }
 
 function array_insert_pair(array, index, key, value) {
-    for (var i = array.length; i > index; i -= 2) {
-        array[i] = array[i - 2]
-        array[i + 1] = array[i - 1]
-    }
-    array[index] = key
-    array[index + 1] = value
+	for (var i = array.length; i > index; i -= 2) {
+		array[i] = array[i-2]
+		array[i+1] = array[i-1]
+	}
+	array[index] = key
+	array[index+1] = value
+}
+
+// Set as plain sorted array
+
+function set_clear(set) {
+	set.length = 0
+}
+
+function set_has(set, item) {
+	var a = 0
+	var b = set.length - 1
+	while (a <= b) {
+		var m = (a + b) >> 1
+		var x = set[m]
+		if (item < x)
+			b = m - 1
+		else if (item > x)
+			a = m + 1
+		else
+			return true
+	}
+	return false
+}
+
+function set_add(set, item) {
+	var a = 0
+	var b = set.length - 1
+	// optimize fast case of appending items in order
+	if (item > set[b]) {
+		set[b+1] = item
+		return
+	}
+	while (a <= b) {
+		var m = (a + b) >> 1
+		var x = set[m]
+		if (item < x)
+			b = m - 1
+		else if (item > x)
+			a = m + 1
+		else
+			return
+	}
+	array_insert(set, a, item)
+}
+
+function set_delete(set, item) {
+	var a = 0
+	var b = set.length - 1
+	while (a <= b) {
+		var m = (a + b) >> 1
+		var x = set[m]
+		if (item < x)
+			b = m - 1
+		else if (item > x)
+			a = m + 1
+		else {
+			array_delete(set, m)
+			return
+		}
+	}
+}
+
+function set_toggle(set, item) {
+	var a = 0
+	var b = set.length - 1
+	while (a <= b) {
+		var m = (a + b) >> 1
+		var x = set[m]
+		if (item < x)
+			b = m - 1
+		else if (item > x)
+			a = m + 1
+		else {
+			array_delete(set, m)
+			return
+		}
+	}
+	array_insert(set, a, item)
+}
+
+// Map as plain sorted array of key/value pairs
+
+function map_clear(map) {
+	map.length = 0
+}
+
+function map_has(map, key) {
+	var a = 0
+	var b = (map.length >> 1) - 1
+	while (a <= b) {
+		var m = (a + b) >> 1
+		var x = map[m<<1]
+		if (key < x)
+			b = m - 1
+		else if (key > x)
+			a = m + 1
+		else
+			return true
+	}
+	return false
+}
+
+function map_get(map, key, missing) {
+	var a = 0
+	var b = (map.length >> 1) - 1
+	while (a <= b) {
+		var m = (a + b) >> 1
+		var x = map[m<<1]
+		if (key < x)
+			b = m - 1
+		else if (key > x)
+			a = m + 1
+		else
+			return map[(m<<1)+1]
+	}
+	return missing
+}
+
+function map_set(map, key, value) {
+	var a = 0
+	var b = (map.length >> 1) - 1
+	while (a <= b) {
+		var m = (a + b) >> 1
+		var x = map[m<<1]
+		if (key < x)
+			b = m - 1
+		else if (key > x)
+			a = m + 1
+		else {
+			map[(m<<1)+1] = value
+			return
+		}
+	}
+	array_insert_pair(map, a<<1, key, value)
+}
+
+function map_delete(map, key) {
+	var a = 0
+	var b = (map.length >> 1) - 1
+	while (a <= b) {
+		var m = (a + b) >> 1
+		var x = map[m<<1]
+		if (key < x)
+			b = m - 1
+		else if (key > x)
+			a = m + 1
+		else {
+			array_delete_pair(map, m<<1)
+			return
+		}
+	}
+}
+
+function map_get_set(map, key) {
+	var set = map_get(map, key, null)
+	if (set === null)
+		map_set(map, key, (set = []))
+	return set
+}
+
+function map_for_each(map, f) {
+	for (var i = 0; i < map.length; i += 2)
+		f(map[i], map[i+1])
 }
 
 function q(obj) {
