@@ -11032,23 +11032,6 @@ var send_action_with_oos = function (a, b, valid = false, extra) {
     return original_send_action(a, b, payload)
 }
 
-function validate_action(verb, noun) {
-    if (params.mode === "replay" || params.mode === "debug")
-        return false
-    // Reset action list here so we don't send more than one action per server prompt!
-    if (noun !== undefined) {
-        var realnoun = Array.isArray(noun) ? noun[0] : noun
-        if (view.actions && view.actions[verb] && view.actions[verb].includes(realnoun)) {
-            return true
-        }
-    } else {
-        if (view.actions && view.actions[verb]) {
-            return true
-        }
-    }
-    return false
-}
-
 function try_to_avoid_zoi(hex) {
     if (G.offensive.zoi_intelligence_modifier || G.offensive.stage !== ATTACK_STAGE) {
         return 0
