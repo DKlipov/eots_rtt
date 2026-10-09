@@ -11023,7 +11023,6 @@ var send_action_with_oos = function (a, b, valid = false, extra) {
     }
     if (extra) {
         payload.push(...extra)
-        type += extra.length << 8
     }
     payload[0] = type
     if (payload.length === 1) {

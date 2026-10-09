@@ -183,26 +183,30 @@ exports.action = function (state, role, action, argument) {
 
     var this_state = P[L.P]
     if (this_state && typeof this_state[action] === "function") {
-        var extra = null
+        var extra = undefined
+
         if (Array.isArray(argument)) {
-            var type = argument[1]
-            var d = 2
-            if (CLIENT_SIDE_SUPPLY && (type & 1)) {
-                G.burma_road = argument[d]
-                d++
-            }
-            var oos_i = (type % (1 << 8)) >> 1
-            if (CLIENT_SIDE_SUPPLY && oos_i > 0) {
-                G.oos = argument.slice(d, oos_i + d)
-                d += oos_i
-            }
-            var ex_i = type >> 8
-            if (ex_i > 0) {
-                extra = argument.slice(d, ex_i + d)
-                d += ex_i
+            if (CLIENT_SIDE_SUPPLY) {
+                var type = argument[1]
+                var offset = 2
+                if (type & 1) {
+                    G.burma_road = argument[offset]
+                    offset += 1
+                }
+                var oos_len = (type >> 1)
+                if (oos_len > 0) {
+                    G.oos = argument.slice(offset, offset + oos_len)
+                    offset += oos_len
+                }
+                if (argument.length > offset)
+                    extra = argument.slice(offset)
+            } else {
+                if (argument.length > 0)
+                    extra = argument.slice(1)
             }
             argument = argument[0]
         }
+
         this_state[action](argument, extra)
         _run()
     } else if (action === "undo" && G.undo.length > 0) {
