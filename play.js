@@ -10991,7 +10991,7 @@ function get_hex_path(from, to) {
 
 }
 
-function check_unit_supply() {
+function menu_check_unit_supply() {
     LOCAL_STATUS = "check_unit_supply"
     LOCAL_STATE = {}
     P.check_unit_supply._begin()
@@ -10999,7 +10999,7 @@ function check_unit_supply() {
     on_update()
 }
 
-function check_distance() {
+function menu_check_distance() {
     LOCAL_STATUS = "check_distance"
     LOCAL_STATE = {}
     P.check_distance._begin()
