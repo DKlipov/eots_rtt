@@ -527,65 +527,6 @@ function define_layout(action, id, rect, keywords, styles) {
         .layout(rect)
 }
 
-function define_track(action, a, b, layout, type_func, orientation = "auto", gap = 0, ...args) {
-    const n = 1 + Math.abs(b - a)
-    const [x, y, w, h] = layout
-    if (orientation === "auto") {
-        if (h > w) {
-            orientation = "v"
-        } else {
-            orientation = "h"
-        }
-    }
-    var total_length, layout_func;
-    switch (orientation) {
-        case "v":
-            total_length = h
-            layout_func = (cell_id) => [x, y + (cell_length + gap) * cell_id, w, cell_length]
-            break;
-        case "h":
-            total_length = w
-            layout_func = (cell_id) => [x + (cell_length + gap) * cell_id, y, cell_length, h]
-            break;
-        default:
-            throw new Error(`Invalid parameter: ${orientation} valid parameter: "auto", "v", "h"`)
-    }
-    const cell_length = (total_length - gap * (n - 1)) / n
-    var id_arr;
-    if (a < b) {
-        id_arr = Array.from({length: n}, (x, i) => i + a)
-    } else {
-        id_arr = Array.from({length: n}, (x, i) => a - i)
-    }
-    for (var i = 0; i < n; ++i) {
-        type_func(action, id_arr[i], layout_func(i), ...args)
-    }
-}
-
-function define_layout_track_h(action, a, b, layout, gap = 0, keywords, styles) {
-    define_track(action, a, b, layout, define_layout, "h", gap, keywords, styles)
-}
-
-function define_layout_track_v(action, a, b, layout, gap = 0, keywords, styles) {
-    define_track(action, a, b, layout, define_layout, "v", gap, keywords, styles)
-}
-
-function define_layout_grid(action, order, cols, rows, layout, gapx, gapy, keywords, styles) {
-    var [x, y, w, h] = layout
-    var cell_w = (w - gapx * (cols - 1)) / cols
-    var cell_h = (h - gapy * (rows - 1)) / rows
-    var r, c, i
-    i = 0
-    for (r = 0; r < rows; ++r) {
-        x = layout[0]
-        for (c = 0; c < cols; ++c) {
-            define_layout(action, order[i++], [x, y, cell_w, cell_h], keywords, styles)
-            x += cell_w + gapx
-        }
-        y += cell_h + gapy
-    }
-}
-
 function define_button(action, id, text) {
     var element = document.createElement("button")
     element.innerHTML = text
@@ -643,6 +584,113 @@ function define_marker_list(action, a, b, keywords) {
 function define_card_list(action, a, b, keywords_with_prefix) {
     for (var i = a; i <= b; ++i)
         define_card(action, i, keywords_with_prefix + i)
+}
+
+/* TRACKS & GRIDS */
+
+function _define_track_auto(callback, action, a, b, layout, gap=0, args) {
+    if (layout[2] > layout[3])
+        _define_track_h(callback, action, a, b, layout, gap, args)
+    else
+        _define_track_v(callback, action, a, b, layout, gap, args)
+}
+
+function _define_track_h(callback, action, a, b, layout, gap=0, args) {
+    var [ x, y, w, h ] = layout
+    var n = 1 + Math.abs(b - a)
+    var cell_w = (w - gap * (n-1)) / n
+    if (a < b) {
+        for (var id = a; id <= b; ++id) {
+            callback(action, id, [ x, y, cell_w, h ], ...args)
+            x += cell_w + gap
+        }
+    } else {
+        for (var id = a; id >= b; --id) {
+            callback(action, id, [ x, y, cell_w, h ], ...args)
+            x += cell_w + gap
+        }
+    }
+}
+
+function _define_track_v(callback, action, a, b, layout, gap=0, args) {
+    var [ x, y, w, h ] = layout
+    var n = 1 + Math.abs(b - a)
+    var cell_h = (h - gap * (n-1)) / n
+    if (a < b) {
+        for (var id = a; id <= b; ++id) {
+            callback(action, id, [ x, y, w, cell_h ], ...args)
+            y += cell_h + gap
+        }
+    } else {
+        for (var id = a; id >= b; --id) {
+            callback(action, id, [ x, y, w, cell_h ], ...args)
+            y += cell_h + gap
+        }
+    }
+}
+
+function _define_grid(callback, action, order, cols, rows, layout, gapx, gapy, args) {
+    var [ x, y, w, h ] = layout
+    var cell_w = (w - gapx * (cols-1)) / cols
+    var cell_h = (h - gapy * (rows-1)) / rows
+    var r, c, i
+    i = 0
+    for (r = 0; r < rows; ++r) {
+        x = layout[0]
+        for (c = 0; c < cols; ++c) {
+            callback(action, order[i++], [ x, y, cell_w, cell_h ], ...args)
+            x += cell_w + gapx
+        }
+        y += cell_h + gapy
+    }
+}
+
+function define_layout_track_auto(action, a, b, layout, gap=0, keywords, styles) {
+    _define_track_auto(define_layout, action, a, b, layout, gap, [ keywords, styles ])
+}
+
+function define_layout_track_h(action, a, b, layout, gap=0, keywords, styles) {
+    _define_track_h(define_layout, action, a, b, layout, gap, [ keywords, styles ])
+}
+
+function define_layout_track_v(action, a, b, layout, gap=0, keywords, styles) {
+    _define_track_v(define_layout, action, a, b, layout, gap, [ keywords, styles ])
+}
+
+function define_layout_grid(action, order, cols, rows, layout, gapx, gapy, keywords, styles) {
+    _define_grid(define_layout, action, order, cols, rows, layout, gapx, gapy, [ keywords, styles ])
+}
+
+function define_space_track_auto(action, a, b, layout, gap=0, keywords) {
+    _define_track_auto(define_space, action, a, b, layout, gap, [ keywords ])
+}
+
+function define_space_track_h(action, a, b, layout, gap=0, keywords) {
+    _define_track_h(define_space, action, a, b, layout, gap, [ keywords ])
+}
+
+function define_space_track_v(action, a, b, layout, gap=0, keywords) {
+    _define_track_v(define_space, action, a, b, layout, gap, [ keywords ])
+}
+
+function define_space_grid(action, order, cols, rows, layout, gapx, gapy, keywords) {
+    _define_grid(define_space, action, order, cols, rows, layout, gapx, gapy, [ keywords ])
+}
+
+function define_stack_track_auto(action, a, b, layout, gap=0, ...args) {
+    _define_track_auto(define_stack, action, a, b, layout, gap, args)
+}
+
+function define_stack_track_h(action, a, b, layout, gap=0, ...args) {
+    _define_track_h(define_stack, action, a, b, layout, gap, args)
+}
+
+function define_stack_track_v(action, a, b, layout, gap=0, ...args) {
+    _define_track_v(define_stack, action, a, b, layout, gap, args)
+}
+
+function define_stack_grid(action, order, cols, rows, layout, gapx, gapy, ...args) {
+    _define_grid(define_stack, action, order, cols, rows, layout, gapx, gapy, args)
 }
 
 /* UPDATE THINGS */

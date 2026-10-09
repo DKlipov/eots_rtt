@@ -10150,7 +10150,6 @@ function clear_paths() {
     CANVAS_CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
 }
 
-
 function sort_unit_stack(a, focus) {
     var map = []
     var index = 0;
@@ -10645,7 +10644,7 @@ function on_init(scenario, game_options, static_view) {
             define_board("#map", 1275, 825, [12, 12, 12, 12])
             map_info = SOUTH_PAC_BOARD_INFO
 
-            define_track("track", 0, 1, map_layout.track_strat_record_0_1, define_stack, "h", 0,
+            define_stack_track_h("track", 0, 1, map_layout.track_strat_record_0_1, 0,
                 ...VERTICAL_STACK_PARAMS
             )
             define_stack("track", 2, map_layout.track_strat_record_2,
@@ -10741,16 +10740,12 @@ function on_init(scenario, game_options, static_view) {
 
     define_layout("status", JP_AGREEMENT, map_layout.box_isr_jp)
     define_layout("status", AP_AGREEMENT, map_layout.box_isr_us)
-    define_track("pw", map_info.pw_a, map_info.pw_b, map_layout.track_political_will, define_layout, "auto", 0)
-    define_track("wie", map_info.wie_a, map_info.wie_b, map_layout.track_wie, define_layout, "auto", 0)
+    define_layout_track_auto("pw", map_info.pw_a, map_info.pw_b, map_layout.track_political_will, 0)
+    define_layout_track_auto("wie", map_info.wie_a, map_info.wie_b, map_layout.track_wie, 0)
 
-    define_track("turn", map_info.turn_a, map_info.turn_b, map_layout.track_game_turn, define_stack, "auto", 0,
-        ...map_info.TURN_STACK_PARAMS
-    )
-    define_track("turn_box", map_info.turn_a + TURN_BOX, map_info.turn_b + TURN_BOX, map_layout.track_game_turn, define_space, "auto", 0,)
-    define_track("track", map_info.track_a, map_info.track_b, map_layout.track_strat_record, define_stack, "auto", 0,
-        ...map_info.TRACK_STACK_PARAMS
-    )
+    define_stack_track_auto("turn", map_info.turn_a, map_info.turn_b, map_layout.track_game_turn, 0, ...map_info.TURN_STACK_PARAMS)
+    define_space_track_auto("turn_box", map_info.turn_a + TURN_BOX, map_info.turn_b + TURN_BOX, map_layout.track_game_turn, 0)
+    define_stack_track_auto("track", map_info.track_a, map_info.track_b, map_layout.track_strat_record, 0, ...map_info.TRACK_STACK_PARAMS)
 
     if (map_layout.track_india_status !== undefined) {
         define_layout_track_h("india", 0, 4, map_layout.track_india_status, 0)
@@ -10822,6 +10817,7 @@ function init_canvas(scenario) {
 
     CANVAS_CTX.scale(scale, scale)
 }
+
 /*}}} import client/init.js*/
 /*{{{ import client/actions.js*/
 var LOCAL_STATUS = 0
