@@ -215,14 +215,14 @@ function escaped_list(match, p1) {
 
 function on_focus_list(parent) {
     for (var el of parent.children[1].children) {
-        el.onmouseenter();
+        el.onmouseenter()
     }
     on_blur_tip() //prevent unit tooltip from showing
 }
 
 function on_blur_list(parent) {
     for (var el of parent.children[1].children) {
-        el.onmouseleave();
+        el.onmouseleave()
     }
 }
 

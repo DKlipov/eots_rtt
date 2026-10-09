@@ -1,10 +1,10 @@
 function clear_paths() {
-    CANVAS_CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
+    CANVAS_CTX.clearRect(0, 0, CANVAS.width, CANVAS.height)
 }
 
 function sort_unit_stack(a, focus) {
     var map = []
-    var index = 0;
+    var index = 0
     for (var e of a) {
         // if (e.classList.contains("top") && (!e.thing || e.thing.my_action !== "unit") && !focus) {
         // continue
@@ -394,9 +394,9 @@ const BURMA_BOARD_INFO = {
 
 
         if (x == 15 && y > 9) {
-            return false;
+            return false
         } else if (x == 16 && y > 9) {
-            return false;
+            return false
         }
         return hex_in_map(x, y) &&
             i != 92 // Remove unplayable hex in india not catched by the standard data check (1305)
@@ -435,9 +435,9 @@ const SOUTH_PAC_BOARD_INFO = {
         if (i === 1188) {
             return false
         } else if (x == 24 && y == 16) {
-            return true;
+            return true
         } else if ((x % 2 == 0) && y == 16) {
-            return false;
+            return false
         }
         return hex_in_map(x, y)
     }
@@ -446,9 +446,9 @@ const SOUTH_PAC_BOARD_INFO = {
 
 let ALL_BOARD_HEXES = []
 
-let SID = FULL_CAMPAIGN_SCENARIO;
-let map_layout = layout.mainmap;
-let map_info = MAIN_BOARD_INFO;
+let SID = FULL_CAMPAIGN_SCENARIO
+let map_layout = layout.mainmap
+let map_info = MAIN_BOARD_INFO
 
 
 var SP_BORDER = []
@@ -491,8 +491,8 @@ function on_init(scenario, game_options, static_view) {
         case "South Pacific": {
             nations.AUSTRALIAN_MANDATES.keys = nations.AUSTRALIAN_MANDATES.ports
             SID = SOUTH_PACIFIC_SCENARIO
-            map_layout = layout.southpac;
-            map_elem.classList.add("southpac");
+            map_layout = layout.southpac
+            map_elem.classList.add("southpac")
             define_board("#map", 1275, 825, [12, 12, 12, 12])
             map_info = SOUTH_PAC_BOARD_INFO
 
@@ -506,12 +506,12 @@ function on_init(scenario, game_options, static_view) {
             define_s_loc(1400, center_rect(map_layout.h_5808, 45, 45))
             define_space("action_hex", 1400, center_rect(map_layout.h_5808, 68, 68))
             set_map_size(1275, 825)
-            break;
+            break
         }
         case  "Burma: The Forgotten War, 1943-1944": {
             SID = BURMA_SCENARIO
-            map_layout = layout.burma;
-            map_elem.classList.add("burma");
+            map_layout = layout.burma
+            map_elem.classList.add("burma")
             define_board("#map", 1275, 825, [12, 12, 12, 12])
             map_info = BURMA_BOARD_INFO
 
@@ -522,12 +522,12 @@ function on_init(scenario, game_options, static_view) {
             define_thing("road", events.LEDO_ROAD.id).layout([600, 300, 60, 60], "road_ledo hide marker control")
             define_thing("road", events.KWAI_RIVER_BRIDGE.id).layout([528, 501, 50, 95], "road_kwai hide marker control")
             set_map_size(1275, 825)
-            break;
+            break
         }
         default: {
             SID = FULL_CAMPAIGN_SCENARIO
-            map_layout = layout.mainmap;
-            map_elem.classList.add("main");
+            map_layout = layout.mainmap
+            map_elem.classList.add("main")
             define_board("#map", 2550, 1650, [12, 12, 12, 12])
             map_info = MAIN_BOARD_INFO
             define_thing("road", events.JARHAT_ROAD.id).layout([578, 286, 60, 60], "road_jarhat hide marker control")
@@ -645,13 +645,13 @@ function on_init(scenario, game_options, static_view) {
 }
 
 function init_canvas(scenario) {
-    let sizeX, sizeY;
+    let sizeX, sizeY
     switch (scenario) {
         case "South Pacific":
         case  "Burma: The Forgotten War, 1943-1944": {
             sizeX = 1275
             sizeY = 825
-            break;
+            break
         }
             ;
         default: {

@@ -3059,7 +3059,7 @@ function find_piece(id) {
             return i
         }
     }
-    throw new Error("Missed unit " + id);
+    throw new Error("Missed unit " + id)
 }
 
 function ap_air(id) {

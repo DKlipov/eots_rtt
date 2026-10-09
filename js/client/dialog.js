@@ -83,7 +83,7 @@ function dragElement(e) {
 
         // set the element's new position
 
-        the_e.style.position = "absolute";
+        the_e.style.position = "absolute"
         the_e.style.top = (the_e.offsetTop - pos2) + "px"
         the_e.style.left = (the_e.offsetLeft - pos1) + "px"
     }
@@ -142,7 +142,7 @@ function pw_dialog(id, response) {
     var response = pw_query()
     show_dialog(id, (body) => {
         var dl = document.createElement("dl")
-        var header = document.createElement("dt");
+        var header = document.createElement("dt")
         header.appendChild(create_icon(...counters.pw.split(" ")))
         header.innerHTML += ` Current Political Will: ${G.political_will}.`
         dl.appendChild(header)

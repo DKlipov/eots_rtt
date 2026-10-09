@@ -3261,7 +3261,7 @@ function find_piece(id) {
             return i
         }
     }
-    throw new Error("Missed unit " + id);
+    throw new Error("Missed unit " + id)
 }
 
 function ap_air(id) {
@@ -5113,7 +5113,7 @@ function find_card(faction, num) {
             return i
         }
     }
-    throw new Error(`Missed card ${faction} ${num}`);
+    throw new Error(`Missed card ${faction} ${num}`)
 }
 
 function for_each_card(apply) {
@@ -6551,7 +6551,7 @@ function apply_south_pacific(hex) {
     if (sp_map_item && sp_map_item.edges) {
         hex.edges_int = 0
         for (let j = 0; j < 6; j++) {
-            var edge = sp_map_item.edges[j];
+            var edge = sp_map_item.edges[j]
             if (edge & GROUND) {
                 edge |= UNPLAYABLE_LAND
             }
@@ -7683,7 +7683,7 @@ function check_hump() {
 function check_burma_road() {
     G.burma_road = 2
     if (G.sid === SOUTH_PACIFIC_SCENARIO) {
-        return;
+        return
     }
     const faction = AP
     const location = KUNMING
@@ -7718,7 +7718,7 @@ function check_burma_road() {
     }
     if (!rangoon_achived || has_non_n_zoi(RANGOON, JP) || is_space_controlled(RANGOON, JP)) {
         check_hump()
-        return;
+        return
     }
     L.supply.queue.push(RANGOON)
     L.supply.retracing.push(0)
@@ -8004,7 +8004,7 @@ function unit_or_airfield(location, faction) {
 
 function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
     if (!hq_list.length) {
-        return;
+        return
     }
     var i = 0
     const faction = pieces[hq_list[0]].faction
@@ -8077,7 +8077,7 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
             continue
         }
         if (non_neutral_zoi_s || distance < 0) {
-            continue;
+            continue
         }
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
@@ -8257,7 +8257,7 @@ function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
 function get_ground_mp_cost(from, to, faction) {
     var direction = get_direction(from, to)
     if (!(get_map_data(from).edges_int & GROUND << 5 * direction)) {
-        return 100;
+        return 100
     }
     if ((get_map_data(from).edges_int & ROAD << (5 * direction))
         && !(G.supply_cache[to] & TRANSPORT_ROUTE_DISABLED)
@@ -8265,7 +8265,7 @@ function get_ground_mp_cost(from, to, faction) {
         && ((G.supply_cache[to] & (JP_UNITS << faction)) || !(G.supply_cache[to] & (JP_UNITS << 1 - faction)))
         && ((G.supply_cache[from] & (JP_UNITS << faction)) || !(G.supply_cache[from] & (JP_UNITS << 1 - faction)))
     ) {
-        return 1;
+        return 1
     } else {
         return ((get_map_data(to).terrain >> 1) + 1) * 2
     }
@@ -8274,13 +8274,13 @@ function get_ground_mp_cost(from, to, faction) {
 function get_ground_move_cost(from, to, faction) {
     var direction = get_direction(from, to)
     if (!(get_map_data(from).edges_int & GROUND << 5 * direction)) {
-        return 100;
+        return 100
     }
     if ((get_map_data(from).edges_int & ROAD << (5 * direction))
         && !(G.supply_cache[to] & (TRANSPORT_ROUTE_DISABLED | (JP_GA_UNITS << 1 - faction)))
         && !(G.supply_cache[from] & TRANSPORT_ROUTE_DISABLED)
     ) {
-        return 1;
+        return 1
     } else {
         return ((get_map_data(to).terrain >> 1) + 1) * 2
     }
@@ -8854,7 +8854,7 @@ function mark_participate_attack_hex() {
     var base_distance = G.offensive.naval_move_distance + L.move_data.battle_range
     if (G.offensive.stage === REACTION_STAGE && set_has(G.offensive.battle_hexes, base_location)) {
         mark_attack_zone(base_location, L.move_data.battle_range)
-        return;
+        return
     }
     if (!L.move_data.is_ground_present) {
         map_for_each(G.offensive.paths, (u, path) => {
@@ -9000,16 +9000,16 @@ function ground_move_denied(hex) {
         return !(region === "IChina" || region === "NIndia" || region === "Burma")
     }
     if (G.sid === SOUTH_PACIFIC_SCENARIO && faction === AP && hex === TRUK && G.turn === 3) {
-        return true;
+        return true
     }
     if (G.sid === BURMA_SCENARIO && faction === AP && (region === "Siam" || region === "Indochina")) {
-        return true;
+        return true
     }
     if (G.sid === BURMA_SCENARIO && hex === SINGAPORE) {
-        return true;
+        return true
     }
     if (G.turn === 1 && faction === JP && (hex === SINGAPORE || hex === MANILA) && !L.move_data.is_naval_present) {
-        return true;
+        return true
     }
 }
 
@@ -9067,7 +9067,7 @@ function check_china_box_restricted() {
             count++
         }
     }
-    return !!(count >= 2 || pieces[G.active_stack[0]].b29 && (G.location[B_29_1] === CHINA_BOX || G.location[B_29_2] === CHINA_BOX));
+    return !!(count >= 2 || pieces[G.active_stack[0]].b29 && (G.location[B_29_1] === CHINA_BOX || G.location[B_29_2] === CHINA_BOX))
 
 }
 
@@ -10100,11 +10100,11 @@ function before_victory_check() {
         }
         if (is_space_controlled(hex_to_int(hex_data.id), AP)) {
             no_capture = false
-            break;
+            break
         }
     }
     if (no_capture) {
-        change_political_will(-1, "no AP control of any hex originally controlled by the JP");
+        change_political_will(-1, "no AP control of any hex originally controlled by the JP")
     }
     //17.11.26. At the end of the game if the War in Europe is in a box with a
     //negative number the US PW is reduced by one prior to scoring.
@@ -10147,12 +10147,12 @@ function check_nation_controlled(nation, faction) {
 
 /*{{{ import client/init.js*/
 function clear_paths() {
-    CANVAS_CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
+    CANVAS_CTX.clearRect(0, 0, CANVAS.width, CANVAS.height)
 }
 
 function sort_unit_stack(a, focus) {
     var map = []
-    var index = 0;
+    var index = 0
     for (var e of a) {
         // if (e.classList.contains("top") && (!e.thing || e.thing.my_action !== "unit") && !focus) {
         // continue
@@ -10542,9 +10542,9 @@ const BURMA_BOARD_INFO = {
 
 
         if (x == 15 && y > 9) {
-            return false;
+            return false
         } else if (x == 16 && y > 9) {
-            return false;
+            return false
         }
         return hex_in_map(x, y) &&
             i != 92 // Remove unplayable hex in india not catched by the standard data check (1305)
@@ -10583,9 +10583,9 @@ const SOUTH_PAC_BOARD_INFO = {
         if (i === 1188) {
             return false
         } else if (x == 24 && y == 16) {
-            return true;
+            return true
         } else if ((x % 2 == 0) && y == 16) {
-            return false;
+            return false
         }
         return hex_in_map(x, y)
     }
@@ -10594,9 +10594,9 @@ const SOUTH_PAC_BOARD_INFO = {
 
 let ALL_BOARD_HEXES = []
 
-let SID = FULL_CAMPAIGN_SCENARIO;
-let map_layout = layout.mainmap;
-let map_info = MAIN_BOARD_INFO;
+let SID = FULL_CAMPAIGN_SCENARIO
+let map_layout = layout.mainmap
+let map_info = MAIN_BOARD_INFO
 
 
 var SP_BORDER = []
@@ -10639,8 +10639,8 @@ function on_init(scenario, game_options, static_view) {
         case "South Pacific": {
             nations.AUSTRALIAN_MANDATES.keys = nations.AUSTRALIAN_MANDATES.ports
             SID = SOUTH_PACIFIC_SCENARIO
-            map_layout = layout.southpac;
-            map_elem.classList.add("southpac");
+            map_layout = layout.southpac
+            map_elem.classList.add("southpac")
             define_board("#map", 1275, 825, [12, 12, 12, 12])
             map_info = SOUTH_PAC_BOARD_INFO
 
@@ -10654,12 +10654,12 @@ function on_init(scenario, game_options, static_view) {
             define_s_loc(1400, center_rect(map_layout.h_5808, 45, 45))
             define_space("action_hex", 1400, center_rect(map_layout.h_5808, 68, 68))
             set_map_size(1275, 825)
-            break;
+            break
         }
         case  "Burma: The Forgotten War, 1943-1944": {
             SID = BURMA_SCENARIO
-            map_layout = layout.burma;
-            map_elem.classList.add("burma");
+            map_layout = layout.burma
+            map_elem.classList.add("burma")
             define_board("#map", 1275, 825, [12, 12, 12, 12])
             map_info = BURMA_BOARD_INFO
 
@@ -10670,12 +10670,12 @@ function on_init(scenario, game_options, static_view) {
             define_thing("road", events.LEDO_ROAD.id).layout([600, 300, 60, 60], "road_ledo hide marker control")
             define_thing("road", events.KWAI_RIVER_BRIDGE.id).layout([528, 501, 50, 95], "road_kwai hide marker control")
             set_map_size(1275, 825)
-            break;
+            break
         }
         default: {
             SID = FULL_CAMPAIGN_SCENARIO
-            map_layout = layout.mainmap;
-            map_elem.classList.add("main");
+            map_layout = layout.mainmap
+            map_elem.classList.add("main")
             define_board("#map", 2550, 1650, [12, 12, 12, 12])
             map_info = MAIN_BOARD_INFO
             define_thing("road", events.JARHAT_ROAD.id).layout([578, 286, 60, 60], "road_jarhat hide marker control")
@@ -10793,13 +10793,13 @@ function on_init(scenario, game_options, static_view) {
 }
 
 function init_canvas(scenario) {
-    let sizeX, sizeY;
+    let sizeX, sizeY
     switch (scenario) {
         case "South Pacific":
         case  "Burma: The Forgotten War, 1943-1944": {
             sizeX = 1275
             sizeY = 825
-            break;
+            break
         }
             ;
         default: {
@@ -10877,23 +10877,23 @@ P.check_unit_supply = {
             var d = index * 2 - 3
             CANVAS_CTX.strokeStyle = color
             CANVAS_CTX.fillStyle = color
-            CANVAS_CTX.lineWidth = 3;
+            CANVAS_CTX.lineWidth = 3
             for (var j = 1; j < v.length; j++) {
                 start = hex_center(v[j - 1])
                 finish = hex_center(v[j])
-                CANVAS_CTX.beginPath();
+                CANVAS_CTX.beginPath()
                 if (LOCAL_STATE.supply_data.oos) {
-                    CANVAS_CTX.setLineDash([5, 3]);
+                    CANVAS_CTX.setLineDash([5, 3])
                 }
-                CANVAS_CTX.moveTo(start[0], start[1] + d);
-                CANVAS_CTX.lineTo(finish[0], finish[1] + d);
-                CANVAS_CTX.stroke();
+                CANVAS_CTX.moveTo(start[0], start[1] + d)
+                CANVAS_CTX.lineTo(finish[0], finish[1] + d)
+                CANVAS_CTX.stroke()
                 CANVAS_CTX.setLineDash([])
             }
             if (finish) {
-                CANVAS_CTX.beginPath();
+                CANVAS_CTX.beginPath()
                 CANVAS_CTX.fillRect(finish[0] - 4, finish[1] - 4 + d, 8, 8)
-                CANVAS_CTX.stroke();
+                CANVAS_CTX.stroke()
             }
         })
         var focused = []
@@ -10935,7 +10935,7 @@ P.check_distance = {
     },
     action_hex(h) {
         if (SID === SOUTH_PACIFIC_SCENARIO && h === OAHU || SID === BURMA_SCENARIO && h === SINGAPORE || h > LAST_BOARD_HEX) {
-            return;
+            return
         }
         while (LOCAL_STATE.points.includes(h)) {
             if (LOCAL_STATE.points.pop() === h) {
@@ -11303,7 +11303,7 @@ function dragElement(e) {
 
         // set the element's new position
 
-        the_e.style.position = "absolute";
+        the_e.style.position = "absolute"
         the_e.style.top = (the_e.offsetTop - pos2) + "px"
         the_e.style.left = (the_e.offsetLeft - pos1) + "px"
     }
@@ -11362,7 +11362,7 @@ function pw_dialog(id, response) {
     var response = pw_query()
     show_dialog(id, (body) => {
         var dl = document.createElement("dl")
-        var header = document.createElement("dt");
+        var header = document.createElement("dt")
         header.appendChild(create_icon(...counters.pw.split(" ")))
         header.innerHTML += ` Current Political Will: ${G.political_will}.`
         dl.appendChild(header)
@@ -11872,7 +11872,7 @@ function is_active_card(card) {
 }
 
 function update_hand(side) {
-    var fo_card;
+    var fo_card
     if (G.future_offensive[side] > 0) {
         fo_card = populate("hand", side, "card", G.future_offensive[side])
     } else if (G.events[events.FUTURE_OFFENSIVE_JP.id + side] > 0) {
@@ -11913,29 +11913,29 @@ function draw_paths() {
         var d = pieces[k].faction ? -2 : 2
         CANVAS_CTX.strokeStyle = color
         CANVAS_CTX.fillStyle = color
-        CANVAS_CTX.lineWidth = 1;
+        CANVAS_CTX.lineWidth = 1
         for (var j = 3; j < v.length; j++) {
             start = hex_center(v[j - 1])
             finish = hex_center(v[j])
-            CANVAS_CTX.beginPath();
+            CANVAS_CTX.beginPath()
             if (v[j - 1] === v[j] || j === 3) {
-                CANVAS_CTX.arc(start[0], start[1] + d, 4, 0, 2 * Math.PI);
-                CANVAS_CTX.fill();
-                CANVAS_CTX.stroke();
+                CANVAS_CTX.arc(start[0], start[1] + d, 4, 0, 2 * Math.PI)
+                CANVAS_CTX.fill()
+                CANVAS_CTX.stroke()
             }
-            CANVAS_CTX.beginPath();
+            CANVAS_CTX.beginPath()
             if (G.location[k] === v[j - 1] && j === v.length - 1) {
-                CANVAS_CTX.setLineDash([5, 3]);
+                CANVAS_CTX.setLineDash([5, 3])
             }
-            CANVAS_CTX.moveTo(start[0], start[1] + d);
-            CANVAS_CTX.lineTo(finish[0], finish[1] + d);
-            CANVAS_CTX.stroke();
+            CANVAS_CTX.moveTo(start[0], start[1] + d)
+            CANVAS_CTX.lineTo(finish[0], finish[1] + d)
+            CANVAS_CTX.stroke()
             CANVAS_CTX.setLineDash([])
         }
         if (finish) {
-            CANVAS_CTX.beginPath();
+            CANVAS_CTX.beginPath()
             CANVAS_CTX.fillRect(finish[0] - 4, finish[1] - 4 + d, 8, 8)
-            CANVAS_CTX.stroke();
+            CANVAS_CTX.stroke()
         }
     })
 }
@@ -11972,7 +11972,7 @@ function place_unit(u, location) {
             console.log("rotate", u)
         }
 
-        unit.innerHTML = '';
+        unit.innerHTML = ''
         var battle = map_get(G.offensive.committed, u)
         var path = map_get(G.offensive.paths, u, [0])[0]
         // unit.classList.remove("gray")
@@ -12386,15 +12386,15 @@ function hex_in_map(x, y) {
 function get_element_weight(e) {
     var marker = !e.thing || e.thing.my_action !== "unit"
     if (marker && e.classList.contains("top")) {
-        return 64000;
+        return 64000
     } else if (marker) {
-        return 0;
+        return 0
     }
-    var value = 0;
+    var value = 0
     var unit = e.thing.my_id
     var piece = pieces[unit]
     if (piece.garrison) {
-        return 0;
+        return 0
     }
     if (piece.faction === G.offensive.attacker) {
         value += 32000
@@ -12406,13 +12406,13 @@ function get_element_weight(e) {
         value += 4000
     }
     if (piece.class === "naval") {
-        value += 1000;
+        value += 1000
     } else if (piece.class === "ground") {
-        value += 7000;
+        value += 7000
     } else if (piece.class === "hq") {
-        value += 8000;
+        value += 8000
     } else if (piece.class === "air") {
-        value += 9000;
+        value += 9000
     }
     // if (set_has(G.offensive.active_units[piece.faction], unit)) {
     //     value += 512
@@ -12425,7 +12425,7 @@ function get_element_weight(e) {
     } else if (piece.service !== "navy") {
         value += 64
     }
-    return value;
+    return value
 }
 
 function hex_center(i) {
@@ -12444,8 +12444,8 @@ function hex_center(i) {
             // display TUNNEL_BOX directly to the left of the blue singapore label
             const box = map_layout.label_singapore
             var sing_left_coord = center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
-            sing_left_coord[0] -= 47;
-            return sing_left_coord;
+            sing_left_coord[0] -= 47
+            return sing_left_coord
         }
     } else if (SID === SOUTH_PACIFIC_SCENARIO && i >= OAHU) {
         const box = map_layout.h_5808
@@ -12675,14 +12675,14 @@ function escaped_list(match, p1) {
 
 function on_focus_list(parent) {
     for (var el of parent.children[1].children) {
-        el.onmouseenter();
+        el.onmouseenter()
     }
     on_blur_tip() //prevent unit tooltip from showing
 }
 
 function on_blur_list(parent) {
     for (var el of parent.children[1].children) {
-        el.onmouseleave();
+        el.onmouseleave()
     }
 }
 

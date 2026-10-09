@@ -175,7 +175,7 @@ function apply_inter_service() {
         }
     })
     if (!service) {
-        return;
+        return
     }
     const rival_service = service === "army" ? "navy" : "army"
     L.allowed_units = L.allowed_units.filter(i => pieces[i].service !== rival_service)
@@ -215,7 +215,7 @@ function mark_ground_reaction_hexes(location) {
 
 function mark_asp_reaction_hexes(hex) {
     if (!get_map_data(hex).coastal) {
-        return;
+        return
     }
     const asp_capable = is_hex_asp_capable(hex)
     const naval_present = is_faction_naval_units(hex, G.offensive.attacker)
@@ -401,7 +401,7 @@ function is_air_reaction_able(u) {
     for (var i = 0; i < queue.length; i++) {
         var item = queue[i]
         var nh_list = map_get(AIRFIELD_LINKS, item, [])
-        var j = 1;
+        var j = 1
         while (j < nh_list.length && nh_list[j] <= range) {
             var nh = nh_list[j - 1]
             if (set_has(selected, nh) || !(is_space_controlled(nh, G.active))) {
@@ -475,7 +475,7 @@ P.activate_units = {
         if (!L.possible_units.length) {
             log_units_activated()
             end()
-            return;
+            return
         } else {
             this.update_possible_units()
         }
@@ -835,8 +835,8 @@ P.move_offensive_units = {
 
         if (piece.organic) {
             var pairs = G.active_stack.filter(au => pieces[au].organic && pieces[au].class !== piece.class && !G.offensive.organic.includes(au))
-            var a = -1;
-            var b;
+            var a = -1
+            var b
             if (pairs.length && piece.class === "naval") {
                 a = u
                 b = pairs[0]
@@ -889,7 +889,7 @@ P.move_offensive_units = {
             if (ground_move_completed(hex, G.active)) {
                 this.stop()
             }
-            return;
+            return
         }
 
         if (L.move_type === BARGES_MOVE) {
@@ -1082,7 +1082,7 @@ P.check_overstacking = {
         L.remove_flag = G.offensive.stage === EVENT_STAGE || G.offensive.stage === EMERGENCY_STAGE || G.offensive.stage === POST_BATTLE_STAGE && G.active === G.offensive.attacker
         if (!L.remove_flag) {
             goto("notify_overstacking")
-            return;
+            return
         }
         if (init_overstack_check(false, G.active)) {
             end()
@@ -1287,7 +1287,7 @@ P.prepare_disengagement = {
         var allowed_units = get_disengagement_units(L.L.active)
         if (allowed_units.length <= 0) {
             end()
-            return;
+            return
         }
     },
     inactive: "choose disengagement",
@@ -1356,7 +1356,7 @@ P.retro_disengagement = {
         prompt(`Choose hex to move disengaging unit${L.allowed_units.length > 1 ? "s" : ""} or skip.`)
         if (L.conflicted || L.next_d >= G.offensive.disengagement.length) {
             button("done")
-            return;
+            return
         }
         L.allowed_hexes.forEach(h => action_hex(h))
         button("skip")
@@ -1606,7 +1606,7 @@ P.assign_escort = {
         })
         if (L.possible_units.length <= 0) {
             end()
-            return;
+            return
         }
     },
     inactive: "assign units to escorting",
@@ -1876,7 +1876,7 @@ P.define_intelligence_condition = {
         L.card = false
         G.offensive.logistic = cards[G.offensive.offensive_card].ops
         if (!G.async) {
-            return;
+            return
         }
         var cancel = 0
         for_each_card((c, card) => {
@@ -1902,7 +1902,7 @@ P.define_intelligence_condition = {
             button("roll")
         }
         if (G.offensive.offensive_card === CARRIER_RAID && G.offensive.type === EC) {
-            return;
+            return
         }
         if (!L.rolled) {
             get_hand(G.active).filter(c => {
@@ -2455,7 +2455,7 @@ P.jp_cv_reassign = {
         if (L.to_repair.length === 0 || L.to_damage.length === 0 || G.offensive.battle.critical[AP] ||
             L.to_damage.length === 1 && L.to_repair.length === 2 && L.to_repair[0] === L.to_damage[0]) {
             end()
-            return;
+            return
         } else {
             G.active = JP
             L.stage = 0

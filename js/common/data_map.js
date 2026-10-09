@@ -1421,7 +1421,7 @@ function apply_south_pacific(hex) {
     if (sp_map_item && sp_map_item.edges) {
         hex.edges_int = 0
         for (let j = 0; j < 6; j++) {
-            var edge = sp_map_item.edges[j];
+            var edge = sp_map_item.edges[j]
             if (edge & GROUND) {
                 edge |= UNPLAYABLE_LAND
             }

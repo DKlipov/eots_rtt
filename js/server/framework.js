@@ -474,7 +474,7 @@ function _parse(text) {
                     emit(`if (++(${i}) <= ${end}) L.I = ${ix_loop}`)
                     return
                 }
-                    // for i in (array) { block }
+                // for i in (array) { block }
                 // NOTE: array is evaluated repeatedly so should be a constant!
                 else if (line.length === 5 && line[2] === "in") {
                     k = line[1]

@@ -425,7 +425,7 @@ function mark_participate_attack_hex() {
     var base_distance = G.offensive.naval_move_distance + L.move_data.battle_range
     if (G.offensive.stage === REACTION_STAGE && set_has(G.offensive.battle_hexes, base_location)) {
         mark_attack_zone(base_location, L.move_data.battle_range)
-        return;
+        return
     }
     if (!L.move_data.is_ground_present) {
         map_for_each(G.offensive.paths, (u, path) => {
@@ -571,16 +571,16 @@ function ground_move_denied(hex) {
         return !(region === "IChina" || region === "NIndia" || region === "Burma")
     }
     if (G.sid === SOUTH_PACIFIC_SCENARIO && faction === AP && hex === TRUK && G.turn === 3) {
-        return true;
+        return true
     }
     if (G.sid === BURMA_SCENARIO && faction === AP && (region === "Siam" || region === "Indochina")) {
-        return true;
+        return true
     }
     if (G.sid === BURMA_SCENARIO && hex === SINGAPORE) {
-        return true;
+        return true
     }
     if (G.turn === 1 && faction === JP && (hex === SINGAPORE || hex === MANILA) && !L.move_data.is_naval_present) {
-        return true;
+        return true
     }
 }
 
@@ -638,7 +638,7 @@ function check_china_box_restricted() {
             count++
         }
     }
-    return !!(count >= 2 || pieces[G.active_stack[0]].b29 && (G.location[B_29_1] === CHINA_BOX || G.location[B_29_2] === CHINA_BOX));
+    return !!(count >= 2 || pieces[G.active_stack[0]].b29 && (G.location[B_29_1] === CHINA_BOX || G.location[B_29_2] === CHINA_BOX))
 
 }
 

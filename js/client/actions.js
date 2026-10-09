@@ -55,23 +55,23 @@ P.check_unit_supply = {
             var d = index * 2 - 3
             CANVAS_CTX.strokeStyle = color
             CANVAS_CTX.fillStyle = color
-            CANVAS_CTX.lineWidth = 3;
+            CANVAS_CTX.lineWidth = 3
             for (var j = 1; j < v.length; j++) {
                 start = hex_center(v[j - 1])
                 finish = hex_center(v[j])
-                CANVAS_CTX.beginPath();
+                CANVAS_CTX.beginPath()
                 if (LOCAL_STATE.supply_data.oos) {
-                    CANVAS_CTX.setLineDash([5, 3]);
+                    CANVAS_CTX.setLineDash([5, 3])
                 }
-                CANVAS_CTX.moveTo(start[0], start[1] + d);
-                CANVAS_CTX.lineTo(finish[0], finish[1] + d);
-                CANVAS_CTX.stroke();
+                CANVAS_CTX.moveTo(start[0], start[1] + d)
+                CANVAS_CTX.lineTo(finish[0], finish[1] + d)
+                CANVAS_CTX.stroke()
                 CANVAS_CTX.setLineDash([])
             }
             if (finish) {
-                CANVAS_CTX.beginPath();
+                CANVAS_CTX.beginPath()
                 CANVAS_CTX.fillRect(finish[0] - 4, finish[1] - 4 + d, 8, 8)
-                CANVAS_CTX.stroke();
+                CANVAS_CTX.stroke()
             }
         })
         var focused = []
@@ -113,7 +113,7 @@ P.check_distance = {
     },
     action_hex(h) {
         if (SID === SOUTH_PACIFIC_SCENARIO && h === OAHU || SID === BURMA_SCENARIO && h === SINGAPORE || h > LAST_BOARD_HEX) {
-            return;
+            return
         }
         while (LOCAL_STATE.points.includes(h)) {
             if (LOCAL_STATE.points.pop() === h) {

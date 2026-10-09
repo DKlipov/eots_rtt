@@ -1779,7 +1779,7 @@ function find_card(faction, num) {
             return i
         }
     }
-    throw new Error(`Missed card ${faction} ${num}`);
+    throw new Error(`Missed card ${faction} ${num}`)
 }
 
 function for_each_card(apply) {
