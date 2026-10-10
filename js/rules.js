@@ -1,6 +1,8 @@
 /** main*/
 "use strict"
 
+/* global exports console */
+
 var G, L, R, V, P = {}
 
 const ROLES = ["Japan", "Allies"]

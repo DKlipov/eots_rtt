@@ -97,12 +97,12 @@ exports.setup = function (seed, scenario, options) {
     return G
 }
 
-exports.static_view = function (game) {
+exports.static_view = function (state) {
     var SV = null
     if (typeof on_static_view === "function") {
         G = state
         L = null
-        R = role
+        R = null
         V = null
         _load()
         SV = on_static_view()
