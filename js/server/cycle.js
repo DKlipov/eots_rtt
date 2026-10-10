@@ -223,7 +223,7 @@ P.national_status_segment = function () {
         }
         change_political_will(L.pw, "National status")
         end()
-        return;
+        return
     }
     if (check_nation_surrender(nations.NEW_GUINEA)) {
         set_control_over_nation(nations.NEW_GUINEA, false)
@@ -237,7 +237,7 @@ P.national_status_segment = function () {
         }
         change_political_will(L.pw, "National status")
         end()
-        return;
+        return
     }
     if (check_nation_surrender(nations.PHILIPPINES)) {
         if (G.surrender[nations.PHILIPPINES.id]) {
@@ -431,7 +431,7 @@ P.attrition = {
         })
         for_each_unit((u, piece, location) => {
             if (location > LAST_BOARD_HEX && location !== CHINA_BOX || piece.faction !== G.active || pieces[u].class === "naval" || pieces[u].class === "hq") {
-                return;
+                return
             }
             if (set_has(G.attrition, u)) {
                 if (!set_has(G.reduced, u)) {

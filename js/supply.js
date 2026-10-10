@@ -145,7 +145,7 @@ function check_hump() {
 function check_burma_road() {
     G.burma_road = 2
     if (G.sid === SOUTH_PACIFIC_SCENARIO) {
-        return;
+        return
     }
     const faction = AP
     const location = KUNMING
@@ -180,7 +180,7 @@ function check_burma_road() {
     }
     if (!rangoon_achived || has_non_n_zoi(RANGOON, JP) || is_space_controlled(RANGOON, JP)) {
         check_hump()
-        return;
+        return
     }
     L.supply.queue.push(RANGOON)
     L.supply.retracing.push(0)
@@ -466,7 +466,7 @@ function unit_or_airfield(location, faction) {
 
 function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
     if (!hq_list.length) {
-        return;
+        return
     }
     var i = 0
     const faction = pieces[hq_list[0]].faction
@@ -539,7 +539,7 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
             continue
         }
         if (non_neutral_zoi_s || distance < 0) {
-            continue;
+            continue
         }
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
@@ -719,7 +719,7 @@ function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
 function get_ground_mp_cost(from, to, faction) {
     var direction = get_direction(from, to)
     if (!(get_map_data(from).edges_int & GROUND << 5 * direction)) {
-        return 100;
+        return 100
     }
     if ((get_map_data(from).edges_int & ROAD << (5 * direction))
         && !(G.supply_cache[to] & TRANSPORT_ROUTE_DISABLED)
@@ -727,7 +727,7 @@ function get_ground_mp_cost(from, to, faction) {
         && ((G.supply_cache[to] & (JP_UNITS << faction)) || !(G.supply_cache[to] & (JP_UNITS << 1 - faction)))
         && ((G.supply_cache[from] & (JP_UNITS << faction)) || !(G.supply_cache[from] & (JP_UNITS << 1 - faction)))
     ) {
-        return 1;
+        return 1
     } else {
         return ((get_map_data(to).terrain >> 1) + 1) * 2
     }
@@ -736,13 +736,13 @@ function get_ground_mp_cost(from, to, faction) {
 function get_ground_move_cost(from, to, faction) {
     var direction = get_direction(from, to)
     if (!(get_map_data(from).edges_int & GROUND << 5 * direction)) {
-        return 100;
+        return 100
     }
     if ((get_map_data(from).edges_int & ROAD << (5 * direction))
         && !(G.supply_cache[to] & (TRANSPORT_ROUTE_DISABLED | (JP_GA_UNITS << 1 - faction)))
         && !(G.supply_cache[from] & TRANSPORT_ROUTE_DISABLED)
     ) {
-        return 1;
+        return 1
     } else {
         return ((get_map_data(to).terrain >> 1) + 1) * 2
     }

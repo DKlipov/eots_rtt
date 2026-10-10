@@ -3263,7 +3263,7 @@ function find_piece(id) {
             return i
         }
     }
-    throw new Error("Missed unit " + id);
+    throw new Error("Missed unit " + id)
 }
 
 function ap_air(id) {
@@ -5115,7 +5115,7 @@ function find_card(faction, num) {
             return i
         }
     }
-    throw new Error(`Missed card ${faction} ${num}`);
+    throw new Error(`Missed card ${faction} ${num}`)
 }
 
 function for_each_card(apply) {
@@ -6553,7 +6553,7 @@ function apply_south_pacific(hex) {
     if (sp_map_item && sp_map_item.edges) {
         hex.edges_int = 0
         for (let j = 0; j < 6; j++) {
-            var edge = sp_map_item.edges[j];
+            var edge = sp_map_item.edges[j]
             if (edge & GROUND) {
                 edge |= UNPLAYABLE_LAND
             }
@@ -7685,7 +7685,7 @@ function check_hump() {
 function check_burma_road() {
     G.burma_road = 2
     if (G.sid === SOUTH_PACIFIC_SCENARIO) {
-        return;
+        return
     }
     const faction = AP
     const location = KUNMING
@@ -7720,7 +7720,7 @@ function check_burma_road() {
     }
     if (!rangoon_achived || has_non_n_zoi(RANGOON, JP) || is_space_controlled(RANGOON, JP)) {
         check_hump()
-        return;
+        return
     }
     L.supply.queue.push(RANGOON)
     L.supply.retracing.push(0)
@@ -8006,7 +8006,7 @@ function unit_or_airfield(location, faction) {
 
 function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
     if (!hq_list.length) {
-        return;
+        return
     }
     var i = 0
     const faction = pieces[hq_list[0]].faction
@@ -8079,7 +8079,7 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
             continue
         }
         if (non_neutral_zoi_s || distance < 0) {
-            continue;
+            continue
         }
         for (let j = 0; j < nh_list.length; j++) {
             let nh = nh_list[j]
@@ -8259,7 +8259,7 @@ function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
 function get_ground_mp_cost(from, to, faction) {
     var direction = get_direction(from, to)
     if (!(get_map_data(from).edges_int & GROUND << 5 * direction)) {
-        return 100;
+        return 100
     }
     if ((get_map_data(from).edges_int & ROAD << (5 * direction))
         && !(G.supply_cache[to] & TRANSPORT_ROUTE_DISABLED)
@@ -8267,7 +8267,7 @@ function get_ground_mp_cost(from, to, faction) {
         && ((G.supply_cache[to] & (JP_UNITS << faction)) || !(G.supply_cache[to] & (JP_UNITS << 1 - faction)))
         && ((G.supply_cache[from] & (JP_UNITS << faction)) || !(G.supply_cache[from] & (JP_UNITS << 1 - faction)))
     ) {
-        return 1;
+        return 1
     } else {
         return ((get_map_data(to).terrain >> 1) + 1) * 2
     }
@@ -8276,13 +8276,13 @@ function get_ground_mp_cost(from, to, faction) {
 function get_ground_move_cost(from, to, faction) {
     var direction = get_direction(from, to)
     if (!(get_map_data(from).edges_int & GROUND << 5 * direction)) {
-        return 100;
+        return 100
     }
     if ((get_map_data(from).edges_int & ROAD << (5 * direction))
         && !(G.supply_cache[to] & (TRANSPORT_ROUTE_DISABLED | (JP_GA_UNITS << 1 - faction)))
         && !(G.supply_cache[from] & TRANSPORT_ROUTE_DISABLED)
     ) {
-        return 1;
+        return 1
     } else {
         return ((get_map_data(to).terrain >> 1) + 1) * 2
     }
@@ -8856,7 +8856,7 @@ function mark_participate_attack_hex() {
     var base_distance = G.offensive.naval_move_distance + L.move_data.battle_range
     if (G.offensive.stage === REACTION_STAGE && set_has(G.offensive.battle_hexes, base_location)) {
         mark_attack_zone(base_location, L.move_data.battle_range)
-        return;
+        return
     }
     if (!L.move_data.is_ground_present) {
         map_for_each(G.offensive.paths, (u, path) => {
@@ -9002,16 +9002,16 @@ function ground_move_denied(hex) {
         return !(region === "IChina" || region === "NIndia" || region === "Burma")
     }
     if (G.sid === SOUTH_PACIFIC_SCENARIO && faction === AP && hex === TRUK && G.turn === 3) {
-        return true;
+        return true
     }
     if (G.sid === BURMA_SCENARIO && faction === AP && (region === "Siam" || region === "Indochina")) {
-        return true;
+        return true
     }
     if (G.sid === BURMA_SCENARIO && hex === SINGAPORE) {
-        return true;
+        return true
     }
     if (G.turn === 1 && faction === JP && (hex === SINGAPORE || hex === MANILA) && !L.move_data.is_naval_present) {
-        return true;
+        return true
     }
 }
 
@@ -9069,7 +9069,7 @@ function check_china_box_restricted() {
             count++
         }
     }
-    return !!(count >= 2 || pieces[G.active_stack[0]].b29 && (G.location[B_29_1] === CHINA_BOX || G.location[B_29_2] === CHINA_BOX));
+    return !!(count >= 2 || pieces[G.active_stack[0]].b29 && (G.location[B_29_1] === CHINA_BOX || G.location[B_29_2] === CHINA_BOX))
 
 }
 
@@ -10103,11 +10103,11 @@ function before_victory_check() {
         }
         if (is_space_controlled(hex_to_int(hex_data.id), AP)) {
             no_capture = false
-            break;
+            break
         }
     }
     if (no_capture) {
-        change_political_will(-1, "no AP control of any hex originally controlled by the JP");
+        change_political_will(-1, "no AP control of any hex originally controlled by the JP")
     }
     //17.11.26. At the end of the game if the War in Europe is in a box with a
     //negative number the US PW is reduced by one prior to scoring.
@@ -10290,7 +10290,7 @@ function is_reinforcement_denied(piece) {
     return (piece.service === "au" && is_event_active(events.AUSTRALIA_SURRENDER) && !set_has(G.reduced, piece.u))
         || (piece.service === "ind" && G.surrender[nations.INDIA.id])
         || (L.INDEPENDENCE_CAMPAIGN && piece.class === "ground" &&
-            (piece.service === "ind" || piece.service === "au" || piece.service === "br"));
+            (piece.service === "ind" || piece.service === "au" || piece.service === "br"))
 }
 
 function update_reinf_active() {
@@ -10333,15 +10333,15 @@ P.reinforcement_segment = {
             if (piece.service === "au" && is_event_active(events.AUSTRALIA_SURRENDER)) {
                 log(`Unit eliminated due to Australia surrender.`)
                 eliminate_permanently(u)
-                return;
+                return
             } else if (piece.service === "ind" && G.surrender[nations.INDIA.id]) {
                 log(`Unit eliminated due to India surrender.`)
                 eliminate_permanently(u)
-                return;
+                return
             }
             if (try_delay_reinforcement(u, piece, location)) {
                 delayed_units = true
-                return;
+                return
             }
             set_location(u, reinforcement_hex)
             if (piece.class === "hq") {
@@ -10491,7 +10491,7 @@ P.replacement_segment = {
         if (L.skip) {
             prompt("Confirm skip replacements.")
             button("confirm")
-            return;
+            return
         }
         var ru = L.replacable_units.filter(u => L.replacement_points[pieces[u].replacement] > 0)
         var not_used_unground = L.divisions_used <= 0 || L.replacement_points[GROUND_REP] <= 0
@@ -10763,7 +10763,7 @@ function apply_inter_service() {
         }
     })
     if (!service) {
-        return;
+        return
     }
     const rival_service = service === "army" ? "navy" : "army"
     L.allowed_units = L.allowed_units.filter(i => pieces[i].service !== rival_service)
@@ -10803,7 +10803,7 @@ function mark_ground_reaction_hexes(location) {
 
 function mark_asp_reaction_hexes(hex) {
     if (!get_map_data(hex).coastal) {
-        return;
+        return
     }
     const asp_capable = is_hex_asp_capable(hex)
     const naval_present = is_faction_naval_units(hex, G.offensive.attacker)
@@ -10989,7 +10989,7 @@ function is_air_reaction_able(u) {
     for (var i = 0; i < queue.length; i++) {
         var item = queue[i]
         var nh_list = map_get(AIRFIELD_LINKS, item, [])
-        var j = 1;
+        var j = 1
         while (j < nh_list.length && nh_list[j] <= range) {
             var nh = nh_list[j - 1]
             if (set_has(selected, nh) || !(is_space_controlled(nh, G.active))) {
@@ -11063,7 +11063,7 @@ P.activate_units = {
         if (!L.possible_units.length) {
             log_units_activated()
             end()
-            return;
+            return
         } else {
             this.update_possible_units()
         }
@@ -11423,8 +11423,8 @@ P.move_offensive_units = {
 
         if (piece.organic) {
             var pairs = G.active_stack.filter(au => pieces[au].organic && pieces[au].class !== piece.class && !G.offensive.organic.includes(au))
-            var a = -1;
-            var b;
+            var a = -1
+            var b
             if (pairs.length && piece.class === "naval") {
                 a = u
                 b = pairs[0]
@@ -11477,7 +11477,7 @@ P.move_offensive_units = {
             if (ground_move_completed(hex, G.active)) {
                 this.stop()
             }
-            return;
+            return
         }
 
         if (L.move_type === BARGES_MOVE) {
@@ -11670,7 +11670,7 @@ P.check_overstacking = {
         L.remove_flag = G.offensive.stage === EVENT_STAGE || G.offensive.stage === EMERGENCY_STAGE || G.offensive.stage === POST_BATTLE_STAGE && G.active === G.offensive.attacker
         if (!L.remove_flag) {
             goto("notify_overstacking")
-            return;
+            return
         }
         if (init_overstack_check(false, G.active)) {
             end()
@@ -11875,7 +11875,7 @@ P.prepare_disengagement = {
         var allowed_units = get_disengagement_units(L.L.active)
         if (allowed_units.length <= 0) {
             end()
-            return;
+            return
         }
     },
     inactive: "choose disengagement",
@@ -11944,7 +11944,7 @@ P.retro_disengagement = {
         prompt(`Choose hex to move disengaging unit${L.allowed_units.length > 1 ? "s" : ""} or skip.`)
         if (L.conflicted || L.next_d >= G.offensive.disengagement.length) {
             button("done")
-            return;
+            return
         }
         L.allowed_hexes.forEach(h => action_hex(h))
         button("skip")
@@ -12194,7 +12194,7 @@ P.assign_escort = {
         })
         if (L.possible_units.length <= 0) {
             end()
-            return;
+            return
         }
     },
     inactive: "assign units to escorting",
@@ -12464,7 +12464,7 @@ P.define_intelligence_condition = {
         L.card = false
         G.offensive.logistic = cards[G.offensive.offensive_card].ops
         if (!G.async) {
-            return;
+            return
         }
         var cancel = 0
         for_each_card((c, card) => {
@@ -12490,7 +12490,7 @@ P.define_intelligence_condition = {
             button("roll")
         }
         if (G.offensive.offensive_card === CARRIER_RAID && G.offensive.type === EC) {
-            return;
+            return
         }
         if (!L.rolled) {
             get_hand(G.active).filter(c => {
@@ -13043,7 +13043,7 @@ P.jp_cv_reassign = {
         if (L.to_repair.length === 0 || L.to_damage.length === 0 || G.offensive.battle.critical[AP] ||
             L.to_damage.length === 1 && L.to_repair.length === 2 && L.to_repair[0] === L.to_damage[0]) {
             end()
-            return;
+            return
         } else {
             G.active = JP
             L.stage = 0
@@ -13793,7 +13793,7 @@ P.india_surrender = {
             vp.text.forEach(t => log(t))
             log(`#GTotal VP: ${vp.vp}`)
             finish("Japan", "Japanese Victory - India Surrender.")
-            return;
+            return
         }
     },
     inactive: "execute India surrender sequence",
@@ -14196,7 +14196,7 @@ P.national_status_segment = function () {
         }
         change_political_will(L.pw, "National status")
         end()
-        return;
+        return
     }
     if (check_nation_surrender(nations.NEW_GUINEA)) {
         set_control_over_nation(nations.NEW_GUINEA, false)
@@ -14210,7 +14210,7 @@ P.national_status_segment = function () {
         }
         change_political_will(L.pw, "National status")
         end()
-        return;
+        return
     }
     if (check_nation_surrender(nations.PHILIPPINES)) {
         if (G.surrender[nations.PHILIPPINES.id]) {
@@ -14404,7 +14404,7 @@ P.attrition = {
         })
         for_each_unit((u, piece, location) => {
             if (location > LAST_BOARD_HEX && location !== CHINA_BOX || piece.faction !== G.active || pieces[u].class === "naval" || pieces[u].class === "hq") {
-                return;
+                return
             }
             if (set_has(G.attrition, u)) {
                 if (!set_has(G.reduced, u)) {
@@ -15162,7 +15162,7 @@ cards[find_card(JP, 17)].after_unit_activation = function (u) {
     }
     if (G.offensive.active_units[JP].filter(u => is_cv_unit(pieces[u])).length) {
         call("rule_violation", {rule: SAVO_RULE})
-        return;
+        return
     }
     var service = null
     G.offensive.active_units[R].forEach(u => service = pieces[u].class)
@@ -15688,9 +15688,9 @@ function set_kamikaze_able_battles() {
     for_each_unit_on_map((u, piece, location) => {
         if (piece.faction === JP && piece.class === "air") {
             in_range_on_map(location, piece.ebr, G.offensive.battle_hexes
-                    .filter(h => get_distance(h, TOKYO) <= 11
+                .filter(h => get_distance(h, TOKYO) <= 11
                         && set_has(ap_naval_commited, h)),
-                JP)
+            JP)
                 .forEach(h => set_add(battles, h))
         }
     })
@@ -15770,11 +15770,11 @@ P.kamikaze_attack = {
             L.allowed_units = []
             var hexes_range = in_range_on_map(location, pieces[u].ebr, G.offensive.kamikaze, JP)
             G.offensive.active_units[AP].forEach(ap => {
-                    var bh = get_unit_battle_hex(ap)
-                    if (pieces[ap].faction === AP && pieces[ap].class === "naval" && unit_on_board(ap) && set_has(hexes_range, bh)) {
-                        set_add(L.allowed_units, ap)
-                    }
+                var bh = get_unit_battle_hex(ap)
+                if (pieces[ap].faction === AP && pieces[ap].class === "naval" && unit_on_board(ap) && set_has(hexes_range, bh)) {
+                    set_add(L.allowed_units, ap)
                 }
+            }
             )
             L.stage++
             L.hits = 2
@@ -16970,7 +16970,7 @@ cards[find_card(AP, 38)].before_commit_offensive = function () {
         }
     })
     if (!cn_active) {
-        return "At least one Chinese army should be activated.";
+        return "At least one Chinese army should be activated."
     }
 }
 
@@ -17022,12 +17022,12 @@ cards[find_card(AP, 50)].after_unit_activation = function () {
         }
     })
     L.allowed_units = L.possible_units.filter(u => {
-            var piece = pieces[u]
-            return !set_has(G.offensive.active_units[AP], u) &&
+        var piece = pieces[u]
+        return !set_has(G.offensive.active_units[AP], u) &&
                 (piece.service === "army" && (army > 0 || naval <= 1)
                     || piece.service === "navy" && (army <= 0 || naval > 1 || naval === 0 && !piece.br && piece.class === "naval")
                 )
-        }
+    }
     )
 }
 
@@ -17218,7 +17218,7 @@ P.airborne_landing = {
         var unit = ap_army("11_d")
         if (G.location[unit] > LAST_BOARD_HEX) {
             end()
-            return;
+            return
         }
         if (set_has(G.offensive.active_units[AP], unit)) {
             return
@@ -17738,7 +17738,7 @@ function eliminate(unit, no_log = false) {
     var piece = pieces[unit]
     if (is_event_active(events.AUSTRALIA_SURRENDER) && piece.service === "au") {
         eliminate_permanently(unit)
-        return;
+        return
     }
     var size = get_overstack_size(unit)
     var location = G.location[unit]
@@ -19937,26 +19937,30 @@ exports.action = function (state, role, action, argument) {
 
     var this_state = P[L.P]
     if (this_state && typeof this_state[action] === "function") {
-        var extra = null
+        var extra = undefined
+
         if (Array.isArray(argument)) {
-            var type = argument[1]
-            var d = 2
-            if (CLIENT_SIDE_SUPPLY && (type & 1)) {
-                G.burma_road = argument[d]
-                d++
-            }
-            var oos_i = (type % (1 << 8)) >> 1
-            if (CLIENT_SIDE_SUPPLY && oos_i > 0) {
-                G.oos = argument.slice(d, oos_i + d)
-                d += oos_i
-            }
-            var ex_i = type >> 8
-            if (ex_i > 0) {
-                extra = argument.slice(d, ex_i + d)
-                d += ex_i
+            if (CLIENT_SIDE_SUPPLY) {
+                var type = argument[1]
+                var offset = 2
+                if (type & 1) {
+                    G.burma_road = argument[offset]
+                    offset += 1
+                }
+                var oos_len = (type >> 1)
+                if (oos_len > 0) {
+                    G.oos = argument.slice(offset, offset + oos_len)
+                    offset += oos_len
+                }
+                if (argument.length > offset)
+                    extra = argument.slice(offset)
+            } else {
+                if (argument.length > 0)
+                    extra = argument.slice(1)
             }
             argument = argument[0]
         }
+
         this_state[action](argument, extra)
         _run()
     } else if (action === "undo" && G.undo.length > 0) {
@@ -20228,7 +20232,7 @@ function _parse(text) {
                     emit(`if (++(${i}) <= ${end}) L.I = ${ix_loop}`)
                     return
                 }
-                    // for i in (array) { block }
+                // for i in (array) { block }
                 // NOTE: array is evaluated repeatedly so should be a constant!
                 else if (line.length === 5 && line[2] === "in") {
                     k = line[1]
@@ -20473,6 +20477,7 @@ function shuffle_bigint(list) {
         list[i] = tmp
     }
 }
+
 /*}}} import server/framework.js*/
 
 

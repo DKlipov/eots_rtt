@@ -45,7 +45,7 @@ P.india_surrender = {
             vp.text.forEach(t => log(t))
             log(`#GTotal VP: ${vp.vp}`)
             finish("Japan", "Japanese Victory - India Surrender.")
-            return;
+            return
         }
     },
     inactive: "execute India surrender sequence",

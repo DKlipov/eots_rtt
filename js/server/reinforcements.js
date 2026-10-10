@@ -139,7 +139,7 @@ function is_reinforcement_denied(piece) {
     return (piece.service === "au" && is_event_active(events.AUSTRALIA_SURRENDER) && !set_has(G.reduced, piece.u))
         || (piece.service === "ind" && G.surrender[nations.INDIA.id])
         || (L.INDEPENDENCE_CAMPAIGN && piece.class === "ground" &&
-            (piece.service === "ind" || piece.service === "au" || piece.service === "br"));
+            (piece.service === "ind" || piece.service === "au" || piece.service === "br"))
 }
 
 function update_reinf_active() {
@@ -182,15 +182,15 @@ P.reinforcement_segment = {
             if (piece.service === "au" && is_event_active(events.AUSTRALIA_SURRENDER)) {
                 log(`Unit eliminated due to Australia surrender.`)
                 eliminate_permanently(u)
-                return;
+                return
             } else if (piece.service === "ind" && G.surrender[nations.INDIA.id]) {
                 log(`Unit eliminated due to India surrender.`)
                 eliminate_permanently(u)
-                return;
+                return
             }
             if (try_delay_reinforcement(u, piece, location)) {
                 delayed_units = true
-                return;
+                return
             }
             set_location(u, reinforcement_hex)
             if (piece.class === "hq") {
@@ -340,7 +340,7 @@ P.replacement_segment = {
         if (L.skip) {
             prompt("Confirm skip replacements.")
             button("confirm")
-            return;
+            return
         }
         var ru = L.replacable_units.filter(u => L.replacement_points[pieces[u].replacement] > 0)
         var not_used_unground = L.divisions_used <= 0 || L.replacement_points[GROUND_REP] <= 0

@@ -55,23 +55,23 @@ P.check_unit_supply = {
             var d = index * 2 - 3
             CANVAS_CTX.strokeStyle = color
             CANVAS_CTX.fillStyle = color
-            CANVAS_CTX.lineWidth = 3;
+            CANVAS_CTX.lineWidth = 3
             for (var j = 1; j < v.length; j++) {
                 start = hex_center(v[j - 1])
                 finish = hex_center(v[j])
-                CANVAS_CTX.beginPath();
+                CANVAS_CTX.beginPath()
                 if (LOCAL_STATE.supply_data.oos) {
-                    CANVAS_CTX.setLineDash([5, 3]);
+                    CANVAS_CTX.setLineDash([5, 3])
                 }
-                CANVAS_CTX.moveTo(start[0], start[1] + d);
-                CANVAS_CTX.lineTo(finish[0], finish[1] + d);
-                CANVAS_CTX.stroke();
+                CANVAS_CTX.moveTo(start[0], start[1] + d)
+                CANVAS_CTX.lineTo(finish[0], finish[1] + d)
+                CANVAS_CTX.stroke()
                 CANVAS_CTX.setLineDash([])
             }
             if (finish) {
-                CANVAS_CTX.beginPath();
+                CANVAS_CTX.beginPath()
                 CANVAS_CTX.fillRect(finish[0] - 4, finish[1] - 4 + d, 8, 8)
-                CANVAS_CTX.stroke();
+                CANVAS_CTX.stroke()
             }
         })
         var focused = []
@@ -113,7 +113,7 @@ P.check_distance = {
     },
     action_hex(h) {
         if (SID === SOUTH_PACIFIC_SCENARIO && h === OAHU || SID === BURMA_SCENARIO && h === SINGAPORE || h > LAST_BOARD_HEX) {
-            return;
+            return
         }
         while (LOCAL_STATE.points.includes(h)) {
             if (LOCAL_STATE.points.pop() === h) {
@@ -169,7 +169,7 @@ function get_hex_path(from, to) {
 
 }
 
-function check_unit_supply() {
+function menu_check_unit_supply() {
     LOCAL_STATUS = "check_unit_supply"
     LOCAL_STATE = {}
     P.check_unit_supply._begin()
@@ -177,7 +177,7 @@ function check_unit_supply() {
     on_update()
 }
 
-function check_distance() {
+function menu_check_distance() {
     LOCAL_STATUS = "check_distance"
     LOCAL_STATE = {}
     P.check_distance._begin()
@@ -201,30 +201,12 @@ var send_action_with_oos = function (a, b, valid = false, extra) {
     }
     if (extra) {
         payload.push(...extra)
-        type += extra.length << 8
     }
     payload[0] = type
     if (payload.length === 1) {
         payload = undefined
     }
     return original_send_action(a, b, payload)
-}
-
-function validate_action(verb, noun) {
-    if (params.mode === "replay" || params.mode === "debug")
-        return false
-    // Reset action list here so we don't send more than one action per server prompt!
-    if (noun !== undefined) {
-        var realnoun = Array.isArray(noun) ? noun[0] : noun
-        if (view.actions && view.actions[verb] && view.actions[verb].includes(realnoun)) {
-            return true
-        }
-    } else {
-        if (view.actions && view.actions[verb]) {
-            return true
-        }
-    }
-    return false
 }
 
 function try_to_avoid_zoi(hex) {

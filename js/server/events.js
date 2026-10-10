@@ -311,7 +311,7 @@ cards[find_card(JP, 17)].after_unit_activation = function (u) {
     }
     if (G.offensive.active_units[JP].filter(u => is_cv_unit(pieces[u])).length) {
         call("rule_violation", {rule: SAVO_RULE})
-        return;
+        return
     }
     var service = null
     G.offensive.active_units[R].forEach(u => service = pieces[u].class)
@@ -837,9 +837,9 @@ function set_kamikaze_able_battles() {
     for_each_unit_on_map((u, piece, location) => {
         if (piece.faction === JP && piece.class === "air") {
             in_range_on_map(location, piece.ebr, G.offensive.battle_hexes
-                    .filter(h => get_distance(h, TOKYO) <= 11
+                .filter(h => get_distance(h, TOKYO) <= 11
                         && set_has(ap_naval_commited, h)),
-                JP)
+            JP)
                 .forEach(h => set_add(battles, h))
         }
     })
@@ -919,11 +919,11 @@ P.kamikaze_attack = {
             L.allowed_units = []
             var hexes_range = in_range_on_map(location, pieces[u].ebr, G.offensive.kamikaze, JP)
             G.offensive.active_units[AP].forEach(ap => {
-                    var bh = get_unit_battle_hex(ap)
-                    if (pieces[ap].faction === AP && pieces[ap].class === "naval" && unit_on_board(ap) && set_has(hexes_range, bh)) {
-                        set_add(L.allowed_units, ap)
-                    }
+                var bh = get_unit_battle_hex(ap)
+                if (pieces[ap].faction === AP && pieces[ap].class === "naval" && unit_on_board(ap) && set_has(hexes_range, bh)) {
+                    set_add(L.allowed_units, ap)
                 }
+            }
             )
             L.stage++
             L.hits = 2
@@ -2119,7 +2119,7 @@ cards[find_card(AP, 38)].before_commit_offensive = function () {
         }
     })
     if (!cn_active) {
-        return "At least one Chinese army should be activated.";
+        return "At least one Chinese army should be activated."
     }
 }
 
@@ -2171,12 +2171,12 @@ cards[find_card(AP, 50)].after_unit_activation = function () {
         }
     })
     L.allowed_units = L.possible_units.filter(u => {
-            var piece = pieces[u]
-            return !set_has(G.offensive.active_units[AP], u) &&
+        var piece = pieces[u]
+        return !set_has(G.offensive.active_units[AP], u) &&
                 (piece.service === "army" && (army > 0 || naval <= 1)
                     || piece.service === "navy" && (army <= 0 || naval > 1 || naval === 0 && !piece.br && piece.class === "naval")
                 )
-        }
+    }
     )
 }
 
@@ -2367,7 +2367,7 @@ P.airborne_landing = {
         var unit = ap_army("11_d")
         if (G.location[unit] > LAST_BOARD_HEX) {
             end()
-            return;
+            return
         }
         if (set_has(G.offensive.active_units[AP], unit)) {
             return

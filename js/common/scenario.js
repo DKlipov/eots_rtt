@@ -710,11 +710,11 @@ function before_victory_check() {
         }
         if (is_space_controlled(hex_to_int(hex_data.id), AP)) {
             no_capture = false
-            break;
+            break
         }
     }
     if (no_capture) {
-        change_political_will(-1, "no AP control of any hex originally controlled by the JP");
+        change_political_will(-1, "no AP control of any hex originally controlled by the JP")
     }
     //17.11.26. At the end of the game if the War in Europe is in a box with a
     //negative number the US PW is reduced by one prior to scoring.

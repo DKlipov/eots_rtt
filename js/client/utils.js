@@ -12,15 +12,15 @@ function hex_in_map(x, y) {
 function get_element_weight(e) {
     var marker = !e.thing || e.thing.my_action !== "unit"
     if (marker && e.classList.contains("top")) {
-        return 64000;
+        return 64000
     } else if (marker) {
-        return 0;
+        return 0
     }
-    var value = 0;
+    var value = 0
     var unit = e.thing.my_id
     var piece = pieces[unit]
     if (piece.garrison) {
-        return 0;
+        return 0
     }
     if (piece.faction === G.offensive.attacker) {
         value += 32000
@@ -32,13 +32,13 @@ function get_element_weight(e) {
         value += 4000
     }
     if (piece.class === "naval") {
-        value += 1000;
+        value += 1000
     } else if (piece.class === "ground") {
-        value += 7000;
+        value += 7000
     } else if (piece.class === "hq") {
-        value += 8000;
+        value += 8000
     } else if (piece.class === "air") {
-        value += 9000;
+        value += 9000
     }
     // if (set_has(G.offensive.active_units[piece.faction], unit)) {
     //     value += 512
@@ -51,7 +51,7 @@ function get_element_weight(e) {
     } else if (piece.service !== "navy") {
         value += 64
     }
-    return value;
+    return value
 }
 
 function hex_center(i) {
@@ -70,8 +70,8 @@ function hex_center(i) {
             // display TUNNEL_BOX directly to the left of the blue singapore label
             const box = map_layout.label_singapore
             var sing_left_coord = center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
-            sing_left_coord[0] -= 47;
-            return sing_left_coord;
+            sing_left_coord[0] -= 47
+            return sing_left_coord
         }
     } else if (SID === SOUTH_PACIFIC_SCENARIO && i >= OAHU) {
         const box = map_layout.h_5808

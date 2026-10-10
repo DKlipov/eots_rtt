@@ -1,38 +1,31 @@
 const ICONS = {
-    B0: '<span class="dice B d0"></span>',
-    B1: '<span class="dice B d1"></span>',
-    B2: '<span class="dice B d2"></span>',
-    B3: '<span class="dice B d3"></span>',
-    B4: '<span class="dice B d4"></span>',
-    B5: '<span class="dice B d5"></span>',
-    B6: '<span class="dice B d6"></span>',
-    B7: '<span class="dice B d7"></span>',
-    B8: '<span class="dice B d8"></span>',
-    B9: '<span class="dice B d9"></span>',
-    R0: '<span class="dice R d0"></span>',
-    R1: '<span class="dice R d1"></span>',
-    R2: '<span class="dice R d2"></span>',
-    R3: '<span class="dice R d3"></span>',
-    R4: '<span class="dice R d4"></span>',
-    R5: '<span class="dice R d5"></span>',
-    R6: '<span class="dice R d6"></span>',
-    R7: '<span class="dice R d7"></span>',
-    R8: '<span class="dice R d8"></span>',
-    R9: '<span class="dice R d9"></span>',
-    W0: '<span class="die white d0"></span>',
-    W1: '<span class="die white d1"></span>',
-    W2: '<span class="die white d2"></span>',
-    W3: '<span class="die white d3"></span>',
-    W4: '<span class="die white d4"></span>',
-    W5: '<span class="die white d5"></span>',
-    W6: '<span class="die white d6"></span>',
-    // R0: '<span class="die red d0"></span>',
-    // R1: '<span class="die red d1"></span>',
-    // R2: '<span class="die red d2"></span>',
-    // R3: '<span class="die red d3"></span>',
-    // R4: '<span class="die red d4"></span>',
-    // R5: '<span class="die red d5"></span>',
-    // R6: '<span class="die red d6"></span>',
+    B0: '<span class="xdice B d0"></span>',
+    B1: '<span class="xdice B d1"></span>',
+    B2: '<span class="xdice B d2"></span>',
+    B3: '<span class="xdice B d3"></span>',
+    B4: '<span class="xdice B d4"></span>',
+    B5: '<span class="xdice B d5"></span>',
+    B6: '<span class="xdice B d6"></span>',
+    B7: '<span class="xdice B d7"></span>',
+    B8: '<span class="xdice B d8"></span>',
+    B9: '<span class="xdice B d9"></span>',
+    R0: '<span class="xdice R d0"></span>',
+    R1: '<span class="xdice R d1"></span>',
+    R2: '<span class="xdice R d2"></span>',
+    R3: '<span class="xdice R d3"></span>',
+    R4: '<span class="xdice R d4"></span>',
+    R5: '<span class="xdice R d5"></span>',
+    R6: '<span class="xdice R d6"></span>',
+    R7: '<span class="xdice R d7"></span>',
+    R8: '<span class="xdice R d8"></span>',
+    R9: '<span class="xdice R d9"></span>',
+    W0: '<span class="dice white d0"></span>',
+    W1: '<span class="dice white d1"></span>',
+    W2: '<span class="dice white d2"></span>',
+    W3: '<span class="dice white d3"></span>',
+    W4: '<span class="dice white d4"></span>',
+    W5: '<span class="dice white d5"></span>',
+    W6: '<span class="dice white d6"></span>',
 }
 
 function escape_text(text) {
@@ -222,14 +215,14 @@ function escaped_list(match, p1) {
 
 function on_focus_list(parent) {
     for (var el of parent.children[1].children) {
-        el.onmouseenter();
+        el.onmouseenter()
     }
     on_blur_tip() //prevent unit tooltip from showing
 }
 
 function on_blur_list(parent) {
     for (var el of parent.children[1].children) {
-        el.onmouseleave();
+        el.onmouseleave()
     }
 }
 
