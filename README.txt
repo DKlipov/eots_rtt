@@ -13,3 +13,4 @@ chanhge top color when client-side state processed
 change class list manupilation to world js keywords
 and setting unit.innerHTML also has a world function update_text_html("unit", u, "html code")
 populate_generic("unit", u, countrs.organic_small)
+remove // for some reason, the layout gets completly
