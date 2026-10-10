@@ -281,10 +281,8 @@ function on_update() {
             }
         }
     }
-    for (var thing of world.things["unit"]) {
-        if (thing) {
-            thing.element.classList.toggle("unselect", !!(G.unselect && set_has(G.unselect, thing.my_id)))
-        }
+    if (G.unselect) {
+        G.unselect.forEach(u => update_keyword("unit", u, "unselect"))
     }
 
     if (G.pow > 0) {
