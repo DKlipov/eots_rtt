@@ -320,13 +320,9 @@ class Thing {
         return this
     }
 
-    // XXX: modified (small_dx, small_dy, small_threshold, sort_children)
-    stack(rect, dx, dy, major_dx, major_dy, minor_dx, minor_dy, threshold, wrap, gravity_x, gravity_y, small_dx, small_dy, small_threshold, sort_children) {
+    // options: { dx, dy, major_dx, major_dy, minor_dx, minor_dy, threshold, wrap, gravity_x, gravity_y, shadow }
+    stack(rect, options) {
         world.parent.appendChild(this.element)
-
-        // XXX
-        if (!sort_children)
-            sort_children = a => a
 
         if (Array.isArray(rect))
             var [ x, y, w, h ] = rect
@@ -338,18 +334,26 @@ class Thing {
         this.element.style.height = Math.round(h) + "px"
 
         this.is_stack = true
-        this.my_stack = {
-            w, h,
-            dx, dy, // normal
-            major_dx, major_dy, // expanded major-axis
-            minor_dx, minor_dy, // expanded minor-axis
-            threshold,
-            wrap,
-            gravity_x, gravity_y,
-            small_dx, small_dy, small_threshold, // overrided for small stacks,
-            shadow: 8,
-            sort_children
-        }
+        this.my_stack = { w, h, ...options }
+
+        // default options if missing
+        this.my_stack.dx ??= -12
+        this.my_stack.dy ??= -12
+        this.my_stack.major_dx ??= 0
+        this.my_stack.major_dy ??= -h - 6
+        this.my_stack.minor_dx ??= 0
+        this.my_stack.minor_dy ??= w + 6
+        this.my_stack.threshold ??= 1
+        this.my_stack.wrap ??= 1000
+        this.my_stack.gravity_x ??= 0.5
+        this.my_stack.gravity_y ??= 0.5
+        this.my_stack.shadow ??= 0
+
+        // XXX new options
+        this.my_stack.small_dx ??= 0
+        this.my_stack.small_dy ??= 0
+        this.my_stack.small_threshold ??= 0
+        this.my_stack.sort ??= a => a
 
         world.stack_list.push(this)
 
@@ -512,11 +516,10 @@ function sort_board(x_weight = 1, y_weight = 2) {
 }
 
 // XXX: modified
-function define_stack(action, id, rect, dx = -12, dy = -12, major_dx = dx, major_dy = dy, minor_dx = 0, minor_dy = 0, threshold = 1, wrap = 1000, small_dx,
-                      small_dy, small_treshhold, sort_children, gravity_x = 0.5, gravity_y = 0.5) {
+function define_stack(action, id, rect, options) {
     return define_thing(action, id)
         .keyword("stack")
-        .stack(rect, dx, dy, major_dx, major_dy, minor_dx, minor_dy, threshold, wrap, gravity_x, gravity_y, small_dx, small_dy, small_treshhold, sort_children)
+        .stack(rect, options)
 }
 
 function define_layout(action, id, rect, keywords, styles) {
@@ -677,20 +680,20 @@ function define_space_grid(action, order, cols, rows, layout, gapx, gapy, keywor
     _define_grid(define_space, action, order, cols, rows, layout, gapx, gapy, [ keywords ])
 }
 
-function define_stack_track_auto(action, a, b, layout, gap=0, ...args) {
-    _define_track_auto(define_stack, action, a, b, layout, gap, args)
+function define_stack_track_auto(action, a, b, layout, gap=0, options) {
+    _define_track_auto(define_stack, action, a, b, layout, gap, [ options ])
 }
 
-function define_stack_track_h(action, a, b, layout, gap=0, ...args) {
-    _define_track_h(define_stack, action, a, b, layout, gap, args)
+function define_stack_track_h(action, a, b, layout, gap = 0, options) {
+    _define_track_h(define_stack, action, a, b, layout, gap, [ options ])
 }
 
-function define_stack_track_v(action, a, b, layout, gap=0, ...args) {
-    _define_track_v(define_stack, action, a, b, layout, gap, args)
+function define_stack_track_v(action, a, b, layout, gap = 0, options) {
+    _define_track_v(define_stack, action, a, b, layout, gap, [ options ])
 }
 
-function define_stack_grid(action, order, cols, rows, layout, gapx, gapy, ...args) {
-    _define_grid(define_stack, action, order, cols, rows, layout, gapx, gapy, args)
+function define_stack_grid(action, order, cols, rows, layout, gapx, gapy, options) {
+    _define_grid(define_stack, action, order, cols, rows, layout, gapx, gapy, [ options ])
 }
 
 /* UPDATE THINGS */
@@ -887,11 +890,17 @@ function _layout_stacks() {
     function _(x) { return (typeof x === "function") ? x(n, stack) : x }
     for (var stack of world.stack_list) {
         var padding = stack.element.parentElement.my_padding
+        var shadow = stack.my_stack.shadow
 
         var n = stack.element.children.length
-        if (n === 0)
+        if (n === 0) {
+            if (shadow)
+                stack.element.classList.remove("shadow")
             continue
+        }
 
+        var always_expand = n <= _(stack.my_stack.threshold)
+        var expand = world.focus === stack || always_expand
         // XXX: new
         var dx = stack.my_stack.dx
         var dy = stack.my_stack.dy
@@ -901,8 +910,6 @@ function _layout_stacks() {
             dy = stack.my_stack.small_dy
         }
 
-	var always_expand = n <= _(stack.my_stack.threshold)
-	var expand = world.focus === stack || always_expand
         var z = (world.focus === stack ? 51 : null) // XXX: 51 instead of 1
         var major_dx = expand ? _(stack.my_stack.major_dx) : _(dx) // XXX: dx instead of my_stack.dx
         var major_dy = expand ? _(stack.my_stack.major_dy) : _(dy) // XXX: dy instead of my_stack.dy
@@ -938,7 +945,7 @@ function _layout_stacks() {
         start_y -= stack.element.offsetTop
 
         // XXX: custom sort stack elements
-        var children = stack.my_stack.sort_children(Array.from(stack.element.children), world.focus)
+        var children = stack.my_stack.sort(Array.from(stack.element.children), world.focus)
 
         var i = 0, k = 0
         var bounds = [ Infinity, Infinity, -Infinity, -Infinity ]
@@ -963,7 +970,6 @@ function _layout_stacks() {
             child.style.zIndex = z++ // XXX: increasing z because of sort order
         }
 
-        var shadow = stack.my_stack.shadow
         if (shadow) {
             stack.element.classList.toggle("shadow", world.focus === stack && !always_expand)
             if (world.focus === stack) {

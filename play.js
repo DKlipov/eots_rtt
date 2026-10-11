@@ -10169,51 +10169,54 @@ function sort_unit_stack(a, focus) {
 function define_s_loc(id, rect) {
     define_stack("s-loc", id,
         rect,
-        ...VERTICAL_STACK_PARAMS,
-        sort_unit_stack
+        { ...VERTICAL_STACK_PARAMS, sort: sort_unit_stack }
     )
 }
 
 const HEX_X_SIZE = 48.0
 const HEX_Y_SIZE = 55.25
 
-const TURN_STACK_PARAMS = [
+const TURN_STACK_PARAMS = {
     // stack parameters:
-    5, 0, // closed offset
-    48, 0, // open offset (major axis)
-    0, 35, // open offset (minor axis)
-    1, // threshold to auto-open
-    8, // wrap limit
-    18, 0, 3
-]
-const TRACK_STACK_PARAMS = [
+    dx: 5, dy: 0, // closed offset
+    major_dx: 48, major_dy: 0, // open offset (major axis)
+    minor_dx: 0, minor_dy: 35, // open offset (minor axis)
+    threshold: 1, // threshold to auto-open
+    wrap: 8, // wrap limit
+    small_dx: 18, small_dy: 0, small_threshold: 3,
+    shadow: 6
+}
+const TRACK_STACK_PARAMS = {
     // stack parameters:
-    10, 0, // closed offset
-    48, 0, // open offset (major axis)
-    0, 35, // open offset (minor axis)
-    2, // threshold to auto-open
-    8, // wrap limit
-    18, 0, 4
-]
-const VERTICAL_STACK_PARAMS = [
+    dx: 10, dy: 0, // closed offset
+    major_dx: 48, major_dy: 0, // open offset (major axis)
+    minor_dx: 0, minor_dy: 35, // open offset (minor axis)
+    threshold: 2, // threshold to auto-open
+    wrap: 8, // wrap limit
+    small_dx: 18, small_dy: 0, small_threshold: 4,
+    shadow: 6
+}
+const VERTICAL_STACK_PARAMS = {
     // stack parameters:
-    -2, -3, // closed offset
-    0, -50, // open offset (major axis)
-    50, 0, // open offset (minor axis)
-    1, // threshold to auto-open
-    8, // wrap limit
-    -6, -9, 4
-]
+    dx: -2, dy: -3, // closed offset
+    major_dx: 0, major_dy: -50, // open offset (major axis)
+    minor_dx: 50, minor_dy: 0, // open offset (minor axis)
+    threshold: 1, // threshold to auto-open
+    wrap: 8, // wrap limit
+    small_dx: -6, small_dy: -9, small_threshold: 4,
+    shadow: 6
+}
 
-const VERTICAL_TURN_STACK_PARAMS = [
+const VERTICAL_TURN_STACK_PARAMS = {
     // stack parameters:
-    0, -3, // closed offset
-    0, -50, // open offset (major axis)
-    50, 0, // open offset (minor axis)
-    1, // threshold to auto-open
-    8, // wrap limit
-    0, -6, 3
-]
+    dx: 0, dy: -3, // closed offset
+    major_dx: 0, major_dy: -50, // open offset (major axis)
+    minor_dx: 50, minor_dy: 0, // open offset (minor axis)
+    threshold: 1, // threshold to auto-open
+    wrap: 8, // wrap limit
+    small_dx: 0, small_dy: -6, small_threshold: 3,
+    shadow: 6
+}
 
 const MANCHURIA_1 = hex_to_int(3302)
 const MANCHURIA_2 = hex_to_int(3303)
@@ -10644,12 +10647,8 @@ function on_init(scenario, game_options, static_view) {
             define_board("#map", 1275, 825, [12, 12, 12, 12])
             map_info = SOUTH_PAC_BOARD_INFO
 
-            define_stack_track_h("track", 0, 1, map_layout.track_strat_record_0_1, 0,
-                ...VERTICAL_STACK_PARAMS
-            )
-            define_stack("track", 2, map_layout.track_strat_record_2,
-                ...VERTICAL_TURN_STACK_PARAMS
-            )
+            define_stack_track_h("track", 0, 1, map_layout.track_strat_record_0_1, 0, VERTICAL_STACK_PARAMS)
+            define_stack("track", 2, map_layout.track_strat_record_2, VERTICAL_TURN_STACK_PARAMS)
 
             define_s_loc(1400, center_rect(map_layout.h_5808, 45, 45))
             define_space("action_hex", 1400, center_rect(map_layout.h_5808, 68, 68))
@@ -10731,9 +10730,7 @@ function on_init(scenario, game_options, static_view) {
     }
     define_stack("s-loc", CHINA_BOX,
         map_layout.box_air_unit_in_china,
-        ...TRACK_STACK_PARAMS,
-        sort_unit_stack,
-        0.22,
+        { ...TRACK_STACK_PARAMS, sort: sort_unit_stack }
     )
 
     define_space("action_hex", CHINA_BOX, map_layout.box_air_unit_in_china, "china_box")
@@ -10743,9 +10740,9 @@ function on_init(scenario, game_options, static_view) {
     define_layout_track_auto("pw", map_info.pw_a, map_info.pw_b, map_layout.track_political_will, 0)
     define_layout_track_auto("wie", map_info.wie_a, map_info.wie_b, map_layout.track_wie, 0)
 
-    define_stack_track_auto("turn", map_info.turn_a, map_info.turn_b, map_layout.track_game_turn, 0, ...map_info.TURN_STACK_PARAMS)
+    define_stack_track_auto("turn", map_info.turn_a, map_info.turn_b, map_layout.track_game_turn, 0, map_info.TURN_STACK_PARAMS)
     define_space_track_auto("turn_box", map_info.turn_a + TURN_BOX, map_info.turn_b + TURN_BOX, map_layout.track_game_turn, 0)
-    define_stack_track_auto("track", map_info.track_a, map_info.track_b, map_layout.track_strat_record, 0, ...map_info.TRACK_STACK_PARAMS)
+    define_stack_track_auto("track", map_info.track_a, map_info.track_b, map_layout.track_strat_record, 0, map_info.TRACK_STACK_PARAMS)
 
     if (map_layout.track_india_status !== undefined) {
         define_layout_track_h("india", 0, 4, map_layout.track_india_status, 0)
