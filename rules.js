@@ -3,6 +3,8 @@
 /** main*/
 "use strict"
 
+/* global exports console */
+
 var G, L, R, V, P = {}
 
 const ROLES = ["Japan", "Allies"]
@@ -19732,6 +19734,7 @@ SCENARIO_DATA[BURMA_SCENARIO].before_unit_activation = function () {
     filter_activation_units((u) => G.location[u] !== SINGAPORE || pieces[u].class !== "naval"
         || G.offensive.stage === ATTACK_STAGE && G.offensive.type === EC && G.offensive.offensive_card === OPERATION_C, JP)
 }
+
 /*}}} import server/scenario_setup.js*/
 /*{{{ import server/framework.js*/
 /* FRAMEWORK */
@@ -19833,12 +19836,12 @@ exports.setup = function (seed, scenario, options) {
     return G
 }
 
-exports.static_view = function (game) {
+exports.static_view = function (state) {
     var SV = null
     if (typeof on_static_view === "function") {
         G = state
         L = null
-        R = role
+        R = null
         V = null
         _load()
         SV = on_static_view()
