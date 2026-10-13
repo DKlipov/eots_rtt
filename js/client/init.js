@@ -468,7 +468,7 @@ function set_map_size(w, h) {
 check_supply = function () {
     if (!G.client_supply) {
         world.original_oos = G.oos
-        world.original_br = G.br
+        world.original_br = G.burma_road
     }
     basic_check_supply()
     G.client_supply = 1

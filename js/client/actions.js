@@ -190,7 +190,7 @@ var original_send_action = send_action
 var send_action_with_oos = function (a, b, valid = false, extra) {
     var type = 0
     var payload = [0]
-    if (world.original_br !== G.br) {
+    if (world.original_br !== G.burma_road) {
         payload.push(G.burma_road)
         type += 1
     }
