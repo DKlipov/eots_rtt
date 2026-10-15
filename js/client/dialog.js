@@ -43,18 +43,6 @@ function hide_dialog(id) {
     on_blur_tip()
 }
 
-function toggle_dialog_collapse(id) {
-    var dialog_body = document.getElementById(id).querySelector(".dialog_body")
-    var dialog_x = document.getElementById(id).querySelector(".dialog_x")
-    if (dialog_body.className.includes("hide")) {
-        dialog_body.classList.remove("hide")
-        dialog_x.textContent = "A"
-    } else {
-        dialog_body.classList.add("hide")
-        dialog_x.textContent = "V"
-    }
-}
-
 //BR// Makes an element/dialog draggable by the player
 function dragElement(e) {
     var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0

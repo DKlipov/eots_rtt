@@ -7298,6 +7298,7 @@ function map_group_by(items, callback) {
     }
     return groups
 }
+
 /*}}} import common/library.js*/
 
 function hex_to_int(i) {
@@ -11259,18 +11260,6 @@ function hide_dialog(id) {
     on_blur_tip()
 }
 
-function toggle_dialog_collapse(id) {
-    var dialog_body = document.getElementById(id).querySelector(".dialog_body")
-    var dialog_x = document.getElementById(id).querySelector(".dialog_x")
-    if (dialog_body.className.includes("hide")) {
-        dialog_body.classList.remove("hide")
-        dialog_x.textContent = "A"
-    } else {
-        dialog_body.classList.add("hide")
-        dialog_x.textContent = "V"
-    }
-}
-
 //BR// Makes an element/dialog draggable by the player
 function dragElement(e) {
     var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0
@@ -11851,22 +11840,9 @@ function draw_list() {
     })
     return {hand}
 }
+
 /*}}} import client/dialog.js*/
 /*{{{ import client/update.js*/
-function push_stack(stk, elt) {
-    stk.unshift(elt)
-    elt.my_stack = stk
-}
-
-function is_active_card(card) {
-    for (var a of CARD_ACTIONS) {
-        if (G.actions && G.actions[a] && set_has(G.actions[a], card)) {
-            return true
-        }
-    }
-    return false
-}
-
 function update_hand(side) {
     var fo_card
     if (G.future_offensive[side] > 0) {

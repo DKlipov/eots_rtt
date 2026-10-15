@@ -1,17 +1,3 @@
-function push_stack(stk, elt) {
-    stk.unshift(elt)
-    elt.my_stack = stk
-}
-
-function is_active_card(card) {
-    for (var a of CARD_ACTIONS) {
-        if (G.actions && G.actions[a] && set_has(G.actions[a], card)) {
-            return true
-        }
-    }
-    return false
-}
-
 function update_hand(side) {
     var fo_card
     if (G.future_offensive[side] > 0) {
