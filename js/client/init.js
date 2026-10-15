@@ -1,3 +1,12 @@
+function on_reply(q, response) {
+    if (q === "original_control")
+        scenario_data().original_control ??= response
+    if (q === "combat")
+        update_combat_window(response)
+    if (q === "check_unit_supply")
+        P.check_unit_supply.show_supply(response)
+}
+
 function clear_paths() {
     CANVAS_CTX.clearRect(0, 0, CANVAS.width, CANVAS.height)
 }
@@ -486,6 +495,13 @@ function on_init(scenario, game_options, static_view) {
     init_preference_checkbox("fullcontrol", false)
     init_preference_checkbox("hidezoi", false)
 
+    create_window("window_cards_jp", "Japanese Event Cards", update_window_cards_jp)
+    create_window("window_cards_ap", "Allied Event Cards", update_window_cards_ap)
+    create_window("window_pw", "Political Status", update_window_pw)
+    create_window("window_vp", "Victory Points", update_window_vp)
+    create_window("window_eliminated", "Eliminated Units", update_window_eliminated)
+    create_window("window_combat", "Combat X")
+
     // world.tip.addEventListener("touchstart", function () {
     //     on_blur_tip()
     // })
@@ -614,7 +630,7 @@ function on_init(scenario, game_options, static_view) {
         battle.element.index = i
         battle.element.addEventListener("mousedown", evt => {
             if (world.focus !== (evt.target.parentElement.thing)) {
-                send_query({name: "battle_info", index: evt.target.index})
+                send_query("combat", evt.target.index)
             }
         })
         var landing = define_marker("landing", i, "conflict landing top")
@@ -622,7 +638,7 @@ function on_init(scenario, game_options, static_view) {
         landing.element.index = i
         landing.element.addEventListener("mousedown", evt => {
             if (world.focus !== (evt.target.parentElement.thing)) {
-                send_query({name: "battle_info", index: evt.target.index})
+                send_query("combat", evt.target.index)
             }
         })
     }

@@ -245,14 +245,14 @@ exports.finish = function (state, result, message) {
     return G
 }
 
-exports.query = function (state, role, q) {
+exports.query = function (state, role, q, params) {
     G = state
     L = G.L
     R = role
     V = null
 
     _load()
-    var result = on_query(q)
+    var result = on_query(q, params)
     _save()
 
     return result

@@ -1,6 +1,6 @@
-function on_query(q, params, b) {
-    if (q.name === "battle_info") {
-        return battle_info_query(q.index)
+function on_query(q, params) {
+    if (q === "combat") {
+        return combat_query(params)
     }
     if (q === "original_control") {
         return scenario_data().original_control
@@ -11,8 +11,11 @@ function vp_query() {
     return get_victory()
 }
 
-//could corrupt G, run only in safe context
-function battle_info_query(battle) {
+function combat_query(battle) {
+    // we could corrupt G, so make a copy to work on
+    var save_G = G
+    G = object_copy(G)
+
     var battle_hex = G.offensive.battle_names[battle]
     if (!set_has(G.offensive.battle_hexes, battle_hex)) {
         create_battle_hex(battle_hex)
@@ -60,6 +63,10 @@ function battle_info_query(battle) {
     get_battle_modifiers(AP)
     result.ground_rm[AP] = G.offensive.battle.roll_modifiers
     result.ground_log[AP] = G.log
+
+    // restore saved G
+    G = save_G
+
     return result
 }
 

@@ -257,7 +257,7 @@ class Thing {
     // XXX: added
     tooltip_image(tip) {
         var id = this.my_id
-        if (is_mobile()) {
+        if ("ontouchstart" in window) {
             this.element.addEventListener("touchstart", function () {
                 if (typeof tip === "function") long_tap(() => tip(id, true))
             })

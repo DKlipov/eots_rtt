@@ -1,6 +1,8 @@
 /** main*/
 "use strict"
 
+const ROLES = ["Japan", "Allies"]
+
 function log(){}
 function capture_hex(){}
 

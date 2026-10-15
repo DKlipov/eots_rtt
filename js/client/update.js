@@ -152,9 +152,13 @@ function update_role_info() {
     }
 }
 
-
 function on_update() {
     begin_update()
+
+    // TODO: why is this necessary?
+    if (!scenario_data().original_control)
+        send_query("original_control")
+
     check_supply()
     if (G.actions && R >= 0 && !init_overstack_check(true, R)) {
         L.hexes = []
@@ -208,7 +212,8 @@ function on_update() {
         draw_paths()
     }
 
-    document.getElementById("vp_check_button").classList.toggle("disabled", CAMPAIGN_SCENARIOS.includes(G.sid))
+    document.getElementById("vp_check_button").hidden = CAMPAIGN_SCENARIOS.includes(G.sid)
+
     if (G.pow <= 0) {
         G.capture = []
     }

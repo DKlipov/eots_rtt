@@ -20,44 +20,6 @@
 </head>
 <body>
 
-<div id="event_cards_ap" class="dialog">
-    <div class="dialog_header">Allied Event Cards</div>
-    <div class="dialog_x" onclick="hide_dialog('event_cards_ap')">&#x274c;</div>
-    <div class="dialog_body"></div>
-</div>
-
-<div id="event_cards_jp" class="dialog">
-    <div class="dialog_header">Japanese Event Cards</div>
-    <div class="dialog_x" onclick="hide_dialog('event_cards_jp')">&#x274c;</div>
-    <div class="dialog_body"></div>
-</div>
-
-<div id="vp_check" class="dialog">
-    <div class="dialog_header">Victory Points</div>
-    <div class="dialog_body"></div>
-    <div class="dialog_x" onclick="hide_dialog('vp_check')">&#x274c;</div>
-</div>
-
-<div id="elim_check" class="dialog">
-    <div class="dialog_header">Eliminated Units</div>
-    <div class="dialog_body"></div>
-    <div class="dialog_x" onclick="hide_dialog('elim_check')">&#x274c;</div>
-</div>
-
-<div id="pw_check" class="dialog">
-    <div class="dialog_header">Political Status</div>
-    <div class="dialog_body"></div>
-    <div class="dialog_x" onclick="hide_dialog('pw_check')">&#x274c;</div>
-</div>
-
-<div id="battle_info" class="dialog">
-    <div class="dialog_header">Battle info</div>
-    <div class="dialog_body"></div>
-    <div class="dialog_x" onclick="hide_dialog('battle_info')">&#x274c;</div>
-</div>
-
-<div id="tip" class="hide"></div>
-
 <header>
     <div id="toolbar">
         <details>
@@ -79,16 +41,11 @@
         <details id="info_menu">
             <summary><img src="/images/wooden-sign.svg"></summary>
             <menu>
-                <li onclick="toggle_dialog('event_cards','event_cards_jp')">
-                    <div>Inspect Japanese Cards</div>
-                <li onclick="toggle_dialog('event_cards','event_cards_ap')">
-                    <div>Inspect Allied Cards</div>
-                <li onclick="toggle_dialog('pw_check')" id="pw_check_button">
-                    <div>Inspect Political Status</div>
-                <li onclick="toggle_dialog('vp_check')" id="vp_check_button">
-                    <div>Inspect Victory Points</div>
-                <li onclick="toggle_dialog('elim_check')" id="elim_check_button">
-                    <div>Inspect Eliminated Units</div>
+                <li onclick="toggle_window('window_cards_jp')"> Inspect Japanese Cards
+                <li onclick="toggle_window('window_cards_ap','event_cards_ap')"> Inspect Allied Cards
+                <li onclick="toggle_window('window_pw')" id="pw_check_button"> Inspect Political Status
+                <li onclick="toggle_window('window_vp')" id="vp_check_button"> Inspect Victory Points
+                <li onclick="toggle_window('window_eliminated')" id="elim_check_button"> Inspect Eliminated Units
             </menu>
         </details>
         <details id="supply_menu">
@@ -137,6 +94,7 @@
 
 </main>
 
+<div id="tip" hidden></div>
 <footer id="status"></footer>
 
 </body>
