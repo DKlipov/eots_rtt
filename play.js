@@ -10805,11 +10805,11 @@ function on_init(scenario, game_options, static_view) {
     define_marker("divisions", 0, counters.divisions_china)
     for (let i = 1; i < pieces.length; ++i) {
         let piece = pieces[i]
-        piece.element = define_piece("unit", i, (piece.faction ? "ap " : "jp ") + piece.counter).tooltip_image(unit_tooltip_image)
+        piece.element = define_piece("unit", i, (piece.faction ? "ap " : "jp ") + piece.counter).tip_magic(focus_unit, blur_unit)
     }
     for (let i = 1; i < cards.length; ++i) {
         let card = cards[i]
-        card.element = define_card("card", i, `card_${card.faction ? "ap" : "jp"}_${card.num}`).tooltip_image(on_focus_card_tip)
+        card.element = define_card("card", i, `card_${card.faction ? "ap" : "jp"}_${card.num}`)
         card.element.card = i
     }
     define_panel("#jp_hand", "hand", JP)
@@ -11896,6 +11896,8 @@ function update_role_info() {
 function on_update() {
     begin_update()
 
+    L = {} // for shared rules/play code and client-side states
+
     // TODO: why is this necessary?
     if (!scenario_data().original_control)
         send_query("original_control")
@@ -12327,6 +12329,63 @@ function hex_center(i) {
 
 /* }}} */
 /* {{{ js/client/framework.js */
+/* UNIT ZOOMED TOOLTIP & HQ RANGE DISPLAY TOGGLE */
+
+function focus_unit(id) {
+    const piece = pieces[id]
+
+    // Show BOTH sides of the marker
+    var html = `<div class="unit-tip-list"><div class="piece unit ${piece.counter}"></div>`
+    if (piece.class !== "hq" && (!piece.start_reduced || !piece.notreplaceable))
+        html += `<div class="piece unit ${piece.counter} reduced"></div>`
+    html += "</div>"
+    world.tip.className = "unit-tip"
+    world.tip.innerHTML = html
+
+    // show HQ range
+    if (piece.class === "hq" && G.location[id] < LAST_BOARD_HEX) {
+        world.hq = id
+        if (id === HQ_CENTRAL_PACIFIC && G.sid === SOUTH_PACIFIC_SCENARIO)
+            world.range = [ hex_to_int(5226), 5 ]
+        else
+            world.range = [ G.location[id], pieces[id].cr ]
+        on_update()
+    }
+}
+
+function blur_unit(id) {
+    // hide HQ range
+    world.hq = 0
+    if (world.range[0]) {
+        world.range = [0, 0]
+        on_update()
+    }
+}
+
+/* LOG & PROMT TEXT FORMATTING */
+
+const card_classes = cards.map(c => `card card_${c?.faction ? "ap" : "jp"}_${c?.num}`)
+const card_names = cards.map(c => c?.name)
+
+const unit_classes = pieces.map(p => `piece unit ${p?.faction ? "ap" : "jp"} ${p?.counter}`)
+const unit_names = pieces.map(p => p?.name)
+
+const hex_names = []
+for (let i = 0; i <= TUNNEL_BOX; ++i) {
+    if (i === CHINA_BOX) {
+        hex_names[i] = "China Box"
+    } else if (i > LAST_BOARD_HEX) {
+        hex_names[i] = "offboard"
+    } else {
+        let hex = int_to_hex(i)
+        let info = map.find(e => e.id === hex)
+        if (info && info.name)
+            hex_names[i] = `${info.name} (${hex})`
+        else
+            hex_names[i] = String(hex)
+    }
+}
+
 const ICONS = {
     B0: '<span class="xdice B d0"></span>',
     B1: '<span class="xdice B d1"></span>',
@@ -12358,13 +12417,27 @@ const ICONS = {
 }
 
 function escape_text(text) {
-    text = String(text)
-    text = text.replace(/[BRW]\d/g, (m) => ICONS[m] ?? m)
-    text = text.replace(/\^(.*?)\^/g, escaped_list)
-    text = text.replace(/C(\d+)/g, sub_card)
-    text = text.replace(/P(\d+)/g, sub_piece)
-    text = text.replace(/H(\d+)/g, sub_hex)
+    text = text.replace(/\^(.*?)\|(.*?)\^/g, escape_list)
+
+    text = escape_icon(text, /\b[BRW]\d\b/g, ICONS)
+
+    text = escape_tip_class(text, /C(\d+)/g, "card-tip", card_classes, card_names)
+    text = escape_tip_light(text, /H(\d+)/g, "hex-tip", "action_hex", hex_names)
+    text = escape_tip_light(text, /P(\d+)/g, "piece-tip", "unit", unit_names)
+
     return text
+}
+
+function escape_list(match, head, body) {
+    if (body.split(",").length <= 3)
+        return body
+    return `<span class="expand-list" onclick="expand_list()">${head}</span><span hidden>${body}</span></span>`
+}
+
+function expand_list() {
+    event.currentTarget.hidden = true
+    event.currentTarget.nextSibling.hidden = false
+    event.stopPropagation()
 }
 
 function on_prompt(text) {
@@ -12462,175 +12535,6 @@ function on_log(text, i) {
     p.innerHTML = escape_text(text)
 
     return p
-}
-
-function format_card_info(c) {
-    var text = "C" + c
-    return escape_text(text)
-}
-
-function sub_card(match, p1) {
-    const c = p1 | 0
-    const cn = "card-tip"
-    return `<span class="${cn}" onmouseenter="on_focus_card_tip(${c})" onclick="on_focus_card_tip(${c})" onmouseleave="on_blur_tip()">${cards[c].name}</span>`
-}
-
-
-function get_piece_elem(p) {
-    return pieces[p].element.element
-}
-
-
-function sub_piece(match, p1) {
-    const piece_id = p1 | 0
-    const name = pieces[piece_id].name
-    return `<span class="piece-tip" onclick="on_click_piece_tip(${piece_id})" onmouseenter="on_focus_piece_tip(${piece_id})" onmouseleave="on_blur_piece_tip(${piece_id})">${name}</span>`
-}
-
-function on_click_piece_tip(z) {
-    scroll_into_view(get_piece_elem(z))
-}
-
-function on_focus_piece_tip(z) {
-    get_piece_elem(z).classList.toggle("tip", true)
-    on_focus_unit_tip(z)
-}
-
-function on_blur_piece_tip(z) {
-    get_piece_elem(z).classList.toggle("tip", false)
-    on_blur_tip()
-}
-
-function get_hex_elem(h) {
-    //perhaps should cache this somewhere ?
-    return lookup_thing("s-loc", h)
-}
-
-function get_hex_name(h) {
-    const hex = int_to_hex(h)
-    const hex_id = map.findIndex((element) => element.id === hex)
-    if (h === CHINA_BOX) {
-        return "China Box"
-    } else if (h > LAST_BOARD_HEX) {
-        return "offboard"
-    } else if (hex_id != -1) {
-        const hex_data = map[hex_id]
-        if (hex_data.name) {
-            return `${hex_data.name} (${hex})`
-        }
-    }
-    return `${hex}`
-}
-
-function expand_list(parent) {
-    parent.children[0].hidden = true
-    parent.children[1].hidden = false
-    event.stopPropagation()
-}
-
-function escaped_list(match, p1) {
-    var ind = p1.indexOf("|")
-    var header = escape_text(p1.substring(0, ind))
-    const text = escape_text(p1.substring(ind + 1))
-    var array = text.split(", ").length
-    var id = "list" + world.list_id++
-    if (array <= 3) {
-        return `<span>${text}</span>`
-    } else {
-        return `<span id="${id}"><span class="list-tip" onclick="expand_list(${id})" onmouseenter="on_focus_list(${id})" onmouseleave="on_blur_list(${id})">&lt;${header}&gt;</span><span hidden>${text}</span></span>`
-    }
-
-}
-
-function on_focus_list(parent) {
-    for (var el of parent.children[1].children) {
-        el.onmouseenter()
-    }
-    on_blur_tip() //prevent unit tooltip from showing
-}
-
-function on_blur_list(parent) {
-    for (var el of parent.children[1].children) {
-        el.onmouseleave()
-    }
-}
-
-function sub_hex(match, p1) {
-    const hex_id = p1 | 0
-    const name = get_hex_name(hex_id)
-    if (hex_id > LAST_BOARD_HEX && hex_id !== CHINA_BOX) {
-        return "offboard"
-    }
-    return `<span class="hex-tip" onclick="on_click_hex_tip(${hex_id})" onmouseenter="on_focus_hex_tip(${hex_id})" onmouseleave="on_blur_hex_tip(${hex_id})">${name}</span>`
-}
-
-
-function on_focus_hex_tip(z) {
-    lookup_thing("action_hex", z).element.classList.toggle("tip", true)
-}
-
-function on_click_hex_tip(z) {
-    scroll_into_view(get_hex_elem(z).element)
-}
-
-function on_blur_hex_tip(z) {
-    lookup_thing("action_hex", z).element.classList.toggle("tip", false)
-    get_hex_elem(z).element.classList.toggle("tip", false)
-}
-
-/* TOOLTIP ON FOCUS */
-
-function unit_tooltip_image(a, onoff) {
-    if (onoff) {
-        on_focus_unit_tip(a)
-    } else {
-        on_blur_tip()
-    }
-}
-
-function on_focus_unit_tip(a) {
-    world.hq = 0
-    world.tip.hidden = false//is_mobile()
-    const piece = pieces[a]
-    // Show BOTH sides of the marker
-    world.tip.innerHTML = `<div class="unit-tip piece ${piece.counter}"></div>`
-    if (piece.class !== "hq" && (!piece.start_reduced || !piece.notreplaceable)) {
-        world.tip.innerHTML += `<div class="unit-tip piece ${piece.counter} reduced"></div>`
-    }
-    world.tip.classList = "zoomed"
-    var prev = world.range[0]
-    if (piece.class === "hq" && G.location[a] < LAST_BOARD_HEX) {
-        world.range = [G.location[a], pieces[a].cr]
-        world.hq = a
-        if (a === HQ_CENTRAL_PACIFIC && G.sid === SOUTH_PACIFIC_SCENARIO) {
-            world.range = [hex_to_int(5226), 5]
-        } else {
-
-        }
-    } else {
-        world.range = [0, 0]
-    }
-    if (prev !== world.range[0]) {
-        on_update()
-    }
-}
-
-function on_blur_tip() {
-    world.tip.hidden = true
-    world.tip.innerHTML = ""
-    world.tip.classList = ''
-    world.hq = 0
-    if (world.range[0]) {
-        world.range = [0, 0]
-        on_update()
-    }
-}
-
-function on_focus_card_tip(c) {
-    world.tip.hidden = false//is_mobile()
-    world.tip.innerHTML = ""
-    const card = cards[c]
-    world.tip.classList = `card card_${card.faction ? "ap" : "jp"}_${card.num}`
 }
 
 /* }}} */

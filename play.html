@@ -41,8 +41,8 @@
         <details id="info_menu">
             <summary><img src="/images/wooden-sign.svg"></summary>
             <menu>
-                <li onclick="toggle_window('window_cards_jp')"> Inspect Japanese Cards
-                <li onclick="toggle_window('window_cards_ap','event_cards_ap')"> Inspect Allied Cards
+                <li onclick="hide_window('window_cards_ap');toggle_window('window_cards_jp')"> Inspect Japanese Cards
+                <li onclick="hide_window('window_cards_jp');toggle_window('window_cards_ap')"> Inspect Allied Cards
                 <li onclick="toggle_window('window_pw')" id="pw_check_button"> Inspect Political Status
                 <li onclick="toggle_window('window_vp')" id="vp_check_button"> Inspect Victory Points
                 <li onclick="toggle_window('window_eliminated')" id="elim_check_button"> Inspect Eliminated Units

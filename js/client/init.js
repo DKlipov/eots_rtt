@@ -639,11 +639,11 @@ function on_init(scenario, game_options, static_view) {
     define_marker("divisions", 0, counters.divisions_china)
     for (let i = 1; i < pieces.length; ++i) {
         let piece = pieces[i]
-        piece.element = define_piece("unit", i, (piece.faction ? "ap " : "jp ") + piece.counter).tooltip_image(unit_tooltip_image)
+        piece.element = define_piece("unit", i, (piece.faction ? "ap " : "jp ") + piece.counter).tip_magic(focus_unit, blur_unit)
     }
     for (let i = 1; i < cards.length; ++i) {
         let card = cards[i]
-        card.element = define_card("card", i, `card_${card.faction ? "ap" : "jp"}_${card.num}`).tooltip_image(on_focus_card_tip)
+        card.element = define_card("card", i, `card_${card.faction ? "ap" : "jp"}_${card.num}`)
         card.element.card = i
     }
     define_panel("#jp_hand", "hand", JP)

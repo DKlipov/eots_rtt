@@ -154,6 +154,8 @@ function update_role_info() {
 function on_update() {
     begin_update()
 
+    L = {} // for shared rules/play code and client-side states
+
     // TODO: why is this necessary?
     if (!scenario_data().original_control)
         send_query("original_control")

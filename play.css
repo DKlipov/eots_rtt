@@ -174,6 +174,8 @@ body.hide-pieces .marker:not(.control) { display: none }
 #log div.bold { font-weight: bold }
 #log div.italic { font-style: italic }
 
+#log .expand-list { background-color: #0001; border-radius: 6px; padding: 0 3px; margin: 0 -2px; }
+
 #log .card-tip {
     cursor: pointer;
     font-style: italic
@@ -372,51 +374,28 @@ body.Allies #jp_hand {
 /* TOOLTIPS */
 /* #status - standard tooltip */
 /* #tip - additional tooltip images */
-/* #map_tip - additional tooltip image using map cutout */
-/* #mobile_tip - special tooltip only used for cards, and only on mobile */
 
-/* data-tooltip - behaves like title attribute attached to element */
-/*#tip {*/
-/*    pointer-events: none;*/
-/*    position: fixed;*/
-/*    z-index: 1000;*/
-/*    margin: 6px;*/
-/*}*/
+.unit-tip {
+    width: auto;
+    height: fit-content;
+}
 
-.zoomed {
+.unit-tip-list {
+    background-color: #0004;
+    padding: 8px;
+    visibility: hidden;
     transform: scale(2);
+    transform-origin: top right;
 }
 
-[data-tooltip] {
-    position: relative;
+@media (max-width: 800px) {
+    .unit-tip-list {
+        transform-origin: center;
+    }
 }
 
-[data-tooltip]:after {
-    content: attr(data-tooltip);
-    position: absolute;
-    pointer-events: none;
-    background-color: oldlace;
-    border: 1px solid black;
-    /*border-radius: 5px;*/
-    padding: 0 5px;
-    width: max-content;
-    display: none;
-    z-index: 100;
-}
-
-[data-tooltip]:hover:after {
-    display: block;
-}
-
-span[data-tooltip]:after {
-    top: 20px;
-    left: 20px;
-}
-
-div[data-tooltip]:after {
-    top: 20px;
-    left: 5px;
-}
+body.shift .unit-tip-list { visibility: visible; }
+.unit-tip-list .unit { margin: 8px auto; }
 
 /* CARDS */
 
@@ -467,7 +446,7 @@ body.hex-clickable .action_hex { z-index: 50; }
 .action_hex.amph { background-image: url(images/hex_amph.svg); z-index: 999;pointer-events: none;}
 .action_hex.violation { background-image: url(images/hex_violation.svg); z-index: 999;pointer-events: none;}
 .action_hex.action { background-image: url(images/hex_action.svg); z-index: 50;pointer-events: auto;}
-.action_hex.tip { background-image: url(images/hex_highlight.svg); z-index: 1000; pointer-events: none;}
+.action_hex.highlight { background-image: url(images/hex_highlight.svg); z-index: 1000; pointer-events: none;}
 
 
 .action_hex.china_box.action, .turn_box.action {
@@ -478,7 +457,7 @@ body.hex-clickable .action_hex { z-index: 50; }
     box-sizing: border-box;
 }
 
-.action_hex.china_box.tip, .turn_box.tip {
+.action_hex.china_box.highlight, .turn_box.highlight {
     border: 4px solid lime;
     background-image: none;
     box-shadow: 0 0 0 1px black, inset 0 0 0 1px black;
@@ -535,15 +514,6 @@ body.hex-clickable .action_hex { z-index: 50; }
 
 .marker.road {
     border: none;
-}
-
-.unit-tip {
-    transition: left 200ms, top 200ms;
-    background-repeat: no-repeat;
-    /*border-radius: 5px;*/
-    width: 35px;
-    height: 35px;
-    background-size: 35px 35px;
 }
 
 .card > .big.marker {
@@ -692,16 +662,7 @@ body.hex-clickable .action_hex { z-index: 50; }
     font-style: italic
 }
 
-.list-tip { /* for text in log and dialogs */
-    cursor: pointer;
-    font-weight: bolder;
-}
-
-.list-tip > * {
-    pointer-events: none;
-}
-
-.piece.tip, .piece.activated.tip { /* highlight the piece itself */
+.piece.highlight, .piece.activated.highlight { /* highlight the piece itself */
     border: 4px solid lime;
     z-index: 100;
 }
@@ -711,7 +672,7 @@ body.hex-clickable .action_hex { z-index: 50; }
     font-style: italic
 }
 
-.board_hex.tip { /* highlight the piece itself */
+.board_hex.highlight { /* highlight the piece itself */
     border: 4px dashed lime;
     z-index: 100;
 }

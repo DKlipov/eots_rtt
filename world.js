@@ -42,7 +42,8 @@ function toggle_markers_and_pieces() {
     } else {
         document.body.classList.add("hide-pieces")
     }
-    // XXX: on_update()
+    // XXX: added
+    on_update()
 }
 
 function is_disabled_button(action, id) {
@@ -224,8 +225,7 @@ class Thing {
         return this
     }
 
-    /// XXX: not used
-    XXX_tooltip(tip) {
+    tooltip(tip) {
         var id = this.my_id
         this.element.addEventListener("mouseenter", function () {
             try {
@@ -238,48 +238,30 @@ class Thing {
         return this
     }
 
-    // XXX: modified
-    tooltip(tip) {
+    tip_magic(focus_callback, blur_callback) {
         var id = this.my_id
-        this.element.addEventListener("mouseenter", function () {
-            try {
-                world.status.innerHTML = (typeof tip === "function") ? tip(id) : tip
-            } catch (err) {
-                world.status.textContent = err.toString()
-            }
-        })
-        this.element.addEventListener("mouseleave", function () {
-            world.status.innerHTML = ""
-        })
+        this.element.addEventListener("mouseenter", () => _tip_focus_magic(focus_callback, id))
+        this.element.addEventListener("mouseleave", () => _tip_blur_magic(blur_callback, id))
         return this
     }
 
-    // XXX: added
-    tooltip_image(tip) {
-        var id = this.my_id
-        if ("ontouchstart" in window) {
-            this.element.addEventListener("touchstart", function () {
-                if (typeof tip === "function") long_tap(() => tip(id, true))
-            })
-            this.element.addEventListener("touchend", function () {
-                if (typeof tip === "function") {
-                    long_tap_cancel()
-                    on_blur_tip()
-                }
-            })
-        } else {
-            this.element.addEventListener("mouseenter", function () {
-                if (event.ctrlKey) {
-                    tip(id, true)
-                }
-                world.focused = [tip, id]
-            })
-            this.element.addEventListener("mouseleave", function () {
-                if (typeof tip === "function") on_blur_tip()
-                world.focused = null
-            })
-        }
+    tip_clone(clone_action, clone_id) {
+        this.element.addEventListener("mouseenter", () => _tip_focus_clone(clone_action, clone_id))
+        this.element.addEventListener("mouseleave", _tip_blur_clone)
+        return this
+    }
 
+    tip_class(class_names) {
+        var id = this.my_id
+        this.element.addEventListener("mouseenter", () => _tip_focus_class(class_names[id]))
+        this.element.addEventListener("mouseleave", _tip_blur_class)
+        return this
+    }
+
+    tip_class_sub(class_name) {
+        class_name = class_name.replace("$1", this.my_id)
+        this.element.addEventListener("mouseenter", () => _tip_focus_class(class_name))
+        this.element.addEventListener("mouseleave", _tip_blur_class)
         return this
     }
 
@@ -399,25 +381,6 @@ class Thing {
     }
 }
 
-// XXX: added
-var long_tap_timer
-
-// XXX: added
-function long_tap(callback, timeout = 200) {
-    long_tap_timer = setTimeout(() => {
-        callback()
-    }, timeout);
-    document.body.style.userSelect = "none";
-    document.body.style.webkitUserSelect = "none";
-}
-
-// XXX: added
-function long_tap_cancel() {
-    clearTimeout(long_tap_timer)
-    document.body.style.userSelect = null;
-    document.body.style.webkitUserSelect = null;
-}
-
 function lookup_thing(action, id) {
     var list = world.things[action]
     if (list === undefined)
@@ -514,7 +477,6 @@ function sort_board(x_weight = 1, y_weight = 2) {
         parent.appendChild(e)
 }
 
-// XXX: modified
 function define_stack(action, id, rect, options) {
     return define_thing(action, id)
         .keyword("stack")
@@ -1083,8 +1045,6 @@ function begin_update() {
     G = V = view
     R = roles[player]?.index ?? -1
 
-    L = {} // XXX: added
-
     // reset status text nesting tracker
     world.status_nest.length = 0
     world.status.textContent = ""
@@ -1370,17 +1330,6 @@ document.body.addEventListener("keydown", function (e) {
             }
         }
     }
-    // XXX: added
-    else if (world.focused && (e.key === "Control")) {
-        world.focused[0](world.focused[1], true)
-    }
-})
-
-// XXX: added
-document.body.addEventListener("keyup", function (e) {
-    if ("Control") {
-        on_blur_tip()
-    }
 })
 
 window.addEventListener("resize", function (e) {
@@ -1488,6 +1437,21 @@ function escape_dice(text, re = /\b([BW])([0-6])\b/g) {
 
 function escape_icon(text, re, icons) {
     return text.replace(re, (m) => icons[m] ?? m)
+}
+
+function _tip_focus_magic(callback, id) {
+    world.tip.hidden = false
+    if (callback)
+        callback(id)
+}
+
+function _tip_blur_magic(callback, id) {
+    world.tip.removeAttribute("style")
+    world.tip.removeAttribute("class")
+    world.tip.replaceChildren()
+    world.tip.hidden = true
+    if (callback)
+        callback(id)
 }
 
 function _tip_focus_class(name) {
