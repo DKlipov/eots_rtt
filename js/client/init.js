@@ -644,7 +644,9 @@ function on_init(scenario, game_options, static_view) {
     define_marker("divisions", 0, counters.divisions_china)
     for (let i = 1; i < pieces.length; ++i) {
         let piece = pieces[i]
-        piece.element = define_piece("unit", i, (piece.faction ? "ap " : "jp ") + piece.counter).tip_magic(focus_unit, blur_unit)
+        piece.element = define_piece("unit", i, (piece.faction ? "ap " : "jp ") + piece.counter)
+            .tip_magic(focus_unit, blur_unit)
+            .tooltip(format_unit_tooltip)
     }
     for (let i = 1; i < cards.length; ++i) {
         let card = cards[i]

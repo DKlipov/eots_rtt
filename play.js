@@ -10810,7 +10810,9 @@ function on_init(scenario, game_options, static_view) {
     define_marker("divisions", 0, counters.divisions_china)
     for (let i = 1; i < pieces.length; ++i) {
         let piece = pieces[i]
-        piece.element = define_piece("unit", i, (piece.faction ? "ap " : "jp ") + piece.counter).tip_magic(focus_unit, blur_unit)
+        piece.element = define_piece("unit", i, (piece.faction ? "ap " : "jp ") + piece.counter)
+            .tip_magic(focus_unit, blur_unit)
+            .tooltip(format_unit_tooltip)
     }
     for (let i = 1; i < cards.length; ++i) {
         let card = cards[i]
@@ -12369,6 +12371,59 @@ const card_names = cards.map(c => c?.name)
 
 const unit_classes = pieces.map(p => `piece unit ${p?.faction ? "ap" : "jp"} ${p?.counter}`)
 const unit_names = pieces.map(p => p?.name)
+
+const digit_superscript = [
+    "\u2070",
+    "\u2071",
+    "\xb2",
+    "\xb3",
+    "\u2074",
+    "\u2075",
+    "\u2076",
+    "\u2077",
+    "\u2078",
+    "\u2079",
+]
+
+function format_unit_tooltip(u) {
+    var p = pieces[u]
+    var tip = ""
+
+    switch (p.class) {
+    case "hq":
+        return `HQ ${p.cr} [${p.cm}] (${p.name.replace(" HQ", "")})`
+    case "ground":
+        if (p.size === 4) tip += "XXXX"
+        else if (p.size === 3) tip += "XXX"
+        else if (p.size === 1) tip += "X"
+        else tip += "Ground"
+        break
+    case "air":
+        tip += "Air"
+        break
+    case "naval":
+        tip += p.type.toUpperCase()
+        break
+    }
+
+    if (!set_has(G.reduced, u))
+        tip += ` ${p.cf}`
+    else
+        tip += ` (${p.rcf}`
+    tip += `-${p.lf}`
+    if (p.br)
+        tip += `-${p.br}`
+    if (p.ebr)
+        tip += " " + digit_superscript[p.ebr]
+    if (!set_has(G.reduced, u))
+        tip += ""
+    else
+        tip += ")"
+
+    tip += ` (${p.name})`
+
+    return tip
+}
 
 const hex_names = []
 for (let i = 0; i <= TUNNEL_BOX; ++i) {
