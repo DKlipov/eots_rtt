@@ -1,5 +1,5 @@
 function is_china_coast_captured() {
-    return CHINA_COAST.filter(h => is_space_controlled(h, JP)).length === 0
+    return CHINA_COAST.some(h => is_space_controlled(h, JP))
 }
 
 P.china_offensive = {

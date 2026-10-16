@@ -219,7 +219,7 @@ const TRACK_MARKERS = [
     {
         counter: counters.resource_jp,
         alt_counter: counters.resource_jp_1,
-        value: G => RESOURCE_HEX.filter(h => is_space_controlled(h, JP)).length
+        value: G => array_count(RESOURCE_HEX, h => is_space_controlled(h, JP))
     },
     {
         counter: counters.naval_repl,
@@ -355,7 +355,7 @@ const TURN_MARKERS = [
 ]
 
 function current_pow(G) {
-    return G.capture.filter(h => is_space_controlled(h, AP)).length
+    return array_count(G.capture, h => is_space_controlled(h, AP))
 }
 
 

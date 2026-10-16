@@ -158,7 +158,7 @@ P.strategic_bombing = {
         end()
     },
     roll() {
-        var close_air_base = TOKYO_AIR_BASES.filter(h => is_space_controlled(h, AP) && (G.supply_cache[h] & AP_SUPPLY_AIRFIELD)).length > 0
+        var close_air_base = TOKYO_AIR_BASES.some(h => is_space_controlled(h, AP) && (G.supply_cache[h] & AP_SUPPLY_AIRFIELD))
         if (!G.active_stack.map(u => bombing(u, close_air_base)).reduce((a, b) => a || b, false)) {
             G.events[events.STRAT_BOMBING_CAMPAIGN.id] = 0
         }
@@ -230,8 +230,7 @@ P.national_status_segment = function () {
     }
     if (G.sid === SOUTH_PACIFIC_SCENARIO) {
         var surr = G.surrender[nations.AUSTRALIAN_MANDATES.id]
-        if (nations.AUSTRALIAN_MANDATES.ports
-            .filter(h => is_space_controlled(hex_to_int(h), surr ? JP : AP)).length === 0) {
+        if (!nations.AUSTRALIAN_MANDATES.ports.some(h => is_space_controlled(hex_to_int(h), surr ? JP : AP))) {
             G.surrender[nations.AUSTRALIAN_MANDATES.id] = (surr) ? 0 : G.turn
             log(`${nations.AUSTRALIAN_MANDATES.name} controlled ${surr ? "AP" : "JP"}.`)
         }

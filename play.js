@@ -7052,6 +7052,14 @@ function object_diff(a, b) {
 
 // Array remove and insert (faster than splice)
 
+function array_count(array, pred) {
+    var n = 0
+    for (var item of array)
+        if (pred(item))
+            ++n
+    return n
+}
+
 function array_delete(array, index) {
     var i, n = array.length
     for (i = index + 1; i < n; ++i)
@@ -7458,7 +7466,7 @@ function offensive_card_header() {
 }
 
 function get_jp_resources() {
-    return RESOURCE_HEX.filter(h => is_space_controlled(h, JP) && get_map_data(h).resource).length
+    return array_count(RESOURCE_HEX, h => is_space_controlled(h, JP) && get_map_data(h).resource)
 }
 
 function get_china_offensive_modifiers() {
@@ -7537,6 +7545,7 @@ function array_equals(a, b) {
     }
     return true
 }
+
 /*}}} import common/utils.js*/
 /*{{{ import supply.js*/
 var last = Date.now()
@@ -9530,7 +9539,7 @@ function victory_burma() {
         result.text.push(`1 VP - War in Europe < 0`)
     }
     //F. For controlling each hex of Northern India, +1 VP per hex
-    var india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
+    var india = array_count(nations.INDIA.keys, i => is_space_controlled(hex_to_int(i), JP))
     adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
     //G. For India Unrest or Strikes, +1 Victory Point (awarded on the last game turn)
     var india_status =  G.events[events.INDIA_STATUS.id]
@@ -9598,7 +9607,7 @@ function victory_1942() {
     binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
         "Townsville was not isolated", [hex_to_int(3727), OAHU])
 
-    var india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
+    var india = array_count(nations.INDIA.keys, i => is_space_controlled(hex_to_int(i), JP))
     adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
     var india_status =  G.events[events.INDIA_STATUS.id]
     if (india_status > 0 && india_status <= 2) {
@@ -9723,7 +9732,7 @@ function victory_1943() {
     binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
         "Townsville was not isolated", [hex_to_int(3727), OAHU])
 
-    var india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
+    var india = array_count(nations.INDIA.keys, i => is_space_controlled(hex_to_int(i), JP))
     adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
     var india_status =  G.events[events.INDIA_STATUS.id]
     if (india_status > 0 && india_status <= 2) {
@@ -9823,7 +9832,7 @@ function victory_1944() {
     binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
         "Townsville was not isolated", [hex_to_int(3727), OAHU])
 
-    var india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
+    var india = array_count(nations.INDIA.keys, i => is_space_controlled(hex_to_int(i), JP))
     adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
     var india_status =  G.events[events.INDIA_STATUS.id]
     if (india_status > 0 && india_status <= 2) {
@@ -10145,6 +10154,7 @@ function check_nation_controlled(nation, faction) {
     }
     return true
 }
+
 /*}}} import common/scenario.js*/
 
 
@@ -10370,7 +10380,7 @@ const TRACK_MARKERS = [
     {
         counter: counters.resource_jp,
         alt_counter: counters.resource_jp_1,
-        value: G => RESOURCE_HEX.filter(h => is_space_controlled(h, JP)).length
+        value: G => array_count(RESOURCE_HEX, h => is_space_controlled(h, JP))
     },
     {
         counter: counters.naval_repl,
@@ -10506,7 +10516,7 @@ const TURN_MARKERS = [
 ]
 
 function current_pow(G) {
-    return G.capture.filter(h => is_space_controlled(h, AP)).length
+    return array_count(G.capture, h => is_space_controlled(h, AP))
 }
 
 
@@ -11244,7 +11254,7 @@ function draw_list() {
             hand[faction].push(id)
         }
     })
-    return {hand}
+    return hand
 }
 
 function update_window_cards_jp() {
@@ -11267,7 +11277,7 @@ function update_window_cards(R) {
     for (var c of G.discard[R])
         text.push("<dd>" + escape_text("C" + c))
 
-    var hand = draw_list().hand[R]
+    var hand = draw_list()[R]
     text.push(`<dt>${ROLES[R]} Deck and Hand (${hand.length})`)
     for (var c of hand)
         text.push("<dd>" + escape_text("C" + c))
@@ -11298,23 +11308,14 @@ function get_china_info() {
     var offensive = G.events[events.CHINA_OFFENSIVE.id]
     var mods = get_china_offensive_modifiers()
     var info = []
-    var draw = draw_list().hand
-    var count = [0, 0]
-    draw[JP].forEach(c => {
-        if (cards[c].china) {
-            count[JP]++
-        }
-    })
-    draw[AP].forEach(c => {
-        if (cards[c].china) {
-            count[AP]++
-        }
-    })
+    var draw = draw_list()
+    var count_jp = array_count(draw[JP], c => cards[c].china)
+    var count_ap = array_count(draw[AP], c => cards[c].china)
     if (!surrender) {
         info.push(`Offensive ${(G.turn - offensive > 1) ? "" : "not "}possible${offensive > 0 ? ". Last launched turn " + offensive : ""}.`)
         mods.log.forEach(l => info.push(l))
-        info.push(`Not played JP cards to China Government Front Status: ${count[JP]}.`)
-        info.push(`Not played AP cards to China Government Front Status: ${count[AP]}.`)
+        info.push(`Not played JP cards to China Government Front Status: ${count_jp}.`)
+        info.push(`Not played AP cards to China Government Front Status: ${count_ap}.`)
     }
     return {
         id, control: surrender ? JP : AP, info,
@@ -11476,7 +11477,7 @@ function print_resources(text) {
         text.push("<dt>JP control 3 or fewer resource hexes -- completed (-3 PW)")
         text.push(print_icon(counters.resource_jp))
     } else {
-        var value = RESOURCE_HEX.filter(h => is_space_controlled(h, JP)).length
+        var value = array_count(RESOURCE_HEX, h => is_space_controlled(h, JP))
         text.push(`<dt>JP control ${value} > 3 resource hexes.`)
         text.push(print_icon("gray " + counters.resource_jp))
     }
@@ -11937,8 +11938,8 @@ function on_update() {
     if (G.actions && G.actions["card"]) {
         G.actions["play_card"] = 1
     }
-    if (G.actions && G.actions["unit"] && G.actions["unit"].filter(u => G.location[u] === ELIMINATED_BOX).length) {
-        G.actions["to_unit"] = [G.actions["unit"].filter(u => G.location[u] === ELIMINATED_BOX)[0]]
+    if (G.actions && G.actions["unit"] && array_count(G.actions["unit"], u => G.location[u] === ELIMINATED_BOX)) {
+        G.actions["to_unit"] = [ G.actions["unit"].find(u => G.location[u] === ELIMINATED_BOX) ]
     }
 
     update_role_info()

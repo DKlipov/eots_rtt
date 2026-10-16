@@ -7054,6 +7054,14 @@ function object_diff(a, b) {
 
 // Array remove and insert (faster than splice)
 
+function array_count(array, pred) {
+    var n = 0
+    for (var item of array)
+        if (pred(item))
+            ++n
+    return n
+}
+
 function array_delete(array, index) {
     var i, n = array.length
     for (i = index + 1; i < n; ++i)
@@ -7460,7 +7468,7 @@ function offensive_card_header() {
 }
 
 function get_jp_resources() {
-    return RESOURCE_HEX.filter(h => is_space_controlled(h, JP) && get_map_data(h).resource).length
+    return array_count(RESOURCE_HEX, h => is_space_controlled(h, JP) && get_map_data(h).resource)
 }
 
 function get_china_offensive_modifiers() {
@@ -7539,6 +7547,7 @@ function array_equals(a, b) {
     }
     return true
 }
+
 /*}}} import common/utils.js*/
 /*{{{ import supply.js*/
 var last = Date.now()
@@ -9533,7 +9542,7 @@ function victory_burma() {
         result.text.push(`1 VP - War in Europe < 0`)
     }
     //F. For controlling each hex of Northern India, +1 VP per hex
-    var india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
+    var india = array_count(nations.INDIA.keys, i => is_space_controlled(hex_to_int(i), JP))
     adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
     //G. For India Unrest or Strikes, +1 Victory Point (awarded on the last game turn)
     var india_status =  G.events[events.INDIA_STATUS.id]
@@ -9601,7 +9610,7 @@ function victory_1942() {
     binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
         "Townsville was not isolated", [hex_to_int(3727), OAHU])
 
-    var india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
+    var india = array_count(nations.INDIA.keys, i => is_space_controlled(hex_to_int(i), JP))
     adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
     var india_status =  G.events[events.INDIA_STATUS.id]
     if (india_status > 0 && india_status <= 2) {
@@ -9726,7 +9735,7 @@ function victory_1943() {
     binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
         "Townsville was not isolated", [hex_to_int(3727), OAHU])
 
-    var india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
+    var india = array_count(nations.INDIA.keys, i => is_space_controlled(hex_to_int(i), JP))
     adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
     var india_status =  G.events[events.INDIA_STATUS.id]
     if (india_status > 0 && india_status <= 2) {
@@ -9826,7 +9835,7 @@ function victory_1944() {
     binary_vp(result, !check_supply_line(hex_to_int(3727), OAHU, AP), 5, "Townsville isolated from Oahu",
         "Townsville was not isolated", [hex_to_int(3727), OAHU])
 
-    var india = nations.INDIA.keys.map(i => hex_to_int(i)).filter(i => is_space_controlled(i, JP)).length
+    var india = array_count(nations.INDIA.keys, i => is_space_controlled(hex_to_int(i), JP))
     adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
     var india_status =  G.events[events.INDIA_STATUS.id]
     if (india_status > 0 && india_status <= 2) {
@@ -10148,6 +10157,7 @@ function check_nation_controlled(nation, faction) {
     }
     return true
 }
+
 /*}}} import common/scenario.js*/
 /*{{{ import server/game.js*/
 /*{{{ import server/cycle.js*/
@@ -14134,7 +14144,7 @@ P.strategic_bombing = {
         end()
     },
     roll() {
-        var close_air_base = TOKYO_AIR_BASES.filter(h => is_space_controlled(h, AP) && (G.supply_cache[h] & AP_SUPPLY_AIRFIELD)).length > 0
+        var close_air_base = TOKYO_AIR_BASES.some(h => is_space_controlled(h, AP) && (G.supply_cache[h] & AP_SUPPLY_AIRFIELD))
         if (!G.active_stack.map(u => bombing(u, close_air_base)).reduce((a, b) => a || b, false)) {
             G.events[events.STRAT_BOMBING_CAMPAIGN.id] = 0
         }
@@ -14206,8 +14216,7 @@ P.national_status_segment = function () {
     }
     if (G.sid === SOUTH_PACIFIC_SCENARIO) {
         var surr = G.surrender[nations.AUSTRALIAN_MANDATES.id]
-        if (nations.AUSTRALIAN_MANDATES.ports
-            .filter(h => is_space_controlled(hex_to_int(h), surr ? JP : AP)).length === 0) {
+        if (!nations.AUSTRALIAN_MANDATES.ports.some(h => is_space_controlled(hex_to_int(h), surr ? JP : AP))) {
             G.surrender[nations.AUSTRALIAN_MANDATES.id] = (surr) ? 0 : G.turn
             log(`${nations.AUSTRALIAN_MANDATES.name} controlled ${surr ? "AP" : "JP"}.`)
         }
@@ -14461,7 +14470,7 @@ P.attrition = {
 
 /*{{{ import server/actions.js*/
 function is_china_coast_captured() {
-    return CHINA_COAST.filter(h => is_space_controlled(h, JP)).length === 0
+    return CHINA_COAST.some(h => is_space_controlled(h, JP))
 }
 
 P.china_offensive = {

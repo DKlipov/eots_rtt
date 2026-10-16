@@ -9,7 +9,7 @@ function draw_list() {
             hand[faction].push(id)
         }
     })
-    return {hand}
+    return hand
 }
 
 function update_window_cards_jp() {
@@ -32,7 +32,7 @@ function update_window_cards(R) {
     for (var c of G.discard[R])
         text.push("<dd>" + escape_text("C" + c))
 
-    var hand = draw_list().hand[R]
+    var hand = draw_list()[R]
     text.push(`<dt>${ROLES[R]} Deck and Hand (${hand.length})`)
     for (var c of hand)
         text.push("<dd>" + escape_text("C" + c))
@@ -63,23 +63,14 @@ function get_china_info() {
     var offensive = G.events[events.CHINA_OFFENSIVE.id]
     var mods = get_china_offensive_modifiers()
     var info = []
-    var draw = draw_list().hand
-    var count = [0, 0]
-    draw[JP].forEach(c => {
-        if (cards[c].china) {
-            count[JP]++
-        }
-    })
-    draw[AP].forEach(c => {
-        if (cards[c].china) {
-            count[AP]++
-        }
-    })
+    var draw = draw_list()
+    var count_jp = array_count(draw[JP], c => cards[c].china)
+    var count_ap = array_count(draw[AP], c => cards[c].china)
     if (!surrender) {
         info.push(`Offensive ${(G.turn - offensive > 1) ? "" : "not "}possible${offensive > 0 ? ". Last launched turn " + offensive : ""}.`)
         mods.log.forEach(l => info.push(l))
-        info.push(`Not played JP cards to China Government Front Status: ${count[JP]}.`)
-        info.push(`Not played AP cards to China Government Front Status: ${count[AP]}.`)
+        info.push(`Not played JP cards to China Government Front Status: ${count_jp}.`)
+        info.push(`Not played AP cards to China Government Front Status: ${count_ap}.`)
     }
     return {
         id, control: surrender ? JP : AP, info,
@@ -241,7 +232,7 @@ function print_resources(text) {
         text.push("<dt>JP control 3 or fewer resource hexes -- completed (-3 PW)")
         text.push(print_icon(counters.resource_jp))
     } else {
-        var value = RESOURCE_HEX.filter(h => is_space_controlled(h, JP)).length
+        var value = array_count(RESOURCE_HEX, h => is_space_controlled(h, JP))
         text.push(`<dt>JP control ${value} > 3 resource hexes.`)
         text.push(print_icon("gray " + counters.resource_jp))
     }

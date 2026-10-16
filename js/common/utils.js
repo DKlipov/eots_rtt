@@ -155,7 +155,7 @@ function offensive_card_header() {
 }
 
 function get_jp_resources() {
-    return RESOURCE_HEX.filter(h => is_space_controlled(h, JP) && get_map_data(h).resource).length
+    return array_count(RESOURCE_HEX, h => is_space_controlled(h, JP) && get_map_data(h).resource)
 }
 
 function get_china_offensive_modifiers() {

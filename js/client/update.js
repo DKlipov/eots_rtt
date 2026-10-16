@@ -195,8 +195,8 @@ function on_update() {
     if (G.actions && G.actions["card"]) {
         G.actions["play_card"] = 1
     }
-    if (G.actions && G.actions["unit"] && G.actions["unit"].filter(u => G.location[u] === ELIMINATED_BOX).length) {
-        G.actions["to_unit"] = [G.actions["unit"].filter(u => G.location[u] === ELIMINATED_BOX)[0]]
+    if (G.actions && G.actions["unit"] && array_count(G.actions["unit"], u => G.location[u] === ELIMINATED_BOX)) {
+        G.actions["to_unit"] = [ G.actions["unit"].find(u => G.location[u] === ELIMINATED_BOX) ]
     }
 
     update_role_info()

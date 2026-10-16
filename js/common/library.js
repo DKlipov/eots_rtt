@@ -57,6 +57,14 @@ function object_diff(a, b) {
 
 // Array remove and insert (faster than splice)
 
+function array_count(array, pred) {
+    var n = 0
+    for (var item of array)
+        if (pred(item))
+            ++n
+    return n
+}
+
 function array_delete(array, index) {
     var i, n = array.length
     for (i = index + 1; i < n; ++i)
