@@ -10679,6 +10679,7 @@ function on_init(scenario, game_options, static_view) {
 
             define_s_loc(1400, center_rect(map_layout.h_5808, 45, 45))
             define_space("action_hex", 1400, center_rect(map_layout.h_5808, 68, 68))
+                .tooltip(format_hex_tooltip)
             set_map_size(1275, 825)
             break
         }
@@ -10691,6 +10692,7 @@ function on_init(scenario, game_options, static_view) {
 
             define_s_loc(SINGAPORE, center_rect(map_layout.box_singapore, 45, 45))
             define_space("action_hex", SINGAPORE, center_rect(map_layout.box_singapore, 68, 68))
+                .tooltip(format_hex_tooltip)
             define_thing("road", events.JARHAT_ROAD.id).layout([549, 286, 60, 60], "road_jarhat hide marker control")
             define_thing("road", events.IMPHAL_ROAD.id).layout([550, 330, 60, 60], "road_imphal hide marker control")
             define_thing("road", events.LEDO_ROAD.id).layout([600, 300, 60, 60], "road_ledo hide marker control")
@@ -10746,6 +10748,7 @@ function on_init(scenario, game_options, static_view) {
             define_s_loc(i, center_rect(xy, 45, 45))
             define_thing("zoi_hex", i).layout(center_rect(xy, 62, 62))
             define_space("action_hex", i, center_rect(xy, 68, 68))
+                .tooltip(format_hex_tooltip)
         }
     }
 
@@ -10761,6 +10764,7 @@ function on_init(scenario, game_options, static_view) {
     )
 
     define_space("action_hex", CHINA_BOX, map_layout.box_air_unit_in_china, "china_box")
+        .tooltip("China Box")
 
     define_layout("status", JP_AGREEMENT, map_layout.box_isr_jp)
     define_layout("status", AP_AGREEMENT, map_layout.box_isr_us)
@@ -12439,6 +12443,36 @@ for (let i = 0; i <= TUNNEL_BOX; ++i) {
         else
             hex_names[i] = String(hex)
     }
+}
+
+const terrain_name = [
+    "ocean",
+    "open",
+    "jungle",
+    "mixed",
+    "mountain",
+    "atoll",
+]
+
+function format_hex_tooltip(h) {
+    var hex = int_to_hex(h)
+    var tip = hex + ""
+    var info = map.find(e => e.id === hex)
+    if (info) {
+        if (info.name) tip += " " + info.name
+        if (info.region) tip += " (" + info.region + ")"
+        var props = []
+        if (info.city === CITY) props.push("city")
+        if (info.city === JAPANESE_CITY) props.push("Japanese city")
+        if (info.city === CHINESE_CITY) props.push("Chinese city")
+        if (info.airfield) props.push("airfield")
+        if (info.port) props.push("port")
+        if (info.island) props.push("island")
+        if (info.resource) props.push("resource")
+        if (info.terrain) props.push(terrain_name[info.terrain])
+        if (props.length > 0) tip += " - " + props.join(", ")
+    }
+    return tip
 }
 
 const ICONS = {

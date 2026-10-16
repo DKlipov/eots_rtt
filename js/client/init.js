@@ -513,6 +513,7 @@ function on_init(scenario, game_options, static_view) {
 
             define_s_loc(1400, center_rect(map_layout.h_5808, 45, 45))
             define_space("action_hex", 1400, center_rect(map_layout.h_5808, 68, 68))
+                .tooltip(format_hex_tooltip)
             set_map_size(1275, 825)
             break
         }
@@ -525,6 +526,7 @@ function on_init(scenario, game_options, static_view) {
 
             define_s_loc(SINGAPORE, center_rect(map_layout.box_singapore, 45, 45))
             define_space("action_hex", SINGAPORE, center_rect(map_layout.box_singapore, 68, 68))
+                .tooltip(format_hex_tooltip)
             define_thing("road", events.JARHAT_ROAD.id).layout([549, 286, 60, 60], "road_jarhat hide marker control")
             define_thing("road", events.IMPHAL_ROAD.id).layout([550, 330, 60, 60], "road_imphal hide marker control")
             define_thing("road", events.LEDO_ROAD.id).layout([600, 300, 60, 60], "road_ledo hide marker control")
@@ -580,6 +582,7 @@ function on_init(scenario, game_options, static_view) {
             define_s_loc(i, center_rect(xy, 45, 45))
             define_thing("zoi_hex", i).layout(center_rect(xy, 62, 62))
             define_space("action_hex", i, center_rect(xy, 68, 68))
+                .tooltip(format_hex_tooltip)
         }
     }
 
@@ -595,6 +598,7 @@ function on_init(scenario, game_options, static_view) {
     )
 
     define_space("action_hex", CHINA_BOX, map_layout.box_air_unit_in_china, "china_box")
+        .tooltip("China Box")
 
     define_layout("status", JP_AGREEMENT, map_layout.box_isr_jp)
     define_layout("status", AP_AGREEMENT, map_layout.box_isr_us)

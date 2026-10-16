@@ -108,6 +108,36 @@ for (let i = 0; i <= TUNNEL_BOX; ++i) {
     }
 }
 
+const terrain_name = [
+    "ocean",
+    "open",
+    "jungle",
+    "mixed",
+    "mountain",
+    "atoll",
+]
+
+function format_hex_tooltip(h) {
+    var hex = int_to_hex(h)
+    var tip = hex + ""
+    var info = map.find(e => e.id === hex)
+    if (info) {
+        if (info.name) tip += " " + info.name
+        if (info.region) tip += " (" + info.region + ")"
+        var props = []
+        if (info.city === CITY) props.push("city")
+        if (info.city === JAPANESE_CITY) props.push("Japanese city")
+        if (info.city === CHINESE_CITY) props.push("Chinese city")
+        if (info.airfield) props.push("airfield")
+        if (info.port) props.push("port")
+        if (info.island) props.push("island")
+        if (info.resource) props.push("resource")
+        if (info.terrain) props.push(terrain_name[info.terrain])
+        if (props.length > 0) tip += " - " + props.join(", ")
+    }
+    return tip
+}
+
 const ICONS = {
     B0: '<span class="xdice B d0"></span>',
     B1: '<span class="xdice B d1"></span>',
