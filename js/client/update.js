@@ -96,7 +96,6 @@ function place_unit(u, location) {
         if (G.active_stack.includes(u)) {
             update_keyword("unit", u, "selected")
             update_rotation("unit", u, 22.5)
-            console.log("rotate", u)
         }
 
         unit.innerHTML = ''
@@ -196,7 +195,7 @@ function on_update() {
         G.actions["play_card"] = 1
     }
     if (G.actions && G.actions["unit"] && array_count(G.actions["unit"], u => G.location[u] === ELIMINATED_BOX)) {
-        G.actions["to_unit"] = [ G.actions["unit"].find(u => G.location[u] === ELIMINATED_BOX) ]
+        G.actions["to_unit"] = [G.actions["unit"].find(u => G.location[u] === ELIMINATED_BOX)]
     }
 
     update_role_info()
@@ -338,7 +337,7 @@ function on_update() {
     update_hand(JP)
 
     G.offensive.battle_hexes.forEach(h => populate("s-loc", h, "battle", G.offensive.battle_names.indexOf(h)))
-    G.offensive.landing_hexes.filter(h => get_map_data(h).named && is_space_controlled(h, G.offensive.attacker - 1) && has_zoi(h, G.offensive.attacker - 1))
+    G.offensive.landing_hexes.filter(h => get_map_data(h).named && is_space_controlled(h, 1 - G.offensive.attacker) && has_zoi(h, 1- G.offensive.attacker))
         .forEach(h => populate("s-loc", h, "landing", G.offensive.battle_names.indexOf(h)))
     var isr_marker = (v, i) => {
         if (v && i === AP) {

@@ -124,9 +124,8 @@ function update_window_pw() {
     var text = []
     text.push("<dl>")
 
-    text.push("<dt>Current Political Will:")
+    text.push(`<dt>US Political Will: ${G.political_will}`)
     text.push(print_icon(counters.pw))
-    text.push("<dd>" + G.political_will)
 
     if (SID === BURMA_SCENARIO) {
         print_nation_status(text, get_nation_info(nations.BURMA))
@@ -170,6 +169,7 @@ function update_window_pw() {
 function print_pow(text) {
     if (G.pow <= 0) {
         text.push(`<dt>No progress of war required for turn ${G.turn}.`)
+        text.push(print_icon(counters.pow_target))
         return
     }
 

@@ -754,6 +754,7 @@ body.hex-clickable .action_hex { z-index: 50; }
     border: 1px solid black;
     right: 0;
     pointer-events: none;
+    position: absolute;
 }
 
 .unit > .marker.barges_small {
