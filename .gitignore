@@ -1,3 +1,4 @@
 HIRES
+*.js.map
 info/*.png
 *.idea
