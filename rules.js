@@ -1,6 +1,4 @@
 // THIS FILE IS GENERATED! DO NOT EDIT!
-
-/** main*/
 "use strict"
 
 /* global exports console */
@@ -11,7 +9,7 @@ const ROLES = ["Japan", "Allies"]
 
 exports.default_scenario = "South Pacific"
 
-/*{{{ import common/constants.js*/
+/* {{{ js/common/constants.js */
 const SOUTH_PACIFIC_SCENARIO = 0
 const FULL_CAMPAIGN_SCENARIO = 1
 const YEAR_1942_SCENARIO = 2
@@ -201,9 +199,9 @@ HEX_DIRECTION[10] = 2
 HEX_DIRECTION[39] = 3
 HEX_DIRECTION[68] = 4
 HEX_DIRECTION[69] = 5
-/*}}} import common/constants.js*/
-/*{{{ import common/data.js*/
-/*{{{ import common/data_pieces.js*/
+/* }}} */
+/* {{{ js/common/data.js */
+/* {{{ js/common/data_pieces.js */
 var pieces = [
     {},
     {
@@ -3334,8 +3332,8 @@ function get_unit_supply_type(piece) {
     }
     throw new Error("Invalid piece supply: " + piece.name)
 }
-/*}}} import common/data_pieces.js*/
-/*{{{ import common/data_cards.js*/
+/* }}} */
+/* {{{ js/common/data_cards.js */
 var cards = [
     {},
     {
@@ -5130,8 +5128,8 @@ function for_each_card(apply) {
 
     }
 }
-/*}}} import common/data_cards.js*/
-/*{{{ import common/data_map.js*/
+/* }}} */
+/* {{{ js/common/data_map.js */
 //hex data
 const CITY = 1
 const JAPANESE_CITY = 2
@@ -6623,7 +6621,7 @@ function create_tonnel(data) {
 function get_near_hexes(hex) {
     return get_map_data(hex).nh
 }
-/*}}} import common/data_map.js*/
+/* }}} */
 
 var counters = {
     oos: "oos top",
@@ -6992,9 +6990,9 @@ function is_event_active(event) {
     }
     return G.events[event.id]
 }
-/*}}} import common/data.js*/
-/*{{{ import common/utils.js*/
-/*{{{ import common/library.js*/
+/* }}} */
+/* {{{ js/common/utils.js */
+/* {{{ js/common/library.js */
 
 // Fast deep copy for objects without cycles
 function object_copy(original) {
@@ -7311,7 +7309,7 @@ function map_group_by(items, callback) {
     return groups
 }
 
-/*}}} import common/library.js*/
+/* }}} */
 
 function hex_to_int(i) {
     return (Math.floor(i / 100) - 10) * 29 + i % 100
@@ -7548,8 +7546,8 @@ function array_equals(a, b) {
     return true
 }
 
-/*}}} import common/utils.js*/
-/*{{{ import supply.js*/
+/* }}} */
+/* {{{ js/supply.js */
 var last = Date.now()
 var count = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
@@ -8439,8 +8437,8 @@ function mark_activation_zone(hq) {
         }
     }
 }
-/*}}} import supply.js*/
-/*{{{ import move.js*/
+/* }}} */
+/* {{{ js/move.js */
 function update_move_hex() {
     if (G.active_stack.length === 0) {
         L.allowed_hexes = []
@@ -9400,9 +9398,9 @@ function set_location(unit, location, no_logs) {
     }
     G.location[unit] = location
 }
-/*}}} import move.js*/
+/* }}} */
 
-/*{{{ import common/scenario.js*/
+/* {{{ js/common/scenario.js */
 const S_P_DECK = S_P_deck()
 const B_F_W_DECK = B_F_W_deck()
 
@@ -10158,10 +10156,10 @@ function check_nation_controlled(nation, faction) {
     return true
 }
 
-/*}}} import common/scenario.js*/
-/*{{{ import server/game.js*/
-/*{{{ import server/cycle.js*/
-/*{{{ import server/reinforcements.js*/
+/* }}} */
+/* {{{ js/server/game.js */
+/* {{{ js/server/cycle.js */
+/* {{{ js/server/reinforcements.js */
 function wie_roll_result() {
     if (G.wie >= 10) {
         return 7
@@ -10597,8 +10595,8 @@ P.replacement_segment = {
         end()
     }
 }
-/*}}} import server/reinforcements.js*/
-/*{{{ import server/offensive.js*/
+/* }}} */
+/* {{{ js/server/offensive.js */
 P.offensive_sequence = script(`
     set G.offensive.stage ATTACK_STAGE
     eval {
@@ -13756,8 +13754,8 @@ function capture_landing_hexes() {
     G.offensive.landing_hexes = []
 }
 
-/*}}} import server/offensive.js*/
-/*{{{ import server/surrender.js*/
+/* }}} */
+/* {{{ js/server/surrender.js */
 function china_surrender() {
     change_political_will(-nations.CHINA.pw, "China surrenders")
     var units = [ap_army("5_cn"), ap_army("6_cn"), ap_army("66_cn")]
@@ -13985,7 +13983,7 @@ function india_stable() {
         G.events[events.INDIA_STATUS.id] = 0
     }
 }
-/*}}} import server/surrender.js*/
+/* }}} */
 
 P.strategic_phase = script(`
     log ("!Turn " + G.turn + " - " + get_year_season() + " " + get_year())
@@ -14465,9 +14463,9 @@ P.attrition = {
     }
 }
 
-/*}}} import server/cycle.js*/
+/* }}} */
 
-/*{{{ import server/actions.js*/
+/* {{{ js/server/actions.js */
 function is_china_coast_captured() {
     return CHINA_COAST.some(h => is_space_controlled(h, JP))
 }
@@ -14858,8 +14856,8 @@ function get_allowed_actions(num) {
 
 
 
-/*}}} import server/actions.js*/
-/*{{{ import server/events.js*/
+/* }}} */
+/* {{{ js/server/events.js */
 /* EVENTS */
 
 function filter_activation_units(condition, faction) {
@@ -17404,7 +17402,7 @@ cards[CARRIER_RAID].before_unit_activation = function () {
     filter_activation_units((u, piece) => is_us_unit(piece) && piece.class === "naval" && piece.br, AP)
 }
 
-/*}}} import server/events.js*/
+/* }}} */
 
 
 function prepare_game_log() {
@@ -18250,8 +18248,8 @@ function print_reinforcements() {
 
 
 
-/*}}} import server/game.js*/
-/*{{{ import server/query.js*/
+/* }}} */
+/* {{{ js/server/query.js */
 function on_query(q, params) {
     if (q === "combat") {
         return combat_query(params)
@@ -18337,8 +18335,8 @@ function draw_list() {
     return {hand}
 }
 
-/*}}} import server/query.js*/
-/*{{{ import server/scenario_setup.js*/
+/* }}} */
+/* {{{ js/server/scenario_setup.js */
 const SCENARIO_SETUP = [
     {
         id: SOUTH_PACIFIC_SCENARIO,
@@ -19752,8 +19750,8 @@ SCENARIO_DATA[BURMA_SCENARIO].before_unit_activation = function () {
         || G.offensive.stage === ATTACK_STAGE && G.offensive.type === EC && G.offensive.offensive_card === OPERATION_C, JP)
 }
 
-/*}}} import server/scenario_setup.js*/
-/*{{{ import server/framework.js*/
+/* }}} */
+/* {{{ js/server/framework.js */
 /* FRAMEWORK */
 
 /*
@@ -20480,8 +20478,6 @@ function shuffle_bigint(list) {
     }
 }
 
-/*}}} import server/framework.js*/
+/* }}} */
 
-
-
-
+//# sourceMappingURL=rules.js.map

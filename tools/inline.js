@@ -1,67 +1,46 @@
+"use strict"
+
 const fs = require("fs")
-const Path = require('path')
+const { SourceMapGenerator } = require("./source-map/source-map.js")
 
-const inlined = []
-const templates = []
-const output = []
+function compile(output, input) {
+    var map = new SourceMapGenerator({ file: output })
+    var stm = []
 
-read_dir("js")
-
-for (var i = 0; i < output.length - 1; i += 2) {
-    create_by_template(output[i], output[i + 1])
-}
-
-function read_dir(dir) {
-    fs.readdirSync(dir, {withFileTypes: true})
-        .forEach(item => {
-            var full_name=item.parentPath + "/" + item.name
-            if (item.isDirectory()) {
-                read_dir(full_name)
-            } else {
-                console.log("Read:", full_name)
-                var content = fs.readFileSync(full_name, "utf-8").split("\n")[0]
-                if (content.includes("/** main*/")) {
-                    output.push(full_name, item.name)
-                }
-                inlined.push(full_name.trim())
-                templates.push(create_template(full_name).replace("js/","").trim())
-            }
+    function emit(source, lineno, text) {
+        stm.push(text)
+        map.addMapping({
+            generated: { line: stm.length, column: 1 },
+            source: source,
+            original: { line: lineno, column: 1 },
         })
-}
+    }
 
-function create_by_template(target, filename) {
-    var stream = fs.createWriteStream(filename);
-    stream.once('open', function (fd) {
-        stream.write("// THIS FILE IS GENERATED! DO NOT EDIT!\n\n");
-        insert_into(target, stream)
-        stream.end();
-    });
-    console.log(`Compiled: ${target}`)
-}
-
-function insert_into(target, stream) {
-    var content = fs.readFileSync(target, "utf-8").split("\n")
-    for (var i = 0; i < content.length; i++) {
-        var line = content[i]
-        if (line.startsWith("/** import")) {
-            stream.write(line.replace("* import", "{{{ import"));
-            stream.write("\n");
-            var file_name=inlined[templates.indexOf(line.trim())]
-            if(!file_name){
-                console.log(`Failed read: ${file_name}(${line})`)
+    function process(source) {
+        var lineno = 1
+        for (var text of fs.readFileSync(source, "utf-8").split("\n")) {
+            //text = text.replaceAll("    ", "\t").trimEnd()
+            if (text.startsWith("/** import")) {
+                var next_file = "js/" + text.replace("/** import ", "").replace("*/", "").trim()
+                emit(source, lineno, "/* {{{ " + next_file + " */")
+                process(next_file, 0)
+                emit(source, lineno, "/* }}} */")
+            } else {
+                emit(source, lineno, text)
             }
-            insert_into(file_name, stream)
-            stream.write(line.replace("* import", "}}} import"));
-            stream.write("\n");
-        } else {
-            stream.write(line);
-            stream.write("\n");
+            ++lineno
         }
     }
 
+    emit(input, 1, "// THIS FILE IS GENERATED! DO NOT EDIT!")
+
+    process(input)
+
+    stm.push("//# sourceMappingURL=" + output + ".map")
+
+    fs.writeFileSync(output, stm.join("\n"))
+    fs.writeFileSync(output + ".map", map.toString())
 }
 
-function create_template(file) {
-    return `/** import ${file}*/`
-}
-
+compile("play.js", "js/play.js")
+compile("rules.js", "js/rules.js")

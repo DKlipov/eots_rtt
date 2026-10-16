@@ -1,4 +1,3 @@
-/** main*/
 "use strict"
 
 /* global exports console */
@@ -9,17 +8,14 @@ const ROLES = ["Japan", "Allies"]
 
 exports.default_scenario = "South Pacific"
 
-/** import common/constants.js*/
-/** import common/data.js*/
-/** import common/utils.js*/
-/** import supply.js*/
-/** import move.js*/
+/** import common/constants.js */
+/** import common/data.js */
+/** import common/utils.js */
+/** import supply.js */
+/** import move.js */
 
-/** import common/scenario.js*/
-/** import server/game.js*/
-/** import server/query.js*/
-/** import server/scenario_setup.js*/
-/** import server/framework.js*/
-
-
-
+/** import common/scenario.js */
+/** import server/game.js */
+/** import server/query.js */
+/** import server/scenario_setup.js */
+/** import server/framework.js */

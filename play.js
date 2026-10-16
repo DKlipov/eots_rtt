@@ -1,6 +1,4 @@
 // THIS FILE IS GENERATED! DO NOT EDIT!
-
-/** main*/
 "use strict"
 
 const ROLES = ["Japan", "Allies"]
@@ -8,7 +6,7 @@ const ROLES = ["Japan", "Allies"]
 function log(){}
 function capture_hex(){}
 
-/*{{{ import common/constants.js*/
+/* {{{ js/common/constants.js */
 const SOUTH_PACIFIC_SCENARIO = 0
 const FULL_CAMPAIGN_SCENARIO = 1
 const YEAR_1942_SCENARIO = 2
@@ -198,10 +196,12 @@ HEX_DIRECTION[10] = 2
 HEX_DIRECTION[39] = 3
 HEX_DIRECTION[68] = 4
 HEX_DIRECTION[69] = 5
-/*}}} import common/constants.js*/
+/* }}} */
+
 CLIENT_SIDE_SUPPLY = 0
-/*{{{ import common/data.js*/
-/*{{{ import common/data_pieces.js*/
+
+/* {{{ js/common/data.js */
+/* {{{ js/common/data_pieces.js */
 var pieces = [
     {},
     {
@@ -3332,8 +3332,8 @@ function get_unit_supply_type(piece) {
     }
     throw new Error("Invalid piece supply: " + piece.name)
 }
-/*}}} import common/data_pieces.js*/
-/*{{{ import common/data_cards.js*/
+/* }}} */
+/* {{{ js/common/data_cards.js */
 var cards = [
     {},
     {
@@ -5128,8 +5128,8 @@ function for_each_card(apply) {
 
     }
 }
-/*}}} import common/data_cards.js*/
-/*{{{ import common/data_map.js*/
+/* }}} */
+/* {{{ js/common/data_map.js */
 //hex data
 const CITY = 1
 const JAPANESE_CITY = 2
@@ -6621,7 +6621,7 @@ function create_tonnel(data) {
 function get_near_hexes(hex) {
     return get_map_data(hex).nh
 }
-/*}}} import common/data_map.js*/
+/* }}} */
 
 var counters = {
     oos: "oos top",
@@ -6990,9 +6990,9 @@ function is_event_active(event) {
     }
     return G.events[event.id]
 }
-/*}}} import common/data.js*/
-/*{{{ import common/utils.js*/
-/*{{{ import common/library.js*/
+/* }}} */
+/* {{{ js/common/utils.js */
+/* {{{ js/common/library.js */
 
 // Fast deep copy for objects without cycles
 function object_copy(original) {
@@ -7309,7 +7309,7 @@ function map_group_by(items, callback) {
     return groups
 }
 
-/*}}} import common/library.js*/
+/* }}} */
 
 function hex_to_int(i) {
     return (Math.floor(i / 100) - 10) * 29 + i % 100
@@ -7546,8 +7546,8 @@ function array_equals(a, b) {
     return true
 }
 
-/*}}} import common/utils.js*/
-/*{{{ import supply.js*/
+/* }}} */
+/* {{{ js/supply.js */
 var last = Date.now()
 var count = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
@@ -8437,8 +8437,8 @@ function mark_activation_zone(hq) {
         }
     }
 }
-/*}}} import supply.js*/
-/*{{{ import move.js*/
+/* }}} */
+/* {{{ js/move.js */
 function update_move_hex() {
     if (G.active_stack.length === 0) {
         L.allowed_hexes = []
@@ -9398,8 +9398,8 @@ function set_location(unit, location, no_logs) {
     }
     G.location[unit] = location
 }
-/*}}} import move.js*/
-/*{{{ import common/scenario.js*/
+/* }}} */
+/* {{{ js/common/scenario.js */
 const S_P_DECK = S_P_deck()
 const B_F_W_DECK = B_F_W_deck()
 
@@ -10155,10 +10155,9 @@ function check_nation_controlled(nation, faction) {
     return true
 }
 
-/*}}} import common/scenario.js*/
+/* }}} */
 
-
-/*{{{ import client/init.js*/
+/* {{{ js/client/init.js */
 function on_reply(q, response) {
     if (q === "original_control")
         scenario_data().original_control ??= response
@@ -10834,8 +10833,8 @@ function init_canvas(scenario) {
     CANVAS_CTX.scale(scale, scale)
 }
 
-/*}}} import client/init.js*/
-/*{{{ import client/actions.js*/
+/* }}} */
+/* {{{ js/client/actions.js */
 var LOCAL_STATUS = 0
 var LOCAL_STATE = null
 var STORED_STATE = null
@@ -11231,8 +11230,8 @@ function retrace_supply_path(location) {
     return result
 }
 
-/*}}} import client/actions.js*/
-/*{{{ import client/dialog.js*/
+/* }}} */
+/* {{{ js/client/dialog.js */
 // EVENT CARD WINDOW
 
 function draw_list() {
@@ -11729,8 +11728,8 @@ function print_battle_box(text, faction, cf, rm, units, log) {
     text.push("</dl>")
 }
 
-/*}}} import client/dialog.js*/
-/*{{{ import client/update.js*/
+/* }}} */
+/* {{{ js/client/update.js */
 function update_hand(side) {
     var fo_card
     if (G.future_offensive[side] > 0) {
@@ -12232,8 +12231,8 @@ function apply_conflict_marker(marker, hex) {
     marker.innerText = String.fromCharCode(65 + G.offensive.battle_names.indexOf(hex))
 }
 
-/*}}} import client/update.js*/
-/*{{{ import client/utils.js*/
+/* }}} */
+/* {{{ js/client/utils.js */
 function center_rect([x, y], w, h) {
     return [x - w / 2, y - h / 2, w, h]
 }
@@ -12316,8 +12315,8 @@ function hex_center(i) {
     ]
 }
 
-/*}}} import client/utils.js*/
-/*{{{ import client/framework.js*/
+/* }}} */
+/* {{{ js/client/framework.js */
 const ICONS = {
     B0: '<span class="xdice B d0"></span>',
     B1: '<span class="xdice B d1"></span>',
@@ -12624,5 +12623,6 @@ function on_focus_card_tip(c) {
     world.tip.classList = `card card_${card.faction ? "ap" : "jp"}_${card.num}`
 }
 
-/*}}} import client/framework.js*/
+/* }}} */
 
+//# sourceMappingURL=play.js.map
