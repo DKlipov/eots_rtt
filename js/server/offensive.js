@@ -2831,7 +2831,6 @@ function check_us_casualties() {
         } else {
             track_event(events.US_CASUALTIES)
         }
-        console.log(G.events[events.US_CASUALTIES.id])
     }
 }
 

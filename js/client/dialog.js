@@ -394,7 +394,7 @@ function update_window_eliminated() {
 function update_combat_window(response) {
     var text = []
 
-    console.log("COMBAT WINDOW", JSON.stringify(response))
+ //   console.log("COMBAT WINDOW", JSON.stringify(response))
 
     update_window_title("window_combat",
         escape_text(`Combat ${String.fromCharCode(65 + response.battle_name)}: H${response.battle_hex}`)

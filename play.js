@@ -11045,13 +11045,13 @@ var send_action_with_oos = function (a, b, valid = false, extra) {
     check_supply()
     if (!array_equals(world.original_oos, G.oos)) {
         payload.push(...G.oos)
-        type += G.oos.length << 1
+        type += G.oos.length + 1 << 1
     }
     if (extra) {
         payload.push(...extra)
     }
     payload[0] = type
-    if (payload.length === 1) {
+    if (payload.length === 1 && type === 0) {
         payload = undefined
     }
     return original_send_action(a, b, payload)
@@ -11639,7 +11639,7 @@ function update_window_eliminated() {
 function update_combat_window(response) {
     var text = []
 
-    console.log("COMBAT WINDOW", JSON.stringify(response))
+ //   console.log("COMBAT WINDOW", JSON.stringify(response))
 
     update_window_title("window_combat",
         escape_text(`Combat ${String.fromCharCode(65 + response.battle_name)}: H${response.battle_hex}`)

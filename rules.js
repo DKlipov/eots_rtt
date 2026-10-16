@@ -13432,7 +13432,6 @@ function check_us_casualties() {
         } else {
             track_event(events.US_CASUALTIES)
         }
-        console.log(G.events[events.US_CASUALTIES.id])
     }
 }
 
@@ -19952,7 +19951,7 @@ exports.action = function (state, role, action, argument) {
                 }
                 var oos_len = (type >> 1)
                 if (oos_len > 0) {
-                    G.oos = argument.slice(offset, offset + oos_len)
+                    G.oos = argument.slice(offset, offset + oos_len - 1)
                     offset += oos_len
                 }
                 if (argument.length > offset)
@@ -20235,7 +20234,7 @@ function _parse(text) {
                     emit(`if (++(${i}) <= ${end}) L.I = ${ix_loop}`)
                     return
                 }
-                // for i in (array) { block }
+                    // for i in (array) { block }
                 // NOTE: array is evaluated repeatedly so should be a constant!
                 else if (line.length === 5 && line[2] === "in") {
                     k = line[1]
