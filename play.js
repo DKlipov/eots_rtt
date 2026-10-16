@@ -10650,7 +10650,6 @@ function on_init(scenario, game_options, static_view) {
     init_canvas(scenario)
 
     init_preference_checkbox("noroad", false)
-    init_preference_checkbox("full_log", false)
     init_preference_checkbox("nopath", false)
     init_preference_checkbox("fullcontrol", false)
     init_preference_checkbox("hidezoi", false)
@@ -12450,12 +12449,21 @@ function on_prompt(text) {
     }
 }
 
-var SHOW_FULL_LOG = get_preference("full_log", false)
+var shorten_log_start = 0
 
 function show_full_log() {
-    SHOW_FULL_LOG = !get_preference("full_log", false)
-    var len = Number.isInteger(view.log) ? view.log : game_log.length
-    update_log(0, len)
+    shorten_log_start = 0
+    update_log(0, game_log.length)
+}
+
+function on_init_log(log) {
+    var turns = []
+    for (var i = 0; i < log.length; ++i) {
+        if (log[i][0] === "!" || log[i][0] === "@" || log[i] === "#AAP Action" || log[i] === "#JJP Action")
+            turns.push(i)
+    }
+    if (turns.length >= 8)
+        shorten_log_start = turns[turns.length-4]
 }
 
 function on_log(text, i) {
@@ -12463,19 +12471,22 @@ function on_log(text, i) {
     if (Number.isInteger(view.log)) {
         total = view.log
     }
-    if (!SHOW_FULL_LOG && total > 100 && i === 0) {
-        var d = document.createElement("div")
-        d.classList.add("full_log")
-        var b = document.createElement("button")
-        b.onclick = () => show_full_log()
-        b.textContent = "Show full log"
-        d.append(b)
-        return d
-    } else if (!SHOW_FULL_LOG && total - i > 100) {
+
+    if (i < shorten_log_start) {
+        if (i === 0) {
+            var d = document.createElement("div")
+            d.classList.add("full_log")
+            var b = document.createElement("button")
+            b.onclick = () => show_full_log()
+            b.textContent = "Show full log"
+            d.append(b)
+            return d
+        }
         var empty = document.createElement("div")
         empty.hidden = true
         return empty
     }
+
     var p = document.createElement("div")
 
     switch (text[0]) {
