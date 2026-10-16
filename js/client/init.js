@@ -619,22 +619,28 @@ function on_init(scenario, game_options, static_view) {
         define_layout_track_h("divisions", 1, (SID == BURMA_SCENARIO ? 9 : 13), map_layout.track_japanese_divisions_available_china, 0)
     }
     for (i = 0; i < 35; i++) {
-        var battle = define_marker("battle", i, "conflict battle top")
+        var battle = define_thing("battle", i).keyword("marker conflict battle top").animate()
         battle.element.innerText = String.fromCharCode(65 + i)
         battle.element.index = i
         battle.element.addEventListener("mousedown", evt => {
-            if (world.focus !== (evt.target.parentElement.thing)) {
+            if (event.button === 0) {
                 send_query("combat", evt.target.index)
+                if (world.focus === (evt.target.parentElement.thing))
+                    evt.stopImmediatePropagation()
             }
         })
-        var landing = define_marker("landing", i, "conflict landing top")
+        battle.stackable()
+        var landing = define_thing("landing", i).keyword("marker conflict landing top").animate()
         landing.element.innerText = String.fromCharCode(65 + i)
         landing.element.index = i
         landing.element.addEventListener("mousedown", evt => {
-            if (world.focus !== (evt.target.parentElement.thing)) {
+            if (event.button === 0) {
                 send_query("combat", evt.target.index)
+                if (world.focus === (evt.target.parentElement.thing))
+                    evt.stopImmediatePropagation()
             }
         })
+        landing.stackable()
     }
     define_marker("divisions", 0, counters.divisions_china)
     for (let i = 1; i < pieces.length; ++i) {

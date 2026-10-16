@@ -310,11 +310,6 @@ function update_window_vp() {
     var text = []
     text.push("<dl>")
 
-    if (!scenario_data().original_control) {
-        send_query("original_control")
-        return
-    }
-
     var response = get_victory()
 
     text.push("<dt>" + response.won_text)
