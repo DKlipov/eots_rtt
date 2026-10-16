@@ -319,6 +319,10 @@ const TURN_MARKERS = [
         value: G => G.events[events.LACK_US_CV.id]
     },
     {
+        counter: counters.pw_failed_pow,
+        value: G => G.events[events.FAILED_POW.id]
+    },
+    {
         counter: counters.us_sub,
         value: G => G.events[events.SUBMARINE_DOCTRINE.id]
     },

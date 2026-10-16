@@ -6708,6 +6708,7 @@ var counters = {
     pw_casualties: "pw_casualties",
     pw_bb: "pw_bb",
     pw_cv: "pw_cv",
+    pw_failed_pow: "pw_failed_pow",
 }
 
 var nations = {
@@ -6973,6 +6974,10 @@ var events = {
         cause: "no US CV units",
         counter: counters.pw_cv,
         pw: -1,
+    },
+    FAILED_POW: {
+        id: 35,
+        counter: counters.pw_failed_pow,
     },
 }
 
@@ -13907,14 +13912,6 @@ function set_control_over_nation(nation, only_ground = true) {
 }
 
 function update_china_status(diff, to_stable = false) {
-    //todo: remove
-    if (!G.events[events.CHINA_STATUS.id]) {
-        G.events[events.CHINA_STATUS.id] = G.surrender[nations.CHINA.id]
-        if (G.events[events.CHINA_STATUS.id] == undefined) {
-            G.events[events.CHINA_STATUS.id] = 0
-        }
-        G.surrender[nations.CHINA.id] = 0
-    }
     if (!G.events[events.INDIA_STATUS.id]) {
         G.events[events.INDIA_STATUS.id] = G.surrender[nations.INDIA.id]
         if (!G.events[events.INDIA_STATUS.id]) {
@@ -14328,6 +14325,7 @@ function check_progress_of_war() {
     var pow_count = G.capture.filter(h => is_space_controlled(h, AP)).length
     if (pow_count < G.pow) {
         change_political_will(-1, `current progress of war ${pow_count} < ${G.pow}`)
+        track_event(events.FAILED_POW)
     } else {
         log(`Progress of War ${pow_count} >= ${G.pow}.`)
     }
@@ -14401,10 +14399,6 @@ P.end_of_turn_phase = script(`
 
 P.attrition = {
     _begin() {
-        if (!G.attrition) {
-            G.attrition = G.oos
-            //todo: remove
-        }
         L.unit_to_attrition = []
         var hq_list = []
         for_each_unit_on_map((u, piece) => {
@@ -17562,21 +17556,6 @@ function on_view(sherlock) {
 }
 
 function create_view(sherlock) {
-    //todo: remove
-    if (!G.events[events.CHINA_STATUS.id]) {
-        G.events[events.CHINA_STATUS.id] = G.surrender[nations.CHINA.id]
-        if (G.events[events.CHINA_STATUS.id] == undefined) {
-            G.events[events.CHINA_STATUS.id] = 0
-        }
-        G.surrender[nations.CHINA.id] = 0
-    }
-    if (!G.events[events.INDIA_STATUS.id]) {
-        G.events[events.INDIA_STATUS.id] = G.surrender[nations.INDIA.id]
-        if (!G.events[events.INDIA_STATUS.id]) {
-            G.events[events.INDIA_STATUS.id] = 0
-        }
-        G.surrender[nations.INDIA.id] = 0
-    }
     V.active = G.active
     V.turn = G.turn
     V.sid = G.sid

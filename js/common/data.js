@@ -87,6 +87,7 @@ var counters = {
     pw_casualties: "pw_casualties",
     pw_bb: "pw_bb",
     pw_cv: "pw_cv",
+    pw_failed_pow: "pw_failed_pow",
 }
 
 var nations = {
@@ -352,6 +353,10 @@ var events = {
         cause: "no US CV units",
         counter: counters.pw_cv,
         pw: -1,
+    },
+    FAILED_POW: {
+        id: 35,
+        counter: counters.pw_failed_pow,
     },
 }
 

@@ -344,6 +344,7 @@ function check_progress_of_war() {
     var pow_count = G.capture.filter(h => is_space_controlled(h, AP)).length
     if (pow_count < G.pow) {
         change_political_will(-1, `current progress of war ${pow_count} < ${G.pow}`)
+        track_event(events.FAILED_POW)
     } else {
         log(`Progress of War ${pow_count} >= ${G.pow}.`)
     }
@@ -417,10 +418,6 @@ P.end_of_turn_phase = script(`
 
 P.attrition = {
     _begin() {
-        if (!G.attrition) {
-            G.attrition = G.oos
-            //todo: remove
-        }
         L.unit_to_attrition = []
         var hq_list = []
         for_each_unit_on_map((u, piece) => {
