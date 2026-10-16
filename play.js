@@ -12251,6 +12251,91 @@ function apply_conflict_marker(marker, hex) {
 
 /* }}} */
 /* {{{ js/client/utils.js */
+/* MISC CLIENT STUFF */
+
+const digit_superscript = [
+    "\u2070",
+    "\u2071",
+    "\xb2",
+    "\xb3",
+    "\u2074",
+    "\u2075",
+    "\u2076",
+    "\u2077",
+    "\u2078",
+    "\u2079",
+]
+
+function format_unit_tooltip(u) {
+    var p = pieces[u]
+    var tip = ""
+
+    switch (p.class) {
+    case "hq":
+        return `HQ ${p.cr} [${p.cm}] (${p.name.replace(" HQ", "")})`
+    case "ground":
+        if (p.size === 4) tip += "XXXX"
+        else if (p.size === 3) tip += "XXX"
+        else if (p.size === 1) tip += "X"
+        else tip += "Ground"
+        break
+    case "air":
+        tip += "Air"
+        break
+    case "naval":
+        tip += p.type.toUpperCase()
+        break
+    }
+
+    if (!set_has(G.reduced, u))
+        tip += ` ${p.cf}`
+    else
+        tip += ` (${p.rcf}`
+    tip += `-${p.lf}`
+    if (p.br)
+        tip += `-${p.br}`
+    if (p.ebr)
+        tip += " " + digit_superscript[p.ebr]
+    if (!set_has(G.reduced, u))
+        tip += ""
+    else
+        tip += ")"
+
+    tip += ` (${p.name})`
+
+    return tip
+}
+
+const terrain_name = [
+    "ocean",
+    "open",
+    "jungle",
+    "mixed",
+    "mountain",
+    "atoll",
+]
+
+function format_hex_tooltip(h) {
+    var hex = int_to_hex(h)
+    var tip = hex + ""
+    var info = map.find(e => e.id === hex)
+    if (info) {
+        if (info.name) tip += " " + info.name
+        if (info.region) tip += " (" + info.region + ")"
+        var props = []
+        if (info.city === CITY) props.push("city")
+        if (info.city === JAPANESE_CITY) props.push("Japanese city")
+        if (info.city === CHINESE_CITY) props.push("Chinese city")
+        if (info.airfield) props.push("airfield")
+        if (info.port) props.push("port")
+        if (info.island) props.push("island")
+        if (info.resource) props.push("resource")
+        if (info.terrain) props.push(terrain_name[info.terrain])
+        if (props.length > 0) tip += " - " + props.join(", ")
+    }
+    return tip
+}
+
 function center_rect([x, y], w, h) {
     return [x - w / 2, y - h / 2, w, h]
 }
@@ -12376,59 +12461,6 @@ const card_names = cards.map(c => c?.name)
 const unit_classes = pieces.map(p => `piece unit ${p?.faction ? "ap" : "jp"} ${p?.counter}`)
 const unit_names = pieces.map(p => p?.name)
 
-const digit_superscript = [
-    "\u2070",
-    "\u2071",
-    "\xb2",
-    "\xb3",
-    "\u2074",
-    "\u2075",
-    "\u2076",
-    "\u2077",
-    "\u2078",
-    "\u2079",
-]
-
-function format_unit_tooltip(u) {
-    var p = pieces[u]
-    var tip = ""
-
-    switch (p.class) {
-    case "hq":
-        return `HQ ${p.cr} [${p.cm}] (${p.name.replace(" HQ", "")})`
-    case "ground":
-        if (p.size === 4) tip += "XXXX"
-        else if (p.size === 3) tip += "XXX"
-        else if (p.size === 1) tip += "X"
-        else tip += "Ground"
-        break
-    case "air":
-        tip += "Air"
-        break
-    case "naval":
-        tip += p.type.toUpperCase()
-        break
-    }
-
-    if (!set_has(G.reduced, u))
-        tip += ` ${p.cf}`
-    else
-        tip += ` (${p.rcf}`
-    tip += `-${p.lf}`
-    if (p.br)
-        tip += `-${p.br}`
-    if (p.ebr)
-        tip += " " + digit_superscript[p.ebr]
-    if (!set_has(G.reduced, u))
-        tip += ""
-    else
-        tip += ")"
-
-    tip += ` (${p.name})`
-
-    return tip
-}
-
 const hex_names = []
 for (let i = 0; i <= TUNNEL_BOX; ++i) {
     if (i === CHINA_BOX) {
@@ -12443,36 +12475,6 @@ for (let i = 0; i <= TUNNEL_BOX; ++i) {
         else
             hex_names[i] = String(hex)
     }
-}
-
-const terrain_name = [
-    "ocean",
-    "open",
-    "jungle",
-    "mixed",
-    "mountain",
-    "atoll",
-]
-
-function format_hex_tooltip(h) {
-    var hex = int_to_hex(h)
-    var tip = hex + ""
-    var info = map.find(e => e.id === hex)
-    if (info) {
-        if (info.name) tip += " " + info.name
-        if (info.region) tip += " (" + info.region + ")"
-        var props = []
-        if (info.city === CITY) props.push("city")
-        if (info.city === JAPANESE_CITY) props.push("Japanese city")
-        if (info.city === CHINESE_CITY) props.push("Chinese city")
-        if (info.airfield) props.push("airfield")
-        if (info.port) props.push("port")
-        if (info.island) props.push("island")
-        if (info.resource) props.push("resource")
-        if (info.terrain) props.push(terrain_name[info.terrain])
-        if (props.length > 0) tip += " - " + props.join(", ")
-    }
-    return tip
 }
 
 const ICONS = {
