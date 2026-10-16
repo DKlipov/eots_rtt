@@ -10,12 +10,9 @@ function hex_in_map(x, y) {
 }
 
 function get_element_weight(e) {
-    var marker = !e.thing || e.thing.my_action !== "unit"
-    if (marker && e.classList.contains("top")) {
-        return 64000
-    } else if (marker) {
-        return 0
-    }
+    var is_marker = !e.thing || e.thing.my_action !== "unit"
+    if (is_marker)
+        return e.classList.contains("top") ? 64000 : 0
     var value = 0
     var unit = e.thing.my_id
     var piece = pieces[unit]

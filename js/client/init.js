@@ -11,20 +11,10 @@ function clear_paths() {
     CANVAS_CTX.clearRect(0, 0, CANVAS.width, CANVAS.height)
 }
 
-function sort_unit_stack(a, focus) {
-    var map = []
-    var index = 0
-    for (var e of a) {
-        // if (e.classList.contains("top") && (!e.thing || e.thing.my_action !== "unit") && !focus) {
-        // continue
-        // }
-        map_set(map, get_element_weight(e) + index, e)
-        index++
-    }
-    if (map.length === 0) {
-        return a
-    }
-    return map.filter((a, index) => index % 2 === 1)
+function sort_unit_stack(a, b) {
+    var aw = get_element_weight(a) + a.thing.my_id
+    var bw = get_element_weight(b) + b.thing.my_id
+    return aw - bw
 }
 
 function define_s_loc(id, rect) {

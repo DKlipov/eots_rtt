@@ -353,7 +353,6 @@ class Thing {
         this.my_stack.small_dx ??= 0
         this.my_stack.small_dy ??= 0
         this.my_stack.small_threshold ??= 0
-        this.my_stack.sort ??= a => a
 
         world.stack_list.push(this)
 
@@ -945,7 +944,9 @@ function _layout_stacks() {
         start_y -= stack.element.offsetTop
 
         // XXX: custom sort stack elements
-        var children = stack.my_stack.sort(Array.from(stack.element.children), world.focus)
+        var children = Array.from(stack.element.children)
+        if (stack.my_stack.sort)
+            children.sort(stack.my_stack.sort)
 
         var i = 0, k = 0
         var bounds = [ Infinity, Infinity, -Infinity, -Infinity ]
