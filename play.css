@@ -11,6 +11,8 @@ header {
     filter: grayscale(100%);
 }
 
+.marker.control { pointer-events: none }
+
 /* RESCUED FROM WORLD.CSS */
 
 body.hide-markers .marker:not(.road) { display: none }
