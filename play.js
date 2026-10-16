@@ -7761,7 +7761,8 @@ function check_burma_road() {
 
 function is_supply_source(hex, supply, faction) {
     var md = get_map_data(hex)
-    return md.supply_source & supply && (md.region === "Australia" || md.region === "Japan" || !has_non_n_zoi(hex, 1 - faction))
+    return md.supply_source & supply && (md.region === "Japan" || !has_non_n_zoi(hex, 1 - faction) && md.region !== "Australia"
+        || md.region === "Australia" && (md.port && is_space_controlled(hex, faction) || !md.coastal))
 }
 
 function for_each_unit(apply) {

@@ -7761,7 +7761,8 @@ function check_burma_road() {
 
 function is_supply_source(hex, supply, faction) {
     var md = get_map_data(hex)
-    return md.supply_source & supply && (md.region === "Australia" || md.region === "Japan" || !has_non_n_zoi(hex, 1 - faction))
+    return md.supply_source & supply && (md.region === "Japan" || !has_non_n_zoi(hex, 1 - faction) && md.region !== "Australia"
+        || md.region === "Australia" && (md.port && is_space_controlled(hex, faction) || !md.coastal))
 }
 
 function for_each_unit(apply) {
@@ -19947,9 +19948,9 @@ exports.action = function (state, role, action, argument) {
                     G.burma_road = argument[offset]
                     offset += 1
                 }
-                var oos_len = (type >> 1)
+                var oos_len = (type >> 1) - 1
                 if (oos_len > 0) {
-                    G.oos = argument.slice(offset, offset + oos_len - 1)
+                    G.oos = argument.slice(offset, offset + oos_len)
                     offset += oos_len
                 }
                 if (argument.length > offset)
