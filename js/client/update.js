@@ -284,9 +284,9 @@ function on_update() {
         var hex = G.location[G.oos[i]]
         if (!set_has(oos_hex_set, hex) && hex <= LAST_BOARD_HEX && !set_has(supplied_hex, hex)) {
             var counter = counters.isolated
-            if (HQ_LIST.filter(hq => G.location[hq] < LAST_BOARD_HEX && hex < LAST_BOARD_HEX
+            if (HQ_LIST.some(hq => G.location[hq] < LAST_BOARD_HEX && hex < LAST_BOARD_HEX
                 && pieces[hq].faction === pieces[G.oos[i]].faction
-                && in_range_on_map(G.location[hq], pieces[hq].cr, [hex], pieces[hq].faction).length).length) {
+                && in_range_on_map(G.location[hq], pieces[hq].cr, [hex], pieces[hq].faction).length)) {
                 counter = counters.oos
             }
             populate_generic("s-loc", hex, counter)

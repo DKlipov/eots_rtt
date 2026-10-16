@@ -9,7 +9,7 @@ function china_surrender() {
             displace_to_turn(u, 1, true)
         }
     })
-    if (!events.ALLIED_NATIONS_SURRENDERS.nations.filter(n => !G.surrender[n]).length) {
+    if (!events.ALLIED_NATIONS_SURRENDERS.nations.some(n => !G.surrender[n])) {
         check_event(events.ALLIED_NATIONS_SURRENDERS)
     }
     G.surrender[nations.CHINA.id] = G.turn
@@ -64,8 +64,9 @@ P.india_surrender = {
             prompt(`India surrenders. Choose unit to emergency move.`)
             L.unit_to_retreat.forEach(u => action_unit(u))
         }
-        if (!G.active_stack.length && (!L.unit_to_retreat.length || L.unit_to_retreat.map(u => pieces[u])
-            .filter(piece => piece.service === "army" || piece.service === "navy" || piece.service === "us").length === L.unit_to_retreat.length)) {
+        if (!G.active_stack.length && (!L.unit_to_retreat.length ||
+            array_count(L.unit_to_retreat,
+                u => pieces[u].service === "army" || pieces[u].service === "navy" || pieces[u].service === "us") === L.unit_to_retreat.length)) {
             prompt(`India surrenders. Confirm emergency move.`)
             button("done")
         }

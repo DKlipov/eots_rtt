@@ -344,7 +344,6 @@ P.replacement_segment = {
         }
         var ru = L.replacable_units.filter(u => L.replacement_points[pieces[u].replacement] > 0)
         var not_used_unground = L.divisions_used <= 0 || L.replacement_points[GROUND_REP] <= 0
-        var first_replacable = ru.filter(u => G.location[u] === ELIMINATED_BOX)[0]
         if (G.active_stack.length > 0) {
             prompt(`Choose hex to place ${piece_get_log_str(G.active_stack[0])}${not_used_unground ? "" : "(Ground replacements should be spent)"}.`)
             L.allowed_hexes.forEach(h => action_hex(h))
@@ -357,7 +356,7 @@ P.replacement_segment = {
         } else if (not_used_unground) {
             button("skip")
         }
-        if (L.divisions && L.replacable_units.filter(u => pieces[u].class === "ground").length) {
+        if (L.divisions && L.replacable_units.some(u => pieces[u].class === "ground")) {
             action("divisions", 0)
             button("divisions_button")
         }

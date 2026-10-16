@@ -360,7 +360,7 @@ function get_allowed_actions(num) {
     if (G.sid !== BURMA_SCENARIO) {
         result.push("displace_hq")
     }
-    if (HQ_LIST.filter(u => G.location[u] > TURN_BOX && pieces[u].faction === R).length
+    if (HQ_LIST.some(u => G.location[u] > TURN_BOX && pieces[u].faction === R)
         && (R !== JP || G.sid !== SOUTH_PACIFIC_SCENARIO) && G.sid !== BURMA_SCENARIO) {
         result.push("return_hq")
     }

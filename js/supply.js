@@ -675,7 +675,7 @@ function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
     for_each_unit_on_map((i, p) => both_sides_zoi || p.faction === faction ? set_zoi(i, p, oos_units) : null)
     indian_zoi_hack((i, p) => both_sides_zoi || p.faction === faction ? set_zoi(i, p, oos_units) : null)
     mark_supply_eligable_ports(faction)
-    var size = oos_units[faction].filter(u => pieces[u].zoi_generator).length
+    var size = array_count(oos_units[faction], u => pieces[u].zoi_generator)
     oos_units[faction] = []
     var hqs = HQ_LIST.filter(hq => {
         var piece = pieces[hq]
@@ -714,7 +714,7 @@ function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
     if (faction === AP && G.burma_road < 2) {
         check_burma_road()
     }
-    return oos_units[faction].filter(u => pieces[u].zoi_generator).length === size && burma === G.burma_road
+    return array_count(oos_units[faction], u => pieces[u].zoi_generator) === size && burma === G.burma_road
 }
 
 function get_ground_mp_cost(from, to, faction) {

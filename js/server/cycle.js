@@ -215,7 +215,7 @@ P.national_status_segment = function () {
         //shift for India surrender, else do not move the India marker and
         //score any VP based on its location during the last Political Phase.
         var ind_control = check_nation_controlled(nations.INDIA, JP)
-        if (ind_control && G.turn < 9 ||  G.events[events.INDIA_STATUS.id] === 3) {
+        if (ind_control && G.turn < 9 || G.events[events.INDIA_STATUS.id] === 3) {
             degrade_india(true)
         } else if (!ind_control && G.turn < 9) {
             //17.11.27.
@@ -326,7 +326,7 @@ P.political_will_segment = function () {
         end()
         return
     }
-    if (!events.ALLIED_NATIONS_SURRENDERS.nations.filter(n => !G.surrender[n]).length) {
+    if (!events.ALLIED_NATIONS_SURRENDERS.nations.some(n => !G.surrender[n])) {
         check_event(events.ALLIED_NATIONS_SURRENDERS)
     }
     check_occupation(true)
@@ -341,7 +341,7 @@ function check_progress_of_war() {
         log(`Progress of War not checked for turn ${G.turn}.`)
         return
     }
-    var pow_count = G.capture.filter(h => is_space_controlled(h, AP)).length
+    var pow_count = array_count(G.capture, h => is_space_controlled(h, AP))
     if (pow_count < G.pow) {
         change_political_will(-1, `current progress of war ${pow_count} < ${G.pow}`)
         track_event(events.FAILED_POW)

@@ -510,11 +510,11 @@ P.activate_units = {
         if (L.joint_disadvantage) {
             L.hq_bonus -= 1
         }
-        if (L.kwai && G.offensive.active_units[G.active].filter(u => KWAI_HQ_MOD.includes(get_map_data(G.location[u]).region)).length) {
+        if (L.kwai && G.offensive.active_units[G.active].some(u => KWAI_HQ_MOD.includes(get_map_data(G.location[u]).region))) {
             L.hq_bonus += L.kwai
         }
         if (G.offensive.stage === REACTION_STAGE && L.asp_ground_units) {
-            var asp_used = G.offensive.active_units[G.active].filter(u => set_has(L.asp_ground_units, u)).length
+            var asp_used = G.offensive.active_units[G.active].some(u => set_has(L.asp_ground_units, u))
             if (asp_used) {
                 L.allowed_units = L.allowed_units.filter(u => !set_has(L.asp_ground_units, u))
             }
@@ -540,7 +540,7 @@ P.activate_units = {
     },
     done() {
         push_undo()
-        if (L.kwai && G.offensive.active_units[G.active].filter(u => KWAI_HQ_MOD.includes(get_map_data(G.location[u]).region)).length) {
+        if (L.kwai && G.offensive.active_units[G.active].some(u => KWAI_HQ_MOD.includes(get_map_data(G.location[u]).region))) {
             log(`${L.kwai > 0 ? "+" : ""}${L.kwai} activation (Bridge over the River Kwai).`)
         }
         log_units_activated()
@@ -632,7 +632,7 @@ function get_move_buttons() {
     }
     if (G.offensive.stage === ATTACK_STAGE && L.move_data.location && get_map_data(L.move_data.location).coastal
         && G.offensive.barges && L.move_type !== BARGES_MOVE
-        && G.offensive.barges > 1 && G.active_stack.filter(u => pieces[u].class === "ground").length === 1) {
+        && G.offensive.barges > 1 && array_count(G.active_stack, u => pieces[u].class === "ground") === 1) {
         result.push("barges")
     }
 
@@ -717,8 +717,8 @@ P.move_offensive_units = {
         prompt(`${offensive_card_header()} Move units (${L.max_movable - L.movable_units.length}/${L.max_movable}).`)
         if (G.active_stack.length === 0 &&
             (G.offensive.stage === ATTACK_STAGE
-                || G.offensive.stage === POST_BATTLE_STAGE && !G.active_stack.length && L.movable_units.filter(u => !could_unit_stop_here(u)).length === 0
-                || G.offensive.stage === REACTION_STAGE && !G.active_stack.length && L.movable_units.filter(u => !set_has(G.offensive.battle_hexes, G.location[u])).length === 0
+                || G.offensive.stage === POST_BATTLE_STAGE && !G.active_stack.length && !L.movable_units.some(u => !could_unit_stop_here(u))
+                || G.offensive.stage === REACTION_STAGE && !G.active_stack.length && !L.movable_units.some(u => !set_has(G.offensive.battle_hexes, G.location[u]))
             )) {
             if (L.movable_units.length) {
                 button("skip")
@@ -731,7 +731,7 @@ P.move_offensive_units = {
             L.movable_units.forEach(u => action_unit(u))
         } else {
             var buttons = get_move_buttons()
-            if (buttons.filter(b => !ALWAYS_SHOW_BUTTONS.includes(b)).length > 3 && !L.spec_move) {
+            if (array_count(buttons, b => !ALWAYS_SHOW_BUTTONS.includes(b)) > 3 && !L.spec_move) {
                 button("advanced_move")
             } else if (buttons.length) {
                 buttons.forEach(b => button(b))
@@ -896,7 +896,7 @@ P.move_offensive_units = {
             G.offensive.barges = 1
             log(`Barges ability used.`)
         }
-        if (G.offensive.organic.length && G.active_stack.filter(u => G.offensive.organic.includes(u)).length) {
+        if (G.offensive.organic.length && G.active_stack.some(u => G.offensive.organic.includes(u))) {
             G.active_stack.forEach(u => {
                 var index = G.offensive.organic.indexOf(u)
                 if (index >= 0 && pieces[u].class === "naval") {
@@ -994,15 +994,15 @@ function get_air_attack_hex() {
 
 P.choose_attack_hex = {
     _begin() {
-        if (!G.active_stack || G.active_stack.filter(u => pieces[u].class === "ground").length) {
+        if (!G.active_stack || G.active_stack.some(u => pieces[u].class === "ground")) {
             end()
             return
         }
         var hex = G.location[G.active_stack[0]]
-        var escort = G.offensive.active_units[G.active].filter(u => {
+        var escort = G.offensive.active_units[G.active].some(u => {
             var piece = pieces[u]
             return G.location[u] === hex && piece.br && piece.class === "naval"
-        }).length
+        })
         var battle_range = L.L.L.move_data.battle_range
         var path = map_get(G.offensive.paths, G.active_stack[0], [0, 0, 0])
         var moved_to_bh = set_has(G.offensive.battle_hexes, hex) && !set_has(G.offensive.battle_hexes, path[2])
@@ -1749,7 +1749,7 @@ P.special_reaction = {
                 hq_list.push(G.location[u], piece.cr)
             }
         })
-        if (G.offensive.landing_hexes.filter(h => get_map_data(h).named && is_space_controlled(h, G.active)).length) {
+        if (G.offensive.landing_hexes.some(h => get_map_data(h).named && is_space_controlled(h, G.active))) {
             check_supply()
         } else {
             end()

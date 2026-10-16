@@ -469,8 +469,8 @@ function get_naval_move(zoi_mask) {
                 set_add(marine_landed_islands, G.location[u])
             }
         })
-        us_army_unit_active = G.active_stack.map(u => pieces[u]).filter(p => p.class === "ground" && p.service === "army").length &&
-            !G.active_stack.map(u => pieces[u]).filter(p => p.class === "ground" && p.type === "marine").length
+        us_army_unit_active = G.active_stack.map(u => pieces[u]).some(p => p.class === "ground" && p.service === "army") &&
+            !G.active_stack.map(u => pieces[u]).some(p => p.class === "ground" && p.type === "marine")
     }
     if (G.offensive.type === EC && G.offensive.offensive_card === KING_II) {
         us_army_unit_active = false
@@ -528,7 +528,7 @@ function get_naval_move(zoi_mask) {
         G.active === JP
     var kamikaze_only = burma_pbm && set_has(G.active_stack, KAMIKAZE) &&
         !map_get(G.offensive.paths, KAMIKAZE, [0, 0, 0]).includes(SINGAPORE, 2)
-        && G.active_stack.filter(u => pieces[u].class === "naval").length === 1
+        && array_count(G.active_stack, u => pieces[u].class === "naval") === 1
 
     if (burma_pbm && move_data.is_naval_present && !kamikaze_only) {
         var s = map_get(result, SINGAPORE)
@@ -562,12 +562,12 @@ function ground_move_denied(hex) {
         return true
     }
     if (region === "IChina") {
-        return G.active_stack.filter(u => pieces[u].service !== "ch").length
+        return array_count(G.active_stack, u => pieces[u].service !== "ch")
     }
     if (faction === JP && region === "India") {
-        return G.active_stack.filter(u => pieces[u].class === "ground").length
+        return array_count(G.active_stack, u => pieces[u].class === "ground")
     }
-    if (G.active_stack.filter(u => pieces[u].service === "ch").length) {
+    if (G.active_stack.some(u => pieces[u].service === "ch")) {
         return !(region === "IChina" || region === "NIndia" || region === "Burma")
     }
     if (G.sid === SOUTH_PACIFIC_SCENARIO && faction === AP && hex === TRUK && G.turn === 3) {
@@ -824,8 +824,8 @@ function move_units(units, path) {
     var zoi_cross_denied = path[0] & STRAT_MOVE || path[0] & AMPH_MOVE && !L.move_data.battle_range
     var zoi_cross_declared = path[0] & VIOLATE_ZOI
     var could_zoi_cross = !G.offensive.zoi_intelligence_modifier && G.offensive.stage === ATTACK_STAGE && pieces[units[0]].faction === G.offensive.attacker
-    var could_zoi_change = G.active_stack.filter(u => pieces[u].zoi_generator).length
-        || (path[0] & GROUND_MOVE) && G.active_stack.filter(u => pieces[u].class === "ground").length
+    var could_zoi_change = G.active_stack.some(u => pieces[u].zoi_generator)
+        || (path[0] & GROUND_MOVE) && G.active_stack.some(u => pieces[u].class === "ground")
     var supply_checked = CLIENT_SIDE_SUPPLY || zoi_cross_declared
     var faction = pieces[units[0]].faction
     var enemy_faction = 1 - pieces[units[0]].faction

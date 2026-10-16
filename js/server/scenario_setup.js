@@ -44,7 +44,7 @@ const SCENARIO_SETUP = [
 ]
 
 SCENARIO_DATA.forEach(s => {
-    var setup = SCENARIO_SETUP.filter(ss => ss.id === s.id)[0]
+    var setup = SCENARIO_SETUP.find(ss => ss.id === s.id)
     s.replacement_points = setup.replacement_points ? setup.replacement_points : get_replacement_points
     s.deal_cards = setup.deal_cards ? setup.deal_cards : deal_cards
     s.setup = setup.setup
@@ -1008,7 +1008,7 @@ function get_replacement_points() {
         }
         log(`+1 US Naval Replacement Point (AP controlled Oahu).`)
     }
-    if ([6, 9, 12].includes(G.turn) && COM_REPLACEMENT_POINTS.filter(h => is_space_controlled(h, AP)).length) {
+    if ([6, 9, 12].includes(G.turn) && COM_REPLACEMENT_POINTS.some(h => is_space_controlled(h, AP))) {
         result[COMMONWEALTH_REP] = 1
     }
     result[GROUND_REP] = 2
@@ -1344,7 +1344,7 @@ P.japan_init_1942 = {
         while (G.hand[JP].length < 7) {
             draw_card(JP)
         }
-        if (G.hand[JP].filter(c => cards[c].type === MILITARY).length) {
+        if (G.hand[JP].some(c => cards[c].type === MILITARY)) {
             end()
         }
     },
@@ -1354,7 +1354,7 @@ P.japan_init_1942 = {
         if (G.hand[JP].includes(find_card(JP, 47))) {
             button("done")
         } else {
-            var has_3_ops = G.hand[JP].filter(c => cards[c].ops >= 3).length
+            var has_3_ops = G.hand[JP].some(c => cards[c].ops >= 3)
             G.hand[JP].filter(c => cards[c].ops >= 3 || !has_3_ops).forEach(c => action_card(c))
             button("skip")
         }
@@ -1393,7 +1393,7 @@ SCENARIO_DATA[SOUTH_PACIFIC_SCENARIO].before_unit_activation = function () {
 }
 
 SCENARIO_DATA[SOUTH_PACIFIC_SCENARIO].before_choose_hq = function () {
-    if (G.offensive.attacker === JP && G.offensive.battle_hexes.filter(h => get_map_data(h).region === "Hebrides").length <= 0) {
+    if (G.offensive.attacker === JP && !G.offensive.battle_hexes.some(h => get_map_data(h).region === "Hebrides")) {
         array_delete_item(L.possible_units, HQ_CENTRAL_PACIFIC)
     }
 }

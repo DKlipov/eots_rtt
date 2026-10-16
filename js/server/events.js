@@ -40,7 +40,7 @@ function trigger_event(stage, arg) {
 function only_one_ground_unit(card) {
     var faction = cards[card].faction
     cards[card].after_unit_activation = function () {
-        if (G.active !== faction || G.offensive.active_units[R].filter(u => pieces[u].class === "ground").length <= 0) {
+        if (G.active !== faction || !G.offensive.active_units[R].some(u => pieces[u].class === "ground")) {
             return
         }
         L.allowed_units = L.allowed_units.filter(u => pieces[u].class !== "ground")
@@ -163,7 +163,7 @@ P.conquest_of_se_asia_reaction = {
         }
         for_each_unit_on_map((u, piece, location) => {
             if (piece.faction === AP && !set_has(G.offensive.battle_hexes, location)
-                && piece.br && G.offensive.battle_hexes.filter(bh => get_distance(bh, location) <= piece.br).length > 0) {
+                && piece.br && G.offensive.battle_hexes.some(bh => get_distance(bh, location) <= piece.br)) {
                 set_add(L.allowed_units, u)
             }
         })
@@ -213,7 +213,7 @@ cards[COL_TSUJI].before_unit_activation = function () {
 }
 
 cards[JN_25_SPECIAL].can_play = function () {
-    return G.offensive.active_cards.filter(c => cards[c].type === INTELLIGENCE && cards[c].faction === JP).length <= 0
+    return !G.offensive.active_cards.some(c => cards[c].type === INTELLIGENCE && cards[c].faction === JP)
 }
 
 cards[find_card(JP, 5)].event = function () {
@@ -258,7 +258,7 @@ cards[find_card(JP, 12)].before_commit_offensive = function () {
     if (G.offensive.stage !== ATTACK_STAGE) {
         return
     }
-    if (G.offensive.battle_hexes.filter(h => !get_map_data(h).island).length) {
+    if (G.offensive.battle_hexes.some(h => !get_map_data(h).island)) {
         return "All battles must be fought in one hex island."
     }
 }
@@ -309,7 +309,7 @@ cards[find_card(JP, 17)].after_unit_activation = function (u) {
     if (G.active !== JP) {
         return
     }
-    if (G.offensive.active_units[JP].filter(u => is_cv_unit(pieces[u])).length) {
+    if (G.offensive.active_units[JP].some(u => is_cv_unit(pieces[u]))) {
         call("rule_violation", {rule: SAVO_RULE})
         return
     }
@@ -352,7 +352,7 @@ cards[find_card(JP, 17)].before_battle_roll = function (faction) {
 }
 
 cards[find_card(JP, 18)].can_play = function () {
-    return events.KWAI_RIVER_BRIDGE.keys.filter(h => is_space_controlled(h, JP)).length >= 2
+    return array_count(events.KWAI_RIVER_BRIDGE.keys, h => is_space_controlled(h, JP)) >= 2
 }
 
 cards[find_card(JP, 18)].event = function () {
@@ -470,7 +470,7 @@ cards[find_card(JP, 23)].before_battle_roll = function (faction) {
 }
 
 function has_active_naval_units(faction) {
-    return G.offensive.active_units[faction].filter(u => unit_on_board(u) && pieces[u].class === "naval").length
+    return G.offensive.active_units[faction].some(u => unit_on_board(u) && pieces[u].class === "naval")
 }
 
 cards[find_card(JP, 24)].can_play = () => has_active_naval_units(AP)
@@ -820,7 +820,7 @@ function check_kamikaze_playable() {
     if (!G.offensive.kamikaze) {
         set_kamikaze_able_battles()
     }
-    return G.offensive.active_cards.filter(c => cards[c].kamikaze).length < G.offensive.kamikaze.length
+    return array_count(G.offensive.active_cards, c => cards[c].kamikaze) < G.offensive.kamikaze.length
 }
 
 function set_kamikaze_able_battles() {
@@ -837,9 +837,9 @@ function set_kamikaze_able_battles() {
     for_each_unit_on_map((u, piece, location) => {
         if (piece.faction === JP && piece.class === "air") {
             in_range_on_map(location, piece.ebr, G.offensive.battle_hexes
-                .filter(h => get_distance(h, TOKYO) <= 11
+                    .filter(h => get_distance(h, TOKYO) <= 11
                         && set_has(ap_naval_commited, h)),
-            JP)
+                JP)
                 .forEach(h => set_add(battles, h))
         }
     })
@@ -851,7 +851,7 @@ P.kamikaze_attack = {
         check_units()
         L.allowed_units = []
         for_each_unit_on_map((u, piece, location) => {
-            if (piece.faction === JP && piece.class === "air" && G.offensive.kamikaze.filter(bh => get_distance(bh, location) <= piece.ebr).length) {
+            if (piece.faction === JP && piece.class === "air" && G.offensive.kamikaze.some(bh => get_distance(bh, location) <= piece.ebr)) {
                 set_add(L.allowed_units, u)
             }
         })
@@ -919,16 +919,16 @@ P.kamikaze_attack = {
             L.allowed_units = []
             var hexes_range = in_range_on_map(location, pieces[u].ebr, G.offensive.kamikaze, JP)
             G.offensive.active_units[AP].forEach(ap => {
-                var bh = get_unit_battle_hex(ap)
-                if (pieces[ap].faction === AP && pieces[ap].class === "naval" && unit_on_board(ap) && set_has(hexes_range, bh)) {
-                    set_add(L.allowed_units, ap)
+                    var bh = get_unit_battle_hex(ap)
+                    if (pieces[ap].faction === AP && pieces[ap].class === "naval" && unit_on_board(ap) && set_has(hexes_range, bh)) {
+                        set_add(L.allowed_units, ap)
+                    }
                 }
-            }
             )
             L.stage++
             L.hits = 2
-            var kamikaze = G.offensive.active_cards.filter(c => cards[c].kamikaze)
-            if (kamikaze.length && G.offensive.counter_offensive_card === SHO_GO && !G.offensive.sho_go) {
+            var kamikaze = G.offensive.active_cards.some(c => cards[c].kamikaze)
+            if (kamikaze && G.offensive.counter_offensive_card === SHO_GO && !G.offensive.sho_go) {
                 this.bonus()
             }
         } else {
@@ -1229,8 +1229,8 @@ function check_fuel_shortage_data() {
         }
     }
     var over = L.target ? L.overstack[L.target] : 0
-    if (L.moved.filter(u => pieces[u].class === "naval").length < 4 &&
-        G.active_stack.filter(u => pieces[u].class === "naval").length < (6 - (over >> 7))) {
+    if (array_count(L.moved, u => pieces[u].class === "naval") < 4 &&
+        array_count(G.active_stack, u => pieces[u].class === "naval") < (6 - (over >> 7))) {
         var non_selected = !G.active_stack.length
         for_each_unit_on_map((u, piece, loc) => {
             if (G.supply_cache[loc] & HEX_TEMP_FLAG1 && (piece.class === "naval" && piece.faction === JP)
@@ -1551,7 +1551,7 @@ cards[find_card(AP, 7)].before_battle_roll = function (faction) {
 }
 
 cards[find_card(AP, 8)].can_play = function () {
-    return G.offensive.active_units[JP].filter(u => pieces[u].class !== "ground").length
+    return G.offensive.active_units[JP].some(u => pieces[u].class !== "ground")
 }
 
 cards[find_card(AP, 9)].before_activation = function () {
@@ -1709,8 +1709,8 @@ cards[find_card(AP, 20)].before_activation = function () {
 
 cards[find_card(AP, 22)].can_play = function () {
     var regions = ["Burma", "NIndia"]
-    return G.offensive.active_units[JP].filter(u => pieces[u].class === "ground" &&
-        regions.includes(get_map_data(map_get(G.offensive.paths, u, [0, 0, 0])[2]).region)).length
+    return G.offensive.active_units[JP].some(u => pieces[u].class === "ground" &&
+        regions.includes(get_map_data(map_get(G.offensive.paths, u, [0, 0, 0])[2]).region))
 }
 
 cards[find_card(AP, 22)].event = function () {
@@ -1908,7 +1908,7 @@ P.chronicle = {
             }
         })
         landing_hexes.filter(l => get_map_data(l).island && !set_has(G.offensive.chronicle, l) && !is_faction_units(l, JP)
-            && get_map_data(l).nh.filter(nh => this.condition(nh)).length
+            && get_map_data(l).nh.some(nh => this.condition(nh))
         ).forEach(l => set_add(L.allowed_hexes, l))
     },
     prompt() {
@@ -1951,14 +1951,14 @@ cards[find_card(AP, 29)].before_battle_roll = function (faction) {
 }
 
 cards[SANDCRAB].can_play = function () {
-    return events.ALASKA_OCCUPATION.keys.filter(k => is_faction_units(hex_to_int(k), JP)).length
+    return events.ALASKA_OCCUPATION.keys.some(k => is_faction_units(hex_to_int(k), JP))
 }
 
 cards[SANDCRAB].before_commit_offensive = function () {
     if (G.offensive.stage !== ATTACK_STAGE) {
         return
     }
-    if (!G.offensive.battle_hexes.filter(h => get_map_data(h).region === "Alaska").length) {
+    if (!G.offensive.battle_hexes.some(h => get_map_data(h).region === "Alaska")) {
         return "At least one battle at Aleutian islands should be declared."
     }
 }
@@ -1998,7 +1998,7 @@ P.build_road = {
     },
     action_hex(h) {
         push_undo()
-        var event = ROAD_EVENTS.filter(e => e.keys[0] === h)[0]
+        var event = ROAD_EVENTS.find(e => e.keys[0] === h)
         check_event(event)
         log(`CBI infrastructure built - ${hex_get_log_str(event.keys[0])}.`)
         L.done = 1
@@ -2025,9 +2025,9 @@ for (var i = 1; i < cards.length; i++) {
     if (!card.can_play && card.hq) {
         card.can_play = () => event_hq_check(card)
     } else if (!card.can_play && card.china < 0) {
-        card.can_play = () =>  G.events[events.CHINA_STATUS.id] > 1 && G.events[events.CHINA_STATUS.id] < 5
+        card.can_play = () => G.events[events.CHINA_STATUS.id] > 1 && G.events[events.CHINA_STATUS.id] < 5
     } else if (!card.can_play && card.china > 0) {
-        card.can_play = () =>  G.events[events.CHINA_STATUS.id] < 5
+        card.can_play = () => G.events[events.CHINA_STATUS.id] < 5
     } else if (!card.can_play) {
         card.can_play = always_true
     }
@@ -2081,7 +2081,7 @@ cards[find_card(AP, 38)].can_play = function () {
     HQ_LIST.forEach(hq => {
         var piece = pieces[hq]
         if (G.location[hq] < LAST_BOARD_HEX && piece.faction === AP
-            && get_activatable_units(hq, piece.supply).filter(u => pieces[u].service === "ch").length) {
+            && get_activatable_units(hq, piece.supply).some(u => pieces[u].service === "ch")) {
             hqs.push(hq)
         }
     })
@@ -2171,12 +2171,12 @@ cards[find_card(AP, 50)].after_unit_activation = function () {
         }
     })
     L.allowed_units = L.possible_units.filter(u => {
-        var piece = pieces[u]
-        return !set_has(G.offensive.active_units[AP], u) &&
+            var piece = pieces[u]
+            return !set_has(G.offensive.active_units[AP], u) &&
                 (piece.service === "army" && (army > 0 || naval <= 1)
                     || piece.service === "navy" && (army <= 0 || naval > 1 || naval === 0 && !piece.br && piece.class === "naval")
                 )
-    }
+        }
     )
 }
 

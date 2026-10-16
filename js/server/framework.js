@@ -224,7 +224,7 @@ exports.action = function (state, role, action, argument) {
     } else {
         active = ROLES.indexOf(G.active)
     }
-    if (old_active !== G.active || G.undo && G.undo.filter(s => s.active !== active).length) {
+    if (old_active !== G.active || G.undo && G.undo.some(s => s.active !== active)) {
         clear_undo()
     }
 

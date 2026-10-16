@@ -64,7 +64,7 @@ function setup_jp_unit(piece, hex_id, reduced = false) {
 function on_setup(scenario, options) {
 
     G.scenario = scenario
-    G.sid = SCENARIO_DATA.filter(s => s.name === G.scenario)[0].id//scenario id
+    G.sid = SCENARIO_DATA.find(s => s.name === G.scenario).id//scenario id
     G.active = JP
     G.redo_count = 0
     G.turn = 1
@@ -460,7 +460,7 @@ function check_occupation(apply_pw = false) {
 }
 
 function check_occupation_region(event, apply_pw = false) {
-    var result = event.keys.filter(k => is_faction_units(hex_to_int(k), JP)).length
+    var result = event.keys.some(k => is_faction_units(hex_to_int(k), JP))
     var map_value = G.events[event.id]
     var occupied_for = (G.turn - map_value) + 1
     if (!result && map_value > 0 && occupied_for <= event.turns_to_control) {
@@ -605,7 +605,7 @@ function into_turn_draw(faction) {
 }
 
 function resolve_into_turn_draw(faction) {
-    var count = G.offensive.draw[faction].filter(c => c <= 0).length
+    var count = array_count(G.offensive.draw[faction], c => c <= 0)
     if (count <= 0) {
         return
     }

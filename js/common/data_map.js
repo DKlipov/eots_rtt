@@ -1417,7 +1417,7 @@ function apply_south_pacific(hex) {
         S_P_MAP_DATA[id] = non_playable_hex(id)
         return
     }
-    var sp_map_item = sp_map.filter(h => h.id === hex.id)[0]
+    var sp_map_item = sp_map.find(h => h.id === hex.id)
     if (sp_map_item && sp_map_item.edges) {
         hex.edges_int = 0
         for (let j = 0; j < 6; j++) {
