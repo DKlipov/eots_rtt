@@ -1,12 +1,15 @@
 // THIS FILE IS GENERATED! DO NOT EDIT!
 "use strict"
 
-const ROLES = ["Japan", "Allies"]
+const CLIENT_SIDE_SUPPLY = 0
 
-function log(){}
-function capture_hex(){}
+/* dummies for client side supply and move pathing */
+function log() {}
+function capture_hex() {}
 
 /* {{{ js/common/constants.js */
+const ROLES = ["Japan", "Allies"]
+
 const SOUTH_PACIFIC_SCENARIO = 0
 const FULL_CAMPAIGN_SCENARIO = 1
 const YEAR_1942_SCENARIO = 2
@@ -18,8 +21,6 @@ const EVEN_SHORT_CAMPAIGN_SCENARIO = 8
 const BURMA_SCENARIO = 10
 
 const CAMPAIGN_SCENARIOS = [FULL_CAMPAIGN_SCENARIO, SHORT_CAMPAIGN_SCENARIO, EVEN_SHORT_CAMPAIGN_SCENARIO]
-
-var CLIENT_SIDE_SUPPLY = 1
 
 const JP = 0
 const AP = 1
@@ -201,9 +202,6 @@ HEX_DIRECTION[68] = 4
 HEX_DIRECTION[69] = 5
 
 /* }}} */
-
-CLIENT_SIDE_SUPPLY = 0
-
 /* {{{ js/common/data.js */
 /* {{{ js/common/data_pieces.js */
 var pieces = [

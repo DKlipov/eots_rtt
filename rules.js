@@ -1,15 +1,13 @@
 // THIS FILE IS GENERATED! DO NOT EDIT!
 "use strict"
 
-/* global exports console */
-
 var G, L, R, V, P = {}
 
-const ROLES = ["Japan", "Allies"]
-
-exports.default_scenario = "South Pacific"
+const CLIENT_SIDE_SUPPLY = 1
 
 /* {{{ js/common/constants.js */
+const ROLES = ["Japan", "Allies"]
+
 const SOUTH_PACIFIC_SCENARIO = 0
 const FULL_CAMPAIGN_SCENARIO = 1
 const YEAR_1942_SCENARIO = 2
@@ -21,8 +19,6 @@ const EVEN_SHORT_CAMPAIGN_SCENARIO = 8
 const BURMA_SCENARIO = 10
 
 const CAMPAIGN_SCENARIOS = [FULL_CAMPAIGN_SCENARIO, SHORT_CAMPAIGN_SCENARIO, EVEN_SHORT_CAMPAIGN_SCENARIO]
-
-var CLIENT_SIDE_SUPPLY = 1
 
 const JP = 0
 const AP = 1
@@ -18380,6 +18376,8 @@ SCENARIO_DATA.forEach(s => {
 })
 
 const SCENARIOS = SCENARIO_DATA.map(s => s.name)
+
+exports.default_scenario = "South Pacific"
 
 function setup_scenario_burma() {
     G.draw = [[], []]

@@ -1,14 +1,12 @@
 "use strict"
 
-const ROLES = ["Japan", "Allies"]
+const CLIENT_SIDE_SUPPLY = 0
 
-function log(){}
-function capture_hex(){}
+/* dummies for client side supply and move pathing */
+function log() {}
+function capture_hex() {}
 
 /** import common/constants.js */
-
-CLIENT_SIDE_SUPPLY = 0
-
 /** import common/data.js */
 /** import common/utils.js */
 /** import common/supply.js */

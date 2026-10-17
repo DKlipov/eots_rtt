@@ -1,12 +1,8 @@
 "use strict"
 
-/* global exports console */
-
 var G, L, R, V, P = {}
 
-const ROLES = ["Japan", "Allies"]
-
-exports.default_scenario = "South Pacific"
+const CLIENT_SIDE_SUPPLY = 1
 
 /** import common/constants.js */
 /** import common/data.js */

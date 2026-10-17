@@ -52,6 +52,8 @@ SCENARIO_DATA.forEach(s => {
 
 const SCENARIOS = SCENARIO_DATA.map(s => s.name)
 
+exports.default_scenario = "South Pacific"
+
 function setup_scenario_burma() {
     G.draw = [[], []]
     G.removed = [[], []]
