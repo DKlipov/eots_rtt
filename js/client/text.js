@@ -33,20 +33,14 @@ function format_unit_tooltip(u) {
         tip += p.type.toUpperCase()
         break
     }
-
-    if (!set_has(G.reduced, u))
-        tip += ` ${p.cf}`
-    else
-        tip += ` (${p.rcf}`
+    tip += ` ${p.cf}`
+    if (p.rcf!==p.cf)
+        tip += `(${p.rcf})`
     tip += `-${p.lf}`
     if (p.br)
         tip += `-${p.br}`
     if (p.ebr)
         tip += " " + DIGIT_SUPERSCRIPT[p.ebr]
-    if (!set_has(G.reduced, u))
-        tip += ""
-    else
-        tip += ")"
 
     tip += ` (${p.name})`
 

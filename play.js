@@ -12091,6 +12091,10 @@ function on_update() {
             update_unit(i, G.location[i])
     }
 
+    if (G.unselect)
+        for (var u of G.unselect)
+            update_keyword("unit", u, "unselect")
+
     // OUT OF SUPPLY MARKERS
     var oos_hex_set = []
     for (i = 0; i < G.oos.length; i++) {
@@ -12143,6 +12147,11 @@ function on_update() {
         update_text_html("violations", 0, "<b>STACKING VIOLATIONS:</B>\n" + escape_text(G.violations.map(h => "H"+h).join(", ")) + ".")
     }
 
+
+
+
+
+
     highlight_aa()
 
     world.things["card"].forEach(e => e.element.innerHTML = '')
@@ -12183,10 +12192,6 @@ function on_update() {
     }
 
     populate_generic("china", Math.min(5, G.events[events.CHINA_STATUS.id]), counters.china)
-
-    if (G.unselect)
-        for (var u of G.unselect)
-            update_keyword("unit", u, "unselect")
 
     // TURN MARKERS
 
@@ -12459,20 +12464,14 @@ function format_unit_tooltip(u) {
         tip += p.type.toUpperCase()
         break
     }
-
-    if (!set_has(G.reduced, u))
-        tip += ` ${p.cf}`
-    else
-        tip += ` (${p.rcf}`
+    tip += ` ${p.cf}`
+    if (p.rcf!==p.cf)
+        tip += `(${p.rcf})`
     tip += `-${p.lf}`
     if (p.br)
         tip += `-${p.br}`
     if (p.ebr)
         tip += " " + DIGIT_SUPERSCRIPT[p.ebr]
-    if (!set_has(G.reduced, u))
-        tip += ""
-    else
-        tip += ")"
 
     tip += ` (${p.name})`
 
