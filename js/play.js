@@ -14,6 +14,7 @@ function capture_hex() {}
 /** import common/scenario.js */
 /** import common/library.js*/
 
+/** import client/layout.js */
 /** import client/init.js */
 /** import client/actions.js */
 /** import client/dialog.js */
