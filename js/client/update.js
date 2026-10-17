@@ -40,22 +40,23 @@ function apply_conflict_marker(marker, hex) {
 
 function update_unit(u, location) {
     var piece = pieces[u]
-    var unit
     var one_step = piece.notreplaceable && piece.start_reduced
-    var slocs = world.things["s-loc"]
-    var turn = world.things["turn"]
+    var last_turn = Math.max(map_info.turn_a, map_info.turn_b)
+
     if (location > TURN_BOX) {
-        if (!turn[location - TURN_BOX]) {
-            unit = populate("s-loc", ELIMINATED_BOX, "unit", u)
-        } else {
-            unit = populate("turn", location - TURN_BOX, "unit", u)
-        }
-        unit.classList.toggle("reduced", (set_has(G.reduced, u) && !one_step))
-        unit.classList.remove("activated")
-        unit.classList.remove("selected")
-    } else if (location === ELIMINATED_BOX && (!pieces[u].notreplaceable || is_action("unit", u))
-        || (location !== ELIMINATED_BOX && slocs[location])) {
-        unit = populate("s-loc", location, "unit", u)
+        var turn = location - TURN_BOX
+        if (turn <= 0 || turn > last_turn)
+            populate("s-loc", ELIMINATED_BOX, "unit", u)
+        else
+            populate("turn", turn, "unit", u)
+
+        update_keyword("unit", u, set_has(G.reduced, u) && !one_step)
+
+        return
+    }
+
+    if (location === ELIMINATED_BOX && (!pieces[u].notreplaceable || is_action("unit", u)) || (location !== ELIMINATED_BOX && location >= 0 && location <= LAST_BOARD_HEX)) {
+        populate("s-loc", location, "unit", u)
 
         update_keyword("unit", u, "reduced",
             (set_has(G.reduced, u) && !one_step) || location === ELIMINATED_BOX
@@ -64,35 +65,47 @@ function update_unit(u, location) {
 
         if (set_has(G.offensive.active_units[piece.faction], u))
             update_keyword("unit", u, "activated")
+
         if (G.active_stack.includes(u)) {
             update_keyword("unit", u, "selected")
             update_rotation("unit", u, 22.5)
         }
 
-        unit.innerHTML = ''
         var battle = map_get(G.offensive.committed, u)
-        var path = map_get(G.offensive.paths, u, [0])[0]
-        // unit.classList.remove("gray")
+        var battle_ix = battle ? G.offensive.battle_names.indexOf(battle) : 0
+        var path = map_get(G.offensive.paths, u)
+        if (path) path = path[0]
+
         if (battle && set_has(G.offensive.battle_hexes, battle)) {
-            apply_conflict_marker(populate_generic_to_parent(unit, "marker conflict battle"), battle)
+            populate_generic("unit", u, "marker conflict battle letter" + battle_ix)
         } else if (battle && set_has(G.offensive.landing_hexes, battle)) {
-            apply_conflict_marker(populate_generic_to_parent(unit, "marker conflict landing"), battle)
+            populate_generic("unit", u, "marker conflict landing letter" + battle_ix)
         } else if (battle && (piece.parenthetical || piece.class === "ground")) {
-            apply_conflict_marker(populate_generic_to_parent(unit, "marker conflict battle gray"), battle)
-            // unit.classList.add("gray")
+            populate_generic("unit", u, "marker conflict battle gray letter" + battle_ix)
         } else if (piece.organic && !(path & STRAT_MOVE) && G.offensive.organic.includes(u)) {
-            populate_generic_to_parent(unit, counters.organic_small)
+            populate_generic("unit", u, counters.organic_small)
         } else if (set_has(G.oos, u)) {
-            populate_generic_to_parent(unit, counters.oos_small)
+            populate_generic("unit", u, counters.oos_small)
         } else {
-            for (var i = 0; i < UNIT_MOVEMENT_MARKERS.length; i++) {
-                var m = UNIT_MOVEMENT_MARKERS[i]
+            for (var m of UNIT_MOVEMENT_MARKERS) {
                 if (m.condition(u, piece, path)) {
-                    populate_generic_to_parent(unit, m.counter)
-                    return
+                    populate_generic("unit", u, m.counter)
+                    break // only first one that matches
                 }
             }
         }
+    }
+}
+
+function get_isr_marker(v, i) {
+    if (v && i === AP) {
+        return counters.rivalry_ap
+    } else if (v && i === JP) {
+        return counters.rivalry_jp
+    } else if (i === AP) {
+        return counters.agreement_ap
+    } else {
+        return counters.agreement_jp
     }
 }
 
@@ -317,32 +330,31 @@ function on_update() {
     for (let c of G.offensive.active_cards)
         populate("hand", 2, "card", c)
 
-    G.offensive.battle_hexes.forEach(h => populate("s-loc", h, "battle", G.offensive.battle_names.indexOf(h)))
-    G.offensive.landing_hexes.filter(h => get_map_data(h).named && is_space_controlled(h, 1 - G.offensive.attacker) && has_zoi(h, 1- G.offensive.attacker))
-        .forEach(h => populate("s-loc", h, "landing", G.offensive.battle_names.indexOf(h)))
-    var isr_marker = (v, i) => {
-        if (v && i === AP) {
-            return counters.rivalry_ap
-        } else if (v && i === JP) {
-            return counters.rivalry_jp
-        } else if (i === AP) {
-            return counters.agreement_ap
-        } else {
-            return counters.agreement_jp
-        }
-    }
-    G.inter_service.forEach((v, i) => populate_generic("status", i, isr_marker(v, i)))
-    populate_generic("pw", G.political_will, counters.pw)
-    populate_generic("wie", G.wie, counters.wie)
+    for (var h of G.offensive.battle_hexes)
+        populate("s-loc", h, "battle", G.offensive.battle_names.indexOf(h))
 
+    for (var h of G.offensive.landing_hexes)
+        if (get_map_data(h).named && is_space_controlled(h, 1 - G.offensive.attacker) && has_zoi(h, 1- G.offensive.attacker))
+            populate("s-loc", h, "landing", G.offensive.battle_names.indexOf(h))
+
+    // MISC MARKERS
+
+    populate("track-isr", JP, "marker-isr", JP)
+    populate("track-isr", AP, "marker-isr", AP)
+    update_keyword("marker-isr", JP, "reduced", !G.inter_service[JP])
+    update_keyword("marker-isr", AP, "reduced", !G.inter_service[AP])
+
+    populate("track-pw", G.political_will, "marker-pw", 0)
+    populate("track-wie", G.wie, "marker-wie", 0)
+
+    populate("track-china", Math.min(5, G.events[events.CHINA_STATUS.id]), "marker-china", 0)
     if (G.sid !== SOUTH_PACIFIC_SCENARIO) {
-        populate_generic("india", Math.max(0, 4 - G.events[events.INDIA_STATUS.id]),
-            (G.events[events.INDIA_STATUS.id] >= 5) ? counters.india_status_surrender : counters.india_status)
-        populate_generic("burma", 2 - G.burma_road, G.events[events.HUMP.id] ? counters.burma_road_hump : counters.burma_road)
-        populate("divisions", G.china_divisions + 1, `divisions`, 0)
+        populate("track-india", Math.max(0, 4 - G.events[events.INDIA_STATUS.id]), "marker-india", 0)
+        update_keyword("marker-india", 0, "reduced", G.events[events.INDIA_STATUS.id] >= 5)
+        populate("track-burma", 2 - G.burma_road, "marker-burma", 0)
+        update_keyword("marker-burma", 0, "reduced", G.events[events.HUMP.id])
+        populate("track-divisions", G.china_divisions + 1, "marker-divisions", 0)
     }
-
-    populate_generic("china", Math.min(5, G.events[events.CHINA_STATUS.id]), counters.china)
 
     // TURN MARKERS
 

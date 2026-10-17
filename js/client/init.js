@@ -37,22 +37,22 @@ function current_pow(G) {
 
 const UNIT_MOVEMENT_MARKERS = [
     {
-        "name": "BARGES_MOVE",
+        name: "BARGES_MOVE",
         condition: (u, piece, path) => path & BARGES_MOVE,
         counter: counters.barges_small,
     },
     {
-        "name": "STRAT_MOVE",
+        name: "STRAT_MOVE",
         condition: (u, piece, path) => path & STRAT_MOVE && piece.class !== "air",
         counter: counters.strat_small,
     },
     {
-        "name": "STRAT_MOVE",
+        name: "STRAT_MOVE",
         condition: (u, piece, path) => path & STRAT_MOVE && piece.class === "air",
         counter: counters.strat_air_small,
     },
     {
-        "name": "AMPH_MOVE",
+        name: "AMPH_MOVE",
         condition: (u, piece, path) => path & AMPH_MOVE && piece.class === "ground",
         counter: counters.aa_small,
     },
@@ -65,11 +65,13 @@ const UNIT_MOVEMENT_MARKERS = [
 const TRACK_MARKERS = [
     {
         counter: counters.asp_jp,
-        reduced: G => (G.events[events.BARGES.id] > 0),
-        gray: G => jp_gray_amp(),
-        value: G => G.asp[0][0]
+        tooltip: () => (G.events[events.BARGES.id] > 0) ? "ASP: Barges" : "ASP: No Barges",
+        reduced: () => (G.events[events.BARGES.id] > 0),
+        gray: () => jp_gray_amp(),
+        value: () => G.asp[0][0],
     },
     {
+        // TODO: more tooltips
         counter: counters.asp_jp,
         reduced: G => (G.events[events.BARGES.id] > 0),
         value: G => (jp_gray_amp()) ? Math.ceil(G.asp[0][0] / 2) : 0
@@ -134,14 +136,17 @@ const TRACK_MARKERS = [
 
 const TURN_MARKERS = [
     {
+        tooltip: "Scenario Start",
         counter: counters.scenario_start,
         value: G => SCENARIO_LENGTH[G.sid][0]
     },
     {
+        tooltip: "Scenario End",
         counter: counters.scenario_end,
         value: G => SCENARIO_LENGTH[G.sid][1]
     },
     {
+        // TODO: tooltips...
         counter: counters.future_offensive_jp,
         value: G => G.events[events.FUTURE_OFFENSIVE_JP.id]
     },
@@ -273,7 +278,7 @@ function on_init(scenario, game_options, static_view) {
             update_map_size(1275, 825)
             break
         }
-        case  "Burma: The Forgotten War, 1943-1944": {
+        case "Burma: The Forgotten War, 1943-1944": {
             SID = BURMA_SCENARIO
             map_layout = LAYOUT.burma
             mapwrap.classList.add("burma")
@@ -357,29 +362,29 @@ function on_init(scenario, game_options, static_view) {
     define_space("action_hex", CHINA_BOX, map_layout.box_air_unit_in_china, "china_box")
         .tooltip("China Box")
 
-    define_layout("status", JP, map_layout.box_isr_jp)
-    define_layout("status", AP, map_layout.box_isr_us)
-    define_layout_track_auto("pw", map_info.pw_a, map_info.pw_b, map_layout.track_political_will, 0)
-    define_layout_track_auto("wie", map_info.wie_a, map_info.wie_b, map_layout.track_wie, 0)
+    // Tracks
+
+    define_layout("track-isr", JP, map_layout.box_isr_jp)
+    define_layout("track-isr", AP, map_layout.box_isr_us)
+    define_layout_track_auto("track-pw", map_info.pw_a, map_info.pw_b, map_layout.track_political_will, 0)
+    define_layout_track_auto("track-wie", map_info.wie_a, map_info.wie_b, map_layout.track_wie, 0)
 
     define_stack_track_auto("turn", map_info.turn_a, map_info.turn_b, map_layout.track_game_turn, 0, map_info.TURN_STACK_PARAMS)
     define_space_track_auto("turn_box", map_info.turn_a + TURN_BOX, map_info.turn_b + TURN_BOX, map_layout.track_game_turn, 0)
     define_stack_track_auto("track", map_info.track_a, map_info.track_b, map_layout.track_strat_record, 0, map_info.TRACK_STACK_PARAMS)
 
     if (map_layout.track_india_status !== undefined) {
-        define_layout_track_h("india", 0, 4, map_layout.track_india_status, 0)
+        define_layout_track_h("track-india", 0, 4, map_layout.track_india_status, 0)
     }
     if (map_layout.track_burma_road !== undefined) {
-        define_layout_track_h("burma", 0, 2, map_layout.track_burma_road, 0)
+        define_layout_track_h("track-burma", 0, 2, map_layout.track_burma_road, 0)
     }
 
-    define_layout_track_h("china", 5, 0, map_layout.track_chinese_government, 0)
+    define_layout_track_h("track-china", 5, 0, map_layout.track_chinese_government, 0)
 
     if (map_layout.track_japanese_divisions_available_china !== undefined) {
-        define_layout_track_h("divisions", 1, (SID == BURMA_SCENARIO ? 9 : 13), map_layout.track_japanese_divisions_available_china, 0)
+        define_layout_track_h("track-divisions", 1, (SID == BURMA_SCENARIO ? 9 : 13), map_layout.track_japanese_divisions_available_china, 0)
     }
-
-    define_marker("divisions", 0, counters.divisions_china)
 
     // Battle and Landing markers
     for (i = 0; i < 35; i++) {
@@ -433,12 +438,38 @@ function on_init(scenario, game_options, static_view) {
         }
     }
 
+    // Markers
+    // TODO: dynamic tooltip with current effect of track?
+
+    define_marker("marker-isr", JP, counters.rivalry_jp)
+        .tooltip(() => G.inter_service[JP] ? "Inter-Service Rivalry" : "Strategic Agreement")
+    define_marker("marker-isr", AP, counters.rivalry_ap)
+        .tooltip(() => G.inter_service[AP] ? "Inter-Service Rivalry" : "Strategic Agreement")
+
+    define_marker("marker-pw", 0, counters.pw)
+        .tooltip("U.S. Political Will")
+
+    define_marker("marker-wie", 0, counters.wie)
+        .tooltip("War in Europe")
+
+    define_marker("marker-india", 0, counters.india_status)
+        .tooltip(() => G.events[events.INDIA_STATUS.id] ? "India Surrender" : "India")
+
+    define_marker("marker-burma", 0, counters.burma_road)
+        .tooltip(() => G.events[events.HUMP.id] ? "Burma Road Hump" : "Burma Road No Hump")
+
+    define_marker("marker-divisions", 0, counters.divisions_china)
+        .tooltip("Japanese Divisions in China")
+
+    define_marker("marker-china", 0, counters.china)
+        .tooltip("China")
+
     TRACK_MARKERS.forEach(function (m, i) {
-        define_marker("track-marker", i, m.counter)
+        define_marker("track-marker", i, m.counter).tooltip(m.tooltip)
     })
 
     TURN_MARKERS.forEach(function (m, i) {
-        define_marker("turn-marker", i, m.counter)
+        define_marker("turn-marker", i, m.counter).tooltip(m.tooltip)
     })
 
 }

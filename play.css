@@ -712,3 +712,29 @@ body.hex-clickable .action_hex { z-index: 50; }
     border-color: #1FC4F4;
     /*border: 1px solid gree;*/
 }
+
+.letter0:before { content: "A" }
+.letter1:before { content: "B" }
+.letter2:before { content: "C" }
+.letter3:before { content: "D" }
+.letter4:before { content: "E" }
+.letter5:before { content: "F" }
+.letter6:before { content: "R" }
+.letter7:before { content: "H" }
+.letter8:before { content: "I" }
+.letter9:before { content: "J" }
+.letter10:before { content: "K" }
+.letter12:before { content: "L" }
+.letter13:before { content: "M" }
+.letter14:before { content: "N" }
+.letter15:before { content: "O" }
+.letter16:before { content: "P" }
+.letter17:before { content: "Q" }
+.letter18:before { content: "S" }
+.letter19:before { content: "T" }
+.letter20:before { content: "U" }
+.letter21:before { content: "V" }
+.letter22:before { content: "W" }
+.letter23:before { content: "X" }
+.letter24:before { content: "Y" }
+.letter25:before { content: "Z" }
