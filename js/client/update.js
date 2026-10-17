@@ -102,15 +102,15 @@ function get_control_marker(h) {
     }
 }
 
-function update_role_info() {
-    for (var who = JP; who <= AP; who++) {
-        var hand_size = Number.isInteger(G.hand[who]) ? G.hand[who] : G.hand[who].length
-        var fo = G.events[events.FUTURE_OFFENSIVE_JP.id + who]
-        roles[who].stat.innerHTML = `${hand_size} cards${fo && fo < G.turn ? " + FO" : ""}${G.passes[who] ? ", " + G.passes[who] + " passes" : ""}`
-        if (!hand_size) {
-            roles[who].stat.innerHTML = `0 cards`
-        }
-    }
+function update_role_info(who) {
+    var hand_size = Array.isArray(G.hand[who]) ? G.hand[who].length : G.hand[who]
+    var fo = G.events[events.FUTURE_OFFENSIVE_JP.id + who]
+    var text = `${hand_size} cards`
+    if (fo && fo < G.turn)
+        text += " + FO"
+    if (G.passes[who])
+        text += `, ${G.passes[who]} passes`
+    roles[who].stat.textContent = escape_text(text)
 }
 
 function on_update() {
@@ -122,47 +122,15 @@ function on_update() {
     if (!scenario_data().original_control)
         send_query("original_control")
 
+    // CLIENT-SIDE SUPPLY CHECK
     check_supply()
-    if (G.actions && R >= 0 && !init_overstack_check(true, R)) {
-        L.hexes = []
-        L.allowed_units.forEach(u => set_add(L.hexes, G.location[u]))
-        G.violations = L.hexes
-        L.allowed_units = []
-    }
-    if (G.actions && G.actions.move) {
-        L.allowed_hexes = []
-        L.move_type = G.move_type
-        update_move_hex()
-        if (!G.actions.action_hex) {
-            G.actions.action_hex = []
-        }
-        map_for_each(L.allowed_hexes, h => set_add(G.actions.action_hex, h))
-        if (L.allowed_hexes) {
-            delete G.actions.con_eliminate
-        }
-    }
-    document.body.classList.remove("hex-clickable")
-    world.log_boxes = []
-    if (LOCAL_STATUS) {
-        P[LOCAL_STATUS].prompt()
-    }
-    if (!G.proxy) {
-        STORED_STATE = JSON.parse(JSON.stringify(G))
-        G.proxy = 1
-    }
-    if (LOCAL_STATE) {
-        G.actions = LOCAL_STATE.actions
-        G.actions.proxy = 1
-    }
 
-    if (G.actions && G.actions["card"]) {
-        G.actions["play_card"] = 1
-    }
-    if (G.actions && G.actions["unit"] && array_count(G.actions["unit"], u => G.location[u] === ELIMINATED_BOX)) {
-        G.actions["to_unit"] = [G.actions["unit"].find(u => G.location[u] === ELIMINATED_BOX)]
-    }
+    // LOCAL ACTIONS (PART 1)
+    on_update_local_actions()
 
-    update_role_info()
+    update_role_info(JP)
+    update_role_info(AP)
+
     map_for_each(G.offensive.damaged, (u, s) => {
         if (s > 2) {
             G.location[u] = ELIMINATED_BOX
@@ -371,7 +339,7 @@ function on_update() {
         }
     }
 
-    // LOCAL ACTIONS
+    // LOCAL ACTIONS (PART 2)
 
     if (LOCAL_STATUS) {
         P[LOCAL_STATUS].on_update()

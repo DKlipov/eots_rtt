@@ -11,15 +11,6 @@ function on_reply(q, response) {
         P.check_unit_supply.show_supply(response)
 }
 
-check_supply = function () {
-    if (!G.client_supply) {
-        world.original_oos = G.oos
-        world.original_br = G.burma_road
-    }
-    basic_check_supply()
-    G.client_supply = 1
-}
-
 // MARKERS
 
 const SCENARIO_LENGTH = [

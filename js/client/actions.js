@@ -7,6 +7,15 @@ var STORED_STATE = null
 var L = {}
 const P = {}
 
+check_supply = function () {
+    if (!G.client_supply) {
+        world.original_oos = G.oos
+        world.original_br = G.burma_road
+    }
+    basic_check_supply()
+    G.client_supply = 1
+}
+
 function menu_check_unit_supply() {
     LOCAL_STATUS = "check_unit_supply"
     LOCAL_STATE = {}
@@ -34,6 +43,48 @@ function array_equals(a, b) {
     }
     return true
 }
+
+function on_update_local_actions() {
+    if (G.actions && R >= 0 && !init_overstack_check(true, R)) {
+        L.hexes = []
+        L.allowed_units.forEach(u => set_add(L.hexes, G.location[u]))
+        G.violations = L.hexes
+        L.allowed_units = []
+    }
+    if (G.actions && G.actions.move) {
+        L.allowed_hexes = []
+        L.move_type = G.move_type
+        update_move_hex()
+        if (!G.actions.action_hex) {
+            G.actions.action_hex = []
+        }
+        map_for_each(L.allowed_hexes, h => set_add(G.actions.action_hex, h))
+        if (L.allowed_hexes) {
+            delete G.actions.con_eliminate
+        }
+    }
+    document.body.classList.remove("hex-clickable")
+    world.log_boxes = []
+    if (LOCAL_STATUS) {
+        P[LOCAL_STATUS].prompt()
+    }
+    if (!G.proxy) {
+        STORED_STATE = JSON.parse(JSON.stringify(G))
+        G.proxy = 1
+    }
+    if (LOCAL_STATE) {
+        G.actions = LOCAL_STATE.actions
+        G.actions.proxy = 1
+    }
+
+    if (G.actions && G.actions["card"]) {
+        G.actions["play_card"] = 1
+    }
+    if (G.actions && G.actions["unit"] && array_count(G.actions["unit"], u => G.location[u] === ELIMINATED_BOX)) {
+        G.actions["to_unit"] = [G.actions["unit"].find(u => G.location[u] === ELIMINATED_BOX)]
+    }
+}
+
 
 P.check_unit_supply = {
     _begin() {
