@@ -2,7 +2,7 @@
 /** import common/data_cards.js*/
 /** import common/data_map.js*/
 
-var counters = {
+const counters = {
     oos: "oos top",
     isolated: "isolated top",
     control_jp: "small_markers_white unit_ix_2 control",
@@ -90,7 +90,7 @@ var counters = {
     pw_failed_pow: "pw_failed_pow",
 }
 
-var nations = {
+const nations = {
     PHILIPPINES: {
         id: 0,
         name: "Philippines",
@@ -202,7 +202,7 @@ var nations = {
     },
 }
 
-var events = {
+const events = {
     ALLIED_NATIONS_SURRENDERS: {
         id: 1,
         cause: "allied nations surrendered [16.41]",
