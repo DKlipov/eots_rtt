@@ -69,19 +69,12 @@ const VERTICAL_TURN_STACK_PARAMS = {
     shadow: 6
 }
 
-const MANCHURIA_1 = hex_to_int(3302)
-const MANCHURIA_2 = hex_to_int(3303)
-
 const SUPPLY_TYPES = {
     to_port: {color: "green"},
     from_port: {color: "red"},
     to_hq: {color: "blue"},
     to_source: {color: "yellow"},
 }
-
-//status markers
-const JP_AGREEMENT = 0
-const AP_AGREEMENT = 1
 
 const CANVAS = document.getElementById("canvas")
 const CANVAS_CTX = document.getElementById("canvas").getContext("2d")
@@ -135,8 +128,6 @@ for (var i = 0; i < map.length; i++) {
 }
 HEX_BY_NATION[hex_to_int(2709)] = -3
 
-const CARD_ACTIONS = ["card"]
-
 const SCENARIO_LENGTH = [
     [0, 0],
     [0, 0],
@@ -150,10 +141,6 @@ const SCENARIO_LENGTH = [
     [8, 10],
     [0, 0],
 ]
-
-const US_MARINE_UNIT = find_piece("army_ap_1_m")
-const US_BB_UNIT = find_piece("washington")
-const US_CV_UNIT = find_piece("essex")
 
 const UNIT_MOVEMENT_MARKERS = [
     {
@@ -600,8 +587,8 @@ function on_init(scenario, game_options, static_view) {
     define_space("action_hex", CHINA_BOX, map_layout.box_air_unit_in_china, "china_box")
         .tooltip("China Box")
 
-    define_layout("status", JP_AGREEMENT, map_layout.box_isr_jp)
-    define_layout("status", AP_AGREEMENT, map_layout.box_isr_us)
+    define_layout("status", JP, map_layout.box_isr_jp)
+    define_layout("status", AP, map_layout.box_isr_us)
     define_layout_track_auto("pw", map_info.pw_a, map_info.pw_b, map_layout.track_political_will, 0)
     define_layout_track_auto("wie", map_info.wie_a, map_info.wie_b, map_layout.track_wie, 0)
 

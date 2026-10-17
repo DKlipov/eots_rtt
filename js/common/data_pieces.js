@@ -2988,6 +2988,10 @@ const JP_GARRISON_JP = jp_army("g_mainland")
 const JP_GARRISON_CN = [jp_army("g_1"), jp_army("g_2"), jp_army("g_3")]
 const KAMIKAZE = find_piece("kamikaze")
 
+const US_MARINE_UNIT = find_piece("army_ap_1_m")
+const US_BB_UNIT = find_piece("washington")
+const US_CV_UNIT = find_piece("essex")
+
 //HQ
 const HQ_YAMAMOTO = find_piece("hq_jp_cy")
 const HQ_OZAWA = find_piece("hq_jp_co")
