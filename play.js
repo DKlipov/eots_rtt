@@ -12256,7 +12256,7 @@ function canvas_draw_supply(supply_data) {
 /* {{{ js/client/utils.js */
 /* MISC CLIENT STUFF */
 
-const digit_superscript = [
+const DIGIT_SUPERSCRIPT = [
     "\u2070",
     "\u2071",
     "\xb2",
@@ -12298,7 +12298,7 @@ function format_unit_tooltip(u) {
     if (p.br)
         tip += `-${p.br}`
     if (p.ebr)
-        tip += " " + digit_superscript[p.ebr]
+        tip += " " + DIGIT_SUPERSCRIPT[p.ebr]
     if (!set_has(G.reduced, u))
         tip += ""
     else
@@ -12309,7 +12309,7 @@ function format_unit_tooltip(u) {
     return tip
 }
 
-const terrain_name = [
+const TERRAIN_NAME = [
     "ocean",
     "open",
     "jungle",
@@ -12333,7 +12333,7 @@ function format_hex_tooltip(h) {
         if (info.port) props.push("port")
         if (info.island) props.push("island")
         if (info.resource) props.push("resource")
-        if (info.terrain) props.push(terrain_name[info.terrain])
+        if (info.terrain) props.push(TERRAIN_NAME[INFO.TERRAIN])
         if (props.length > 0) tip += " - " + props.join(", ")
     }
     return tip
@@ -12458,25 +12458,24 @@ function blur_unit(id) {
 
 /* LOG & PROMT TEXT FORMATTING */
 
-const card_classes = cards.map(c => `card card_${c?.faction ? "ap" : "jp"}_${c?.num}`)
-const card_names = cards.map(c => c?.name)
+const CARD_CLASSES = cards.map(c => `card card_${c?.faction ? "ap" : "jp"}_${c?.num}`)
+const CARD_NAMES = cards.map(c => c?.name)
 
-const unit_classes = pieces.map(p => `piece unit ${p?.faction ? "ap" : "jp"} ${p?.counter}`)
-const unit_names = pieces.map(p => p?.name)
+const UNIT_NAMES = pieces.map(p => p?.name)
 
-const hex_names = []
+const HEX_NAMES = []
 for (let i = 0; i <= TUNNEL_BOX; ++i) {
     if (i === CHINA_BOX) {
-        hex_names[i] = "China Box"
+        HEX_NAMES[i] = "China Box"
     } else if (i > LAST_BOARD_HEX) {
-        hex_names[i] = "offboard"
+        HEX_NAMES[i] = "offboard"
     } else {
         let hex = int_to_hex(i)
         let info = map.find(e => e.id === hex)
         if (info && info.name)
-            hex_names[i] = `${info.name} (${hex})`
+            HEX_NAMES[i] = `${info.name} (${hex})`
         else
-            hex_names[i] = String(hex)
+            HEX_NAMES[i] = String(hex)
     }
 }
 
@@ -12515,9 +12514,9 @@ function escape_text(text) {
 
     text = escape_icon(text, /\b[BRW]\d\b/g, ICONS)
 
-    text = escape_tip_class(text, /C(\d+)/g, "card-tip", card_classes, card_names)
-    text = escape_tip_light(text, /H(\d+)/g, "hex-tip", "action_hex", hex_names)
-    text = escape_tip_light(text, /P(\d+)/g, "piece-tip", "unit", unit_names)
+    text = escape_tip_class(text, /C(\d+)/g, "card-tip", CARD_CLASSES, CARD_NAMES)
+    text = escape_tip_light(text, /H(\d+)/g, "hex-tip", "action_hex", HEX_NAMES)
+    text = escape_tip_light(text, /P(\d+)/g, "piece-tip", "unit", UNIT_NAMES)
 
     return text
 }

@@ -1,6 +1,6 @@
 /* MISC CLIENT STUFF */
 
-const digit_superscript = [
+const DIGIT_SUPERSCRIPT = [
     "\u2070",
     "\u2071",
     "\xb2",
@@ -42,7 +42,7 @@ function format_unit_tooltip(u) {
     if (p.br)
         tip += `-${p.br}`
     if (p.ebr)
-        tip += " " + digit_superscript[p.ebr]
+        tip += " " + DIGIT_SUPERSCRIPT[p.ebr]
     if (!set_has(G.reduced, u))
         tip += ""
     else
@@ -53,7 +53,7 @@ function format_unit_tooltip(u) {
     return tip
 }
 
-const terrain_name = [
+const TERRAIN_NAME = [
     "ocean",
     "open",
     "jungle",
@@ -77,7 +77,7 @@ function format_hex_tooltip(h) {
         if (info.port) props.push("port")
         if (info.island) props.push("island")
         if (info.resource) props.push("resource")
-        if (info.terrain) props.push(terrain_name[info.terrain])
+        if (info.terrain) props.push(TERRAIN_NAME[INFO.TERRAIN])
         if (props.length > 0) tip += " - " + props.join(", ")
     }
     return tip
