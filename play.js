@@ -6402,7 +6402,7 @@ const MAP_DATA = []
 const S_P_MAP_DATA = []
 const B_F_W_MAP_DATA = []
 const AIRFIELD_LINKS = []
-const TONNELING = [
+const TUNNELING = [
     {from: hex_to_int(4825), distance: 21, to: OAHU, map: S_P_MAP_DATA, duplex: true},
     {from: hex_to_int(4826), distance: 22, to: OAHU, map: S_P_MAP_DATA, duplex: true},
     {from: hex_to_int(4828), distance: 24, to: OAHU, map: S_P_MAP_DATA, duplex: true},
@@ -6508,14 +6508,14 @@ B_F_W_MAP_DATA[hex_to_int(1912)].nh.length = 3
 B_F_W_MAP_DATA[hex_to_int(1912)].edges_int = (B_F_W_MAP_DATA[hex_to_int(1912)].edges_int % (1 << 5 * 3))
 
 var t1 = 1
-for (var i = 0; i < TONNELING.length; i++) {
-    var tonnel = TONNELING[i]
-    create_tonnel(tonnel)
-    if (tonnel.duplex) {
-        var from = tonnel.from
-        tonnel.from = tonnel.to
-        tonnel.to = from
-        create_tonnel(tonnel)
+for (var i = 0; i < TUNNELING.length; i++) {
+    var tunnel = TUNNELING[i]
+    create_tunnel(tunnel)
+    if (tunnel.duplex) {
+        var from = tunnel.from
+        tunnel.from = tunnel.to
+        tunnel.to = from
+        create_tunnel(tunnel)
     }
 }
 B_F_W_MAP_DATA[hex_to_int(1912)].nh.push(-1)
@@ -6610,7 +6610,7 @@ function apply_burma(hex) {
     B_F_W_MAP_DATA[id] = hex
 }
 
-function create_tonnel(data) {
+function create_tunnel(data) {
     data.map[data.from].edges_int |= (WATER | UNPLAYABLE_WATER) << (5 * data.map[data.from].nh.length)
     data.map[data.from].nh.push(TUNNEL_BOX + t1)
     for (var i = 0; i < data.distance; i++) {
@@ -6630,6 +6630,7 @@ function create_tonnel(data) {
 function get_near_hexes(hex) {
     return get_map_data(hex).nh
 }
+
 /* }}} */
 
 var counters = {
