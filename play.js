@@ -12179,17 +12179,17 @@ function on_update() {
 
     // HQ RANGE
     // TODO: focused has invalid hexes, so need to filter by ALL_BOARD_HEXES
-    if (world.range[0] && world.hq && G.location[world.hq] < LAST_BOARD_HEX) {
-        mark_activation_zone(world.hq)
-        for_each_hex_in_range(G.location[world.hq], pieces[world.hq].cr, hex => {
+    if (focus_hq_range[0] && focus_hq && G.location[focus_hq] < LAST_BOARD_HEX) {
+        mark_activation_zone(focus_hq)
+        for_each_hex_in_range(G.location[focus_hq], pieces[focus_hq].cr, hex => {
             if (G.supply_cache[hex] & HEX_TEMP_FLAG3)
                 if (set_has(ALL_BOARD_HEXES, hex))
                     update_keyword("zoi_hex", hex, "yellow")
         })
     } else {
         var focused = []
-        for_each_hex_in_range(world.range[0], world.range[1], hex => set_add(focused, hex))
-        focused = in_range_on_map(world.range[0], world.range[1], focused, AP)
+        for_each_hex_in_range(focus_hq_range[0], focus_hq_range[1], hex => set_add(focused, hex))
+        focused = in_range_on_map(focus_hq_range[0], focus_hq_range[1], focused, AP)
         for (var hex of focused)
             if (set_has(ALL_BOARD_HEXES, hex))
                 update_keyword("zoi_hex", hex, "yellow")
@@ -12549,6 +12549,9 @@ function format_hex_tooltip(h) {
 
 /* UNIT ZOOMED TOOLTIP & HQ RANGE DISPLAY TOGGLE */
 
+var focus_hq = 0
+var focus_hq_range = [0, 0]
+
 function focus_unit(id) {
     const piece = pieces[id]
 
@@ -12562,20 +12565,20 @@ function focus_unit(id) {
 
     // show HQ range
     if (piece.class === "hq" && G.location[id] < LAST_BOARD_HEX) {
-        world.hq = id
+        focus_hq = id
         if (id === HQ_CENTRAL_PACIFIC && G.sid === SOUTH_PACIFIC_SCENARIO)
-            world.range = [ hex_to_int(5226), 5 ]
+            focus_hq_range = [ hex_to_int(5226), 5 ]
         else
-            world.range = [ G.location[id], pieces[id].cr ]
+            focus_hq_range = [ G.location[id], pieces[id].cr ]
         on_update()
     }
 }
 
 function blur_unit(id) {
     // hide HQ range
-    world.hq = 0
-    if (world.range[0]) {
-        world.range = [0, 0]
+    focus_hq = 0
+    if (focus_hq_range[0]) {
+        focus_hq_range = [0, 0]
         on_update()
     }
 }

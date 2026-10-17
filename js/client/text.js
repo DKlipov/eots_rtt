@@ -81,6 +81,9 @@ function format_hex_tooltip(h) {
 
 /* UNIT ZOOMED TOOLTIP & HQ RANGE DISPLAY TOGGLE */
 
+var focus_hq = 0
+var focus_hq_range = [0, 0]
+
 function focus_unit(id) {
     const piece = pieces[id]
 
@@ -94,20 +97,20 @@ function focus_unit(id) {
 
     // show HQ range
     if (piece.class === "hq" && G.location[id] < LAST_BOARD_HEX) {
-        world.hq = id
+        focus_hq = id
         if (id === HQ_CENTRAL_PACIFIC && G.sid === SOUTH_PACIFIC_SCENARIO)
-            world.range = [ hex_to_int(5226), 5 ]
+            focus_hq_range = [ hex_to_int(5226), 5 ]
         else
-            world.range = [ G.location[id], pieces[id].cr ]
+            focus_hq_range = [ G.location[id], pieces[id].cr ]
         on_update()
     }
 }
 
 function blur_unit(id) {
     // hide HQ range
-    world.hq = 0
-    if (world.range[0]) {
-        world.range = [0, 0]
+    focus_hq = 0
+    if (focus_hq_range[0]) {
+        focus_hq_range = [0, 0]
         on_update()
     }
 }
