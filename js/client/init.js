@@ -252,6 +252,8 @@ function on_init(scenario, game_options, static_view) {
     define_panel("#ap_hand", "hand", AP)
     define_panel("#active_cards", "hand", 2)
 
+    define_html_thing("#turn_info", "violations", 0)
+
     var mapwrap = document.getElementById("mapwrap")
     switch (scenario) {
         case "South Pacific": {
@@ -301,6 +303,8 @@ function on_init(scenario, game_options, static_view) {
             update_map_size(2550, 1650)
         }
     }
+
+    document.getElementById("vp_check_button").hidden = CAMPAIGN_SCENARIOS.includes(SID)
 
     document.getElementById("ap_deck_link").href += `&sid=${SID}`
     document.getElementById("jp_deck_link").href += `&sid=${SID}`

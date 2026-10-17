@@ -64,7 +64,6 @@ function on_update_local_actions() {
         }
     }
     document.body.classList.remove("hex-clickable")
-    world.log_boxes = []
     if (LOCAL_STATUS) {
         P[LOCAL_STATUS].prompt()
     }

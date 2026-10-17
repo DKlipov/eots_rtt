@@ -29,7 +29,7 @@ function update_hand(side) {
 }
 
 
-function place_unit(u, location) {
+function update_unit(u, location) {
     var piece = pieces[u]
     var unit
     var one_step = piece.notreplaceable && piece.start_reduced
@@ -113,6 +113,24 @@ function update_role_info(who) {
     roles[who].stat.textContent = escape_text(text)
 }
 
+function should_show_hex_control(i, all_control, vassal_control) {
+	var hn = HEX_BY_NATION[i]
+	var cont = is_space_controlled(i, JP) ? JP : AP
+	if ((cont === AP && set_has(G.capture, i) && !all_control) || !(G.supply_cache[i] & HEX_CONTROLLABLE))
+		return false
+	var default_condition =
+		(hn >= 0 && G.surrender[HEX_BY_NATION[i]] > 0 == cont) || (hn === -1 && cont === AP) || (hn < -1 && cont === JP)
+	var vassal_condition = set_has(JP_BOUNDARY_HEX, i) + 0 === cont
+	if (
+		map_info.hex_check(i) &&
+		cont !== null &&
+		(all_control || (!is_faction_units(i, AP) && !is_faction_units(i, JP))) &&
+		(all_control || (!vassal_control && default_condition) || (vassal_control && vassal_condition))
+	)
+		return true
+	return false
+}
+
 function on_update() {
     begin_update()
 
@@ -131,6 +149,7 @@ function on_update() {
     update_role_info(JP)
     update_role_info(AP)
 
+    // TODO: why are we mutating G here?
     map_for_each(G.offensive.damaged, (u, s) => {
         if (s > 2) {
             G.location[u] = ELIMINATED_BOX
@@ -138,85 +157,94 @@ function on_update() {
             set_add(G.reduced, u)
         }
     })
+    if (G.pow <= 0) {
+        G.capture = []
+    }
 
+    var supplied_hex = []
+    for (var i = 1; i < pieces.length; ++i) {
+        var loc = G.location[i]
+        if (loc > 0) {
+            if (!set_has(G.oos, i)) {
+                set_add(supplied_hex, G.location[i])
+            }
+        }
+    }
+    // ^^^^
+
+    // OVERLAY PATHS
     if (!get_preference("nopath", false)) {
         canvas_draw_paths()
     } else {
         canvas_clear_paths()
     }
 
-    document.getElementById("vp_check_button").hidden = CAMPAIGN_SCENARIOS.includes(G.sid)
-
-    if (G.pow <= 0) {
-        G.capture = []
-    }
+    // CONTROL MARKERS
     var all_control = document.body.classList.contains("hide-pieces")
     var vassal_control = get_preference("fullcontrol", false)
     for (var i = 0; i < LAST_BOARD_HEX; i++) {
-        var hn = HEX_BY_NATION[i]
-        var cont = is_space_controlled(i, JP) ? JP : AP
-        if (cont === AP && set_has(G.capture, i) && !all_control || !(G.supply_cache[i] & HEX_CONTROLLABLE)) {
-            continue
-        }
-        var default_condition = (hn >= 0 && (G.surrender[HEX_BY_NATION[i]] > 0) == cont
-            || hn === -1 && cont === AP
-            || hn < -1 && cont === JP)
-        var vassal_condition = (set_has(JP_BOUNDARY_HEX, i) + 0) === cont
-        if (map_info.hex_check(i) && cont !== null && (all_control || !is_faction_units(i, AP) && !is_faction_units(i, JP))
-            && (all_control || !vassal_control && default_condition || vassal_control && vassal_condition)
-        ) {
-            populate_generic("s-loc", i, get_control_marker(i) + (vassal_control ? " transparent" : ""))
+        if (should_show_hex_control(i, all_control, vassal_control)) {
+            if (vassal_control)
+                populate_generic("s-loc", i, get_control_marker(i) + " transparent")
+            else
+                populate_generic("s-loc", i, get_control_marker(i))
         }
     }
-    G.garr_elim.filter(h => is_space_controlled(h, JP)).forEach(h => populate_generic("s-loc", h, counters.no_garrison))
-    var base_road_counters = get_preference("noroad", false)
-    ROAD_EVENTS.filter(event => map_info.hex_check(event.keys[0])).forEach(event => {
-        var thing = lookup_thing("road", event.id)
-        var active = G.events[event.id]
-        thing.element.classList.add("hide")
-        if (!active && !base_road_counters) {
-            thing.element.classList.remove("hide")
-        }
-        if ((event === events.KWAI_RIVER_BRIDGE && active)
-            || (!active && base_road_counters && event !== events.KWAI_RIVER_BRIDGE)) {
-            populate_generic("s-loc", event.keys[0], event.counter)
-        }
+
+    // ELIMINATED GARRISONS
+    for (var h of G.garr_elim)
+        if (is_space_controlled(h, JP))
+            populate_generic("s-loc", h, counters.no_garrison)
+
+    // GARRISONS
+    map_for_each(G.garrison, (h, count) => {
+        if (count === 0)
+            populate_generic("s-loc", h, "unit " + pieces[JP_GARRISON_JP].counter, 1)
+        else
+            populate_generic("s-loc", h, "unit " + pieces[JP_GARRISON_CN[0]].counter, count)
     })
+
+    // ROADS
+    var base_road_counters = get_preference("noroad", false)
+    for (var event of ROAD_EVENTS) {
+        if (map_info.hex_check(event.keys[0])) {
+            var is_road_event_active = G.events[event.id]
+            update_show("road", event.id, !is_road_event_active && !base_road_counters)
+            if (event === events.KWAI_RIVER_BRIDGE && is_road_event_active)
+                populate_generic("s-loc", event.keys[0], event.counter)
+            if (event !== events.KWAI_RIVER_BRIDGE && !is_road_event_active && base_road_counters)
+                populate_generic("s-loc", event.keys[0], event.counter)
+        }
+    }
+
+    // TOKYO EXPRESS
     if (G.events[events.TOKYO_EXPRESS.id] > 0) {
         populate_generic("s-loc", G.events[events.TOKYO_EXPRESS.id], counters.tokyo_express)
     }
-    map_for_each(G.garrison, (h, count) => {
-        var marker = JP_GARRISON_CN[0]
-        if (count === 0) {
-            count = 1
-            marker = JP_GARRISON_JP
-        }
-        for (var i = 0; i < count; i++) {
-            populate_generic("s-loc", h, "unit " + pieces[marker].counter)
-        }
-    })
-    var supplied_hex = []
-    for (var i = 1; i < pieces.length; ++i) {
-        var loc = G.location[i]
-        if (loc > 0) {
-            place_unit(i, G.location[i])
-            if (!set_has(G.oos, i)) {
-                set_add(supplied_hex, G.location[i])
-            }
-        }
-    }
-    if (G.unselect) {
-        G.unselect.forEach(u => update_keyword("unit", u, "unselect"))
+
+    // POWs
+    if (G.pow > 0) {
+        for (var h of G.capture)
+            if (is_space_controlled(h, AP))
+                populate_generic("s-loc", h, counters.pow)
     }
 
-    if (G.pow > 0) {
-        G.capture.filter(h => is_space_controlled(h, AP))
-            .forEach(h => populate_generic("s-loc", h, counters.pow))
+    // UNITS
+    for (var i = 1; i < pieces.length; ++i) {
+        var loc = G.location[i]
+        if (loc > 0)
+            update_unit(i, G.location[i])
     }
+
+    if (G.unselect)
+        for (var u of G.unselect)
+            update_keyword("unit", u, "unselect")
+
+    // OUT OF SUPPLY MARKERS
     var oos_hex_set = []
     for (i = 0; i < G.oos.length; i++) {
         var hex = G.location[G.oos[i]]
-        if (!set_has(oos_hex_set, hex) && hex <= LAST_BOARD_HEX && !set_has(supplied_hex, hex)) {
+        if (hex <= LAST_BOARD_HEX && !set_has(oos_hex_set, hex) && !set_has(supplied_hex, hex)) {
             var counter = counters.isolated
             if (HQ_LIST.some(hq => G.location[hq] < LAST_BOARD_HEX && hex < LAST_BOARD_HEX
                 && pieces[hq].faction === pieces[G.oos[i]].faction
@@ -228,6 +256,7 @@ function on_update() {
         }
     }
 
+    // ZONE OF INFLUENCE
     if (!get_preference("hidezoi", false)) {
         for (var hex of ALL_BOARD_HEXES) {
             const zoi_state = G.supply_cache[hex]
@@ -238,24 +267,36 @@ function on_update() {
         }
     }
 
-    var focused = []
+    // HQ RANGE
+    // TODO: focused has invalid hexes, so need to filter by ALL_BOARD_HEXES
     if (world.range[0] && world.hq && G.location[world.hq] < LAST_BOARD_HEX) {
         mark_activation_zone(world.hq)
         for_each_hex_in_range(G.location[world.hq], pieces[world.hq].cr, hex => {
-            if (G.supply_cache[hex] & HEX_TEMP_FLAG3) {
-                set_add(focused, hex)
-            }
+            if (G.supply_cache[hex] & HEX_TEMP_FLAG3)
+                if (set_has(ALL_BOARD_HEXES, hex))
+                    update_keyword("zoi_hex", hex, "yellow")
         })
     } else {
+        var focused = []
         for_each_hex_in_range(world.range[0], world.range[1], hex => set_add(focused, hex))
         focused = in_range_on_map(world.range[0], world.range[1], focused, AP)
-    }
-    for (var hex of ALL_BOARD_HEXES) {
-        update_keyword("zoi_hex", hex, "yellow", set_has(focused, hex))
+        for (var hex of focused)
+            if (set_has(ALL_BOARD_HEXES, hex))
+                update_keyword("zoi_hex", hex, "yellow")
     }
 
-    print_violations()
-    update_violations()
+    // VIOLATIONS
+    if (G.violations.length > 0) {
+        for (var h of G.violations)
+            update_keyword("action_hex", h, "violation")
+        update_text_html("violations", 0, "<b>STACKING VIOLATIONS:</B>\n" + escape_text(G.violations.map(h => "H"+h).join(", ")) + ".")
+    }
+
+
+
+
+
+
     highlight_aa()
 
     world.things["card"].forEach(e => e.element.innerHTML = '')
@@ -403,15 +444,6 @@ function on_update() {
     show_full_log_if_needed()
 }
 
-function print_violations() {
-    if (world.violations) {
-        world.violations.forEach(h => lookup_thing("action_hex", h).element.classList.toggle("violation", false))
-        world.violations = []
-    }
-    G.violations.forEach(h => lookup_thing("action_hex", h).element.classList.toggle("violation", true))
-    world.violations = G.violations
-}
-
 function highlight_aa() {
     world.amph.forEach(h => lookup_thing("action_hex", h).element.classList.remove("amph"))
     G.offensive.active_units[G.offensive.attacker].forEach(u => {
@@ -424,19 +456,6 @@ function highlight_aa() {
             lookup_thing("action_hex", location).element.classList.add("amph")
         }
     })
-}
-
-function update_violations() {
-    var ui = document.getElementById("violations")
-    var list = G.violations
-    if (list.length > 0) {
-        ui.replaceChildren()
-        let p = document.createElement("div")
-        p.innerHTML = `<u><b>Overstack Violations: ${escape_text(list.map(h => hex_get_log_str(h)).join(", "))}</b></u>`
-        ui.appendChild(p)
-    } else {
-        ui.replaceChildren()
-    }
 }
 
 function apply_conflict_marker(marker, hex) {

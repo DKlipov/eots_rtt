@@ -118,9 +118,9 @@ const world = {
     // XXX: added properties
     hq: 0,
     range: [0, 0],
+
     violations: [],
     amph: [],
-    list_id: 0,
 }
 
 class Thing {

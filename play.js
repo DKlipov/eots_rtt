@@ -196,7 +196,7 @@ var pieces = [
         id: "army_jp_g_mainland",
         "faction": JP,
         "name": "Japanese Home Islands garrison",
-        "counter": "piece garrison_jp",
+        "counter": "unit garrison_jp",
         "class": "ground",
         "service": "army",
         "garrison": true,
@@ -211,7 +211,7 @@ var pieces = [
         id: "army_jp_g_1",
         "faction": JP,
         "name": "Japanese garrison",
-        "counter": "piece garrison_cn",
+        "counter": "unit garrison_cn",
         "class": "ground",
         "service": "army",
         "garrison": true,
@@ -226,7 +226,7 @@ var pieces = [
         id: "army_jp_g_2",
         "faction": JP,
         "name": "Japanese garrison",
-        "counter": "piece garrison_cn",
+        "counter": "unit garrison_cn",
         "class": "ground",
         "service": "army",
         "garrison": true,
@@ -241,7 +241,7 @@ var pieces = [
         id: "army_jp_g_3",
         "faction": JP,
         "name": "Japanese garrison",
-        "counter": "piece garrison_cn",
+        "counter": "unit garrison_cn",
         "class": "ground",
         "service": "army",
         "garrison": true,
@@ -256,7 +256,7 @@ var pieces = [
         id: "hq_jp_cy",
         "faction": JP,
         "name": "Combined Fleet HQ (Yamamoto)",
-        "counter": "small_units_ltyellow unit_ix_2",
+        "counter": "unit small_units_ltyellow unit_ix_2",
         "class": "hq",
         "cr": 13,
         "cm": 3,
@@ -266,7 +266,7 @@ var pieces = [
         id: "hq_jp_ss",
         "faction": JP,
         "name": "South Seas HQ",
-        "counter": "small_units_ltyellow unit_ix_1",
+        "counter": "unit small_units_ltyellow unit_ix_1",
         "class": "hq",
         "cr": 12,
         "cm": 2,
@@ -276,7 +276,7 @@ var pieces = [
         id: "hq_jp_s",
         "faction": JP,
         "name": "South HQ",
-        "counter": "small_units_ltyellow unit_ix_3",
+        "counter": "unit small_units_ltyellow unit_ix_3",
         "class": "hq",
         "cr": 13,
         "cm": 1,
@@ -286,7 +286,7 @@ var pieces = [
         id: "hq_jp_co",
         "faction": JP,
         "name": "Combined Fleet HQ (Ozawa)",
-        "counter": "small_units_ltyellow unit_ix_4",
+        "counter": "unit small_units_ltyellow unit_ix_4",
         "class": "hq",
         "cr": 12,
         "cm": 2,
@@ -297,7 +297,7 @@ var pieces = [
         "name": "Akagi",
         "class": "naval",
         "type": "cv",
-        "counter": "big_units_white big unit_ix_10",
+        "counter": "unit big_units_white big unit_ix_10",
         "cf": 12,
         "lf": 12,
         "br": 3,
@@ -310,7 +310,7 @@ var pieces = [
         "faction": JP,
         "name": "Soryu",
         "class": "naval",
-        "counter": "big_units_white big unit_ix_12",
+        "counter": "unit big_units_white big unit_ix_12",
         "type": "cv",
         "cf": 10,
         "lf": 12,
@@ -324,7 +324,7 @@ var pieces = [
         "faction": JP,
         "name": "Shokaku",
         "class": "naval",
-        "counter": "big_units_white big unit_ix_13",
+        "counter": "unit big_units_white big unit_ix_13",
         "type": "cv",
         "cf": 14,
         "lf": 12,
@@ -338,7 +338,7 @@ var pieces = [
         "faction": JP,
         "name": "Zuiho",
         "class": "naval",
-        "counter": "big_units_white big unit_ix_16",
+        "counter": "unit big_units_white big unit_ix_16",
         "type": "cvl",
         "cf": 8,
         "lf": 8,
@@ -352,7 +352,7 @@ var pieces = [
         "faction": JP,
         "name": "Ryujo",
         "class": "naval",
-        "counter": "big_units_white big unit_ix_4",
+        "counter": "unit big_units_white big unit_ix_4",
         "type": "cvl",
         "cf": 6,
         "lf": 8,
@@ -365,7 +365,7 @@ var pieces = [
         "faction": JP,
         "name": "Nagato",
         "class": "naval",
-        "counter": "big_units_white big unit_ix_15",
+        "counter": "unit big_units_white big unit_ix_15",
         "type": "bb",
         "cf": 20,
         "lf": 14,
@@ -377,7 +377,7 @@ var pieces = [
         "faction": JP,
         "name": "Hiei",
         "class": "naval",
-        "counter": "big_units_white big unit_ix_14",
+        "counter": "unit big_units_white big unit_ix_14",
         "type": "bb",
         "cf": 17,
         "lf": 14,
@@ -389,7 +389,7 @@ var pieces = [
         "faction": JP,
         "name": "Kongo",
         "class": "naval",
-        "counter": "big_units_white big unit_ix_19",
+        "counter": "unit big_units_white big unit_ix_19",
         "type": "bb",
         "cf": 13,
         "lf": 14,
@@ -401,7 +401,7 @@ var pieces = [
         "faction": JP,
         "name": "Aoba",
         "class": "naval",
-        "counter": "big_units_white big unit_ix_17",
+        "counter": "unit big_units_white big unit_ix_17",
         "type": "ca",
         "organic": true,
         "cf": 12,
@@ -414,7 +414,7 @@ var pieces = [
         "faction": JP,
         "name": "Mogami",
         "class": "naval",
-        "counter": "big_units_white big unit_ix_5",
+        "counter": "unit big_units_white big unit_ix_5",
         "type": "ca",
         "organic": true,
         "cf": 12,
@@ -428,7 +428,7 @@ var pieces = [
         "faction": JP,
         "class": "naval",
         "notreplaceable": true,
-        "counter": "big_units_white big unit_ix_1",
+        "counter": "unit big_units_white big unit_ix_1",
         "start": 2909,
         "name": "Takao",
         "type": "ca",
@@ -442,7 +442,7 @@ var pieces = [
         "faction": JP,
         "class": "naval",
         "notreplaceable": true,
-        "counter": "big_units_white big unit_ix_3",
+        "counter": "unit big_units_white big unit_ix_3",
         "start": 3416,
         "name": "Nachi",
         "type": "ca",
@@ -456,7 +456,7 @@ var pieces = [
         "faction": JP,
         "class": "naval",
         "notreplaceable": true,
-        "counter": "big_units_white big unit_ix_18",
+        "counter": "unit big_units_white big unit_ix_18",
         "start": 4017,
         "name": "Kamikaze",
         "type": "apd",
@@ -470,7 +470,7 @@ var pieces = [
         "faction": JP,
         "class": "naval",
         "notreplaceable": true,
-        "counter": "big_units_white big unit_ix_2",
+        "counter": "unit big_units_white big unit_ix_2",
         "start": 4715,
         "name": "Tenyru",
         "type": "cl",
@@ -483,7 +483,7 @@ var pieces = [
         id: "air_jp_21",
         "faction": JP,
         "name": "21st Air Flotilla",
-        "counter": "small_units_white unit_ix_11",
+        "counter": "unit small_units_white unit_ix_11",
         "class": "air",
         "service": "navy",
         "notreplaceable": true,
@@ -498,7 +498,7 @@ var pieces = [
         id: "air_jp_22",
         "faction": JP,
         "name": "22nd Air Flotilla",
-        "counter": "small_units_white unit_ix_12",
+        "counter": "unit small_units_white unit_ix_12",
         "class": "air",
         "service": "navy",
         "notreplaceable": true,
@@ -513,7 +513,7 @@ var pieces = [
         id: "air_jp_23",
         "faction": JP,
         "name": "23rd Air Flotilla",
-        "counter": "small_units_white unit_ix_13",
+        "counter": "unit small_units_white unit_ix_13",
         "class": "air",
         "service": "navy",
         "notreplaceable": true,
@@ -528,7 +528,7 @@ var pieces = [
         id: "air_jp_24",
         "faction": JP,
         "name": "24th Air Flotilla",
-        "counter": "small_units_white unit_ix_14",
+        "counter": "unit small_units_white unit_ix_14",
         "class": "air",
         "service": "navy",
         "notreplaceable": true,
@@ -543,7 +543,7 @@ var pieces = [
         id: "army_jp_1sn",
         "faction": JP,
         "name": "1st SN Brigade",
-        "counter": "small_units_white unit_ix_3",
+        "counter": "unit small_units_white unit_ix_3",
         "class": "ground",
         "service": "navy",
         "notreplaceable": true,
@@ -558,7 +558,7 @@ var pieces = [
         id: "army_jp_2sn",
         "faction": JP,
         "name": "2nd SN Brigade",
-        "counter": "small_units_white unit_ix_4",
+        "counter": "unit small_units_white unit_ix_4",
         "class": "ground",
         "service": "navy",
         "notreplaceable": true,
@@ -573,7 +573,7 @@ var pieces = [
         id: "army_jp_3sn",
         "faction": JP,
         "name": "3rd SN Brigade",
-        "counter": "small_units_white unit_ix_5",
+        "counter": "unit small_units_white unit_ix_5",
         "class": "ground",
         "service": "navy",
         "notreplaceable": true,
@@ -588,7 +588,7 @@ var pieces = [
         id: "army_jp_4sn",
         "faction": JP,
         "name": "4th SN Brigade",
-        "counter": "small_units_white unit_ix_7",
+        "counter": "unit small_units_white unit_ix_7",
         "class": "ground",
         "service": "navy",
         "notreplaceable": true,
@@ -603,7 +603,7 @@ var pieces = [
         id: "army_jp_ss",
         "faction": JP,
         "name": "South Seas Brigade",
-        "counter": "small_units_white unit_ix_6",
+        "counter": "unit small_units_white unit_ix_6",
         "class": "ground",
         "service": "navy",
         "notreplaceable": true,
@@ -618,7 +618,7 @@ var pieces = [
         id: "army_jp_kor",
         "faction": JP,
         "name": "Korean Army",
-        "counter": "small_units_yellow unit_ix_20",
+        "counter": "unit small_units_yellow unit_ix_20",
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
@@ -632,7 +632,7 @@ var pieces = [
         id: "army_jp_ed",
         "faction": JP,
         "name": "Eastern District Army",
-        "counter": "small_units_yellow unit_ix_3",
+        "counter": "unit small_units_yellow unit_ix_3",
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
@@ -646,7 +646,7 @@ var pieces = [
         id: "army_jp_14",
         "faction": JP,
         "name": "14th Army",
-        "counter": "small_units_yellow unit_ix_18",
+        "counter": "unit small_units_yellow unit_ix_18",
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
@@ -663,7 +663,7 @@ var pieces = [
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
-        "counter": "small_units_yellow unit_ix_12",
+        "counter": "unit small_units_yellow unit_ix_12",
         "start": 2211,
         "size": 4,
         "cf": 20,
@@ -677,7 +677,7 @@ var pieces = [
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
-        "counter": "small_units_yellow unit_ix_21",
+        "counter": "unit small_units_yellow unit_ix_21",
         "start": 3416,
         "start_reduced": true,
         "size": 4,
@@ -692,7 +692,7 @@ var pieces = [
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
-        "counter": "small_units_yellow unit_ix_16",
+        "counter": "unit small_units_yellow unit_ix_16",
         "start": 2708,
         "start_reduced": true,
         "size": 4,
@@ -707,7 +707,7 @@ var pieces = [
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
-        "counter": "small_units_yellow unit_ix_4",
+        "counter": "unit small_units_yellow unit_ix_4",
         "start": 3706,
         "start_reduced": true,
         "size": 4,
@@ -722,7 +722,7 @@ var pieces = [
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
-        "counter": "small_units_yellow unit_ix_19",
+        "counter": "unit small_units_yellow unit_ix_19",
         "start": 3209,
         "start_reduced": true,
         "size": 4,
@@ -737,7 +737,7 @@ var pieces = [
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
-        "counter": "small_units_yellow unit_ix_14",
+        "counter": "unit small_units_yellow unit_ix_14",
         "start": 2509,
         "start_reduced": true,
         "size": 4,
@@ -752,7 +752,7 @@ var pieces = [
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
-        "counter": "small_units_yellow unit_ix_1",
+        "counter": "unit small_units_yellow unit_ix_1",
         "start": 3704,
         "start_reduced": true,
         "size": 4,
@@ -767,7 +767,7 @@ var pieces = [
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
-        "counter": "small_units_yellow unit_ix_17",
+        "counter": "unit small_units_yellow unit_ix_17",
         "start": 3007,
         "start_reduced": true,
         "size": 4,
@@ -782,7 +782,7 @@ var pieces = [
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
-        "counter": "small_units_yellow unit_ix_2",
+        "counter": "unit small_units_yellow unit_ix_2",
         "start": 2211,
         "size": 4,
         "cf": 18,
@@ -796,7 +796,7 @@ var pieces = [
         "class": "air",
         "service": "army",
         "notreplaceable": true,
-        "counter": "small_units_yellow_air unit_ix_1",
+        "counter": "unit small_units_yellow_air unit_ix_1",
         "start": 3706,
         "cf": 20,
         "lf": 10,
@@ -808,7 +808,7 @@ var pieces = [
         id: "air_jp_2",
         "faction": JP,
         "name": "2nd Air Division",
-        "counter": "small_units_yellow_air unit_ix_2",
+        "counter": "unit small_units_yellow_air unit_ix_2",
         "class": "air",
         "service": "army",
         "notreplaceable": true,
@@ -823,7 +823,7 @@ var pieces = [
         id: "air_jp_3",
         "faction": JP,
         "name": "3rd Air Division",
-        "counter": "small_units_yellow_air unit_ix_3",
+        "counter": "unit small_units_yellow_air unit_ix_3",
         "class": "air",
         "service": "army",
         "notreplaceable": true,
@@ -838,7 +838,7 @@ var pieces = [
         id: "air_jp_4",
         "faction": JP,
         "name": "4th Air Division",
-        "counter": "small_units_yellow_air unit_ix_4",
+        "counter": "unit small_units_yellow_air unit_ix_4",
         "class": "air",
         "service": "army",
         "notreplaceable": true,
@@ -853,7 +853,7 @@ var pieces = [
         id: "air_jp_5",
         "faction": JP,
         "name": "5th Air Division",
-        "counter": "small_units_yellow_air unit_ix_5",
+        "counter": "unit small_units_yellow_air unit_ix_5",
         "class": "air",
         "service": "army",
         "notreplaceable": true,
@@ -868,7 +868,7 @@ var pieces = [
         id: "air_jp_25",
         "faction": JP,
         "name": "25th Air Flotilla",
-        "counter": "small_units_white unit_ix_15",
+        "counter": "unit small_units_white unit_ix_15",
         "class": "air",
         "service": "navy",
         "rptype": "jp_air",
@@ -883,7 +883,7 @@ var pieces = [
         id: "air_jp_26",
         "faction": JP,
         "name": "26th Air Flotilla",
-        "counter": "small_units_white unit_ix_16",
+        "counter": "unit small_units_white unit_ix_16",
         "class": "air",
         "service": "navy",
         "rptype": "jp_air",
@@ -898,7 +898,7 @@ var pieces = [
         id: "air_jp_27",
         "faction": JP,
         "name": "27th Air Flotilla",
-        "counter": "small_units_white unit_ix_17",
+        "counter": "unit small_units_white unit_ix_17",
         "class": "air",
         "service": "navy",
         "rptype": "jp_air",
@@ -913,7 +913,7 @@ var pieces = [
         id: "air_jp_28",
         "faction": JP,
         "name": "28th Air Flotilla",
-        "counter": "small_units_white unit_ix_18",
+        "counter": "unit small_units_white unit_ix_18",
         "class": "air",
         "service": "navy",
         "rptype": "jp_air",
@@ -928,7 +928,7 @@ var pieces = [
         id: "air_jp_50",
         "faction": JP,
         "name": "50th Air Flotilla",
-        "counter": "small_units_white unit_ix_19",
+        "counter": "unit small_units_white unit_ix_19",
         "class": "air",
         "service": "navy",
         "rptype": "jp_air",
@@ -943,7 +943,7 @@ var pieces = [
         id: "air_jp_51",
         "faction": JP,
         "name": "51st Air Flotilla",
-        "counter": "small_units_white unit_ix_20",
+        "counter": "unit small_units_white unit_ix_20",
         "class": "air",
         "service": "navy",
         "rptype": "jp_air",
@@ -958,7 +958,7 @@ var pieces = [
         id: "air_jp_61",
         "faction": JP,
         "name": "61st Air Flotilla",
-        "counter": "small_units_white unit_ix_1",
+        "counter": "unit small_units_white unit_ix_1",
         "class": "air",
         "service": "navy",
         "rptype": "jp_air",
@@ -973,7 +973,7 @@ var pieces = [
         id: "air_jp_62",
         "faction": JP,
         "name": "62nd Air Flotilla",
-        "counter": "small_units_white unit_ix_2",
+        "counter": "unit small_units_white unit_ix_2",
         "class": "air",
         "service": "navy",
         "rptype": "jp_air",
@@ -988,7 +988,7 @@ var pieces = [
         id: "air_jp_t",
         "faction": JP,
         "name": "Tainan Air Unit",
-        "counter": "small_units_yellow_air unit_ix_13",
+        "counter": "unit small_units_yellow_air unit_ix_13",
         "class": "air",
         "service": "army",
         "notreplaceable": true,
@@ -1003,7 +1003,7 @@ var pieces = [
         id: "air_jp_6",
         "faction": JP,
         "name": "6th Air Division",
-        "counter": "small_units_yellow_air unit_ix_6",
+        "counter": "unit small_units_yellow_air unit_ix_6",
         "class": "air",
         "service": "army",
         "rptype": "jp_air",
@@ -1018,7 +1018,7 @@ var pieces = [
         id: "air_jp_7",
         "faction": JP,
         "name": "7th Air Division",
-        "counter": "small_units_yellow_air unit_ix_7",
+        "counter": "unit small_units_yellow_air unit_ix_7",
         "class": "air",
         "service": "army",
         "rptype": "jp_air",
@@ -1033,7 +1033,7 @@ var pieces = [
         id: "air_jp_8",
         "faction": JP,
         "name": "8th Air Division",
-        "counter": "small_units_yellow_air unit_ix_8",
+        "counter": "unit small_units_yellow_air unit_ix_8",
         "class": "air",
         "service": "army",
         "rptype": "jp_air",
@@ -1048,7 +1048,7 @@ var pieces = [
         id: "air_jp_9",
         "faction": JP,
         "name": "9th Air Division",
-        "counter": "small_units_yellow_air unit_ix_9",
+        "counter": "unit small_units_yellow_air unit_ix_9",
         "class": "air",
         "service": "army",
         "rptype": "jp_air",
@@ -1063,7 +1063,7 @@ var pieces = [
         id: "air_jp_10",
         "faction": JP,
         "name": "10th Air Division",
-        "counter": "small_units_yellow_air unit_ix_10",
+        "counter": "unit small_units_yellow_air unit_ix_10",
         "class": "air",
         "service": "army",
         "rptype": "jp_air",
@@ -1078,7 +1078,7 @@ var pieces = [
         id: "air_jp_11",
         "faction": JP,
         "name": "11th Air Division",
-        "counter": "small_units_yellow_air unit_ix_11",
+        "counter": "unit small_units_yellow_air unit_ix_11",
         "class": "air",
         "service": "army",
         "rptype": "jp_air",
@@ -1093,7 +1093,7 @@ var pieces = [
         id: "air_jp_12",
         "faction": JP,
         "name": "12th Air Division",
-        "counter": "small_units_yellow_air unit_ix_12",
+        "counter": "unit small_units_yellow_air unit_ix_12",
         "class": "air",
         "service": "army",
         "rptype": "jp_air",
@@ -1108,7 +1108,7 @@ var pieces = [
         id: "army_jp_28",
         "faction": JP,
         "name": "28th Army",
-        "counter": "small_units_yellow unit_ix_5",
+        "counter": "unit small_units_yellow unit_ix_5",
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
@@ -1123,7 +1123,7 @@ var pieces = [
         id: "army_jp_31",
         "faction": JP,
         "name": "31st Army",
-        "counter": "small_units_yellow unit_ix_6",
+        "counter": "unit small_units_yellow unit_ix_6",
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
@@ -1138,7 +1138,7 @@ var pieces = [
         id: "army_jp_37",
         "faction": JP,
         "name": "37th Army",
-        "counter": "small_units_yellow unit_ix_7",
+        "counter": "unit small_units_yellow unit_ix_7",
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
@@ -1153,7 +1153,7 @@ var pieces = [
         id: "army_jp_33",
         "faction": JP,
         "name": "33rd Army",
-        "counter": "small_units_yellow unit_ix_8",
+        "counter": "unit small_units_yellow unit_ix_8",
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
@@ -1168,7 +1168,7 @@ var pieces = [
         id: "army_jp_2",
         "faction": JP,
         "name": "2nd Army",
-        "counter": "small_units_yellow unit_ix_9",
+        "counter": "unit small_units_yellow unit_ix_9",
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
@@ -1183,7 +1183,7 @@ var pieces = [
         id: "army_jp_29",
         "faction": JP,
         "name": "29th Army",
-        "counter": "small_units_yellow unit_ix_10",
+        "counter": "unit small_units_yellow unit_ix_10",
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
@@ -1198,7 +1198,7 @@ var pieces = [
         id: "army_jp_32",
         "faction": JP,
         "name": "32nd Army",
-        "counter": "small_units_yellow unit_ix_11",
+        "counter": "unit small_units_yellow unit_ix_11",
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
@@ -1213,7 +1213,7 @@ var pieces = [
         id: "army_jp_36",
         "faction": JP,
         "name": "36th Army",
-        "counter": "small_units_yellow unit_ix_15",
+        "counter": "unit small_units_yellow unit_ix_15",
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
@@ -1227,7 +1227,7 @@ var pieces = [
         id: "army_jp_39",
         "faction": JP,
         "name": "39th Army",
-        "counter": "small_units_yellow unit_ix_13",
+        "counter": "unit small_units_yellow unit_ix_13",
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
@@ -1243,7 +1243,7 @@ var pieces = [
         "faction": JP,
         "name": "Yamato",
         "class": "naval",
-        "counter": "big_units_white big unit_ix_6",
+        "counter": "unit big_units_white big unit_ix_6",
         "type": "bb",
         "cf": 18,
         "lf": 18,
@@ -1257,7 +1257,7 @@ var pieces = [
         "faction": JP,
         "name": "Junyo",
         "class": "naval",
-        "counter": "big_units_white big unit_ix_7",
+        "counter": "unit big_units_white big unit_ix_7",
         "type": "cv",
         "cf": 8,
         "lf": 8,
@@ -1271,7 +1271,7 @@ var pieces = [
         "faction": JP,
         "name": "Kaiyo",
         "class": "naval",
-        "counter": "big_units_white big unit_ix_8",
+        "counter": "unit big_units_white big unit_ix_8",
         "type": "cve",
         "cf": 8,
         "lf": 8,
@@ -1286,7 +1286,7 @@ var pieces = [
         "faction": JP,
         "name": "Taiho",
         "class": "naval",
-        "counter": "big_units_white big unit_ix_9",
+        "counter": "unit big_units_white big unit_ix_9",
         "type": "cv",
         "cf": 10,
         "lf": 12,
@@ -1300,7 +1300,7 @@ var pieces = [
         "faction": JP,
         "name": "Amagi",
         "class": "naval",
-        "counter": "big_units_white big unit_ix_11",
+        "counter": "unit big_units_white big unit_ix_11",
         "type": "cvl",
         "cf": 8,
         "lf": 8,
@@ -1313,7 +1313,7 @@ var pieces = [
         id: "hq_ap_c",
         "faction": AP,
         "name": "Central Pacific HQ",
-        "counter": "small_units_turquoise unit_ix_1",
+        "counter": "unit small_units_turquoise unit_ix_1",
         "class": "hq",
         "service": "us",
         "cr": 25,
@@ -1324,7 +1324,7 @@ var pieces = [
         id: "hq_ap_sw",
         "faction": AP,
         "name": "South West Pacific HQ",
-        "counter": "small_units_turquoise unit_ix_2",
+        "counter": "unit small_units_turquoise unit_ix_2",
         "class": "hq",
         "service": "us",
         "cr": 20,
@@ -1335,7 +1335,7 @@ var pieces = [
         id: "hq_ap_sg",
         "faction": AP,
         "name": "South Pacific HQ (Ghormley)",
-        "counter": "small_units_turquoise unit_ix_3",
+        "counter": "unit small_units_turquoise unit_ix_3",
         "class": "hq",
         "service": "us",
         "cr": 7,
@@ -1346,7 +1346,7 @@ var pieces = [
         id: "hq_ap_sh",
         "faction": AP,
         "name": "South Pacific HQ (Halsey)",
-        "counter": "small_units_turquoise unit_ix_4",
+        "counter": "unit small_units_turquoise unit_ix_4",
         "class": "hq",
         "service": "us",
         "cr": 10,
@@ -1356,7 +1356,7 @@ var pieces = [
         id: "hq_ap_m",
         "faction": AP,
         "name": "Malaya HQ",
-        "counter": "small_units_beige unit_ix_4",
+        "counter": "unit small_units_beige unit_ix_4",
         "class": "hq",
         "service": "br",
         "cr": 5,
@@ -1368,7 +1368,7 @@ var pieces = [
         id: "hq_ap_seac",
         "faction": AP,
         "name": "SEAC HQ",
-        "counter": "small_units_beige unit_ix_5",
+        "counter": "unit small_units_beige unit_ix_5",
         "class": "hq",
         "service": "br",
         "cr": 10,
@@ -1379,7 +1379,7 @@ var pieces = [
         id: "hq_ap_abda",
         "faction": AP,
         "name": "ABDA HQ",
-        "counter": "small_units_dkblue unit_ix_1",
+        "counter": "unit small_units_dkblue unit_ix_1",
         "class": "hq",
         "service": "joint",
         "cr": 12,
@@ -1390,7 +1390,7 @@ var pieces = [
         id: "hq_ap_anzac",
         "faction": AP,
         "name": "ANZAC HQ",
-        "counter": "small_units_dkblue unit_ix_2",
+        "counter": "unit small_units_dkblue unit_ix_2",
         "class": "hq",
         "service": "joint",
         "cr": 10,
@@ -1404,7 +1404,7 @@ var pieces = [
         "class": "naval",
         "type": "cv",
         "service": "navy",
-        "counter": "big_units_blue big unit_ix_3",
+        "counter": "unit big_units_blue big unit_ix_3",
         "cf": 12,
         "lf": 12,
         "br": 2,
@@ -1417,7 +1417,7 @@ var pieces = [
         id: "enterprise",
         "faction": AP,
         "name": "Enterprise",
-        "counter": "big_units_blue big unit_ix_4",
+        "counter": "unit big_units_blue big unit_ix_4",
         "class": "naval",
         "type": "cv",
         "service": "navy",
@@ -1434,7 +1434,7 @@ var pieces = [
         "faction": AP,
         "name": "MD/CA",
         "class": "naval",
-        "counter": "big_units_blue big unit_ix_5",
+        "counter": "unit big_units_blue big unit_ix_5",
         "type": "bb",
         "service": "navy",
         "start": 5808,
@@ -1448,7 +1448,7 @@ var pieces = [
         "faction": AP,
         "name": "New Orleans",
         "class": "naval",
-        "counter": "big_units_blue big unit_ix_7",
+        "counter": "unit big_units_blue big unit_ix_7",
         "type": "ca",
         "service": "navy",
         "start": 5808,
@@ -1461,7 +1461,7 @@ var pieces = [
         id: "casia",
         "faction": AP,
         "name": "US Asia (Cruiser)",
-        "counter": "big_units_blue big unit_ix_2",
+        "counter": "unit big_units_blue big unit_ix_2",
         "class": "naval",
         "type": "ca",
         "service": "navy",
@@ -1475,7 +1475,7 @@ var pieces = [
         id: "dasia",
         "faction": AP,
         "name": "Us Asia (Destroyer)",
-        "counter": "big_units_blue big unit_ix_1",
+        "counter": "unit big_units_blue big unit_ix_1",
         "class": "naval",
         "type": "dd",
         "service": "navy",
@@ -1489,7 +1489,7 @@ var pieces = [
         id: "forcez",
         "faction": AP,
         "name": "Force Z",
-        "counter": "big_units_beige big unit_ix_1",
+        "counter": "unit big_units_beige big unit_ix_1",
         "class": "naval",
         "service": "br",
         "type": "bb",
@@ -1503,7 +1503,7 @@ var pieces = [
         id: "exeter",
         "faction": AP,
         "name": "Exeter",
-        "counter": "big_units_beige big unit_ix_3",
+        "counter": "unit big_units_beige big unit_ix_3",
         "class": "naval",
         "service": "br",
         "type": "ca",
@@ -1518,7 +1518,7 @@ var pieces = [
         "faction": AP,
         "name": "Kent",
         "class": "naval",
-        "counter": "big_units_beige big unit_ix_2",
+        "counter": "unit big_units_beige big unit_ix_2",
         "service": "au",
         "type": "ca",
         "start": 3727,
@@ -1532,7 +1532,7 @@ var pieces = [
         "faction": AP,
         "name": "Dutch",
         "class": "naval",
-        "counter": "big_units_orange big unit_ix_1",
+        "counter": "unit big_units_orange big unit_ix_1",
         "service": "du",
         "type": "cl",
         "start": 2019,
@@ -1545,7 +1545,7 @@ var pieces = [
         id: "air_ap_211",
         "faction": AP,
         "name": "Marine Fighter Attack Squadron 211",
-        "counter": "small_units_blue unit_ix_1",
+        "counter": "unit small_units_blue unit_ix_1",
         "class": "air",
         "service": "navy",
         "parenthetical": true,
@@ -1562,7 +1562,7 @@ var pieces = [
         id: "air_ap_feaf",
         "faction": AP,
         "name": "Far East Air Force (US)",
-        "counter": "small_units_green_air unit_ix_1",
+        "counter": "unit small_units_green_air unit_ix_1",
         "class": "air",
         "service": "army",
         "parenthetical": true,
@@ -1578,7 +1578,7 @@ var pieces = [
         id: "air_ap_19_lrb",
         "faction": AP,
         "name": "19th LRB air unit",
-        "counter": "small_units_green_air unit_ix_2",
+        "counter": "unit small_units_green_air unit_ix_2",
         "class": "air",
         "service": "army",
         "type": "lrb",
@@ -1595,7 +1595,7 @@ var pieces = [
         "name": "7th Air Force",
         "class": "air",
         "service": "army",
-        "counter": "small_units_green_air unit_ix_3",
+        "counter": "unit small_units_green_air unit_ix_3",
         "rptype": "ap_air",
         "start": 5808,
         "cf": 10,
@@ -1608,7 +1608,7 @@ var pieces = [
         id: "air_ap_7_lrb",
         "faction": AP,
         "name": "7th Air Force (LRB)",
-        "counter": "small_units_green_air unit_ix_4",
+        "counter": "unit small_units_green_air unit_ix_4",
         "class": "air",
         "service": "army",
         "type": "lrb",
@@ -1624,7 +1624,7 @@ var pieces = [
         id: "air_ap_avg",
         "faction": AP,
         "name": "The American Volunteer Groups",
-        "counter": "small_units_green_air unit_ix_16",
+        "counter": "unit small_units_green_air unit_ix_16",
         "class": "air",
         "service": "army",
         "parenthetical": true,
@@ -1640,7 +1640,7 @@ var pieces = [
         id: "air_ap_du",
         "faction": AP,
         "name": "Royal Netherlands Air Force",
-        "counter": "small_units_orange unit_ix_1",
+        "counter": "unit small_units_orange unit_ix_1",
         "class": "air",
         "service": "du",
         "parenthetical": true,
@@ -1656,7 +1656,7 @@ var pieces = [
         id: "air_ap_fe",
         "faction": AP,
         "name": "Far East Air Force (RAF)",
-        "counter": "small_units_beige_air unit_ix_3",
+        "counter": "unit small_units_beige_air unit_ix_3",
         "class": "air",
         "service": "br",
         "parenthetical": true,
@@ -1672,7 +1672,7 @@ var pieces = [
         id: "air_ap_ma",
         "faction": AP,
         "name": "Malayan Air Force (RAF)",
-        "counter": "small_units_beige_air unit_ix_4",
+        "counter": "unit small_units_beige_air unit_ix_4",
         "class": "air",
         "service": "br",
         "parenthetical": true,
@@ -1688,7 +1688,7 @@ var pieces = [
         id: "air_ap_au",
         "faction": AP,
         "name": "Australian Air Force",
-        "counter": "small_units_beige_air unit_ix_5",
+        "counter": "unit small_units_beige_air unit_ix_5",
         "class": "air",
         "service": "au",
         "parenthetical": true,
@@ -1704,7 +1704,7 @@ var pieces = [
         id: "air_ap_14",
         "faction": AP,
         "name": "14th Air Force",
-        "counter": "small_units_green_air unit_ix_15",
+        "counter": "unit small_units_green_air unit_ix_15",
         "class": "air",
         "service": "army",
         "rptype": "ap_air",
@@ -1718,7 +1718,7 @@ var pieces = [
         id: "air_ap_10_lrb",
         "faction": AP,
         "name": "10th Air Force (LRB)",
-        "counter": "small_units_green_air unit_ix_5",
+        "counter": "unit small_units_green_air unit_ix_5",
         "class": "air",
         "type": "lrb",
         "service": "army",
@@ -1733,7 +1733,7 @@ var pieces = [
         id: "air_ap_5_lrb",
         "faction": AP,
         "name": "5th Air Force (LRB)",
-        "counter": "small_units_green_air unit_ix_7",
+        "counter": "unit small_units_green_air unit_ix_7",
         "class": "air",
         "type": "lrb",
         "service": "army",
@@ -1748,7 +1748,7 @@ var pieces = [
         id: "air_ap_5",
         "faction": AP,
         "name": "5th Air Force",
-        "counter": "small_units_green_air unit_ix_6",
+        "counter": "unit small_units_green_air unit_ix_6",
         "class": "air",
         "service": "army",
         "rptype": "ap_air",
@@ -1763,7 +1763,7 @@ var pieces = [
         id: "air_ap_1_maw",
         "faction": AP,
         "name": "1st Marine Aircraft Wing",
-        "counter": "small_units_blue unit_ix_3",
+        "counter": "unit small_units_blue unit_ix_3",
         "class": "air",
         "service": "navy",
         "parenthetical": true,
@@ -1779,7 +1779,7 @@ var pieces = [
         id: "air_ap_seac",
         "faction": AP,
         "name": "SEAC Air Force",
-        "counter": "small_units_beige_air unit_ix_1",
+        "counter": "unit small_units_beige_air unit_ix_1",
         "class": "air",
         "service": "br",
         "rptype": "ap_air",
@@ -1794,7 +1794,7 @@ var pieces = [
         id: "air_ap_seac_lrb",
         "faction": AP,
         "name": "SEAC Air Force (LRB)",
-        "counter": "small_units_beige_air unit_ix_2",
+        "counter": "unit small_units_beige_air unit_ix_2",
         "class": "air",
         "type": "lrb",
         "service": "br",
@@ -1809,7 +1809,7 @@ var pieces = [
         id: "air_ap_13_lrb",
         "faction": AP,
         "name": "13th Air Force (LRB)",
-        "counter": "small_units_green_air unit_ix_9",
+        "counter": "unit small_units_green_air unit_ix_9",
         "class": "air",
         "type": "lrb",
         "service": "army",
@@ -1824,7 +1824,7 @@ var pieces = [
         id: "air_ap_13",
         "faction": AP,
         "name": "13th Air Force",
-        "counter": "small_units_green_air unit_ix_8",
+        "counter": "unit small_units_green_air unit_ix_8",
         "class": "air",
         "service": "army",
         "rptype": "ap_air",
@@ -1839,7 +1839,7 @@ var pieces = [
         id: "air_ap_11_lrb",
         "faction": AP,
         "name": "11th Air Force (LRB)",
-        "counter": "small_units_green_air unit_ix_11",
+        "counter": "unit small_units_green_air unit_ix_11",
         "class": "air",
         "type": "lrb",
         "service": "army",
@@ -1854,7 +1854,7 @@ var pieces = [
         id: "air_ap_11",
         "faction": AP,
         "name": "11th Air Force",
-        "counter": "small_units_green_air unit_ix_10",
+        "counter": "unit small_units_green_air unit_ix_10",
         "class": "air",
         "service": "army",
         "rptype": "ap_air",
@@ -1869,7 +1869,7 @@ var pieces = [
         id: "air_ap_14_lrb",
         "faction": AP,
         "name": "14th Air Force (LRB)",
-        "counter": "small_units_green_air unit_ix_12",
+        "counter": "unit small_units_green_air unit_ix_12",
         "class": "air",
         "type": "lrb",
         "service": "army",
@@ -1884,7 +1884,7 @@ var pieces = [
         id: "air_ap_2_maw",
         "faction": AP,
         "name": "2nd Marine Aircraft Wing",
-        "counter": "small_units_blue unit_ix_4",
+        "counter": "unit small_units_blue unit_ix_4",
         "class": "air",
         "service": "navy",
         "parenthetical": true,
@@ -1900,7 +1900,7 @@ var pieces = [
         id: "air_ap_3_maw",
         "faction": AP,
         "name": "3rd Marine Aircraft Wing",
-        "counter": "small_units_blue unit_ix_5",
+        "counter": "unit small_units_blue unit_ix_5",
         "class": "air",
         "service": "navy",
         "parenthetical": true,
@@ -1916,7 +1916,7 @@ var pieces = [
         id: "air_ap_20_bc",
         "faction": AP,
         "name": "XX Bomber Command (B-29)",
-        "counter": "small_units_green_air unit_ix_13",
+        "counter": "unit small_units_green_air unit_ix_13",
         "class": "air",
         "type": "lrb",
         "service": "army",
@@ -1932,7 +1932,7 @@ var pieces = [
         id: "air_ap_21_bc",
         "faction": AP,
         "name": "XXI Bomber Command (B-29)",
-        "counter": "small_units_green_air unit_ix_14",
+        "counter": "unit small_units_green_air unit_ix_14",
         "class": "air",
         "type": "lrb",
         "service": "army",
@@ -1948,7 +1948,7 @@ var pieces = [
         id: "mississippi",
         "faction": AP,
         "name": "Mississippi",
-        "counter": "big_units_blue big unit_ix_6",
+        "counter": "unit big_units_blue big unit_ix_6",
         "class": "naval",
         "type": "bb",
         "service": "navy",
@@ -1962,7 +1962,7 @@ var pieces = [
         id: "northampton",
         "faction": AP,
         "name": "Northampton",
-        "counter": "big_units_blue big unit_ix_8",
+        "counter": "unit big_units_blue big unit_ix_8",
         "class": "naval",
         "type": "ca",
         "service": "navy",
@@ -1976,7 +1976,7 @@ var pieces = [
         id: "warspite",
         "faction": AP,
         "name": "Warspite",
-        "counter": "big_units_beige big unit_ix_6",
+        "counter": "unit big_units_beige big unit_ix_6",
         "class": "naval",
         "type": "bb",
         "service": "br",
@@ -1990,7 +1990,7 @@ var pieces = [
         id: "indomitable",
         "faction": AP,
         "name": "Indomitable",
-        "counter": "big_units_beige big unit_ix_5",
+        "counter": "unit big_units_beige big unit_ix_5",
         "class": "naval",
         "type": "cv",
         "service": "br",
@@ -2006,7 +2006,7 @@ var pieces = [
         "faction": AP,
         "name": "Hermes",
         "class": "naval",
-        "counter": "big_units_beige big unit_ix_7",
+        "counter": "unit big_units_beige big unit_ix_7",
         "type": "cvl",
         "service": "br",
         "reinforcement": 2,
@@ -2021,7 +2021,7 @@ var pieces = [
         id: "carolina",
         "faction": AP,
         "name": "North Carolina",
-        "counter": "big_units_blue big unit_ix_10",
+        "counter": "unit big_units_blue big unit_ix_10",
         "class": "naval",
         "type": "bb",
         "service": "navy",
@@ -2036,7 +2036,7 @@ var pieces = [
         "faction": AP,
         "name": "Wasp",
         "class": "naval",
-        "counter": "big_units_blue big unit_ix_9",
+        "counter": "unit big_units_blue big unit_ix_9",
         "type": "cv",
         "service": "navy",
         "cf": 12,
@@ -2050,7 +2050,7 @@ var pieces = [
         id: "washington",
         "faction": AP,
         "name": "Washington",
-        "counter": "big_units_blue big unit_ix_11",
+        "counter": "unit big_units_blue big unit_ix_11",
         "class": "naval",
         "type": "bb",
         "service": "navy",
@@ -2065,7 +2065,7 @@ var pieces = [
         "faction": AP,
         "name": "London",
         "class": "naval",
-        "counter": "big_units_beige big unit_ix_8",
+        "counter": "unit big_units_beige big unit_ix_8",
         "type": "ca",
         "service": "br",
         "reinforcement": 4,
@@ -2078,7 +2078,7 @@ var pieces = [
         id: "mass",
         "faction": AP,
         "name": "Massachusetts",
-        "counter": "big_units_blue big unit_ix_12",
+        "counter": "unit big_units_blue big unit_ix_12",
         "class": "naval",
         "type": "bb",
         "service": "navy",
@@ -2092,7 +2092,7 @@ var pieces = [
         id: "jacinto",
         "faction": AP,
         "name": "San Jacinto",
-        "counter": "big_units_blue big unit_ix_13",
+        "counter": "unit big_units_blue big unit_ix_13",
         "class": "naval",
         "type": "cvl",
         "service": "navy",
@@ -2108,7 +2108,7 @@ var pieces = [
         "faction": AP,
         "name": "Essex",
         "class": "naval",
-        "counter": "big_units_blue big unit_ix_14",
+        "counter": "unit big_units_blue big unit_ix_14",
         "type": "cv",
         "service": "navy",
         "cf": 14,
@@ -2122,7 +2122,7 @@ var pieces = [
         id: "bunker",
         "faction": AP,
         "name": "Bunker Hill",
-        "counter": "big_units_blue big unit_ix_18",
+        "counter": "unit big_units_blue big unit_ix_18",
         "class": "naval",
         "type": "cv",
         "service": "navy",
@@ -2137,7 +2137,7 @@ var pieces = [
         id: "cowpens",
         "faction": AP,
         "name": "Cowpens",
-        "counter": "big_units_blue big unit_ix_17",
+        "counter": "unit big_units_blue big unit_ix_17",
         "class": "naval",
         "type": "cvl",
         "service": "navy",
@@ -2152,7 +2152,7 @@ var pieces = [
         id: "belleau",
         "faction": AP,
         "name": "Belleau Wood",
-        "counter": "big_units_blue big unit_ix_15",
+        "counter": "unit big_units_blue big unit_ix_15",
         "class": "naval",
         "type": "cvl",
         "service": "navy",
@@ -2167,7 +2167,7 @@ var pieces = [
         id: "sangamon",
         "faction": AP,
         "name": "Sangamon",
-        "counter": "big_units_blue big unit_ix_16",
+        "counter": "unit big_units_blue big unit_ix_16",
         "class": "naval",
         "type": "cve",
         "service": "navy",
@@ -2182,7 +2182,7 @@ var pieces = [
         id: "jersey",
         "faction": AP,
         "name": "New Jersey",
-        "counter": "big_units_blue big unit_ix_22",
+        "counter": "unit big_units_blue big unit_ix_22",
         "class": "naval",
         "type": "bb",
         "service": "navy",
@@ -2196,7 +2196,7 @@ var pieces = [
         id: "franklin",
         "faction": AP,
         "name": "Franklin",
-        "counter": "big_units_blue big unit_ix_21",
+        "counter": "unit big_units_blue big unit_ix_21",
         "class": "naval",
         "type": "cv",
         "service": "navy",
@@ -2211,7 +2211,7 @@ var pieces = [
         id: "intrepid",
         "faction": AP,
         "name": "Intrepid",
-        "counter": "big_units_blue big unit_ix_20",
+        "counter": "unit big_units_blue big unit_ix_20",
         "class": "naval",
         "type": "cv",
         "service": "navy",
@@ -2227,7 +2227,7 @@ var pieces = [
         "faction": AP,
         "name": "Bataan",
         "class": "naval",
-        "counter": "big_units_blue big unit_ix_19",
+        "counter": "unit big_units_blue big unit_ix_19",
         "type": "cvl",
         "service": "navy",
         "cf": 10,
@@ -2240,7 +2240,7 @@ var pieces = [
     {
         id: "hancock",
         "faction": AP,
-        "counter": "big_units_blue big unit_ix_24",
+        "counter": "unit big_units_blue big unit_ix_24",
         "name": "Hancock",
         "class": "naval",
         "type": "cv",
@@ -2256,7 +2256,7 @@ var pieces = [
         id: "casablanca",
         "faction": AP,
         "name": "Casablanca",
-        "counter": "big_units_blue big unit_ix_23",
+        "counter": "unit big_units_blue big unit_ix_23",
         "class": "naval",
         "type": "cve",
         "service": "navy",
@@ -2271,7 +2271,7 @@ var pieces = [
         id: "shangri",
         "faction": AP,
         "name": "Shangri-La",
-        "counter": "big_units_blue big unit_ix_27",
+        "counter": "unit big_units_blue big unit_ix_27",
         "class": "naval",
         "type": "cv",
         "service": "navy",
@@ -2286,7 +2286,7 @@ var pieces = [
         id: "missouri",
         "faction": AP,
         "name": "Missouri",
-        "counter": "big_units_blue big unit_ix_26",
+        "counter": "unit big_units_blue big unit_ix_26",
         "class": "naval",
         "type": "bb",
         "service": "navy",
@@ -2300,7 +2300,7 @@ var pieces = [
         id: "newyork",
         "faction": AP,
         "name": "New York",
-        "counter": "big_units_blue big unit_ix_25",
+        "counter": "unit big_units_blue big unit_ix_25",
         "class": "naval",
         "type": "bb",
         "service": "navy",
@@ -2314,7 +2314,7 @@ var pieces = [
         id: "richard",
         "faction": AP,
         "name": "B.H. Richard",
-        "counter": "big_units_blue big unit_ix_30",
+        "counter": "unit big_units_blue big unit_ix_30",
         "class": "naval",
         "type": "cv",
         "service": "navy",
@@ -2330,7 +2330,7 @@ var pieces = [
         "faction": AP,
         "name": "Alaska",
         "class": "naval",
-        "counter": "big_units_blue big unit_ix_29",
+        "counter": "unit big_units_blue big unit_ix_29",
         "type": "bc",
         "service": "navy",
         "reinforcement": 10,
@@ -2343,7 +2343,7 @@ var pieces = [
         id: "stlo",
         "faction": AP,
         "name": "St. Lo",
-        "counter": "big_units_blue big unit_ix_28",
+        "counter": "unit big_units_blue big unit_ix_28",
         "class": "naval",
         "type": "cve",
         "service": "navy",
@@ -2358,7 +2358,7 @@ var pieces = [
         id: "cbay",
         "faction": AP,
         "name": "Commencement Bay",
-        "counter": "big_units_blue big unit_ix_32",
+        "counter": "unit big_units_blue big unit_ix_32",
         "class": "naval",
         "type": "cve",
         "service": "navy",
@@ -2373,7 +2373,7 @@ var pieces = [
         id: "baltimore",
         "faction": AP,
         "name": "Baltimore",
-        "counter": "big_units_blue big unit_ix_31",
+        "counter": "unit big_units_blue big unit_ix_31",
         "class": "naval",
         "type": "ca",
         "service": "navy",
@@ -2387,7 +2387,7 @@ var pieces = [
         id: "duke",
         "faction": AP,
         "name": "Duke of York",
-        "counter": "big_units_beige big unit_ix_4",
+        "counter": "unit big_units_beige big unit_ix_4",
         "class": "naval",
         "type": "bb",
         "service": "br",
@@ -2401,7 +2401,7 @@ var pieces = [
         id: "victorious",
         "faction": AP,
         "name": "Victorious",
-        "counter": "big_units_beige big unit_ix_9",
+        "counter": "unit big_units_beige big unit_ix_9",
         "class": "naval",
         "type": "cv",
         "service": "br",
@@ -2416,7 +2416,7 @@ var pieces = [
         id: "army_ap_5_cn",
         "faction": AP,
         "name": "Chinese 5th Army",
-        "counter": "small_units_red unit_ix_2",
+        "counter": "unit small_units_red unit_ix_2",
         "class": "ground",
         "service": "ch",
         "rptype": "ch_ground",
@@ -2431,7 +2431,7 @@ var pieces = [
         id: "army_ap_6_cn",
         "faction": AP,
         "name": "Chinese 6th Army",
-        "counter": "small_units_red unit_ix_3",
+        "counter": "unit small_units_red unit_ix_3",
         "class": "ground",
         "service": "ch",
         "rptype": "ch_ground",
@@ -2446,7 +2446,7 @@ var pieces = [
         id: "army_ap_66_cn",
         "faction": AP,
         "name": "Chinese 66th Army",
-        "counter": "small_units_red unit_ix_1",
+        "counter": "unit small_units_red unit_ix_1",
         "class": "ground",
         "service": "ch",
         "rptype": "ch_ground",
@@ -2462,7 +2462,7 @@ var pieces = [
         "faction": AP,
         "name": "Wake Island Brigade",
         "class": "ground",
-        "counter": "small_units_blue unit_ix_2",
+        "counter": "unit small_units_blue unit_ix_2",
         "type": "marine",
         "service": "navy",
         "start": 4612,
@@ -2477,7 +2477,7 @@ var pieces = [
         id: "army_ap_nl",
         "faction": AP,
         "name": "NL Corps",
-        "counter": "small_units_green unit_ix_1",
+        "counter": "unit small_units_green unit_ix_1",
         "class": "ground",
         "service": "army",
         "start": 2812,
@@ -2491,7 +2491,7 @@ var pieces = [
         id: "army_ap_r",
         "faction": AP,
         "name": "R Corps",
-        "counter": "small_units_green unit_ix_2",
+        "counter": "unit small_units_green unit_ix_2",
         "class": "ground",
         "service": "army",
         "start": 2813,
@@ -2505,7 +2505,7 @@ var pieces = [
         id: "army_ap_sl",
         "faction": AP,
         "name": "SL Corps",
-        "counter": "small_units_green unit_ix_3",
+        "counter": "unit small_units_green unit_ix_3",
         "class": "ground",
         "service": "army",
         "start": 2913,
@@ -2520,7 +2520,7 @@ var pieces = [
         "faction": AP,
         "name": "M Corps",
         "class": "ground",
-        "counter": "small_units_green unit_ix_4",
+        "counter": "unit small_units_green unit_ix_4",
         "service": "army",
         "start": 2915,
         "size": 3,
@@ -2533,7 +2533,7 @@ var pieces = [
         id: "army_ap_p",
         "faction": AP,
         "name": "P Brigade",
-        "counter": "small_units_green unit_ix_5",
+        "counter": "unit small_units_green unit_ix_5",
         "class": "ground",
         "service": "army",
         "start": 3014,
@@ -2548,7 +2548,7 @@ var pieces = [
         id: "army_ap_10",
         "faction": AP,
         "name": "X Corps",
-        "counter": "small_units_green unit_ix_6",
+        "counter": "unit small_units_green unit_ix_6",
         "class": "ground",
         "service": "army",
         "start": 5808,
@@ -2562,7 +2562,7 @@ var pieces = [
         id: "army_ap_1_au",
         "faction": AP,
         "name": "1st Australian Corps",
-        "counter": "small_units_beige unit_ix_8",
+        "counter": "unit small_units_beige unit_ix_8",
         "class": "ground",
         "service": "au",
         "start": 3023,
@@ -2576,7 +2576,7 @@ var pieces = [
         id: "army_ap_2_au",
         "faction": AP,
         "name": "2nd Australian Corps",
-        "counter": "small_units_beige unit_ix_9",
+        "counter": "unit small_units_beige unit_ix_9",
         "class": "ground",
         "service": "au",
         "start": 3727,
@@ -2590,7 +2590,7 @@ var pieces = [
         id: "army_ap_8_au",
         "faction": AP,
         "name": "8th Australian Division",
-        "counter": "small_units_beige unit_ix_7",
+        "counter": "unit small_units_beige unit_ix_7",
         "class": "ground",
         "service": "au",
         "start": 2015,
@@ -2604,7 +2604,7 @@ var pieces = [
         id: "army_ap_pm",
         "faction": AP,
         "name": "PM Brigade",
-        "counter": "small_units_beige unit_ix_10",
+        "counter": "unit small_units_beige unit_ix_10",
         "class": "ground",
         "service": "au",
         "start": 3823,
@@ -2618,7 +2618,7 @@ var pieces = [
         id: "army_ap_hk",
         "faction": AP,
         "name": "Hong Kong Division",
-        "counter": "small_units_beige unit_ix_1",
+        "counter": "unit small_units_beige unit_ix_1",
         "class": "ground",
         "service": "br",
         "start": 2709,
@@ -2632,7 +2632,7 @@ var pieces = [
         id: "army_ap_3_ind",
         "faction": AP,
         "name": "3rd Indian Corps",
-        "counter": "small_units_beige unit_ix_18",
+        "counter": "unit small_units_beige unit_ix_18",
         "class": "ground",
         "service": "ind",
         "start": 2014,
@@ -2646,7 +2646,7 @@ var pieces = [
         id: "army_ap_b_ind",
         "faction": AP,
         "name": "Burma Indian Division",
-        "counter": "small_units_beige unit_ix_19",
+        "counter": "unit small_units_beige unit_ix_19",
         "class": "ground",
         "service": "bu",
         "start": 2008,
@@ -2660,7 +2660,7 @@ var pieces = [
         id: "army_ap_1_bu",
         "faction": AP,
         "name": "1st Burma Division",
-        "counter": "small_units_beige unit_ix_15",
+        "counter": "unit small_units_beige unit_ix_15",
         "class": "ground",
         "service": "bu",
         "start": 2108,
@@ -2674,7 +2674,7 @@ var pieces = [
         id: "army_ap_1_ind",
         "faction": AP,
         "name": "1st Indian Corps",
-        "counter": "small_units_beige unit_ix_16",
+        "counter": "unit small_units_beige unit_ix_16",
         "class": "ground",
         "service": "ind",
         "start": 2105,
@@ -2688,7 +2688,7 @@ var pieces = [
         id: "army_ap_2_ind",
         "faction": AP,
         "name": "2nd Indian Corps",
-        "counter": "small_units_beige unit_ix_17",
+        "counter": "unit small_units_beige unit_ix_17",
         "class": "ground",
         "service": "ind",
         "start": 1905,
@@ -2702,7 +2702,7 @@ var pieces = [
         id: "army_ap_1_du",
         "faction": AP,
         "name": "1st Regiment",
-        "counter": "small_units_orange unit_ix_2",
+        "counter": "unit small_units_orange unit_ix_2",
         "class": "ground",
         "service": "du",
         "start": 1916,
@@ -2717,7 +2717,7 @@ var pieces = [
         id: "army_ap_2_du",
         "faction": AP,
         "name": "2nd Regiment",
-        "counter": "small_units_orange unit_ix_3",
+        "counter": "unit small_units_orange unit_ix_3",
         "class": "ground",
         "service": "du",
         "start": 1813,
@@ -2732,7 +2732,7 @@ var pieces = [
         id: "army_ap_3_du",
         "faction": AP,
         "name": "3rd Regiment",
-        "counter": "small_units_orange unit_ix_4",
+        "counter": "unit small_units_orange unit_ix_4",
         "class": "ground",
         "service": "du",
         "start": 2616,
@@ -2747,7 +2747,7 @@ var pieces = [
         id: "army_ap_4_du",
         "faction": AP,
         "name": "4th Regiment",
-        "counter": "small_units_orange unit_ix_5",
+        "counter": "unit small_units_orange unit_ix_5",
         "class": "ground",
         "service": "du",
         "start": 2919,
@@ -2762,7 +2762,7 @@ var pieces = [
         id: "army_ap_5_du",
         "faction": AP,
         "name": "5th Regiment",
-        "counter": "small_units_orange unit_ix_6",
+        "counter": "unit small_units_orange unit_ix_6",
         "class": "ground",
         "service": "du",
         "start": 2517,
@@ -2777,7 +2777,7 @@ var pieces = [
         id: "army_ap_6_du",
         "faction": AP,
         "name": "6th Regiment",
-        "counter": "small_units_orange unit_ix_7",
+        "counter": "unit small_units_orange unit_ix_7",
         "class": "ground",
         "service": "du",
         "start": 2917,
@@ -2793,7 +2793,7 @@ var pieces = [
         "faction": AP,
         "name": "7th Regiment",
         "class": "ground",
-        "counter": "small_units_orange unit_ix_8",
+        "counter": "unit small_units_orange unit_ix_8",
         "service": "du",
         "start": 2719,
         "size": 1,
@@ -2807,7 +2807,7 @@ var pieces = [
         id: "army_ap_8_du",
         "faction": AP,
         "name": "8th Regiment",
-        "counter": "small_units_orange unit_ix_9",
+        "counter": "unit small_units_orange unit_ix_9",
         "class": "ground",
         "service": "du",
         "start": 2721,
@@ -2822,7 +2822,7 @@ var pieces = [
         id: "army_ap_j",
         "faction": AP,
         "name": "Java Division",
-        "counter": "small_units_orange unit_ix_10",
+        "counter": "unit small_units_orange unit_ix_10",
         "class": "ground",
         "service": "du",
         "start": 2019,
@@ -2837,7 +2837,7 @@ var pieces = [
         "faction": AP,
         "name": "7th Armored Brigade",
         "class": "ground",
-        "counter": "small_units_beige unit_ix_14",
+        "counter": "unit small_units_beige unit_ix_14",
         "service": "br",
         "size": 1,
         "cf": 4,
@@ -2849,7 +2849,7 @@ var pieces = [
         id: "army_ap_77",
         "faction": AP,
         "name": "77th Brigade",
-        "counter": "small_units_beige unit_ix_6",
+        "counter": "unit small_units_beige unit_ix_6",
         "class": "ground",
         "service": "br",
         "size": 1,
@@ -2862,7 +2862,7 @@ var pieces = [
         id: "army_ap_4_m",
         "faction": AP,
         "name": "4th Marine Division",
-        "counter": "small_units_blue unit_ix_8",
+        "counter": "unit small_units_blue unit_ix_8",
         "class": "ground",
         "type": "marine",
         "service": "navy",
@@ -2877,7 +2877,7 @@ var pieces = [
         "faction": AP,
         "name": "XI Corps",
         "class": "ground",
-        "counter": "small_units_green unit_ix_9",
+        "counter": "unit small_units_green unit_ix_9",
         "service": "army",
         "size": 3,
         "cf": 22,
@@ -2890,7 +2890,7 @@ var pieces = [
         id: "army_ap_14",
         "faction": AP,
         "name": "XIV Corps",
-        "counter": "small_units_green unit_ix_8",
+        "counter": "unit small_units_green unit_ix_8",
         "class": "ground",
         "service": "army",
         "size": 3,
@@ -2907,7 +2907,7 @@ var pieces = [
         "name": "I Corps",
         "class": "ground",
         "service": "army",
-        "counter": "small_units_green unit_ix_7",
+        "counter": "unit small_units_green unit_ix_7",
         "size": 3,
         "cf": 22,
         "lf": 12,
@@ -2920,7 +2920,7 @@ var pieces = [
         id: "army_ap_24",
         "faction": AP,
         "name": "XXIV Corps",
-        "counter": "small_units_green unit_ix_10",
+        "counter": "unit small_units_green unit_ix_10",
         "class": "ground",
         "service": "army",
         "size": 3,
@@ -2934,7 +2934,7 @@ var pieces = [
         id: "army_ap_9",
         "faction": AP,
         "name": "IX Corps",
-        "counter": "small_units_green unit_ix_11",
+        "counter": "unit small_units_green unit_ix_11",
         "class": "ground",
         "service": "army",
         "size": 3,
@@ -2948,7 +2948,7 @@ var pieces = [
         id: "army_ap_11_d",
         "faction": AP,
         "name": "11th Airborne Division",
-        "counter": "small_units_green unit_ix_12",
+        "counter": "unit small_units_green unit_ix_12",
         "class": "ground",
         "service": "army",
         "size": 2,
@@ -2962,7 +2962,7 @@ var pieces = [
         id: "army_ap_mb",
         "faction": AP,
         "name": "Marine Brigade",
-        "counter": "small_units_blue unit_ix_6",
+        "counter": "unit small_units_blue unit_ix_6",
         "class": "ground",
         "type": "marine",
         "service": "navy",
@@ -2977,7 +2977,7 @@ var pieces = [
         id: "army_ap_sf",
         "faction": AP,
         "name": "SF Brigade",
-        "counter": "small_units_blue unit_ix_7",
+        "counter": "unit small_units_blue unit_ix_7",
         "class": "ground",
         "service": "navy",
         "size": 1,
@@ -2991,7 +2991,7 @@ var pieces = [
         id: "army_ap_1_m",
         "faction": AP,
         "name": "1st Marine Division",
-        "counter": "small_units_blue unit_ix_8",
+        "counter": "unit small_units_blue unit_ix_8",
         "class": "ground",
         "type": "marine",
         "service": "navy",
@@ -3006,7 +3006,7 @@ var pieces = [
         id: "army_ap_2_m",
         "faction": AP,
         "name": "2nd Marine Division",
-        "counter": "small_units_blue unit_ix_9",
+        "counter": "unit small_units_blue unit_ix_9",
         "class": "ground",
         "type": "marine",
         "service": "navy",
@@ -3021,7 +3021,7 @@ var pieces = [
         id: "army_ap_3_m",
         "faction": AP,
         "name": "3rd Marine Division",
-        "counter": "small_units_blue unit_ix_10",
+        "counter": "unit small_units_blue unit_ix_10",
         "class": "ground",
         "type": "marine",
         "service": "navy",
@@ -3036,7 +3036,7 @@ var pieces = [
         id: "army_ap_6_m",
         "faction": AP,
         "name": "6th Marine Division",
-        "counter": "small_units_blue unit_ix_11",
+        "counter": "unit small_units_blue unit_ix_11",
         "class": "ground",
         "type": "marine",
         "service": "navy",
@@ -3051,7 +3051,7 @@ var pieces = [
         id: "army_ap_5_m",
         "faction": AP,
         "name": "5th Marine Division",
-        "counter": "small_units_blue unit_ix_12",
+        "counter": "unit small_units_blue unit_ix_12",
         "class": "ground",
         "type": "marine",
         "service": "navy",
@@ -3067,7 +3067,7 @@ var pieces = [
         "faction": AP,
         "name": "15th Corps",
         "class": "ground",
-        "counter": "small_units_beige unit_ix_2",
+        "counter": "unit small_units_beige unit_ix_2",
         "service": "br",
         "size": 3,
         "cf": 16,
@@ -3080,7 +3080,7 @@ var pieces = [
         id: "army_ap_33",
         "faction": AP,
         "name": "33rd Corps",
-        "counter": "small_units_beige unit_ix_3",
+        "counter": "unit small_units_beige unit_ix_3",
         "class": "ground",
         "service": "br",
         "size": 3,
@@ -3095,7 +3095,7 @@ var pieces = [
         "faction": AP,
         "name": "3rd Australian Corps",
         "class": "ground",
-        "counter": "small_units_beige unit_ix_11",
+        "counter": "unit small_units_beige unit_ix_11",
         "service": "au",
         "size": 3,
         "cf": 22,
@@ -3108,7 +3108,7 @@ var pieces = [
         id: "army_ap_3_nz",
         "faction": AP,
         "name": "3rd New Zealand Division",
-        "counter": "small_units_beige unit_ix_12",
+        "counter": "unit small_units_beige unit_ix_12",
         "class": "ground",
         "service": "br",
         "size": 2,
@@ -3122,7 +3122,7 @@ var pieces = [
         id: "army_ap_4_ind",
         "faction": AP,
         "name": "4th Indian Corps",
-        "counter": "small_units_beige unit_ix_20",
+        "counter": "unit small_units_beige unit_ix_20",
         "class": "ground",
         "service": "ind",
         "size": 3,
@@ -3136,7 +3136,7 @@ var pieces = [
         id: "army_ap_4_au",
         "faction": AP,
         "name": "4th Australian Corps",
-        "counter": "small_units_beige unit_ix_13",
+        "counter": "unit small_units_beige unit_ix_13",
         "class": "ground",
         "service": "au",
         "size": 3,
@@ -10739,6 +10739,8 @@ function on_init(scenario, game_options, static_view) {
     define_panel("#ap_hand", "hand", AP)
     define_panel("#active_cards", "hand", 2)
 
+    define_html_thing("#turn_info", "violations", 0)
+
     var mapwrap = document.getElementById("mapwrap")
     switch (scenario) {
         case "South Pacific": {
@@ -10788,6 +10790,8 @@ function on_init(scenario, game_options, static_view) {
             update_map_size(2550, 1650)
         }
     }
+
+    document.getElementById("vp_check_button").hidden = CAMPAIGN_SCENARIOS.includes(SID)
 
     document.getElementById("ap_deck_link").href += `&sid=${SID}`
     document.getElementById("jp_deck_link").href += `&sid=${SID}`
@@ -10988,7 +10992,6 @@ function on_update_local_actions() {
         }
     }
     document.body.classList.remove("hex-clickable")
-    world.log_boxes = []
     if (LOCAL_STATUS) {
         P[LOCAL_STATUS].prompt()
     }
@@ -11881,7 +11884,7 @@ function update_hand(side) {
 }
 
 
-function place_unit(u, location) {
+function update_unit(u, location) {
     var piece = pieces[u]
     var unit
     var one_step = piece.notreplaceable && piece.start_reduced
@@ -11965,6 +11968,24 @@ function update_role_info(who) {
     roles[who].stat.textContent = escape_text(text)
 }
 
+function should_show_hex_control(i, all_control, vassal_control) {
+	var hn = HEX_BY_NATION[i]
+	var cont = is_space_controlled(i, JP) ? JP : AP
+	if ((cont === AP && set_has(G.capture, i) && !all_control) || !(G.supply_cache[i] & HEX_CONTROLLABLE))
+		return false
+	var default_condition =
+		(hn >= 0 && G.surrender[HEX_BY_NATION[i]] > 0 == cont) || (hn === -1 && cont === AP) || (hn < -1 && cont === JP)
+	var vassal_condition = set_has(JP_BOUNDARY_HEX, i) + 0 === cont
+	if (
+		map_info.hex_check(i) &&
+		cont !== null &&
+		(all_control || (!is_faction_units(i, AP) && !is_faction_units(i, JP))) &&
+		(all_control || (!vassal_control && default_condition) || (vassal_control && vassal_condition))
+	)
+		return true
+	return false
+}
+
 function on_update() {
     begin_update()
 
@@ -11983,6 +12004,7 @@ function on_update() {
     update_role_info(JP)
     update_role_info(AP)
 
+    // TODO: why are we mutating G here?
     map_for_each(G.offensive.damaged, (u, s) => {
         if (s > 2) {
             G.location[u] = ELIMINATED_BOX
@@ -11990,85 +12012,90 @@ function on_update() {
             set_add(G.reduced, u)
         }
     })
+    if (G.pow <= 0) {
+        G.capture = []
+    }
 
+    var supplied_hex = []
+    for (var i = 1; i < pieces.length; ++i) {
+        var loc = G.location[i]
+        if (loc > 0) {
+            if (!set_has(G.oos, i)) {
+                set_add(supplied_hex, G.location[i])
+            }
+        }
+    }
+    // ^^^^
+
+    // OVERLAY PATHS
     if (!get_preference("nopath", false)) {
         canvas_draw_paths()
     } else {
         canvas_clear_paths()
     }
 
-    document.getElementById("vp_check_button").hidden = CAMPAIGN_SCENARIOS.includes(G.sid)
-
-    if (G.pow <= 0) {
-        G.capture = []
-    }
+    // CONTROL MARKERS
     var all_control = document.body.classList.contains("hide-pieces")
     var vassal_control = get_preference("fullcontrol", false)
     for (var i = 0; i < LAST_BOARD_HEX; i++) {
-        var hn = HEX_BY_NATION[i]
-        var cont = is_space_controlled(i, JP) ? JP : AP
-        if (cont === AP && set_has(G.capture, i) && !all_control || !(G.supply_cache[i] & HEX_CONTROLLABLE)) {
-            continue
-        }
-        var default_condition = (hn >= 0 && (G.surrender[HEX_BY_NATION[i]] > 0) == cont
-            || hn === -1 && cont === AP
-            || hn < -1 && cont === JP)
-        var vassal_condition = (set_has(JP_BOUNDARY_HEX, i) + 0) === cont
-        if (map_info.hex_check(i) && cont !== null && (all_control || !is_faction_units(i, AP) && !is_faction_units(i, JP))
-            && (all_control || !vassal_control && default_condition || vassal_control && vassal_condition)
-        ) {
-            populate_generic("s-loc", i, get_control_marker(i) + (vassal_control ? " transparent" : ""))
+        if (should_show_hex_control(i, all_control, vassal_control)) {
+            if (vassal_control)
+                populate_generic("s-loc", i, get_control_marker(i) + " transparent")
+            else
+                populate_generic("s-loc", i, get_control_marker(i))
         }
     }
-    G.garr_elim.filter(h => is_space_controlled(h, JP)).forEach(h => populate_generic("s-loc", h, counters.no_garrison))
-    var base_road_counters = get_preference("noroad", false)
-    ROAD_EVENTS.filter(event => map_info.hex_check(event.keys[0])).forEach(event => {
-        var thing = lookup_thing("road", event.id)
-        var active = G.events[event.id]
-        thing.element.classList.add("hide")
-        if (!active && !base_road_counters) {
-            thing.element.classList.remove("hide")
-        }
-        if ((event === events.KWAI_RIVER_BRIDGE && active)
-            || (!active && base_road_counters && event !== events.KWAI_RIVER_BRIDGE)) {
-            populate_generic("s-loc", event.keys[0], event.counter)
-        }
+
+    // ELIMINATED GARRISONS
+    for (var h of G.garr_elim)
+        if (is_space_controlled(h, JP))
+            populate_generic("s-loc", h, counters.no_garrison)
+
+    // GARRISONS
+    map_for_each(G.garrison, (h, count) => {
+        if (count === 0)
+            populate_generic("s-loc", h, "unit " + pieces[JP_GARRISON_JP].counter, 1)
+        else
+            populate_generic("s-loc", h, "unit " + pieces[JP_GARRISON_CN[0]].counter, count)
     })
+
+    // ROADS
+    var base_road_counters = get_preference("noroad", false)
+    for (var event of ROAD_EVENTS) {
+        if (map_info.hex_check(event.keys[0])) {
+            var is_road_event_active = G.events[event.id]
+            update_show("road", event.id, !is_road_event_active && !base_road_counters)
+            if (event === events.KWAI_RIVER_BRIDGE && is_road_event_active)
+                populate_generic("s-loc", event.keys[0], event.counter)
+            if (event !== events.KWAI_RIVER_BRIDGE && !is_road_event_active && base_road_counters)
+                populate_generic("s-loc", event.keys[0], event.counter)
+        }
+    }
+
+    // TOKYO EXPRESS
     if (G.events[events.TOKYO_EXPRESS.id] > 0) {
         populate_generic("s-loc", G.events[events.TOKYO_EXPRESS.id], counters.tokyo_express)
     }
-    map_for_each(G.garrison, (h, count) => {
-        var marker = JP_GARRISON_CN[0]
-        if (count === 0) {
-            count = 1
-            marker = JP_GARRISON_JP
-        }
-        for (var i = 0; i < count; i++) {
-            populate_generic("s-loc", h, "unit " + pieces[marker].counter)
-        }
-    })
-    var supplied_hex = []
-    for (var i = 1; i < pieces.length; ++i) {
-        var loc = G.location[i]
-        if (loc > 0) {
-            place_unit(i, G.location[i])
-            if (!set_has(G.oos, i)) {
-                set_add(supplied_hex, G.location[i])
-            }
-        }
-    }
-    if (G.unselect) {
-        G.unselect.forEach(u => update_keyword("unit", u, "unselect"))
+
+    // POWs
+    if (G.pow > 0) {
+        for (var h of G.capture)
+            if (is_space_controlled(h, AP))
+                populate_generic("s-loc", h, counters.pow)
     }
 
-    if (G.pow > 0) {
-        G.capture.filter(h => is_space_controlled(h, AP))
-            .forEach(h => populate_generic("s-loc", h, counters.pow))
+    // UNITS
+    for (var i = 1; i < pieces.length; ++i) {
+        var loc = G.location[i]
+        if (loc > 0)
+            update_unit(i, G.location[i])
     }
+
+    // OUT OF SUPPLY MARKERS
     var oos_hex_set = []
     for (i = 0; i < G.oos.length; i++) {
         var hex = G.location[G.oos[i]]
-        if (!set_has(oos_hex_set, hex) && hex <= LAST_BOARD_HEX && !set_has(supplied_hex, hex)) {
+        if (hex <= LAST_BOARD_HEX && !set_has(oos_hex_set, hex) && !set_has(supplied_hex, hex)) {
             var counter = counters.isolated
             if (HQ_LIST.some(hq => G.location[hq] < LAST_BOARD_HEX && hex < LAST_BOARD_HEX
                 && pieces[hq].faction === pieces[G.oos[i]].faction
@@ -12080,6 +12107,7 @@ function on_update() {
         }
     }
 
+    // ZONE OF INFLUENCE
     if (!get_preference("hidezoi", false)) {
         for (var hex of ALL_BOARD_HEXES) {
             const zoi_state = G.supply_cache[hex]
@@ -12090,24 +12118,31 @@ function on_update() {
         }
     }
 
-    var focused = []
+    // HQ RANGE
+    // TODO: focused has invalid hexes, so need to filter by ALL_BOARD_HEXES
     if (world.range[0] && world.hq && G.location[world.hq] < LAST_BOARD_HEX) {
         mark_activation_zone(world.hq)
         for_each_hex_in_range(G.location[world.hq], pieces[world.hq].cr, hex => {
-            if (G.supply_cache[hex] & HEX_TEMP_FLAG3) {
-                set_add(focused, hex)
-            }
+            if (G.supply_cache[hex] & HEX_TEMP_FLAG3)
+                if (set_has(ALL_BOARD_HEXES, hex))
+                    update_keyword("zoi_hex", hex, "yellow")
         })
     } else {
+        var focused = []
         for_each_hex_in_range(world.range[0], world.range[1], hex => set_add(focused, hex))
         focused = in_range_on_map(world.range[0], world.range[1], focused, AP)
-    }
-    for (var hex of ALL_BOARD_HEXES) {
-        update_keyword("zoi_hex", hex, "yellow", set_has(focused, hex))
+        for (var hex of focused)
+            if (set_has(ALL_BOARD_HEXES, hex))
+                update_keyword("zoi_hex", hex, "yellow")
     }
 
-    print_violations()
-    update_violations()
+    // VIOLATIONS
+    if (G.violations.length > 0) {
+        for (var h of G.violations)
+            update_keyword("action_hex", h, "violation")
+        update_text_html("violations", 0, "<b>STACKING VIOLATIONS:</B>\n" + escape_text(G.violations.map(h => "H"+h).join(", ")) + ".")
+    }
+
     highlight_aa()
 
     world.things["card"].forEach(e => e.element.innerHTML = '')
@@ -12148,6 +12183,10 @@ function on_update() {
     }
 
     populate_generic("china", Math.min(5, G.events[events.CHINA_STATUS.id]), counters.china)
+
+    if (G.unselect)
+        for (var u of G.unselect)
+            update_keyword("unit", u, "unselect")
 
     // TURN MARKERS
 
@@ -12255,15 +12294,6 @@ function on_update() {
     show_full_log_if_needed()
 }
 
-function print_violations() {
-    if (world.violations) {
-        world.violations.forEach(h => lookup_thing("action_hex", h).element.classList.toggle("violation", false))
-        world.violations = []
-    }
-    G.violations.forEach(h => lookup_thing("action_hex", h).element.classList.toggle("violation", true))
-    world.violations = G.violations
-}
-
 function highlight_aa() {
     world.amph.forEach(h => lookup_thing("action_hex", h).element.classList.remove("amph"))
     G.offensive.active_units[G.offensive.attacker].forEach(u => {
@@ -12276,19 +12306,6 @@ function highlight_aa() {
             lookup_thing("action_hex", location).element.classList.add("amph")
         }
     })
-}
-
-function update_violations() {
-    var ui = document.getElementById("violations")
-    var list = G.violations
-    if (list.length > 0) {
-        ui.replaceChildren()
-        let p = document.createElement("div")
-        p.innerHTML = `<u><b>Overstack Violations: ${escape_text(list.map(h => hex_get_log_str(h)).join(", "))}</b></u>`
-        ui.appendChild(p)
-    } else {
-        ui.replaceChildren()
-    }
 }
 
 function apply_conflict_marker(marker, hex) {
