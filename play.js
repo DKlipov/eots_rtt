@@ -6416,7 +6416,7 @@ const TUNNELING = [
 map.forEach(h => MAP_DATA[hex_to_int(h.id)] = h)
 
 var S_P_first_hex = []
-
+var TUNNEL_INDEX = 1
 ;(function(){
 
     for (var i = 0; i < sp_map.length; i++) {
@@ -6513,7 +6513,7 @@ var S_P_first_hex = []
     B_F_W_MAP_DATA[hex_to_int(1912)].nh.length = 3
     B_F_W_MAP_DATA[hex_to_int(1912)].edges_int = (B_F_W_MAP_DATA[hex_to_int(1912)].edges_int % (1 << 5 * 3))
 
-    var t1 = 1
+
     for (var i = 0; i < TUNNELING.length; i++) {
         var tunnel = TUNNELING[i]
         create_tunnel(tunnel)
@@ -6621,19 +6621,19 @@ function apply_burma(hex) {
 
 function create_tunnel(data) {
     data.map[data.from].edges_int |= (WATER | UNPLAYABLE_WATER) << (5 * data.map[data.from].nh.length)
-    data.map[data.from].nh.push(TUNNEL_BOX + t1)
+    data.map[data.from].nh.push(TUNNEL_BOX + TUNNEL_INDEX)
     for (var i = 0; i < data.distance; i++) {
         var hex = {
-            id: TUNNEL_BOX + t1,
+            id: TUNNEL_BOX + TUNNEL_INDEX,
             terrain: OCEAN,
             region: "Ocean",
             edges_int: WATER | UNPLAYABLE_WATER,
-            nh: [TUNNEL_BOX + t1 + 1]
+            nh: [TUNNEL_BOX + TUNNEL_INDEX + 1]
         }
-        data.map[TUNNEL_BOX + t1] = hex
-        t1++
+        data.map[TUNNEL_BOX + TUNNEL_INDEX] = hex
+        TUNNEL_INDEX++
     }
-    data.map[TUNNEL_BOX + t1 - 1].nh[0] = data.to
+    data.map[TUNNEL_BOX + TUNNEL_INDEX - 1].nh[0] = data.to
 }
 
 function get_near_hexes(hex) {
@@ -12268,20 +12268,14 @@ function format_unit_tooltip(u) {
         tip += p.type.toUpperCase()
         break
     }
-
-    if (!set_has(G.reduced, u))
-        tip += ` ${p.cf}`
-    else
-        tip += ` (${p.rcf}`
+    tip += ` ${p.cf}`
+    if (p.rcf!==p.cf)
+        tip += `(${p.rcf})`
     tip += `-${p.lf}`
     if (p.br)
         tip += `-${p.br}`
     if (p.ebr)
         tip += " " + DIGIT_SUPERSCRIPT[p.ebr]
-    if (!set_has(G.reduced, u))
-        tip += ""
-    else
-        tip += ")"
 
     tip += ` (${p.name})`
 
@@ -12314,7 +12308,7 @@ function format_hex_tooltip(h) {
         if (info.port) props.push("port")
         if (info.island) props.push("island")
         if (info.resource) props.push("resource")
-        if (info.terrain) props.push(TERRAIN_NAME[INFO.TERRAIN])
+        if (info.terrain) props.push(TERRAIN_NAME[info.terrain])
         if (props.length > 0) tip += " - " + props.join(", ")
     }
     return tip
