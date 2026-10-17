@@ -182,6 +182,11 @@ function escape_text(text) {
     text = escape_tip_light(text, /H(\d+)/g, "hex-tip", "action_hex", HEX_NAMES)
     text = escape_tip_light(text, /P(\d+)/g, "piece-tip", "unit", UNIT_NAMES)
 
+    text = text.replace(/\b1 passes/g, "1 pass")
+    text = text.replace(/\b1 cards/g, "1 card")
+    text = text.replace(/\b1 hexes/g, "1 hex")
+    text = text.replace(/\b1 units/g, "1 unit")
+
     return text
 }
 
