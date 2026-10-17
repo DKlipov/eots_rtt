@@ -72,16 +72,3 @@ function combat_query(battle) {
 
     return result
 }
-
-function draw_list() {
-    var hand = [G.draw[JP].concat(G.hand[JP]), G.draw[AP].concat(G.hand[AP])]
-    if (G.future_offensive[AP] > 0) {
-        hand[AP].push(G.future_offensive[AP])
-    }
-    if (G.future_offensive[JP] > 0) {
-        hand[JP].push(G.future_offensive[JP])
-    }
-    hand[AP].sort()
-    hand[JP].sort()
-    return {hand}
-}
