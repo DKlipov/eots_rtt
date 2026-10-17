@@ -3208,60 +3208,64 @@ const ED_ARMY = find_piece("army_jp_ed")
 
 const HQ_LIST = []
 
-for (let i = 1; i < pieces.length; i++) {
-    if (pieces[i].class === "hq") {
-        set_add(HQ_LIST, i)
-    }
-}
+;(function(){
 
-//Fill units data
-for (var i = 1; i < pieces.length; i++) {
-    const piece = pieces[i]
-    piece.u = i
-    const supply = piece.class === "hq" ? get_hq_supply_type(piece) : get_unit_supply_type(piece)
-    piece.supply = supply
-    piece.replacement = get_unit_replacement_type(piece)
-    if (piece.class === "naval" && !piece.faction) {
-        piece.service = "navy"
-    }
-
-    if (piece.class === "air" || piece.class === "naval" && piece.br) {
-        piece.zoi_generator = 1
-    }
-
-    if (piece.start_reduced && pieces.notreplaceable) {
-        piece.one_step = 1
-    }
-    if (!piece.ebr && piece.br) {
-        piece.ebr = piece.br
-    }
-
-    if (piece.type === "lrb" && i !== LRB_19 && i !== LRB_10) {
-        var pair = find_piece(piece.id.replace("_lrb", ""))
-        if (pair !== i) {
-            pieces[pair].pair = i
-            piece.pair = pair
+    for (let i = 1; i < pieces.length; i++) {
+        if (pieces[i].class === "hq") {
+            set_add(HQ_LIST, i)
         }
     }
 
-    if (i === jp_army("kor")) {
-        piece.asp = 4
-        piece.aspr = 2
-        piece.strat_move = true
-    } else if (i === ARMOR_BRIGADE) {
-        piece.strat_move = true
-    } else if (piece.class === "ground" && ["du", "ind", "ch", "bu"].includes(piece.service)) {
-        piece.strat_move = false
-    } else if (piece.class === "ground" && piece.size < 3) {
-        piece.asp = 1
-        piece.aspr = 1
-        piece.strat_move = true
-    } else if (piece.class === "ground") {
-        piece.asp = 2
-        piece.aspr = 1
-        piece.strat_move = true
+    //Fill units data
+    for (var i = 1; i < pieces.length; i++) {
+        const piece = pieces[i]
+        piece.u = i
+        const supply = piece.class === "hq" ? get_hq_supply_type(piece) : get_unit_supply_type(piece)
+        piece.supply = supply
+        piece.replacement = get_unit_replacement_type(piece)
+        if (piece.class === "naval" && !piece.faction) {
+            piece.service = "navy"
+        }
+
+        if (piece.class === "air" || piece.class === "naval" && piece.br) {
+            piece.zoi_generator = 1
+        }
+
+        if (piece.start_reduced && pieces.notreplaceable) {
+            piece.one_step = 1
+        }
+        if (!piece.ebr && piece.br) {
+            piece.ebr = piece.br
+        }
+
+        if (piece.type === "lrb" && i !== LRB_19 && i !== LRB_10) {
+            var pair = find_piece(piece.id.replace("_lrb", ""))
+            if (pair !== i) {
+                pieces[pair].pair = i
+                piece.pair = pair
+            }
+        }
+
+        if (i === jp_army("kor")) {
+            piece.asp = 4
+            piece.aspr = 2
+            piece.strat_move = true
+        } else if (i === ARMOR_BRIGADE) {
+            piece.strat_move = true
+        } else if (piece.class === "ground" && ["du", "ind", "ch", "bu"].includes(piece.service)) {
+            piece.strat_move = false
+        } else if (piece.class === "ground" && piece.size < 3) {
+            piece.asp = 1
+            piece.aspr = 1
+            piece.strat_move = true
+        } else if (piece.class === "ground") {
+            piece.asp = 2
+            piece.aspr = 1
+            piece.strat_move = true
+        }
     }
-}
+
+})()
 
 function find_piece(id) {
     for (let i = 1; i < pieces.length; i++) {
@@ -6413,136 +6417,143 @@ map.forEach(h => MAP_DATA[hex_to_int(h.id)] = h)
 
 var S_P_first_hex = []
 
-for (var i = 0; i < sp_map.length; i++) {
-    var hex = hex_to_int(sp_map[i].id)
-    let x = Math.floor(hex / 29)
-    let y = hex % 29
-    if (sp_map[i].top) {
-        map_set(S_P_first_hex, x, y)
-    }
-}
+;(function(){
 
-for (let i = 0; i <= LAST_BOARD_HEX; ++i) {
-    let hex = MAP_DATA[i]
-    var x = Math.floor(i / 29)
-    var y = i % 29
-    var sw = (x <= 17 && y <= 12) ? 1 : 0
-    if (!hex) {
-        hex = {id: int_to_hex(i), terrain: OCEAN, region: "Ocean", nh: get_edge_hexes(i), sw}
-        MAP_DATA[i] = hex
-    }
-    hex.sw = sw
-    hex.edges_int = 0
-    hex.coastal = false
-    let nh = get_edge_hexes(i)
-    for (let j = 0; j < nh.length; j++) {
-        let near_hex = MAP_DATA[nh[j]]
-        let nh_index = (j + 3) % 6
-        let border = GROUND
-        if (nh[j] < 0) {
-            border = MAP_BORDER
-        } else if (hex.edges) {
-            border = hex.edges[j] | (hex.edges[j] & ROAD ? GROUND : 0)
-        } else if (near_hex && near_hex.edges) {
-            border = near_hex.edges[nh_index]
-        } else if (hex.island || hex.terrain === ATOLL || hex.terrain === OCEAN) {
-            border = 1
+    for (var i = 0; i < sp_map.length; i++) {
+        var hex = hex_to_int(sp_map[i].id)
+        let x = Math.floor(hex / 29)
+        let y = hex % 29
+        if (sp_map[i].top) {
+            map_set(S_P_first_hex, x, y)
         }
-        if (border & GROUND) {
-            border |= UNPLAYABLE_LAND
-        }
-        if (border & WATER) {
-            border |= UNPLAYABLE_WATER
-        }
-        hex.coastal = hex.coastal || (border & WATER)
-        hex.edges_int = hex.edges_int | (border << 5 * j)
     }
-    if (hex.terrain === ATOLL) {
-        hex.island = true
-    }
-    if (hex.airfield || hex.port || hex.port || hex.city || hex.resource) {
-        hex.named = true
-    }
-    if (hex.city === JAPANESE_CITY) {
-        hex.supply_source |= JP_SUPPLIED_HEX
-    } else if (i < 29) {
-        hex.supply_source |= JOINT_SUPPLIED_HEX
-    } else if (i > (LAST_BOARD_HEX - 29)) {
-        hex.supply_source |= US_SUPPLIED_HEX
-        hex.supply_source |= JOINT_SUPPLIED_HEX
-    }
-    hex.nh = get_edge_hexes(i)
-    if (i === 472) {
-        // remove hex only found in the burma scenario (2608)
-        MAP_DATA[i] = non_playable_hex(i)
-    }
-    apply_south_pacific(Object.assign({}, hex))
-    apply_burma(Object.assign({}, hex))
-}
-MAP_DATA[CHINA_BOX] = {
-    id: int_to_hex(CHINA_BOX),
-    terrain: OCEAN,
-    region: "Ocean",
-    airfield: true,
-    edges_int: MAP_DATA[OAHU].edges_int
-}
-B_F_W_MAP_DATA[CHINA_BOX] = MAP_DATA[CHINA_BOX]
-S_P_MAP_DATA[CHINA_BOX] = MAP_DATA[CHINA_BOX]
-S_P_MAP_DATA[OAHU] = Object.assign({}, MAP_DATA[OAHU])
-S_P_MAP_DATA[OAHU].supply_source = JOINT_SUPPLIED_HEX | US_SUPPLIED_HEX
-S_P_MAP_DATA[OAHU].nh = []
-S_P_MAP_DATA[OAHU].edges_int = 0
-S_P_MAP_DATA[hex_to_int(4819)].terrain = OCEAN
 
-B_F_W_MAP_DATA[SINGAPORE] = Object.assign({}, MAP_DATA[SINGAPORE])
-B_F_W_MAP_DATA[SINGAPORE].edges_int = 0
-B_F_W_MAP_DATA[SINGAPORE].nh = []
-B_F_W_MAP_DATA[SINGAPORE].airfield = false
-B_F_W_MAP_DATA[SAIGON].nh.length = 3
-B_F_W_MAP_DATA[SAIGON].edges_int = B_F_W_MAP_DATA[SAIGON].edges_int % (1 << 5 * 4)
-B_F_W_MAP_DATA[hex_to_int(2609)].edges_int += GROUND
-B_F_W_MAP_DATA[hex_to_int(2508)].edges_int += GROUND << 5
-B_F_W_MAP_DATA[hex_to_int(1912)].nh.length = 3
-B_F_W_MAP_DATA[hex_to_int(1912)].edges_int = (B_F_W_MAP_DATA[hex_to_int(1912)].edges_int % (1 << 5 * 3))
+    for (let i = 0; i <= LAST_BOARD_HEX; ++i) {
+        let hex = MAP_DATA[i]
+        var x = Math.floor(i / 29)
+        var y = i % 29
+        var sw = (x <= 17 && y <= 12) ? 1 : 0
+        if (!hex) {
+            hex = {id: int_to_hex(i), terrain: OCEAN, region: "Ocean", nh: get_edge_hexes(i), sw}
+            MAP_DATA[i] = hex
+        }
+        hex.sw = sw
+        hex.edges_int = 0
+        hex.coastal = false
+        let nh = get_edge_hexes(i)
+        for (let j = 0; j < nh.length; j++) {
+            let near_hex = MAP_DATA[nh[j]]
+            let nh_index = (j + 3) % 6
+            let border = GROUND
+            if (nh[j] < 0) {
+                border = MAP_BORDER
+            } else if (hex.edges) {
+                border = hex.edges[j] | (hex.edges[j] & ROAD ? GROUND : 0)
+            } else if (near_hex && near_hex.edges) {
+                border = near_hex.edges[nh_index]
+            } else if (hex.island || hex.terrain === ATOLL || hex.terrain === OCEAN) {
+                border = 1
+            }
+            if (border & GROUND) {
+                border |= UNPLAYABLE_LAND
+            }
+            if (border & WATER) {
+                border |= UNPLAYABLE_WATER
+            }
+            hex.coastal = hex.coastal || (border & WATER)
+            hex.edges_int = hex.edges_int | (border << 5 * j)
+        }
+        if (hex.terrain === ATOLL) {
+            hex.island = true
+        }
+        if (hex.airfield || hex.port || hex.port || hex.city || hex.resource) {
+            hex.named = true
+        }
+        if (hex.city === JAPANESE_CITY) {
+            hex.supply_source |= JP_SUPPLIED_HEX
+        } else if (i < 29) {
+            hex.supply_source |= JOINT_SUPPLIED_HEX
+        } else if (i > (LAST_BOARD_HEX - 29)) {
+            hex.supply_source |= US_SUPPLIED_HEX
+            hex.supply_source |= JOINT_SUPPLIED_HEX
+        }
+        hex.nh = get_edge_hexes(i)
+        if (i === 472) {
+            // remove hex only found in the burma scenario (2608)
+            MAP_DATA[i] = non_playable_hex(i)
+        }
+        apply_south_pacific(Object.assign({}, hex))
+        apply_burma(Object.assign({}, hex))
+    }
 
-var t1 = 1
-for (var i = 0; i < TUNNELING.length; i++) {
-    var tunnel = TUNNELING[i]
-    create_tunnel(tunnel)
-    if (tunnel.duplex) {
-        var from = tunnel.from
-        tunnel.from = tunnel.to
-        tunnel.to = from
+    MAP_DATA[CHINA_BOX] = {
+        id: int_to_hex(CHINA_BOX),
+        terrain: OCEAN,
+        region: "Ocean",
+        airfield: true,
+        edges_int: MAP_DATA[OAHU].edges_int
+    }
+
+    B_F_W_MAP_DATA[CHINA_BOX] = MAP_DATA[CHINA_BOX]
+    S_P_MAP_DATA[CHINA_BOX] = MAP_DATA[CHINA_BOX]
+    S_P_MAP_DATA[OAHU] = Object.assign({}, MAP_DATA[OAHU])
+    S_P_MAP_DATA[OAHU].supply_source = JOINT_SUPPLIED_HEX | US_SUPPLIED_HEX
+    S_P_MAP_DATA[OAHU].nh = []
+    S_P_MAP_DATA[OAHU].edges_int = 0
+    S_P_MAP_DATA[hex_to_int(4819)].terrain = OCEAN
+
+    B_F_W_MAP_DATA[SINGAPORE] = Object.assign({}, MAP_DATA[SINGAPORE])
+    B_F_W_MAP_DATA[SINGAPORE].edges_int = 0
+    B_F_W_MAP_DATA[SINGAPORE].nh = []
+    B_F_W_MAP_DATA[SINGAPORE].airfield = false
+    B_F_W_MAP_DATA[SAIGON].nh.length = 3
+    B_F_W_MAP_DATA[SAIGON].edges_int = B_F_W_MAP_DATA[SAIGON].edges_int % (1 << 5 * 4)
+    B_F_W_MAP_DATA[hex_to_int(2609)].edges_int += GROUND
+    B_F_W_MAP_DATA[hex_to_int(2508)].edges_int += GROUND << 5
+    B_F_W_MAP_DATA[hex_to_int(1912)].nh.length = 3
+    B_F_W_MAP_DATA[hex_to_int(1912)].edges_int = (B_F_W_MAP_DATA[hex_to_int(1912)].edges_int % (1 << 5 * 3))
+
+    var t1 = 1
+    for (var i = 0; i < TUNNELING.length; i++) {
+        var tunnel = TUNNELING[i]
         create_tunnel(tunnel)
+        if (tunnel.duplex) {
+            var from = tunnel.from
+            tunnel.from = tunnel.to
+            tunnel.to = from
+            create_tunnel(tunnel)
+        }
     }
-}
-B_F_W_MAP_DATA[hex_to_int(1912)].nh.push(-1)
-B_F_W_MAP_DATA[hex_to_int(1912)].nh.push(hex_to_int(1812))
-B_F_W_MAP_DATA[hex_to_int(1912)].edges_int |= ((WATER | UNPLAYABLE_WATER) << 5 * 5)
 
-for (var i = 0; i < map.length; i++) {
-    if (!map[i].airfield) {
-        continue
-    }
-    var links = []
-    var hex_i = hex_to_int(map[i].id)
-    for (var j = 0; j < map.length; j++) {
-        if (!map[j].airfield || i === j) {
+    B_F_W_MAP_DATA[hex_to_int(1912)].nh.push(-1)
+    B_F_W_MAP_DATA[hex_to_int(1912)].nh.push(hex_to_int(1812))
+    B_F_W_MAP_DATA[hex_to_int(1912)].edges_int |= ((WATER | UNPLAYABLE_WATER) << 5 * 5)
+
+    for (var i = 0; i < map.length; i++) {
+        if (!map[i].airfield) {
             continue
         }
-        var hex_j = hex_to_int(map[j].id)
-        let distance = get_distance(hex_i, hex_j)
-        if (distance <= 8) {
-            links.push([hex_j, distance])
+        var links = []
+        var hex_i = hex_to_int(map[i].id)
+        for (var j = 0; j < map.length; j++) {
+            if (!map[j].airfield || i === j) {
+                continue
+            }
+            var hex_j = hex_to_int(map[j].id)
+            let distance = get_distance(hex_i, hex_j)
+            if (distance <= 8) {
+                links.push([hex_j, distance])
+            }
         }
+        if (hex_i === JARHAT || hex_i === DACCA || hex_i === LEDO) {
+            links.push([CHINA_BOX, 1])
+        }
+        map_set(AIRFIELD_LINKS, hex_i, links.sort((a, b) => a[1] - b[1]).flatMap(a => a))
     }
-    if (hex_i === JARHAT || hex_i === DACCA || hex_i === LEDO) {
-        links.push([CHINA_BOX, 1])
-    }
-    map_set(AIRFIELD_LINKS, hex_i, links.sort((a, b) => a[1] - b[1]).flatMap(a => a))
-}
 
-map_set(AIRFIELD_LINKS, CHINA_BOX, [JARHAT, 1, DACCA, 1, LEDO, 1])
+    map_set(AIRFIELD_LINKS, CHINA_BOX, [JARHAT, 1, DACCA, 1, LEDO, 1])
+
+})()
 
 function non_playable_hex(id) {
     return {id: id, terrain: OCEAN, region: "Ocean", edges_int: 0, nh: []}
@@ -10128,21 +10139,60 @@ function map_group_by(items, callback) {
 
 /* }}} */
 
-/* {{{ js/client/init.js */
-function on_reply(q, response) {
-    if (q === "original_control")
-        scenario_data().original_control ??= response
-    if (q === "combat")
-        update_combat_window(response)
-    if (q === "check_unit_supply")
-        P.check_unit_supply.show_supply(response)
-}
-
-function define_s_loc(id, rect) {
-    define_stack("s-loc", id,
-        rect,
-        { ...VERTICAL_STACK_PARAMS, sort: sort_unit_stack }
-    )
+/* {{{ js/client/layout.js */
+const LAYOUT = {
+    "mainmap" : {
+        "box_delayed_reinf": [2363,1503,160,79],
+        "box_air_unit_in_china": [852,407,121,75],
+        "box_isr_jp": [986,132,45,64],
+        "box_isr_us": [1048,132,45,64],
+        "box_eliminated": [100,1280,45,45],
+        "box_ap_reinf": [2298,544,45,45],
+        "box_jp_reinf": [1386,461,45,45],
+        "track_chinese_government": [603,130,281,63],
+        "track_japanese_divisions_available_china": [671,42,608,55],
+        "track_india_status": [396,51,250,55],
+        "track_burma_road": [397,141,179,52],
+        "track_game_turn": [54,665,65,561],
+        "track_political_will": [157,712,64,517],
+        "track_wie": [259,707,64,517],
+        "track_strat_record": [346,1158,92,468],
+    },
+    "southpac" : {
+        "box_delayed_reinf": [1140,710,116,95],
+        "h_5808": [1065,690,45,45],
+        "box_air_unit_in_china": [19,602,98,60],
+        "box_isr_jp": [127,619,43,43],
+        "box_isr_us": [179,619,42,42],
+        "track_chinese_government": [519,755,267,50],
+        "track_game_turn": [1078,569,180,55],
+        "track_political_will": [19,66,41,282],
+        "track_wie": [795,756,337,49],
+        "track_strat_record": [602,691,313,47],
+        "track_strat_record_0_1": [335,687,177,118],
+        "track_strat_record_2": [513,691,88,47],
+        "box_eliminated": [50,680,45,45],
+        "box_ap_reinf": [823,583,45,45],
+        "box_jp_reinf": [58,103,45,45],
+    },
+    "burma" : {
+        "box_air_unit_in_china": [757,300,121,75],
+        "box_singapore": [70,754,45,45],
+        "box_isr_jp": [383,218,45,64],
+        "box_isr_us": [435,216,45,64],
+        "track_chinese_government": [367,129,281,63],
+        "track_japanese_divisions_available_china": [632,44,421,52],
+        "track_india_status": [367,42,250,65],
+        "track_burma_road": [1078,43,169,55],
+        "track_game_turn": [29,249,186,52],
+        "track_political_will": [731,732,517,64],
+        "track_wie": [871,590,377,45],
+        "track_strat_record": [779,672,467,53],
+        "box_eliminated": [306,29,45,45],
+        "label_singapore": [496,781,64,17],
+        "box_ap_reinf": [823,583,45,45],
+        "box_jp_reinf": [34,34,45,45],
+    },
 }
 
 const HEX_X_SIZE = 48.0
@@ -10158,6 +10208,7 @@ const TURN_STACK_PARAMS = {
     small_dx: 18, small_dy: 0, small_threshold: 3,
     shadow: 6
 }
+
 const TRACK_STACK_PARAMS = {
     // stack parameters:
     dx: 10, dy: 0, // closed offset
@@ -10168,6 +10219,7 @@ const TRACK_STACK_PARAMS = {
     small_dx: 18, small_dy: 0, small_threshold: 4,
     shadow: 6
 }
+
 const VERTICAL_STACK_PARAMS = {
     // stack parameters:
     dx: -2, dy: -3, // closed offset
@@ -10190,61 +10242,127 @@ const VERTICAL_TURN_STACK_PARAMS = {
     shadow: 6
 }
 
-const SUPPLY_TYPES = {
-    to_port: {color: "green"},
-    from_port: {color: "red"},
-    to_hq: {color: "blue"},
-    to_source: {color: "yellow"},
-}
-
-const BR_REGIONS = ["India", "Ceylon", "NIndia", "Burma", "Siam", "Malaya", "Sumatra", "Indochina", "IChina"]
-const JP_REGIONS = ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Caroline", "Japan", "Marshall"]
-const JP_BOUNDARY_HEX = []
-
-const REGIONS_BY_NATION = {}
-const HEX_BY_NATION = []
-const BR_NATIONS = [-3, nations.AUSTRALIA.id, nations.BURMA.id, nations.MALAYA.id]
-
-
-for (var key of Object.keys(counters)) {
-    counters[key] = "marker " + counters[key]
-}
-
-for (var key of Object.keys(nations)) {
-    if (nations[key].counter) {
-        nations[key].counter = "marker " + nations[key].counter
+const MAIN_BOARD_INFO = {
+    "LAST_BOARD_HEX": 1478,
+    "COLUMN_HEX_NB": 29,
+    "ROW_HEX_NB": 50,
+    "grid_x_offset": 0,
+    "grid_y_offset": 0,
+    "display_x_offset": 76.375,
+    "display_y_offset": 53.375,
+    "turn_a": 12,
+    "turn_b": 1,
+    "track_a": 9,
+    "track_b": 0,
+    "wie_a": 0,
+    "wie_b": 10,
+    "pw_a": 10,
+    "pw_b": 0,
+    "TURN_STACK_PARAMS": TURN_STACK_PARAMS,
+    "TRACK_STACK_PARAMS": TRACK_STACK_PARAMS,
+    "hex_check": (i) => {
+        return i != 472 && //Remove the hex exclusive to the burma scenario
+            i != 92 // Remove unplayable hex in india not catched by the standard data check (1305)
     }
-    if (!nations[key].no_full_control && nations[key].regions) {
-        for (var reg of nations[key].regions) {
-            REGIONS_BY_NATION[reg] = nations[key]
+}
+
+const BURMA_BOARD_INFO = {
+    "LAST_BOARD_HEX": 2609,
+    "COLUMN_HEX_NB": 13,
+    "ROW_HEX_NB": 17,
+    "grid_x_offset": 0,
+    "grid_y_offset": 0,
+    "display_x_offset": 48.375,
+    "display_y_offset": 53.375,
+    "turn_a": 6,
+    "turn_b": 9,
+    "track_a": 0,
+    "track_b": 9,
+    "wie_a": 7,
+    "wie_b": 0,
+    "pw_a": 10,
+    "pw_b": 0,
+    "TURN_STACK_PARAMS": VERTICAL_TURN_STACK_PARAMS,
+    "TRACK_STACK_PARAMS": VERTICAL_TURN_STACK_PARAMS,
+    "hex_check": (i) => {
+        var x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
+        var y = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
+        if (x == 15 && y > 9) {
+            return false
+        } else if (x == 16 && y > 9) {
+            return false
+        }
+        return hex_in_map(x, y) &&
+            i != 92 // Remove unplayable hex in india not catched by the standard data check (1305)
+    }
+}
+
+const SOUTH_PAC_BORDER = []
+;(function(){
+    for (var i = 0; i < sp_map.length; i++) {
+        var hex = hex_to_int(sp_map[i].id)
+        let x = Math.floor(hex / 29)
+        let y = hex % 29
+        if (sp_map[i].top) {
+            SOUTH_PAC_BORDER[x] = y
         }
     }
+})()
+
+const SOUTH_PAC_BOARD_INFO = {
+    "LAST_BOARD_HEX": 5027,
+    "COLUMN_HEX_NB": 13,
+    "ROW_HEX_NB": 21,
+    "grid_x_offset": 20,
+    "grid_y_offset": 16,
+    "display_x_offset": 89.375,
+    "display_y_offset": 9.125,
+    "turn_a": 3,
+    "turn_b": 6,
+    "track_a": 3,
+    "track_b": 9,
+    "wie_a": 7,
+    "wie_b": 0,
+    "pw_a": 5,
+    "pw_b": 0,
+    "TURN_STACK_PARAMS": VERTICAL_TURN_STACK_PARAMS,
+    "TRACK_STACK_PARAMS": VERTICAL_TURN_STACK_PARAMS,
+    "hex_check": (i) => {
+        if (int_to_hex(i) === 4818 || int_to_hex(i) === 4918) {
+            return true
+        }
+        var x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
+        var y = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
+        if (SOUTH_PAC_BORDER[x] && y < SOUTH_PAC_BORDER[x]) {
+            return false
+        }
+        if (i === 1188) {
+            return false
+        } else if (x == 24 && y == 16) {
+            return true
+        } else if ((x % 2 == 0) && y == 16) {
+            return false
+        }
+        return hex_in_map(x, y)
+    }
 }
 
-for (var key of Object.keys(events)) {
-    if (events[key].counter) {
-        events[key].counter = "marker " + events[key].counter
-    }
+/* }}} */
+/* {{{ js/client/init.js */
+var SID = FULL_CAMPAIGN_SCENARIO
+var map_info = MAIN_BOARD_INFO
+const ALL_BOARD_HEXES = []
+
+function on_reply(q, response) {
+    if (q === "original_control")
+        scenario_data().original_control ??= response
+    if (q === "combat")
+        update_combat_window(response)
+    if (q === "check_unit_supply")
+        P.check_unit_supply.show_supply(response)
 }
 
-for (var i = 0; i < map.length; i++) {
-    var hex = hex_to_int(map[i].id)
-    var region = map[i].region
-    var nation = REGIONS_BY_NATION[region]
-    if (nation) {
-        HEX_BY_NATION[hex] = nation.id
-    } else if (JP_REGIONS.includes(region)) {
-        HEX_BY_NATION[hex] = -1
-    } else if (BR_REGIONS.includes(region)) {
-        HEX_BY_NATION[hex] = -3
-    } else {
-        HEX_BY_NATION[hex] = -2
-    }
-    if (JP_REGIONS.includes(region)) {
-        set_add(JP_BOUNDARY_HEX, hex)
-    }
-}
-HEX_BY_NATION[hex_to_int(2709)] = -3
+// MARKERS
 
 const SCENARIO_LENGTH = [
     [0, 0],
@@ -10259,6 +10377,14 @@ const SCENARIO_LENGTH = [
     [8, 10],
     [0, 0],
 ]
+
+function jp_gray_amp() {
+    return (G.inter_service[JP] && G.asp[0][0] > 1)
+}
+
+function current_pow(G) {
+    return array_count(G.capture, h => is_space_controlled(h, AP))
+}
 
 const UNIT_MOVEMENT_MARKERS = [
     {
@@ -10285,12 +10411,7 @@ const UNIT_MOVEMENT_MARKERS = [
         condition: (u, piece, path) => piece.b29 && G.b29u & 2 << piece.b29,
         counter: counters.strat_bombing_small,
     },
-
 ]
-
-function jp_gray_amp() {
-    return (G.inter_service[JP] && G.asp[0][0] > 1)
-}
 
 const TRACK_MARKERS = [
     {
@@ -10453,128 +10574,6 @@ const TURN_MARKERS = [
     },
 ]
 
-function current_pow(G) {
-    return array_count(G.capture, h => is_space_controlled(h, AP))
-}
-
-
-const MAIN_BOARD_INFO = {
-    "LAST_BOARD_HEX": 1478,
-    "COLUMN_HEX_NB": 29,
-    "ROW_HEX_NB": 50,
-    "grid_x_offset": 0,
-    "grid_y_offset": 0,
-    "display_x_offset": 76.375,
-    "display_y_offset": 53.375,
-    "turn_a": 12,
-    "turn_b": 1,
-    "track_a": 9,
-    "track_b": 0,
-    "wie_a": 0,
-    "wie_b": 10,
-    "pw_a": 10,
-    "pw_b": 0,
-    "TURN_STACK_PARAMS": TURN_STACK_PARAMS,
-    "TRACK_STACK_PARAMS": TRACK_STACK_PARAMS,
-    "hex_check": (i) => {
-        return i != 472 && //Remove the hex exclusive to the burma scenario
-            i != 92 // Remove unplayable hex in india not catched by the standard data check (1305)
-    }
-}
-const BURMA_BOARD_INFO = {
-    "LAST_BOARD_HEX": 2609,
-    "COLUMN_HEX_NB": 13,
-    "ROW_HEX_NB": 17,
-    "grid_x_offset": 0,
-    "grid_y_offset": 0,
-    "display_x_offset": 48.375,
-    "display_y_offset": 53.375,
-    "turn_a": 6,
-    "turn_b": 9,
-    "track_a": 0,
-    "track_b": 9,
-    "wie_a": 7,
-    "wie_b": 0,
-    "pw_a": 10,
-    "pw_b": 0,
-    "TURN_STACK_PARAMS": VERTICAL_TURN_STACK_PARAMS,
-    "TRACK_STACK_PARAMS": VERTICAL_TURN_STACK_PARAMS,
-    "hex_check": (i) => {
-        var x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
-        var y = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
-
-
-        if (x == 15 && y > 9) {
-            return false
-        } else if (x == 16 && y > 9) {
-            return false
-        }
-        return hex_in_map(x, y) &&
-            i != 92 // Remove unplayable hex in india not catched by the standard data check (1305)
-    }
-}
-
-const SOUTH_PAC_BOARD_INFO = {
-    "LAST_BOARD_HEX": 5027,
-    "COLUMN_HEX_NB": 13,
-    "ROW_HEX_NB": 21,
-    "grid_x_offset": 20,
-    "grid_y_offset": 16,
-    "display_x_offset": 89.375,
-    "display_y_offset": 9.125,
-    "turn_a": 3,
-    "turn_b": 6,
-    "track_a": 3,
-    "track_b": 9,
-    "wie_a": 7,
-    "wie_b": 0,
-    "pw_a": 5,
-    "pw_b": 0,
-    "TURN_STACK_PARAMS": VERTICAL_TURN_STACK_PARAMS,
-    "TRACK_STACK_PARAMS": VERTICAL_TURN_STACK_PARAMS,
-    "hex_check": (i) => {
-        if (int_to_hex(i) === 4818 || int_to_hex(i) === 4918) {
-            return true
-        }
-        var x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
-        var y = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
-
-        if (SP_BORDER[x] && y < SP_BORDER[x]) {
-            return false
-        }
-
-        if (i === 1188) {
-            return false
-        } else if (x == 24 && y == 16) {
-            return true
-        } else if ((x % 2 == 0) && y == 16) {
-            return false
-        }
-        return hex_in_map(x, y)
-    }
-}
-
-
-let ALL_BOARD_HEXES = []
-
-let SID = FULL_CAMPAIGN_SCENARIO
-let map_layout = layout.mainmap
-let map_info = MAIN_BOARD_INFO
-
-
-var SP_BORDER = []
-for (var i = 0; i < sp_map.length; i++) {
-    var hex = hex_to_int(sp_map[i].id)
-    let x = Math.floor(hex / 29)
-    let y = hex % 29
-    if (sp_map[i].top) {
-        SP_BORDER[x] = y
-    }
-}
-
-function set_map_size(w, h) {
-    update_map_size(w, h)
-}
 
 check_supply = function () {
     if (!G.client_supply) {
@@ -10585,7 +10584,16 @@ check_supply = function () {
     G.client_supply = 1
 }
 
+function define_s_loc(id, rect) {
+    define_stack("s-loc", id,
+        rect,
+        { ...VERTICAL_STACK_PARAMS, sort: sort_unit_stack }
+    )
+}
+
 function on_init(scenario, game_options, static_view) {
+    let map_layout = LAYOUT.mainmap
+
     canvas_init(scenario)
 
     init_preference_checkbox("noroad", false)
@@ -10608,7 +10616,7 @@ function on_init(scenario, game_options, static_view) {
         case "South Pacific": {
             nations.AUSTRALIAN_MANDATES.keys = nations.AUSTRALIAN_MANDATES.ports
             SID = SOUTH_PACIFIC_SCENARIO
-            map_layout = layout.southpac
+            map_layout = LAYOUT.southpac
             map_elem.classList.add("southpac")
             define_board("#map", 1275, 825, [12, 12, 12, 12])
             map_info = SOUTH_PAC_BOARD_INFO
@@ -10619,12 +10627,12 @@ function on_init(scenario, game_options, static_view) {
             define_s_loc(1400, center_rect(map_layout.h_5808, 45, 45))
             define_space("action_hex", 1400, center_rect(map_layout.h_5808, 68, 68))
                 .tooltip(format_hex_tooltip)
-            set_map_size(1275, 825)
+            update_map_size(1275, 825)
             break
         }
         case  "Burma: The Forgotten War, 1943-1944": {
             SID = BURMA_SCENARIO
-            map_layout = layout.burma
+            map_layout = LAYOUT.burma
             map_elem.classList.add("burma")
             define_board("#map", 1275, 825, [12, 12, 12, 12])
             map_info = BURMA_BOARD_INFO
@@ -10636,12 +10644,12 @@ function on_init(scenario, game_options, static_view) {
             define_thing("road", events.IMPHAL_ROAD.id).layout([550, 330, 60, 60], "road_imphal hide marker control")
             define_thing("road", events.LEDO_ROAD.id).layout([600, 300, 60, 60], "road_ledo hide marker control")
             define_thing("road", events.KWAI_RIVER_BRIDGE.id).layout([528, 501, 50, 95], "road_kwai hide marker control")
-            set_map_size(1275, 825)
+            update_map_size(1275, 825)
             break
         }
         default: {
             SID = FULL_CAMPAIGN_SCENARIO
-            map_layout = layout.mainmap
+            map_layout = LAYOUT.mainmap
             map_elem.classList.add("main")
             define_board("#map", 2550, 1650, [12, 12, 12, 12])
             map_info = MAIN_BOARD_INFO
@@ -10649,7 +10657,7 @@ function on_init(scenario, game_options, static_view) {
             define_thing("road", events.IMPHAL_ROAD.id).layout([579, 330, 60, 60], "road_imphal hide marker control")
             define_thing("road", events.LEDO_ROAD.id).layout([629, 300, 60, 60], "road_ledo hide marker control")
             define_thing("road", events.KWAI_RIVER_BRIDGE.id).layout([557, 501, 50, 95], "road_kwai hide marker control")
-            set_map_size(2550, 1650)
+            update_map_size(2550, 1650)
         }
     }
     var href = document.getElementsByClassName("deck_href")
@@ -12118,6 +12126,13 @@ function apply_conflict_marker(marker, hex) {
 const CANVAS = document.getElementById("canvas")
 const CANVAS_CTX = document.getElementById("canvas").getContext("2d")
 
+const SUPPLY_COLORS = {
+    to_port: "green",
+    from_port: "red",
+    to_hq: "blue",
+    to_source: "yellow",
+}
+
 function canvas_init(scenario) {
     let sizeX, sizeY
     switch (scenario) {
@@ -12191,7 +12206,7 @@ function canvas_draw_supply(supply_data) {
         var v = supply_data.path[type]
         var start = hex_center(v[0])
         var finish
-        var color = SUPPLY_TYPES[type].color
+        var color = SUPPLY_COLORS[type]
         var d = index * 2 - 3
         CANVAS_CTX.strokeStyle = color
         CANVAS_CTX.fillStyle = color
@@ -12346,20 +12361,22 @@ const CARD_NAMES = cards.map(c => c?.name)
 const UNIT_NAMES = pieces.map(p => p?.name)
 
 const HEX_NAMES = []
-for (let i = 0; i <= TUNNEL_BOX; ++i) {
-    if (i === CHINA_BOX) {
-        HEX_NAMES[i] = "China Box"
-    } else if (i > LAST_BOARD_HEX) {
-        HEX_NAMES[i] = "offboard"
-    } else {
-        let hex = int_to_hex(i)
-        let info = map.find(e => e.id === hex)
-        if (info && info.name)
-            HEX_NAMES[i] = `${info.name} (${hex})`
-        else
-            HEX_NAMES[i] = String(hex)
+;(function(){
+    for (let i = 0; i <= TUNNEL_BOX; ++i) {
+        if (i === CHINA_BOX) {
+            HEX_NAMES[i] = "China Box"
+        } else if (i > LAST_BOARD_HEX) {
+            HEX_NAMES[i] = "offboard"
+        } else {
+            let hex = int_to_hex(i)
+            let info = map.find(e => e.id === hex)
+            if (info && info.name)
+                HEX_NAMES[i] = `${info.name} (${hex})`
+            else
+                HEX_NAMES[i] = String(hex)
+        }
     }
-}
+})()
 
 const ICONS = {
     B0: '<span class="xdice B d0"></span>',
@@ -12528,6 +12545,58 @@ function on_log(text, i) {
 /* {{{ js/client/utils.js */
 /* MISC CLIENT STUFF */
 
+const BR_REGIONS = ["India", "Ceylon", "NIndia", "Burma", "Siam", "Malaya", "Sumatra", "Indochina", "IChina"]
+const BR_NATIONS = [-3, nations.AUSTRALIA.id, nations.BURMA.id, nations.MALAYA.id]
+const JP_REGIONS = ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Caroline", "Japan", "Marshall"]
+
+const JP_BOUNDARY_HEX = []
+const REGIONS_BY_NATION = {}
+const HEX_BY_NATION = []
+
+;(function(){
+
+    for (var key of Object.keys(counters)) {
+        counters[key] = "marker " + counters[key]
+    }
+
+    for (var key of Object.keys(nations)) {
+        if (nations[key].counter) {
+            nations[key].counter = "marker " + nations[key].counter
+        }
+        if (!nations[key].no_full_control && nations[key].regions) {
+            for (var reg of nations[key].regions) {
+                REGIONS_BY_NATION[reg] = nations[key]
+            }
+        }
+    }
+
+    for (var key of Object.keys(events)) {
+        if (events[key].counter) {
+            events[key].counter = "marker " + events[key].counter
+        }
+    }
+
+    for (var i = 0; i < map.length; i++) {
+        var hex = hex_to_int(map[i].id)
+        var region = map[i].region
+        var nation = REGIONS_BY_NATION[region]
+        if (nation) {
+            HEX_BY_NATION[hex] = nation.id
+        } else if (JP_REGIONS.includes(region)) {
+            HEX_BY_NATION[hex] = -1
+        } else if (BR_REGIONS.includes(region)) {
+            HEX_BY_NATION[hex] = -3
+        } else {
+            HEX_BY_NATION[hex] = -2
+        }
+        if (JP_REGIONS.includes(region)) {
+            set_add(JP_BOUNDARY_HEX, hex)
+        }
+    }
+    HEX_BY_NATION[hex_to_int(2709)] = -3
+
+})()
+
 function center_rect([x, y], w, h) {
     return [x - w / 2, y - h / 2, w, h]
 }
@@ -12588,6 +12657,12 @@ function get_element_weight(e) {
 }
 
 function hex_center(i) {
+    var map_layout = LAYOUT.mainmap
+    if (SID === SOUTH_PACIFIC_SCENARIO)
+        map_layout = LAYOUT.southpac
+    if (SID === BURMA_SCENARIO)
+            map_layout = LAYOUT.burma
+
     if (i === CHINA_BOX) {
         var box = map_layout.box_air_unit_in_china
         return center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])

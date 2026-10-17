@@ -1,6 +1,13 @@
 const CANVAS = document.getElementById("canvas")
 const CANVAS_CTX = document.getElementById("canvas").getContext("2d")
 
+const SUPPLY_COLORS = {
+    to_port: "green",
+    from_port: "red",
+    to_hq: "blue",
+    to_source: "yellow",
+}
+
 function canvas_init(scenario) {
     let sizeX, sizeY
     switch (scenario) {
@@ -74,7 +81,7 @@ function canvas_draw_supply(supply_data) {
         var v = supply_data.path[type]
         var start = hex_center(v[0])
         var finish
-        var color = SUPPLY_TYPES[type].color
+        var color = SUPPLY_COLORS[type]
         var d = index * 2 - 3
         CANVAS_CTX.strokeStyle = color
         CANVAS_CTX.fillStyle = color
