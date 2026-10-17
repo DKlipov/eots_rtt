@@ -11,6 +11,15 @@ function on_reply(q, response) {
         P.check_unit_supply.show_supply(response)
 }
 
+check_supply = function () {
+    if (!G.client_supply) {
+        world.original_oos = G.oos
+        world.original_br = G.burma_road
+    }
+    basic_check_supply()
+    G.client_supply = 1
+}
+
 // MARKERS
 
 const SCENARIO_LENGTH = [
@@ -223,27 +232,16 @@ const TURN_MARKERS = [
     },
 ]
 
-
-check_supply = function () {
-    if (!G.client_supply) {
-        world.original_oos = G.oos
-        world.original_br = G.burma_road
-    }
-    basic_check_supply()
-    G.client_supply = 1
-}
-
-function define_s_loc(id, rect) {
-    define_stack("s-loc", id,
-        rect,
-        { ...VERTICAL_STACK_PARAMS, sort: sort_unit_stack }
-    )
-}
+// DEFINE WORLD
 
 function on_init(scenario, game_options, static_view) {
-    let map_layout = LAYOUT.mainmap
+    var map_layout = LAYOUT.mainmap
 
     canvas_init(scenario)
+
+    function define_s_loc(id, rect) {
+        define_stack("s-loc", id, rect, { ...VERTICAL_STACK_PARAMS, sort: sort_unit_stack })
+    }
 
     init_preference_checkbox("noroad", false)
     init_preference_checkbox("nopath", false)
@@ -257,16 +255,17 @@ function on_init(scenario, game_options, static_view) {
     create_window("window_eliminated", "Eliminated Units", update_window_eliminated)
     create_window("window_combat", "Combat X")
 
-    // world.tip.addEventListener("touchstart", function () {
-    //     on_blur_tip()
-    // })
-    let map_elem = document.getElementById("mapwrap")
+    define_panel("#jp_hand", "hand", JP)
+    define_panel("#ap_hand", "hand", AP)
+    define_panel("#active_cards", "hand", 2)
+
+    var mapwrap = document.getElementById("mapwrap")
     switch (scenario) {
         case "South Pacific": {
             nations.AUSTRALIAN_MANDATES.keys = nations.AUSTRALIAN_MANDATES.ports
             SID = SOUTH_PACIFIC_SCENARIO
             map_layout = LAYOUT.southpac
-            map_elem.classList.add("southpac")
+            mapwrap.classList.add("southpac")
             define_board("#map", 1275, 825, [12, 12, 12, 12])
             map_info = SOUTH_PAC_BOARD_INFO
 
@@ -282,7 +281,7 @@ function on_init(scenario, game_options, static_view) {
         case  "Burma: The Forgotten War, 1943-1944": {
             SID = BURMA_SCENARIO
             map_layout = LAYOUT.burma
-            map_elem.classList.add("burma")
+            mapwrap.classList.add("burma")
             define_board("#map", 1275, 825, [12, 12, 12, 12])
             map_info = BURMA_BOARD_INFO
 
@@ -299,7 +298,7 @@ function on_init(scenario, game_options, static_view) {
         default: {
             SID = FULL_CAMPAIGN_SCENARIO
             map_layout = LAYOUT.mainmap
-            map_elem.classList.add("main")
+            mapwrap.classList.add("main")
             define_board("#map", 2550, 1650, [12, 12, 12, 12])
             map_info = MAIN_BOARD_INFO
             define_thing("road", events.JARHAT_ROAD.id).layout([578, 286, 60, 60], "road_jarhat hide marker control")
@@ -309,10 +308,9 @@ function on_init(scenario, game_options, static_view) {
             update_map_size(2550, 1650)
         }
     }
-    var href = document.getElementsByClassName("deck_href")
-    for (var i = 0; i < href.length; i++) {
-        href[i].href += `&sid=${SID}`
-    }
+
+    document.getElementById("ap_deck_link").href += `&sid=${SID}`
+    document.getElementById("jp_deck_link").href += `&sid=${SID}`
 
     // used hexes
     var used_hex = []
@@ -354,10 +352,7 @@ function on_init(scenario, game_options, static_view) {
     if (SID !== BURMA_SCENARIO) {
         define_s_loc(DELAYED_BOX, map_layout.box_delayed_reinf)
     }
-    define_stack("s-loc", CHINA_BOX,
-        map_layout.box_air_unit_in_china,
-        { ...TRACK_STACK_PARAMS, sort: sort_unit_stack }
-    )
+    define_stack("s-loc", CHINA_BOX, map_layout.box_air_unit_in_china, { ...TRACK_STACK_PARAMS, sort: sort_unit_stack })
 
     define_space("action_hex", CHINA_BOX, map_layout.box_air_unit_in_china, "china_box")
         .tooltip("China Box")
@@ -383,6 +378,10 @@ function on_init(scenario, game_options, static_view) {
     if (map_layout.track_japanese_divisions_available_china !== undefined) {
         define_layout_track_h("divisions", 1, (SID == BURMA_SCENARIO ? 9 : 13), map_layout.track_japanese_divisions_available_china, 0)
     }
+
+    define_marker("divisions", 0, counters.divisions_china)
+
+    // Battle and Landing markers
     for (i = 0; i < 35; i++) {
         var battle = define_thing("battle", i).keyword("marker conflict battle top").animate()
         battle.element.innerText = String.fromCharCode(65 + i)
@@ -407,19 +406,20 @@ function on_init(scenario, game_options, static_view) {
         })
         landing.stackable()
     }
-    define_marker("divisions", 0, counters.divisions_china)
+
+    // Units
     for (let i = 1; i < pieces.length; ++i) {
         let piece = pieces[i]
         piece.element = define_piece("unit", i, (piece.faction ? "ap " : "jp ") + piece.counter)
             .tip_magic(focus_unit, blur_unit)
             .tooltip(format_unit_tooltip)
     }
+
+    // Cards
     for (let i = 1; i < cards.length; ++i) {
         let card = cards[i]
         card.element = define_card("card", i, `card_${card.faction ? "ap" : "jp"}_${card.num}`)
         card.element.card = i
     }
-    define_panel("#jp_hand", "hand", JP)
-    define_panel("#ap_hand", "hand", AP)
-    define_panel("#active_cards", "hand", 2)
+
 }
