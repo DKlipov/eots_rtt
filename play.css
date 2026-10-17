@@ -511,17 +511,12 @@ body.hex-clickable .action_hex { z-index: 50; }
     border: none;
 }
 
-.card > .big.marker {
-    width: 90px;
-    height: 90px;
-    right: 10px;
+.card > .marker {
+    position: absolute;
     top: 10px;
-}
-.card > .big.unit_ix_4 {
-    background-position-x:  -270px;
-}
-.card > .big.unit_ix_5 {
-    background-position-x:  -360px;
+    right: 10px;
+    transform: scale(1.333);
+    transform-origin: top right;
 }
 
 /* MARKER IMAGES */
