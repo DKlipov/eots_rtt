@@ -7562,7 +7562,7 @@ function array_equals(a, b) {
 }
 
 /* }}} */
-/* {{{ js/supply.js */
+/* {{{ js/common/supply.js */
 var last = Date.now()
 var count = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
@@ -8454,7 +8454,7 @@ function mark_activation_zone(hq) {
     }
 }
 /* }}} */
-/* {{{ js/move.js */
+/* {{{ js/common/move.js */
 function update_move_hex() {
     if (G.active_stack.length === 0) {
         L.allowed_hexes = []
