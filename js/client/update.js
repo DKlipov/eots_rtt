@@ -136,10 +136,6 @@ function on_update() {
 
     L = {} // for shared rules/play code and client-side states
 
-    // TODO: why is this necessary?
-    if (!scenario_data().original_control)
-        send_query("original_control")
-
     // CLIENT-SIDE SUPPLY CHECK
     check_supply()
 

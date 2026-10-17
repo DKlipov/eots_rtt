@@ -18237,12 +18237,15 @@ function print_reinforcements() {
 
 /* }}} */
 /* {{{ js/server/query.js */
+function on_static_view() {
+    return {
+        original_control: scenario_data().original_control
+    }
+}
+
 function on_query(q, params) {
     if (q === "combat") {
         return combat_query(params)
-    }
-    if (q === "original_control") {
-        return scenario_data().original_control
     }
 }
 

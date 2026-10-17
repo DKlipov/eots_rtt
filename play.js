@@ -10791,6 +10791,9 @@ function on_init(scenario, game_options, static_view) {
         }
     }
 
+    if (!SCENARIO_DATA[SID].original_control)
+        SCENARIO_DATA[SID].original_control = static_view.original_control
+
     document.getElementById("vp_check_button").hidden = CAMPAIGN_SCENARIOS.includes(SID)
 
     document.getElementById("ap_deck_link").href += `&sid=${SID}`
@@ -11990,10 +11993,6 @@ function on_update() {
     begin_update()
 
     L = {} // for shared rules/play code and client-side states
-
-    // TODO: why is this necessary?
-    if (!scenario_data().original_control)
-        send_query("original_control")
 
     // CLIENT-SIDE SUPPLY CHECK
     check_supply()

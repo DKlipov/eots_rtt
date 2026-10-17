@@ -304,6 +304,9 @@ function on_init(scenario, game_options, static_view) {
         }
     }
 
+    if (!SCENARIO_DATA[SID].original_control)
+        SCENARIO_DATA[SID].original_control = static_view.original_control
+
     document.getElementById("vp_check_button").hidden = CAMPAIGN_SCENARIOS.includes(SID)
 
     document.getElementById("ap_deck_link").href += `&sid=${SID}`
