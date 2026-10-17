@@ -10572,7 +10572,6 @@ const TRACK_MARKERS = [
     },
     {
         counter: counters.asp_ap,
-        reversible: true,
         value: G => G.asp[1][0]
     },
     {
@@ -10582,7 +10581,6 @@ const TRACK_MARKERS = [
     },
     {
         counter: counters.resource_jp,
-        reversible: true,
         value: G => array_count(RESOURCE_HEX, h => is_space_controlled(h, JP))
     },
     {
@@ -10620,13 +10618,12 @@ const TRACK_MARKERS = [
     },
     {
         counter: counters.aspu_jp,
-        always_show: true,
+        always_show: G => true,
         value: G => G.asp[0][1]
     },
     {
         counter: counters.aspu_ap,
-        reversible: true,
-        always_show: true,
+        always_show: G => true,
         value: G => G.asp[1][1]
     },
 ]
@@ -10912,6 +10909,14 @@ function on_init(scenario, game_options, static_view) {
         let card = cards[i]
         card.element = define_card("card", i, `card_${card.faction ? "ap" : "jp"}_${card.num}`)
         card.element.card = i
+    }
+
+    for (let key in nations) {
+        var nation = nations[key]
+        if (nation.counter) {
+            define_marker("nation-marker-turn", nation.id, nation.counter)
+            define_marker("nation-marker-map", nation.id, nation.counter)
+        }
     }
 
     TRACK_MARKERS.forEach(function (m, i) {
@@ -12134,51 +12139,55 @@ function on_update() {
 
     populate_generic("china", Math.min(5, G.events[events.CHINA_STATUS.id]), counters.china)
 
-    var turns = world.things["turn"]
-    for (var key of Object.keys(nations)) {
+    // TURN MARKERS
+
+    var last_turn = Math.max(map_info.turn_a, map_info.turn_b)
+
+    for (var key in nations) {
         var nation = nations[key]
-        var marker = nation.counter
-        var hex = nation.counter_hex
-        var value = G.surrender[nation.id]
-        if (nation.id === nations.MARSHALL.id) {
-            value = !value
-        }
-        if (marker && turns[value] && value) {
-            populate_generic("turn", value, marker)
-        }
-        if (marker && hex && value && !vassal_control && map_info.hex_check(hex_to_int(hex))) {
-            populate_generic("s-loc", hex_to_int(hex), marker)
+        if (nation.counter) {
+            var hex = nation.counter_hex
+            var value = G.surrender[nation.id]
+            if (nation.id === nations.MARSHALL.id)
+                value = !value
+            if (value > 0 && value <= last_turn)
+                populate("turn", value, "nation-marker-turn", nation.id)
+            if (hex && value && !vassal_control && map_info.hex_check(hex_to_int(hex)))
+                populate("s-loc", hex_to_int(hex), "nation-marker-map", nation.id)
         }
     }
 
     for (i = 0; i < TURN_MARKERS.length; i++) {
         const marker = TURN_MARKERS[i]
         var v = marker.value(G)
-        if (v > 0 && turns[v]) { // v <= map_info.turn_b) {
+        if (v > 0 && v <= last_turn) {
             populate("turn", v, "turn-marker", i)
             if (marker.reduced?.(G))
                 update_keyword("turn-marker", i, "reduced")
-            if (marker.gray?.(G))
-                update_keyword("turn-marker", i, "gray")
         }
     }
+
+    // TRACK MARKERS
 
     for (i = 0; i < TRACK_MARKERS.length; i++) {
         const marker = TRACK_MARKERS[i]
         var value = marker.value(G)
-        var track = Math.min(9, value)
-        if (value > 9 && marker.reversible) {
-            update_keyword("track-marker", i, "reduced")
-            track = Math.min(9, value - 10)
-        }
-        if (value > 0 || marker.always_show === true || (marker.always_show === 'function' && marker.always_show(G))) {
-            populate("track", track, "track-marker", i)
+        if (value > 0 || marker.always_show?.(G)) {
+            populate("track", value % 10, "track-marker", i)
+            if (value > 9)
+                update_keyword("track-marker", i, "reduced")
+            if (marker.gray?.(G))
+                update_keyword("track-marker", i, "gray")
         }
     }
+
+    // LOCAL ACTIONS
 
     if (LOCAL_STATUS) {
         P[LOCAL_STATUS].on_update()
     }
+
+    // BUTTONS
 
     action_button("play_card", "Choose card")
     action_button("to_unit", "Rebuild unit")
@@ -12229,6 +12238,7 @@ function on_update() {
 
     action_button("redo", "Redo")
     action_button("undo", "Undo")
+
     end_update()
 }
 

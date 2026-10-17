@@ -85,7 +85,6 @@ const TRACK_MARKERS = [
     },
     {
         counter: counters.asp_ap,
-        reversible: true,
         value: G => G.asp[1][0]
     },
     {
@@ -95,7 +94,6 @@ const TRACK_MARKERS = [
     },
     {
         counter: counters.resource_jp,
-        reversible: true,
         value: G => array_count(RESOURCE_HEX, h => is_space_controlled(h, JP))
     },
     {
@@ -133,13 +131,12 @@ const TRACK_MARKERS = [
     },
     {
         counter: counters.aspu_jp,
-        always_show: true,
+        always_show: G => true,
         value: G => G.asp[0][1]
     },
     {
         counter: counters.aspu_ap,
-        reversible: true,
-        always_show: true,
+        always_show: G => true,
         value: G => G.asp[1][1]
     },
 ]
@@ -425,6 +422,14 @@ function on_init(scenario, game_options, static_view) {
         let card = cards[i]
         card.element = define_card("card", i, `card_${card.faction ? "ap" : "jp"}_${card.num}`)
         card.element.card = i
+    }
+
+    for (let key in nations) {
+        var nation = nations[key]
+        if (nation.counter) {
+            define_marker("nation-marker-turn", nation.id, nation.counter)
+            define_marker("nation-marker-map", nation.id, nation.counter)
+        }
     }
 
     TRACK_MARKERS.forEach(function (m, i) {
