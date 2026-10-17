@@ -46,34 +46,7 @@ P.check_unit_supply = {
         if (!LOCAL_STATE.supply_data) {
             return
         }
-        clear_paths()
-        Object.keys(LOCAL_STATE.supply_data.path).forEach((type, index) => {
-            var v = LOCAL_STATE.supply_data.path[type]
-            var start = hex_center(v[0])
-            var finish
-            var color = SUPPLY_TYPES[type].color
-            var d = index * 2 - 3
-            CANVAS_CTX.strokeStyle = color
-            CANVAS_CTX.fillStyle = color
-            CANVAS_CTX.lineWidth = 3
-            for (var j = 1; j < v.length; j++) {
-                start = hex_center(v[j - 1])
-                finish = hex_center(v[j])
-                CANVAS_CTX.beginPath()
-                if (LOCAL_STATE.supply_data.oos) {
-                    CANVAS_CTX.setLineDash([5, 3])
-                }
-                CANVAS_CTX.moveTo(start[0], start[1] + d)
-                CANVAS_CTX.lineTo(finish[0], finish[1] + d)
-                CANVAS_CTX.stroke()
-                CANVAS_CTX.setLineDash([])
-            }
-            if (finish) {
-                CANVAS_CTX.beginPath()
-                CANVAS_CTX.fillRect(finish[0] - 4, finish[1] - 4 + d, 8, 8)
-                CANVAS_CTX.stroke()
-            }
-        })
+        canvas_draw_supply(LOCAL_STATE.supply_data)
         var focused = []
         if (LOCAL_STATE.unit && pieces[LOCAL_STATE.unit].class === "hq" && G.location[LOCAL_STATE.unit] < LAST_BOARD_HEX) {
             for_each_hex_in_range(G.location[LOCAL_STATE.unit], pieces[LOCAL_STATE.unit].cr, hex => set_add(focused, hex))
@@ -84,7 +57,6 @@ P.check_unit_supply = {
         }
     },
 }
-
 
 P.check_distance = {
     _begin() {

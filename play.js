@@ -10182,10 +10182,6 @@ function on_reply(q, response) {
         P.check_unit_supply.show_supply(response)
 }
 
-function clear_paths() {
-    CANVAS_CTX.clearRect(0, 0, CANVAS.width, CANVAS.height)
-}
-
 function sort_unit_stack(a, b) {
     var aw = get_element_weight(a) + a.thing.my_id
     var bw = get_element_weight(b) + b.thing.my_id
@@ -10250,9 +10246,6 @@ const SUPPLY_TYPES = {
     to_hq: {color: "blue"},
     to_source: {color: "yellow"},
 }
-
-const CANVAS = document.getElementById("canvas")
-const CANVAS_CTX = document.getElementById("canvas").getContext("2d")
 
 const BR_REGIONS = ["India", "Ceylon", "NIndia", "Burma", "Siam", "Malaya", "Sumatra", "Indochina", "IChina"]
 const JP_REGIONS = ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Caroline", "Japan", "Marshall"]
@@ -10643,7 +10636,7 @@ check_supply = function () {
 }
 
 function on_init(scenario, game_options, static_view) {
-    init_canvas(scenario)
+    canvas_init(scenario)
 
     init_preference_checkbox("noroad", false)
     init_preference_checkbox("nopath", false)
@@ -10824,32 +10817,6 @@ function on_init(scenario, game_options, static_view) {
     define_panel("#active_cards", "hand", 2)
 }
 
-function init_canvas(scenario) {
-    let sizeX, sizeY
-    switch (scenario) {
-        case "South Pacific":
-        case  "Burma: The Forgotten War, 1943-1944": {
-            sizeX = 1275
-            sizeY = 825
-            break
-        }
-            ;
-        default: {
-            sizeX = 2550
-            sizeY = 1650
-        }
-    }
-
-    CANVAS.style.width = sizeX + "px"
-    CANVAS.style.height = sizeY + "px"
-
-    var scale = window.devicePixelRatio
-    CANVAS.width = sizeX * scale
-    CANVAS.height = sizeY * scale
-
-    CANVAS_CTX.scale(scale, scale)
-}
-
 /* }}} */
 /* {{{ js/client/actions.js */
 var LOCAL_STATUS = 0
@@ -10900,34 +10867,7 @@ P.check_unit_supply = {
         if (!LOCAL_STATE.supply_data) {
             return
         }
-        clear_paths()
-        Object.keys(LOCAL_STATE.supply_data.path).forEach((type, index) => {
-            var v = LOCAL_STATE.supply_data.path[type]
-            var start = hex_center(v[0])
-            var finish
-            var color = SUPPLY_TYPES[type].color
-            var d = index * 2 - 3
-            CANVAS_CTX.strokeStyle = color
-            CANVAS_CTX.fillStyle = color
-            CANVAS_CTX.lineWidth = 3
-            for (var j = 1; j < v.length; j++) {
-                start = hex_center(v[j - 1])
-                finish = hex_center(v[j])
-                CANVAS_CTX.beginPath()
-                if (LOCAL_STATE.supply_data.oos) {
-                    CANVAS_CTX.setLineDash([5, 3])
-                }
-                CANVAS_CTX.moveTo(start[0], start[1] + d)
-                CANVAS_CTX.lineTo(finish[0], finish[1] + d)
-                CANVAS_CTX.stroke()
-                CANVAS_CTX.setLineDash([])
-            }
-            if (finish) {
-                CANVAS_CTX.beginPath()
-                CANVAS_CTX.fillRect(finish[0] - 4, finish[1] - 4 + d, 8, 8)
-                CANVAS_CTX.stroke()
-            }
-        })
+        canvas_draw_supply(LOCAL_STATE.supply_data)
         var focused = []
         if (LOCAL_STATE.unit && pieces[LOCAL_STATE.unit].class === "hq" && G.location[LOCAL_STATE.unit] < LAST_BOARD_HEX) {
             for_each_hex_in_range(G.location[LOCAL_STATE.unit], pieces[LOCAL_STATE.unit].cr, hex => set_add(focused, hex))
@@ -10938,7 +10878,6 @@ P.check_unit_supply = {
         }
     },
 }
-
 
 P.check_distance = {
     _begin() {
@@ -11773,44 +11712,6 @@ function update_hand(side) {
 }
 
 
-function draw_paths() {
-    map_for_each(G.offensive.paths, (k, v) => {
-        if (G.location[k] > LAST_BOARD_HEX && G.location[k] !== CHINA_BOX) {
-            return
-        }
-        var start = hex_center(v[2])
-        var finish
-        var color = pieces[k].faction ? "blue" : "red"
-        var d = pieces[k].faction ? -2 : 2
-        CANVAS_CTX.strokeStyle = color
-        CANVAS_CTX.fillStyle = color
-        CANVAS_CTX.lineWidth = 1
-        for (var j = 3; j < v.length; j++) {
-            start = hex_center(v[j - 1])
-            finish = hex_center(v[j])
-            CANVAS_CTX.beginPath()
-            if (v[j - 1] === v[j] || j === 3) {
-                CANVAS_CTX.arc(start[0], start[1] + d, 4, 0, 2 * Math.PI)
-                CANVAS_CTX.fill()
-                CANVAS_CTX.stroke()
-            }
-            CANVAS_CTX.beginPath()
-            if (G.location[k] === v[j - 1] && j === v.length - 1) {
-                CANVAS_CTX.setLineDash([5, 3])
-            }
-            CANVAS_CTX.moveTo(start[0], start[1] + d)
-            CANVAS_CTX.lineTo(finish[0], finish[1] + d)
-            CANVAS_CTX.stroke()
-            CANVAS_CTX.setLineDash([])
-        }
-        if (finish) {
-            CANVAS_CTX.beginPath()
-            CANVAS_CTX.fillRect(finish[0] - 4, finish[1] - 4 + d, 8, 8)
-            CANVAS_CTX.stroke()
-        }
-    })
-}
-
 function place_unit(u, location) {
     var piece = pieces[u]
     var unit
@@ -11952,9 +11853,11 @@ function on_update() {
             set_add(G.reduced, u)
         }
     })
-    clear_paths()
+
     if (!get_preference("nopath", false)) {
-        draw_paths()
+        canvas_draw_paths()
+    } else {
+        canvas_clear_paths()
     }
 
     document.getElementById("vp_check_button").hidden = CAMPAIGN_SCENARIOS.includes(G.sid)
@@ -12243,6 +12146,109 @@ function update_violations() {
 
 function apply_conflict_marker(marker, hex) {
     marker.innerText = String.fromCharCode(65 + G.offensive.battle_names.indexOf(hex))
+}
+
+/* }}} */
+/* {{{ js/client/canvas.js */
+const CANVAS = document.getElementById("canvas")
+const CANVAS_CTX = document.getElementById("canvas").getContext("2d")
+
+function canvas_init(scenario) {
+    let sizeX, sizeY
+    switch (scenario) {
+    case "South Pacific":
+    case "Burma: The Forgotten War, 1943-1944":
+        sizeX = 1275
+        sizeY = 825
+        break
+    default:
+        sizeX = 2550
+        sizeY = 1650
+        break
+    }
+
+    CANVAS.style.width = sizeX + "px"
+    CANVAS.style.height = sizeY + "px"
+
+    var scale = window.devicePixelRatio
+    CANVAS.width = sizeX * scale
+    CANVAS.height = sizeY * scale
+
+    CANVAS_CTX.scale(scale, scale)
+}
+
+function canvas_clear_paths() {
+    CANVAS_CTX.clearRect(0, 0, CANVAS.width, CANVAS.height)
+}
+
+function canvas_draw_paths() {
+    canvas_clear_paths()
+    map_for_each(G.offensive.paths, (k, v) => {
+        if (G.location[k] > LAST_BOARD_HEX && G.location[k] !== CHINA_BOX) {
+            return
+        }
+        var start = hex_center(v[2])
+        var finish
+        var color = pieces[k].faction ? "blue" : "red"
+        var d = pieces[k].faction ? -2 : 2
+        CANVAS_CTX.strokeStyle = color
+        CANVAS_CTX.fillStyle = color
+        CANVAS_CTX.lineWidth = 1
+        for (var j = 3; j < v.length; j++) {
+            start = hex_center(v[j - 1])
+            finish = hex_center(v[j])
+            CANVAS_CTX.beginPath()
+            if (v[j - 1] === v[j] || j === 3) {
+                CANVAS_CTX.arc(start[0], start[1] + d, 4, 0, 2 * Math.PI)
+                CANVAS_CTX.fill()
+                CANVAS_CTX.stroke()
+            }
+            CANVAS_CTX.beginPath()
+            if (G.location[k] === v[j - 1] && j === v.length - 1) {
+                CANVAS_CTX.setLineDash([5, 3])
+            }
+            CANVAS_CTX.moveTo(start[0], start[1] + d)
+            CANVAS_CTX.lineTo(finish[0], finish[1] + d)
+            CANVAS_CTX.stroke()
+            CANVAS_CTX.setLineDash([])
+        }
+        if (finish) {
+            CANVAS_CTX.beginPath()
+            CANVAS_CTX.fillRect(finish[0] - 4, finish[1] - 4 + d, 8, 8)
+            CANVAS_CTX.stroke()
+        }
+    })
+}
+
+function canvas_draw_supply(supply_data) {
+    canvas_clear_paths()
+    Object.keys(supply_data.path).forEach((type, index) => {
+        var v = supply_data.path[type]
+        var start = hex_center(v[0])
+        var finish
+        var color = SUPPLY_TYPES[type].color
+        var d = index * 2 - 3
+        CANVAS_CTX.strokeStyle = color
+        CANVAS_CTX.fillStyle = color
+        CANVAS_CTX.lineWidth = 3
+        for (var j = 1; j < v.length; j++) {
+            start = hex_center(v[j - 1])
+            finish = hex_center(v[j])
+            CANVAS_CTX.beginPath()
+            if (supply_data.oos) {
+                CANVAS_CTX.setLineDash([5, 3])
+            }
+            CANVAS_CTX.moveTo(start[0], start[1] + d)
+            CANVAS_CTX.lineTo(finish[0], finish[1] + d)
+            CANVAS_CTX.stroke()
+            CANVAS_CTX.setLineDash([])
+        }
+        if (finish) {
+            CANVAS_CTX.beginPath()
+            CANVAS_CTX.fillRect(finish[0] - 4, finish[1] - 4 + d, 8, 8)
+            CANVAS_CTX.stroke()
+        }
+    })
 }
 
 /* }}} */

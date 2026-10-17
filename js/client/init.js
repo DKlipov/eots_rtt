@@ -7,10 +7,6 @@ function on_reply(q, response) {
         P.check_unit_supply.show_supply(response)
 }
 
-function clear_paths() {
-    CANVAS_CTX.clearRect(0, 0, CANVAS.width, CANVAS.height)
-}
-
 function sort_unit_stack(a, b) {
     var aw = get_element_weight(a) + a.thing.my_id
     var bw = get_element_weight(b) + b.thing.my_id
@@ -75,9 +71,6 @@ const SUPPLY_TYPES = {
     to_hq: {color: "blue"},
     to_source: {color: "yellow"},
 }
-
-const CANVAS = document.getElementById("canvas")
-const CANVAS_CTX = document.getElementById("canvas").getContext("2d")
 
 const BR_REGIONS = ["India", "Ceylon", "NIndia", "Burma", "Siam", "Malaya", "Sumatra", "Indochina", "IChina"]
 const JP_REGIONS = ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Caroline", "Japan", "Marshall"]
@@ -468,7 +461,7 @@ check_supply = function () {
 }
 
 function on_init(scenario, game_options, static_view) {
-    init_canvas(scenario)
+    canvas_init(scenario)
 
     init_preference_checkbox("noroad", false)
     init_preference_checkbox("nopath", false)
@@ -647,30 +640,4 @@ function on_init(scenario, game_options, static_view) {
     define_panel("#jp_hand", "hand", JP)
     define_panel("#ap_hand", "hand", AP)
     define_panel("#active_cards", "hand", 2)
-}
-
-function init_canvas(scenario) {
-    let sizeX, sizeY
-    switch (scenario) {
-        case "South Pacific":
-        case  "Burma: The Forgotten War, 1943-1944": {
-            sizeX = 1275
-            sizeY = 825
-            break
-        }
-            ;
-        default: {
-            sizeX = 2550
-            sizeY = 1650
-        }
-    }
-
-    CANVAS.style.width = sizeX + "px"
-    CANVAS.style.height = sizeY + "px"
-
-    var scale = window.devicePixelRatio
-    CANVAS.width = sizeX * scale
-    CANVAS.height = sizeY * scale
-
-    CANVAS_CTX.scale(scale, scale)
 }

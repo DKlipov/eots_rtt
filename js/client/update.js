@@ -29,44 +29,6 @@ function update_hand(side) {
 }
 
 
-function draw_paths() {
-    map_for_each(G.offensive.paths, (k, v) => {
-        if (G.location[k] > LAST_BOARD_HEX && G.location[k] !== CHINA_BOX) {
-            return
-        }
-        var start = hex_center(v[2])
-        var finish
-        var color = pieces[k].faction ? "blue" : "red"
-        var d = pieces[k].faction ? -2 : 2
-        CANVAS_CTX.strokeStyle = color
-        CANVAS_CTX.fillStyle = color
-        CANVAS_CTX.lineWidth = 1
-        for (var j = 3; j < v.length; j++) {
-            start = hex_center(v[j - 1])
-            finish = hex_center(v[j])
-            CANVAS_CTX.beginPath()
-            if (v[j - 1] === v[j] || j === 3) {
-                CANVAS_CTX.arc(start[0], start[1] + d, 4, 0, 2 * Math.PI)
-                CANVAS_CTX.fill()
-                CANVAS_CTX.stroke()
-            }
-            CANVAS_CTX.beginPath()
-            if (G.location[k] === v[j - 1] && j === v.length - 1) {
-                CANVAS_CTX.setLineDash([5, 3])
-            }
-            CANVAS_CTX.moveTo(start[0], start[1] + d)
-            CANVAS_CTX.lineTo(finish[0], finish[1] + d)
-            CANVAS_CTX.stroke()
-            CANVAS_CTX.setLineDash([])
-        }
-        if (finish) {
-            CANVAS_CTX.beginPath()
-            CANVAS_CTX.fillRect(finish[0] - 4, finish[1] - 4 + d, 8, 8)
-            CANVAS_CTX.stroke()
-        }
-    })
-}
-
 function place_unit(u, location) {
     var piece = pieces[u]
     var unit
@@ -208,9 +170,11 @@ function on_update() {
             set_add(G.reduced, u)
         }
     })
-    clear_paths()
+
     if (!get_preference("nopath", false)) {
-        draw_paths()
+        canvas_draw_paths()
+    } else {
+        canvas_clear_paths()
     }
 
     document.getElementById("vp_check_button").hidden = CAMPAIGN_SCENARIOS.includes(G.sid)
