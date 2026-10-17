@@ -126,20 +126,22 @@ const CARD_NAMES = cards.map(c => c?.name)
 const UNIT_NAMES = pieces.map(p => p?.name)
 
 const HEX_NAMES = []
-for (let i = 0; i <= TUNNEL_BOX; ++i) {
-    if (i === CHINA_BOX) {
-        HEX_NAMES[i] = "China Box"
-    } else if (i > LAST_BOARD_HEX) {
-        HEX_NAMES[i] = "offboard"
-    } else {
-        let hex = int_to_hex(i)
-        let info = map.find(e => e.id === hex)
-        if (info && info.name)
-            HEX_NAMES[i] = `${info.name} (${hex})`
-        else
-            HEX_NAMES[i] = String(hex)
+;(function(){
+    for (let i = 0; i <= TUNNEL_BOX; ++i) {
+        if (i === CHINA_BOX) {
+            HEX_NAMES[i] = "China Box"
+        } else if (i > LAST_BOARD_HEX) {
+            HEX_NAMES[i] = "offboard"
+        } else {
+            let hex = int_to_hex(i)
+            let info = map.find(e => e.id === hex)
+            if (info && info.name)
+                HEX_NAMES[i] = `${info.name} (${hex})`
+            else
+                HEX_NAMES[i] = String(hex)
+        }
     }
-}
+})()
 
 const ICONS = {
     B0: '<span class="xdice B d0"></span>',

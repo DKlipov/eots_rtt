@@ -1,3 +1,7 @@
+var SID = FULL_CAMPAIGN_SCENARIO
+var map_info = MAIN_BOARD_INFO
+const ALL_BOARD_HEXES = []
+
 function on_reply(q, response) {
     if (q === "original_control")
         scenario_data().original_control ??= response
@@ -7,113 +11,7 @@ function on_reply(q, response) {
         P.check_unit_supply.show_supply(response)
 }
 
-function define_s_loc(id, rect) {
-    define_stack("s-loc", id,
-        rect,
-        { ...VERTICAL_STACK_PARAMS, sort: sort_unit_stack }
-    )
-}
-
-const HEX_X_SIZE = 48.0
-const HEX_Y_SIZE = 55.25
-
-const TURN_STACK_PARAMS = {
-    // stack parameters:
-    dx: 5, dy: 0, // closed offset
-    major_dx: 48, major_dy: 0, // open offset (major axis)
-    minor_dx: 0, minor_dy: 35, // open offset (minor axis)
-    threshold: 1, // threshold to auto-open
-    wrap: 8, // wrap limit
-    small_dx: 18, small_dy: 0, small_threshold: 3,
-    shadow: 6
-}
-const TRACK_STACK_PARAMS = {
-    // stack parameters:
-    dx: 10, dy: 0, // closed offset
-    major_dx: 48, major_dy: 0, // open offset (major axis)
-    minor_dx: 0, minor_dy: 35, // open offset (minor axis)
-    threshold: 2, // threshold to auto-open
-    wrap: 8, // wrap limit
-    small_dx: 18, small_dy: 0, small_threshold: 4,
-    shadow: 6
-}
-const VERTICAL_STACK_PARAMS = {
-    // stack parameters:
-    dx: -2, dy: -3, // closed offset
-    major_dx: 0, major_dy: -50, // open offset (major axis)
-    minor_dx: 50, minor_dy: 0, // open offset (minor axis)
-    threshold: 1, // threshold to auto-open
-    wrap: 8, // wrap limit
-    small_dx: -6, small_dy: -9, small_threshold: 4,
-    shadow: 6
-}
-
-const VERTICAL_TURN_STACK_PARAMS = {
-    // stack parameters:
-    dx: 0, dy: -3, // closed offset
-    major_dx: 0, major_dy: -50, // open offset (major axis)
-    minor_dx: 50, minor_dy: 0, // open offset (minor axis)
-    threshold: 1, // threshold to auto-open
-    wrap: 8, // wrap limit
-    small_dx: 0, small_dy: -6, small_threshold: 3,
-    shadow: 6
-}
-
-const SUPPLY_TYPES = {
-    to_port: {color: "green"},
-    from_port: {color: "red"},
-    to_hq: {color: "blue"},
-    to_source: {color: "yellow"},
-}
-
-const BR_REGIONS = ["India", "Ceylon", "NIndia", "Burma", "Siam", "Malaya", "Sumatra", "Indochina", "IChina"]
-const JP_REGIONS = ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Caroline", "Japan", "Marshall"]
-const JP_BOUNDARY_HEX = []
-
-const REGIONS_BY_NATION = {}
-const HEX_BY_NATION = []
-const BR_NATIONS = [-3, nations.AUSTRALIA.id, nations.BURMA.id, nations.MALAYA.id]
-
-
-for (var key of Object.keys(counters)) {
-    counters[key] = "marker " + counters[key]
-}
-
-for (var key of Object.keys(nations)) {
-    if (nations[key].counter) {
-        nations[key].counter = "marker " + nations[key].counter
-    }
-    if (!nations[key].no_full_control && nations[key].regions) {
-        for (var reg of nations[key].regions) {
-            REGIONS_BY_NATION[reg] = nations[key]
-        }
-    }
-}
-
-for (var key of Object.keys(events)) {
-    if (events[key].counter) {
-        events[key].counter = "marker " + events[key].counter
-    }
-}
-
-for (var i = 0; i < map.length; i++) {
-    var hex = hex_to_int(map[i].id)
-    var region = map[i].region
-    var nation = REGIONS_BY_NATION[region]
-    if (nation) {
-        HEX_BY_NATION[hex] = nation.id
-    } else if (JP_REGIONS.includes(region)) {
-        HEX_BY_NATION[hex] = -1
-    } else if (BR_REGIONS.includes(region)) {
-        HEX_BY_NATION[hex] = -3
-    } else {
-        HEX_BY_NATION[hex] = -2
-    }
-    if (JP_REGIONS.includes(region)) {
-        set_add(JP_BOUNDARY_HEX, hex)
-    }
-}
-HEX_BY_NATION[hex_to_int(2709)] = -3
+// MARKERS
 
 const SCENARIO_LENGTH = [
     [0, 0],
@@ -128,6 +26,14 @@ const SCENARIO_LENGTH = [
     [8, 10],
     [0, 0],
 ]
+
+function jp_gray_amp() {
+    return (G.inter_service[JP] && G.asp[0][0] > 1)
+}
+
+function current_pow(G) {
+    return array_count(G.capture, h => is_space_controlled(h, AP))
+}
 
 const UNIT_MOVEMENT_MARKERS = [
     {
@@ -154,12 +60,7 @@ const UNIT_MOVEMENT_MARKERS = [
         condition: (u, piece, path) => piece.b29 && G.b29u & 2 << piece.b29,
         counter: counters.strat_bombing_small,
     },
-
 ]
-
-function jp_gray_amp() {
-    return (G.inter_service[JP] && G.asp[0][0] > 1)
-}
 
 const TRACK_MARKERS = [
     {
@@ -322,128 +223,6 @@ const TURN_MARKERS = [
     },
 ]
 
-function current_pow(G) {
-    return array_count(G.capture, h => is_space_controlled(h, AP))
-}
-
-
-const MAIN_BOARD_INFO = {
-    "LAST_BOARD_HEX": 1478,
-    "COLUMN_HEX_NB": 29,
-    "ROW_HEX_NB": 50,
-    "grid_x_offset": 0,
-    "grid_y_offset": 0,
-    "display_x_offset": 76.375,
-    "display_y_offset": 53.375,
-    "turn_a": 12,
-    "turn_b": 1,
-    "track_a": 9,
-    "track_b": 0,
-    "wie_a": 0,
-    "wie_b": 10,
-    "pw_a": 10,
-    "pw_b": 0,
-    "TURN_STACK_PARAMS": TURN_STACK_PARAMS,
-    "TRACK_STACK_PARAMS": TRACK_STACK_PARAMS,
-    "hex_check": (i) => {
-        return i != 472 && //Remove the hex exclusive to the burma scenario
-            i != 92 // Remove unplayable hex in india not catched by the standard data check (1305)
-    }
-}
-const BURMA_BOARD_INFO = {
-    "LAST_BOARD_HEX": 2609,
-    "COLUMN_HEX_NB": 13,
-    "ROW_HEX_NB": 17,
-    "grid_x_offset": 0,
-    "grid_y_offset": 0,
-    "display_x_offset": 48.375,
-    "display_y_offset": 53.375,
-    "turn_a": 6,
-    "turn_b": 9,
-    "track_a": 0,
-    "track_b": 9,
-    "wie_a": 7,
-    "wie_b": 0,
-    "pw_a": 10,
-    "pw_b": 0,
-    "TURN_STACK_PARAMS": VERTICAL_TURN_STACK_PARAMS,
-    "TRACK_STACK_PARAMS": VERTICAL_TURN_STACK_PARAMS,
-    "hex_check": (i) => {
-        var x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
-        var y = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
-
-
-        if (x == 15 && y > 9) {
-            return false
-        } else if (x == 16 && y > 9) {
-            return false
-        }
-        return hex_in_map(x, y) &&
-            i != 92 // Remove unplayable hex in india not catched by the standard data check (1305)
-    }
-}
-
-const SOUTH_PAC_BOARD_INFO = {
-    "LAST_BOARD_HEX": 5027,
-    "COLUMN_HEX_NB": 13,
-    "ROW_HEX_NB": 21,
-    "grid_x_offset": 20,
-    "grid_y_offset": 16,
-    "display_x_offset": 89.375,
-    "display_y_offset": 9.125,
-    "turn_a": 3,
-    "turn_b": 6,
-    "track_a": 3,
-    "track_b": 9,
-    "wie_a": 7,
-    "wie_b": 0,
-    "pw_a": 5,
-    "pw_b": 0,
-    "TURN_STACK_PARAMS": VERTICAL_TURN_STACK_PARAMS,
-    "TRACK_STACK_PARAMS": VERTICAL_TURN_STACK_PARAMS,
-    "hex_check": (i) => {
-        if (int_to_hex(i) === 4818 || int_to_hex(i) === 4918) {
-            return true
-        }
-        var x = Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB)
-        var y = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
-
-        if (SP_BORDER[x] && y < SP_BORDER[x]) {
-            return false
-        }
-
-        if (i === 1188) {
-            return false
-        } else if (x == 24 && y == 16) {
-            return true
-        } else if ((x % 2 == 0) && y == 16) {
-            return false
-        }
-        return hex_in_map(x, y)
-    }
-}
-
-
-let ALL_BOARD_HEXES = []
-
-let SID = FULL_CAMPAIGN_SCENARIO
-let map_layout = layout.mainmap
-let map_info = MAIN_BOARD_INFO
-
-
-var SP_BORDER = []
-for (var i = 0; i < sp_map.length; i++) {
-    var hex = hex_to_int(sp_map[i].id)
-    let x = Math.floor(hex / 29)
-    let y = hex % 29
-    if (sp_map[i].top) {
-        SP_BORDER[x] = y
-    }
-}
-
-function set_map_size(w, h) {
-    update_map_size(w, h)
-}
 
 check_supply = function () {
     if (!G.client_supply) {
@@ -454,7 +233,16 @@ check_supply = function () {
     G.client_supply = 1
 }
 
+function define_s_loc(id, rect) {
+    define_stack("s-loc", id,
+        rect,
+        { ...VERTICAL_STACK_PARAMS, sort: sort_unit_stack }
+    )
+}
+
 function on_init(scenario, game_options, static_view) {
+    let map_layout = LAYOUT.mainmap
+
     canvas_init(scenario)
 
     init_preference_checkbox("noroad", false)
@@ -477,7 +265,7 @@ function on_init(scenario, game_options, static_view) {
         case "South Pacific": {
             nations.AUSTRALIAN_MANDATES.keys = nations.AUSTRALIAN_MANDATES.ports
             SID = SOUTH_PACIFIC_SCENARIO
-            map_layout = layout.southpac
+            map_layout = LAYOUT.southpac
             map_elem.classList.add("southpac")
             define_board("#map", 1275, 825, [12, 12, 12, 12])
             map_info = SOUTH_PAC_BOARD_INFO
@@ -488,12 +276,12 @@ function on_init(scenario, game_options, static_view) {
             define_s_loc(1400, center_rect(map_layout.h_5808, 45, 45))
             define_space("action_hex", 1400, center_rect(map_layout.h_5808, 68, 68))
                 .tooltip(format_hex_tooltip)
-            set_map_size(1275, 825)
+            update_map_size(1275, 825)
             break
         }
         case  "Burma: The Forgotten War, 1943-1944": {
             SID = BURMA_SCENARIO
-            map_layout = layout.burma
+            map_layout = LAYOUT.burma
             map_elem.classList.add("burma")
             define_board("#map", 1275, 825, [12, 12, 12, 12])
             map_info = BURMA_BOARD_INFO
@@ -505,12 +293,12 @@ function on_init(scenario, game_options, static_view) {
             define_thing("road", events.IMPHAL_ROAD.id).layout([550, 330, 60, 60], "road_imphal hide marker control")
             define_thing("road", events.LEDO_ROAD.id).layout([600, 300, 60, 60], "road_ledo hide marker control")
             define_thing("road", events.KWAI_RIVER_BRIDGE.id).layout([528, 501, 50, 95], "road_kwai hide marker control")
-            set_map_size(1275, 825)
+            update_map_size(1275, 825)
             break
         }
         default: {
             SID = FULL_CAMPAIGN_SCENARIO
-            map_layout = layout.mainmap
+            map_layout = LAYOUT.mainmap
             map_elem.classList.add("main")
             define_board("#map", 2550, 1650, [12, 12, 12, 12])
             map_info = MAIN_BOARD_INFO
@@ -518,7 +306,7 @@ function on_init(scenario, game_options, static_view) {
             define_thing("road", events.IMPHAL_ROAD.id).layout([579, 330, 60, 60], "road_imphal hide marker control")
             define_thing("road", events.LEDO_ROAD.id).layout([629, 300, 60, 60], "road_ledo hide marker control")
             define_thing("road", events.KWAI_RIVER_BRIDGE.id).layout([557, 501, 50, 95], "road_kwai hide marker control")
-            set_map_size(2550, 1650)
+            update_map_size(2550, 1650)
         }
     }
     var href = document.getElementsByClassName("deck_href")

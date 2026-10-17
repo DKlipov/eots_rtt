@@ -2017,28 +2017,30 @@ cards[find_card(AP, 33)].before_unit_activation = function () {
     filter_activation_units((u, piece) => piece.class !== "naval", AP)
 }
 
-for (var i = 1; i < cards.length; i++) {
-    var always_true = () => true
-    const card = cards[i]
-    card.c = i
-    card.could_play = () => could_play(card)
-    if (!card.can_play && card.hq) {
-        card.can_play = () => event_hq_check(card)
-    } else if (!card.can_play && card.china < 0) {
-        card.can_play = () => G.events[events.CHINA_STATUS.id] > 1 && G.events[events.CHINA_STATUS.id] < 5
-    } else if (!card.can_play && card.china > 0) {
-        card.can_play = () => G.events[events.CHINA_STATUS.id] < 5
-    } else if (!card.can_play) {
-        card.can_play = always_true
+;(function(){
+    for (var i = 1; i < cards.length; i++) {
+        var always_true = () => true
+        const card = cards[i]
+        card.c = i
+        card.could_play = () => could_play(card)
+        if (!card.can_play && card.hq) {
+            card.can_play = () => event_hq_check(card)
+        } else if (!card.can_play && card.china < 0) {
+            card.can_play = () => G.events[events.CHINA_STATUS.id] > 1 && G.events[events.CHINA_STATUS.id] < 5
+        } else if (!card.can_play && card.china > 0) {
+            card.can_play = () => G.events[events.CHINA_STATUS.id] < 5
+        } else if (!card.can_play) {
+            card.can_play = always_true
+        }
+        if (!cards[i].event) {
+            cards[i].event = always_true
+        }
+        if (cards[i].kamikaze) {
+            cards[i].before_battles = () => call("kamikaze_attack")
+            cards[i].can_play = () => check_kamikaze_playable()
+        }
     }
-    if (!cards[i].event) {
-        cards[i].event = always_true
-    }
-    if (cards[i].kamikaze) {
-        cards[i].before_battles = () => call("kamikaze_attack")
-        cards[i].can_play = () => check_kamikaze_playable()
-    }
-}
+})()
 
 cards[find_card(AP, 34)].before_unit_activation = function () {
     filter_activation_units((u, piece) => is_commonwelth(piece), AP)

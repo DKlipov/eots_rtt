@@ -3206,60 +3206,64 @@ const ED_ARMY = find_piece("army_jp_ed")
 
 const HQ_LIST = []
 
-for (let i = 1; i < pieces.length; i++) {
-    if (pieces[i].class === "hq") {
-        set_add(HQ_LIST, i)
-    }
-}
+;(function(){
 
-//Fill units data
-for (var i = 1; i < pieces.length; i++) {
-    const piece = pieces[i]
-    piece.u = i
-    const supply = piece.class === "hq" ? get_hq_supply_type(piece) : get_unit_supply_type(piece)
-    piece.supply = supply
-    piece.replacement = get_unit_replacement_type(piece)
-    if (piece.class === "naval" && !piece.faction) {
-        piece.service = "navy"
-    }
-
-    if (piece.class === "air" || piece.class === "naval" && piece.br) {
-        piece.zoi_generator = 1
-    }
-
-    if (piece.start_reduced && pieces.notreplaceable) {
-        piece.one_step = 1
-    }
-    if (!piece.ebr && piece.br) {
-        piece.ebr = piece.br
-    }
-
-    if (piece.type === "lrb" && i !== LRB_19 && i !== LRB_10) {
-        var pair = find_piece(piece.id.replace("_lrb", ""))
-        if (pair !== i) {
-            pieces[pair].pair = i
-            piece.pair = pair
+    for (let i = 1; i < pieces.length; i++) {
+        if (pieces[i].class === "hq") {
+            set_add(HQ_LIST, i)
         }
     }
 
-    if (i === jp_army("kor")) {
-        piece.asp = 4
-        piece.aspr = 2
-        piece.strat_move = true
-    } else if (i === ARMOR_BRIGADE) {
-        piece.strat_move = true
-    } else if (piece.class === "ground" && ["du", "ind", "ch", "bu"].includes(piece.service)) {
-        piece.strat_move = false
-    } else if (piece.class === "ground" && piece.size < 3) {
-        piece.asp = 1
-        piece.aspr = 1
-        piece.strat_move = true
-    } else if (piece.class === "ground") {
-        piece.asp = 2
-        piece.aspr = 1
-        piece.strat_move = true
+    //Fill units data
+    for (var i = 1; i < pieces.length; i++) {
+        const piece = pieces[i]
+        piece.u = i
+        const supply = piece.class === "hq" ? get_hq_supply_type(piece) : get_unit_supply_type(piece)
+        piece.supply = supply
+        piece.replacement = get_unit_replacement_type(piece)
+        if (piece.class === "naval" && !piece.faction) {
+            piece.service = "navy"
+        }
+
+        if (piece.class === "air" || piece.class === "naval" && piece.br) {
+            piece.zoi_generator = 1
+        }
+
+        if (piece.start_reduced && pieces.notreplaceable) {
+            piece.one_step = 1
+        }
+        if (!piece.ebr && piece.br) {
+            piece.ebr = piece.br
+        }
+
+        if (piece.type === "lrb" && i !== LRB_19 && i !== LRB_10) {
+            var pair = find_piece(piece.id.replace("_lrb", ""))
+            if (pair !== i) {
+                pieces[pair].pair = i
+                piece.pair = pair
+            }
+        }
+
+        if (i === jp_army("kor")) {
+            piece.asp = 4
+            piece.aspr = 2
+            piece.strat_move = true
+        } else if (i === ARMOR_BRIGADE) {
+            piece.strat_move = true
+        } else if (piece.class === "ground" && ["du", "ind", "ch", "bu"].includes(piece.service)) {
+            piece.strat_move = false
+        } else if (piece.class === "ground" && piece.size < 3) {
+            piece.asp = 1
+            piece.aspr = 1
+            piece.strat_move = true
+        } else if (piece.class === "ground") {
+            piece.asp = 2
+            piece.aspr = 1
+            piece.strat_move = true
+        }
     }
-}
+
+})()
 
 function find_piece(id) {
     for (let i = 1; i < pieces.length; i++) {
@@ -6411,136 +6415,143 @@ map.forEach(h => MAP_DATA[hex_to_int(h.id)] = h)
 
 var S_P_first_hex = []
 
-for (var i = 0; i < sp_map.length; i++) {
-    var hex = hex_to_int(sp_map[i].id)
-    let x = Math.floor(hex / 29)
-    let y = hex % 29
-    if (sp_map[i].top) {
-        map_set(S_P_first_hex, x, y)
-    }
-}
+;(function(){
 
-for (let i = 0; i <= LAST_BOARD_HEX; ++i) {
-    let hex = MAP_DATA[i]
-    var x = Math.floor(i / 29)
-    var y = i % 29
-    var sw = (x <= 17 && y <= 12) ? 1 : 0
-    if (!hex) {
-        hex = {id: int_to_hex(i), terrain: OCEAN, region: "Ocean", nh: get_edge_hexes(i), sw}
-        MAP_DATA[i] = hex
-    }
-    hex.sw = sw
-    hex.edges_int = 0
-    hex.coastal = false
-    let nh = get_edge_hexes(i)
-    for (let j = 0; j < nh.length; j++) {
-        let near_hex = MAP_DATA[nh[j]]
-        let nh_index = (j + 3) % 6
-        let border = GROUND
-        if (nh[j] < 0) {
-            border = MAP_BORDER
-        } else if (hex.edges) {
-            border = hex.edges[j] | (hex.edges[j] & ROAD ? GROUND : 0)
-        } else if (near_hex && near_hex.edges) {
-            border = near_hex.edges[nh_index]
-        } else if (hex.island || hex.terrain === ATOLL || hex.terrain === OCEAN) {
-            border = 1
+    for (var i = 0; i < sp_map.length; i++) {
+        var hex = hex_to_int(sp_map[i].id)
+        let x = Math.floor(hex / 29)
+        let y = hex % 29
+        if (sp_map[i].top) {
+            map_set(S_P_first_hex, x, y)
         }
-        if (border & GROUND) {
-            border |= UNPLAYABLE_LAND
+    }
+
+    for (let i = 0; i <= LAST_BOARD_HEX; ++i) {
+        let hex = MAP_DATA[i]
+        var x = Math.floor(i / 29)
+        var y = i % 29
+        var sw = (x <= 17 && y <= 12) ? 1 : 0
+        if (!hex) {
+            hex = {id: int_to_hex(i), terrain: OCEAN, region: "Ocean", nh: get_edge_hexes(i), sw}
+            MAP_DATA[i] = hex
         }
-        if (border & WATER) {
-            border |= UNPLAYABLE_WATER
+        hex.sw = sw
+        hex.edges_int = 0
+        hex.coastal = false
+        let nh = get_edge_hexes(i)
+        for (let j = 0; j < nh.length; j++) {
+            let near_hex = MAP_DATA[nh[j]]
+            let nh_index = (j + 3) % 6
+            let border = GROUND
+            if (nh[j] < 0) {
+                border = MAP_BORDER
+            } else if (hex.edges) {
+                border = hex.edges[j] | (hex.edges[j] & ROAD ? GROUND : 0)
+            } else if (near_hex && near_hex.edges) {
+                border = near_hex.edges[nh_index]
+            } else if (hex.island || hex.terrain === ATOLL || hex.terrain === OCEAN) {
+                border = 1
+            }
+            if (border & GROUND) {
+                border |= UNPLAYABLE_LAND
+            }
+            if (border & WATER) {
+                border |= UNPLAYABLE_WATER
+            }
+            hex.coastal = hex.coastal || (border & WATER)
+            hex.edges_int = hex.edges_int | (border << 5 * j)
         }
-        hex.coastal = hex.coastal || (border & WATER)
-        hex.edges_int = hex.edges_int | (border << 5 * j)
+        if (hex.terrain === ATOLL) {
+            hex.island = true
+        }
+        if (hex.airfield || hex.port || hex.port || hex.city || hex.resource) {
+            hex.named = true
+        }
+        if (hex.city === JAPANESE_CITY) {
+            hex.supply_source |= JP_SUPPLIED_HEX
+        } else if (i < 29) {
+            hex.supply_source |= JOINT_SUPPLIED_HEX
+        } else if (i > (LAST_BOARD_HEX - 29)) {
+            hex.supply_source |= US_SUPPLIED_HEX
+            hex.supply_source |= JOINT_SUPPLIED_HEX
+        }
+        hex.nh = get_edge_hexes(i)
+        if (i === 472) {
+            // remove hex only found in the burma scenario (2608)
+            MAP_DATA[i] = non_playable_hex(i)
+        }
+        apply_south_pacific(Object.assign({}, hex))
+        apply_burma(Object.assign({}, hex))
     }
-    if (hex.terrain === ATOLL) {
-        hex.island = true
-    }
-    if (hex.airfield || hex.port || hex.port || hex.city || hex.resource) {
-        hex.named = true
-    }
-    if (hex.city === JAPANESE_CITY) {
-        hex.supply_source |= JP_SUPPLIED_HEX
-    } else if (i < 29) {
-        hex.supply_source |= JOINT_SUPPLIED_HEX
-    } else if (i > (LAST_BOARD_HEX - 29)) {
-        hex.supply_source |= US_SUPPLIED_HEX
-        hex.supply_source |= JOINT_SUPPLIED_HEX
-    }
-    hex.nh = get_edge_hexes(i)
-    if (i === 472) {
-        // remove hex only found in the burma scenario (2608)
-        MAP_DATA[i] = non_playable_hex(i)
-    }
-    apply_south_pacific(Object.assign({}, hex))
-    apply_burma(Object.assign({}, hex))
-}
-MAP_DATA[CHINA_BOX] = {
-    id: int_to_hex(CHINA_BOX),
-    terrain: OCEAN,
-    region: "Ocean",
-    airfield: true,
-    edges_int: MAP_DATA[OAHU].edges_int
-}
-B_F_W_MAP_DATA[CHINA_BOX] = MAP_DATA[CHINA_BOX]
-S_P_MAP_DATA[CHINA_BOX] = MAP_DATA[CHINA_BOX]
-S_P_MAP_DATA[OAHU] = Object.assign({}, MAP_DATA[OAHU])
-S_P_MAP_DATA[OAHU].supply_source = JOINT_SUPPLIED_HEX | US_SUPPLIED_HEX
-S_P_MAP_DATA[OAHU].nh = []
-S_P_MAP_DATA[OAHU].edges_int = 0
-S_P_MAP_DATA[hex_to_int(4819)].terrain = OCEAN
 
-B_F_W_MAP_DATA[SINGAPORE] = Object.assign({}, MAP_DATA[SINGAPORE])
-B_F_W_MAP_DATA[SINGAPORE].edges_int = 0
-B_F_W_MAP_DATA[SINGAPORE].nh = []
-B_F_W_MAP_DATA[SINGAPORE].airfield = false
-B_F_W_MAP_DATA[SAIGON].nh.length = 3
-B_F_W_MAP_DATA[SAIGON].edges_int = B_F_W_MAP_DATA[SAIGON].edges_int % (1 << 5 * 4)
-B_F_W_MAP_DATA[hex_to_int(2609)].edges_int += GROUND
-B_F_W_MAP_DATA[hex_to_int(2508)].edges_int += GROUND << 5
-B_F_W_MAP_DATA[hex_to_int(1912)].nh.length = 3
-B_F_W_MAP_DATA[hex_to_int(1912)].edges_int = (B_F_W_MAP_DATA[hex_to_int(1912)].edges_int % (1 << 5 * 3))
-
-var t1 = 1
-for (var i = 0; i < TUNNELING.length; i++) {
-    var tunnel = TUNNELING[i]
-    create_tunnel(tunnel)
-    if (tunnel.duplex) {
-        var from = tunnel.from
-        tunnel.from = tunnel.to
-        tunnel.to = from
-        create_tunnel(tunnel)
+    MAP_DATA[CHINA_BOX] = {
+        id: int_to_hex(CHINA_BOX),
+        terrain: OCEAN,
+        region: "Ocean",
+        airfield: true,
+        edges_int: MAP_DATA[OAHU].edges_int
     }
-}
-B_F_W_MAP_DATA[hex_to_int(1912)].nh.push(-1)
-B_F_W_MAP_DATA[hex_to_int(1912)].nh.push(hex_to_int(1812))
-B_F_W_MAP_DATA[hex_to_int(1912)].edges_int |= ((WATER | UNPLAYABLE_WATER) << 5 * 5)
 
-for (var i = 0; i < map.length; i++) {
-    if (!map[i].airfield) {
-        continue
+    B_F_W_MAP_DATA[CHINA_BOX] = MAP_DATA[CHINA_BOX]
+    S_P_MAP_DATA[CHINA_BOX] = MAP_DATA[CHINA_BOX]
+    S_P_MAP_DATA[OAHU] = Object.assign({}, MAP_DATA[OAHU])
+    S_P_MAP_DATA[OAHU].supply_source = JOINT_SUPPLIED_HEX | US_SUPPLIED_HEX
+    S_P_MAP_DATA[OAHU].nh = []
+    S_P_MAP_DATA[OAHU].edges_int = 0
+    S_P_MAP_DATA[hex_to_int(4819)].terrain = OCEAN
+
+    B_F_W_MAP_DATA[SINGAPORE] = Object.assign({}, MAP_DATA[SINGAPORE])
+    B_F_W_MAP_DATA[SINGAPORE].edges_int = 0
+    B_F_W_MAP_DATA[SINGAPORE].nh = []
+    B_F_W_MAP_DATA[SINGAPORE].airfield = false
+    B_F_W_MAP_DATA[SAIGON].nh.length = 3
+    B_F_W_MAP_DATA[SAIGON].edges_int = B_F_W_MAP_DATA[SAIGON].edges_int % (1 << 5 * 4)
+    B_F_W_MAP_DATA[hex_to_int(2609)].edges_int += GROUND
+    B_F_W_MAP_DATA[hex_to_int(2508)].edges_int += GROUND << 5
+    B_F_W_MAP_DATA[hex_to_int(1912)].nh.length = 3
+    B_F_W_MAP_DATA[hex_to_int(1912)].edges_int = (B_F_W_MAP_DATA[hex_to_int(1912)].edges_int % (1 << 5 * 3))
+
+    var t1 = 1
+    for (var i = 0; i < TUNNELING.length; i++) {
+        var tunnel = TUNNELING[i]
+        create_tunnel(tunnel, t1)
+        if (tunnel.duplex) {
+            var from = tunnel.from
+            tunnel.from = tunnel.to
+            tunnel.to = from
+            create_tunnel(tunnel, t1)
+        }
     }
-    var links = []
-    var hex_i = hex_to_int(map[i].id)
-    for (var j = 0; j < map.length; j++) {
-        if (!map[j].airfield || i === j) {
+
+    B_F_W_MAP_DATA[hex_to_int(1912)].nh.push(-1)
+    B_F_W_MAP_DATA[hex_to_int(1912)].nh.push(hex_to_int(1812))
+    B_F_W_MAP_DATA[hex_to_int(1912)].edges_int |= ((WATER | UNPLAYABLE_WATER) << 5 * 5)
+
+    for (var i = 0; i < map.length; i++) {
+        if (!map[i].airfield) {
             continue
         }
-        var hex_j = hex_to_int(map[j].id)
-        let distance = get_distance(hex_i, hex_j)
-        if (distance <= 8) {
-            links.push([hex_j, distance])
+        var links = []
+        var hex_i = hex_to_int(map[i].id)
+        for (var j = 0; j < map.length; j++) {
+            if (!map[j].airfield || i === j) {
+                continue
+            }
+            var hex_j = hex_to_int(map[j].id)
+            let distance = get_distance(hex_i, hex_j)
+            if (distance <= 8) {
+                links.push([hex_j, distance])
+            }
         }
+        if (hex_i === JARHAT || hex_i === DACCA || hex_i === LEDO) {
+            links.push([CHINA_BOX, 1])
+        }
+        map_set(AIRFIELD_LINKS, hex_i, links.sort((a, b) => a[1] - b[1]).flatMap(a => a))
     }
-    if (hex_i === JARHAT || hex_i === DACCA || hex_i === LEDO) {
-        links.push([CHINA_BOX, 1])
-    }
-    map_set(AIRFIELD_LINKS, hex_i, links.sort((a, b) => a[1] - b[1]).flatMap(a => a))
-}
 
-map_set(AIRFIELD_LINKS, CHINA_BOX, [JARHAT, 1, DACCA, 1, LEDO, 1])
+    map_set(AIRFIELD_LINKS, CHINA_BOX, [JARHAT, 1, DACCA, 1, LEDO, 1])
+
+})()
 
 function non_playable_hex(id) {
     return {id: id, terrain: OCEAN, region: "Ocean", edges_int: 0, nh: []}
@@ -6606,7 +6617,7 @@ function apply_burma(hex) {
     B_F_W_MAP_DATA[id] = hex
 }
 
-function create_tunnel(data) {
+function create_tunnel(data, t1) {
     data.map[data.from].edges_int |= (WATER | UNPLAYABLE_WATER) << (5 * data.map[data.from].nh.length)
     data.map[data.from].nh.push(TUNNEL_BOX + t1)
     for (var i = 0; i < data.distance; i++) {
@@ -16867,28 +16878,30 @@ cards[find_card(AP, 33)].before_unit_activation = function () {
     filter_activation_units((u, piece) => piece.class !== "naval", AP)
 }
 
-for (var i = 1; i < cards.length; i++) {
-    var always_true = () => true
-    const card = cards[i]
-    card.c = i
-    card.could_play = () => could_play(card)
-    if (!card.can_play && card.hq) {
-        card.can_play = () => event_hq_check(card)
-    } else if (!card.can_play && card.china < 0) {
-        card.can_play = () => G.events[events.CHINA_STATUS.id] > 1 && G.events[events.CHINA_STATUS.id] < 5
-    } else if (!card.can_play && card.china > 0) {
-        card.can_play = () => G.events[events.CHINA_STATUS.id] < 5
-    } else if (!card.can_play) {
-        card.can_play = always_true
+;(function(){
+    for (var i = 1; i < cards.length; i++) {
+        var always_true = () => true
+        const card = cards[i]
+        card.c = i
+        card.could_play = () => could_play(card)
+        if (!card.can_play && card.hq) {
+            card.can_play = () => event_hq_check(card)
+        } else if (!card.can_play && card.china < 0) {
+            card.can_play = () => G.events[events.CHINA_STATUS.id] > 1 && G.events[events.CHINA_STATUS.id] < 5
+        } else if (!card.can_play && card.china > 0) {
+            card.can_play = () => G.events[events.CHINA_STATUS.id] < 5
+        } else if (!card.can_play) {
+            card.can_play = always_true
+        }
+        if (!cards[i].event) {
+            cards[i].event = always_true
+        }
+        if (cards[i].kamikaze) {
+            cards[i].before_battles = () => call("kamikaze_attack")
+            cards[i].can_play = () => check_kamikaze_playable()
+        }
     }
-    if (!cards[i].event) {
-        cards[i].event = always_true
-    }
-    if (cards[i].kamikaze) {
-        cards[i].before_battles = () => call("kamikaze_attack")
-        cards[i].can_play = () => check_kamikaze_playable()
-    }
-}
+})()
 
 cards[find_card(AP, 34)].before_unit_activation = function () {
     filter_activation_units((u, piece) => is_commonwelth(piece), AP)

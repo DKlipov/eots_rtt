@@ -1,5 +1,57 @@
 /* MISC CLIENT STUFF */
 
+const BR_REGIONS = ["India", "Ceylon", "NIndia", "Burma", "Siam", "Malaya", "Sumatra", "Indochina", "IChina"]
+const BR_NATIONS = [-3, nations.AUSTRALIA.id, nations.BURMA.id, nations.MALAYA.id]
+const JP_REGIONS = ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Caroline", "Japan", "Marshall"]
+
+const JP_BOUNDARY_HEX = []
+const REGIONS_BY_NATION = {}
+const HEX_BY_NATION = []
+
+;(function(){
+
+    for (var key of Object.keys(counters)) {
+        counters[key] = "marker " + counters[key]
+    }
+
+    for (var key of Object.keys(nations)) {
+        if (nations[key].counter) {
+            nations[key].counter = "marker " + nations[key].counter
+        }
+        if (!nations[key].no_full_control && nations[key].regions) {
+            for (var reg of nations[key].regions) {
+                REGIONS_BY_NATION[reg] = nations[key]
+            }
+        }
+    }
+
+    for (var key of Object.keys(events)) {
+        if (events[key].counter) {
+            events[key].counter = "marker " + events[key].counter
+        }
+    }
+
+    for (var i = 0; i < map.length; i++) {
+        var hex = hex_to_int(map[i].id)
+        var region = map[i].region
+        var nation = REGIONS_BY_NATION[region]
+        if (nation) {
+            HEX_BY_NATION[hex] = nation.id
+        } else if (JP_REGIONS.includes(region)) {
+            HEX_BY_NATION[hex] = -1
+        } else if (BR_REGIONS.includes(region)) {
+            HEX_BY_NATION[hex] = -3
+        } else {
+            HEX_BY_NATION[hex] = -2
+        }
+        if (JP_REGIONS.includes(region)) {
+            set_add(JP_BOUNDARY_HEX, hex)
+        }
+    }
+    HEX_BY_NATION[hex_to_int(2709)] = -3
+
+})()
+
 function center_rect([x, y], w, h) {
     return [x - w / 2, y - h / 2, w, h]
 }
@@ -60,6 +112,12 @@ function get_element_weight(e) {
 }
 
 function hex_center(i) {
+    var map_layout = LAYOUT.mainmap
+    if (SID === SOUTH_PACIFIC_SCENARIO)
+        map_layout = LAYOUT.southpac
+    if (SID === BURMA_SCENARIO)
+            map_layout = LAYOUT.burma
+
     if (i === CHINA_BOX) {
         var box = map_layout.box_air_unit_in_china
         return center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])

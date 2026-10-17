@@ -3002,60 +3002,64 @@ const ED_ARMY = find_piece("army_jp_ed")
 
 const HQ_LIST = []
 
-for (let i = 1; i < pieces.length; i++) {
-    if (pieces[i].class === "hq") {
-        set_add(HQ_LIST, i)
-    }
-}
+;(function(){
 
-//Fill units data
-for (var i = 1; i < pieces.length; i++) {
-    const piece = pieces[i]
-    piece.u = i
-    const supply = piece.class === "hq" ? get_hq_supply_type(piece) : get_unit_supply_type(piece)
-    piece.supply = supply
-    piece.replacement = get_unit_replacement_type(piece)
-    if (piece.class === "naval" && !piece.faction) {
-        piece.service = "navy"
-    }
-
-    if (piece.class === "air" || piece.class === "naval" && piece.br) {
-        piece.zoi_generator = 1
-    }
-
-    if (piece.start_reduced && pieces.notreplaceable) {
-        piece.one_step = 1
-    }
-    if (!piece.ebr && piece.br) {
-        piece.ebr = piece.br
-    }
-
-    if (piece.type === "lrb" && i !== LRB_19 && i !== LRB_10) {
-        var pair = find_piece(piece.id.replace("_lrb", ""))
-        if (pair !== i) {
-            pieces[pair].pair = i
-            piece.pair = pair
+    for (let i = 1; i < pieces.length; i++) {
+        if (pieces[i].class === "hq") {
+            set_add(HQ_LIST, i)
         }
     }
 
-    if (i === jp_army("kor")) {
-        piece.asp = 4
-        piece.aspr = 2
-        piece.strat_move = true
-    } else if (i === ARMOR_BRIGADE) {
-        piece.strat_move = true
-    } else if (piece.class === "ground" && ["du", "ind", "ch", "bu"].includes(piece.service)) {
-        piece.strat_move = false
-    } else if (piece.class === "ground" && piece.size < 3) {
-        piece.asp = 1
-        piece.aspr = 1
-        piece.strat_move = true
-    } else if (piece.class === "ground") {
-        piece.asp = 2
-        piece.aspr = 1
-        piece.strat_move = true
+    //Fill units data
+    for (var i = 1; i < pieces.length; i++) {
+        const piece = pieces[i]
+        piece.u = i
+        const supply = piece.class === "hq" ? get_hq_supply_type(piece) : get_unit_supply_type(piece)
+        piece.supply = supply
+        piece.replacement = get_unit_replacement_type(piece)
+        if (piece.class === "naval" && !piece.faction) {
+            piece.service = "navy"
+        }
+
+        if (piece.class === "air" || piece.class === "naval" && piece.br) {
+            piece.zoi_generator = 1
+        }
+
+        if (piece.start_reduced && pieces.notreplaceable) {
+            piece.one_step = 1
+        }
+        if (!piece.ebr && piece.br) {
+            piece.ebr = piece.br
+        }
+
+        if (piece.type === "lrb" && i !== LRB_19 && i !== LRB_10) {
+            var pair = find_piece(piece.id.replace("_lrb", ""))
+            if (pair !== i) {
+                pieces[pair].pair = i
+                piece.pair = pair
+            }
+        }
+
+        if (i === jp_army("kor")) {
+            piece.asp = 4
+            piece.aspr = 2
+            piece.strat_move = true
+        } else if (i === ARMOR_BRIGADE) {
+            piece.strat_move = true
+        } else if (piece.class === "ground" && ["du", "ind", "ch", "bu"].includes(piece.service)) {
+            piece.strat_move = false
+        } else if (piece.class === "ground" && piece.size < 3) {
+            piece.asp = 1
+            piece.aspr = 1
+            piece.strat_move = true
+        } else if (piece.class === "ground") {
+            piece.asp = 2
+            piece.aspr = 1
+            piece.strat_move = true
+        }
     }
-}
+
+})()
 
 function find_piece(id) {
     for (let i = 1; i < pieces.length; i++) {
