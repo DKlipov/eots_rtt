@@ -422,6 +422,9 @@ function on_init(scenario, game_options, static_view) {
         card.element.card = i
     }
 
+    define_card("fo-card", JP, "card_jp_0").tooltip("Future offensive")
+    define_card("fo-card", AP, "card_ap_0").tooltip("Future offensive")
+
     for (let key in nations) {
         var nation = nations[key]
         if (nation.counter) {

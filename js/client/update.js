@@ -1,33 +1,42 @@
 function update_hand(side) {
-    var fo_card
+    var hand = G.hand[side]
+    var fo_card, fo_card_id
+
     if (G.future_offensive[side] > 0) {
-        fo_card = populate("hand", side, "card", G.future_offensive[side])
+        fo_card = "card"
+        fo_card_id = G.future_offensive[side]
+        populate("hand", side, "card", G.future_offensive[side])
     } else if (G.events[events.FUTURE_OFFENSIVE_JP.id + side] > 0) {
-        fo_card = populate_generic_to_parent(lookup_thing("hand", side).element, side === JP ? "card card_jp_0" : "card card_ap_0")
+        fo_card = "fo-card"
+        fo_card_id = side
+        populate("hand", side, "fo-card", side)
     }
 
     if (G.events[events.FUTURE_OFFENSIVE_JP.id + side] === G.turn) {
-        populate_generic_to_parent(fo_card, counters.future_offensive_inactive)
+        populate_generic(fo_card, fo_card_id, counters.future_offensive_inactive)
     } else if (G.events[events.FUTURE_OFFENSIVE_JP.id + side] > 0) {
-        populate_generic_to_parent(fo_card, ((side === AP) ? counters.future_offensive_ap : counters.future_offensive_jp))
+        if (side === AP)
+            populate_generic(fo_card, fo_card_id, counters.future_offensive_ap)
+        else
+            populate_generic(fo_card, fo_card_id, counters.future_offensive_jp)
     }
 
-    if (!Array.isArray(G.hand[side])) {
-        for (var i = 0; i < G.hand[side]; i++) {
-            populate_generic("hand", side, side === JP ? "card card_jp_0" : "card card_ap_0").innerHTML = ''
-        }
+    if (Array.isArray(G.hand[side])) {
+        if (side === AP)
+            populate_with_list("hand", side, "card", G.hand[side], "card card_ap_0")
+        else
+            populate_with_list("hand", side, "card", G.hand[side], "card card_jp_0")
     } else {
-        for (var i = 0; i < G.hand[side].length; i++) {
-            if (G.hand[side][i] <= 0) {
-                populate_generic("hand", side, side === JP ? "card card_jp_0" : "card card_ap_0").innerHTML = ''
-            } else {
-                var card = G.hand[side][i]
-                populate("hand", side, "card", card)
-            }
-        }
+        if (side === AP)
+            populate_generic("hand", side, "card card_ap_0", G.hand[side])
+        else
+            populate_generic("hand", side, "card card_jp_0", G.hand[side])
     }
 }
 
+function apply_conflict_marker(marker, hex) {
+    marker.innerText = String.fromCharCode(65 + G.offensive.battle_names.indexOf(hex))
+}
 
 function update_unit(u, location) {
     var piece = pieces[u]
@@ -281,31 +290,32 @@ function on_update() {
                 update_keyword("zoi_hex", hex, "yellow")
     }
 
-    // VIOLATIONS
+    // STACKING VIOLATIONS
     if (G.violations.length > 0) {
         for (var h of G.violations)
             update_keyword("action_hex", h, "violation")
         update_text_html("violations", 0, "<b>STACKING VIOLATIONS:</B>\n" + escape_text(G.violations.map(h => "H"+h).join(", ")) + ".")
     }
 
-
-
-
-
-
-    highlight_aa()
-
-    world.things["card"].forEach(e => e.element.innerHTML = '')
-    if (G.offensive.active_cards.length > 0) {
-        document.getElementById("active_cards").classList.remove("hide")
-        for (let i = 0; i < G.offensive.active_cards.length; i++) {
-            populate("hand", 2, "card", G.offensive.active_cards[i])
-        }
-    } else {
-        document.getElementById("active_cards").classList.add("hide")
+    // AMPHIBIOUS HEXES
+    for (var u of G.offensive.active_units[G.offensive.attacker]) {
+        var piece = pieces[u]
+        var location = G.location[u]
+        if (
+            G.offensive.stage !== POST_BATTLE_STAGE &&
+            piece.class === "ground" &&
+            location < LAST_BOARD_HEX &&
+            (!get_map_data(location).port || !is_space_controlled(location, G.offensive.attacker)) &&
+            map_get(G.offensive.paths, u, [ 0 ])[0] & AMPH_MOVE
+        )
+            update_keyword("action_hex", "amph")
     }
-    update_hand(AP)
+
+    // CARDS
     update_hand(JP)
+    update_hand(AP)
+    for (let c of G.offensive.active_cards)
+        populate("hand", 2, "card", c)
 
     G.offensive.battle_hexes.forEach(h => populate("s-loc", h, "battle", G.offensive.battle_names.indexOf(h)))
     G.offensive.landing_hexes.filter(h => get_map_data(h).named && is_space_controlled(h, 1 - G.offensive.attacker) && has_zoi(h, 1- G.offensive.attacker))
@@ -438,22 +448,4 @@ function on_update() {
 
     // trigger log expansion if snapshot view goes beyond the start
     show_full_log_if_needed()
-}
-
-function highlight_aa() {
-    world.amph.forEach(h => lookup_thing("action_hex", h).element.classList.remove("amph"))
-    G.offensive.active_units[G.offensive.attacker].forEach(u => {
-        var piece = pieces[u]
-        var location = G.location[u]
-        if (G.offensive.stage !== POST_BATTLE_STAGE && piece.class === "ground" && location < LAST_BOARD_HEX
-            && (!get_map_data(location).port || !is_space_controlled(location, G.offensive.attacker))
-            && map_get(G.offensive.paths, u, [0])[0] & AMPH_MOVE) {
-            set_add(world.amph, location)
-            lookup_thing("action_hex", location).element.classList.add("amph")
-        }
-    })
-}
-
-function apply_conflict_marker(marker, hex) {
-    marker.innerText = String.fromCharCode(65 + G.offensive.battle_names.indexOf(hex))
 }
