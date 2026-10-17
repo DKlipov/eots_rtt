@@ -20,5 +20,5 @@ CLIENT_SIDE_SUPPLY = 0
 /** import client/dialog.js */
 /** import client/update.js */
 /** import client/canvas.js */
+/** import client/text.js */
 /** import client/utils.js */
-/** import client/framework.js */

@@ -7,12 +7,6 @@ function on_reply(q, response) {
         P.check_unit_supply.show_supply(response)
 }
 
-function sort_unit_stack(a, b) {
-    var aw = get_element_weight(a) + a.thing.my_id
-    var bw = get_element_weight(b) + b.thing.my_id
-    return aw - bw
-}
-
 function define_s_loc(id, rect) {
     define_stack("s-loc", id,
         rect,

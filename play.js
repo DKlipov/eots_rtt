@@ -10183,12 +10183,6 @@ function on_reply(q, response) {
         P.check_unit_supply.show_supply(response)
 }
 
-function sort_unit_stack(a, b) {
-    var aw = get_element_weight(a) + a.thing.my_id
-    var bw = get_element_weight(b) + b.thing.my_id
-    return aw - bw
-}
-
 function define_s_loc(id, rect) {
     define_stack("s-loc", id,
         rect,
@@ -10820,11 +10814,31 @@ function on_init(scenario, game_options, static_view) {
 
 /* }}} */
 /* {{{ js/client/actions.js */
+/* LOCAL ACTION OVERRIDE */
+
 var LOCAL_STATUS = 0
 var LOCAL_STATE = null
 var STORED_STATE = null
+
 var L = {}
 const P = {}
+
+function menu_check_unit_supply() {
+    LOCAL_STATUS = "check_unit_supply"
+    LOCAL_STATE = {}
+    P.check_unit_supply._begin()
+    update_header()
+    on_update()
+}
+
+function menu_check_distance() {
+    LOCAL_STATUS = "check_distance"
+    LOCAL_STATE = {}
+    P.check_distance._begin()
+    update_header()
+    on_update()
+}
+
 
 P.check_unit_supply = {
     _begin() {
@@ -10961,22 +10975,6 @@ function get_hex_path(from, to) {
     }
     return result
 
-}
-
-function menu_check_unit_supply() {
-    LOCAL_STATUS = "check_unit_supply"
-    LOCAL_STATE = {}
-    P.check_unit_supply._begin()
-    update_header()
-    on_update()
-}
-
-function menu_check_distance() {
-    LOCAL_STATUS = "check_distance"
-    LOCAL_STATE = {}
-    P.check_distance._begin()
-    update_header()
-    on_update()
 }
 
 var original_send_action = send_action
@@ -12253,8 +12251,8 @@ function canvas_draw_supply(supply_data) {
 }
 
 /* }}} */
-/* {{{ js/client/utils.js */
-/* MISC CLIENT STUFF */
+/* {{{ js/client/text.js */
+/* UNIT TEXT TOOLTIP */
 
 const DIGIT_SUPERSCRIPT = [
     "\u2070",
@@ -12309,6 +12307,8 @@ function format_unit_tooltip(u) {
     return tip
 }
 
+/* HEX TOOLTIP */
+
 const TERRAIN_NAME = [
     "ocean",
     "open",
@@ -12339,90 +12339,6 @@ function format_hex_tooltip(h) {
     return tip
 }
 
-function center_rect([x, y], w, h) {
-    return [x - w / 2, y - h / 2, w, h]
-}
-
-function hex_in_map(x, y) {
-    return x >= map_info.grid_x_offset &&
-        y >= map_info.grid_y_offset &&
-        x < map_info.grid_x_offset + map_info.ROW_HEX_NB &&
-        y < map_info.grid_y_offset + map_info.COLUMN_HEX_NB
-}
-
-function get_element_weight(e) {
-    var is_marker = !e.thing || e.thing.my_action !== "unit"
-    if (is_marker)
-        return e.classList.contains("top") ? 64000 : 0
-    var value = 0
-    var unit = e.thing.my_id
-    var piece = pieces[unit]
-    if (piece.garrison) {
-        return 0
-    }
-    if (piece.faction === G.offensive.attacker) {
-        value += 32000
-    }
-    if (piece.faction === AP) {
-        value += 16000
-    }
-    if (is_action("unit", unit) || set_has(G.active_stack, unit)) {
-        value += 4000
-    }
-    if (piece.class === "naval") {
-        value += 1000
-    } else if (piece.class === "ground") {
-        value += 7000
-    } else if (piece.class === "hq") {
-        value += 8000
-    } else if (piece.class === "air") {
-        value += 9000
-    }
-    // if (set_has(G.offensive.active_units[piece.faction], unit)) {
-    //     value += 512
-    // }
-    if (set_has(G.reduced, unit)) {
-        value += 256
-    }
-    if (piece.service === "army") {
-        value += 128
-    } else if (piece.service !== "navy") {
-        value += 64
-    }
-    return value
-}
-
-function hex_center(i) {
-    if (i === CHINA_BOX) {
-        var box = map_layout.box_air_unit_in_china
-        return center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
-    }
-    var row = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
-    var column = (Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB))
-    if (SID == BURMA_SCENARIO) {
-        if (i == SINGAPORE) {
-            const box = map_layout.label_singapore
-            return center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
-        }
-        if (i > TUNNEL_BOX) {
-            // display TUNNEL_BOX directly to the left of the blue singapore label
-            const box = map_layout.label_singapore
-            var sing_left_coord = center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
-            sing_left_coord[0] -= 47
-            return sing_left_coord
-        }
-    } else if (SID === SOUTH_PACIFIC_SCENARIO && i >= OAHU) {
-        const box = map_layout.h_5808
-        return center_rect([box[0] + box[2]/2, box[1] + box[3]/2], box[2], box[3])
-    }
-    return [
-        (map_info.display_x_offset) + (column - map_info.grid_x_offset) * HEX_X_SIZE,
-        (map_info.display_y_offset) + (row - map_info.grid_y_offset) * HEX_Y_SIZE + (column & 1) * 27.625
-    ]
-}
-
-/* }}} */
-/* {{{ js/client/framework.js */
 /* UNIT ZOOMED TOOLTIP & HQ RANGE DISPLAY TOGGLE */
 
 function focus_unit(id) {
@@ -12640,6 +12556,98 @@ function on_log(text, i) {
     p.innerHTML = escape_text(text)
 
     return p
+}
+
+/* }}} */
+/* {{{ js/client/utils.js */
+/* MISC CLIENT STUFF */
+
+function center_rect([x, y], w, h) {
+    return [x - w / 2, y - h / 2, w, h]
+}
+
+function hex_in_map(x, y) {
+    return x >= map_info.grid_x_offset &&
+        y >= map_info.grid_y_offset &&
+        x < map_info.grid_x_offset + map_info.ROW_HEX_NB &&
+        y < map_info.grid_y_offset + map_info.COLUMN_HEX_NB
+}
+
+function sort_unit_stack(a, b) {
+    var aw = get_element_weight(a) + a.thing.my_id
+    var bw = get_element_weight(b) + b.thing.my_id
+    return aw - bw
+}
+
+function get_element_weight(e) {
+    var is_marker = !e.thing || e.thing.my_action !== "unit"
+    if (is_marker)
+        return e.classList.contains("top") ? 64000 : 0
+    var value = 0
+    var unit = e.thing.my_id
+    var piece = pieces[unit]
+    if (piece.garrison) {
+        return 0
+    }
+    if (piece.faction === G.offensive.attacker) {
+        value += 32000
+    }
+    if (piece.faction === AP) {
+        value += 16000
+    }
+    if (is_action("unit", unit) || set_has(G.active_stack, unit)) {
+        value += 4000
+    }
+    if (piece.class === "naval") {
+        value += 1000
+    } else if (piece.class === "ground") {
+        value += 7000
+    } else if (piece.class === "hq") {
+        value += 8000
+    } else if (piece.class === "air") {
+        value += 9000
+    }
+    // if (set_has(G.offensive.active_units[piece.faction], unit)) {
+    //     value += 512
+    // }
+    if (set_has(G.reduced, unit)) {
+        value += 256
+    }
+    if (piece.service === "army") {
+        value += 128
+    } else if (piece.service !== "navy") {
+        value += 64
+    }
+    return value
+}
+
+function hex_center(i) {
+    if (i === CHINA_BOX) {
+        var box = map_layout.box_air_unit_in_china
+        return center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
+    }
+    var row = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
+    var column = (Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB))
+    if (SID == BURMA_SCENARIO) {
+        if (i == SINGAPORE) {
+            const box = map_layout.label_singapore
+            return center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
+        }
+        if (i > TUNNEL_BOX) {
+            // display TUNNEL_BOX directly to the left of the blue singapore label
+            const box = map_layout.label_singapore
+            var sing_left_coord = center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
+            sing_left_coord[0] -= 47
+            return sing_left_coord
+        }
+    } else if (SID === SOUTH_PACIFIC_SCENARIO && i >= OAHU) {
+        const box = map_layout.h_5808
+        return center_rect([box[0] + box[2]/2, box[1] + box[3]/2], box[2], box[3])
+    }
+    return [
+        (map_info.display_x_offset) + (column - map_info.grid_x_offset) * HEX_X_SIZE,
+        (map_info.display_y_offset) + (row - map_info.grid_y_offset) * HEX_Y_SIZE + (column & 1) * 27.625
+    ]
 }
 
 /* }}} */

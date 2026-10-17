@@ -1,8 +1,28 @@
+/* LOCAL ACTION OVERRIDE */
+
 var LOCAL_STATUS = 0
 var LOCAL_STATE = null
 var STORED_STATE = null
+
 var L = {}
 const P = {}
+
+function menu_check_unit_supply() {
+    LOCAL_STATUS = "check_unit_supply"
+    LOCAL_STATE = {}
+    P.check_unit_supply._begin()
+    update_header()
+    on_update()
+}
+
+function menu_check_distance() {
+    LOCAL_STATUS = "check_distance"
+    LOCAL_STATE = {}
+    P.check_distance._begin()
+    update_header()
+    on_update()
+}
+
 
 P.check_unit_supply = {
     _begin() {
@@ -139,22 +159,6 @@ function get_hex_path(from, to) {
     }
     return result
 
-}
-
-function menu_check_unit_supply() {
-    LOCAL_STATUS = "check_unit_supply"
-    LOCAL_STATE = {}
-    P.check_unit_supply._begin()
-    update_header()
-    on_update()
-}
-
-function menu_check_distance() {
-    LOCAL_STATUS = "check_distance"
-    LOCAL_STATE = {}
-    P.check_distance._begin()
-    update_header()
-    on_update()
 }
 
 var original_send_action = send_action
