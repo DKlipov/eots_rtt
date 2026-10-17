@@ -345,27 +345,29 @@ function on_update() {
             populate_generic("s-loc", hex_to_int(hex), marker)
         }
     }
+
     for (i = 0; i < TURN_MARKERS.length; i++) {
         const marker = TURN_MARKERS[i]
-        var value = marker.value(G)
-        var counter = (typeof marker.counter === 'function') ? marker.counter(G) : marker.counter
-        if (!Array.isArray(value)) {
-            value = [value]
+        var v = marker.value(G)
+        if (v > 0 && turns[v]) { // v <= map_info.turn_b) {
+            populate("turn", v, "turn-marker", i)
+            if (marker.reduced?.(G))
+                update_keyword("turn-marker", i, "reduced")
+            if (marker.gray?.(G))
+                update_keyword("turn-marker", i, "gray")
         }
-        value.filter(v => v > 0 && turns[v]).forEach(v => populate_generic("turn", v, counter))
     }
 
     for (i = 0; i < TRACK_MARKERS.length; i++) {
         const marker = TRACK_MARKERS[i]
         var value = marker.value(G)
-        var counter = (typeof marker.counter === 'function') ? marker.counter(G) : marker.counter
         var track = Math.min(9, value)
-        if (value > 9 && marker.alt_counter) {
-            counter = marker.alt_counter
+        if (value > 9 && marker.reversible) {
+            update_keyword("track-marker", i, "reduced")
             track = Math.min(9, value - 10)
         }
-        if (value > 0 || marker.always_show === true || (typeof marker.always_show === 'function' && marker.always_show(G))) {
-            populate_generic("track", track, counter)
+        if (value > 0 || marker.always_show === true || (marker.always_show === 'function' && marker.always_show(G))) {
+            populate("track", track, "track-marker", i)
         }
     }
 

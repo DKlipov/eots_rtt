@@ -10573,26 +10573,29 @@ const UNIT_MOVEMENT_MARKERS = [
 
 const TRACK_MARKERS = [
     {
-        counter: () => (G.events[events.BARGES.id] > 0 ? counters.asp_b_jp : counters.asp_jp) + (jp_gray_amp() ? " gray" : ""),
+        counter: counters.asp_jp,
+        reduced: G => (G.events[events.BARGES.id] > 0),
+        gray: G => jp_gray_amp(),
         value: G => G.asp[0][0]
     },
     {
-        counter: () => (G.events[events.BARGES.id] > 0 ? counters.asp_b_jp : counters.asp_jp),
+        counter: counters.asp_jp,
+        reduced: G => (G.events[events.BARGES.id] > 0),
         value: G => (jp_gray_amp()) ? Math.ceil(G.asp[0][0] / 2) : 0
     },
     {
         counter: counters.asp_ap,
-        alt_counter: counters.asp_ap_1,
+        reversible: true,
         value: G => G.asp[1][0]
     },
     {
         counter: counters.divisions_china,
-        always_show: G => 0,
+        // TODO -- this does nothing? -- always_show: G => 0,
         value: G => (G.sid === SOUTH_PACIFIC_SCENARIO) ? G.china_divisions : 0
     },
     {
         counter: counters.resource_jp,
-        alt_counter: counters.resource_jp_1,
+        reversible: true,
         value: G => array_count(RESOURCE_HEX, h => is_space_controlled(h, JP))
     },
     {
@@ -10635,7 +10638,7 @@ const TRACK_MARKERS = [
     },
     {
         counter: counters.aspu_ap,
-        alt_counter: counters.aspu_ap_1,
+        reversible: true,
         always_show: true,
         value: G => G.asp[1][1]
     },
@@ -10671,7 +10674,8 @@ const TURN_MARKERS = [
         value: G => G.events[events.KWAI_RIVER_BRIDGE.id]
     },
     {
-        counter: () => (G.events[events.JP_ESCORTS.id] >> 4 === 2) ? counters.escorts2 : counters.escorts4,
+        counter: counters.escorts2,
+        reduced: G => (G.events[events.JP_ESCORTS.id] >> 4 !== 2),
         value: G => G.events[events.JP_ESCORTS.id] % (1 << 4)
     },
     {
@@ -10727,7 +10731,8 @@ const TURN_MARKERS = [
         value: G => G.events[events.CHINA_OFFENSIVE.id]
     },
     {
-        counter: G => G.events[events.TOJO.id] ? counters.turn_tr : counters.turn_pmt,
+        counter: counters.turn_pmt,
+        reduced: G => G.events[events.TOJO.id],
         value: G => G.turn
     },
 ]
@@ -10921,6 +10926,14 @@ function on_init(scenario, game_options, static_view) {
         card.element = define_card("card", i, `card_${card.faction ? "ap" : "jp"}_${card.num}`)
         card.element.card = i
     }
+
+    TRACK_MARKERS.forEach(function (m, i) {
+        define_marker("track-marker", i, m.counter)
+    })
+
+    TURN_MARKERS.forEach(function (m, i) {
+        define_marker("turn-marker", i, m.counter)
+    })
 
 }
 
@@ -12150,27 +12163,29 @@ function on_update() {
             populate_generic("s-loc", hex_to_int(hex), marker)
         }
     }
+
     for (i = 0; i < TURN_MARKERS.length; i++) {
         const marker = TURN_MARKERS[i]
-        var value = marker.value(G)
-        var counter = (typeof marker.counter === 'function') ? marker.counter(G) : marker.counter
-        if (!Array.isArray(value)) {
-            value = [value]
+        var v = marker.value(G)
+        if (v > 0 && turns[v]) { // v <= map_info.turn_b) {
+            populate("turn", v, "turn-marker", i)
+            if (marker.reduced?.(G))
+                update_keyword("turn-marker", i, "reduced")
+            if (marker.gray?.(G))
+                update_keyword("turn-marker", i, "gray")
         }
-        value.filter(v => v > 0 && turns[v]).forEach(v => populate_generic("turn", v, counter))
     }
 
     for (i = 0; i < TRACK_MARKERS.length; i++) {
         const marker = TRACK_MARKERS[i]
         var value = marker.value(G)
-        var counter = (typeof marker.counter === 'function') ? marker.counter(G) : marker.counter
         var track = Math.min(9, value)
-        if (value > 9 && marker.alt_counter) {
-            counter = marker.alt_counter
+        if (value > 9 && marker.reversible) {
+            update_keyword("track-marker", i, "reduced")
             track = Math.min(9, value - 10)
         }
-        if (value > 0 || marker.always_show === true || (typeof marker.always_show === 'function' && marker.always_show(G))) {
-            populate_generic("track", track, counter)
+        if (value > 0 || marker.always_show === true || (marker.always_show === 'function' && marker.always_show(G))) {
+            populate("track", track, "track-marker", i)
         }
     }
 
