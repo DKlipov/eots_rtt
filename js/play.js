@@ -12,6 +12,7 @@ function capture_hex() {}
 /** import common/supply.js */
 /** import common/move.js */
 /** import common/scenario.js */
+/** import common/library.js*/
 
 /** import client/init.js */
 /** import client/actions.js */

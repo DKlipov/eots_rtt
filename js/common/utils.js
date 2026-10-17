@@ -1,26 +1,9 @@
-/** import common/library.js*/
-
 function hex_to_int(i) {
     return (Math.floor(i / 100) - 10) * 29 + i % 100
 }
 
-
 function int_to_hex(i) {
     return (Math.floor(i / 29) * 100) + 1000 + i % 29
-}
-
-
-function with_state_as_G(state, apply) {
-    var actual_g = G
-    G = state
-    G = state
-    // G.active = actual_g.active
-    var log = G.log
-    G.log = []
-    var result = apply()
-    G.log = log
-    G = actual_g
-    return result
 }
 
 function get_direction(from, to) {
@@ -150,10 +133,6 @@ function slow_in_range(first_hex, range, hexes, faction) {
     return result
 }
 
-function offensive_card_header() {
-    return `${G.offensive.type === EC ? "EC" : "OC"}: ${cards[G.offensive.active_cards[0]].ops} Ops.`
-}
-
 function get_jp_resources() {
     return array_count(RESOURCE_HEX, h => is_space_controlled(h, JP) && get_map_data(h).resource)
 }
@@ -191,20 +170,8 @@ function hex_get_log_str(h) {
     return `H${h}`
 }
 
-function card_get_log_str(c) {
-    return `C${c}`
-}
-
 function piece_get_log_str(p) {
     return `P${p}`
-}
-
-function dice_get_log_str(p, modifiers, faction = G.active) {
-    return `${faction === AP ? "B" : "R"}${p} ${modifiers > 0 ? "+" : ""}${modifiers ? modifiers : ""}`
-}
-
-function side_get_log_str(side) {
-    return `${side === AP ? "AP" : "JP"}`
 }
 
 function list_get_log_str(header, items) {
@@ -221,16 +188,4 @@ function scenario_data() {
 
 function solely_occupied_land(hex, faction) {
     return G.supply_cache[hex] & JP_GAH_UNITS << (faction) && !(G.supply_cache[hex] & JP_GAH_UNITS << (1 - faction))
-}
-
-function array_equals(a, b) {
-    if (a.length !== b.length) {
-        return false
-    }
-    for (var i = 0; i < a.length; i++) {
-        if (a[i] !== b[i]) {
-            return false
-        }
-    }
-    return true
 }

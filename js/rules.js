@@ -10,7 +10,9 @@ const CLIENT_SIDE_SUPPLY = 1
 /** import common/supply.js */
 /** import common/move.js */
 /** import common/scenario.js */
+/** import common/library.js*/
 
+/** import server/utils.js */
 /** import server/game.js */
 /** import server/query.js */
 /** import server/scenario_setup.js */

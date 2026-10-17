@@ -23,6 +23,17 @@ function menu_check_distance() {
     on_update()
 }
 
+function array_equals(a, b) {
+    if (a.length !== b.length) {
+        return false
+    }
+    for (var i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) {
+            return false
+        }
+    }
+    return true
+}
 
 P.check_unit_supply = {
     _begin() {
