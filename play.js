@@ -12213,7 +12213,7 @@ function on_update() {
             (!get_map_data(location).port || !is_space_controlled(location, G.offensive.attacker)) &&
             map_get(G.offensive.paths, u, [ 0 ])[0] & AMPH_MOVE
         )
-            update_keyword("action_hex", "amph")
+            update_keyword("action_hex", location, "amph")
     }
 
     // CARDS
