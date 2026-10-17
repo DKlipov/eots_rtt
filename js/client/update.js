@@ -398,6 +398,9 @@ function on_update() {
     action_button("undo", "Undo")
 
     end_update()
+
+    // trigger log expansion if snapshot view goes beyond the start
+    show_full_log_if_needed()
 }
 
 function print_violations() {

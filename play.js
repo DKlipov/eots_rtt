@@ -12250,6 +12250,9 @@ function on_update() {
     action_button("undo", "Undo")
 
     end_update()
+
+    // trigger log expansion if snapshot view goes beyond the start
+    show_full_log_if_needed()
 }
 
 function print_violations() {
@@ -12617,6 +12620,8 @@ function on_prompt(text) {
     }
 }
 
+// FIXME: icky log shortening hacks...
+
 var shorten_log_start = 0
 
 function show_full_log() {
@@ -12632,6 +12637,15 @@ function on_init_log(log) {
     }
     if (turns.length >= 8)
         shorten_log_start = turns[turns.length-4]
+}
+
+function show_full_log_if_needed() {
+    var current_log_length = document.getElementById("log").children.length
+    if (current_log_length < shorten_log_start) {
+        console.log("Expanded log during snapshot review")
+        shorten_log_start = 0
+        update_log(0, current_log_length)
+    }
 }
 
 function on_log(text, i) {
