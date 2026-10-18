@@ -11087,7 +11087,6 @@ P.check_distance = {
     },
     on_update() {
         var measure = document.getElementById("measure")
-        console.log("Measure", LOCAL_STATE.points.length, "points")
         LOCAL_STATE.points.forEach((hex, index) => {
             var [ x, y ] = hex_center(hex)
             var e = document.createElement("div")
@@ -11101,26 +11100,21 @@ P.check_distance = {
 }
 
 function get_hex_path(from, to) {
-    var result = []
-    var current = from
-    while (current !== to) {
-        var nh = get_edge_hexes(current)
-        var d = 500
-        var r = -1
-        for (var i = 0; i < nh.length; i++) {
-            var dist = get_distance(nh[i], to)
-            // TODO: don't dig into world to see if hex is defined (use ALL_BOARD_HEXES?)
-            // OLD: if (dist < d && world.things["s-loc"][nh[i]])
-            if (dist < d && set_has(ALL_BOARD_HEXES, nh[i])) {
-                r = nh[i]
+    var path = []
+    while (from !== to) {
+        var d = 5000
+        var best = -1
+        for (var next of get_edge_hexes(from)) {
+            var dist = get_distance(next, to)
+            if (dist < d) {
+                best = next
                 d = dist
             }
         }
-        result.push(r)
-        current = r
+        path.push(best)
+        from = best
     }
-    return result
-
+    return path
 }
 
 var original_send_action = send_action
