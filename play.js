@@ -11951,7 +11951,6 @@ function update_unit(u, location) {
             update_keyword("unit", u, "activated")
 
         if (G.active_stack.includes(u)) {
-            update_keyword("unit", u, "selected")
             update_rotation("unit", u, 22.5)
         }
 
