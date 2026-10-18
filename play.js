@@ -11826,6 +11826,39 @@ function print_battle_box(text, faction, cf, rm, units, log) {
 
 /* }}} */
 /* {{{ js/client/update.js */
+function get_control_marker(h) {
+    var capture = set_has(G.capture, h)
+    if (capture && is_space_controlled(h, JP)) {
+        return counters.capture_jp
+    } else if (is_space_controlled(h, JP)) {
+        return counters.control_jp
+    } else if (h === MANCHURIA_1 || h === MANCHURIA_2) {
+        return counters.control_sov
+    } else if (G.sid === BURMA_SCENARIO || BR_NATIONS.includes(HEX_BY_NATION[h])) {
+        return counters.control_br
+    } else {
+        return counters.control_us
+    }
+}
+
+function should_show_hex_control(i, all_control, vassal_control) {
+	var hn = HEX_BY_NATION[i]
+	var cont = is_space_controlled(i, JP) ? JP : AP
+	if ((cont === AP && set_has(G.capture, i) && !all_control) || !(G.supply_cache[i] & HEX_CONTROLLABLE))
+		return false
+	var default_condition =
+		(hn >= 0 && G.surrender[HEX_BY_NATION[i]] > 0 == cont) || (hn === -1 && cont === AP) || (hn < -1 && cont === JP)
+	var vassal_condition = set_has(JP_BOUNDARY_HEX, i) + 0 === cont
+	if (
+		map_info.hex_check(i) &&
+		cont !== null &&
+		(all_control || (!is_faction_units(i, AP) && !is_faction_units(i, JP))) &&
+		(all_control || (!vassal_control && default_condition) || (vassal_control && vassal_condition))
+	)
+		return true
+	return false
+}
+
 function update_hand(side) {
     var hand = G.hand[side]
     var fo_card, fo_card_id
@@ -11860,10 +11893,6 @@ function update_hand(side) {
         else
             populate_generic("hand", side, "card jp c0", G.hand[side])
     }
-}
-
-function apply_conflict_marker(marker, hex) {
-    marker.innerText = String.fromCharCode(65 + G.offensive.battle_names.indexOf(hex))
 }
 
 function update_unit(u, location) {
@@ -11926,33 +11955,6 @@ function update_unit(u, location) {
     }
 }
 
-function get_isr_marker(v, i) {
-    if (v && i === AP) {
-        return counters.rivalry_ap
-    } else if (v && i === JP) {
-        return counters.rivalry_jp
-    } else if (i === AP) {
-        return counters.agreement_ap
-    } else {
-        return counters.agreement_jp
-    }
-}
-
-function get_control_marker(h) {
-    var capture = set_has(G.capture, h)
-    if (capture && is_space_controlled(h, JP)) {
-        return counters.capture_jp
-    } else if (is_space_controlled(h, JP)) {
-        return counters.control_jp
-    } else if (h === MANCHURIA_1 || h === MANCHURIA_2) {
-        return counters.control_sov
-    } else if (G.sid === BURMA_SCENARIO || BR_NATIONS.includes(HEX_BY_NATION[h])) {
-        return counters.control_br
-    } else {
-        return counters.control_us
-    }
-}
-
 function update_role_info(who) {
     var hand_size = Array.isArray(G.hand[who]) ? G.hand[who].length : G.hand[who]
     var fo = G.events[events.FUTURE_OFFENSIVE_JP.id + who]
@@ -11962,24 +11964,6 @@ function update_role_info(who) {
     if (G.passes[who])
         text += `, ${G.passes[who]} passes`
     roles[who].stat.textContent = escape_text(text)
-}
-
-function should_show_hex_control(i, all_control, vassal_control) {
-	var hn = HEX_BY_NATION[i]
-	var cont = is_space_controlled(i, JP) ? JP : AP
-	if ((cont === AP && set_has(G.capture, i) && !all_control) || !(G.supply_cache[i] & HEX_CONTROLLABLE))
-		return false
-	var default_condition =
-		(hn >= 0 && G.surrender[HEX_BY_NATION[i]] > 0 == cont) || (hn === -1 && cont === AP) || (hn < -1 && cont === JP)
-	var vassal_condition = set_has(JP_BOUNDARY_HEX, i) + 0 === cont
-	if (
-		map_info.hex_check(i) &&
-		cont !== null &&
-		(all_control || (!is_faction_units(i, AP) && !is_faction_units(i, JP))) &&
-		(all_control || (!vassal_control && default_condition) || (vassal_control && vassal_condition))
-	)
-		return true
-	return false
 }
 
 function on_update() {
