@@ -11482,7 +11482,7 @@ P.move_offensive_units = {
         L.log.forEach(r => log(r))
         L.move_type = ANY_MOVE
         L.spec_move = 0
-        call("move_to", {hex})
+        call("move_to", {hex: path[path.length - 1]})
     },
     move(nul, curr_path) {
         if (!curr_path) {
