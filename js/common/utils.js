@@ -1,3 +1,11 @@
+function is_event_active(event) {
+    var data = G.events[event.id]
+    if (Array.isArray(data)) {
+        return data[data.length - 1] === G.turn
+    }
+    return G.events[event.id]
+}
+
 function hex_to_int(i) {
     return (Math.floor(i / 100) - 10) * 29 + i % 100
 }

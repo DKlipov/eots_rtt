@@ -365,12 +365,3 @@ const ROAD_EVENTS = Object.keys(events).filter(k => events[k].road).map(k => {
     event.keys = event.keys.map(h => hex_to_int(h))
     return event
 })
-
-
-function is_event_active(event) {
-    var data = G.events[event.id]
-    if (Array.isArray(data)) {
-        return data[data.length - 1] === G.turn
-    }
-    return G.events[event.id]
-}

@@ -38,8 +38,8 @@ function compile(output, input) {
 
     stm.push("//# sourceMappingURL=" + output + ".map")
 
-    fs.writeFileSync(output, stm.join("\n"))
-    fs.writeFileSync(output + ".map", map.toString())
+    fs.writeFileSync(output, stm.join("\n") + "\n")
+    fs.writeFileSync(output + ".map", map.toString() + "\n")
 }
 
 compile("play.js", "js/play.js")
