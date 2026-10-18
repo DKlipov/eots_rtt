@@ -10749,6 +10749,8 @@ function on_init(scenario, game_options, static_view) {
             define_space("action_hex", i, center_rect(xy, 68, 68))
                 .tooltip(format_hex_tooltip)
             define_s_loc(i, center_rect(xy, 45, 45))
+
+            define_marker("top", i)
         }
     }
 
@@ -10890,6 +10892,14 @@ const P = {}
 var client_original_oos = null
 var client_original_br = -1
 
+function measure_init() {
+    world.measure = document.getElementById("measure")
+}
+
+function measure_update() {
+    document.replaceChildren()
+}
+
 function check_supply() {
     if (!G.client_supply) {
         client_original_oos = G.oos
@@ -10928,6 +10938,8 @@ function array_equals(a, b) {
 }
 
 function on_update_local_actions() {
+    document.getElementById("measure").replaceChildren()
+
     if (G.actions && R >= 0 && !init_overstack_check(true, R)) {
         L.hexes = []
         L.allowed_units.forEach(u => set_add(L.hexes, G.location[u]))
@@ -11074,12 +11086,16 @@ P.check_distance = {
         on_update()
     },
     on_update() {
-        if (!LOCAL_STATE.points.length) {
-            return
-        }
+        var measure = document.getElementById("measure")
+        console.log("Measure", LOCAL_STATE.points.length, "points")
         LOCAL_STATE.points.forEach((hex, index) => {
-            var marker = populate_generic("s-loc", hex, "marker top distance")
-            marker.thing.element.textContent = `${index} ${int_to_hex(hex)}`
+            var [ x, y ] = hex_center(hex)
+            var e = document.createElement("div")
+            e.className = "distance"
+            e.style.top = y - 23 + "px"
+            e.style.left = x - 23 + "px"
+            e.innerHTML = `<big>${index}</big><small>${int_to_hex(hex)}</small>`
+            measure.appendChild(e)
         })
     },
 }
@@ -12076,13 +12092,15 @@ function on_update() {
     for (i = 0; i < G.oos.length; i++) {
         var hex = G.location[G.oos[i]]
         if (hex <= LAST_BOARD_HEX && !set_has(oos_hex_set, hex) && !set_has(supplied_hex, hex)) {
-            var counter = counters.isolated
-            if (HQ_LIST.some(hq => G.location[hq] < LAST_BOARD_HEX && hex < LAST_BOARD_HEX
-                && pieces[hq].faction === pieces[G.oos[i]].faction
-                && in_range_on_map(G.location[hq], pieces[hq].cr, [hex], pieces[hq].faction).length)) {
-                counter = counters.oos
-            }
-            populate_generic("s-loc", hex, counter)
+            populate("s-loc", hex, "top", hex)
+            if (hex < LAST_BOARD_HEX && HQ_LIST.some(hq =>
+                    G.location[hq] < LAST_BOARD_HEX &&
+                    pieces[hq].faction === pieces[G.oos[i]].faction &&
+                    in_range_on_map(G.location[hq], pieces[hq].cr, [hex], pieces[hq].faction).length
+            ))
+                update_keyword("top", hex, "oos")
+            else
+                update_keyword("top", hex, "isolated")
             set_add(oos_hex_set, hex)
         }
     }
