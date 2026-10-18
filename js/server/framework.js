@@ -206,7 +206,7 @@ exports.action = function (state, role, action, argument) {
             }
             argument = argument[0]
         }
-
+        update_outdated_G()
         this_state[action](argument, extra)
         _run()
     } else if (action === "undo" && G.undo.length > 0) {
