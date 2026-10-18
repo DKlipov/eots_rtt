@@ -8,16 +8,28 @@ function int_to_hex(i) {
 
 function get_direction(from, to) {
     var x = ((from) % 29)
-    var d = ((from - x) / 29) % 2
-    var r = HEX_DIRECTION[from - to + 30 + d * 10]
-    return r ? r : 0
+    var d = ((from - x) / 29) & 1
+    switch (from - to + 30 + d * 10) {
+    case 31: return 0
+    case 2: return 1
+    case 1: return 2
+    case 29: return 3
+    case 59: return 4
+    case 60: return 5
+    case 41: return 0
+    case 11: return 1
+    case 10: return 2
+    case 39: return 3
+    case 68: return 4
+    case 69: return 5
+    }
+    return 0
 }
 
 function get_edge_hexes(hex) {
     var y = hex % 29
     var x = (hex - y) / 29
-
-    var y_diff = 1 - (x % 2)
+    var y_diff = 1 - (x & 1)
     var y1_diff = 1 - y_diff
     var result = []
     result.push((-y >> 31) * hex * -1 - 1)                                                                          //N or -1
@@ -33,14 +45,14 @@ function for_each_hex_in_range(hex, range, lambda) {
     lambda(hex)
     const y = hex % 29
     const x = (hex - y) / 29
-    const d = x % 2
+    const d = x & 1
     var i
 
     for (var j = -range; j <= range; j++) {
         if (x + j < 0 || x + j > 50) {
             continue
         }
-        const d2 = Math.abs(j) % 2
+        const d2 = Math.abs(j) & 1
         var current = (x + j) * 29 + y
         lambda(current)
         var limit = (range - d2) / 2 + (1 - d) * d2 + Math.floor((range - Math.abs(j)) / 2)
@@ -71,12 +83,12 @@ function get_distance(first_hex, second_hex) {
     var xf = (first_hex - yf) / 29
     var xs = (second_hex - ys) / 29
     var rx = Math.abs(xs - xf)
-    var ry = ys - yf - (rx % 2) * (xf % 2)
+    var ry = ys - yf - (rx & 1) * (xf & 1)
     if (ry <= (-rx >> 1)) {
-        ry = Math.abs(ry) - rx % 2
+        ry = Math.abs(ry) - (rx & 1)
     } else if (ry < rx >> 1) {
         const c = (rx >> 1) - ry
-        ry = (rx >> 1) + ((c + (rx % 2)) >> 1)
+        ry = (rx >> 1) + ((c + (rx & 2)) >> 1)
         rx -= c
     }
     return rx + ry - (rx >> 1)

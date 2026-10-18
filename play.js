@@ -187,20 +187,6 @@ const NEW_HEBRIDES = [4825, 4826, 4828, 4926].map(h => hex_to_int(h))
 const COM_REPLACEMENT_POINTS = [1307, 1308, 2114, 2709, 3727].map(h => hex_to_int(h))
 const CHINA_COAST = [2508, 2609, 2709, 2809, 2908, 3007, 3105, 3104, 3305, 3306].map(h => hex_to_int(h))
 
-const HEX_DIRECTION = []
-HEX_DIRECTION[31] = 0
-HEX_DIRECTION[2] = 1
-HEX_DIRECTION[1] = 2
-HEX_DIRECTION[29] = 3
-HEX_DIRECTION[59] = 4
-HEX_DIRECTION[60] = 5
-HEX_DIRECTION[41] = 0
-HEX_DIRECTION[11] = 1
-HEX_DIRECTION[10] = 2
-HEX_DIRECTION[39] = 3
-HEX_DIRECTION[68] = 4
-HEX_DIRECTION[69] = 5
-
 /* }}} */
 /* {{{ js/common/data.js */
 /* {{{ js/common/data_pieces.js */
@@ -210,7 +196,7 @@ var pieces = [
         id: "army_jp_g_mainland",
         "faction": JP,
         "name": "Japanese Home Islands garrison",
-        "counter": "piece garrison_jp",
+        "counter": "unit garrison_jp",
         "class": "ground",
         "service": "army",
         "garrison": true,
@@ -225,7 +211,7 @@ var pieces = [
         id: "army_jp_g_1",
         "faction": JP,
         "name": "Japanese garrison",
-        "counter": "piece garrison_cn",
+        "counter": "unit garrison_cn",
         "class": "ground",
         "service": "army",
         "garrison": true,
@@ -240,7 +226,7 @@ var pieces = [
         id: "army_jp_g_2",
         "faction": JP,
         "name": "Japanese garrison",
-        "counter": "piece garrison_cn",
+        "counter": "unit garrison_cn",
         "class": "ground",
         "service": "army",
         "garrison": true,
@@ -255,7 +241,7 @@ var pieces = [
         id: "army_jp_g_3",
         "faction": JP,
         "name": "Japanese garrison",
-        "counter": "piece garrison_cn",
+        "counter": "unit garrison_cn",
         "class": "ground",
         "service": "army",
         "garrison": true,
@@ -270,7 +256,7 @@ var pieces = [
         id: "hq_jp_cy",
         "faction": JP,
         "name": "Combined Fleet HQ (Yamamoto)",
-        "counter": "small_units_ltyellow unit_ix_2",
+        "counter": "unit small_units_ltyellow unit_ix_2",
         "class": "hq",
         "cr": 13,
         "cm": 3,
@@ -280,7 +266,7 @@ var pieces = [
         id: "hq_jp_ss",
         "faction": JP,
         "name": "South Seas HQ",
-        "counter": "small_units_ltyellow unit_ix_1",
+        "counter": "unit small_units_ltyellow unit_ix_1",
         "class": "hq",
         "cr": 12,
         "cm": 2,
@@ -290,7 +276,7 @@ var pieces = [
         id: "hq_jp_s",
         "faction": JP,
         "name": "South HQ",
-        "counter": "small_units_ltyellow unit_ix_3",
+        "counter": "unit small_units_ltyellow unit_ix_3",
         "class": "hq",
         "cr": 13,
         "cm": 1,
@@ -300,7 +286,7 @@ var pieces = [
         id: "hq_jp_co",
         "faction": JP,
         "name": "Combined Fleet HQ (Ozawa)",
-        "counter": "small_units_ltyellow unit_ix_4",
+        "counter": "unit small_units_ltyellow unit_ix_4",
         "class": "hq",
         "cr": 12,
         "cm": 2,
@@ -311,7 +297,7 @@ var pieces = [
         "name": "Akagi",
         "class": "naval",
         "type": "cv",
-        "counter": "big_units_white big unit_ix_10",
+        "counter": "unit big_units_white big unit_ix_10",
         "cf": 12,
         "lf": 12,
         "br": 3,
@@ -324,7 +310,7 @@ var pieces = [
         "faction": JP,
         "name": "Soryu",
         "class": "naval",
-        "counter": "big_units_white big unit_ix_12",
+        "counter": "unit big_units_white big unit_ix_12",
         "type": "cv",
         "cf": 10,
         "lf": 12,
@@ -338,7 +324,7 @@ var pieces = [
         "faction": JP,
         "name": "Shokaku",
         "class": "naval",
-        "counter": "big_units_white big unit_ix_13",
+        "counter": "unit big_units_white big unit_ix_13",
         "type": "cv",
         "cf": 14,
         "lf": 12,
@@ -352,7 +338,7 @@ var pieces = [
         "faction": JP,
         "name": "Zuiho",
         "class": "naval",
-        "counter": "big_units_white big unit_ix_16",
+        "counter": "unit big_units_white big unit_ix_16",
         "type": "cvl",
         "cf": 8,
         "lf": 8,
@@ -366,7 +352,7 @@ var pieces = [
         "faction": JP,
         "name": "Ryujo",
         "class": "naval",
-        "counter": "big_units_white big unit_ix_4",
+        "counter": "unit big_units_white big unit_ix_4",
         "type": "cvl",
         "cf": 6,
         "lf": 8,
@@ -379,7 +365,7 @@ var pieces = [
         "faction": JP,
         "name": "Nagato",
         "class": "naval",
-        "counter": "big_units_white big unit_ix_15",
+        "counter": "unit big_units_white big unit_ix_15",
         "type": "bb",
         "cf": 20,
         "lf": 14,
@@ -391,7 +377,7 @@ var pieces = [
         "faction": JP,
         "name": "Hiei",
         "class": "naval",
-        "counter": "big_units_white big unit_ix_14",
+        "counter": "unit big_units_white big unit_ix_14",
         "type": "bb",
         "cf": 17,
         "lf": 14,
@@ -403,7 +389,7 @@ var pieces = [
         "faction": JP,
         "name": "Kongo",
         "class": "naval",
-        "counter": "big_units_white big unit_ix_19",
+        "counter": "unit big_units_white big unit_ix_19",
         "type": "bb",
         "cf": 13,
         "lf": 14,
@@ -415,7 +401,7 @@ var pieces = [
         "faction": JP,
         "name": "Aoba",
         "class": "naval",
-        "counter": "big_units_white big unit_ix_17",
+        "counter": "unit big_units_white big unit_ix_17",
         "type": "ca",
         "organic": true,
         "cf": 12,
@@ -428,7 +414,7 @@ var pieces = [
         "faction": JP,
         "name": "Mogami",
         "class": "naval",
-        "counter": "big_units_white big unit_ix_5",
+        "counter": "unit big_units_white big unit_ix_5",
         "type": "ca",
         "organic": true,
         "cf": 12,
@@ -442,7 +428,7 @@ var pieces = [
         "faction": JP,
         "class": "naval",
         "notreplaceable": true,
-        "counter": "big_units_white big unit_ix_1",
+        "counter": "unit big_units_white big unit_ix_1",
         "start": 2909,
         "name": "Takao",
         "type": "ca",
@@ -456,7 +442,7 @@ var pieces = [
         "faction": JP,
         "class": "naval",
         "notreplaceable": true,
-        "counter": "big_units_white big unit_ix_3",
+        "counter": "unit big_units_white big unit_ix_3",
         "start": 3416,
         "name": "Nachi",
         "type": "ca",
@@ -470,7 +456,7 @@ var pieces = [
         "faction": JP,
         "class": "naval",
         "notreplaceable": true,
-        "counter": "big_units_white big unit_ix_18",
+        "counter": "unit big_units_white big unit_ix_18",
         "start": 4017,
         "name": "Kamikaze",
         "type": "apd",
@@ -484,7 +470,7 @@ var pieces = [
         "faction": JP,
         "class": "naval",
         "notreplaceable": true,
-        "counter": "big_units_white big unit_ix_2",
+        "counter": "unit big_units_white big unit_ix_2",
         "start": 4715,
         "name": "Tenyru",
         "type": "cl",
@@ -497,7 +483,7 @@ var pieces = [
         id: "air_jp_21",
         "faction": JP,
         "name": "21st Air Flotilla",
-        "counter": "small_units_white unit_ix_11",
+        "counter": "unit small_units_white unit_ix_11",
         "class": "air",
         "service": "navy",
         "notreplaceable": true,
@@ -512,7 +498,7 @@ var pieces = [
         id: "air_jp_22",
         "faction": JP,
         "name": "22nd Air Flotilla",
-        "counter": "small_units_white unit_ix_12",
+        "counter": "unit small_units_white unit_ix_12",
         "class": "air",
         "service": "navy",
         "notreplaceable": true,
@@ -527,7 +513,7 @@ var pieces = [
         id: "air_jp_23",
         "faction": JP,
         "name": "23rd Air Flotilla",
-        "counter": "small_units_white unit_ix_13",
+        "counter": "unit small_units_white unit_ix_13",
         "class": "air",
         "service": "navy",
         "notreplaceable": true,
@@ -542,7 +528,7 @@ var pieces = [
         id: "air_jp_24",
         "faction": JP,
         "name": "24th Air Flotilla",
-        "counter": "small_units_white unit_ix_14",
+        "counter": "unit small_units_white unit_ix_14",
         "class": "air",
         "service": "navy",
         "notreplaceable": true,
@@ -557,7 +543,7 @@ var pieces = [
         id: "army_jp_1sn",
         "faction": JP,
         "name": "1st SN Brigade",
-        "counter": "small_units_white unit_ix_3",
+        "counter": "unit small_units_white unit_ix_3",
         "class": "ground",
         "service": "navy",
         "notreplaceable": true,
@@ -572,7 +558,7 @@ var pieces = [
         id: "army_jp_2sn",
         "faction": JP,
         "name": "2nd SN Brigade",
-        "counter": "small_units_white unit_ix_4",
+        "counter": "unit small_units_white unit_ix_4",
         "class": "ground",
         "service": "navy",
         "notreplaceable": true,
@@ -587,7 +573,7 @@ var pieces = [
         id: "army_jp_3sn",
         "faction": JP,
         "name": "3rd SN Brigade",
-        "counter": "small_units_white unit_ix_5",
+        "counter": "unit small_units_white unit_ix_5",
         "class": "ground",
         "service": "navy",
         "notreplaceable": true,
@@ -602,7 +588,7 @@ var pieces = [
         id: "army_jp_4sn",
         "faction": JP,
         "name": "4th SN Brigade",
-        "counter": "small_units_white unit_ix_7",
+        "counter": "unit small_units_white unit_ix_7",
         "class": "ground",
         "service": "navy",
         "notreplaceable": true,
@@ -617,7 +603,7 @@ var pieces = [
         id: "army_jp_ss",
         "faction": JP,
         "name": "South Seas Brigade",
-        "counter": "small_units_white unit_ix_6",
+        "counter": "unit small_units_white unit_ix_6",
         "class": "ground",
         "service": "navy",
         "notreplaceable": true,
@@ -632,7 +618,7 @@ var pieces = [
         id: "army_jp_kor",
         "faction": JP,
         "name": "Korean Army",
-        "counter": "small_units_yellow unit_ix_20",
+        "counter": "unit small_units_yellow unit_ix_20",
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
@@ -646,7 +632,7 @@ var pieces = [
         id: "army_jp_ed",
         "faction": JP,
         "name": "Eastern District Army",
-        "counter": "small_units_yellow unit_ix_3",
+        "counter": "unit small_units_yellow unit_ix_3",
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
@@ -660,7 +646,7 @@ var pieces = [
         id: "army_jp_14",
         "faction": JP,
         "name": "14th Army",
-        "counter": "small_units_yellow unit_ix_18",
+        "counter": "unit small_units_yellow unit_ix_18",
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
@@ -677,7 +663,7 @@ var pieces = [
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
-        "counter": "small_units_yellow unit_ix_12",
+        "counter": "unit small_units_yellow unit_ix_12",
         "start": 2211,
         "size": 4,
         "cf": 20,
@@ -691,7 +677,7 @@ var pieces = [
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
-        "counter": "small_units_yellow unit_ix_21",
+        "counter": "unit small_units_yellow unit_ix_21",
         "start": 3416,
         "start_reduced": true,
         "size": 4,
@@ -706,7 +692,7 @@ var pieces = [
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
-        "counter": "small_units_yellow unit_ix_16",
+        "counter": "unit small_units_yellow unit_ix_16",
         "start": 2708,
         "start_reduced": true,
         "size": 4,
@@ -721,7 +707,7 @@ var pieces = [
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
-        "counter": "small_units_yellow unit_ix_4",
+        "counter": "unit small_units_yellow unit_ix_4",
         "start": 3706,
         "start_reduced": true,
         "size": 4,
@@ -736,7 +722,7 @@ var pieces = [
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
-        "counter": "small_units_yellow unit_ix_19",
+        "counter": "unit small_units_yellow unit_ix_19",
         "start": 3209,
         "start_reduced": true,
         "size": 4,
@@ -751,7 +737,7 @@ var pieces = [
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
-        "counter": "small_units_yellow unit_ix_14",
+        "counter": "unit small_units_yellow unit_ix_14",
         "start": 2509,
         "start_reduced": true,
         "size": 4,
@@ -766,7 +752,7 @@ var pieces = [
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
-        "counter": "small_units_yellow unit_ix_1",
+        "counter": "unit small_units_yellow unit_ix_1",
         "start": 3704,
         "start_reduced": true,
         "size": 4,
@@ -781,7 +767,7 @@ var pieces = [
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
-        "counter": "small_units_yellow unit_ix_17",
+        "counter": "unit small_units_yellow unit_ix_17",
         "start": 3007,
         "start_reduced": true,
         "size": 4,
@@ -796,7 +782,7 @@ var pieces = [
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
-        "counter": "small_units_yellow unit_ix_2",
+        "counter": "unit small_units_yellow unit_ix_2",
         "start": 2211,
         "size": 4,
         "cf": 18,
@@ -810,7 +796,7 @@ var pieces = [
         "class": "air",
         "service": "army",
         "notreplaceable": true,
-        "counter": "small_units_yellow_air unit_ix_1",
+        "counter": "unit small_units_yellow_air unit_ix_1",
         "start": 3706,
         "cf": 20,
         "lf": 10,
@@ -822,7 +808,7 @@ var pieces = [
         id: "air_jp_2",
         "faction": JP,
         "name": "2nd Air Division",
-        "counter": "small_units_yellow_air unit_ix_2",
+        "counter": "unit small_units_yellow_air unit_ix_2",
         "class": "air",
         "service": "army",
         "notreplaceable": true,
@@ -837,7 +823,7 @@ var pieces = [
         id: "air_jp_3",
         "faction": JP,
         "name": "3rd Air Division",
-        "counter": "small_units_yellow_air unit_ix_3",
+        "counter": "unit small_units_yellow_air unit_ix_3",
         "class": "air",
         "service": "army",
         "notreplaceable": true,
@@ -852,7 +838,7 @@ var pieces = [
         id: "air_jp_4",
         "faction": JP,
         "name": "4th Air Division",
-        "counter": "small_units_yellow_air unit_ix_4",
+        "counter": "unit small_units_yellow_air unit_ix_4",
         "class": "air",
         "service": "army",
         "notreplaceable": true,
@@ -867,7 +853,7 @@ var pieces = [
         id: "air_jp_5",
         "faction": JP,
         "name": "5th Air Division",
-        "counter": "small_units_yellow_air unit_ix_5",
+        "counter": "unit small_units_yellow_air unit_ix_5",
         "class": "air",
         "service": "army",
         "notreplaceable": true,
@@ -882,7 +868,7 @@ var pieces = [
         id: "air_jp_25",
         "faction": JP,
         "name": "25th Air Flotilla",
-        "counter": "small_units_white unit_ix_15",
+        "counter": "unit small_units_white unit_ix_15",
         "class": "air",
         "service": "navy",
         "rptype": "jp_air",
@@ -897,7 +883,7 @@ var pieces = [
         id: "air_jp_26",
         "faction": JP,
         "name": "26th Air Flotilla",
-        "counter": "small_units_white unit_ix_16",
+        "counter": "unit small_units_white unit_ix_16",
         "class": "air",
         "service": "navy",
         "rptype": "jp_air",
@@ -912,7 +898,7 @@ var pieces = [
         id: "air_jp_27",
         "faction": JP,
         "name": "27th Air Flotilla",
-        "counter": "small_units_white unit_ix_17",
+        "counter": "unit small_units_white unit_ix_17",
         "class": "air",
         "service": "navy",
         "rptype": "jp_air",
@@ -927,7 +913,7 @@ var pieces = [
         id: "air_jp_28",
         "faction": JP,
         "name": "28th Air Flotilla",
-        "counter": "small_units_white unit_ix_18",
+        "counter": "unit small_units_white unit_ix_18",
         "class": "air",
         "service": "navy",
         "rptype": "jp_air",
@@ -942,7 +928,7 @@ var pieces = [
         id: "air_jp_50",
         "faction": JP,
         "name": "50th Air Flotilla",
-        "counter": "small_units_white unit_ix_19",
+        "counter": "unit small_units_white unit_ix_19",
         "class": "air",
         "service": "navy",
         "rptype": "jp_air",
@@ -957,7 +943,7 @@ var pieces = [
         id: "air_jp_51",
         "faction": JP,
         "name": "51st Air Flotilla",
-        "counter": "small_units_white unit_ix_20",
+        "counter": "unit small_units_white unit_ix_20",
         "class": "air",
         "service": "navy",
         "rptype": "jp_air",
@@ -972,7 +958,7 @@ var pieces = [
         id: "air_jp_61",
         "faction": JP,
         "name": "61st Air Flotilla",
-        "counter": "small_units_white unit_ix_1",
+        "counter": "unit small_units_white unit_ix_1",
         "class": "air",
         "service": "navy",
         "rptype": "jp_air",
@@ -987,7 +973,7 @@ var pieces = [
         id: "air_jp_62",
         "faction": JP,
         "name": "62nd Air Flotilla",
-        "counter": "small_units_white unit_ix_2",
+        "counter": "unit small_units_white unit_ix_2",
         "class": "air",
         "service": "navy",
         "rptype": "jp_air",
@@ -1002,7 +988,7 @@ var pieces = [
         id: "air_jp_t",
         "faction": JP,
         "name": "Tainan Air Unit",
-        "counter": "small_units_yellow_air unit_ix_13",
+        "counter": "unit small_units_yellow_air unit_ix_13",
         "class": "air",
         "service": "army",
         "notreplaceable": true,
@@ -1017,7 +1003,7 @@ var pieces = [
         id: "air_jp_6",
         "faction": JP,
         "name": "6th Air Division",
-        "counter": "small_units_yellow_air unit_ix_6",
+        "counter": "unit small_units_yellow_air unit_ix_6",
         "class": "air",
         "service": "army",
         "rptype": "jp_air",
@@ -1032,7 +1018,7 @@ var pieces = [
         id: "air_jp_7",
         "faction": JP,
         "name": "7th Air Division",
-        "counter": "small_units_yellow_air unit_ix_7",
+        "counter": "unit small_units_yellow_air unit_ix_7",
         "class": "air",
         "service": "army",
         "rptype": "jp_air",
@@ -1047,7 +1033,7 @@ var pieces = [
         id: "air_jp_8",
         "faction": JP,
         "name": "8th Air Division",
-        "counter": "small_units_yellow_air unit_ix_8",
+        "counter": "unit small_units_yellow_air unit_ix_8",
         "class": "air",
         "service": "army",
         "rptype": "jp_air",
@@ -1062,7 +1048,7 @@ var pieces = [
         id: "air_jp_9",
         "faction": JP,
         "name": "9th Air Division",
-        "counter": "small_units_yellow_air unit_ix_9",
+        "counter": "unit small_units_yellow_air unit_ix_9",
         "class": "air",
         "service": "army",
         "rptype": "jp_air",
@@ -1077,7 +1063,7 @@ var pieces = [
         id: "air_jp_10",
         "faction": JP,
         "name": "10th Air Division",
-        "counter": "small_units_yellow_air unit_ix_10",
+        "counter": "unit small_units_yellow_air unit_ix_10",
         "class": "air",
         "service": "army",
         "rptype": "jp_air",
@@ -1092,7 +1078,7 @@ var pieces = [
         id: "air_jp_11",
         "faction": JP,
         "name": "11th Air Division",
-        "counter": "small_units_yellow_air unit_ix_11",
+        "counter": "unit small_units_yellow_air unit_ix_11",
         "class": "air",
         "service": "army",
         "rptype": "jp_air",
@@ -1107,7 +1093,7 @@ var pieces = [
         id: "air_jp_12",
         "faction": JP,
         "name": "12th Air Division",
-        "counter": "small_units_yellow_air unit_ix_12",
+        "counter": "unit small_units_yellow_air unit_ix_12",
         "class": "air",
         "service": "army",
         "rptype": "jp_air",
@@ -1122,7 +1108,7 @@ var pieces = [
         id: "army_jp_28",
         "faction": JP,
         "name": "28th Army",
-        "counter": "small_units_yellow unit_ix_5",
+        "counter": "unit small_units_yellow unit_ix_5",
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
@@ -1137,7 +1123,7 @@ var pieces = [
         id: "army_jp_31",
         "faction": JP,
         "name": "31st Army",
-        "counter": "small_units_yellow unit_ix_6",
+        "counter": "unit small_units_yellow unit_ix_6",
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
@@ -1152,7 +1138,7 @@ var pieces = [
         id: "army_jp_37",
         "faction": JP,
         "name": "37th Army",
-        "counter": "small_units_yellow unit_ix_7",
+        "counter": "unit small_units_yellow unit_ix_7",
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
@@ -1167,7 +1153,7 @@ var pieces = [
         id: "army_jp_33",
         "faction": JP,
         "name": "33rd Army",
-        "counter": "small_units_yellow unit_ix_8",
+        "counter": "unit small_units_yellow unit_ix_8",
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
@@ -1182,7 +1168,7 @@ var pieces = [
         id: "army_jp_2",
         "faction": JP,
         "name": "2nd Army",
-        "counter": "small_units_yellow unit_ix_9",
+        "counter": "unit small_units_yellow unit_ix_9",
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
@@ -1197,7 +1183,7 @@ var pieces = [
         id: "army_jp_29",
         "faction": JP,
         "name": "29th Army",
-        "counter": "small_units_yellow unit_ix_10",
+        "counter": "unit small_units_yellow unit_ix_10",
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
@@ -1212,7 +1198,7 @@ var pieces = [
         id: "army_jp_32",
         "faction": JP,
         "name": "32nd Army",
-        "counter": "small_units_yellow unit_ix_11",
+        "counter": "unit small_units_yellow unit_ix_11",
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
@@ -1227,7 +1213,7 @@ var pieces = [
         id: "army_jp_36",
         "faction": JP,
         "name": "36th Army",
-        "counter": "small_units_yellow unit_ix_15",
+        "counter": "unit small_units_yellow unit_ix_15",
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
@@ -1241,7 +1227,7 @@ var pieces = [
         id: "army_jp_39",
         "faction": JP,
         "name": "39th Army",
-        "counter": "small_units_yellow unit_ix_13",
+        "counter": "unit small_units_yellow unit_ix_13",
         "class": "ground",
         "service": "army",
         "rptype": "jp_ground",
@@ -1257,7 +1243,7 @@ var pieces = [
         "faction": JP,
         "name": "Yamato",
         "class": "naval",
-        "counter": "big_units_white big unit_ix_6",
+        "counter": "unit big_units_white big unit_ix_6",
         "type": "bb",
         "cf": 18,
         "lf": 18,
@@ -1271,7 +1257,7 @@ var pieces = [
         "faction": JP,
         "name": "Junyo",
         "class": "naval",
-        "counter": "big_units_white big unit_ix_7",
+        "counter": "unit big_units_white big unit_ix_7",
         "type": "cv",
         "cf": 8,
         "lf": 8,
@@ -1285,7 +1271,7 @@ var pieces = [
         "faction": JP,
         "name": "Kaiyo",
         "class": "naval",
-        "counter": "big_units_white big unit_ix_8",
+        "counter": "unit big_units_white big unit_ix_8",
         "type": "cve",
         "cf": 8,
         "lf": 8,
@@ -1300,7 +1286,7 @@ var pieces = [
         "faction": JP,
         "name": "Taiho",
         "class": "naval",
-        "counter": "big_units_white big unit_ix_9",
+        "counter": "unit big_units_white big unit_ix_9",
         "type": "cv",
         "cf": 10,
         "lf": 12,
@@ -1314,7 +1300,7 @@ var pieces = [
         "faction": JP,
         "name": "Amagi",
         "class": "naval",
-        "counter": "big_units_white big unit_ix_11",
+        "counter": "unit big_units_white big unit_ix_11",
         "type": "cvl",
         "cf": 8,
         "lf": 8,
@@ -1327,7 +1313,7 @@ var pieces = [
         id: "hq_ap_c",
         "faction": AP,
         "name": "Central Pacific HQ",
-        "counter": "small_units_turquoise unit_ix_1",
+        "counter": "unit small_units_turquoise unit_ix_1",
         "class": "hq",
         "service": "us",
         "cr": 25,
@@ -1338,7 +1324,7 @@ var pieces = [
         id: "hq_ap_sw",
         "faction": AP,
         "name": "South West Pacific HQ",
-        "counter": "small_units_turquoise unit_ix_2",
+        "counter": "unit small_units_turquoise unit_ix_2",
         "class": "hq",
         "service": "us",
         "cr": 20,
@@ -1349,7 +1335,7 @@ var pieces = [
         id: "hq_ap_sg",
         "faction": AP,
         "name": "South Pacific HQ (Ghormley)",
-        "counter": "small_units_turquoise unit_ix_3",
+        "counter": "unit small_units_turquoise unit_ix_3",
         "class": "hq",
         "service": "us",
         "cr": 7,
@@ -1360,7 +1346,7 @@ var pieces = [
         id: "hq_ap_sh",
         "faction": AP,
         "name": "South Pacific HQ (Halsey)",
-        "counter": "small_units_turquoise unit_ix_4",
+        "counter": "unit small_units_turquoise unit_ix_4",
         "class": "hq",
         "service": "us",
         "cr": 10,
@@ -1370,7 +1356,7 @@ var pieces = [
         id: "hq_ap_m",
         "faction": AP,
         "name": "Malaya HQ",
-        "counter": "small_units_beige unit_ix_4",
+        "counter": "unit small_units_beige unit_ix_4",
         "class": "hq",
         "service": "br",
         "cr": 5,
@@ -1382,7 +1368,7 @@ var pieces = [
         id: "hq_ap_seac",
         "faction": AP,
         "name": "SEAC HQ",
-        "counter": "small_units_beige unit_ix_5",
+        "counter": "unit small_units_beige unit_ix_5",
         "class": "hq",
         "service": "br",
         "cr": 10,
@@ -1393,7 +1379,7 @@ var pieces = [
         id: "hq_ap_abda",
         "faction": AP,
         "name": "ABDA HQ",
-        "counter": "small_units_dkblue unit_ix_1",
+        "counter": "unit small_units_dkblue unit_ix_1",
         "class": "hq",
         "service": "joint",
         "cr": 12,
@@ -1404,7 +1390,7 @@ var pieces = [
         id: "hq_ap_anzac",
         "faction": AP,
         "name": "ANZAC HQ",
-        "counter": "small_units_dkblue unit_ix_2",
+        "counter": "unit small_units_dkblue unit_ix_2",
         "class": "hq",
         "service": "joint",
         "cr": 10,
@@ -1418,7 +1404,7 @@ var pieces = [
         "class": "naval",
         "type": "cv",
         "service": "navy",
-        "counter": "big_units_blue big unit_ix_3",
+        "counter": "unit big_units_blue big unit_ix_3",
         "cf": 12,
         "lf": 12,
         "br": 2,
@@ -1431,7 +1417,7 @@ var pieces = [
         id: "enterprise",
         "faction": AP,
         "name": "Enterprise",
-        "counter": "big_units_blue big unit_ix_4",
+        "counter": "unit big_units_blue big unit_ix_4",
         "class": "naval",
         "type": "cv",
         "service": "navy",
@@ -1448,7 +1434,7 @@ var pieces = [
         "faction": AP,
         "name": "MD/CA",
         "class": "naval",
-        "counter": "big_units_blue big unit_ix_5",
+        "counter": "unit big_units_blue big unit_ix_5",
         "type": "bb",
         "service": "navy",
         "start": 5808,
@@ -1462,7 +1448,7 @@ var pieces = [
         "faction": AP,
         "name": "New Orleans",
         "class": "naval",
-        "counter": "big_units_blue big unit_ix_7",
+        "counter": "unit big_units_blue big unit_ix_7",
         "type": "ca",
         "service": "navy",
         "start": 5808,
@@ -1475,7 +1461,7 @@ var pieces = [
         id: "casia",
         "faction": AP,
         "name": "US Asia (Cruiser)",
-        "counter": "big_units_blue big unit_ix_2",
+        "counter": "unit big_units_blue big unit_ix_2",
         "class": "naval",
         "type": "ca",
         "service": "navy",
@@ -1489,7 +1475,7 @@ var pieces = [
         id: "dasia",
         "faction": AP,
         "name": "Us Asia (Destroyer)",
-        "counter": "big_units_blue big unit_ix_1",
+        "counter": "unit big_units_blue big unit_ix_1",
         "class": "naval",
         "type": "dd",
         "service": "navy",
@@ -1503,7 +1489,7 @@ var pieces = [
         id: "forcez",
         "faction": AP,
         "name": "Force Z",
-        "counter": "big_units_beige big unit_ix_1",
+        "counter": "unit big_units_beige big unit_ix_1",
         "class": "naval",
         "service": "br",
         "type": "bb",
@@ -1517,7 +1503,7 @@ var pieces = [
         id: "exeter",
         "faction": AP,
         "name": "Exeter",
-        "counter": "big_units_beige big unit_ix_3",
+        "counter": "unit big_units_beige big unit_ix_3",
         "class": "naval",
         "service": "br",
         "type": "ca",
@@ -1532,7 +1518,7 @@ var pieces = [
         "faction": AP,
         "name": "Kent",
         "class": "naval",
-        "counter": "big_units_beige big unit_ix_2",
+        "counter": "unit big_units_beige big unit_ix_2",
         "service": "au",
         "type": "ca",
         "start": 3727,
@@ -1546,7 +1532,7 @@ var pieces = [
         "faction": AP,
         "name": "Dutch",
         "class": "naval",
-        "counter": "big_units_orange big unit_ix_1",
+        "counter": "unit big_units_orange big unit_ix_1",
         "service": "du",
         "type": "cl",
         "start": 2019,
@@ -1559,7 +1545,7 @@ var pieces = [
         id: "air_ap_211",
         "faction": AP,
         "name": "Marine Fighter Attack Squadron 211",
-        "counter": "small_units_blue unit_ix_1",
+        "counter": "unit small_units_blue unit_ix_1",
         "class": "air",
         "service": "navy",
         "parenthetical": true,
@@ -1576,7 +1562,7 @@ var pieces = [
         id: "air_ap_feaf",
         "faction": AP,
         "name": "Far East Air Force (US)",
-        "counter": "small_units_green_air unit_ix_1",
+        "counter": "unit small_units_green_air unit_ix_1",
         "class": "air",
         "service": "army",
         "parenthetical": true,
@@ -1592,7 +1578,7 @@ var pieces = [
         id: "air_ap_19_lrb",
         "faction": AP,
         "name": "19th LRB air unit",
-        "counter": "small_units_green_air unit_ix_2",
+        "counter": "unit small_units_green_air unit_ix_2",
         "class": "air",
         "service": "army",
         "type": "lrb",
@@ -1609,7 +1595,7 @@ var pieces = [
         "name": "7th Air Force",
         "class": "air",
         "service": "army",
-        "counter": "small_units_green_air unit_ix_3",
+        "counter": "unit small_units_green_air unit_ix_3",
         "rptype": "ap_air",
         "start": 5808,
         "cf": 10,
@@ -1622,7 +1608,7 @@ var pieces = [
         id: "air_ap_7_lrb",
         "faction": AP,
         "name": "7th Air Force (LRB)",
-        "counter": "small_units_green_air unit_ix_4",
+        "counter": "unit small_units_green_air unit_ix_4",
         "class": "air",
         "service": "army",
         "type": "lrb",
@@ -1638,7 +1624,7 @@ var pieces = [
         id: "air_ap_avg",
         "faction": AP,
         "name": "The American Volunteer Groups",
-        "counter": "small_units_green_air unit_ix_16",
+        "counter": "unit small_units_green_air unit_ix_16",
         "class": "air",
         "service": "army",
         "parenthetical": true,
@@ -1654,7 +1640,7 @@ var pieces = [
         id: "air_ap_du",
         "faction": AP,
         "name": "Royal Netherlands Air Force",
-        "counter": "small_units_orange unit_ix_1",
+        "counter": "unit small_units_orange unit_ix_1",
         "class": "air",
         "service": "du",
         "parenthetical": true,
@@ -1670,7 +1656,7 @@ var pieces = [
         id: "air_ap_fe",
         "faction": AP,
         "name": "Far East Air Force (RAF)",
-        "counter": "small_units_beige_air unit_ix_3",
+        "counter": "unit small_units_beige_air unit_ix_3",
         "class": "air",
         "service": "br",
         "parenthetical": true,
@@ -1686,7 +1672,7 @@ var pieces = [
         id: "air_ap_ma",
         "faction": AP,
         "name": "Malayan Air Force (RAF)",
-        "counter": "small_units_beige_air unit_ix_4",
+        "counter": "unit small_units_beige_air unit_ix_4",
         "class": "air",
         "service": "br",
         "parenthetical": true,
@@ -1702,7 +1688,7 @@ var pieces = [
         id: "air_ap_au",
         "faction": AP,
         "name": "Australian Air Force",
-        "counter": "small_units_beige_air unit_ix_5",
+        "counter": "unit small_units_beige_air unit_ix_5",
         "class": "air",
         "service": "au",
         "parenthetical": true,
@@ -1718,7 +1704,7 @@ var pieces = [
         id: "air_ap_14",
         "faction": AP,
         "name": "14th Air Force",
-        "counter": "small_units_green_air unit_ix_15",
+        "counter": "unit small_units_green_air unit_ix_15",
         "class": "air",
         "service": "army",
         "rptype": "ap_air",
@@ -1732,7 +1718,7 @@ var pieces = [
         id: "air_ap_10_lrb",
         "faction": AP,
         "name": "10th Air Force (LRB)",
-        "counter": "small_units_green_air unit_ix_5",
+        "counter": "unit small_units_green_air unit_ix_5",
         "class": "air",
         "type": "lrb",
         "service": "army",
@@ -1747,7 +1733,7 @@ var pieces = [
         id: "air_ap_5_lrb",
         "faction": AP,
         "name": "5th Air Force (LRB)",
-        "counter": "small_units_green_air unit_ix_7",
+        "counter": "unit small_units_green_air unit_ix_7",
         "class": "air",
         "type": "lrb",
         "service": "army",
@@ -1762,7 +1748,7 @@ var pieces = [
         id: "air_ap_5",
         "faction": AP,
         "name": "5th Air Force",
-        "counter": "small_units_green_air unit_ix_6",
+        "counter": "unit small_units_green_air unit_ix_6",
         "class": "air",
         "service": "army",
         "rptype": "ap_air",
@@ -1777,7 +1763,7 @@ var pieces = [
         id: "air_ap_1_maw",
         "faction": AP,
         "name": "1st Marine Aircraft Wing",
-        "counter": "small_units_blue unit_ix_3",
+        "counter": "unit small_units_blue unit_ix_3",
         "class": "air",
         "service": "navy",
         "parenthetical": true,
@@ -1793,7 +1779,7 @@ var pieces = [
         id: "air_ap_seac",
         "faction": AP,
         "name": "SEAC Air Force",
-        "counter": "small_units_beige_air unit_ix_1",
+        "counter": "unit small_units_beige_air unit_ix_1",
         "class": "air",
         "service": "br",
         "rptype": "ap_air",
@@ -1808,7 +1794,7 @@ var pieces = [
         id: "air_ap_seac_lrb",
         "faction": AP,
         "name": "SEAC Air Force (LRB)",
-        "counter": "small_units_beige_air unit_ix_2",
+        "counter": "unit small_units_beige_air unit_ix_2",
         "class": "air",
         "type": "lrb",
         "service": "br",
@@ -1823,7 +1809,7 @@ var pieces = [
         id: "air_ap_13_lrb",
         "faction": AP,
         "name": "13th Air Force (LRB)",
-        "counter": "small_units_green_air unit_ix_9",
+        "counter": "unit small_units_green_air unit_ix_9",
         "class": "air",
         "type": "lrb",
         "service": "army",
@@ -1838,7 +1824,7 @@ var pieces = [
         id: "air_ap_13",
         "faction": AP,
         "name": "13th Air Force",
-        "counter": "small_units_green_air unit_ix_8",
+        "counter": "unit small_units_green_air unit_ix_8",
         "class": "air",
         "service": "army",
         "rptype": "ap_air",
@@ -1853,7 +1839,7 @@ var pieces = [
         id: "air_ap_11_lrb",
         "faction": AP,
         "name": "11th Air Force (LRB)",
-        "counter": "small_units_green_air unit_ix_11",
+        "counter": "unit small_units_green_air unit_ix_11",
         "class": "air",
         "type": "lrb",
         "service": "army",
@@ -1868,7 +1854,7 @@ var pieces = [
         id: "air_ap_11",
         "faction": AP,
         "name": "11th Air Force",
-        "counter": "small_units_green_air unit_ix_10",
+        "counter": "unit small_units_green_air unit_ix_10",
         "class": "air",
         "service": "army",
         "rptype": "ap_air",
@@ -1883,7 +1869,7 @@ var pieces = [
         id: "air_ap_14_lrb",
         "faction": AP,
         "name": "14th Air Force (LRB)",
-        "counter": "small_units_green_air unit_ix_12",
+        "counter": "unit small_units_green_air unit_ix_12",
         "class": "air",
         "type": "lrb",
         "service": "army",
@@ -1898,7 +1884,7 @@ var pieces = [
         id: "air_ap_2_maw",
         "faction": AP,
         "name": "2nd Marine Aircraft Wing",
-        "counter": "small_units_blue unit_ix_4",
+        "counter": "unit small_units_blue unit_ix_4",
         "class": "air",
         "service": "navy",
         "parenthetical": true,
@@ -1914,7 +1900,7 @@ var pieces = [
         id: "air_ap_3_maw",
         "faction": AP,
         "name": "3rd Marine Aircraft Wing",
-        "counter": "small_units_blue unit_ix_5",
+        "counter": "unit small_units_blue unit_ix_5",
         "class": "air",
         "service": "navy",
         "parenthetical": true,
@@ -1930,7 +1916,7 @@ var pieces = [
         id: "air_ap_20_bc",
         "faction": AP,
         "name": "XX Bomber Command (B-29)",
-        "counter": "small_units_green_air unit_ix_13",
+        "counter": "unit small_units_green_air unit_ix_13",
         "class": "air",
         "type": "lrb",
         "service": "army",
@@ -1946,7 +1932,7 @@ var pieces = [
         id: "air_ap_21_bc",
         "faction": AP,
         "name": "XXI Bomber Command (B-29)",
-        "counter": "small_units_green_air unit_ix_14",
+        "counter": "unit small_units_green_air unit_ix_14",
         "class": "air",
         "type": "lrb",
         "service": "army",
@@ -1962,7 +1948,7 @@ var pieces = [
         id: "mississippi",
         "faction": AP,
         "name": "Mississippi",
-        "counter": "big_units_blue big unit_ix_6",
+        "counter": "unit big_units_blue big unit_ix_6",
         "class": "naval",
         "type": "bb",
         "service": "navy",
@@ -1976,7 +1962,7 @@ var pieces = [
         id: "northampton",
         "faction": AP,
         "name": "Northampton",
-        "counter": "big_units_blue big unit_ix_8",
+        "counter": "unit big_units_blue big unit_ix_8",
         "class": "naval",
         "type": "ca",
         "service": "navy",
@@ -1990,7 +1976,7 @@ var pieces = [
         id: "warspite",
         "faction": AP,
         "name": "Warspite",
-        "counter": "big_units_beige big unit_ix_6",
+        "counter": "unit big_units_beige big unit_ix_6",
         "class": "naval",
         "type": "bb",
         "service": "br",
@@ -2004,7 +1990,7 @@ var pieces = [
         id: "indomitable",
         "faction": AP,
         "name": "Indomitable",
-        "counter": "big_units_beige big unit_ix_5",
+        "counter": "unit big_units_beige big unit_ix_5",
         "class": "naval",
         "type": "cv",
         "service": "br",
@@ -2020,7 +2006,7 @@ var pieces = [
         "faction": AP,
         "name": "Hermes",
         "class": "naval",
-        "counter": "big_units_beige big unit_ix_7",
+        "counter": "unit big_units_beige big unit_ix_7",
         "type": "cvl",
         "service": "br",
         "reinforcement": 2,
@@ -2035,7 +2021,7 @@ var pieces = [
         id: "carolina",
         "faction": AP,
         "name": "North Carolina",
-        "counter": "big_units_blue big unit_ix_10",
+        "counter": "unit big_units_blue big unit_ix_10",
         "class": "naval",
         "type": "bb",
         "service": "navy",
@@ -2050,7 +2036,7 @@ var pieces = [
         "faction": AP,
         "name": "Wasp",
         "class": "naval",
-        "counter": "big_units_blue big unit_ix_9",
+        "counter": "unit big_units_blue big unit_ix_9",
         "type": "cv",
         "service": "navy",
         "cf": 12,
@@ -2064,7 +2050,7 @@ var pieces = [
         id: "washington",
         "faction": AP,
         "name": "Washington",
-        "counter": "big_units_blue big unit_ix_11",
+        "counter": "unit big_units_blue big unit_ix_11",
         "class": "naval",
         "type": "bb",
         "service": "navy",
@@ -2079,7 +2065,7 @@ var pieces = [
         "faction": AP,
         "name": "London",
         "class": "naval",
-        "counter": "big_units_beige big unit_ix_8",
+        "counter": "unit big_units_beige big unit_ix_8",
         "type": "ca",
         "service": "br",
         "reinforcement": 4,
@@ -2092,7 +2078,7 @@ var pieces = [
         id: "mass",
         "faction": AP,
         "name": "Massachusetts",
-        "counter": "big_units_blue big unit_ix_12",
+        "counter": "unit big_units_blue big unit_ix_12",
         "class": "naval",
         "type": "bb",
         "service": "navy",
@@ -2106,7 +2092,7 @@ var pieces = [
         id: "jacinto",
         "faction": AP,
         "name": "San Jacinto",
-        "counter": "big_units_blue big unit_ix_13",
+        "counter": "unit big_units_blue big unit_ix_13",
         "class": "naval",
         "type": "cvl",
         "service": "navy",
@@ -2122,7 +2108,7 @@ var pieces = [
         "faction": AP,
         "name": "Essex",
         "class": "naval",
-        "counter": "big_units_blue big unit_ix_14",
+        "counter": "unit big_units_blue big unit_ix_14",
         "type": "cv",
         "service": "navy",
         "cf": 14,
@@ -2136,7 +2122,7 @@ var pieces = [
         id: "bunker",
         "faction": AP,
         "name": "Bunker Hill",
-        "counter": "big_units_blue big unit_ix_18",
+        "counter": "unit big_units_blue big unit_ix_18",
         "class": "naval",
         "type": "cv",
         "service": "navy",
@@ -2151,7 +2137,7 @@ var pieces = [
         id: "cowpens",
         "faction": AP,
         "name": "Cowpens",
-        "counter": "big_units_blue big unit_ix_17",
+        "counter": "unit big_units_blue big unit_ix_17",
         "class": "naval",
         "type": "cvl",
         "service": "navy",
@@ -2166,7 +2152,7 @@ var pieces = [
         id: "belleau",
         "faction": AP,
         "name": "Belleau Wood",
-        "counter": "big_units_blue big unit_ix_15",
+        "counter": "unit big_units_blue big unit_ix_15",
         "class": "naval",
         "type": "cvl",
         "service": "navy",
@@ -2181,7 +2167,7 @@ var pieces = [
         id: "sangamon",
         "faction": AP,
         "name": "Sangamon",
-        "counter": "big_units_blue big unit_ix_16",
+        "counter": "unit big_units_blue big unit_ix_16",
         "class": "naval",
         "type": "cve",
         "service": "navy",
@@ -2196,7 +2182,7 @@ var pieces = [
         id: "jersey",
         "faction": AP,
         "name": "New Jersey",
-        "counter": "big_units_blue big unit_ix_22",
+        "counter": "unit big_units_blue big unit_ix_22",
         "class": "naval",
         "type": "bb",
         "service": "navy",
@@ -2210,7 +2196,7 @@ var pieces = [
         id: "franklin",
         "faction": AP,
         "name": "Franklin",
-        "counter": "big_units_blue big unit_ix_21",
+        "counter": "unit big_units_blue big unit_ix_21",
         "class": "naval",
         "type": "cv",
         "service": "navy",
@@ -2225,7 +2211,7 @@ var pieces = [
         id: "intrepid",
         "faction": AP,
         "name": "Intrepid",
-        "counter": "big_units_blue big unit_ix_20",
+        "counter": "unit big_units_blue big unit_ix_20",
         "class": "naval",
         "type": "cv",
         "service": "navy",
@@ -2241,7 +2227,7 @@ var pieces = [
         "faction": AP,
         "name": "Bataan",
         "class": "naval",
-        "counter": "big_units_blue big unit_ix_19",
+        "counter": "unit big_units_blue big unit_ix_19",
         "type": "cvl",
         "service": "navy",
         "cf": 10,
@@ -2254,7 +2240,7 @@ var pieces = [
     {
         id: "hancock",
         "faction": AP,
-        "counter": "big_units_blue big unit_ix_24",
+        "counter": "unit big_units_blue big unit_ix_24",
         "name": "Hancock",
         "class": "naval",
         "type": "cv",
@@ -2270,7 +2256,7 @@ var pieces = [
         id: "casablanca",
         "faction": AP,
         "name": "Casablanca",
-        "counter": "big_units_blue big unit_ix_23",
+        "counter": "unit big_units_blue big unit_ix_23",
         "class": "naval",
         "type": "cve",
         "service": "navy",
@@ -2285,7 +2271,7 @@ var pieces = [
         id: "shangri",
         "faction": AP,
         "name": "Shangri-La",
-        "counter": "big_units_blue big unit_ix_27",
+        "counter": "unit big_units_blue big unit_ix_27",
         "class": "naval",
         "type": "cv",
         "service": "navy",
@@ -2300,7 +2286,7 @@ var pieces = [
         id: "missouri",
         "faction": AP,
         "name": "Missouri",
-        "counter": "big_units_blue big unit_ix_26",
+        "counter": "unit big_units_blue big unit_ix_26",
         "class": "naval",
         "type": "bb",
         "service": "navy",
@@ -2314,7 +2300,7 @@ var pieces = [
         id: "newyork",
         "faction": AP,
         "name": "New York",
-        "counter": "big_units_blue big unit_ix_25",
+        "counter": "unit big_units_blue big unit_ix_25",
         "class": "naval",
         "type": "bb",
         "service": "navy",
@@ -2328,7 +2314,7 @@ var pieces = [
         id: "richard",
         "faction": AP,
         "name": "B.H. Richard",
-        "counter": "big_units_blue big unit_ix_30",
+        "counter": "unit big_units_blue big unit_ix_30",
         "class": "naval",
         "type": "cv",
         "service": "navy",
@@ -2344,7 +2330,7 @@ var pieces = [
         "faction": AP,
         "name": "Alaska",
         "class": "naval",
-        "counter": "big_units_blue big unit_ix_29",
+        "counter": "unit big_units_blue big unit_ix_29",
         "type": "bc",
         "service": "navy",
         "reinforcement": 10,
@@ -2357,7 +2343,7 @@ var pieces = [
         id: "stlo",
         "faction": AP,
         "name": "St. Lo",
-        "counter": "big_units_blue big unit_ix_28",
+        "counter": "unit big_units_blue big unit_ix_28",
         "class": "naval",
         "type": "cve",
         "service": "navy",
@@ -2372,7 +2358,7 @@ var pieces = [
         id: "cbay",
         "faction": AP,
         "name": "Commencement Bay",
-        "counter": "big_units_blue big unit_ix_32",
+        "counter": "unit big_units_blue big unit_ix_32",
         "class": "naval",
         "type": "cve",
         "service": "navy",
@@ -2387,7 +2373,7 @@ var pieces = [
         id: "baltimore",
         "faction": AP,
         "name": "Baltimore",
-        "counter": "big_units_blue big unit_ix_31",
+        "counter": "unit big_units_blue big unit_ix_31",
         "class": "naval",
         "type": "ca",
         "service": "navy",
@@ -2401,7 +2387,7 @@ var pieces = [
         id: "duke",
         "faction": AP,
         "name": "Duke of York",
-        "counter": "big_units_beige big unit_ix_4",
+        "counter": "unit big_units_beige big unit_ix_4",
         "class": "naval",
         "type": "bb",
         "service": "br",
@@ -2415,7 +2401,7 @@ var pieces = [
         id: "victorious",
         "faction": AP,
         "name": "Victorious",
-        "counter": "big_units_beige big unit_ix_9",
+        "counter": "unit big_units_beige big unit_ix_9",
         "class": "naval",
         "type": "cv",
         "service": "br",
@@ -2430,7 +2416,7 @@ var pieces = [
         id: "army_ap_5_cn",
         "faction": AP,
         "name": "Chinese 5th Army",
-        "counter": "small_units_red unit_ix_2",
+        "counter": "unit small_units_red unit_ix_2",
         "class": "ground",
         "service": "ch",
         "rptype": "ch_ground",
@@ -2445,7 +2431,7 @@ var pieces = [
         id: "army_ap_6_cn",
         "faction": AP,
         "name": "Chinese 6th Army",
-        "counter": "small_units_red unit_ix_3",
+        "counter": "unit small_units_red unit_ix_3",
         "class": "ground",
         "service": "ch",
         "rptype": "ch_ground",
@@ -2460,7 +2446,7 @@ var pieces = [
         id: "army_ap_66_cn",
         "faction": AP,
         "name": "Chinese 66th Army",
-        "counter": "small_units_red unit_ix_1",
+        "counter": "unit small_units_red unit_ix_1",
         "class": "ground",
         "service": "ch",
         "rptype": "ch_ground",
@@ -2476,7 +2462,7 @@ var pieces = [
         "faction": AP,
         "name": "Wake Island Brigade",
         "class": "ground",
-        "counter": "small_units_blue unit_ix_2",
+        "counter": "unit small_units_blue unit_ix_2",
         "type": "marine",
         "service": "navy",
         "start": 4612,
@@ -2491,7 +2477,7 @@ var pieces = [
         id: "army_ap_nl",
         "faction": AP,
         "name": "NL Corps",
-        "counter": "small_units_green unit_ix_1",
+        "counter": "unit small_units_green unit_ix_1",
         "class": "ground",
         "service": "army",
         "start": 2812,
@@ -2505,7 +2491,7 @@ var pieces = [
         id: "army_ap_r",
         "faction": AP,
         "name": "R Corps",
-        "counter": "small_units_green unit_ix_2",
+        "counter": "unit small_units_green unit_ix_2",
         "class": "ground",
         "service": "army",
         "start": 2813,
@@ -2519,7 +2505,7 @@ var pieces = [
         id: "army_ap_sl",
         "faction": AP,
         "name": "SL Corps",
-        "counter": "small_units_green unit_ix_3",
+        "counter": "unit small_units_green unit_ix_3",
         "class": "ground",
         "service": "army",
         "start": 2913,
@@ -2534,7 +2520,7 @@ var pieces = [
         "faction": AP,
         "name": "M Corps",
         "class": "ground",
-        "counter": "small_units_green unit_ix_4",
+        "counter": "unit small_units_green unit_ix_4",
         "service": "army",
         "start": 2915,
         "size": 3,
@@ -2547,7 +2533,7 @@ var pieces = [
         id: "army_ap_p",
         "faction": AP,
         "name": "P Brigade",
-        "counter": "small_units_green unit_ix_5",
+        "counter": "unit small_units_green unit_ix_5",
         "class": "ground",
         "service": "army",
         "start": 3014,
@@ -2562,7 +2548,7 @@ var pieces = [
         id: "army_ap_10",
         "faction": AP,
         "name": "X Corps",
-        "counter": "small_units_green unit_ix_6",
+        "counter": "unit small_units_green unit_ix_6",
         "class": "ground",
         "service": "army",
         "start": 5808,
@@ -2576,7 +2562,7 @@ var pieces = [
         id: "army_ap_1_au",
         "faction": AP,
         "name": "1st Australian Corps",
-        "counter": "small_units_beige unit_ix_8",
+        "counter": "unit small_units_beige unit_ix_8",
         "class": "ground",
         "service": "au",
         "start": 3023,
@@ -2590,7 +2576,7 @@ var pieces = [
         id: "army_ap_2_au",
         "faction": AP,
         "name": "2nd Australian Corps",
-        "counter": "small_units_beige unit_ix_9",
+        "counter": "unit small_units_beige unit_ix_9",
         "class": "ground",
         "service": "au",
         "start": 3727,
@@ -2604,7 +2590,7 @@ var pieces = [
         id: "army_ap_8_au",
         "faction": AP,
         "name": "8th Australian Division",
-        "counter": "small_units_beige unit_ix_7",
+        "counter": "unit small_units_beige unit_ix_7",
         "class": "ground",
         "service": "au",
         "start": 2015,
@@ -2618,7 +2604,7 @@ var pieces = [
         id: "army_ap_pm",
         "faction": AP,
         "name": "PM Brigade",
-        "counter": "small_units_beige unit_ix_10",
+        "counter": "unit small_units_beige unit_ix_10",
         "class": "ground",
         "service": "au",
         "start": 3823,
@@ -2632,7 +2618,7 @@ var pieces = [
         id: "army_ap_hk",
         "faction": AP,
         "name": "Hong Kong Division",
-        "counter": "small_units_beige unit_ix_1",
+        "counter": "unit small_units_beige unit_ix_1",
         "class": "ground",
         "service": "br",
         "start": 2709,
@@ -2646,7 +2632,7 @@ var pieces = [
         id: "army_ap_3_ind",
         "faction": AP,
         "name": "3rd Indian Corps",
-        "counter": "small_units_beige unit_ix_18",
+        "counter": "unit small_units_beige unit_ix_18",
         "class": "ground",
         "service": "ind",
         "start": 2014,
@@ -2660,7 +2646,7 @@ var pieces = [
         id: "army_ap_b_ind",
         "faction": AP,
         "name": "Burma Indian Division",
-        "counter": "small_units_beige unit_ix_19",
+        "counter": "unit small_units_beige unit_ix_19",
         "class": "ground",
         "service": "bu",
         "start": 2008,
@@ -2674,7 +2660,7 @@ var pieces = [
         id: "army_ap_1_bu",
         "faction": AP,
         "name": "1st Burma Division",
-        "counter": "small_units_beige unit_ix_15",
+        "counter": "unit small_units_beige unit_ix_15",
         "class": "ground",
         "service": "bu",
         "start": 2108,
@@ -2688,7 +2674,7 @@ var pieces = [
         id: "army_ap_1_ind",
         "faction": AP,
         "name": "1st Indian Corps",
-        "counter": "small_units_beige unit_ix_16",
+        "counter": "unit small_units_beige unit_ix_16",
         "class": "ground",
         "service": "ind",
         "start": 2105,
@@ -2702,7 +2688,7 @@ var pieces = [
         id: "army_ap_2_ind",
         "faction": AP,
         "name": "2nd Indian Corps",
-        "counter": "small_units_beige unit_ix_17",
+        "counter": "unit small_units_beige unit_ix_17",
         "class": "ground",
         "service": "ind",
         "start": 1905,
@@ -2716,7 +2702,7 @@ var pieces = [
         id: "army_ap_1_du",
         "faction": AP,
         "name": "1st Regiment",
-        "counter": "small_units_orange unit_ix_2",
+        "counter": "unit small_units_orange unit_ix_2",
         "class": "ground",
         "service": "du",
         "start": 1916,
@@ -2731,7 +2717,7 @@ var pieces = [
         id: "army_ap_2_du",
         "faction": AP,
         "name": "2nd Regiment",
-        "counter": "small_units_orange unit_ix_3",
+        "counter": "unit small_units_orange unit_ix_3",
         "class": "ground",
         "service": "du",
         "start": 1813,
@@ -2746,7 +2732,7 @@ var pieces = [
         id: "army_ap_3_du",
         "faction": AP,
         "name": "3rd Regiment",
-        "counter": "small_units_orange unit_ix_4",
+        "counter": "unit small_units_orange unit_ix_4",
         "class": "ground",
         "service": "du",
         "start": 2616,
@@ -2761,7 +2747,7 @@ var pieces = [
         id: "army_ap_4_du",
         "faction": AP,
         "name": "4th Regiment",
-        "counter": "small_units_orange unit_ix_5",
+        "counter": "unit small_units_orange unit_ix_5",
         "class": "ground",
         "service": "du",
         "start": 2919,
@@ -2776,7 +2762,7 @@ var pieces = [
         id: "army_ap_5_du",
         "faction": AP,
         "name": "5th Regiment",
-        "counter": "small_units_orange unit_ix_6",
+        "counter": "unit small_units_orange unit_ix_6",
         "class": "ground",
         "service": "du",
         "start": 2517,
@@ -2791,7 +2777,7 @@ var pieces = [
         id: "army_ap_6_du",
         "faction": AP,
         "name": "6th Regiment",
-        "counter": "small_units_orange unit_ix_7",
+        "counter": "unit small_units_orange unit_ix_7",
         "class": "ground",
         "service": "du",
         "start": 2917,
@@ -2807,7 +2793,7 @@ var pieces = [
         "faction": AP,
         "name": "7th Regiment",
         "class": "ground",
-        "counter": "small_units_orange unit_ix_8",
+        "counter": "unit small_units_orange unit_ix_8",
         "service": "du",
         "start": 2719,
         "size": 1,
@@ -2821,7 +2807,7 @@ var pieces = [
         id: "army_ap_8_du",
         "faction": AP,
         "name": "8th Regiment",
-        "counter": "small_units_orange unit_ix_9",
+        "counter": "unit small_units_orange unit_ix_9",
         "class": "ground",
         "service": "du",
         "start": 2721,
@@ -2836,7 +2822,7 @@ var pieces = [
         id: "army_ap_j",
         "faction": AP,
         "name": "Java Division",
-        "counter": "small_units_orange unit_ix_10",
+        "counter": "unit small_units_orange unit_ix_10",
         "class": "ground",
         "service": "du",
         "start": 2019,
@@ -2851,7 +2837,7 @@ var pieces = [
         "faction": AP,
         "name": "7th Armored Brigade",
         "class": "ground",
-        "counter": "small_units_beige unit_ix_14",
+        "counter": "unit small_units_beige unit_ix_14",
         "service": "br",
         "size": 1,
         "cf": 4,
@@ -2863,7 +2849,7 @@ var pieces = [
         id: "army_ap_77",
         "faction": AP,
         "name": "77th Brigade",
-        "counter": "small_units_beige unit_ix_6",
+        "counter": "unit small_units_beige unit_ix_6",
         "class": "ground",
         "service": "br",
         "size": 1,
@@ -2876,7 +2862,7 @@ var pieces = [
         id: "army_ap_4_m",
         "faction": AP,
         "name": "4th Marine Division",
-        "counter": "small_units_blue unit_ix_8",
+        "counter": "unit small_units_blue unit_ix_8",
         "class": "ground",
         "type": "marine",
         "service": "navy",
@@ -2891,7 +2877,7 @@ var pieces = [
         "faction": AP,
         "name": "XI Corps",
         "class": "ground",
-        "counter": "small_units_green unit_ix_9",
+        "counter": "unit small_units_green unit_ix_9",
         "service": "army",
         "size": 3,
         "cf": 22,
@@ -2904,7 +2890,7 @@ var pieces = [
         id: "army_ap_14",
         "faction": AP,
         "name": "XIV Corps",
-        "counter": "small_units_green unit_ix_8",
+        "counter": "unit small_units_green unit_ix_8",
         "class": "ground",
         "service": "army",
         "size": 3,
@@ -2921,7 +2907,7 @@ var pieces = [
         "name": "I Corps",
         "class": "ground",
         "service": "army",
-        "counter": "small_units_green unit_ix_7",
+        "counter": "unit small_units_green unit_ix_7",
         "size": 3,
         "cf": 22,
         "lf": 12,
@@ -2934,7 +2920,7 @@ var pieces = [
         id: "army_ap_24",
         "faction": AP,
         "name": "XXIV Corps",
-        "counter": "small_units_green unit_ix_10",
+        "counter": "unit small_units_green unit_ix_10",
         "class": "ground",
         "service": "army",
         "size": 3,
@@ -2948,7 +2934,7 @@ var pieces = [
         id: "army_ap_9",
         "faction": AP,
         "name": "IX Corps",
-        "counter": "small_units_green unit_ix_11",
+        "counter": "unit small_units_green unit_ix_11",
         "class": "ground",
         "service": "army",
         "size": 3,
@@ -2962,7 +2948,7 @@ var pieces = [
         id: "army_ap_11_d",
         "faction": AP,
         "name": "11th Airborne Division",
-        "counter": "small_units_green unit_ix_12",
+        "counter": "unit small_units_green unit_ix_12",
         "class": "ground",
         "service": "army",
         "size": 2,
@@ -2976,7 +2962,7 @@ var pieces = [
         id: "army_ap_mb",
         "faction": AP,
         "name": "Marine Brigade",
-        "counter": "small_units_blue unit_ix_6",
+        "counter": "unit small_units_blue unit_ix_6",
         "class": "ground",
         "type": "marine",
         "service": "navy",
@@ -2991,7 +2977,7 @@ var pieces = [
         id: "army_ap_sf",
         "faction": AP,
         "name": "SF Brigade",
-        "counter": "small_units_blue unit_ix_7",
+        "counter": "unit small_units_blue unit_ix_7",
         "class": "ground",
         "service": "navy",
         "size": 1,
@@ -3005,7 +2991,7 @@ var pieces = [
         id: "army_ap_1_m",
         "faction": AP,
         "name": "1st Marine Division",
-        "counter": "small_units_blue unit_ix_8",
+        "counter": "unit small_units_blue unit_ix_8",
         "class": "ground",
         "type": "marine",
         "service": "navy",
@@ -3020,7 +3006,7 @@ var pieces = [
         id: "army_ap_2_m",
         "faction": AP,
         "name": "2nd Marine Division",
-        "counter": "small_units_blue unit_ix_9",
+        "counter": "unit small_units_blue unit_ix_9",
         "class": "ground",
         "type": "marine",
         "service": "navy",
@@ -3035,7 +3021,7 @@ var pieces = [
         id: "army_ap_3_m",
         "faction": AP,
         "name": "3rd Marine Division",
-        "counter": "small_units_blue unit_ix_10",
+        "counter": "unit small_units_blue unit_ix_10",
         "class": "ground",
         "type": "marine",
         "service": "navy",
@@ -3050,7 +3036,7 @@ var pieces = [
         id: "army_ap_6_m",
         "faction": AP,
         "name": "6th Marine Division",
-        "counter": "small_units_blue unit_ix_11",
+        "counter": "unit small_units_blue unit_ix_11",
         "class": "ground",
         "type": "marine",
         "service": "navy",
@@ -3065,7 +3051,7 @@ var pieces = [
         id: "army_ap_5_m",
         "faction": AP,
         "name": "5th Marine Division",
-        "counter": "small_units_blue unit_ix_12",
+        "counter": "unit small_units_blue unit_ix_12",
         "class": "ground",
         "type": "marine",
         "service": "navy",
@@ -3081,7 +3067,7 @@ var pieces = [
         "faction": AP,
         "name": "15th Corps",
         "class": "ground",
-        "counter": "small_units_beige unit_ix_2",
+        "counter": "unit small_units_beige unit_ix_2",
         "service": "br",
         "size": 3,
         "cf": 16,
@@ -3094,7 +3080,7 @@ var pieces = [
         id: "army_ap_33",
         "faction": AP,
         "name": "33rd Corps",
-        "counter": "small_units_beige unit_ix_3",
+        "counter": "unit small_units_beige unit_ix_3",
         "class": "ground",
         "service": "br",
         "size": 3,
@@ -3109,7 +3095,7 @@ var pieces = [
         "faction": AP,
         "name": "3rd Australian Corps",
         "class": "ground",
-        "counter": "small_units_beige unit_ix_11",
+        "counter": "unit small_units_beige unit_ix_11",
         "service": "au",
         "size": 3,
         "cf": 22,
@@ -3122,7 +3108,7 @@ var pieces = [
         id: "army_ap_3_nz",
         "faction": AP,
         "name": "3rd New Zealand Division",
-        "counter": "small_units_beige unit_ix_12",
+        "counter": "unit small_units_beige unit_ix_12",
         "class": "ground",
         "service": "br",
         "size": 2,
@@ -3136,7 +3122,7 @@ var pieces = [
         id: "army_ap_4_ind",
         "faction": AP,
         "name": "4th Indian Corps",
-        "counter": "small_units_beige unit_ix_20",
+        "counter": "unit small_units_beige unit_ix_20",
         "class": "ground",
         "service": "ind",
         "size": 3,
@@ -3150,7 +3136,7 @@ var pieces = [
         id: "army_ap_4_au",
         "faction": AP,
         "name": "4th Australian Corps",
-        "counter": "small_units_beige unit_ix_13",
+        "counter": "unit small_units_beige unit_ix_13",
         "class": "ground",
         "service": "au",
         "size": 3,
@@ -6416,7 +6402,7 @@ const TUNNELING = [
 map.forEach(h => MAP_DATA[hex_to_int(h.id)] = h)
 
 var S_P_first_hex = []
-var TUNNEL_INDEX = 1
+
 ;(function(){
 
     for (var i = 0; i < sp_map.length; i++) {
@@ -6513,15 +6499,15 @@ var TUNNEL_INDEX = 1
     B_F_W_MAP_DATA[hex_to_int(1912)].nh.length = 3
     B_F_W_MAP_DATA[hex_to_int(1912)].edges_int = (B_F_W_MAP_DATA[hex_to_int(1912)].edges_int % (1 << 5 * 3))
 
-
+    var t1 = 1
     for (var i = 0; i < TUNNELING.length; i++) {
         var tunnel = TUNNELING[i]
-        create_tunnel(tunnel)
+        create_tunnel(tunnel, t1)
         if (tunnel.duplex) {
             var from = tunnel.from
             tunnel.from = tunnel.to
             tunnel.to = from
-            create_tunnel(tunnel)
+            create_tunnel(tunnel, t1)
         }
     }
 
@@ -6619,21 +6605,21 @@ function apply_burma(hex) {
     B_F_W_MAP_DATA[id] = hex
 }
 
-function create_tunnel(data) {
+function create_tunnel(data, t1) {
     data.map[data.from].edges_int |= (WATER | UNPLAYABLE_WATER) << (5 * data.map[data.from].nh.length)
-    data.map[data.from].nh.push(TUNNEL_BOX + TUNNEL_INDEX)
+    data.map[data.from].nh.push(TUNNEL_BOX + t1)
     for (var i = 0; i < data.distance; i++) {
         var hex = {
-            id: TUNNEL_BOX + TUNNEL_INDEX,
+            id: TUNNEL_BOX + t1,
             terrain: OCEAN,
             region: "Ocean",
             edges_int: WATER | UNPLAYABLE_WATER,
-            nh: [TUNNEL_BOX + TUNNEL_INDEX + 1]
+            nh: [TUNNEL_BOX + t1 + 1]
         }
-        data.map[TUNNEL_BOX + TUNNEL_INDEX] = hex
-        TUNNEL_INDEX++
+        data.map[TUNNEL_BOX + t1] = hex
+        t1++
     }
-    data.map[TUNNEL_BOX + TUNNEL_INDEX - 1].nh[0] = data.to
+    data.map[TUNNEL_BOX + t1 - 1].nh[0] = data.to
 }
 
 function get_near_hexes(hex) {
@@ -6642,95 +6628,95 @@ function get_near_hexes(hex) {
 
 /* }}} */
 
-var counters = {
-    oos: "oos top",
-    isolated: "isolated top",
-    control_jp: "small_markers_white unit_ix_2 control",
-    capture_jp: "small_markers_white unit_ix_2 gray control",
-    control_us: "small_markers_white unit_ix_2 reduced control",
-    control_br: "small_markers_white unit_ix_1 control",
-    capture_us: "small_markers_white unit_ix_2 reduced gray control",
-    control_sov: "small_markers_white unit_ix_1 reduced control",
-    capture_sov: "small_markers_white unit_ix_1 reduced gray control",
-    no_garrison: "no_garrison control marker",
-    organic_small: "organic_small",
-    aa_small: "aa_small",
-    strat_small: "strat_small",
-    strat_air_small: "strat_air_small",
-    barges_small: "barges_small",
-    oos_small: "oos_small",
-    pow: "small_markers_dkblue unit_ix_2",
-    pow_target: "small_markers_dkblue unit_ix_4",
-    strat_bombing: "small_markers_black unit_ix_3",
-    strat_bombing_small: "strat_air_small",
-    agreement_jp: "small_markers_yellow unit_ix_2 reduced",
-    agreement_ap: "small_markers_green unit_ix_3 reduced",
-    rivalry_ap: "small_markers_green unit_ix_3",
-    rivalry_jp: "small_markers_yellow unit_ix_2",
-    asp_jp: "big_markers_yellow big unit_ix_3",
-    asp_b_jp: "big_markers_yellow big unit_ix_3 reduced",
-    aspu_jp: "small_markers_yellow unit_ix_8",
-    asp_ap: "big_markers_dkblue big unit_ix_1",
-    asp_ap_1: "big_markers_dkblue big unit_ix_1 reduced",
-    aspu_ap: "small_markers_dkblue unit_ix_1",
-    aspu_ap_1: "small_markers_dkblue unit_ix_1 reduced",
-    wie: "small_markers_black unit_ix_6",
-    pw: "small_markers_black unit_ix_2",
-    turn_pmt: "small_markers_black unit_ix_1",
-    turn_tr: "small_markers_black unit_ix_1 reduced",
-    resource_jp: "small_markers_yellow unit_ix_7",
-    resource_jp_1: "small_markers_yellow unit_ix_7 reduced",
-    pass_jp: "small_markers_yellow unit_ix_1",
-    pass_ap: "small_markers_dkblue unit_ix_3",
-    india_status: "small_markers_brown unit_ix_1",
-    india_status_surrender: "small_markers_brown unit_ix_1 reduced",
-    alaska: "small_markers_yellow unit_ix_5",
-    hawaii: "small_markers_yellow unit_ix_4",
-    future_offensive_ap: "big_markers_white big unit_ix_5",
-    future_offensive_jp: "big_markers_white big unit_ix_4",
-    future_offensive_inactive: "big_markers_white big unit_ix_4 gray",
-    kwai_river: "big_markers_blue big unit_ix_1",
-    road_jarhat: "small_markers_brown unit_ix_2",
-    road_ledo: "small_markers_brown unit_ix_3",
-    road_imphal: "small_markers_brown unit_ix_4",
-    china: "small_markers_red unit_ix_1",
-    burma_road: "small_markers_black unit_ix_5",
-    burma_road_hump: "small_markers_black unit_ix_5 reduced",
-    china_offensive: "small_markers_red unit_ix_2",
-    divisions_china: "small_markers_yellow unit_ix_6",
-    air_repl: "small_markers_yellow unit_ix_12",
-    naval_repl: "small_markers_yellow unit_ix_11",
-    drawn_ap: "small_markers_black unit_ix_4",
-    drawn_jp: "small_markers_black unit_ix_8",
-    tokyo_express: "big_markers_white big unit_ix_1",
-    defensive_doctrine: "big_markers_yellow big unit_ix_1",
-    escorts2: "small_markers_yellow unit_ix_3",
-    escorts4: "small_markers_yellow unit_ix_3 reduced",
-    panama_canal: "big_markers_blue big unit_ix_4",
-    interceptors_jp: "big_markers_yellow big unit_ix_2",
-    barges: "big_markers_blue big unit_ix_2 reduced",
-    doolitle: "big_markers_blue big unit_ix_3",
-    pt_boats: "big_markers_blue big unit_ix_2",
-    us_sub: "big_markers_blue big unit_ix_5",
-    australia_surrender: "big_markers_white big unit_ix_3",
-    china_surrender: "big_markers_white big unit_ix_2",
-    india_surrender: "big_markers_white big unit_ix_11",
-    burma_surrender: "big_markers_white big unit_ix_10",
-    dei_surrender: "big_markers_white big unit_ix_9",
-    malaya_surrender: "big_markers_white big unit_ix_8",
-    phillipines_surrender: "big_markers_white big unit_ix_7",
-    mandates_surrender: "big am_surrender",
-    guinea_surrender: "big ng_surrender",
-    marshall_surrender: "big mi_surrender",
-    scenario_start: "scenario_start",
-    scenario_end: "scenario_end",
-    pw_casualties: "pw_casualties",
-    pw_bb: "pw_bb",
-    pw_cv: "pw_cv",
-    pw_failed_pow: "pw_failed_pow",
+const counters = {
+    oos: "marker oos top",
+    isolated: "marker isolated top",
+    control_jp: "marker small_markers_white unit_ix_2 control",
+    capture_jp: "marker small_markers_white unit_ix_2 gray control",
+    control_us: "marker small_markers_white unit_ix_2 reduced control",
+    control_br: "marker small_markers_white unit_ix_1 control",
+    capture_us: "marker small_markers_white unit_ix_2 reduced gray control",
+    control_sov: "marker small_markers_white unit_ix_1 reduced control",
+    capture_sov: "marker small_markers_white unit_ix_1 reduced gray control",
+    no_garrison: "marker no_garrison control marker",
+    organic_small: "marker organic_small",
+    aa_small: "marker aa_small",
+    strat_small: "marker strat_small",
+    strat_air_small: "marker strat_air_small",
+    barges_small: "marker barges_small",
+    oos_small: "marker oos_small",
+    pow: "marker small_markers_dkblue unit_ix_2",
+    pow_target: "marker small_markers_dkblue unit_ix_4",
+    strat_bombing: "marker small_markers_black unit_ix_3",
+    strat_bombing_small: "marker strat_air_small",
+    agreement_jp: "marker small_markers_yellow unit_ix_2 reduced",
+    agreement_ap: "marker small_markers_green unit_ix_3 reduced",
+    rivalry_ap: "marker small_markers_green unit_ix_3",
+    rivalry_jp: "marker small_markers_yellow unit_ix_2",
+    asp_jp: "marker big_markers_yellow big unit_ix_3",
+    asp_b_jp: "marker big_markers_yellow big unit_ix_3 reduced",
+    aspu_jp: "marker small_markers_yellow unit_ix_8",
+    asp_ap: "marker big_markers_dkblue big unit_ix_1",
+    asp_ap_1: "marker big_markers_dkblue big unit_ix_1 reduced",
+    aspu_ap: "marker small_markers_dkblue unit_ix_1",
+    aspu_ap_1: "marker small_markers_dkblue unit_ix_1 reduced",
+    wie: "marker small_markers_black unit_ix_6",
+    pw: "marker small_markers_black unit_ix_2",
+    turn_pmt: "marker small_markers_black unit_ix_1",
+    turn_tr: "marker small_markers_black unit_ix_1 reduced",
+    resource_jp: "marker small_markers_yellow unit_ix_7",
+    resource_jp_1: "marker small_markers_yellow unit_ix_7 reduced",
+    pass_jp: "marker small_markers_yellow unit_ix_1",
+    pass_ap: "marker small_markers_dkblue unit_ix_3",
+    india_status: "marker small_markers_brown unit_ix_1",
+    india_status_surrender: "marker small_markers_brown unit_ix_1 reduced",
+    alaska: "marker small_markers_yellow unit_ix_5",
+    hawaii: "marker small_markers_yellow unit_ix_4",
+    future_offensive_ap: "marker big_markers_white big unit_ix_5",
+    future_offensive_jp: "marker big_markers_white big unit_ix_4",
+    future_offensive_inactive: "marker big_markers_white big unit_ix_4 gray",
+    kwai_river: "marker big_markers_blue big unit_ix_1",
+    road_jarhat: "marker small_markers_brown unit_ix_2",
+    road_ledo: "marker small_markers_brown unit_ix_3",
+    road_imphal: "marker small_markers_brown unit_ix_4",
+    china: "marker small_markers_red unit_ix_1",
+    burma_road: "marker small_markers_black unit_ix_5",
+    burma_road_hump: "marker small_markers_black unit_ix_5 reduced",
+    china_offensive: "marker small_markers_red unit_ix_2",
+    divisions_china: "marker small_markers_yellow unit_ix_6",
+    air_repl: "marker small_markers_yellow unit_ix_12",
+    naval_repl: "marker small_markers_yellow unit_ix_11",
+    drawn_ap: "marker small_markers_black unit_ix_4",
+    drawn_jp: "marker small_markers_black unit_ix_8",
+    tokyo_express: "marker big_markers_white big unit_ix_1",
+    defensive_doctrine: "marker big_markers_yellow big unit_ix_1",
+    escorts2: "marker small_markers_yellow unit_ix_3",
+    escorts4: "marker small_markers_yellow unit_ix_3 reduced",
+    panama_canal: "marker big_markers_blue big unit_ix_4",
+    interceptors_jp: "marker big_markers_yellow big unit_ix_2",
+    barges: "marker big_markers_blue big unit_ix_2 reduced",
+    doolitle: "marker big_markers_blue big unit_ix_3",
+    pt_boats: "marker big_markers_blue big unit_ix_2",
+    us_sub: "marker big_markers_blue big unit_ix_5",
+    australia_surrender: "marker big_markers_white big unit_ix_3",
+    china_surrender: "marker big_markers_white big unit_ix_2",
+    india_surrender: "marker big_markers_white big unit_ix_11",
+    burma_surrender: "marker big_markers_white big unit_ix_10",
+    dei_surrender: "marker big_markers_white big unit_ix_9",
+    malaya_surrender: "marker big_markers_white big unit_ix_8",
+    phillipines_surrender: "marker big_markers_white big unit_ix_7",
+    mandates_surrender: "marker big am_surrender",
+    guinea_surrender: "marker big ng_surrender",
+    marshall_surrender: "marker big mi_surrender",
+    scenario_start: "marker scenario_start",
+    scenario_end: "marker scenario_end",
+    pw_casualties: "marker pw_casualties",
+    pw_bb: "marker pw_bb",
+    pw_cv: "marker pw_cv",
+    pw_failed_pow: "marker pw_failed_pow",
 }
 
-var nations = {
+const nations = {
     PHILIPPINES: {
         id: 0,
         name: "Philippines",
@@ -6842,7 +6828,7 @@ var nations = {
     },
 }
 
-var events = {
+const events = {
     ALLIED_NATIONS_SURRENDERS: {
         id: 1,
         cause: "allied nations surrendered [16.41]",
@@ -7014,6 +7000,7 @@ function is_event_active(event) {
     }
     return G.events[event.id]
 }
+
 /* }}} */
 /* {{{ js/common/utils.js */
 function hex_to_int(i) {
@@ -7026,16 +7013,28 @@ function int_to_hex(i) {
 
 function get_direction(from, to) {
     var x = ((from) % 29)
-    var d = ((from - x) / 29) % 2
-    var r = HEX_DIRECTION[from - to + 30 + d * 10]
-    return r ? r : 0
+    var d = ((from - x) / 29) & 1
+    switch (from - to + 30 + d * 10) {
+    case 31: return 0
+    case 2: return 1
+    case 1: return 2
+    case 29: return 3
+    case 59: return 4
+    case 60: return 5
+    case 41: return 0
+    case 11: return 1
+    case 10: return 2
+    case 39: return 3
+    case 68: return 4
+    case 69: return 5
+    }
+    return 0
 }
 
 function get_edge_hexes(hex) {
     var y = hex % 29
     var x = (hex - y) / 29
-
-    var y_diff = 1 - (x % 2)
+    var y_diff = 1 - (x & 1)
     var y1_diff = 1 - y_diff
     var result = []
     result.push((-y >> 31) * hex * -1 - 1)                                                                          //N or -1
@@ -7051,14 +7050,14 @@ function for_each_hex_in_range(hex, range, lambda) {
     lambda(hex)
     const y = hex % 29
     const x = (hex - y) / 29
-    const d = x % 2
+    const d = x & 1
     var i
 
     for (var j = -range; j <= range; j++) {
         if (x + j < 0 || x + j > 50) {
             continue
         }
-        const d2 = Math.abs(j) % 2
+        const d2 = Math.abs(j) & 1
         var current = (x + j) * 29 + y
         lambda(current)
         var limit = (range - d2) / 2 + (1 - d) * d2 + Math.floor((range - Math.abs(j)) / 2)
@@ -7089,12 +7088,12 @@ function get_distance(first_hex, second_hex) {
     var xf = (first_hex - yf) / 29
     var xs = (second_hex - ys) / 29
     var rx = Math.abs(xs - xf)
-    var ry = ys - yf - (rx % 2) * (xf % 2)
+    var ry = ys - yf - (rx & 1) * (xf & 1)
     if (ry <= (-rx >> 1)) {
-        ry = Math.abs(ry) - rx % 2
+        ry = Math.abs(ry) - (rx & 1)
     } else if (ry < rx >> 1) {
         const c = (rx >> 1) - ry
-        ry = (rx >> 1) + ((c + (rx % 2)) >> 1)
+        ry = (rx >> 1) + ((c + (rx & 2)) >> 1)
         rx -= c
     }
     return rx + ry - (rx >> 1)
@@ -10139,6 +10138,143 @@ function map_group_by(items, callback) {
 
 /* }}} */
 
+/* {{{ js/client/utils.js */
+/* MISC CLIENT STUFF */
+
+const BR_REGIONS = ["India", "Ceylon", "NIndia", "Burma", "Siam", "Malaya", "Sumatra", "Indochina", "IChina"]
+const BR_NATIONS = [-3, nations.AUSTRALIA.id, nations.BURMA.id, nations.MALAYA.id]
+const JP_REGIONS = ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Caroline", "Japan", "Marshall"]
+
+const JP_BOUNDARY_HEX = []
+const REGIONS_BY_NATION = {}
+const HEX_BY_NATION = []
+
+;(function(){
+
+    for (var key of Object.keys(nations)) {
+        if (!nations[key].no_full_control && nations[key].regions) {
+            for (var reg of nations[key].regions) {
+                REGIONS_BY_NATION[reg] = nations[key]
+            }
+        }
+    }
+
+    for (var i = 0; i < map.length; i++) {
+        var hex = hex_to_int(map[i].id)
+        var region = map[i].region
+        var nation = REGIONS_BY_NATION[region]
+        if (nation) {
+            HEX_BY_NATION[hex] = nation.id
+        } else if (JP_REGIONS.includes(region)) {
+            HEX_BY_NATION[hex] = -1
+        } else if (BR_REGIONS.includes(region)) {
+            HEX_BY_NATION[hex] = -3
+        } else {
+            HEX_BY_NATION[hex] = -2
+        }
+        if (JP_REGIONS.includes(region)) {
+            set_add(JP_BOUNDARY_HEX, hex)
+        }
+    }
+    HEX_BY_NATION[hex_to_int(2709)] = -3
+
+})()
+
+function center_rect([x, y], w, h) {
+    return [x - w / 2, y - h / 2, w, h]
+}
+
+function hex_in_map(x, y) {
+    return x >= map_info.grid_x_offset &&
+        y >= map_info.grid_y_offset &&
+        x < map_info.grid_x_offset + map_info.ROW_HEX_NB &&
+        y < map_info.grid_y_offset + map_info.COLUMN_HEX_NB
+}
+
+function sort_unit_stack(a, b) {
+    var aw = get_element_weight(a) + a.thing.my_id
+    var bw = get_element_weight(b) + b.thing.my_id
+    return aw - bw
+}
+
+function get_element_weight(e) {
+    var is_marker = !e.thing || e.thing.my_action !== "unit"
+    if (is_marker)
+        return e.classList.contains("top") ? 64000 : 0
+    var value = 0
+    var unit = e.thing.my_id
+    var piece = pieces[unit]
+    if (piece.garrison) {
+        return 0
+    }
+    if (piece.faction === G.offensive.attacker) {
+        value += 32000
+    }
+    if (piece.faction === AP) {
+        value += 16000
+    }
+    if (is_action("unit", unit) || set_has(G.active_stack, unit)) {
+        value += 4000
+    }
+    if (piece.class === "naval") {
+        value += 1000
+    } else if (piece.class === "ground") {
+        value += 7000
+    } else if (piece.class === "hq") {
+        value += 8000
+    } else if (piece.class === "air") {
+        value += 9000
+    }
+    // if (set_has(G.offensive.active_units[piece.faction], unit)) {
+    //     value += 512
+    // }
+    if (set_has(G.reduced, unit)) {
+        value += 256
+    }
+    if (piece.service === "army") {
+        value += 128
+    } else if (piece.service !== "navy") {
+        value += 64
+    }
+    return value
+}
+
+function hex_center(i) {
+    var map_layout = LAYOUT.mainmap
+    if (SID === SOUTH_PACIFIC_SCENARIO)
+        map_layout = LAYOUT.southpac
+    if (SID === BURMA_SCENARIO)
+            map_layout = LAYOUT.burma
+
+    if (i === CHINA_BOX) {
+        var box = map_layout.box_air_unit_in_china
+        return center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
+    }
+    var row = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
+    var column = (Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB))
+    if (SID == BURMA_SCENARIO) {
+        if (i == SINGAPORE) {
+            const box = map_layout.label_singapore
+            return center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
+        }
+        if (i > TUNNEL_BOX) {
+            // display TUNNEL_BOX directly to the left of the blue singapore label
+            const box = map_layout.label_singapore
+            var sing_left_coord = center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
+            sing_left_coord[0] -= 47
+            return sing_left_coord
+        }
+    } else if (SID === SOUTH_PACIFIC_SCENARIO && i >= OAHU) {
+        const box = map_layout.h_5808
+        return center_rect([box[0] + box[2]/2, box[1] + box[3]/2], box[2], box[3])
+    }
+    return [
+        (map_info.display_x_offset) + (column - map_info.grid_x_offset) * HEX_X_SIZE,
+        (map_info.display_y_offset) + (row - map_info.grid_y_offset) * HEX_Y_SIZE + (column & 1) * 27.625
+    ]
+}
+
+/* }}} */
 /* {{{ js/client/layout.js */
 const LAYOUT = {
     "mainmap" : {
@@ -10388,22 +10524,22 @@ function current_pow(G) {
 
 const UNIT_MOVEMENT_MARKERS = [
     {
-        "name": "BARGES_MOVE",
+        name: "BARGES_MOVE",
         condition: (u, piece, path) => path & BARGES_MOVE,
         counter: counters.barges_small,
     },
     {
-        "name": "STRAT_MOVE",
+        name: "STRAT_MOVE",
         condition: (u, piece, path) => path & STRAT_MOVE && piece.class !== "air",
         counter: counters.strat_small,
     },
     {
-        "name": "STRAT_MOVE",
+        name: "STRAT_MOVE",
         condition: (u, piece, path) => path & STRAT_MOVE && piece.class === "air",
         counter: counters.strat_air_small,
     },
     {
-        "name": "AMPH_MOVE",
+        name: "AMPH_MOVE",
         condition: (u, piece, path) => path & AMPH_MOVE && piece.class === "ground",
         counter: counters.aa_small,
     },
@@ -10415,26 +10551,29 @@ const UNIT_MOVEMENT_MARKERS = [
 
 const TRACK_MARKERS = [
     {
-        counter: () => (G.events[events.BARGES.id] > 0 ? counters.asp_b_jp : counters.asp_jp) + (jp_gray_amp() ? " gray" : ""),
-        value: G => G.asp[0][0]
+        counter: counters.asp_jp,
+        tooltip: () => (G.events[events.BARGES.id] > 0) ? "ASP: Barges" : "ASP: No Barges",
+        reduced: () => (G.events[events.BARGES.id] > 0),
+        gray: () => jp_gray_amp(),
+        value: () => G.asp[0][0],
     },
     {
-        counter: () => (G.events[events.BARGES.id] > 0 ? counters.asp_b_jp : counters.asp_jp),
+        // TODO: more tooltips
+        counter: counters.asp_jp,
+        reduced: G => (G.events[events.BARGES.id] > 0),
         value: G => (jp_gray_amp()) ? Math.ceil(G.asp[0][0] / 2) : 0
     },
     {
         counter: counters.asp_ap,
-        alt_counter: counters.asp_ap_1,
         value: G => G.asp[1][0]
     },
     {
         counter: counters.divisions_china,
-        always_show: G => 0,
+        // TODO -- this does nothing? -- always_show: G => 0,
         value: G => (G.sid === SOUTH_PACIFIC_SCENARIO) ? G.china_divisions : 0
     },
     {
         counter: counters.resource_jp,
-        alt_counter: counters.resource_jp_1,
         value: G => array_count(RESOURCE_HEX, h => is_space_controlled(h, JP))
     },
     {
@@ -10472,27 +10611,29 @@ const TRACK_MARKERS = [
     },
     {
         counter: counters.aspu_jp,
-        always_show: true,
+        always_show: G => true,
         value: G => G.asp[0][1]
     },
     {
         counter: counters.aspu_ap,
-        alt_counter: counters.aspu_ap_1,
-        always_show: true,
+        always_show: G => true,
         value: G => G.asp[1][1]
     },
 ]
 
 const TURN_MARKERS = [
     {
+        tooltip: "Scenario Start",
         counter: counters.scenario_start,
         value: G => SCENARIO_LENGTH[G.sid][0]
     },
     {
+        tooltip: "Scenario End",
         counter: counters.scenario_end,
         value: G => SCENARIO_LENGTH[G.sid][1]
     },
     {
+        // TODO: tooltips...
         counter: counters.future_offensive_jp,
         value: G => G.events[events.FUTURE_OFFENSIVE_JP.id]
     },
@@ -10513,7 +10654,8 @@ const TURN_MARKERS = [
         value: G => G.events[events.KWAI_RIVER_BRIDGE.id]
     },
     {
-        counter: () => (G.events[events.JP_ESCORTS.id] >> 4 === 2) ? counters.escorts2 : counters.escorts4,
+        counter: counters.escorts2,
+        reduced: G => (G.events[events.JP_ESCORTS.id] >> 4 !== 2),
         value: G => G.events[events.JP_ESCORTS.id] % (1 << 4)
     },
     {
@@ -10569,32 +10711,22 @@ const TURN_MARKERS = [
         value: G => G.events[events.CHINA_OFFENSIVE.id]
     },
     {
-        counter: G => G.events[events.TOJO.id] ? counters.turn_tr : counters.turn_pmt,
+        counter: counters.turn_pmt,
+        reduced: G => G.events[events.TOJO.id],
         value: G => G.turn
     },
 ]
 
-
-check_supply = function () {
-    if (!G.client_supply) {
-        world.original_oos = G.oos
-        world.original_br = G.burma_road
-    }
-    basic_check_supply()
-    G.client_supply = 1
-}
-
-function define_s_loc(id, rect) {
-    define_stack("s-loc", id,
-        rect,
-        { ...VERTICAL_STACK_PARAMS, sort: sort_unit_stack }
-    )
-}
+// DEFINE WORLD
 
 function on_init(scenario, game_options, static_view) {
-    let map_layout = LAYOUT.mainmap
+    var map_layout = LAYOUT.mainmap
 
     canvas_init(scenario)
+
+    function define_s_loc(id, rect) {
+        define_stack("s-loc", id, rect, { ...VERTICAL_STACK_PARAMS, sort: sort_unit_stack })
+    }
 
     init_preference_checkbox("noroad", false)
     init_preference_checkbox("nopath", false)
@@ -10608,16 +10740,19 @@ function on_init(scenario, game_options, static_view) {
     create_window("window_eliminated", "Eliminated Units", update_window_eliminated)
     create_window("window_combat", "Combat X")
 
-    // world.tip.addEventListener("touchstart", function () {
-    //     on_blur_tip()
-    // })
-    let map_elem = document.getElementById("mapwrap")
+    define_panel("#jp_hand", "hand", JP)
+    define_panel("#ap_hand", "hand", AP)
+    define_panel("#active_cards", "hand", 2)
+
+    define_html_thing("#turn_info", "violations", 0)
+
+    var mapwrap = document.getElementById("mapwrap")
     switch (scenario) {
         case "South Pacific": {
             nations.AUSTRALIAN_MANDATES.keys = nations.AUSTRALIAN_MANDATES.ports
             SID = SOUTH_PACIFIC_SCENARIO
             map_layout = LAYOUT.southpac
-            map_elem.classList.add("southpac")
+            mapwrap.classList.add("southpac")
             define_board("#map", 1275, 825, [12, 12, 12, 12])
             map_info = SOUTH_PAC_BOARD_INFO
 
@@ -10630,10 +10765,10 @@ function on_init(scenario, game_options, static_view) {
             update_map_size(1275, 825)
             break
         }
-        case  "Burma: The Forgotten War, 1943-1944": {
+        case "Burma: The Forgotten War, 1943-1944": {
             SID = BURMA_SCENARIO
             map_layout = LAYOUT.burma
-            map_elem.classList.add("burma")
+            mapwrap.classList.add("burma")
             define_board("#map", 1275, 825, [12, 12, 12, 12])
             map_info = BURMA_BOARD_INFO
 
@@ -10650,7 +10785,7 @@ function on_init(scenario, game_options, static_view) {
         default: {
             SID = FULL_CAMPAIGN_SCENARIO
             map_layout = LAYOUT.mainmap
-            map_elem.classList.add("main")
+            mapwrap.classList.add("main")
             define_board("#map", 2550, 1650, [12, 12, 12, 12])
             map_info = MAIN_BOARD_INFO
             define_thing("road", events.JARHAT_ROAD.id).layout([578, 286, 60, 60], "road_jarhat hide marker control")
@@ -10660,10 +10795,14 @@ function on_init(scenario, game_options, static_view) {
             update_map_size(2550, 1650)
         }
     }
-    var href = document.getElementsByClassName("deck_href")
-    for (var i = 0; i < href.length; i++) {
-        href[i].href += `&sid=${SID}`
-    }
+
+    if (!SCENARIO_DATA[SID].original_control)
+        SCENARIO_DATA[SID].original_control = static_view.original_control
+
+    document.getElementById("vp_check_button").hidden = CAMPAIGN_SCENARIOS.includes(SID)
+
+    document.getElementById("ap_deck_link").href += `&sid=${SID}`
+    document.getElementById("jp_deck_link").href += `&sid=${SID}`
 
     // used hexes
     var used_hex = []
@@ -10705,35 +10844,36 @@ function on_init(scenario, game_options, static_view) {
     if (SID !== BURMA_SCENARIO) {
         define_s_loc(DELAYED_BOX, map_layout.box_delayed_reinf)
     }
-    define_stack("s-loc", CHINA_BOX,
-        map_layout.box_air_unit_in_china,
-        { ...TRACK_STACK_PARAMS, sort: sort_unit_stack }
-    )
+    define_stack("s-loc", CHINA_BOX, map_layout.box_air_unit_in_china, { ...TRACK_STACK_PARAMS, sort: sort_unit_stack })
 
     define_space("action_hex", CHINA_BOX, map_layout.box_air_unit_in_china, "china_box")
         .tooltip("China Box")
 
-    define_layout("status", JP, map_layout.box_isr_jp)
-    define_layout("status", AP, map_layout.box_isr_us)
-    define_layout_track_auto("pw", map_info.pw_a, map_info.pw_b, map_layout.track_political_will, 0)
-    define_layout_track_auto("wie", map_info.wie_a, map_info.wie_b, map_layout.track_wie, 0)
+    // Tracks
+
+    define_layout("track-isr", JP, map_layout.box_isr_jp)
+    define_layout("track-isr", AP, map_layout.box_isr_us)
+    define_layout_track_auto("track-pw", map_info.pw_a, map_info.pw_b, map_layout.track_political_will, 0)
+    define_layout_track_auto("track-wie", map_info.wie_a, map_info.wie_b, map_layout.track_wie, 0)
 
     define_stack_track_auto("turn", map_info.turn_a, map_info.turn_b, map_layout.track_game_turn, 0, map_info.TURN_STACK_PARAMS)
     define_space_track_auto("turn_box", map_info.turn_a + TURN_BOX, map_info.turn_b + TURN_BOX, map_layout.track_game_turn, 0)
     define_stack_track_auto("track", map_info.track_a, map_info.track_b, map_layout.track_strat_record, 0, map_info.TRACK_STACK_PARAMS)
 
     if (map_layout.track_india_status !== undefined) {
-        define_layout_track_h("india", 0, 4, map_layout.track_india_status, 0)
+        define_layout_track_h("track-india", 0, 4, map_layout.track_india_status, 0)
     }
     if (map_layout.track_burma_road !== undefined) {
-        define_layout_track_h("burma", 0, 2, map_layout.track_burma_road, 0)
+        define_layout_track_h("track-burma", 0, 2, map_layout.track_burma_road, 0)
     }
 
-    define_layout_track_h("china", 5, 0, map_layout.track_chinese_government, 0)
+    define_layout_track_h("track-china", 5, 0, map_layout.track_chinese_government, 0)
 
     if (map_layout.track_japanese_divisions_available_china !== undefined) {
-        define_layout_track_h("divisions", 1, (SID == BURMA_SCENARIO ? 9 : 13), map_layout.track_japanese_divisions_available_china, 0)
+        define_layout_track_h("track-divisions", 1, (SID == BURMA_SCENARIO ? 9 : 13), map_layout.track_japanese_divisions_available_china, 0)
     }
+
+    // Battle and Landing markers
     for (i = 0; i < 35; i++) {
         var battle = define_thing("battle", i).keyword("marker conflict battle top").animate()
         battle.element.innerText = String.fromCharCode(65 + i)
@@ -10758,21 +10898,67 @@ function on_init(scenario, game_options, static_view) {
         })
         landing.stackable()
     }
-    define_marker("divisions", 0, counters.divisions_china)
+
+    // Units
     for (let i = 1; i < pieces.length; ++i) {
         let piece = pieces[i]
         piece.element = define_piece("unit", i, (piece.faction ? "ap " : "jp ") + piece.counter)
             .tip_magic(focus_unit, blur_unit)
             .tooltip(format_unit_tooltip)
     }
+
+    // Cards
     for (let i = 1; i < cards.length; ++i) {
         let card = cards[i]
         card.element = define_card("card", i, `card_${card.faction ? "ap" : "jp"}_${card.num}`)
         card.element.card = i
     }
-    define_panel("#jp_hand", "hand", JP)
-    define_panel("#ap_hand", "hand", AP)
-    define_panel("#active_cards", "hand", 2)
+
+    define_card("fo-card", JP, "card_jp_0").tooltip("Future offensive")
+    define_card("fo-card", AP, "card_ap_0").tooltip("Future offensive")
+
+    for (let key in nations) {
+        var nation = nations[key]
+        if (nation.counter) {
+            define_marker("nation-marker-turn", nation.id, nation.counter)
+            define_marker("nation-marker-map", nation.id, nation.counter)
+        }
+    }
+
+    // Markers
+    // TODO: dynamic tooltip with current effect of track?
+
+    define_marker("marker-isr", JP, counters.rivalry_jp)
+        .tooltip(() => G.inter_service[JP] ? "Inter-Service Rivalry" : "Strategic Agreement")
+    define_marker("marker-isr", AP, counters.rivalry_ap)
+        .tooltip(() => G.inter_service[AP] ? "Inter-Service Rivalry" : "Strategic Agreement")
+
+    define_marker("marker-pw", 0, counters.pw)
+        .tooltip("U.S. Political Will")
+
+    define_marker("marker-wie", 0, counters.wie)
+        .tooltip("War in Europe")
+
+    define_marker("marker-india", 0, counters.india_status)
+        .tooltip(() => G.events[events.INDIA_STATUS.id] ? "India Surrender" : "India")
+
+    define_marker("marker-burma", 0, counters.burma_road)
+        .tooltip(() => G.events[events.HUMP.id] ? "Burma Road Hump" : "Burma Road No Hump")
+
+    define_marker("marker-divisions", 0, counters.divisions_china)
+        .tooltip("Japanese Divisions in China")
+
+    define_marker("marker-china", 0, counters.china)
+        .tooltip("China")
+
+    TRACK_MARKERS.forEach(function (m, i) {
+        define_marker("track-marker", i, m.counter).tooltip(m.tooltip)
+    })
+
+    TURN_MARKERS.forEach(function (m, i) {
+        define_marker("turn-marker", i, m.counter).tooltip(m.tooltip)
+    })
+
 }
 
 /* }}} */
@@ -10785,6 +10971,15 @@ var STORED_STATE = null
 
 var L = {}
 const P = {}
+
+check_supply = function () {
+    if (!G.client_supply) {
+        world.original_oos = G.oos
+        world.original_br = G.burma_road
+    }
+    basic_check_supply()
+    G.client_supply = 1
+}
 
 function menu_check_unit_supply() {
     LOCAL_STATUS = "check_unit_supply"
@@ -10813,6 +11008,47 @@ function array_equals(a, b) {
     }
     return true
 }
+
+function on_update_local_actions() {
+    if (G.actions && R >= 0 && !init_overstack_check(true, R)) {
+        L.hexes = []
+        L.allowed_units.forEach(u => set_add(L.hexes, G.location[u]))
+        G.violations = L.hexes
+        L.allowed_units = []
+    }
+    if (G.actions && G.actions.move) {
+        L.allowed_hexes = []
+        L.move_type = G.move_type
+        update_move_hex()
+        if (!G.actions.action_hex) {
+            G.actions.action_hex = []
+        }
+        map_for_each(L.allowed_hexes, h => set_add(G.actions.action_hex, h))
+        if (L.allowed_hexes) {
+            delete G.actions.con_eliminate
+        }
+    }
+    document.body.classList.remove("hex-clickable")
+    if (LOCAL_STATUS) {
+        P[LOCAL_STATUS].prompt()
+    }
+    if (!G.proxy) {
+        STORED_STATE = JSON.parse(JSON.stringify(G))
+        G.proxy = 1
+    }
+    if (LOCAL_STATE) {
+        G.actions = LOCAL_STATE.actions
+        G.actions.proxy = 1
+    }
+
+    if (G.actions && G.actions["card"]) {
+        G.actions["play_card"] = 1
+    }
+    if (G.actions && G.actions["unit"] && array_count(G.actions["unit"], u => G.location[u] === ELIMINATED_BOX)) {
+        G.actions["to_unit"] = [G.actions["unit"].find(u => G.location[u] === ELIMINATED_BOX)]
+    }
+}
+
 
 P.check_unit_supply = {
     _begin() {
@@ -11655,54 +11891,64 @@ function print_battle_box(text, faction, cf, rm, units, log) {
 /* }}} */
 /* {{{ js/client/update.js */
 function update_hand(side) {
-    var fo_card
+    var hand = G.hand[side]
+    var fo_card, fo_card_id
+
     if (G.future_offensive[side] > 0) {
-        fo_card = populate("hand", side, "card", G.future_offensive[side])
+        fo_card = "card"
+        fo_card_id = G.future_offensive[side]
+        populate("hand", side, "card", G.future_offensive[side])
     } else if (G.events[events.FUTURE_OFFENSIVE_JP.id + side] > 0) {
-        fo_card = populate_generic_to_parent(lookup_thing("hand", side).element, side === JP ? "card card_jp_0" : "card card_ap_0")
+        fo_card = "fo-card"
+        fo_card_id = side
+        populate("hand", side, "fo-card", side)
     }
 
     if (G.events[events.FUTURE_OFFENSIVE_JP.id + side] === G.turn) {
-        populate_generic_to_parent(fo_card, counters.future_offensive_inactive)
+        populate_generic(fo_card, fo_card_id, counters.future_offensive_inactive)
     } else if (G.events[events.FUTURE_OFFENSIVE_JP.id + side] > 0) {
-        populate_generic_to_parent(fo_card, ((side === AP) ? counters.future_offensive_ap : counters.future_offensive_jp))
+        if (side === AP)
+            populate_generic(fo_card, fo_card_id, counters.future_offensive_ap)
+        else
+            populate_generic(fo_card, fo_card_id, counters.future_offensive_jp)
     }
 
-    if (!Array.isArray(G.hand[side])) {
-        for (var i = 0; i < G.hand[side]; i++) {
-            populate_generic("hand", side, side === JP ? "card card_jp_0" : "card card_ap_0").innerHTML = ''
-        }
+    if (Array.isArray(G.hand[side])) {
+        if (side === AP)
+            populate_with_list("hand", side, "card", G.hand[side], "card card_ap_0")
+        else
+            populate_with_list("hand", side, "card", G.hand[side], "card card_jp_0")
     } else {
-        for (var i = 0; i < G.hand[side].length; i++) {
-            if (G.hand[side][i] <= 0) {
-                populate_generic("hand", side, side === JP ? "card card_jp_0" : "card card_ap_0").innerHTML = ''
-            } else {
-                var card = G.hand[side][i]
-                populate("hand", side, "card", card)
-            }
-        }
+        if (side === AP)
+            populate_generic("hand", side, "card card_ap_0", G.hand[side])
+        else
+            populate_generic("hand", side, "card card_jp_0", G.hand[side])
     }
 }
 
+function apply_conflict_marker(marker, hex) {
+    marker.innerText = String.fromCharCode(65 + G.offensive.battle_names.indexOf(hex))
+}
 
-function place_unit(u, location) {
+function update_unit(u, location) {
     var piece = pieces[u]
-    var unit
     var one_step = piece.notreplaceable && piece.start_reduced
-    var slocs = world.things["s-loc"]
-    var turn = world.things["turn"]
+    var last_turn = Math.max(map_info.turn_a, map_info.turn_b)
+
     if (location > TURN_BOX) {
-        if (!turn[location - TURN_BOX]) {
-            unit = populate("s-loc", ELIMINATED_BOX, "unit", u)
-        } else {
-            unit = populate("turn", location - TURN_BOX, "unit", u)
-        }
-        unit.classList.toggle("reduced", (set_has(G.reduced, u) && !one_step))
-        unit.classList.remove("activated")
-        unit.classList.remove("selected")
-    } else if (location === ELIMINATED_BOX && (!pieces[u].notreplaceable || is_action("unit", u))
-        || (location !== ELIMINATED_BOX && slocs[location])) {
-        unit = populate("s-loc", location, "unit", u)
+        var turn = location - TURN_BOX
+        if (turn <= 0 || turn > last_turn)
+            populate("s-loc", ELIMINATED_BOX, "unit", u)
+        else
+            populate("turn", turn, "unit", u)
+
+        update_keyword("unit", u, set_has(G.reduced, u) && !one_step)
+
+        return
+    }
+
+    if (location === ELIMINATED_BOX && (!pieces[u].notreplaceable || is_action("unit", u)) || (location !== ELIMINATED_BOX && location >= 0 && location <= LAST_BOARD_HEX)) {
+        populate("s-loc", location, "unit", u)
 
         update_keyword("unit", u, "reduced",
             (set_has(G.reduced, u) && !one_step) || location === ELIMINATED_BOX
@@ -11711,35 +11957,47 @@ function place_unit(u, location) {
 
         if (set_has(G.offensive.active_units[piece.faction], u))
             update_keyword("unit", u, "activated")
+
         if (G.active_stack.includes(u)) {
             update_keyword("unit", u, "selected")
             update_rotation("unit", u, 22.5)
         }
 
-        unit.innerHTML = ''
         var battle = map_get(G.offensive.committed, u)
-        var path = map_get(G.offensive.paths, u, [0])[0]
-        // unit.classList.remove("gray")
+        var battle_ix = battle ? G.offensive.battle_names.indexOf(battle) : 0
+        var path = map_get(G.offensive.paths, u)
+        if (path) path = path[0]
+
         if (battle && set_has(G.offensive.battle_hexes, battle)) {
-            apply_conflict_marker(populate_generic_to_parent(unit, "marker conflict battle"), battle)
+            populate_generic("unit", u, "marker conflict battle letter" + battle_ix)
         } else if (battle && set_has(G.offensive.landing_hexes, battle)) {
-            apply_conflict_marker(populate_generic_to_parent(unit, "marker conflict landing"), battle)
+            populate_generic("unit", u, "marker conflict landing letter" + battle_ix)
         } else if (battle && (piece.parenthetical || piece.class === "ground")) {
-            apply_conflict_marker(populate_generic_to_parent(unit, "marker conflict battle gray"), battle)
-            // unit.classList.add("gray")
+            populate_generic("unit", u, "marker conflict battle gray letter" + battle_ix)
         } else if (piece.organic && !(path & STRAT_MOVE) && G.offensive.organic.includes(u)) {
-            populate_generic_to_parent(unit, counters.organic_small)
+            populate_generic("unit", u, counters.organic_small)
         } else if (set_has(G.oos, u)) {
-            populate_generic_to_parent(unit, counters.oos_small)
+            populate_generic("unit", u, counters.oos_small)
         } else {
-            for (var i = 0; i < UNIT_MOVEMENT_MARKERS.length; i++) {
-                var m = UNIT_MOVEMENT_MARKERS[i]
+            for (var m of UNIT_MOVEMENT_MARKERS) {
                 if (m.condition(u, piece, path)) {
-                    populate_generic_to_parent(unit, m.counter)
-                    return
+                    populate_generic("unit", u, m.counter)
+                    break // only first one that matches
                 }
             }
         }
+    }
+}
+
+function get_isr_marker(v, i) {
+    if (v && i === AP) {
+        return counters.rivalry_ap
+    } else if (v && i === JP) {
+        return counters.rivalry_jp
+    } else if (i === AP) {
+        return counters.agreement_ap
+    } else {
+        return counters.agreement_jp
     }
 }
 
@@ -11758,15 +12016,33 @@ function get_control_marker(h) {
     }
 }
 
-function update_role_info() {
-    for (var who = JP; who <= AP; who++) {
-        var hand_size = Number.isInteger(G.hand[who]) ? G.hand[who] : G.hand[who].length
-        var fo = G.events[events.FUTURE_OFFENSIVE_JP.id + who]
-        roles[who].stat.innerHTML = `${hand_size} cards${fo && fo < G.turn ? " + FO" : ""}${G.passes[who] ? ", " + G.passes[who] + " passes" : ""}`
-        if (!hand_size) {
-            roles[who].stat.innerHTML = `0 cards`
-        }
-    }
+function update_role_info(who) {
+    var hand_size = Array.isArray(G.hand[who]) ? G.hand[who].length : G.hand[who]
+    var fo = G.events[events.FUTURE_OFFENSIVE_JP.id + who]
+    var text = `${hand_size} cards`
+    if (fo && fo < G.turn)
+        text += " + FO"
+    if (G.passes[who])
+        text += `, ${G.passes[who]} passes`
+    roles[who].stat.textContent = escape_text(text)
+}
+
+function should_show_hex_control(i, all_control, vassal_control) {
+	var hn = HEX_BY_NATION[i]
+	var cont = is_space_controlled(i, JP) ? JP : AP
+	if ((cont === AP && set_has(G.capture, i) && !all_control) || !(G.supply_cache[i] & HEX_CONTROLLABLE))
+		return false
+	var default_condition =
+		(hn >= 0 && G.surrender[HEX_BY_NATION[i]] > 0 == cont) || (hn === -1 && cont === AP) || (hn < -1 && cont === JP)
+	var vassal_condition = set_has(JP_BOUNDARY_HEX, i) + 0 === cont
+	if (
+		map_info.hex_check(i) &&
+		cont !== null &&
+		(all_control || (!is_faction_units(i, AP) && !is_faction_units(i, JP))) &&
+		(all_control || (!vassal_control && default_condition) || (vassal_control && vassal_condition))
+	)
+		return true
+	return false
 }
 
 function on_update() {
@@ -11774,51 +12050,16 @@ function on_update() {
 
     L = {} // for shared rules/play code and client-side states
 
-    // TODO: why is this necessary?
-    if (!scenario_data().original_control)
-        send_query("original_control")
-
+    // CLIENT-SIDE SUPPLY CHECK
     check_supply()
-    if (G.actions && R >= 0 && !init_overstack_check(true, R)) {
-        L.hexes = []
-        L.allowed_units.forEach(u => set_add(L.hexes, G.location[u]))
-        G.violations = L.hexes
-        L.allowed_units = []
-    }
-    if (G.actions && G.actions.move) {
-        L.allowed_hexes = []
-        L.move_type = G.move_type
-        update_move_hex()
-        if (!G.actions.action_hex) {
-            G.actions.action_hex = []
-        }
-        map_for_each(L.allowed_hexes, h => set_add(G.actions.action_hex, h))
-        if (L.allowed_hexes) {
-            delete G.actions.con_eliminate
-        }
-    }
-    document.body.classList.remove("hex-clickable")
-    world.log_boxes = []
-    if (LOCAL_STATUS) {
-        P[LOCAL_STATUS].prompt()
-    }
-    if (!G.proxy) {
-        STORED_STATE = JSON.parse(JSON.stringify(G))
-        G.proxy = 1
-    }
-    if (LOCAL_STATE) {
-        G.actions = LOCAL_STATE.actions
-        G.actions.proxy = 1
-    }
 
-    if (G.actions && G.actions["card"]) {
-        G.actions["play_card"] = 1
-    }
-    if (G.actions && G.actions["unit"] && array_count(G.actions["unit"], u => G.location[u] === ELIMINATED_BOX)) {
-        G.actions["to_unit"] = [G.actions["unit"].find(u => G.location[u] === ELIMINATED_BOX)]
-    }
+    // LOCAL ACTIONS (PART 1)
+    on_update_local_actions()
 
-    update_role_info()
+    update_role_info(JP)
+    update_role_info(AP)
+
+    // TODO: why are we mutating G here?
     map_for_each(G.offensive.damaged, (u, s) => {
         if (s > 2) {
             G.location[u] = ELIMINATED_BOX
@@ -11826,85 +12067,94 @@ function on_update() {
             set_add(G.reduced, u)
         }
     })
+    if (G.pow <= 0) {
+        G.capture = []
+    }
 
+    var supplied_hex = []
+    for (var i = 1; i < pieces.length; ++i) {
+        var loc = G.location[i]
+        if (loc > 0) {
+            if (!set_has(G.oos, i)) {
+                set_add(supplied_hex, G.location[i])
+            }
+        }
+    }
+    // ^^^^
+
+    // OVERLAY PATHS
     if (!get_preference("nopath", false)) {
         canvas_draw_paths()
     } else {
         canvas_clear_paths()
     }
 
-    document.getElementById("vp_check_button").hidden = CAMPAIGN_SCENARIOS.includes(G.sid)
-
-    if (G.pow <= 0) {
-        G.capture = []
-    }
+    // CONTROL MARKERS
     var all_control = document.body.classList.contains("hide-pieces")
     var vassal_control = get_preference("fullcontrol", false)
     for (var i = 0; i < LAST_BOARD_HEX; i++) {
-        var hn = HEX_BY_NATION[i]
-        var cont = is_space_controlled(i, JP) ? JP : AP
-        if (cont === AP && set_has(G.capture, i) && !all_control || !(G.supply_cache[i] & HEX_CONTROLLABLE)) {
-            continue
-        }
-        var default_condition = (hn >= 0 && (G.surrender[HEX_BY_NATION[i]] > 0) == cont
-            || hn === -1 && cont === AP
-            || hn < -1 && cont === JP)
-        var vassal_condition = (set_has(JP_BOUNDARY_HEX, i) + 0) === cont
-        if (map_info.hex_check(i) && cont !== null && (all_control || !is_faction_units(i, AP) && !is_faction_units(i, JP))
-            && (all_control || !vassal_control && default_condition || vassal_control && vassal_condition)
-        ) {
-            populate_generic("s-loc", i, get_control_marker(i) + (vassal_control ? " transparent" : ""))
+        if (should_show_hex_control(i, all_control, vassal_control)) {
+            if (vassal_control)
+                populate_generic("s-loc", i, get_control_marker(i) + " transparent")
+            else
+                populate_generic("s-loc", i, get_control_marker(i))
         }
     }
-    G.garr_elim.filter(h => is_space_controlled(h, JP)).forEach(h => populate_generic("s-loc", h, counters.no_garrison))
-    var base_road_counters = get_preference("noroad", false)
-    ROAD_EVENTS.filter(event => map_info.hex_check(event.keys[0])).forEach(event => {
-        var thing = lookup_thing("road", event.id)
-        var active = G.events[event.id]
-        thing.element.classList.add("hide")
-        if (!active && !base_road_counters) {
-            thing.element.classList.remove("hide")
-        }
-        if ((event === events.KWAI_RIVER_BRIDGE && active)
-            || (!active && base_road_counters && event !== events.KWAI_RIVER_BRIDGE)) {
-            populate_generic("s-loc", event.keys[0], event.counter)
-        }
+
+    // ELIMINATED GARRISONS
+    for (var h of G.garr_elim)
+        if (is_space_controlled(h, JP))
+            populate_generic("s-loc", h, counters.no_garrison)
+
+    // GARRISONS
+    map_for_each(G.garrison, (h, count) => {
+        if (count === 0)
+            populate_generic("s-loc", h, "unit " + pieces[JP_GARRISON_JP].counter, 1)
+        else
+            populate_generic("s-loc", h, "unit " + pieces[JP_GARRISON_CN[0]].counter, count)
     })
+
+    // ROADS
+    var base_road_counters = get_preference("noroad", false)
+    for (var event of ROAD_EVENTS) {
+        if (map_info.hex_check(event.keys[0])) {
+            var is_road_event_active = G.events[event.id]
+            update_show("road", event.id, !is_road_event_active && !base_road_counters)
+            if (event === events.KWAI_RIVER_BRIDGE && is_road_event_active)
+                populate_generic("s-loc", event.keys[0], event.counter)
+            if (event !== events.KWAI_RIVER_BRIDGE && !is_road_event_active && base_road_counters)
+                populate_generic("s-loc", event.keys[0], event.counter)
+        }
+    }
+
+    // TOKYO EXPRESS
     if (G.events[events.TOKYO_EXPRESS.id] > 0) {
         populate_generic("s-loc", G.events[events.TOKYO_EXPRESS.id], counters.tokyo_express)
     }
-    map_for_each(G.garrison, (h, count) => {
-        var marker = JP_GARRISON_CN[0]
-        if (count === 0) {
-            count = 1
-            marker = JP_GARRISON_JP
-        }
-        for (var i = 0; i < count; i++) {
-            populate_generic("s-loc", h, "unit " + pieces[marker].counter)
-        }
-    })
-    var supplied_hex = []
-    for (var i = 1; i < pieces.length; ++i) {
-        var loc = G.location[i]
-        if (loc > 0) {
-            place_unit(i, G.location[i])
-            if (!set_has(G.oos, i)) {
-                set_add(supplied_hex, G.location[i])
-            }
-        }
-    }
-    if (G.unselect) {
-        G.unselect.forEach(u => update_keyword("unit", u, "unselect"))
+
+    // POWs
+    if (G.pow > 0) {
+        for (var h of G.capture)
+            if (is_space_controlled(h, AP))
+                populate_generic("s-loc", h, counters.pow)
     }
 
-    if (G.pow > 0) {
-        G.capture.filter(h => is_space_controlled(h, AP))
-            .forEach(h => populate_generic("s-loc", h, counters.pow))
+    // UNITS
+    for (var i = 1; i < pieces.length; ++i) {
+        var loc = G.location[i]
+        if (loc > 0)
+            update_unit(i, G.location[i])
     }
+
+    if (G.unselect)
+        for (var u of G.unselect)
+            update_keyword("unit", u, "unselect")
+
+    // OUT OF SUPPLY MARKERS
     var oos_hex_set = []
     for (i = 0; i < G.oos.length; i++) {
         var hex = G.location[G.oos[i]]
-        if (!set_has(oos_hex_set, hex) && hex <= LAST_BOARD_HEX && !set_has(supplied_hex, hex)) {
+        if (hex <= LAST_BOARD_HEX && !set_has(oos_hex_set, hex) && !set_has(supplied_hex, hex)) {
             var counter = counters.isolated
             if (HQ_LIST.some(hq => G.location[hq] < LAST_BOARD_HEX && hex < LAST_BOARD_HEX
                 && pieces[hq].faction === pieces[G.oos[i]].faction
@@ -11916,6 +12166,7 @@ function on_update() {
         }
     }
 
+    // ZONE OF INFLUENCE
     if (!get_preference("hidezoi", false)) {
         for (var hex of ALL_BOARD_HEXES) {
             const zoi_state = G.supply_cache[hex]
@@ -11926,108 +12177,126 @@ function on_update() {
         }
     }
 
-    var focused = []
-    if (world.range[0] && world.hq && G.location[world.hq] < LAST_BOARD_HEX) {
-        mark_activation_zone(world.hq)
-        for_each_hex_in_range(G.location[world.hq], pieces[world.hq].cr, hex => {
-            if (G.supply_cache[hex] & HEX_TEMP_FLAG3) {
-                set_add(focused, hex)
-            }
+    // HQ RANGE
+    // TODO: focused has invalid hexes, so need to filter by ALL_BOARD_HEXES
+    if (focus_hq_range[0] && focus_hq && G.location[focus_hq] < LAST_BOARD_HEX) {
+        mark_activation_zone(focus_hq)
+        for_each_hex_in_range(G.location[focus_hq], pieces[focus_hq].cr, hex => {
+            if (G.supply_cache[hex] & HEX_TEMP_FLAG3)
+                if (set_has(ALL_BOARD_HEXES, hex))
+                    update_keyword("zoi_hex", hex, "yellow")
         })
     } else {
-        for_each_hex_in_range(world.range[0], world.range[1], hex => set_add(focused, hex))
-        focused = in_range_on_map(world.range[0], world.range[1], focused, AP)
-    }
-    for (var hex of ALL_BOARD_HEXES) {
-        update_keyword("zoi_hex", hex, "yellow", set_has(focused, hex))
+        var focused = []
+        for_each_hex_in_range(focus_hq_range[0], focus_hq_range[1], hex => set_add(focused, hex))
+        focused = in_range_on_map(focus_hq_range[0], focus_hq_range[1], focused, AP)
+        for (var hex of focused)
+            if (set_has(ALL_BOARD_HEXES, hex))
+                update_keyword("zoi_hex", hex, "yellow")
     }
 
-    print_violations()
-    update_violations()
-    highlight_aa()
-
-    world.things["card"].forEach(e => e.element.innerHTML = '')
-    if (G.offensive.active_cards.length > 0) {
-        document.getElementById("active_cards").classList.remove("hide")
-        for (let i = 0; i < G.offensive.active_cards.length; i++) {
-            populate("hand", 2, "card", G.offensive.active_cards[i])
-        }
-    } else {
-        document.getElementById("active_cards").classList.add("hide")
+    // STACKING VIOLATIONS
+    if (G.violations.length > 0) {
+        for (var h of G.violations)
+            update_keyword("action_hex", h, "violation")
+        update_text_html("violations", 0, "<b>STACKING VIOLATIONS:</B>\n" + escape_text(G.violations.map(h => "H"+h).join(", ")) + ".")
     }
-    update_hand(AP)
+
+    // AMPHIBIOUS HEXES
+    for (var u of G.offensive.active_units[G.offensive.attacker]) {
+        var piece = pieces[u]
+        var location = G.location[u]
+        if (
+            G.offensive.stage !== POST_BATTLE_STAGE &&
+            piece.class === "ground" &&
+            location < LAST_BOARD_HEX &&
+            (!get_map_data(location).port || !is_space_controlled(location, G.offensive.attacker)) &&
+            map_get(G.offensive.paths, u, [ 0 ])[0] & AMPH_MOVE
+        )
+            update_keyword("action_hex", location, "amph")
+    }
+
+    // CARDS
     update_hand(JP)
+    update_hand(AP)
+    for (let c of G.offensive.active_cards)
+        populate("hand", 2, "card", c)
 
-    G.offensive.battle_hexes.forEach(h => populate("s-loc", h, "battle", G.offensive.battle_names.indexOf(h)))
-    G.offensive.landing_hexes.filter(h => get_map_data(h).named && is_space_controlled(h, 1 - G.offensive.attacker) && has_zoi(h, 1- G.offensive.attacker))
-        .forEach(h => populate("s-loc", h, "landing", G.offensive.battle_names.indexOf(h)))
-    var isr_marker = (v, i) => {
-        if (v && i === AP) {
-            return counters.rivalry_ap
-        } else if (v && i === JP) {
-            return counters.rivalry_jp
-        } else if (i === AP) {
-            return counters.agreement_ap
-        } else {
-            return counters.agreement_jp
-        }
-    }
-    G.inter_service.forEach((v, i) => populate_generic("status", i, isr_marker(v, i)))
-    populate_generic("pw", G.political_will, counters.pw)
-    populate_generic("wie", G.wie, counters.wie)
+    for (var h of G.offensive.battle_hexes)
+        populate("s-loc", h, "battle", G.offensive.battle_names.indexOf(h))
 
+    for (var h of G.offensive.landing_hexes)
+        if (get_map_data(h).named && is_space_controlled(h, 1 - G.offensive.attacker) && has_zoi(h, 1- G.offensive.attacker))
+            populate("s-loc", h, "landing", G.offensive.battle_names.indexOf(h))
+
+    // MISC MARKERS
+
+    populate("track-isr", JP, "marker-isr", JP)
+    populate("track-isr", AP, "marker-isr", AP)
+    update_keyword("marker-isr", JP, "reduced", !G.inter_service[JP])
+    update_keyword("marker-isr", AP, "reduced", !G.inter_service[AP])
+
+    populate("track-pw", G.political_will, "marker-pw", 0)
+    populate("track-wie", G.wie, "marker-wie", 0)
+
+    populate("track-china", Math.min(5, G.events[events.CHINA_STATUS.id]), "marker-china", 0)
     if (G.sid !== SOUTH_PACIFIC_SCENARIO) {
-        populate_generic("india", Math.max(0, 4 - G.events[events.INDIA_STATUS.id]),
-            (G.events[events.INDIA_STATUS.id] >= 5) ? counters.india_status_surrender : counters.india_status)
-        populate_generic("burma", 2 - G.burma_road, G.events[events.HUMP.id] ? counters.burma_road_hump : counters.burma_road)
-        populate("divisions", G.china_divisions + 1, `divisions`, 0)
+        populate("track-india", Math.max(0, 4 - G.events[events.INDIA_STATUS.id]), "marker-india", 0)
+        update_keyword("marker-india", 0, "reduced", G.events[events.INDIA_STATUS.id] >= 5)
+        populate("track-burma", 2 - G.burma_road, "marker-burma", 0)
+        update_keyword("marker-burma", 0, "reduced", G.events[events.HUMP.id])
+        populate("track-divisions", G.china_divisions + 1, "marker-divisions", 0)
     }
 
-    populate_generic("china", Math.min(5, G.events[events.CHINA_STATUS.id]), counters.china)
+    // TURN MARKERS
 
-    var turns = world.things["turn"]
-    for (var key of Object.keys(nations)) {
+    var last_turn = Math.max(map_info.turn_a, map_info.turn_b)
+
+    for (var key in nations) {
         var nation = nations[key]
-        var marker = nation.counter
-        var hex = nation.counter_hex
-        var value = G.surrender[nation.id]
-        if (nation.id === nations.MARSHALL.id) {
-            value = !value
-        }
-        if (marker && turns[value] && value) {
-            populate_generic("turn", value, marker)
-        }
-        if (marker && hex && value && !vassal_control && map_info.hex_check(hex_to_int(hex))) {
-            populate_generic("s-loc", hex_to_int(hex), marker)
+        if (nation.counter) {
+            var hex = nation.counter_hex
+            var value = G.surrender[nation.id]
+            if (nation.id === nations.MARSHALL.id)
+                value = !value
+            if (value > 0 && value <= last_turn)
+                populate("turn", value, "nation-marker-turn", nation.id)
+            if (hex && value && !vassal_control && map_info.hex_check(hex_to_int(hex)))
+                populate("s-loc", hex_to_int(hex), "nation-marker-map", nation.id)
         }
     }
+
     for (i = 0; i < TURN_MARKERS.length; i++) {
         const marker = TURN_MARKERS[i]
-        var value = marker.value(G)
-        var counter = (typeof marker.counter === 'function') ? marker.counter(G) : marker.counter
-        if (!Array.isArray(value)) {
-            value = [value]
+        var v = marker.value(G)
+        if (v > 0 && v <= last_turn) {
+            populate("turn", v, "turn-marker", i)
+            if (marker.reduced?.(G))
+                update_keyword("turn-marker", i, "reduced")
         }
-        value.filter(v => v > 0 && turns[v]).forEach(v => populate_generic("turn", v, counter))
     }
+
+    // TRACK MARKERS
 
     for (i = 0; i < TRACK_MARKERS.length; i++) {
         const marker = TRACK_MARKERS[i]
         var value = marker.value(G)
-        var counter = (typeof marker.counter === 'function') ? marker.counter(G) : marker.counter
-        var track = Math.min(9, value)
-        if (value > 9 && marker.alt_counter) {
-            counter = marker.alt_counter
-            track = Math.min(9, value - 10)
-        }
-        if (value > 0 || marker.always_show === true || (typeof marker.always_show === 'function' && marker.always_show(G))) {
-            populate_generic("track", track, counter)
+        if (value > 0 || marker.always_show?.(G)) {
+            populate("track", value % 10, "track-marker", i)
+            if (value > 9)
+                update_keyword("track-marker", i, "reduced")
+            if (marker.gray?.(G))
+                update_keyword("track-marker", i, "gray")
         }
     }
+
+    // LOCAL ACTIONS (PART 2)
 
     if (LOCAL_STATUS) {
         P[LOCAL_STATUS].on_update()
     }
+
+    // BUTTONS
 
     action_button("play_card", "Choose card")
     action_button("to_unit", "Rebuild unit")
@@ -12078,47 +12347,11 @@ function on_update() {
 
     action_button("redo", "Redo")
     action_button("undo", "Undo")
+
     end_update()
-}
 
-function print_violations() {
-    if (world.violations) {
-        world.violations.forEach(h => lookup_thing("action_hex", h).element.classList.toggle("violation", false))
-        world.violations = []
-    }
-    G.violations.forEach(h => lookup_thing("action_hex", h).element.classList.toggle("violation", true))
-    world.violations = G.violations
-}
-
-function highlight_aa() {
-    world.amph.forEach(h => lookup_thing("action_hex", h).element.classList.remove("amph"))
-    G.offensive.active_units[G.offensive.attacker].forEach(u => {
-        var piece = pieces[u]
-        var location = G.location[u]
-        if (G.offensive.stage !== POST_BATTLE_STAGE && piece.class === "ground" && location < LAST_BOARD_HEX
-            && (!get_map_data(location).port || !is_space_controlled(location, G.offensive.attacker))
-            && map_get(G.offensive.paths, u, [0])[0] & AMPH_MOVE) {
-            set_add(world.amph, location)
-            lookup_thing("action_hex", location).element.classList.add("amph")
-        }
-    })
-}
-
-function update_violations() {
-    var ui = document.getElementById("violations")
-    var list = G.violations
-    if (list.length > 0) {
-        ui.replaceChildren()
-        let p = document.createElement("div")
-        p.innerHTML = `<u><b>Overstack Violations: ${escape_text(list.map(h => hex_get_log_str(h)).join(", "))}</b></u>`
-        ui.appendChild(p)
-    } else {
-        ui.replaceChildren()
-    }
-}
-
-function apply_conflict_marker(marker, hex) {
-    marker.innerText = String.fromCharCode(65 + G.offensive.battle_names.indexOf(hex))
+    // trigger log expansion if snapshot view goes beyond the start
+    show_full_log_if_needed()
 }
 
 /* }}} */
@@ -12316,6 +12549,9 @@ function format_hex_tooltip(h) {
 
 /* UNIT ZOOMED TOOLTIP & HQ RANGE DISPLAY TOGGLE */
 
+var focus_hq = 0
+var focus_hq_range = [0, 0]
+
 function focus_unit(id) {
     const piece = pieces[id]
 
@@ -12329,20 +12565,20 @@ function focus_unit(id) {
 
     // show HQ range
     if (piece.class === "hq" && G.location[id] < LAST_BOARD_HEX) {
-        world.hq = id
+        focus_hq = id
         if (id === HQ_CENTRAL_PACIFIC && G.sid === SOUTH_PACIFIC_SCENARIO)
-            world.range = [ hex_to_int(5226), 5 ]
+            focus_hq_range = [ hex_to_int(5226), 5 ]
         else
-            world.range = [ G.location[id], pieces[id].cr ]
+            focus_hq_range = [ G.location[id], pieces[id].cr ]
         on_update()
     }
 }
 
 function blur_unit(id) {
     // hide HQ range
-    world.hq = 0
-    if (world.range[0]) {
-        world.range = [0, 0]
+    focus_hq = 0
+    if (focus_hq_range[0]) {
+        focus_hq_range = [0, 0]
         on_update()
     }
 }
@@ -12411,6 +12647,11 @@ function escape_text(text) {
     text = escape_tip_light(text, /H(\d+)/g, "hex-tip", "action_hex", HEX_NAMES)
     text = escape_tip_light(text, /P(\d+)/g, "piece-tip", "unit", UNIT_NAMES)
 
+    text = text.replace(/\b1 passes/g, "1 pass")
+    text = text.replace(/\b1 cards/g, "1 card")
+    text = text.replace(/\b1 hexes/g, "1 hex")
+    text = text.replace(/\b1 units/g, "1 unit")
+
     return text
 }
 
@@ -12435,6 +12676,8 @@ function on_prompt(text) {
     }
 }
 
+// FIXME: icky log shortening hacks...
+
 var shorten_log_start = 0
 
 function show_full_log() {
@@ -12450,6 +12693,15 @@ function on_init_log(log) {
     }
     if (turns.length >= 8)
         shorten_log_start = turns[turns.length-4]
+}
+
+function show_full_log_if_needed() {
+    var current_log_length = document.getElementById("log").children.length
+    if (current_log_length < shorten_log_start) {
+        console.log("Expanded log during snapshot review")
+        shorten_log_start = 0
+        update_log(0, current_log_length)
+    }
 }
 
 function on_log(text, i) {
@@ -12533,156 +12785,6 @@ function on_log(text, i) {
     p.innerHTML = escape_text(text)
 
     return p
-}
-
-/* }}} */
-/* {{{ js/client/utils.js */
-/* MISC CLIENT STUFF */
-
-const BR_REGIONS = ["India", "Ceylon", "NIndia", "Burma", "Siam", "Malaya", "Sumatra", "Indochina", "IChina"]
-const BR_NATIONS = [-3, nations.AUSTRALIA.id, nations.BURMA.id, nations.MALAYA.id]
-const JP_REGIONS = ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Caroline", "Japan", "Marshall"]
-
-const JP_BOUNDARY_HEX = []
-const REGIONS_BY_NATION = {}
-const HEX_BY_NATION = []
-
-;(function(){
-
-    for (var key of Object.keys(counters)) {
-        counters[key] = "marker " + counters[key]
-    }
-
-    for (var key of Object.keys(nations)) {
-        if (nations[key].counter) {
-            nations[key].counter = "marker " + nations[key].counter
-        }
-        if (!nations[key].no_full_control && nations[key].regions) {
-            for (var reg of nations[key].regions) {
-                REGIONS_BY_NATION[reg] = nations[key]
-            }
-        }
-    }
-
-    for (var key of Object.keys(events)) {
-        if (events[key].counter) {
-            events[key].counter = "marker " + events[key].counter
-        }
-    }
-
-    for (var i = 0; i < map.length; i++) {
-        var hex = hex_to_int(map[i].id)
-        var region = map[i].region
-        var nation = REGIONS_BY_NATION[region]
-        if (nation) {
-            HEX_BY_NATION[hex] = nation.id
-        } else if (JP_REGIONS.includes(region)) {
-            HEX_BY_NATION[hex] = -1
-        } else if (BR_REGIONS.includes(region)) {
-            HEX_BY_NATION[hex] = -3
-        } else {
-            HEX_BY_NATION[hex] = -2
-        }
-        if (JP_REGIONS.includes(region)) {
-            set_add(JP_BOUNDARY_HEX, hex)
-        }
-    }
-    HEX_BY_NATION[hex_to_int(2709)] = -3
-
-})()
-
-function center_rect([x, y], w, h) {
-    return [x - w / 2, y - h / 2, w, h]
-}
-
-function hex_in_map(x, y) {
-    return x >= map_info.grid_x_offset &&
-        y >= map_info.grid_y_offset &&
-        x < map_info.grid_x_offset + map_info.ROW_HEX_NB &&
-        y < map_info.grid_y_offset + map_info.COLUMN_HEX_NB
-}
-
-function sort_unit_stack(a, b) {
-    var aw = get_element_weight(a) + a.thing.my_id
-    var bw = get_element_weight(b) + b.thing.my_id
-    return aw - bw
-}
-
-function get_element_weight(e) {
-    var is_marker = !e.thing || e.thing.my_action !== "unit"
-    if (is_marker)
-        return e.classList.contains("top") ? 64000 : 0
-    var value = 0
-    var unit = e.thing.my_id
-    var piece = pieces[unit]
-    if (piece.garrison) {
-        return 0
-    }
-    if (piece.faction === G.offensive.attacker) {
-        value += 32000
-    }
-    if (piece.faction === AP) {
-        value += 16000
-    }
-    if (is_action("unit", unit) || set_has(G.active_stack, unit)) {
-        value += 4000
-    }
-    if (piece.class === "naval") {
-        value += 1000
-    } else if (piece.class === "ground") {
-        value += 7000
-    } else if (piece.class === "hq") {
-        value += 8000
-    } else if (piece.class === "air") {
-        value += 9000
-    }
-    // if (set_has(G.offensive.active_units[piece.faction], unit)) {
-    //     value += 512
-    // }
-    if (set_has(G.reduced, unit)) {
-        value += 256
-    }
-    if (piece.service === "army") {
-        value += 128
-    } else if (piece.service !== "navy") {
-        value += 64
-    }
-    return value
-}
-
-function hex_center(i) {
-    var map_layout = LAYOUT.mainmap
-    if (SID === SOUTH_PACIFIC_SCENARIO)
-        map_layout = LAYOUT.southpac
-    if (SID === BURMA_SCENARIO)
-            map_layout = LAYOUT.burma
-
-    if (i === CHINA_BOX) {
-        var box = map_layout.box_air_unit_in_china
-        return center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
-    }
-    var row = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
-    var column = (Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB))
-    if (SID == BURMA_SCENARIO) {
-        if (i == SINGAPORE) {
-            const box = map_layout.label_singapore
-            return center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
-        }
-        if (i > TUNNEL_BOX) {
-            // display TUNNEL_BOX directly to the left of the blue singapore label
-            const box = map_layout.label_singapore
-            var sing_left_coord = center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
-            sing_left_coord[0] -= 47
-            return sing_left_coord
-        }
-    } else if (SID === SOUTH_PACIFIC_SCENARIO && i >= OAHU) {
-        const box = map_layout.h_5808
-        return center_rect([box[0] + box[2]/2, box[1] + box[3]/2], box[2], box[3])
-    }
-    return [
-        (map_info.display_x_offset) + (column - map_info.grid_x_offset) * HEX_X_SIZE,
-        (map_info.display_y_offset) + (row - map_info.grid_y_offset) * HEX_Y_SIZE + (column & 1) * 27.625
-    ]
 }
 
 /* }}} */

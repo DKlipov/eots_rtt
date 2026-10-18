@@ -10,24 +10,11 @@ const HEX_BY_NATION = []
 
 ;(function(){
 
-    for (var key of Object.keys(counters)) {
-        counters[key] = "marker " + counters[key]
-    }
-
     for (var key of Object.keys(nations)) {
-        if (nations[key].counter) {
-            nations[key].counter = "marker " + nations[key].counter
-        }
         if (!nations[key].no_full_control && nations[key].regions) {
             for (var reg of nations[key].regions) {
                 REGIONS_BY_NATION[reg] = nations[key]
             }
-        }
-    }
-
-    for (var key of Object.keys(events)) {
-        if (events[key].counter) {
-            events[key].counter = "marker " + events[key].counter
         }
     }
 

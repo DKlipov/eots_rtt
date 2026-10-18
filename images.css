@@ -29,9 +29,6 @@
 .big_markers_blue { background-image: url(pieces150/big_markers_blue.150.webp); background-size: 225px 90px; }
 .big_markers_dkblue { background-image: url(pieces150/big_markers_dkblue.150.webp); background-size: 45px 90px; }
 .big_markers_white { background-image: url(pieces150/big_markers_white.150.webp); background-size: 495px 90px; }
-.card > .big_markers_white {
-    background-size: 990px 180px;
-}
 .big_markers_yellow { background-image: url(pieces150/big_markers_yellow.150.webp); background-size: 135px 90px; }
 .small_markers_dkblue { background-image: url(pieces150/small_markers_dkblue.150.webp); background-size: 140px 70px; }
 .small_markers_green { background-image: url(pieces150/small_markers_green.150.webp); background-size: 105px 70px; }

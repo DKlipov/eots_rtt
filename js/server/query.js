@@ -1,9 +1,12 @@
+function on_static_view() {
+    return {
+        original_control: scenario_data().original_control
+    }
+}
+
 function on_query(q, params) {
     if (q === "combat") {
         return combat_query(params)
-    }
-    if (q === "original_control") {
-        return scenario_data().original_control
     }
 }
 
@@ -68,17 +71,4 @@ function combat_query(battle) {
     G = save_G
 
     return result
-}
-
-function draw_list() {
-    var hand = [G.draw[JP].concat(G.hand[JP]), G.draw[AP].concat(G.hand[AP])]
-    if (G.future_offensive[AP] > 0) {
-        hand[AP].push(G.future_offensive[AP])
-    }
-    if (G.future_offensive[JP] > 0) {
-        hand[JP].push(G.future_offensive[JP])
-    }
-    hand[AP].sort()
-    hand[JP].sort()
-    return {hand}
 }

@@ -3,7 +3,6 @@
 "use strict"
 
 var G, V, R // convenient aliases so that we can share bits of code verbatim from rules.js
-var L // XXX (marks customizations)
 
 /* MISC */
 
@@ -114,13 +113,6 @@ const world = {
     parent: $("#map"),
     parent_w: 1920,
     parent_h: 1080,
-
-    // XXX: added properties
-    hq: 0,
-    range: [0, 0],
-    violations: [],
-    amph: [],
-    list_id: 0,
 }
 
 class Thing {
@@ -679,7 +671,6 @@ function populate(parent_action, arg2, arg3, arg4) {
     var child = lookup_thing(child_action, child_id)
     parent.ensure_parent()
     parent.element.appendChild(child.element)
-    return child.element /// XXX: TODO - remove need for this return
 }
 
 // populate_with_list(parent_action, [parent_id], child_action, child_id_list, fallback)
@@ -717,10 +708,9 @@ function _create_generic(keywords) {
     } else {
         e = document.createElement("div")
         e.className = keywords
+        e.thing = {}
     }
     used.push(e)
-    e.addEventListener("mousedown", _on_click_thing) // XXX: TODO - remove
-    e.thing = {element: e} // XXX: TODO - remove
     return e
 }
 
@@ -739,24 +729,8 @@ function populate_generic(parent_action, arg2, arg3, arg4) {
     n = n ?? 1
     var parent = lookup_thing(parent_action, parent_id)
     parent.ensure_parent()
-    if (false) {
-        // XXX: TODO - use this instead
-        while (n-- > 0)
-            parent.element.appendChild(_create_generic(keywords))
-    } else {
-        // XXX: TODO - don't use this!
-        var child = _create_generic(keywords)
-        parent.element.appendChild(child)
-        return child
-    }
-}
-
-// XXX: TODO - remove
-function populate_generic_to_parent(parent, keywords) {
-    var child = _create_generic(keywords)
-    child.className = keywords
-    parent.appendChild(child)
-    return child
+    while (n-- > 0)
+        parent.element.appendChild(_create_generic(keywords))
 }
 
 function update_position(action, id, x, y) {
@@ -1136,7 +1110,7 @@ document.querySelectorAll(".panel.autohide").forEach(e => e.hidden = true)
 
 function create_panel(parent, html_id, action, id, text) {
     var panel = document.createElement("div")
-    panel.id = html_id
+    panel.id = html_id ?? action
     var head = document.createElement("div")
     var body = document.createElement("div")
     panel.className = "panel"
@@ -1620,209 +1594,6 @@ function init_preference_radio(name, initial, onchange) {
         input.onchange = () => _set_preference(name, input.value, onchange)
     })
     document.body.dataset[name] = value
-}
-
-/* LIBRARY */
-
-// Array remove and insert (faster than splice)
-
-function array_delete(array, index) {
-	var i, n = array.length
-	for (i = index + 1; i < n; ++i)
-		array[i - 1] = array[i]
-	array.length = n - 1
-}
-
-function array_delete_item(array, item) {
-	var i, n = array.length
-	for (i = 0; i < n; ++i)
-		if (array[i] === item)
-			return array_delete(array, i)
-}
-
-function array_insert(array, index, item) {
-	for (var i = array.length; i > index; --i)
-		array[i] = array[i - 1]
-	array[index] = item
-}
-
-function array_delete_pair(array, index) {
-	var i, n = array.length
-	for (i = index + 2; i < n; ++i)
-		array[i - 2] = array[i]
-	array.length = n - 2
-}
-
-function array_insert_pair(array, index, key, value) {
-	for (var i = array.length; i > index; i -= 2) {
-		array[i] = array[i-2]
-		array[i+1] = array[i-1]
-	}
-	array[index] = key
-	array[index+1] = value
-}
-
-// Set as plain sorted array
-
-function set_clear(set) {
-	set.length = 0
-}
-
-function set_has(set, item) {
-	var a = 0
-	var b = set.length - 1
-	while (a <= b) {
-		var m = (a + b) >> 1
-		var x = set[m]
-		if (item < x)
-			b = m - 1
-		else if (item > x)
-			a = m + 1
-		else
-			return true
-	}
-	return false
-}
-
-function set_add(set, item) {
-	var a = 0
-	var b = set.length - 1
-	// optimize fast case of appending items in order
-	if (item > set[b]) {
-		set[b+1] = item
-		return
-	}
-	while (a <= b) {
-		var m = (a + b) >> 1
-		var x = set[m]
-		if (item < x)
-			b = m - 1
-		else if (item > x)
-			a = m + 1
-		else
-			return
-	}
-	array_insert(set, a, item)
-}
-
-function set_delete(set, item) {
-	var a = 0
-	var b = set.length - 1
-	while (a <= b) {
-		var m = (a + b) >> 1
-		var x = set[m]
-		if (item < x)
-			b = m - 1
-		else if (item > x)
-			a = m + 1
-		else {
-			array_delete(set, m)
-			return
-		}
-	}
-}
-
-function set_toggle(set, item) {
-	var a = 0
-	var b = set.length - 1
-	while (a <= b) {
-		var m = (a + b) >> 1
-		var x = set[m]
-		if (item < x)
-			b = m - 1
-		else if (item > x)
-			a = m + 1
-		else {
-			array_delete(set, m)
-			return
-		}
-	}
-	array_insert(set, a, item)
-}
-
-// Map as plain sorted array of key/value pairs
-
-function map_clear(map) {
-	map.length = 0
-}
-
-function map_has(map, key) {
-	var a = 0
-	var b = (map.length >> 1) - 1
-	while (a <= b) {
-		var m = (a + b) >> 1
-		var x = map[m<<1]
-		if (key < x)
-			b = m - 1
-		else if (key > x)
-			a = m + 1
-		else
-			return true
-	}
-	return false
-}
-
-function map_get(map, key, missing) {
-	var a = 0
-	var b = (map.length >> 1) - 1
-	while (a <= b) {
-		var m = (a + b) >> 1
-		var x = map[m<<1]
-		if (key < x)
-			b = m - 1
-		else if (key > x)
-			a = m + 1
-		else
-			return map[(m<<1)+1]
-	}
-	return missing
-}
-
-function map_set(map, key, value) {
-	var a = 0
-	var b = (map.length >> 1) - 1
-	while (a <= b) {
-		var m = (a + b) >> 1
-		var x = map[m<<1]
-		if (key < x)
-			b = m - 1
-		else if (key > x)
-			a = m + 1
-		else {
-			map[(m<<1)+1] = value
-			return
-		}
-	}
-	array_insert_pair(map, a<<1, key, value)
-}
-
-function map_delete(map, key) {
-	var a = 0
-	var b = (map.length >> 1) - 1
-	while (a <= b) {
-		var m = (a + b) >> 1
-		var x = map[m<<1]
-		if (key < x)
-			b = m - 1
-		else if (key > x)
-			a = m + 1
-		else {
-			array_delete_pair(map, m<<1)
-			return
-		}
-	}
-}
-
-function map_get_set(map, key) {
-	var set = map_get(map, key, null)
-	if (set === null)
-		map_set(map, key, (set = []))
-	return set
-}
-
-function map_for_each(map, f) {
-	for (var i = 0; i < map.length; i += 2)
-		f(map[i], map[i+1])
 }
 
 function q(obj) {

@@ -37,22 +37,22 @@ function current_pow(G) {
 
 const UNIT_MOVEMENT_MARKERS = [
     {
-        "name": "BARGES_MOVE",
+        name: "BARGES_MOVE",
         condition: (u, piece, path) => path & BARGES_MOVE,
         counter: counters.barges_small,
     },
     {
-        "name": "STRAT_MOVE",
+        name: "STRAT_MOVE",
         condition: (u, piece, path) => path & STRAT_MOVE && piece.class !== "air",
         counter: counters.strat_small,
     },
     {
-        "name": "STRAT_MOVE",
+        name: "STRAT_MOVE",
         condition: (u, piece, path) => path & STRAT_MOVE && piece.class === "air",
         counter: counters.strat_air_small,
     },
     {
-        "name": "AMPH_MOVE",
+        name: "AMPH_MOVE",
         condition: (u, piece, path) => path & AMPH_MOVE && piece.class === "ground",
         counter: counters.aa_small,
     },
@@ -64,26 +64,29 @@ const UNIT_MOVEMENT_MARKERS = [
 
 const TRACK_MARKERS = [
     {
-        counter: () => (G.events[events.BARGES.id] > 0 ? counters.asp_b_jp : counters.asp_jp) + (jp_gray_amp() ? " gray" : ""),
-        value: G => G.asp[0][0]
+        counter: counters.asp_jp,
+        tooltip: () => (G.events[events.BARGES.id] > 0) ? "ASP: Barges" : "ASP: No Barges",
+        reduced: () => (G.events[events.BARGES.id] > 0),
+        gray: () => jp_gray_amp(),
+        value: () => G.asp[0][0],
     },
     {
-        counter: () => (G.events[events.BARGES.id] > 0 ? counters.asp_b_jp : counters.asp_jp),
+        // TODO: more tooltips
+        counter: counters.asp_jp,
+        reduced: G => (G.events[events.BARGES.id] > 0),
         value: G => (jp_gray_amp()) ? Math.ceil(G.asp[0][0] / 2) : 0
     },
     {
         counter: counters.asp_ap,
-        alt_counter: counters.asp_ap_1,
         value: G => G.asp[1][0]
     },
     {
         counter: counters.divisions_china,
-        always_show: G => 0,
+        // TODO -- this does nothing? -- always_show: G => 0,
         value: G => (G.sid === SOUTH_PACIFIC_SCENARIO) ? G.china_divisions : 0
     },
     {
         counter: counters.resource_jp,
-        alt_counter: counters.resource_jp_1,
         value: G => array_count(RESOURCE_HEX, h => is_space_controlled(h, JP))
     },
     {
@@ -121,27 +124,29 @@ const TRACK_MARKERS = [
     },
     {
         counter: counters.aspu_jp,
-        always_show: true,
+        always_show: G => true,
         value: G => G.asp[0][1]
     },
     {
         counter: counters.aspu_ap,
-        alt_counter: counters.aspu_ap_1,
-        always_show: true,
+        always_show: G => true,
         value: G => G.asp[1][1]
     },
 ]
 
 const TURN_MARKERS = [
     {
+        tooltip: "Scenario Start",
         counter: counters.scenario_start,
         value: G => SCENARIO_LENGTH[G.sid][0]
     },
     {
+        tooltip: "Scenario End",
         counter: counters.scenario_end,
         value: G => SCENARIO_LENGTH[G.sid][1]
     },
     {
+        // TODO: tooltips...
         counter: counters.future_offensive_jp,
         value: G => G.events[events.FUTURE_OFFENSIVE_JP.id]
     },
@@ -162,7 +167,8 @@ const TURN_MARKERS = [
         value: G => G.events[events.KWAI_RIVER_BRIDGE.id]
     },
     {
-        counter: () => (G.events[events.JP_ESCORTS.id] >> 4 === 2) ? counters.escorts2 : counters.escorts4,
+        counter: counters.escorts2,
+        reduced: G => (G.events[events.JP_ESCORTS.id] >> 4 !== 2),
         value: G => G.events[events.JP_ESCORTS.id] % (1 << 4)
     },
     {
@@ -218,32 +224,22 @@ const TURN_MARKERS = [
         value: G => G.events[events.CHINA_OFFENSIVE.id]
     },
     {
-        counter: G => G.events[events.TOJO.id] ? counters.turn_tr : counters.turn_pmt,
+        counter: counters.turn_pmt,
+        reduced: G => G.events[events.TOJO.id],
         value: G => G.turn
     },
 ]
 
-
-check_supply = function () {
-    if (!G.client_supply) {
-        world.original_oos = G.oos
-        world.original_br = G.burma_road
-    }
-    basic_check_supply()
-    G.client_supply = 1
-}
-
-function define_s_loc(id, rect) {
-    define_stack("s-loc", id,
-        rect,
-        { ...VERTICAL_STACK_PARAMS, sort: sort_unit_stack }
-    )
-}
+// DEFINE WORLD
 
 function on_init(scenario, game_options, static_view) {
-    let map_layout = LAYOUT.mainmap
+    var map_layout = LAYOUT.mainmap
 
     canvas_init(scenario)
+
+    function define_s_loc(id, rect) {
+        define_stack("s-loc", id, rect, { ...VERTICAL_STACK_PARAMS, sort: sort_unit_stack })
+    }
 
     init_preference_checkbox("noroad", false)
     init_preference_checkbox("nopath", false)
@@ -257,16 +253,19 @@ function on_init(scenario, game_options, static_view) {
     create_window("window_eliminated", "Eliminated Units", update_window_eliminated)
     create_window("window_combat", "Combat X")
 
-    // world.tip.addEventListener("touchstart", function () {
-    //     on_blur_tip()
-    // })
-    let map_elem = document.getElementById("mapwrap")
+    define_panel("#jp_hand", "hand", JP)
+    define_panel("#ap_hand", "hand", AP)
+    define_panel("#active_cards", "hand", 2)
+
+    define_html_thing("#turn_info", "violations", 0)
+
+    var mapwrap = document.getElementById("mapwrap")
     switch (scenario) {
         case "South Pacific": {
             nations.AUSTRALIAN_MANDATES.keys = nations.AUSTRALIAN_MANDATES.ports
             SID = SOUTH_PACIFIC_SCENARIO
             map_layout = LAYOUT.southpac
-            map_elem.classList.add("southpac")
+            mapwrap.classList.add("southpac")
             define_board("#map", 1275, 825, [12, 12, 12, 12])
             map_info = SOUTH_PAC_BOARD_INFO
 
@@ -279,10 +278,10 @@ function on_init(scenario, game_options, static_view) {
             update_map_size(1275, 825)
             break
         }
-        case  "Burma: The Forgotten War, 1943-1944": {
+        case "Burma: The Forgotten War, 1943-1944": {
             SID = BURMA_SCENARIO
             map_layout = LAYOUT.burma
-            map_elem.classList.add("burma")
+            mapwrap.classList.add("burma")
             define_board("#map", 1275, 825, [12, 12, 12, 12])
             map_info = BURMA_BOARD_INFO
 
@@ -299,7 +298,7 @@ function on_init(scenario, game_options, static_view) {
         default: {
             SID = FULL_CAMPAIGN_SCENARIO
             map_layout = LAYOUT.mainmap
-            map_elem.classList.add("main")
+            mapwrap.classList.add("main")
             define_board("#map", 2550, 1650, [12, 12, 12, 12])
             map_info = MAIN_BOARD_INFO
             define_thing("road", events.JARHAT_ROAD.id).layout([578, 286, 60, 60], "road_jarhat hide marker control")
@@ -309,10 +308,14 @@ function on_init(scenario, game_options, static_view) {
             update_map_size(2550, 1650)
         }
     }
-    var href = document.getElementsByClassName("deck_href")
-    for (var i = 0; i < href.length; i++) {
-        href[i].href += `&sid=${SID}`
-    }
+
+    if (!SCENARIO_DATA[SID].original_control)
+        SCENARIO_DATA[SID].original_control = static_view.original_control
+
+    document.getElementById("vp_check_button").hidden = CAMPAIGN_SCENARIOS.includes(SID)
+
+    document.getElementById("ap_deck_link").href += `&sid=${SID}`
+    document.getElementById("jp_deck_link").href += `&sid=${SID}`
 
     // used hexes
     var used_hex = []
@@ -354,35 +357,36 @@ function on_init(scenario, game_options, static_view) {
     if (SID !== BURMA_SCENARIO) {
         define_s_loc(DELAYED_BOX, map_layout.box_delayed_reinf)
     }
-    define_stack("s-loc", CHINA_BOX,
-        map_layout.box_air_unit_in_china,
-        { ...TRACK_STACK_PARAMS, sort: sort_unit_stack }
-    )
+    define_stack("s-loc", CHINA_BOX, map_layout.box_air_unit_in_china, { ...TRACK_STACK_PARAMS, sort: sort_unit_stack })
 
     define_space("action_hex", CHINA_BOX, map_layout.box_air_unit_in_china, "china_box")
         .tooltip("China Box")
 
-    define_layout("status", JP, map_layout.box_isr_jp)
-    define_layout("status", AP, map_layout.box_isr_us)
-    define_layout_track_auto("pw", map_info.pw_a, map_info.pw_b, map_layout.track_political_will, 0)
-    define_layout_track_auto("wie", map_info.wie_a, map_info.wie_b, map_layout.track_wie, 0)
+    // Tracks
+
+    define_layout("track-isr", JP, map_layout.box_isr_jp)
+    define_layout("track-isr", AP, map_layout.box_isr_us)
+    define_layout_track_auto("track-pw", map_info.pw_a, map_info.pw_b, map_layout.track_political_will, 0)
+    define_layout_track_auto("track-wie", map_info.wie_a, map_info.wie_b, map_layout.track_wie, 0)
 
     define_stack_track_auto("turn", map_info.turn_a, map_info.turn_b, map_layout.track_game_turn, 0, map_info.TURN_STACK_PARAMS)
     define_space_track_auto("turn_box", map_info.turn_a + TURN_BOX, map_info.turn_b + TURN_BOX, map_layout.track_game_turn, 0)
     define_stack_track_auto("track", map_info.track_a, map_info.track_b, map_layout.track_strat_record, 0, map_info.TRACK_STACK_PARAMS)
 
     if (map_layout.track_india_status !== undefined) {
-        define_layout_track_h("india", 0, 4, map_layout.track_india_status, 0)
+        define_layout_track_h("track-india", 0, 4, map_layout.track_india_status, 0)
     }
     if (map_layout.track_burma_road !== undefined) {
-        define_layout_track_h("burma", 0, 2, map_layout.track_burma_road, 0)
+        define_layout_track_h("track-burma", 0, 2, map_layout.track_burma_road, 0)
     }
 
-    define_layout_track_h("china", 5, 0, map_layout.track_chinese_government, 0)
+    define_layout_track_h("track-china", 5, 0, map_layout.track_chinese_government, 0)
 
     if (map_layout.track_japanese_divisions_available_china !== undefined) {
-        define_layout_track_h("divisions", 1, (SID == BURMA_SCENARIO ? 9 : 13), map_layout.track_japanese_divisions_available_china, 0)
+        define_layout_track_h("track-divisions", 1, (SID == BURMA_SCENARIO ? 9 : 13), map_layout.track_japanese_divisions_available_china, 0)
     }
+
+    // Battle and Landing markers
     for (i = 0; i < 35; i++) {
         var battle = define_thing("battle", i).keyword("marker conflict battle top").animate()
         battle.element.innerText = String.fromCharCode(65 + i)
@@ -407,19 +411,65 @@ function on_init(scenario, game_options, static_view) {
         })
         landing.stackable()
     }
-    define_marker("divisions", 0, counters.divisions_china)
+
+    // Units
     for (let i = 1; i < pieces.length; ++i) {
         let piece = pieces[i]
         piece.element = define_piece("unit", i, (piece.faction ? "ap " : "jp ") + piece.counter)
             .tip_magic(focus_unit, blur_unit)
             .tooltip(format_unit_tooltip)
     }
+
+    // Cards
     for (let i = 1; i < cards.length; ++i) {
         let card = cards[i]
         card.element = define_card("card", i, `card_${card.faction ? "ap" : "jp"}_${card.num}`)
         card.element.card = i
     }
-    define_panel("#jp_hand", "hand", JP)
-    define_panel("#ap_hand", "hand", AP)
-    define_panel("#active_cards", "hand", 2)
+
+    define_card("fo-card", JP, "card_jp_0").tooltip("Future offensive")
+    define_card("fo-card", AP, "card_ap_0").tooltip("Future offensive")
+
+    for (let key in nations) {
+        var nation = nations[key]
+        if (nation.counter) {
+            define_marker("nation-marker-turn", nation.id, nation.counter)
+            define_marker("nation-marker-map", nation.id, nation.counter)
+        }
+    }
+
+    // Markers
+    // TODO: dynamic tooltip with current effect of track?
+
+    define_marker("marker-isr", JP, counters.rivalry_jp)
+        .tooltip(() => G.inter_service[JP] ? "Inter-Service Rivalry" : "Strategic Agreement")
+    define_marker("marker-isr", AP, counters.rivalry_ap)
+        .tooltip(() => G.inter_service[AP] ? "Inter-Service Rivalry" : "Strategic Agreement")
+
+    define_marker("marker-pw", 0, counters.pw)
+        .tooltip("U.S. Political Will")
+
+    define_marker("marker-wie", 0, counters.wie)
+        .tooltip("War in Europe")
+
+    define_marker("marker-india", 0, counters.india_status)
+        .tooltip(() => G.events[events.INDIA_STATUS.id] ? "India Surrender" : "India")
+
+    define_marker("marker-burma", 0, counters.burma_road)
+        .tooltip(() => G.events[events.HUMP.id] ? "Burma Road Hump" : "Burma Road No Hump")
+
+    define_marker("marker-divisions", 0, counters.divisions_china)
+        .tooltip("Japanese Divisions in China")
+
+    define_marker("marker-china", 0, counters.china)
+        .tooltip("China")
+
+    TRACK_MARKERS.forEach(function (m, i) {
+        define_marker("track-marker", i, m.counter).tooltip(m.tooltip)
+    })
+
+    TURN_MARKERS.forEach(function (m, i) {
+        define_marker("turn-marker", i, m.counter).tooltip(m.tooltip)
+    })
+
 }

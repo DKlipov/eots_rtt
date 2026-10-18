@@ -21,16 +21,9 @@ body.hide-markers .zoi_hex { display: none }
 body.hide-pieces .piece { display: none }
 body.hide-pieces .marker:not(.control) { display: none }
 
-#violations:empty {
-	display: none
-}
-
-#violations {
-	padding: 4px 8px;
-	background-color: wheat;
-	font-style: normal;
+#turn_info {
+	background-color: palegreen;
 	color: black;
-	border-bottom: 1px solid black;
 }
 
 .space {
@@ -327,7 +320,7 @@ body.Allies #jp_hand {
     width: 1275px;
     height: 825px;
 }
-#mapwrap.burma > #canvas{
+#mapwrap.burma > #canvas {
     width: 1275px;
     height: 825px;
 }
@@ -518,17 +511,12 @@ body.hex-clickable .action_hex { z-index: 50; }
     border: none;
 }
 
-.card > .big.marker {
-    width: 90px;
-    height: 90px;
-    right: 10px;
+.card > .marker {
+    position: absolute;
     top: 10px;
-}
-.card > .big.unit_ix_4 {
-    background-position-x:  -270px;
-}
-.card > .big.unit_ix_5 {
-    background-position-x:  -360px;
+    right: 10px;
+    transform: scale(1.333);
+    transform-origin: top right;
 }
 
 /* MARKER IMAGES */
@@ -724,3 +712,29 @@ body.hex-clickable .action_hex { z-index: 50; }
     border-color: #1FC4F4;
     /*border: 1px solid gree;*/
 }
+
+.letter0:before { content: "A" }
+.letter1:before { content: "B" }
+.letter2:before { content: "C" }
+.letter3:before { content: "D" }
+.letter4:before { content: "E" }
+.letter5:before { content: "F" }
+.letter6:before { content: "R" }
+.letter7:before { content: "H" }
+.letter8:before { content: "I" }
+.letter9:before { content: "J" }
+.letter10:before { content: "K" }
+.letter12:before { content: "L" }
+.letter13:before { content: "M" }
+.letter14:before { content: "N" }
+.letter15:before { content: "O" }
+.letter16:before { content: "P" }
+.letter17:before { content: "Q" }
+.letter18:before { content: "S" }
+.letter19:before { content: "T" }
+.letter20:before { content: "U" }
+.letter21:before { content: "V" }
+.letter22:before { content: "W" }
+.letter23:before { content: "X" }
+.letter24:before { content: "Y" }
+.letter25:before { content: "Z" }

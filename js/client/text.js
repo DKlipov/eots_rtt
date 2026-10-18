@@ -81,6 +81,9 @@ function format_hex_tooltip(h) {
 
 /* UNIT ZOOMED TOOLTIP & HQ RANGE DISPLAY TOGGLE */
 
+var focus_hq = 0
+var focus_hq_range = [0, 0]
+
 function focus_unit(id) {
     const piece = pieces[id]
 
@@ -94,20 +97,20 @@ function focus_unit(id) {
 
     // show HQ range
     if (piece.class === "hq" && G.location[id] < LAST_BOARD_HEX) {
-        world.hq = id
+        focus_hq = id
         if (id === HQ_CENTRAL_PACIFIC && G.sid === SOUTH_PACIFIC_SCENARIO)
-            world.range = [ hex_to_int(5226), 5 ]
+            focus_hq_range = [ hex_to_int(5226), 5 ]
         else
-            world.range = [ G.location[id], pieces[id].cr ]
+            focus_hq_range = [ G.location[id], pieces[id].cr ]
         on_update()
     }
 }
 
 function blur_unit(id) {
     // hide HQ range
-    world.hq = 0
-    if (world.range[0]) {
-        world.range = [0, 0]
+    focus_hq = 0
+    if (focus_hq_range[0]) {
+        focus_hq_range = [0, 0]
         on_update()
     }
 }
@@ -176,6 +179,11 @@ function escape_text(text) {
     text = escape_tip_light(text, /H(\d+)/g, "hex-tip", "action_hex", HEX_NAMES)
     text = escape_tip_light(text, /P(\d+)/g, "piece-tip", "unit", UNIT_NAMES)
 
+    text = text.replace(/\b1 passes/g, "1 pass")
+    text = text.replace(/\b1 cards/g, "1 card")
+    text = text.replace(/\b1 hexes/g, "1 hex")
+    text = text.replace(/\b1 units/g, "1 unit")
+
     return text
 }
 
@@ -200,6 +208,8 @@ function on_prompt(text) {
     }
 }
 
+// FIXME: icky log shortening hacks...
+
 var shorten_log_start = 0
 
 function show_full_log() {
@@ -215,6 +225,15 @@ function on_init_log(log) {
     }
     if (turns.length >= 8)
         shorten_log_start = turns[turns.length-4]
+}
+
+function show_full_log_if_needed() {
+    var current_log_length = document.getElementById("log").children.length
+    if (current_log_length < shorten_log_start) {
+        console.log("Expanded log during snapshot review")
+        shorten_log_start = 0
+        update_log(0, current_log_length)
+    }
 }
 
 function on_log(text, i) {
