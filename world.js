@@ -708,7 +708,6 @@ function _create_generic(keywords) {
     } else {
         e = document.createElement("div")
         e.className = keywords
-        e.thing = { element: e }
     }
     used.push(e)
     return e
@@ -887,6 +886,8 @@ function _layout_stacks() {
         var i = 0, k = 0
         var bounds = [ Infinity, Infinity, -Infinity, -Infinity ]
         for (var child of children) {
+            // FIXME: to allow populate_generic in stacks (with broken animation)
+            child.thing ??= {}
             var w = child.thing.stack_w ??= child.offsetWidth
             var h = child.thing.stack_h ??= child.offsetHeight
             var x = child.thing.stack_x = start_x + major_dx * i + minor_dx * k + (stack_w - w) * grav_x

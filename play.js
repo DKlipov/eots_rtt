@@ -10269,7 +10269,7 @@ const TRACK_STACK_PARAMS = {
 
 const VERTICAL_STACK_PARAMS = {
     // stack parameters:
-    dx: -2, dy: -3, // closed offset
+    dx: -3, dy: -3, // closed offset
     major_dx: 0, major_dy: -50, // open offset (major axis)
     minor_dx: 50, minor_dy: 0, // open offset (minor axis)
     threshold: 1, // threshold to auto-open
