@@ -334,16 +334,16 @@ body.Allies #jp_hand { grid-row: 3; }
     height: 45px;
 }
 
+.unit.action, .unit.action {
+    box-shadow: 0 0 0 3px yellow, 0 0 0 4px black;
+}
+
 .unit.jp.activated {
     box-shadow: 0 0 0 3px tomato, 0 0 0 4px black;
 }
 
 .unit.ap.activated {
     box-shadow: 0 0 0 3px deepskyblue, 0 0 0 4px black;
-}
-
-.unit.ap.action, .unit.jp.action {
-    box-shadow: 0 0 0 3px yellow, 0 0 0 4px black;
 }
 
 .unit.ap.highlight, .unit.jp.highlight {
