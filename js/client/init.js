@@ -272,9 +272,11 @@ function on_init(scenario, game_options, static_view) {
             define_stack_track_h("track", 0, 1, map_layout.track_strat_record_0_1, 0, VERTICAL_STACK_PARAMS)
             define_stack("track", 2, map_layout.track_strat_record_2, VERTICAL_TURN_STACK_PARAMS)
 
-            define_s_loc(1400, center_rect(map_layout.h_5808, 45, 45))
             define_space("action_hex", 1400, center_rect(map_layout.h_5808, 68, 68))
                 .tooltip(format_hex_tooltip)
+
+            define_s_loc(1400, center_rect(map_layout.h_5808, 45, 45))
+
             update_map_size(1275, 825)
             break
         }
@@ -285,9 +287,10 @@ function on_init(scenario, game_options, static_view) {
             define_board("#map", 1275, 825, [12, 12, 12, 12])
             map_info = BURMA_BOARD_INFO
 
-            define_s_loc(SINGAPORE, center_rect(map_layout.box_singapore, 45, 45))
             define_space("action_hex", SINGAPORE, center_rect(map_layout.box_singapore, 68, 68))
                 .tooltip(format_hex_tooltip)
+            define_s_loc(SINGAPORE, center_rect(map_layout.box_singapore, 45, 45))
+
             define_thing("road", events.JARHAT_ROAD.id).layout([549, 286, 60, 60], "road_jarhat hide marker control")
             define_thing("road", events.IMPHAL_ROAD.id).layout([550, 330, 60, 60], "road_imphal hide marker control")
             define_thing("road", events.LEDO_ROAD.id).layout([600, 300, 60, 60], "road_ledo hide marker control")
@@ -344,10 +347,10 @@ function on_init(scenario, game_options, static_view) {
         if (map_info.hex_check(i)) {
             ALL_BOARD_HEXES.push(i)
             let xy = hex_center(i)
-            define_s_loc(i, center_rect(xy, 45, 45))
             define_thing("zoi_hex", i).layout(center_rect(xy, 62, 62))
             define_space("action_hex", i, center_rect(xy, 68, 68))
                 .tooltip(format_hex_tooltip)
+            define_s_loc(i, center_rect(xy, 45, 45))
         }
     }
 
@@ -387,9 +390,10 @@ function on_init(scenario, game_options, static_view) {
     }
 
     // Battle and Landing markers
+    const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
     for (i = 0; i < 35; i++) {
         var battle = define_thing("battle", i).keyword("marker conflict battle top").animate()
-        battle.element.innerText = String.fromCharCode(65 + i)
+        battle.element.innerText = ALPHABET[i]
         battle.element.index = i
         battle.element.addEventListener("mousedown", evt => {
             if (event.button === 0) {
@@ -400,7 +404,7 @@ function on_init(scenario, game_options, static_view) {
         })
         battle.stackable()
         var landing = define_thing("landing", i).keyword("marker conflict landing top").animate()
-        landing.element.innerText = String.fromCharCode(65 + i)
+        landing.element.innerText = ALPHABET[i]
         landing.element.index = i
         landing.element.addEventListener("mousedown", evt => {
             if (event.button === 0) {
@@ -423,12 +427,12 @@ function on_init(scenario, game_options, static_view) {
     // Cards
     for (let i = 1; i < cards.length; ++i) {
         let card = cards[i]
-        card.element = define_card("card", i, `card_${card.faction ? "ap" : "jp"}_${card.num}`)
+        card.element = define_card("card", i, `${card.faction ? "ap" : "jp"} c${card.num}`)
         card.element.card = i
     }
 
-    define_card("fo-card", JP, "card_jp_0").tooltip("Future offensive")
-    define_card("fo-card", AP, "card_ap_0").tooltip("Future offensive")
+    define_card("fo-card", JP, "jp c0").tooltip("Future offensive")
+    define_card("fo-card", AP, "ap c0").tooltip("Future offensive")
 
     for (let key in nations) {
         var nation = nations[key]

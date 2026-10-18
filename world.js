@@ -708,7 +708,7 @@ function _create_generic(keywords) {
     } else {
         e = document.createElement("div")
         e.className = keywords
-        e.thing = {}
+        e.thing = { element: e }
     }
     used.push(e)
     return e

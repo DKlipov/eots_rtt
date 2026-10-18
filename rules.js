@@ -18471,7 +18471,7 @@ function setup_scenario_burma() {
 }
 
 function log_scenario() {
-    log(`!Empire of the Sun. ${scenario_data().name}`)
+    log(`!Empire of the Sun\n${scenario_data().name}`)
 }
 
 function setup_scenario_1941(options) {
@@ -18481,7 +18481,7 @@ function setup_scenario_1941(options) {
     draw_specific_card(find_card(JP, 1))
     draw_specific_card(find_card(JP, 2))
     prepare_game_log()
-    log("!Empire of the Sun. The Pacific War 1941-1945")
+    log("!Empire of the Sun\nThe Pacific War 1941-1945")
     call("scenario_1941")
 }
 

@@ -117,7 +117,7 @@ function blur_unit(id) {
 
 /* LOG & PROMT TEXT FORMATTING */
 
-const CARD_CLASSES = cards.map(c => `card card_${c?.faction ? "ap" : "jp"}_${c?.num}`)
+const CARD_CLASSES = cards.map(c => `card ${c?.faction ? "ap" : "jp"} c${c?.num}`)
 const CARD_NAMES = cards.map(c => c?.name)
 
 const UNIT_NAMES = pieces.map(p => p?.name)
@@ -141,26 +141,26 @@ const HEX_NAMES = []
 })()
 
 const ICONS = {
-    B0: '<span class="xdice B d0"></span>',
-    B1: '<span class="xdice B d1"></span>',
-    B2: '<span class="xdice B d2"></span>',
-    B3: '<span class="xdice B d3"></span>',
-    B4: '<span class="xdice B d4"></span>',
-    B5: '<span class="xdice B d5"></span>',
-    B6: '<span class="xdice B d6"></span>',
-    B7: '<span class="xdice B d7"></span>',
-    B8: '<span class="xdice B d8"></span>',
-    B9: '<span class="xdice B d9"></span>',
-    R0: '<span class="xdice R d0"></span>',
-    R1: '<span class="xdice R d1"></span>',
-    R2: '<span class="xdice R d2"></span>',
-    R3: '<span class="xdice R d3"></span>',
-    R4: '<span class="xdice R d4"></span>',
-    R5: '<span class="xdice R d5"></span>',
-    R6: '<span class="xdice R d6"></span>',
-    R7: '<span class="xdice R d7"></span>',
-    R8: '<span class="xdice R d8"></span>',
-    R9: '<span class="xdice R d9"></span>',
+    B0: '<span class="icon xdice B d0"></span>',
+    B1: '<span class="icon xdice B d1"></span>',
+    B2: '<span class="icon xdice B d2"></span>',
+    B3: '<span class="icon xdice B d3"></span>',
+    B4: '<span class="icon xdice B d4"></span>',
+    B5: '<span class="icon xdice B d5"></span>',
+    B6: '<span class="icon xdice B d6"></span>',
+    B7: '<span class="icon xdice B d7"></span>',
+    B8: '<span class="icon xdice B d8"></span>',
+    B9: '<span class="icon xdice B d9"></span>',
+    R0: '<span class="icon xdice R d0"></span>',
+    R1: '<span class="icon xdice R d1"></span>',
+    R2: '<span class="icon xdice R d2"></span>',
+    R3: '<span class="icon xdice R d3"></span>',
+    R4: '<span class="icon xdice R d4"></span>',
+    R5: '<span class="icon xdice R d5"></span>',
+    R6: '<span class="icon xdice R d6"></span>',
+    R7: '<span class="icon xdice R d7"></span>',
+    R8: '<span class="icon xdice R d8"></span>',
+    R9: '<span class="icon xdice R d9"></span>',
     W0: '<span class="dice white d0"></span>',
     W1: '<span class="dice white d1"></span>',
     W2: '<span class="dice white d2"></span>',
@@ -175,9 +175,9 @@ function escape_text(text) {
 
     text = escape_icon(text, /\b[BRW]\d\b/g, ICONS)
 
-    text = escape_tip_class(text, /C(\d+)/g, "card-tip", CARD_CLASSES, CARD_NAMES)
-    text = escape_tip_light(text, /H(\d+)/g, "hex-tip", "action_hex", HEX_NAMES)
-    text = escape_tip_light(text, /P(\d+)/g, "piece-tip", "unit", UNIT_NAMES)
+    text = escape_tip_class(text, /C(\d+)/g, "tip", CARD_CLASSES, CARD_NAMES)
+    text = escape_tip_light(text, /H(\d+)/g, "tip", "action_hex", HEX_NAMES)
+    text = escape_tip_light(text, /P(\d+)/g, "tip", "unit", UNIT_NAMES)
 
     text = text.replace(/\b1 passes/g, "1 pass")
     text = text.replace(/\b1 cards/g, "1 card")
@@ -270,31 +270,24 @@ function on_log(text, i) {
             p.classList.add("h2")
             text = m
             break
-        case "$":
-            var m = text.substring(1)
-            p.classList.add("h3")
-            text = m
-            break
         case "#":
             var m = text.substring(2)
-            p.classList.add("h3")
             var code = text[1]
-            var color = null
             if (code === "J") {
-                color = "jp"
+                p.classList.add("h3")
+                p.classList.add("jp")
             } else if (code === "A") {
-                color = "ap"
+                p.classList.add("h3")
+                p.classList.add("ap")
             } else if (code === "I") {
-                color = "int"
-            }
-            if (color) {
-                p.classList.add(color)
+                p.classList.add("h4")
+                p.classList.add("int")
             }
             text = m
             break
         case "%":
             var m = text.substring(2)
-            p.classList.add("h4")
+            p.classList.add("h5")
             p.classList.add("group")
             p.classList.add(text[1] === "J" ? "jp" : "ap")
             text = m
@@ -304,10 +297,6 @@ function on_log(text, i) {
             p.classList.add("group")
             p.classList.add(text[1] === "J" ? "jp" : "ap")
             text = m
-            break
-        case "Q":
-            p.className = "q"
-            text = cards[parseInt(text.substring(1))].text
             break
         case ">":
             p.className = "i"

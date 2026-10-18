@@ -308,3 +308,23 @@ body.hide-pieces .piece { display: none }
 .dice.d4 { background-position: 60% 0; }
 .dice.d5 { background-position: 80% 0; }
 .dice.d6 { background-position: 100% 0; }
+
+/* OTHER ICONS */
+
+.icon {
+	display: inline-block;
+	background-size: 100%;
+	background-repeat: no-repeat;
+}
+
+.icon {
+	vertical-align: -3px;
+	width: 18px;
+	height: 18px;
+}
+
+#log .icon {
+	vertical-align: -2px;
+	width: 14px;
+	height: 14px;
+}

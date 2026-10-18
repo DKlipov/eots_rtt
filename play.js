@@ -10759,9 +10759,11 @@ function on_init(scenario, game_options, static_view) {
             define_stack_track_h("track", 0, 1, map_layout.track_strat_record_0_1, 0, VERTICAL_STACK_PARAMS)
             define_stack("track", 2, map_layout.track_strat_record_2, VERTICAL_TURN_STACK_PARAMS)
 
-            define_s_loc(1400, center_rect(map_layout.h_5808, 45, 45))
             define_space("action_hex", 1400, center_rect(map_layout.h_5808, 68, 68))
                 .tooltip(format_hex_tooltip)
+
+            define_s_loc(1400, center_rect(map_layout.h_5808, 45, 45))
+
             update_map_size(1275, 825)
             break
         }
@@ -10772,9 +10774,10 @@ function on_init(scenario, game_options, static_view) {
             define_board("#map", 1275, 825, [12, 12, 12, 12])
             map_info = BURMA_BOARD_INFO
 
-            define_s_loc(SINGAPORE, center_rect(map_layout.box_singapore, 45, 45))
             define_space("action_hex", SINGAPORE, center_rect(map_layout.box_singapore, 68, 68))
                 .tooltip(format_hex_tooltip)
+            define_s_loc(SINGAPORE, center_rect(map_layout.box_singapore, 45, 45))
+
             define_thing("road", events.JARHAT_ROAD.id).layout([549, 286, 60, 60], "road_jarhat hide marker control")
             define_thing("road", events.IMPHAL_ROAD.id).layout([550, 330, 60, 60], "road_imphal hide marker control")
             define_thing("road", events.LEDO_ROAD.id).layout([600, 300, 60, 60], "road_ledo hide marker control")
@@ -10831,10 +10834,10 @@ function on_init(scenario, game_options, static_view) {
         if (map_info.hex_check(i)) {
             ALL_BOARD_HEXES.push(i)
             let xy = hex_center(i)
-            define_s_loc(i, center_rect(xy, 45, 45))
             define_thing("zoi_hex", i).layout(center_rect(xy, 62, 62))
             define_space("action_hex", i, center_rect(xy, 68, 68))
                 .tooltip(format_hex_tooltip)
+            define_s_loc(i, center_rect(xy, 45, 45))
         }
     }
 
@@ -10874,9 +10877,10 @@ function on_init(scenario, game_options, static_view) {
     }
 
     // Battle and Landing markers
+    const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
     for (i = 0; i < 35; i++) {
         var battle = define_thing("battle", i).keyword("marker conflict battle top").animate()
-        battle.element.innerText = String.fromCharCode(65 + i)
+        battle.element.innerText = ALPHABET[i]
         battle.element.index = i
         battle.element.addEventListener("mousedown", evt => {
             if (event.button === 0) {
@@ -10887,7 +10891,7 @@ function on_init(scenario, game_options, static_view) {
         })
         battle.stackable()
         var landing = define_thing("landing", i).keyword("marker conflict landing top").animate()
-        landing.element.innerText = String.fromCharCode(65 + i)
+        landing.element.innerText = ALPHABET[i]
         landing.element.index = i
         landing.element.addEventListener("mousedown", evt => {
             if (event.button === 0) {
@@ -10910,12 +10914,12 @@ function on_init(scenario, game_options, static_view) {
     // Cards
     for (let i = 1; i < cards.length; ++i) {
         let card = cards[i]
-        card.element = define_card("card", i, `card_${card.faction ? "ap" : "jp"}_${card.num}`)
+        card.element = define_card("card", i, `${card.faction ? "ap" : "jp"} c${card.num}`)
         card.element.card = i
     }
 
-    define_card("fo-card", JP, "card_jp_0").tooltip("Future offensive")
-    define_card("fo-card", AP, "card_ap_0").tooltip("Future offensive")
+    define_card("fo-card", JP, "jp c0").tooltip("Future offensive")
+    define_card("fo-card", AP, "ap c0").tooltip("Future offensive")
 
     for (let key in nations) {
         var nation = nations[key]
@@ -11915,14 +11919,14 @@ function update_hand(side) {
 
     if (Array.isArray(G.hand[side])) {
         if (side === AP)
-            populate_with_list("hand", side, "card", G.hand[side], "card card_ap_0")
+            populate_with_list("hand", side, "card", G.hand[side], "card ap c0")
         else
-            populate_with_list("hand", side, "card", G.hand[side], "card card_jp_0")
+            populate_with_list("hand", side, "card", G.hand[side], "card jp c0")
     } else {
         if (side === AP)
-            populate_generic("hand", side, "card card_ap_0", G.hand[side])
+            populate_generic("hand", side, "card ap c0", G.hand[side])
         else
-            populate_generic("hand", side, "card card_jp_0", G.hand[side])
+            populate_generic("hand", side, "card jp c0", G.hand[side])
     }
 }
 
@@ -11933,11 +11937,12 @@ function apply_conflict_marker(marker, hex) {
 function update_unit(u, location) {
     var piece = pieces[u]
     var one_step = piece.notreplaceable && piece.start_reduced
+    var first_turn = Math.min(map_info.turn_a, map_info.turn_b)
     var last_turn = Math.max(map_info.turn_a, map_info.turn_b)
 
     if (location > TURN_BOX) {
         var turn = location - TURN_BOX
-        if (turn <= 0 || turn > last_turn)
+        if (turn < first_turn || turn > last_turn)
             populate("s-loc", ELIMINATED_BOX, "unit", u)
         else
             populate("turn", turn, "unit", u)
@@ -11969,11 +11974,11 @@ function update_unit(u, location) {
         if (path) path = path[0]
 
         if (battle && set_has(G.offensive.battle_hexes, battle)) {
-            populate_generic("unit", u, "marker conflict battle letter" + battle_ix)
+            populate_generic("unit", u, "marker conflict battle alpha" + battle_ix)
         } else if (battle && set_has(G.offensive.landing_hexes, battle)) {
-            populate_generic("unit", u, "marker conflict landing letter" + battle_ix)
+            populate_generic("unit", u, "marker conflict landing alpha" + battle_ix)
         } else if (battle && (piece.parenthetical || piece.class === "ground")) {
-            populate_generic("unit", u, "marker conflict battle gray letter" + battle_ix)
+            populate_generic("unit", u, "marker conflict battle gray alpha" + battle_ix)
         } else if (piece.organic && !(path & STRAT_MOVE) && G.offensive.organic.includes(u)) {
             populate_generic("unit", u, counters.organic_small)
         } else if (set_has(G.oos, u)) {
@@ -12270,7 +12275,7 @@ function on_update() {
     for (i = 0; i < TURN_MARKERS.length; i++) {
         const marker = TURN_MARKERS[i]
         var v = marker.value(G)
-        if (v > 0 && v <= last_turn) {
+        if (v >= first_turn && v <= last_turn) {
             populate("turn", v, "turn-marker", i)
             if (marker.reduced?.(G))
                 update_keyword("turn-marker", i, "reduced")
@@ -12586,7 +12591,7 @@ function blur_unit(id) {
 
 /* LOG & PROMT TEXT FORMATTING */
 
-const CARD_CLASSES = cards.map(c => `card card_${c?.faction ? "ap" : "jp"}_${c?.num}`)
+const CARD_CLASSES = cards.map(c => `card ${c?.faction ? "ap" : "jp"} c${c?.num}`)
 const CARD_NAMES = cards.map(c => c?.name)
 
 const UNIT_NAMES = pieces.map(p => p?.name)
@@ -12610,26 +12615,26 @@ const HEX_NAMES = []
 })()
 
 const ICONS = {
-    B0: '<span class="xdice B d0"></span>',
-    B1: '<span class="xdice B d1"></span>',
-    B2: '<span class="xdice B d2"></span>',
-    B3: '<span class="xdice B d3"></span>',
-    B4: '<span class="xdice B d4"></span>',
-    B5: '<span class="xdice B d5"></span>',
-    B6: '<span class="xdice B d6"></span>',
-    B7: '<span class="xdice B d7"></span>',
-    B8: '<span class="xdice B d8"></span>',
-    B9: '<span class="xdice B d9"></span>',
-    R0: '<span class="xdice R d0"></span>',
-    R1: '<span class="xdice R d1"></span>',
-    R2: '<span class="xdice R d2"></span>',
-    R3: '<span class="xdice R d3"></span>',
-    R4: '<span class="xdice R d4"></span>',
-    R5: '<span class="xdice R d5"></span>',
-    R6: '<span class="xdice R d6"></span>',
-    R7: '<span class="xdice R d7"></span>',
-    R8: '<span class="xdice R d8"></span>',
-    R9: '<span class="xdice R d9"></span>',
+    B0: '<span class="icon xdice B d0"></span>',
+    B1: '<span class="icon xdice B d1"></span>',
+    B2: '<span class="icon xdice B d2"></span>',
+    B3: '<span class="icon xdice B d3"></span>',
+    B4: '<span class="icon xdice B d4"></span>',
+    B5: '<span class="icon xdice B d5"></span>',
+    B6: '<span class="icon xdice B d6"></span>',
+    B7: '<span class="icon xdice B d7"></span>',
+    B8: '<span class="icon xdice B d8"></span>',
+    B9: '<span class="icon xdice B d9"></span>',
+    R0: '<span class="icon xdice R d0"></span>',
+    R1: '<span class="icon xdice R d1"></span>',
+    R2: '<span class="icon xdice R d2"></span>',
+    R3: '<span class="icon xdice R d3"></span>',
+    R4: '<span class="icon xdice R d4"></span>',
+    R5: '<span class="icon xdice R d5"></span>',
+    R6: '<span class="icon xdice R d6"></span>',
+    R7: '<span class="icon xdice R d7"></span>',
+    R8: '<span class="icon xdice R d8"></span>',
+    R9: '<span class="icon xdice R d9"></span>',
     W0: '<span class="dice white d0"></span>',
     W1: '<span class="dice white d1"></span>',
     W2: '<span class="dice white d2"></span>',
@@ -12644,9 +12649,9 @@ function escape_text(text) {
 
     text = escape_icon(text, /\b[BRW]\d\b/g, ICONS)
 
-    text = escape_tip_class(text, /C(\d+)/g, "card-tip", CARD_CLASSES, CARD_NAMES)
-    text = escape_tip_light(text, /H(\d+)/g, "hex-tip", "action_hex", HEX_NAMES)
-    text = escape_tip_light(text, /P(\d+)/g, "piece-tip", "unit", UNIT_NAMES)
+    text = escape_tip_class(text, /C(\d+)/g, "tip", CARD_CLASSES, CARD_NAMES)
+    text = escape_tip_light(text, /H(\d+)/g, "tip", "action_hex", HEX_NAMES)
+    text = escape_tip_light(text, /P(\d+)/g, "tip", "unit", UNIT_NAMES)
 
     text = text.replace(/\b1 passes/g, "1 pass")
     text = text.replace(/\b1 cards/g, "1 card")
@@ -12739,31 +12744,24 @@ function on_log(text, i) {
             p.classList.add("h2")
             text = m
             break
-        case "$":
-            var m = text.substring(1)
-            p.classList.add("h3")
-            text = m
-            break
         case "#":
             var m = text.substring(2)
-            p.classList.add("h3")
             var code = text[1]
-            var color = null
             if (code === "J") {
-                color = "jp"
+                p.classList.add("h3")
+                p.classList.add("jp")
             } else if (code === "A") {
-                color = "ap"
+                p.classList.add("h3")
+                p.classList.add("ap")
             } else if (code === "I") {
-                color = "int"
-            }
-            if (color) {
-                p.classList.add(color)
+                p.classList.add("h4")
+                p.classList.add("int")
             }
             text = m
             break
         case "%":
             var m = text.substring(2)
-            p.classList.add("h4")
+            p.classList.add("h5")
             p.classList.add("group")
             p.classList.add(text[1] === "J" ? "jp" : "ap")
             text = m
@@ -12773,10 +12771,6 @@ function on_log(text, i) {
             p.classList.add("group")
             p.classList.add(text[1] === "J" ? "jp" : "ap")
             text = m
-            break
-        case "Q":
-            p.className = "q"
-            text = cards[parseInt(text.substring(1))].text
             break
         case ">":
             p.className = "i"

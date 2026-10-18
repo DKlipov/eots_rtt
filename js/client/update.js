@@ -23,14 +23,14 @@ function update_hand(side) {
 
     if (Array.isArray(G.hand[side])) {
         if (side === AP)
-            populate_with_list("hand", side, "card", G.hand[side], "card card_ap_0")
+            populate_with_list("hand", side, "card", G.hand[side], "card ap c0")
         else
-            populate_with_list("hand", side, "card", G.hand[side], "card card_jp_0")
+            populate_with_list("hand", side, "card", G.hand[side], "card jp c0")
     } else {
         if (side === AP)
-            populate_generic("hand", side, "card card_ap_0", G.hand[side])
+            populate_generic("hand", side, "card ap c0", G.hand[side])
         else
-            populate_generic("hand", side, "card card_jp_0", G.hand[side])
+            populate_generic("hand", side, "card jp c0", G.hand[side])
     }
 }
 
@@ -41,11 +41,12 @@ function apply_conflict_marker(marker, hex) {
 function update_unit(u, location) {
     var piece = pieces[u]
     var one_step = piece.notreplaceable && piece.start_reduced
+    var first_turn = Math.min(map_info.turn_a, map_info.turn_b)
     var last_turn = Math.max(map_info.turn_a, map_info.turn_b)
 
     if (location > TURN_BOX) {
         var turn = location - TURN_BOX
-        if (turn <= 0 || turn > last_turn)
+        if (turn < first_turn || turn > last_turn)
             populate("s-loc", ELIMINATED_BOX, "unit", u)
         else
             populate("turn", turn, "unit", u)
@@ -77,11 +78,11 @@ function update_unit(u, location) {
         if (path) path = path[0]
 
         if (battle && set_has(G.offensive.battle_hexes, battle)) {
-            populate_generic("unit", u, "marker conflict battle letter" + battle_ix)
+            populate_generic("unit", u, "marker conflict battle alpha" + battle_ix)
         } else if (battle && set_has(G.offensive.landing_hexes, battle)) {
-            populate_generic("unit", u, "marker conflict landing letter" + battle_ix)
+            populate_generic("unit", u, "marker conflict landing alpha" + battle_ix)
         } else if (battle && (piece.parenthetical || piece.class === "ground")) {
-            populate_generic("unit", u, "marker conflict battle gray letter" + battle_ix)
+            populate_generic("unit", u, "marker conflict battle gray alpha" + battle_ix)
         } else if (piece.organic && !(path & STRAT_MOVE) && G.offensive.organic.includes(u)) {
             populate_generic("unit", u, counters.organic_small)
         } else if (set_has(G.oos, u)) {
@@ -378,7 +379,7 @@ function on_update() {
     for (i = 0; i < TURN_MARKERS.length; i++) {
         const marker = TURN_MARKERS[i]
         var v = marker.value(G)
-        if (v > 0 && v <= last_turn) {
+        if (v >= first_turn && v <= last_turn) {
             populate("turn", v, "turn-marker", i)
             if (marker.reduced?.(G))
                 update_keyword("turn-marker", i, "reduced")
