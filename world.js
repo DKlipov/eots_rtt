@@ -844,7 +844,7 @@ function _layout_stacks() {
             dy = stack.my_stack.small_dy
         }
 
-        var z = (world.focus === stack ? 51 : null) // XXX: 51 instead of 1
+        var z = (world.focus === stack ? 101 : 10) // XXX: z-fighting!
         var major_dx = expand ? _(stack.my_stack.major_dx) : _(dx) // XXX: dx instead of my_stack.dx
         var major_dy = expand ? _(stack.my_stack.major_dy) : _(dy) // XXX: dy instead of my_stack.dy
         var minor_dx = expand ? _(stack.my_stack.minor_dx) : _(0)
@@ -905,7 +905,7 @@ function _layout_stacks() {
         for (var child of children) {
             child.style.left = child.thing.stack_x + "px"
             child.style.top = child.thing.stack_y + "px"
-            child.style.zIndex = z++ // XXX: increasing z because of sort order
+            child.style.zIndex = z++ // XXX: z-fighting
         }
 
         if (shadow) {

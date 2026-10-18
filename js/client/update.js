@@ -46,12 +46,12 @@ function update_hand(side) {
     }
 
     if (G.events[events.FUTURE_OFFENSIVE_JP.id + side] === G.turn) {
-        populate_generic(fo_card, fo_card_id, counters.future_offensive_inactive)
+        populate(fo_card, fo_card_id, "fo-marker", 2)
     } else if (G.events[events.FUTURE_OFFENSIVE_JP.id + side] > 0) {
         if (side === AP)
-            populate_generic(fo_card, fo_card_id, counters.future_offensive_ap)
+            populate(fo_card, fo_card_id, "fo-marker", AP)
         else
-            populate_generic(fo_card, fo_card_id, counters.future_offensive_jp)
+            populate(fo_card, fo_card_id, "fo-marker", JP)
     }
 
     if (Array.isArray(G.hand[side])) {
@@ -279,7 +279,7 @@ function on_update() {
         for_each_hex_in_range(G.location[focus_hq], pieces[focus_hq].cr, hex => {
             if (G.supply_cache[hex] & HEX_TEMP_FLAG3)
                 if (set_has(ALL_BOARD_HEXES, hex))
-                    update_keyword("zoi_hex", hex, "yellow")
+                    update_keyword("zoi_hex", hex, "range")
         })
     } else {
         var focused = []
@@ -287,7 +287,7 @@ function on_update() {
         focused = in_range_on_map(focus_hq_range[0], focus_hq_range[1], focused, AP)
         for (var hex of focused)
             if (set_has(ALL_BOARD_HEXES, hex))
-                update_keyword("zoi_hex", hex, "yellow")
+                update_keyword("zoi_hex", hex, "range")
     }
 
     // STACKING VIOLATIONS
@@ -316,6 +316,8 @@ function on_update() {
     update_hand(AP)
     for (let c of G.offensive.active_cards)
         populate("hand", 2, "card", c)
+    if (V.selected_card)
+        update_keyword("card", V.selected_card, "selected")
 
     for (var h of G.offensive.battle_hexes)
         populate("s-loc", h, "battle", G.offensive.battle_names.indexOf(h))

@@ -51,8 +51,8 @@ function hex_in_map(x, y) {
 }
 
 function sort_unit_stack(a, b) {
-    var aw = get_element_weight(a) + a.thing.my_id
-    var bw = get_element_weight(b) + b.thing.my_id
+    var aw = get_element_weight(a) + (a.thing?.my_id ?? 0)
+    var bw = get_element_weight(b) + (b.thing?.my_id ?? 0)
     return aw - bw
 }
 

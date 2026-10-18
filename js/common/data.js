@@ -111,7 +111,7 @@ const nations = {
     },
     DEI: {
         id: 2,
-        name: "Dutch East India",
+        name: "Dutch East Indies",
         pw: 1,
         counter: counters.dei_surrender,
         counter_hex: 2218,

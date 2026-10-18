@@ -433,14 +433,20 @@ function on_init(scenario, game_options, static_view) {
         card.element.card = i
     }
 
-    define_card("fo-card", JP, "jp c0").tooltip("Future offensive")
-    define_card("fo-card", AP, "ap c0").tooltip("Future offensive")
+    define_card("fo-card", JP, "jp c0").tooltip("Future Offensives Card")
+    define_card("fo-card", AP, "ap c0").tooltip("Future Offensives Card")
+
+    define_marker("fo-marker", JP, counters.future_offensive_jp).tooltip("Future Offensives Card")
+    define_marker("fo-marker", AP, counters.future_offensive_ap).tooltip("Future Offensives Card")
+    define_marker("fo-marker", 2, counters.future_offensive_inactive).tooltip("Future Offensives Card")
 
     for (let key in nations) {
         var nation = nations[key]
         if (nation.counter) {
             define_marker("nation-marker-turn", nation.id, nation.counter)
+                .tooltip(nation.name + " Surrender")
             define_marker("nation-marker-map", nation.id, nation.counter)
+                .tooltip(nation.name + " Surrender")
         }
     }
 

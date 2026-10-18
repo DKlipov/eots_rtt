@@ -6726,7 +6726,7 @@ const nations = {
     },
     DEI: {
         id: 2,
-        name: "Dutch East India",
+        name: "Dutch East Indies",
         pw: 1,
         counter: counters.dei_surrender,
         counter_hex: 2218,
@@ -10103,8 +10103,8 @@ function hex_in_map(x, y) {
 }
 
 function sort_unit_stack(a, b) {
-    var aw = get_element_weight(a) + a.thing.my_id
-    var bw = get_element_weight(b) + b.thing.my_id
+    var aw = get_element_weight(a) + (a.thing?.my_id ?? 0)
+    var bw = get_element_weight(b) + (b.thing?.my_id ?? 0)
     return aw - bw
 }
 
@@ -10831,14 +10831,20 @@ function on_init(scenario, game_options, static_view) {
         card.element.card = i
     }
 
-    define_card("fo-card", JP, "jp c0").tooltip("Future offensive")
-    define_card("fo-card", AP, "ap c0").tooltip("Future offensive")
+    define_card("fo-card", JP, "jp c0").tooltip("Future Offensives Card")
+    define_card("fo-card", AP, "ap c0").tooltip("Future Offensives Card")
+
+    define_marker("fo-marker", JP, counters.future_offensive_jp).tooltip("Future Offensives Card")
+    define_marker("fo-marker", AP, counters.future_offensive_ap).tooltip("Future Offensives Card")
+    define_marker("fo-marker", 2, counters.future_offensive_inactive).tooltip("Future Offensives Card")
 
     for (let key in nations) {
         var nation = nations[key]
         if (nation.counter) {
             define_marker("nation-marker-turn", nation.id, nation.counter)
+                .tooltip(nation.name + " Surrender")
             define_marker("nation-marker-map", nation.id, nation.counter)
+                .tooltip(nation.name + " Surrender")
         }
     }
 
@@ -11111,7 +11117,6 @@ function find_shortest_path_as_the_eagle_flies(start, end) {
             }
         }
     }
-
     var path = []
     var here = end
     while (here !== start) {
@@ -11872,12 +11877,12 @@ function update_hand(side) {
     }
 
     if (G.events[events.FUTURE_OFFENSIVE_JP.id + side] === G.turn) {
-        populate_generic(fo_card, fo_card_id, counters.future_offensive_inactive)
+        populate(fo_card, fo_card_id, "fo-marker", 2)
     } else if (G.events[events.FUTURE_OFFENSIVE_JP.id + side] > 0) {
         if (side === AP)
-            populate_generic(fo_card, fo_card_id, counters.future_offensive_ap)
+            populate(fo_card, fo_card_id, "fo-marker", AP)
         else
-            populate_generic(fo_card, fo_card_id, counters.future_offensive_jp)
+            populate(fo_card, fo_card_id, "fo-marker", JP)
     }
 
     if (Array.isArray(G.hand[side])) {
@@ -12105,7 +12110,7 @@ function on_update() {
         for_each_hex_in_range(G.location[focus_hq], pieces[focus_hq].cr, hex => {
             if (G.supply_cache[hex] & HEX_TEMP_FLAG3)
                 if (set_has(ALL_BOARD_HEXES, hex))
-                    update_keyword("zoi_hex", hex, "yellow")
+                    update_keyword("zoi_hex", hex, "range")
         })
     } else {
         var focused = []
@@ -12113,7 +12118,7 @@ function on_update() {
         focused = in_range_on_map(focus_hq_range[0], focus_hq_range[1], focused, AP)
         for (var hex of focused)
             if (set_has(ALL_BOARD_HEXES, hex))
-                update_keyword("zoi_hex", hex, "yellow")
+                update_keyword("zoi_hex", hex, "range")
     }
 
     // STACKING VIOLATIONS
@@ -12142,6 +12147,8 @@ function on_update() {
     update_hand(AP)
     for (let c of G.offensive.active_cards)
         populate("hand", 2, "card", c)
+    if (V.selected_card)
+        update_keyword("card", V.selected_card, "selected")
 
     for (var h of G.offensive.battle_hexes)
         populate("s-loc", h, "battle", G.offensive.battle_names.indexOf(h))
