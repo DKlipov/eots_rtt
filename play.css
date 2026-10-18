@@ -348,7 +348,8 @@ body.Allies #jp_hand { grid-row: 3; }
     background-size: 35px 35px;
     background-color: white;
     background-clip: content-box;
-    border: 1px solid black;
+    border: 2px solid lime;
+    box-shadow: 0 0 0 1px green;
 }
 
 .unit.big, .marker.big {
@@ -356,6 +357,23 @@ body.Allies #jp_hand { grid-row: 3; }
     height: 45px;
 }
 
+.unit.jp.activated, .unit.jp.activated.unselect {
+    box-shadow: 0 0 0 1px black, 0 0 0 4px tomato, 0 0 0 5px black;
+}
+
+.unit.ap.activated, .unit.ap.activated.unselect {
+    box-shadow: 0 0 0 1px black, 0 0 0 4px deepskyblue, 0 0 0 5px black;
+}
+
+.unit.jp.action, .unit.ap.action {
+    box-shadow: 0 0 0 1px black, 0 0 0 4px yellow, 0 0 0 5px black;
+}
+
+.unit.ap.highlight, .unit.jp.highlight {
+    box-shadow: 0 0 0 1px black, 0 0 0 4px lime, 0 0 0 5px black;
+}
+
+/*
 .unit.jp.activated, .unit.jp.activated.unselect {
     box-shadow: 0 0 0 3px tomato, 0 0 0 4px black;
 }
@@ -371,6 +389,7 @@ body.Allies #jp_hand { grid-row: 3; }
 .unit.ap.highlight, .unit.jp.highlight {
     box-shadow: 0 0 0 3px lime, 0 0 0 4px black;
 }
+*/
 
 .marker.conflict {
     cursor: help;
@@ -417,3 +436,41 @@ body.Allies #jp_hand { grid-row: 3; }
 .unit > .marker.barges_small {
     background-color: turquoise;
 }
+
+/* BEVELS */
+
+button.green { background-color: #90ee90; border-color: #bbffbb #58b55a #58b55a #bbffbb; box-shadow: 0 0 0 1px #001c00; }
+.marker { background-color: #303030; border-color: #404040 #212121 #212121 #404040; box-shadow: 0 0 0 1px #010101; }
+.conflict.landing { background-color: #ee82ee; border-color: #ffb3ff #bb52bc #bb52bc #ffb3ff; box-shadow: 0 0 0 1px #2b0031; }
+.conflict.battle { background-color: #90ee90; border-color: #bbffbb #58b55a #58b55a #bbffbb; box-shadow: 0 0 0 1px #001c00; }
+.marker.aa_small { background-color: #007dc5; border-color: #3ca1eb #005ba0 #005ba0 #3ca1eb; box-shadow: 0 0 0 1px #000037; }
+.big_markers_blue { background-color: #42c8f5; border-color: #7dfcff #0096c1 #0096c1 #7dfcff; box-shadow: 0 0 0 1px #000e34; }
+.big_markers_dkblue { background-color: #007dc5; border-color: #3ca1eb #005ba0 #005ba0 #3ca1eb; box-shadow: 0 0 0 1px #000037; }
+.big_markers_white { background-color: #f5f5f5; border-color: #ffffff #b6b6b6 #b6b6b6 #ffffff; box-shadow: 0 0 0 1px #151515; }
+.big_markers_yellow { background-color: #ffd65c; border-color: #fffb83 #c49d00 #c49d00 #fffb83; box-shadow: 0 0 0 1px #280300; }
+.big_units_beige { background-color: #ceb893; border-color: #ffebc5 #9c8764 #9c8764 #ffebc5; box-shadow: 0 0 0 1px #190900; }
+.big_units_blue { background-color: #42c8f5; border-color: #7dfcff #0096c1 #0096c1 #7dfcff; box-shadow: 0 0 0 1px #000e34; }
+.big_units_orange { background-color: #f7941c; border-color: #ffc55d #c36500 #c36500 #ffc55d; box-shadow: 0 0 0 1px #310000; }
+.big_units_white { background-color: #f5f5f5; border-color: #ffffff #b6b6b6 #b6b6b6 #ffffff; box-shadow: 0 0 0 1px #151515; }
+.small_markers_beige { background-color: #ceb893; border-color: #ffebc5 #9c8764 #9c8764 #ffebc5; box-shadow: 0 0 0 1px #190900; }
+.small_markers_brown { background-color: #aa5d50; border-color: #cf7f71 #863c31 #863c31 #cf7f71; box-shadow: 0 0 0 1px #1e0000; }
+.small_markers_dkblue { background-color: #007dc5; border-color: #3ca1eb #005ba0 #005ba0 #3ca1eb; box-shadow: 0 0 0 1px #000037; }
+.small_markers_green { background-color: #96a854; border-color: #c1d580 #6d7d27 #6d7d27 #c1d580; box-shadow: 0 0 0 1px #070c00; }
+.small_markers_red { background-color: #f04e3e; border-color: #ff7a66 #c1180f #c1180f #ff7a66; box-shadow: 0 0 0 1px #380000; }
+.small_markers_white { background-color: #f5f5f5; border-color: #ffffff #b6b6b6 #b6b6b6 #ffffff; box-shadow: 0 0 0 1px #151515; }
+.small_markers_yellow { background-color: #ffd65c; border-color: #fffb83 #c49d00 #c49d00 #fffb83; box-shadow: 0 0 0 1px #280300; }
+.small_units_beige { background-color: #ceb893; border-color: #ffebc5 #9c8764 #9c8764 #ffebc5; box-shadow: 0 0 0 1px #190900; }
+.small_units_beige_air { background-color: #ceb893; border-color: #ffebc5 #9c8764 #9c8764 #ffebc5; box-shadow: 0 0 0 1px #190900; }
+.small_units_blue { background-color: #42c8f5; border-color: #7dfcff #0096c1 #0096c1 #7dfcff; box-shadow: 0 0 0 1px #000e34; }
+.small_units_brown { background-color: #aa5d50; border-color: #cf7f71 #863c31 #863c31 #cf7f71; box-shadow: 0 0 0 1px #1e0000; }
+.small_units_dkblue { background-color: #007dc5; border-color: #3ca1eb #005ba0 #005ba0 #3ca1eb; box-shadow: 0 0 0 1px #000037; }
+.small_units_green { background-color: #96a854; border-color: #c1d580 #6d7d27 #6d7d27 #c1d580; box-shadow: 0 0 0 1px #070c00; }
+.small_units_green_air { background-color: #96a854; border-color: #c1d580 #6d7d27 #6d7d27 #c1d580; box-shadow: 0 0 0 1px #070c00; }
+.small_units_ltblue { background-color: #9fd2f1; border-color: #d3ffff #6b9dba #6b9dba #d3ffff; box-shadow: 0 0 0 1px #001128; }
+.small_units_ltyellow { background-color: #fff79a; border-color: #ffffa6 #c0b85c #c0b85c #ffffa6; box-shadow: 0 0 0 1px #1e1300; }
+.small_units_orange { background-color: #f7941c; border-color: #ffc55d #c36500 #c36500 #ffc55d; box-shadow: 0 0 0 1px #310000; }
+.small_units_red { background-color: #f04e3e; border-color: #ff7a66 #c1180f #c1180f #ff7a66; box-shadow: 0 0 0 1px #380000; }
+.small_units_turquoise { background-color: #91bea6; border-color: #c1f0d7 #638f78 #638f78 #c1f0d7; box-shadow: 0 0 0 1px #001204; }
+.small_units_white { background-color: #f5f5f5; border-color: #ffffff #b6b6b6 #b6b6b6 #ffffff; box-shadow: 0 0 0 1px #151515; }
+.small_units_yellow { background-color: #ffd65c; border-color: #fffb83 #c49d00 #c49d00 #fffb83; box-shadow: 0 0 0 1px #280300; }
+.small_units_yellow_air { background-color: #ffd65c; border-color: #fffb83 #c49d00 #c49d00 #fffb83; box-shadow: 0 0 0 1px #280300; }

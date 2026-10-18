@@ -59,45 +59,45 @@ const HEX_Y_SIZE = 55.25
 const TURN_STACK_PARAMS = {
     // stack parameters:
     dx: 5, dy: 0, // closed offset
-    major_dx: 48, major_dy: 0, // open offset (major axis)
+    major_dx: 50, major_dy: 0, // open offset (major axis)
     minor_dx: 0, minor_dy: 35, // open offset (minor axis)
     threshold: 1, // threshold to auto-open
     wrap: 8, // wrap limit
     small_dx: 18, small_dy: 0, small_threshold: 3,
-    shadow: 6
+    shadow: 8
 }
 
 const TRACK_STACK_PARAMS = {
     // stack parameters:
     dx: 10, dy: 0, // closed offset
-    major_dx: 48, major_dy: 0, // open offset (major axis)
+    major_dx: 50, major_dy: 0, // open offset (major axis)
     minor_dx: 0, minor_dy: 35, // open offset (minor axis)
     threshold: 2, // threshold to auto-open
     wrap: 8, // wrap limit
     small_dx: 18, small_dy: 0, small_threshold: 4,
-    shadow: 6
+    shadow: 8
 }
 
 const VERTICAL_STACK_PARAMS = {
     // stack parameters:
     dx: -3, dy: -3, // closed offset
-    major_dx: 0, major_dy: -50, // open offset (major axis)
-    minor_dx: 50, minor_dy: 0, // open offset (minor axis)
+    major_dx: 0, major_dy: -54, // open offset (major axis)
+    minor_dx: 54, minor_dy: 0, // open offset (minor axis)
     threshold: 1, // threshold to auto-open
     wrap: 8, // wrap limit
     small_dx: -6, small_dy: -9, small_threshold: 4,
-    shadow: 6
+    shadow: 8
 }
 
 const VERTICAL_TURN_STACK_PARAMS = {
     // stack parameters:
     dx: 0, dy: -3, // closed offset
-    major_dx: 0, major_dy: -50, // open offset (major axis)
-    minor_dx: 50, minor_dy: 0, // open offset (minor axis)
+    major_dx: 0, major_dy: -54, // open offset (major axis)
+    minor_dx: 54, minor_dy: 0, // open offset (minor axis)
     threshold: 1, // threshold to auto-open
     wrap: 8, // wrap limit
     small_dx: 0, small_dy: -6, small_threshold: 3,
-    shadow: 6
+    shadow: 8
 }
 
 const MAIN_BOARD_INFO = {
