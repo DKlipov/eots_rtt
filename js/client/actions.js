@@ -188,8 +188,8 @@ P.check_distance = {
             }
         }
         if (LOCAL_STATE.points.length) {
-            get_hex_path(LOCAL_STATE.points[LOCAL_STATE.points.length - 1], h).forEach(hex =>
-                LOCAL_STATE.points.push(hex))
+            for (var hex of find_shortest_path_as_the_eagle_flies(LOCAL_STATE.points[LOCAL_STATE.points.length - 1], h))
+                LOCAL_STATE.points.push(hex)
         } else {
             LOCAL_STATE.points.push(h)
         }
@@ -217,20 +217,23 @@ P.check_distance = {
     },
 }
 
-function get_hex_path(from, to) {
-    var path = []
-    while (from !== to) {
-        var d = 5000
-        var best = -1
-        for (var next of get_edge_hexes(from)) {
-            var dist = get_distance(next, to)
-            if (dist < d) {
-                best = next
-                d = dist
+function find_shortest_path_as_the_eagle_flies(start, end) {
+    var seen = [ start, -1 ]
+    var queue = [ start ]
+    while (queue.length > 0) {
+        var here = queue.shift()
+        for (var next of get_edge_hexes(here)) {
+            if (!map_has(seen, next) && set_has(ALL_BOARD_HEXES, next)) {
+                queue.push(next)
+                map_set(seen, next, here)
             }
         }
-        path.push(best)
-        from = best
+    }
+    var path = []
+    var here = end
+    while (here !== start) {
+        path.unshift(here)
+        here = map_get(seen, here, start /* in case we don't find a path... */)
     }
     return path
 }
