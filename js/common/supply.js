@@ -1,6 +1,3 @@
-var last = Date.now()
-var count = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-
 function check_supplied_hexes(faction) {
     check_supply()
     L.supply = {}
@@ -62,11 +59,6 @@ function fast_check_supply() {
         G.supply_cache[SINGAPORE] ^= (mask)
     }
     L.supply = 0
-}
-
-var check_supply = basic_check_supply
-if (CLIENT_SIDE_SUPPLY) {
-    check_supply = fast_check_supply
 }
 
 function indian_zoi_hack(apply) {

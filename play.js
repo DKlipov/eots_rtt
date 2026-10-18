@@ -3148,7 +3148,6 @@ var pieces = [
     },
 ]
 
-
 // PIECES
 const HQ_CENTRAL_PACIFIC = find_piece("hq_ap_c")
 const HQ_SOUTH_WEST = find_piece("hq_ap_sw")
@@ -3278,6 +3277,14 @@ function jp_army(id) {
     return find_piece("army_jp_" + id)
 }
 
+function is_commonwealth(piece) {
+    return piece.service === "br" || piece.service === "au" || piece.service === "bu" || piece.service === "ind"
+}
+
+function is_us_unit(piece) {
+    return (piece.service === "navy" || piece.service === "army") && piece.faction === AP
+}
+
 function get_hq_supply_type(piece) {
     if (!piece.faction) {
         return JP_SUPPLIED_HEX
@@ -3306,20 +3313,12 @@ function get_unit_replacement_type(piece) {
     return NAVAl_REP
 }
 
-function is_commonwelth(piece) {
-    return piece.service === "br" || piece.service === "au" || piece.service === "bu" || piece.service === "ind"
-}
-
-function is_us_unit(piece) {
-    return (piece.service === "navy" || piece.service === "army") && piece.faction === AP
-}
-
 function get_unit_supply_type(piece) {
     if (!piece.faction) {
         return JP_SUPPLIED_HEX
     } else if (piece.service === "ch" || piece.class === "air" && (piece.service === "navy" || piece.service === "army")) {
         return AP_SUPPLIED_HEX
-    } else if (is_commonwelth(piece)) {
+    } else if (is_commonwealth(piece)) {
         return BR_SUPPLIED_HEX | JOINT_SUPPLIED_HEX
     } else if (piece.service === "navy" || piece.service === "army") {
         return US_SUPPLIED_HEX | JOINT_SUPPLIED_HEX
@@ -5115,16 +5114,6 @@ function find_card(faction, num) {
     throw new Error(`Missed card ${faction} ${num}`)
 }
 
-function for_each_card(apply) {
-    for (let i = 1; i < cards.length; i++) {
-        var card = cards[i]
-        var returned = apply(i, card)
-        if (returned) {
-            return returned
-        }
-
-    }
-}
 /* }}} */
 /* {{{ js/common/data_map.js */
 //hex data
@@ -5147,6 +5136,7 @@ const GROUND = 2
 const ROAD = 4
 const UNPLAYABLE_WATER = 8
 const UNPLAYABLE_LAND = 16
+
 //Hex sides
 //N,NE,SE,S,SW,NW
 var map = [
@@ -6372,9 +6362,8 @@ var sp_map = [
     {id: 3527, edges: [2, 2, 2, 0, 0, 2]},
 ]
 
-const GARRISONED_CITY = [...Array(Object.keys(map).length).keys()].map(i => map[i]).filter(h => h.city > CITY).map(h => hex_to_int(h.id))
-const RESOURCE_HEX = [...Array(map.length).keys()].filter(h => map[h].resource).map(h => hex_to_int(map[h].id))
-
+const GARRISONED_CITY = map.filter(h => h.city > CITY).map(h => hex_to_int(h.id))
+const RESOURCE_HEX = map.filter(h => h.resource).map(h => hex_to_int(h.id))
 
 function get_map_data(hex) {
     if (G.sid === SOUTH_PACIFIC_SCENARIO) {
@@ -6992,7 +6981,8 @@ const ROAD_EVENTS = Object.keys(events).filter(k => events[k].road).map(k => {
     return event
 })
 
-
+/* }}} */
+/* {{{ js/common/utils.js */
 function is_event_active(event) {
     var data = G.events[event.id]
     if (Array.isArray(data)) {
@@ -7001,8 +6991,17 @@ function is_event_active(event) {
     return G.events[event.id]
 }
 
-/* }}} */
-/* {{{ js/common/utils.js */
+function for_each_card(apply) {
+    for (let i = 1; i < cards.length; i++) {
+        var card = cards[i]
+        var returned = apply(i, card)
+        if (returned) {
+            return returned
+        }
+
+    }
+}
+
 function hex_to_int(i) {
     return (Math.floor(i / 100) - 10) * 29 + i % 100
 }
@@ -7209,9 +7208,6 @@ function solely_occupied_land(hex, faction) {
 
 /* }}} */
 /* {{{ js/common/supply.js */
-var last = Date.now()
-var count = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-
 function check_supplied_hexes(faction) {
     check_supply()
     L.supply = {}
@@ -7273,11 +7269,6 @@ function fast_check_supply() {
         G.supply_cache[SINGAPORE] ^= (mask)
     }
     L.supply = 0
-}
-
-var check_supply = basic_check_supply
-if (CLIENT_SIDE_SUPPLY) {
-    check_supply = fast_check_supply
 }
 
 function indian_zoi_hack(apply) {
@@ -9820,7 +9811,6 @@ function check_nation_controlled(nation, faction) {
 
 /* }}} */
 /* {{{ js/common/library.js */
-
 // Fast deep copy for objects without cycles
 function object_copy(original) {
     var copy, i, n, v
@@ -9846,35 +9836,6 @@ function object_copy(original) {
         }
         return copy
     }
-}
-
-// Fast deep object comparison for objects without cycles
-function object_diff(a, b) {
-    var i, key
-    var a_length
-    if (a === b)
-        return false
-    if (a !== null && b !== null && typeof a === "object" && typeof b === "object") {
-        if (Array.isArray(a)) {
-            if (!Array.isArray(b))
-                return true
-            a_length = a.length
-            if (b.length !== a_length)
-                return true
-            for (i = 0; i < a_length; ++i)
-                if (object_diff(a[i], b[i]))
-                    return true
-            return false
-        }
-        for (key in a)
-            if (object_diff(a[key], b[key]))
-                return true
-        for (key in b)
-            if (!(key in a))
-                return true
-        return false
-    }
-    return true
 }
 
 // Array remove and insert (faster than splice)
@@ -10084,56 +10045,6 @@ function map_get_set(map, key) {
 function map_for_each(map, f) {
     for (var i = 0; i < map.length; i += 2)
         f(map[i], map[i + 1])
-}
-
-// same as Object.groupBy
-function object_group_by(items, callback) {
-    var item, key
-    var groups = {}
-    if (typeof callback === "function") {
-        for (item of items) {
-            key = callback(item)
-            if (key in groups)
-                groups[key].push(item)
-            else
-                groups[key] = [item]
-        }
-    } else {
-        for (item of items) {
-            key = item[callback]
-            if (key in groups)
-                groups[key].push(item)
-            else
-                groups[key] = [item]
-        }
-    }
-    return groups
-}
-
-// like Object.groupBy but for plain array maps
-function map_group_by(items, callback) {
-    var item, key, arr
-    var groups = []
-    if (typeof callback === "function") {
-        for (item of items) {
-            key = callback(item)
-            arr = map_get(groups, key)
-            if (arr)
-                arr.push(item)
-            else
-                map_set(groups, key, [item])
-        }
-    } else {
-        for (item of items) {
-            key = item[callback]
-            arr = map_get(groups, key)
-            if (arr)
-                arr.push(item)
-            else
-                map_set(groups, key, [item])
-        }
-    }
-    return groups
 }
 
 /* }}} */
@@ -10976,10 +10887,13 @@ var STORED_STATE = null
 var L = {}
 const P = {}
 
-check_supply = function () {
+var client_original_oos = null
+var client_original_br = -1
+
+function check_supply() {
     if (!G.client_supply) {
-        world.original_oos = G.oos
-        world.original_br = G.burma_road
+        client_original_oos = G.oos
+        client_original_br = G.burma_road
     }
     basic_check_supply()
     G.client_supply = 1
@@ -11153,9 +11067,9 @@ P.check_distance = {
     },
     redraw() {
         if (LOCAL_STATE.range && LOCAL_STATE.points.length > 1) {
-            world.range = [LOCAL_STATE.points[0], LOCAL_STATE.points.length - 1]
+            focus_hq_range = [LOCAL_STATE.points[0], LOCAL_STATE.points.length - 1]
         } else {
-            world.range = [0, 0]
+            focus_hq_range = [0, 0]
         }
         on_update()
     },
@@ -11179,7 +11093,9 @@ function get_hex_path(from, to) {
         var r = -1
         for (var i = 0; i < nh.length; i++) {
             var dist = get_distance(nh[i], to)
-            if (dist < d && world.things["s-loc"][nh[i]]) {
+            // TODO: don't dig into world to see if hex is defined (use ALL_BOARD_HEXES?)
+            // OLD: if (dist < d && world.things["s-loc"][nh[i]])
+            if (dist < d && set_has(ALL_BOARD_HEXES, nh[i])) {
                 r = nh[i]
                 d = dist
             }
@@ -11196,12 +11112,12 @@ var original_send_action = send_action
 var send_action_with_oos = function (a, b, valid = false, extra) {
     var type = 0
     var payload = [0]
-    if (world.original_br !== G.burma_road) {
+    if (client_original_br !== G.burma_road) {
         payload.push(G.burma_road)
         type += 1
     }
     check_supply()
-    if (!array_equals(world.original_oos, G.oos)) {
+    if (!array_equals(client_original_oos, G.oos)) {
         payload.push(...G.oos)
         type += G.oos.length + 1 << 1
     }

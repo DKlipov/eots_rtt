@@ -7,10 +7,13 @@ var STORED_STATE = null
 var L = {}
 const P = {}
 
-check_supply = function () {
+var client_original_oos = null
+var client_original_br = -1
+
+function check_supply() {
     if (!G.client_supply) {
-        world.original_oos = G.oos
-        world.original_br = G.burma_road
+        client_original_oos = G.oos
+        client_original_br = G.burma_road
     }
     basic_check_supply()
     G.client_supply = 1
@@ -184,9 +187,9 @@ P.check_distance = {
     },
     redraw() {
         if (LOCAL_STATE.range && LOCAL_STATE.points.length > 1) {
-            world.range = [LOCAL_STATE.points[0], LOCAL_STATE.points.length - 1]
+            focus_hq_range = [LOCAL_STATE.points[0], LOCAL_STATE.points.length - 1]
         } else {
-            world.range = [0, 0]
+            focus_hq_range = [0, 0]
         }
         on_update()
     },
@@ -210,7 +213,9 @@ function get_hex_path(from, to) {
         var r = -1
         for (var i = 0; i < nh.length; i++) {
             var dist = get_distance(nh[i], to)
-            if (dist < d && world.things["s-loc"][nh[i]]) {
+            // TODO: don't dig into world to see if hex is defined (use ALL_BOARD_HEXES?)
+            // OLD: if (dist < d && world.things["s-loc"][nh[i]])
+            if (dist < d && set_has(ALL_BOARD_HEXES, nh[i])) {
                 r = nh[i]
                 d = dist
             }
@@ -227,12 +232,12 @@ var original_send_action = send_action
 var send_action_with_oos = function (a, b, valid = false, extra) {
     var type = 0
     var payload = [0]
-    if (world.original_br !== G.burma_road) {
+    if (client_original_br !== G.burma_road) {
         payload.push(G.burma_road)
         type += 1
     }
     check_supply()
-    if (!array_equals(world.original_oos, G.oos)) {
+    if (!array_equals(client_original_oos, G.oos)) {
         payload.push(...G.oos)
         type += G.oos.length + 1 << 1
     }

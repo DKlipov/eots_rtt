@@ -2043,7 +2043,7 @@ cards[find_card(AP, 33)].before_unit_activation = function () {
 })()
 
 cards[find_card(AP, 34)].before_unit_activation = function () {
-    filter_activation_units((u, piece) => is_commonwelth(piece), AP)
+    filter_activation_units((u, piece) => is_commonwealth(piece), AP)
 }
 
 cards[find_card(AP, 35)].before_unit_activation = function () {
@@ -2295,7 +2295,7 @@ P.turkey_shoot = {
 }
 
 cards[find_card(AP, 57)].before_unit_activation = function () {
-    filter_activation_units((u, piece) => (is_commonwelth(piece) || piece.class === "air" || piece.service === "ch") && piece.service !== "du", AP)
+    filter_activation_units((u, piece) => (is_commonwealth(piece) || piece.class === "air" || piece.service === "ch") && piece.service !== "du", AP)
 }
 
 cards[find_card(AP, 58)].before_unit_activation = cards[find_card(AP, 57)].before_unit_activation

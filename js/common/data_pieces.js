@@ -2956,7 +2956,6 @@ var pieces = [
     },
 ]
 
-
 // PIECES
 const HQ_CENTRAL_PACIFIC = find_piece("hq_ap_c")
 const HQ_SOUTH_WEST = find_piece("hq_ap_sw")
@@ -3086,6 +3085,14 @@ function jp_army(id) {
     return find_piece("army_jp_" + id)
 }
 
+function is_commonwealth(piece) {
+    return piece.service === "br" || piece.service === "au" || piece.service === "bu" || piece.service === "ind"
+}
+
+function is_us_unit(piece) {
+    return (piece.service === "navy" || piece.service === "army") && piece.faction === AP
+}
+
 function get_hq_supply_type(piece) {
     if (!piece.faction) {
         return JP_SUPPLIED_HEX
@@ -3114,20 +3121,12 @@ function get_unit_replacement_type(piece) {
     return NAVAl_REP
 }
 
-function is_commonwelth(piece) {
-    return piece.service === "br" || piece.service === "au" || piece.service === "bu" || piece.service === "ind"
-}
-
-function is_us_unit(piece) {
-    return (piece.service === "navy" || piece.service === "army") && piece.faction === AP
-}
-
 function get_unit_supply_type(piece) {
     if (!piece.faction) {
         return JP_SUPPLIED_HEX
     } else if (piece.service === "ch" || piece.class === "air" && (piece.service === "navy" || piece.service === "army")) {
         return AP_SUPPLIED_HEX
-    } else if (is_commonwelth(piece)) {
+    } else if (is_commonwealth(piece)) {
         return BR_SUPPLIED_HEX | JOINT_SUPPLIED_HEX
     } else if (piece.service === "navy" || piece.service === "army") {
         return US_SUPPLIED_HEX | JOINT_SUPPLIED_HEX

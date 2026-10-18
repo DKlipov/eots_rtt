@@ -1,4 +1,3 @@
-
 // Fast deep copy for objects without cycles
 function object_copy(original) {
     var copy, i, n, v
@@ -24,35 +23,6 @@ function object_copy(original) {
         }
         return copy
     }
-}
-
-// Fast deep object comparison for objects without cycles
-function object_diff(a, b) {
-    var i, key
-    var a_length
-    if (a === b)
-        return false
-    if (a !== null && b !== null && typeof a === "object" && typeof b === "object") {
-        if (Array.isArray(a)) {
-            if (!Array.isArray(b))
-                return true
-            a_length = a.length
-            if (b.length !== a_length)
-                return true
-            for (i = 0; i < a_length; ++i)
-                if (object_diff(a[i], b[i]))
-                    return true
-            return false
-        }
-        for (key in a)
-            if (object_diff(a[key], b[key]))
-                return true
-        for (key in b)
-            if (!(key in a))
-                return true
-        return false
-    }
-    return true
 }
 
 // Array remove and insert (faster than splice)
@@ -262,54 +232,4 @@ function map_get_set(map, key) {
 function map_for_each(map, f) {
     for (var i = 0; i < map.length; i += 2)
         f(map[i], map[i + 1])
-}
-
-// same as Object.groupBy
-function object_group_by(items, callback) {
-    var item, key
-    var groups = {}
-    if (typeof callback === "function") {
-        for (item of items) {
-            key = callback(item)
-            if (key in groups)
-                groups[key].push(item)
-            else
-                groups[key] = [item]
-        }
-    } else {
-        for (item of items) {
-            key = item[callback]
-            if (key in groups)
-                groups[key].push(item)
-            else
-                groups[key] = [item]
-        }
-    }
-    return groups
-}
-
-// like Object.groupBy but for plain array maps
-function map_group_by(items, callback) {
-    var item, key, arr
-    var groups = []
-    if (typeof callback === "function") {
-        for (item of items) {
-            key = callback(item)
-            arr = map_get(groups, key)
-            if (arr)
-                arr.push(item)
-            else
-                map_set(groups, key, [item])
-        }
-    } else {
-        for (item of items) {
-            key = item[callback]
-            arr = map_get(groups, key)
-            if (arr)
-                arr.push(item)
-            else
-                map_set(groups, key, [item])
-        }
-    }
-    return groups
 }

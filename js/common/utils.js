@@ -6,6 +6,17 @@ function is_event_active(event) {
     return G.events[event.id]
 }
 
+function for_each_card(apply) {
+    for (let i = 1; i < cards.length; i++) {
+        var card = cards[i]
+        var returned = apply(i, card)
+        if (returned) {
+            return returned
+        }
+
+    }
+}
+
 function hex_to_int(i) {
     return (Math.floor(i / 100) - 10) * 29 + i % 100
 }

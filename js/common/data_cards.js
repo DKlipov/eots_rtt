@@ -1781,14 +1781,3 @@ function find_card(faction, num) {
     }
     throw new Error(`Missed card ${faction} ${num}`)
 }
-
-function for_each_card(apply) {
-    for (let i = 1; i < cards.length; i++) {
-        var card = cards[i]
-        var returned = apply(i, card)
-        if (returned) {
-            return returned
-        }
-
-    }
-}

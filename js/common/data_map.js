@@ -18,6 +18,7 @@ const GROUND = 2
 const ROAD = 4
 const UNPLAYABLE_WATER = 8
 const UNPLAYABLE_LAND = 16
+
 //Hex sides
 //N,NE,SE,S,SW,NW
 var map = [
@@ -1243,9 +1244,8 @@ var sp_map = [
     {id: 3527, edges: [2, 2, 2, 0, 0, 2]},
 ]
 
-const GARRISONED_CITY = [...Array(Object.keys(map).length).keys()].map(i => map[i]).filter(h => h.city > CITY).map(h => hex_to_int(h.id))
-const RESOURCE_HEX = [...Array(map.length).keys()].filter(h => map[h].resource).map(h => hex_to_int(map[h].id))
-
+const GARRISONED_CITY = map.filter(h => h.city > CITY).map(h => hex_to_int(h.id))
+const RESOURCE_HEX = map.filter(h => h.resource).map(h => hex_to_int(h.id))
 
 function get_map_data(hex) {
     if (G.sid === SOUTH_PACIFIC_SCENARIO) {
