@@ -174,10 +174,12 @@ body.shift .unit-tip-list {
 .action_hex.highlight {  z-index: 1000; pointer-events: none;}
 .zoi_hex { z-index: -1; }
 .action_hex { z-index: -100; }
-#canvas { z-index: 45 }
 body.hex-clickable .action_hex { z-index: 50; }
 .space { z-index: -100; }
 */
+
+#canvas { z-index: 80 }
+.action_hex.action {  z-index: 90; }
 .stack.shadow:before { z-index: 100 }
 
 /* PANELS */
