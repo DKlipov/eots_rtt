@@ -214,15 +214,15 @@ function on_update() {
             var is_road_event_active = G.events[event.id]
             update_show("road", event.id, !is_road_event_active && !base_road_counters)
             if (event === events.KWAI_RIVER_BRIDGE && is_road_event_active)
-                populate_generic("s-loc", event.keys[0], event.counter)
+                populate("s-loc", event.keys[0], "event-marker", event.id)
             if (event !== events.KWAI_RIVER_BRIDGE && !is_road_event_active && base_road_counters)
-                populate_generic("s-loc", event.keys[0], event.counter)
+                populate("s-loc", event.keys[0], "event-marker", event.id)
         }
     }
 
     // TOKYO EXPRESS
     if (G.events[events.TOKYO_EXPRESS.id] > 0) {
-        populate_generic("s-loc", G.events[events.TOKYO_EXPRESS.id], counters.tokyo_express)
+        populate("s-loc", G.events[events.TOKYO_EXPRESS.id], "event-marker", events.TOKYO_EXPRESS.id)
     }
 
     // POWs

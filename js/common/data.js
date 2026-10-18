@@ -257,7 +257,7 @@ const events = {
     KWAI_RIVER_BRIDGE: {
         id: 10,
         road: true,
-        name: "Kwai river",
+        name: "River Kwai",
         counter: counters.kwai_river,
         keys: [2109, 2108],
     },

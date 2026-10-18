@@ -146,84 +146,103 @@ const TURN_MARKERS = [
         value: G => SCENARIO_LENGTH[G.sid][1]
     },
     {
-        // TODO: tooltips...
+        tooltip: "Future Offensives Card (JP)",
         counter: counters.future_offensive_jp,
         value: G => G.events[events.FUTURE_OFFENSIVE_JP.id]
     },
     {
+        tooltip: "Future Offensives Card (AP)",
         counter: counters.future_offensive_ap,
         value: G => G.events[events.FUTURE_OFFENSIVE_AP.id]
     },
     {
+        tooltip: "Defensive Doctrine",
         counter: counters.defensive_doctrine,
         value: G => G.events[events.NEW_OPERATION_PLAN.id]
     },
     {
+        tooltip: "Japanese Barges",
         counter: counters.barges,
         value: G => G.events[events.BARGES.id]
     },
     {
+        tooltip: "Bridge over the River Kwai",
         counter: counters.kwai_river,
         value: G => G.events[events.KWAI_RIVER_BRIDGE.id]
     },
     {
+        tooltip: () => (G.events[events.JP_ESCORTS.id] >> 4 !== 2) ? "Escorts +4" : "Escorts +2",
         counter: counters.escorts2,
         reduced: G => (G.events[events.JP_ESCORTS.id] >> 4 !== 2),
         value: G => G.events[events.JP_ESCORTS.id] % (1 << 4)
     },
     {
+        tooltip: "High All Interceptors",
         counter: counters.interceptors_jp,
         value: G => G.events[events.INTERCEPTORS.id]
     },
     {
+        tooltip: "Panama Canal Attacked",
         counter: counters.panama_canal,
         value: G => G.events[events.PANAMA_CANAL.id]
     },
     {
+        tooltip: "Doolittle",
         counter: counters.doolitle,
         value: G => G.events[events.DOOLITLE.id]
     },
     {
+        tooltip: "PT Boats - No Barges",
         counter: counters.pt_boats,
         value: G => G.events[events.PT_BOATS.id]
     },
     {
+        tooltip: "-1 PW (Ground)",
         counter: counters.pw_casualties,
         value: G => G.events[events.US_CASUALTIES.id]
     },
     {
+        tooltip: "-1 PW (BB)",
         counter: counters.pw_bb,
         value: G => G.events[events.LACK_US_BB.id]
     },
     {
+        tooltip: "-1 PW (CV)",
         counter: counters.pw_cv,
         value: G => G.events[events.LACK_US_CV.id]
     },
     {
+        tooltip: "-1PW (Progress of the War)",
         counter: counters.pw_failed_pow,
         value: G => G.events[events.FAILED_POW.id]
     },
     {
+        tooltip: "US Sub - No Escorts",
         counter: counters.us_sub,
         value: G => G.events[events.SUBMARINE_DOCTRINE.id]
     },
     {
+        tooltip: "Alaska Occupied",
         counter: counters.alaska,
         value: G => G.events[events.ALASKA_OCCUPATION.id]
     },
     {
+        tooltip: "Hawaii Occupied",
         counter: counters.hawaii,
         value: G => G.events[events.HAWAII_OCCUPATION.id]
     },
     {
+        tooltip: "Strategic Bombing",
         counter: counters.strat_bombing,
         value: G => G.events[events.STRAT_BOMBING_CAMPAIGN.id]
     },
     {
+        tooltip: "China Offensive",
         counter: counters.china_offensive,
         value: G => G.events[events.CHINA_OFFENSIVE.id]
     },
     {
+        tooltip: () => G.events[events.TOJO.id] ? "Game Turn (Tojo Resigns)" : "Game Turn (PM Tojo)",
         counter: counters.turn_pmt,
         reduced: G => G.events[events.TOJO.id],
         value: G => G.turn
@@ -484,4 +503,8 @@ function on_init(scenario, game_options, static_view) {
         define_marker("turn-marker", i, m.counter).tooltip(m.tooltip)
     })
 
+    for (var event of Object.values(events))
+        if (event.counter)
+            define_marker("event-marker", event.id, event.counter)
+                .tooltip(event.name)
 }
