@@ -16,6 +16,26 @@ body.Allies header.your_turn { background-color: lightsteelblue; }
 .marker.control { pointer-events: none }
 .transparent { border: none !important; opacity: 0.4; }
 
+/* SPECIAL BUTTONS */
+
+button#to_unit_button {
+    background-color: #90ee90;
+    border-color: #bbffbb #58b55a #58b55a #bbffbb;
+}
+
+button#to_unit_button:enabled:active:hover {
+    border-color: #58b55a #bbffbb #bbffbb #58b55a;
+}
+
+button#play_card_button {
+    background-color: #90ee90;
+    border-color: #bbffbb #58b55a #58b55a #bbffbb;
+}
+
+button#play_card_button:enabled:active:hover {
+    border-color: #58b55a #bbffbb #bbffbb #58b55a;
+}
+
 /* LOG & PROMPT TEXT */
 
 #log > .full_log {
