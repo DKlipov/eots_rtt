@@ -44,20 +44,18 @@ function canvas_draw_paths() {
         }
         var start = hex_center(v[2])
         var finish
-        var color = pieces[k].faction ? "blue" : "red"
+        var line_color = pieces[k].faction ? "blue" : "firebrick"
+        var spot_color = pieces[k].faction ? "deepskyblue" : "tomato"
         var d = pieces[k].faction ? -2 : 2
-        CANVAS_CTX.strokeStyle = color
-        CANVAS_CTX.fillStyle = color
-        CANVAS_CTX.lineWidth = 1
+        CANVAS_CTX.strokeStyle = line_color
+        CANVAS_CTX.fillStyle = spot_color
+        CANVAS_CTX.lineWidth = 3
+        CANVAS_CTX.lineCap = "round"
+
+        // lines
         for (var j = 3; j < v.length; j++) {
             start = hex_center(v[j - 1])
             finish = hex_center(v[j])
-            CANVAS_CTX.beginPath()
-            if (v[j - 1] === v[j] || j === 3) {
-                CANVAS_CTX.arc(start[0], start[1] + d, 4, 0, 2 * Math.PI)
-                CANVAS_CTX.fill()
-                CANVAS_CTX.stroke()
-            }
             CANVAS_CTX.beginPath()
             if (G.location[k] === v[j - 1] && j === v.length - 1) {
                 CANVAS_CTX.setLineDash([5, 3])
@@ -67,9 +65,22 @@ function canvas_draw_paths() {
             CANVAS_CTX.stroke()
             CANVAS_CTX.setLineDash([])
         }
+
+        // spots
+        for (var j = 3; j < v.length; j++) {
+            start = hex_center(v[j - 1])
+            finish = hex_center(v[j])
+            if (v[j - 1] === v[j] || j === 3) {
+                CANVAS_CTX.beginPath()
+                CANVAS_CTX.arc(start[0], start[1] + d, 6, 0, 2 * Math.PI)
+                CANVAS_CTX.fill()
+                CANVAS_CTX.stroke()
+            }
+        }
         if (finish) {
             CANVAS_CTX.beginPath()
-            CANVAS_CTX.fillRect(finish[0] - 4, finish[1] - 4 + d, 8, 8)
+            CANVAS_CTX.rect(finish[0] - 6, finish[1] - 6 + d, 12, 12)
+            CANVAS_CTX.fill()
             CANVAS_CTX.stroke()
         }
     })
