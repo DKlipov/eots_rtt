@@ -14432,7 +14432,7 @@ P.attrition = {
 
 /* {{{ js/server/actions.js */
 function is_china_coast_captured() {
-    return CHINA_COAST.some(h => is_space_controlled(h, JP))
+    return !CHINA_COAST.some(h => is_space_controlled(h, JP))
 }
 
 P.china_offensive = {
