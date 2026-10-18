@@ -358,6 +358,7 @@ function on_update() {
 
     // TURN MARKERS
 
+    var first_turn = Math.min(map_info.turn_a, map_info.turn_b)
     var last_turn = Math.max(map_info.turn_a, map_info.turn_b)
 
     for (var key in nations) {
@@ -367,7 +368,7 @@ function on_update() {
             var value = G.surrender[nation.id]
             if (nation.id === nations.MARSHALL.id)
                 value = !value
-            if (value > 0 && value <= last_turn)
+            if (value >= first_turn && value <= last_turn)
                 populate("turn", value, "nation-marker-turn", nation.id)
             if (hex && value && !vassal_control && map_info.hex_check(hex_to_int(hex)))
                 populate("s-loc", hex_to_int(hex), "nation-marker-map", nation.id)
