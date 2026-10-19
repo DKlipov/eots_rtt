@@ -356,7 +356,7 @@ function on_update() {
             var hex = nation.counter_hex
             var value = G.surrender[nation.id]
             if (nation.id === nations.MARSHALL.id)
-                value = !value
+                value = -value
             if (value >= first_turn && value <= last_turn)
                 populate("turn", value, "nation-marker-turn", nation.id)
             if (hex && value && !vassal_control && map_info.hex_check(hex_to_int(hex)))
