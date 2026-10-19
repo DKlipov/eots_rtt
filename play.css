@@ -185,7 +185,7 @@ body.shift .unit-tip-list {
 /* MAPS */
 
 body.full_map {
-    & #map, & #canvas { width: 2550px; height: 1650px; }
+    & #mapwrap, & #map, & #canvas { width: 2550px; height: 1650px; }
     & #panels { max-width: 2156px; }
     @media (max-width: 800px) {
         & #panels { min-width: 2156px; }
@@ -193,7 +193,7 @@ body.full_map {
 }
 
 body.southpac_map, body.burma_map {
-    & #map, & #canvas{ width: 1275px; height: 825px; }
+    & #mapwrap, & #map, & #canvas { width: 1275px; height: 825px; }
     & #panels { max-width 1352px; }
     @media (max-width: 800px) {
         & #panels { min-width 1352px; }
