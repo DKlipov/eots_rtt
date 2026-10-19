@@ -445,6 +445,10 @@ body.shift {
     background-color: turquoise;
 }
 
+.road {
+    background: no-repeat;
+}
+
 /* BEVELS */
 
 button.green { background-color: #90ee90; border-color: #bbffbb #58b55a #58b55a #bbffbb; box-shadow: 0 0 0 1px #001c00; }

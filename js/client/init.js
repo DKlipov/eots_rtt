@@ -313,10 +313,10 @@ function on_init(scenario, game_options, static_view) {
                 .tooltip(format_hex_tooltip)
             define_s_loc(SINGAPORE, center_rect(map_layout.box_singapore, 45, 45))
 
-            define_thing("road", events.JARHAT_ROAD.id).layout([549, 286, 60, 60], "road_jarhat hide marker control")
-            define_thing("road", events.IMPHAL_ROAD.id).layout([550, 330, 60, 60], "road_imphal hide marker control")
-            define_thing("road", events.LEDO_ROAD.id).layout([600, 300, 60, 60], "road_ledo hide marker control")
-            define_thing("road", events.KWAI_RIVER_BRIDGE.id).layout([528, 501, 50, 95], "road_kwai hide marker control")
+            define_thing("road", events.JARHAT_ROAD.id).layout([549, 286, 60, 60], "jarhat control")
+            define_thing("road", events.IMPHAL_ROAD.id).layout([550, 330, 60, 60], "imphal control")
+            define_thing("road", events.LEDO_ROAD.id).layout([600, 300, 60, 60], "ledo control")
+            define_thing("road", events.KWAI_RIVER_BRIDGE.id).layout([528, 501, 50, 95], "kwai control")
             update_map_size(1275, 825)
             break
         }
@@ -326,10 +326,10 @@ function on_init(scenario, game_options, static_view) {
             mapwrap.classList.add("main")
             define_board("#map", 2550, 1650, [12, 12, 12, 12])
             map_info = MAIN_BOARD_INFO
-            define_thing("road", events.JARHAT_ROAD.id).layout([578, 286, 60, 60], "road_jarhat hide marker control")
-            define_thing("road", events.IMPHAL_ROAD.id).layout([579, 330, 60, 60], "road_imphal hide marker control")
-            define_thing("road", events.LEDO_ROAD.id).layout([629, 300, 60, 60], "road_ledo hide marker control")
-            define_thing("road", events.KWAI_RIVER_BRIDGE.id).layout([557, 501, 50, 95], "road_kwai hide marker control")
+            define_thing("road", events.JARHAT_ROAD.id).layout([578, 286, 60, 60], "jarhat control")
+            define_thing("road", events.IMPHAL_ROAD.id).layout([579, 330, 60, 60], "imphal control")
+            define_thing("road", events.LEDO_ROAD.id).layout([629, 300, 60, 60], "ledo control")
+            define_thing("road", events.KWAI_RIVER_BRIDGE.id).layout([557, 501, 50, 95], "kwai control")
             update_map_size(2550, 1650)
         }
     }

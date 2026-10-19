@@ -83,10 +83,10 @@
 .marker.ng_surrender { background-image: url(pieces150/ng_sur.webp);background-size: 45px 45px; }
 .marker.am_surrender { background-image: url(pieces150/am_sur.webp);background-size: 45px 45px; }
 .marker.mi_surrender { background-image: url(pieces150/mi_sur.webp);background-size: 45px 45px; }
-.road_ledo { background-image: url(pieces150/road_ledo.webp); background-size: 50px 55px; }
-.road_imphal { background-image: url(pieces150/road_imphal.webp);background-size: 50px 55px; }
-.road_jarhat { background-image: url(pieces150/road_jarhat.webp); background-size: 55px 45px; }
-.road_kwai { background-image: url(pieces150/road_kwai.webp); background-size: 50px 95px; }
+.road.ledo { background-image: url(pieces150/road_ledo.webp); background-size: 50px 55px; }
+.road.imphal { background-image: url(pieces150/road_imphal.webp);background-size: 50px 55px; }
+.road.jarhat { background-image: url(pieces150/road_jarhat.webp); background-size: 55px 45px; }
+.road.kwai { background-image: url(pieces150/road_kwai.webp); background-size: 50px 95px; }
 .pw_casualties { background-image: url(pieces150/army_lost.png); background-size: 35px 35px; }
 .pw_bb { background-image: url(pieces150/navy_lost.png); background-size: 35px 35px; }
 .pw_cv { background-image: url(pieces150/cv_lost.png); background-size: 35px 35px; }
