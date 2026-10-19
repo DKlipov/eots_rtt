@@ -6914,6 +6914,7 @@ const events = {
     },
     TOKYO_EXPRESS: {
         id: 18,
+        counter: counters.tokyo_express,
         once_per_turn: true,
     },
     NEW_OPERATION_PLAN: {
