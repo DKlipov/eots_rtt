@@ -140,6 +140,7 @@ P.check_unit_supply = {
         if (!LOCAL_STATE.supply_data) {
             return
         }
+        canvas_show()
         canvas_draw_supply(LOCAL_STATE.supply_data)
         var focused = []
         if (LOCAL_STATE.unit && pieces[LOCAL_STATE.unit].class === "hq" && G.location[LOCAL_STATE.unit] < LAST_BOARD_HEX) {

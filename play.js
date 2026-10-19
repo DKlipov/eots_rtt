@@ -11051,6 +11051,7 @@ P.check_unit_supply = {
         if (!LOCAL_STATE.supply_data) {
             return
         }
+        canvas_show()
         canvas_draw_supply(LOCAL_STATE.supply_data)
         var focused = []
         if (LOCAL_STATE.unit && pieces[LOCAL_STATE.unit].class === "hq" && G.location[LOCAL_STATE.unit] < LAST_BOARD_HEX) {
@@ -12030,10 +12031,11 @@ function on_update() {
     // ^^^^
 
     // OVERLAY PATHS
-    if (!get_preference("nopath", false)) {
+    if (!get_preference("nopath", false) && G.offensive.paths.length > 0) {
+        canvas_show()
         canvas_draw_paths()
     } else {
-        canvas_clear_paths()
+        canvas_hide()
     }
 
     // CONTROL MARKERS
@@ -12316,6 +12318,14 @@ const SUPPLY_COLORS = {
     from_port: "red",
     to_hq: "blue",
     to_source: "yellow",
+}
+
+function canvas_show() {
+    CANVAS.hidden = false
+}
+
+function canvas_hide() {
+    CANVAS.hidden = true
 }
 
 function canvas_init(scenario) {

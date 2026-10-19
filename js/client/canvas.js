@@ -8,6 +8,14 @@ const SUPPLY_COLORS = {
     to_source: "yellow",
 }
 
+function canvas_show() {
+    CANVAS.hidden = false
+}
+
+function canvas_hide() {
+    CANVAS.hidden = true
+}
+
 function canvas_init(scenario) {
     let sizeX, sizeY
     switch (scenario) {

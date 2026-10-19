@@ -176,10 +176,11 @@ function on_update() {
     // ^^^^
 
     // OVERLAY PATHS
-    if (!get_preference("nopath", false)) {
+    if (!get_preference("nopath", false) && G.offensive.paths.length > 0) {
+        canvas_show()
         canvas_draw_paths()
     } else {
-        canvas_clear_paths()
+        canvas_hide()
     }
 
     // CONTROL MARKERS
