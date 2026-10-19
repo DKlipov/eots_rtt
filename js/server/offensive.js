@@ -535,7 +535,6 @@ P.activate_units = {
         this.update_possible_units()
     },
     skip() {
-        push_undo()
         this.done()
     },
     done() {
