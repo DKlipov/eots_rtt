@@ -7210,6 +7210,20 @@ function solely_occupied_land(hex, faction) {
     return G.supply_cache[hex] & JP_GAH_UNITS << (faction) && !(G.supply_cache[hex] & JP_GAH_UNITS << (1 - faction))
 }
 
+function get_wie_level() {
+    if (G.wie <= 2) {
+        return "No effect"
+    } else if (G.wie <= 5) {
+        return "Level 1"
+    } else if (G.wie <= 7) {
+        return "Level 2"
+    } else if (G.wie <= 9) {
+        return "Level 3"
+    } else if (G.wie <= 10) {
+        return "Level 4"
+    }
+}
+
 /* }}} */
 /* {{{ js/common/supply.js */
 function check_supplied_hexes(faction) {
@@ -10468,72 +10482,84 @@ const UNIT_MOVEMENT_MARKERS = [
 const TRACK_MARKERS = [
     {
         counter: counters.asp_jp,
-        tooltip: () => (G.events[events.BARGES.id] > 0) ? "ASP: Barges" : "ASP: No Barges",
+        tooltip: () => "Japan ASP" + ((G.events[events.BARGES.id] > 0) ? " (Barges)" : ""),
         reduced: () => (G.events[events.BARGES.id] > 0),
         gray: () => jp_gray_amp(),
         value: () => G.asp[0][0],
     },
     {
-        // TODO: more tooltips
         counter: counters.asp_jp,
-        reduced: G => (G.events[events.BARGES.id] > 0),
-        value: G => (jp_gray_amp()) ? Math.ceil(G.asp[0][0] / 2) : 0
+        tooltip: () => "Japan ASP (allowed with ISR)",
+        reduced: () => (G.events[events.BARGES.id] > 0),
+        value: () => (jp_gray_amp()) ? Math.ceil(G.asp[0][0] / 2) : 0
     },
     {
         counter: counters.asp_ap,
-        value: G => G.asp[1][0]
+        tooltip: () => "Allies ASP",
+        value: () => G.asp[1][0]
     },
     {
         counter: counters.divisions_china,
-        // TODO -- this does nothing? -- always_show: G => 0,
-        value: G => (G.sid === SOUTH_PACIFIC_SCENARIO) ? G.china_divisions : 0
+        tooltip: () => "Japanese Divisions in China",
+        value: () => (G.sid === SOUTH_PACIFIC_SCENARIO) ? G.china_divisions : 0//for SP scenario only
     },
     {
         counter: counters.resource_jp,
-        value: G => array_count(RESOURCE_HEX, h => is_space_controlled(h, JP))
+        tooltip: () => "Japanese Resource Hex Count",
+        value: () => array_count(RESOURCE_HEX, h => is_space_controlled(h, JP))
     },
     {
         counter: counters.naval_repl,
-        value: G => G.reinforcements[0]
+        tooltip: () => "Japanese Naval Replacement Point",
+        value: () => G.reinforcements[0]
     },
     {
         counter: counters.air_repl,
-        value: G => G.reinforcements[1]
+        tooltip: () => "Japanese Air Replacement Point",
+        value: () => G.reinforcements[1]
     },
     {
         counter: counters.drawn_jp,
-        value: G => G.draw_counter[0]
+        tooltip: () => "Japanese Drawn Cards",
+        value: () => G.draw_counter[0]
     },
     {
         counter: counters.drawn_ap,
-        value: G => G.draw_counter[1]
+        tooltip: () => "Allies Drawn Cards",
+        value: () => G.draw_counter[1]
     },
     {
         counter: counters.pass_jp,
-        value: G => G.passes[0]
+        tooltip: () => "Japanese Passes",
+        value: () => G.passes[0]
     },
     {
         counter: counters.pass_ap,
-        value: G => G.passes[1]
+        tooltip: () => "Allies Passes",
+        value: () => G.passes[1]
     },
     {
         counter: counters.pow_target,
-        value: G => G.pow
+        tooltip: () => "Allies Progress of War Target",
+        value: () => G.pow
     },
     {
         counter: counters.pow,
+        tooltip: () => "Allies Progress of War Value",
         always_show: G => G.pow > 0,
-        value: G => (G.pow > 0) ? current_pow(G) : 0
+        value: () => (G.pow > 0) ? current_pow(G) : 0
     },
     {
         counter: counters.aspu_jp,
+        tooltip: () => "Japan ASP Used",
         always_show: G => true,
-        value: G => G.asp[0][1]
+        value: () => G.asp[0][1]
     },
     {
         counter: counters.aspu_ap,
+        tooltip: () => "Allies ASP Used",
         always_show: G => true,
-        value: G => G.asp[1][1]
+        value: () => G.asp[1][1]
     },
 ]
 
@@ -10615,7 +10641,7 @@ const TURN_MARKERS = [
         value: G => G.events[events.LACK_US_CV.id]
     },
     {
-        tooltip: "-1PW (Progress of the War)",
+        tooltip: "-1 PW (Progress of the War)",
         counter: counters.pw_failed_pow,
         value: G => G.events[events.FAILED_POW.id]
     },
@@ -10874,34 +10900,37 @@ function on_init(scenario, game_options, static_view) {
         }
     }
 
-    // Markers
-    // TODO: dynamic tooltip with current effect of track?
-
     define_marker("marker-isr", JP, counters.rivalry_jp)
-        .tooltip(() => G.inter_service[JP] ? "Inter-Service Rivalry" : "Strategic Agreement")
+        .tooltip(() => G.inter_service[JP] ? "Japan Inter-Service Rivalry" : "Japan Strategic Agreement")
     define_marker("marker-isr", AP, counters.rivalry_ap)
-        .tooltip(() => G.inter_service[AP] ? "Inter-Service Rivalry" : "Strategic Agreement")
+        .tooltip(() => G.inter_service[AP] ? "Allies Inter-Service Rivalry" : "Allies Strategic Agreement")
 
     define_marker("marker-pw", 0, counters.pw)
-        .tooltip("U.S. Political Will")
+        .tooltip(() => "U.S. Political Will: " + G.political_will)
 
     define_marker("marker-wie", 0, counters.wie)
-        .tooltip("War in Europe")
+        .tooltip(() => `War in Europe (${get_wie_level()}): ${G.wie - 3}`)
 
     define_marker("marker-india", 0, counters.india_status)
-        .tooltip(() => G.events[events.INDIA_STATUS.id] ? "India Surrender" : "India")
+        .tooltip(() => G.surrender[nations.INDIA.id] ? "India Surrender" : "India - " + nations.INDIA.statuses[G.events[events.INDIA_STATUS.id]])
+
+    var burma = [
+        "Burma Road - Open",
+        "Burma Road - Closed (Hump)",
+        "Burma Road - Closed",
+    ]
 
     define_marker("marker-burma", 0, counters.burma_road)
-        .tooltip(() => G.events[events.HUMP.id] ? "Burma Road Hump" : "Burma Road No Hump")
+        .tooltip(() => burma[G.burma_road])
 
     define_marker("marker-divisions", 0, counters.divisions_china)
-        .tooltip("Japanese Divisions in China")
+        .tooltip(() => `Japanese Divisions in China: ${G.china_divisions}`)
 
     define_marker("marker-china", 0, counters.china)
-        .tooltip("China")
+        .tooltip(() => "China - " + nations.CHINA.statuses[G.events[events.CHINA_STATUS.id]])
 
     TRACK_MARKERS.forEach(function (m, i) {
-        define_marker("track-marker", i, m.counter).tooltip(m.tooltip)
+        define_marker("track-marker", i, m.counter).tooltip(() => m.tooltip() + ": " + m.value())
     })
 
     TURN_MARKERS.forEach(function (m, i) {
@@ -12246,7 +12275,7 @@ function on_update() {
         var value = marker.value(G)
         if (value > 0 || marker.always_show?.(G)) {
             populate("track", value % 10, "track-marker", i)
-            if (value > 9)
+            if (marker.reduced?.(G))
                 update_keyword("track-marker", i, "reduced")
             if (marker.gray?.(G))
                 update_keyword("track-marker", i, "gray")
@@ -12467,30 +12496,28 @@ function format_unit_tooltip(u) {
     var p = pieces[u]
     var tip = ""
 
-    switch (p.class) {
-    case "hq":
-        return `HQ ${p.cr} [${p.cm}] (${p.name.replace(" HQ", "")})`
-    case "ground":
-        if (p.size === 4) tip += "XXXX"
-        else if (p.size === 3) tip += "XXX"
-        else if (p.size === 1) tip += "X"
-        else tip += "Ground"
-        break
-    case "air":
-        tip += "Air"
-        break
-    case "naval":
-        tip += p.type.toUpperCase()
-        break
-    }
-    tip += ` ${p.cf}`
-    if (p.rcf!==p.cf)
-        tip += `(${p.rcf})`
+    if (!set_has(G.reduced, u))
+        tip += ` ${p.cf}`
+    else
+        tip += ` ${p.rcf}`
     tip += `-${p.lf}`
     if (p.br)
         tip += `-${p.br}`
     if (p.ebr)
         tip += " " + DIGIT_SUPERSCRIPT[p.ebr]
+
+    switch (p.class) {
+        case "hq":
+            return `${p.cr} [${p.cm}] (${p.name.replace(" HQ", "")} HQ)`
+        case "ground":
+            break
+        case "air":
+            tip += ""
+            break
+        case "naval":
+            return tip + `(${p.type.toUpperCase()} ${p.name})`
+            break
+    }
 
     tip += ` (${p.name})`
 
@@ -12511,11 +12538,12 @@ const TERRAIN_NAME = [
 function format_hex_tooltip(h) {
     var hex = int_to_hex(h)
     var tip = hex + ""
-    var info = map.find(e => e.id === hex)
+    var info = get_map_data(h)
     if (info) {
         if (info.name) tip += " " + info.name
         if (info.region) tip += " (" + info.region + ")"
         var props = []
+        if (is_controllable_hex(h)) props.push(is_space_controlled(h, AP) ? "[AP]" : "[JP]")
         if (info.city === CITY) props.push("city")
         if (info.city === JAPANESE_CITY) props.push("Japanese city")
         if (info.city === CHINESE_CITY) props.push("Chinese city")
@@ -12545,15 +12573,15 @@ function request_range_update() {
     //     focus_timer = 0
     // }
     // focus_timer = setTimeout(() => {
-        focus_timer = 0
-        if (focus_hq !== focus_want_hq) {
-            focus_hq = focus_want_hq
-            focus_hq_range = focus_want_hq_range
-            console.log("HQ range set", focus_hq)
-            on_update()
-        } else {
-            console.log("HQ range canceled")
-        }
+    focus_timer = 0
+    if (focus_hq !== focus_want_hq) {
+        focus_hq = focus_want_hq
+        focus_hq_range = focus_want_hq_range
+        console.log("HQ range set", focus_hq)
+        on_update()
+    } else {
+        console.log("HQ range canceled")
+    }
     // }, 500)
 }
 
@@ -12572,9 +12600,9 @@ function focus_unit(id) {
     if (piece.class === "hq" && G.location[id] < LAST_BOARD_HEX && focus_hq !== id) {
         focus_want_hq = id
         if (id === HQ_CENTRAL_PACIFIC && G.sid === SOUTH_PACIFIC_SCENARIO)
-            focus_want_hq_range = [ hex_to_int(5226), 5 ]
+            focus_want_hq_range = [hex_to_int(5226), 5]
         else
-            focus_want_hq_range = [ G.location[id], pieces[id].cr ]
+            focus_want_hq_range = [G.location[id], pieces[id].cr]
         request_range_update()
     }
 }
@@ -12596,7 +12624,7 @@ const CARD_NAMES = cards.map(c => c?.name)
 const UNIT_NAMES = pieces.map(p => p?.name)
 
 const HEX_NAMES = []
-;(function(){
+;(function () {
     for (let i = 0; i <= TUNNEL_BOX; ++i) {
         if (i === CHINA_BOX) {
             HEX_NAMES[i] = "China Box"
@@ -12697,7 +12725,7 @@ function on_init_log(log) {
             turns.push(i)
     }
     if (turns.length >= 8)
-        shorten_log_start = turns[turns.length-4]
+        shorten_log_start = turns[turns.length - 4]
 }
 
 function show_full_log_if_needed() {

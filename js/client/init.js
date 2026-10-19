@@ -66,72 +66,84 @@ const UNIT_MOVEMENT_MARKERS = [
 const TRACK_MARKERS = [
     {
         counter: counters.asp_jp,
-        tooltip: () => (G.events[events.BARGES.id] > 0) ? "ASP: Barges" : "ASP: No Barges",
+        tooltip: () => "Japan ASP" + ((G.events[events.BARGES.id] > 0) ? " (Barges)" : ""),
         reduced: () => (G.events[events.BARGES.id] > 0),
         gray: () => jp_gray_amp(),
         value: () => G.asp[0][0],
     },
     {
-        // TODO: more tooltips
         counter: counters.asp_jp,
-        reduced: G => (G.events[events.BARGES.id] > 0),
-        value: G => (jp_gray_amp()) ? Math.ceil(G.asp[0][0] / 2) : 0
+        tooltip: () => "Japan ASP (allowed with ISR)",
+        reduced: () => (G.events[events.BARGES.id] > 0),
+        value: () => (jp_gray_amp()) ? Math.ceil(G.asp[0][0] / 2) : 0
     },
     {
         counter: counters.asp_ap,
-        value: G => G.asp[1][0]
+        tooltip: () => "Allies ASP",
+        value: () => G.asp[1][0]
     },
     {
         counter: counters.divisions_china,
-        // TODO -- this does nothing? -- always_show: G => 0,
-        value: G => (G.sid === SOUTH_PACIFIC_SCENARIO) ? G.china_divisions : 0
+        tooltip: () => "Japanese Divisions in China",
+        value: () => (G.sid === SOUTH_PACIFIC_SCENARIO) ? G.china_divisions : 0//for SP scenario only
     },
     {
         counter: counters.resource_jp,
-        value: G => array_count(RESOURCE_HEX, h => is_space_controlled(h, JP))
+        tooltip: () => "Japanese Resource Hex Count",
+        value: () => array_count(RESOURCE_HEX, h => is_space_controlled(h, JP))
     },
     {
         counter: counters.naval_repl,
-        value: G => G.reinforcements[0]
+        tooltip: () => "Japanese Naval Replacement Point",
+        value: () => G.reinforcements[0]
     },
     {
         counter: counters.air_repl,
-        value: G => G.reinforcements[1]
+        tooltip: () => "Japanese Air Replacement Point",
+        value: () => G.reinforcements[1]
     },
     {
         counter: counters.drawn_jp,
-        value: G => G.draw_counter[0]
+        tooltip: () => "Japanese Drawn Cards",
+        value: () => G.draw_counter[0]
     },
     {
         counter: counters.drawn_ap,
-        value: G => G.draw_counter[1]
+        tooltip: () => "Allies Drawn Cards",
+        value: () => G.draw_counter[1]
     },
     {
         counter: counters.pass_jp,
-        value: G => G.passes[0]
+        tooltip: () => "Japanese Passes",
+        value: () => G.passes[0]
     },
     {
         counter: counters.pass_ap,
-        value: G => G.passes[1]
+        tooltip: () => "Allies Passes",
+        value: () => G.passes[1]
     },
     {
         counter: counters.pow_target,
-        value: G => G.pow
+        tooltip: () => "Allies Progress of War Target",
+        value: () => G.pow
     },
     {
         counter: counters.pow,
+        tooltip: () => "Allies Progress of War Value",
         always_show: G => G.pow > 0,
-        value: G => (G.pow > 0) ? current_pow(G) : 0
+        value: () => (G.pow > 0) ? current_pow(G) : 0
     },
     {
         counter: counters.aspu_jp,
+        tooltip: () => "Japan ASP Used",
         always_show: G => true,
-        value: G => G.asp[0][1]
+        value: () => G.asp[0][1]
     },
     {
         counter: counters.aspu_ap,
+        tooltip: () => "Allies ASP Used",
         always_show: G => true,
-        value: G => G.asp[1][1]
+        value: () => G.asp[1][1]
     },
 ]
 
@@ -213,7 +225,7 @@ const TURN_MARKERS = [
         value: G => G.events[events.LACK_US_CV.id]
     },
     {
-        tooltip: "-1PW (Progress of the War)",
+        tooltip: "-1 PW (Progress of the War)",
         counter: counters.pw_failed_pow,
         value: G => G.events[events.FAILED_POW.id]
     },
@@ -472,34 +484,37 @@ function on_init(scenario, game_options, static_view) {
         }
     }
 
-    // Markers
-    // TODO: dynamic tooltip with current effect of track?
-
     define_marker("marker-isr", JP, counters.rivalry_jp)
-        .tooltip(() => G.inter_service[JP] ? "Inter-Service Rivalry" : "Strategic Agreement")
+        .tooltip(() => G.inter_service[JP] ? "Japan Inter-Service Rivalry" : "Japan Strategic Agreement")
     define_marker("marker-isr", AP, counters.rivalry_ap)
-        .tooltip(() => G.inter_service[AP] ? "Inter-Service Rivalry" : "Strategic Agreement")
+        .tooltip(() => G.inter_service[AP] ? "Allies Inter-Service Rivalry" : "Allies Strategic Agreement")
 
     define_marker("marker-pw", 0, counters.pw)
-        .tooltip("U.S. Political Will")
+        .tooltip(() => "U.S. Political Will: " + G.political_will)
 
     define_marker("marker-wie", 0, counters.wie)
-        .tooltip("War in Europe")
+        .tooltip(() => `War in Europe (${get_wie_level()}): ${G.wie - 3}`)
 
     define_marker("marker-india", 0, counters.india_status)
-        .tooltip(() => G.events[events.INDIA_STATUS.id] ? "India Surrender" : "India")
+        .tooltip(() => G.surrender[nations.INDIA.id] ? "India Surrender" : "India - " + nations.INDIA.statuses[G.events[events.INDIA_STATUS.id]])
+
+    var burma = [
+        "Burma Road - Open",
+        "Burma Road - Closed (Hump)",
+        "Burma Road - Closed",
+    ]
 
     define_marker("marker-burma", 0, counters.burma_road)
-        .tooltip(() => G.events[events.HUMP.id] ? "Burma Road Hump" : "Burma Road No Hump")
+        .tooltip(() => burma[G.burma_road])
 
     define_marker("marker-divisions", 0, counters.divisions_china)
-        .tooltip("Japanese Divisions in China")
+        .tooltip(() => `Japanese Divisions in China: ${G.china_divisions}`)
 
     define_marker("marker-china", 0, counters.china)
-        .tooltip("China")
+        .tooltip(() => "China - " + nations.CHINA.statuses[G.events[events.CHINA_STATUS.id]])
 
     TRACK_MARKERS.forEach(function (m, i) {
-        define_marker("track-marker", i, m.counter).tooltip(m.tooltip)
+        define_marker("track-marker", i, m.counter).tooltip(() => m.tooltip() + ": " + m.value())
     })
 
     TURN_MARKERS.forEach(function (m, i) {

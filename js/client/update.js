@@ -382,7 +382,7 @@ function on_update() {
         var value = marker.value(G)
         if (value > 0 || marker.always_show?.(G)) {
             populate("track", value % 10, "track-marker", i)
-            if (value > 9)
+            if (marker.reduced?.(G))
                 update_keyword("track-marker", i, "reduced")
             if (marker.gray?.(G))
                 update_keyword("track-marker", i, "gray")

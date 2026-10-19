@@ -17,30 +17,28 @@ function format_unit_tooltip(u) {
     var p = pieces[u]
     var tip = ""
 
-    switch (p.class) {
-    case "hq":
-        return `HQ ${p.cr} [${p.cm}] (${p.name.replace(" HQ", "")})`
-    case "ground":
-        if (p.size === 4) tip += "XXXX"
-        else if (p.size === 3) tip += "XXX"
-        else if (p.size === 1) tip += "X"
-        else tip += "Ground"
-        break
-    case "air":
-        tip += "Air"
-        break
-    case "naval":
-        tip += p.type.toUpperCase()
-        break
-    }
-    tip += ` ${p.cf}`
-    if (p.rcf!==p.cf)
-        tip += `(${p.rcf})`
+    if (!set_has(G.reduced, u))
+        tip += ` ${p.cf}`
+    else
+        tip += ` ${p.rcf}`
     tip += `-${p.lf}`
     if (p.br)
         tip += `-${p.br}`
     if (p.ebr)
         tip += " " + DIGIT_SUPERSCRIPT[p.ebr]
+
+    switch (p.class) {
+        case "hq":
+            return `${p.cr} [${p.cm}] (${p.name.replace(" HQ", "")} HQ)`
+        case "ground":
+            break
+        case "air":
+            tip += ""
+            break
+        case "naval":
+            return tip + `(${p.type.toUpperCase()} ${p.name})`
+            break
+    }
 
     tip += ` (${p.name})`
 
@@ -61,11 +59,12 @@ const TERRAIN_NAME = [
 function format_hex_tooltip(h) {
     var hex = int_to_hex(h)
     var tip = hex + ""
-    var info = map.find(e => e.id === hex)
+    var info = get_map_data(h)
     if (info) {
         if (info.name) tip += " " + info.name
         if (info.region) tip += " (" + info.region + ")"
         var props = []
+        if (is_controllable_hex(h)) props.push(is_space_controlled(h, AP) ? "[AP]" : "[JP]")
         if (info.city === CITY) props.push("city")
         if (info.city === JAPANESE_CITY) props.push("Japanese city")
         if (info.city === CHINESE_CITY) props.push("Chinese city")
@@ -95,15 +94,15 @@ function request_range_update() {
     //     focus_timer = 0
     // }
     // focus_timer = setTimeout(() => {
-        focus_timer = 0
-        if (focus_hq !== focus_want_hq) {
-            focus_hq = focus_want_hq
-            focus_hq_range = focus_want_hq_range
-            console.log("HQ range set", focus_hq)
-            on_update()
-        } else {
-            console.log("HQ range canceled")
-        }
+    focus_timer = 0
+    if (focus_hq !== focus_want_hq) {
+        focus_hq = focus_want_hq
+        focus_hq_range = focus_want_hq_range
+        console.log("HQ range set", focus_hq)
+        on_update()
+    } else {
+        console.log("HQ range canceled")
+    }
     // }, 500)
 }
 
@@ -122,9 +121,9 @@ function focus_unit(id) {
     if (piece.class === "hq" && G.location[id] < LAST_BOARD_HEX && focus_hq !== id) {
         focus_want_hq = id
         if (id === HQ_CENTRAL_PACIFIC && G.sid === SOUTH_PACIFIC_SCENARIO)
-            focus_want_hq_range = [ hex_to_int(5226), 5 ]
+            focus_want_hq_range = [hex_to_int(5226), 5]
         else
-            focus_want_hq_range = [ G.location[id], pieces[id].cr ]
+            focus_want_hq_range = [G.location[id], pieces[id].cr]
         request_range_update()
     }
 }
@@ -146,7 +145,7 @@ const CARD_NAMES = cards.map(c => c?.name)
 const UNIT_NAMES = pieces.map(p => p?.name)
 
 const HEX_NAMES = []
-;(function(){
+;(function () {
     for (let i = 0; i <= TUNNEL_BOX; ++i) {
         if (i === CHINA_BOX) {
             HEX_NAMES[i] = "China Box"
@@ -247,7 +246,7 @@ function on_init_log(log) {
             turns.push(i)
     }
     if (turns.length >= 8)
-        shorten_log_start = turns[turns.length-4]
+        shorten_log_start = turns[turns.length - 4]
 }
 
 function show_full_log_if_needed() {

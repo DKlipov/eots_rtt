@@ -540,20 +540,6 @@ function change_political_will(diff, cause) {
     log(`Political will changed to ${G.political_will} (${diff}) - ${cause}.`)
 }
 
-function get_wie_level() {
-    if (G.wie <= 2) {
-        return "No effect"
-    } else if (G.wie <= 5) {
-        return "Level 1"
-    } else if (G.wie <= 7) {
-        return "Level 2"
-    } else if (G.wie <= 9) {
-        return "Level 3"
-    } else if (G.wie <= 10) {
-        return "Level 4"
-    }
-}
-
 function change_wie(diff, cause) {
     if (diff === undefined) {
         log(`No war in europe changed.`)

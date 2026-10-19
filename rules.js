@@ -7216,6 +7216,20 @@ function solely_occupied_land(hex, faction) {
     return G.supply_cache[hex] & JP_GAH_UNITS << (faction) && !(G.supply_cache[hex] & JP_GAH_UNITS << (1 - faction))
 }
 
+function get_wie_level() {
+    if (G.wie <= 2) {
+        return "No effect"
+    } else if (G.wie <= 5) {
+        return "Level 1"
+    } else if (G.wie <= 7) {
+        return "Level 2"
+    } else if (G.wie <= 9) {
+        return "Level 3"
+    } else if (G.wie <= 10) {
+        return "Level 4"
+    }
+}
+
 /* }}} */
 /* {{{ js/common/supply.js */
 function check_supplied_hexes(faction) {
@@ -17830,20 +17844,6 @@ function change_political_will(diff, cause) {
         diff = "+" + diff
     }
     log(`Political will changed to ${G.political_will} (${diff}) - ${cause}.`)
-}
-
-function get_wie_level() {
-    if (G.wie <= 2) {
-        return "No effect"
-    } else if (G.wie <= 5) {
-        return "Level 1"
-    } else if (G.wie <= 7) {
-        return "Level 2"
-    } else if (G.wie <= 9) {
-        return "Level 3"
-    } else if (G.wie <= 10) {
-        return "Level 4"
-    }
 }
 
 function change_wie(diff, cause) {
