@@ -184,6 +184,8 @@ body.shift .unit-tip-list {
 
 /* MAPS */
 
+#map { background-size: 100%; }
+
 body.full_map {
     & #mapwrap, & #map, & #canvas { width: 2550px; height: 1650px; }
     & #panels { max-width: 2156px; }
