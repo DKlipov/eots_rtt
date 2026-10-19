@@ -278,11 +278,13 @@ body.Allies #jp_hand { grid-row: 3; }
 .zoi_hex.contested { background-image: url(images/hex_zoi_contested.svg) }
 .zoi_hex.lrb { background-image: url(images/hex_zoi_lrb.svg) }
 
-.zoi_hex.range { background-image: url(images/hex_zoi_range.svg) }
-.zoi_hex.range.jp { background-image: url(images/hex_zoi_range.svg), url(images/hex_zoi_jp.svg) }
-.zoi_hex.range.ap { background-image: url(images/hex_zoi_range.svg), url(images/hex_zoi_ap.svg) }
-.zoi_hex.range.contested { background-image: url(images/hex_zoi_range.svg), url(images/hex_zoi_contested.svg) }
-.zoi_hex.range.lrb { background-image: url(images/hex_zoi_range.svg), url(images/hex_zoi_lrb.svg) }
+body.shift {
+    & .zoi_hex.range { background-image: url(images/hex_zoi_range.svg) }
+    & .zoi_hex.range.jp { background-image: url(images/hex_zoi_range.svg), url(images/hex_zoi_jp.svg) }
+    & .zoi_hex.range.ap { background-image: url(images/hex_zoi_range.svg), url(images/hex_zoi_ap.svg) }
+    & .zoi_hex.range.contested { background-image: url(images/hex_zoi_range.svg), url(images/hex_zoi_contested.svg) }
+    & .zoi_hex.range.lrb { background-image: url(images/hex_zoi_range.svg), url(images/hex_zoi_lrb.svg) }
+}
 
 .action_hex {
     box-sizing: border-box;
