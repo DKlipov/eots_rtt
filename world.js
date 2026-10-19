@@ -844,7 +844,7 @@ function _layout_stacks() {
             dy = stack.my_stack.small_dy
         }
 
-        var z = (world.focus === stack ? 101 : null) // XXX: other z-index
+        var z = (world.focus === stack ? 101 : 10) // XXX: other z-index
         var major_dx = expand ? _(stack.my_stack.major_dx) : _(dx) // XXX: dx instead of my_stack.dx
         var major_dy = expand ? _(stack.my_stack.major_dy) : _(dy) // XXX: dy instead of my_stack.dy
         var minor_dx = expand ? _(stack.my_stack.minor_dx) : _(0)
@@ -880,10 +880,8 @@ function _layout_stacks() {
 
         // XXX: custom sort stack elements
         var children = Array.from(stack.element.children)
-        if (stack.my_stack.sort) {
+        if (stack.my_stack.sort)
             children.sort(stack.my_stack.sort)
-            stack.element.replaceChildren(...children)
-        }
 
         var i = 0, k = 0
         var bounds = [ Infinity, Infinity, -Infinity, -Infinity ]
@@ -907,7 +905,7 @@ function _layout_stacks() {
         for (var child of children) {
             child.style.left = child.thing.stack_x + "px"
             child.style.top = child.thing.stack_y + "px"
-            child.style.zIndex = z
+            child.style.zIndex = z++
         }
 
         if (shadow) {
