@@ -177,30 +177,27 @@ body.shift .unit-tip-list {
 #mapwrap.southpac { width: 1275px; height: 825px; }
 #mapwrap.burma { width: 1275px; height: 825px; }
 #map { width: 100%; height: 100%; background-size: 100%; }
-#canvas { width: 100%; height: 100%: }
-#measure { width: 100%; height: 100%: }
+#canvas { width: 100%; height: 100%; }
+#measure { width: 100%; height: 100%; }
 
 #canvas { pointer-events: none; }
 #measure { pointer-events: none; }
 
 /* Z-FIGHTING! */
-/*
-.unit.highlight { z-index: 100; }
-.action_hex.china_box.action, .turn_box.action { z-index: 100; }
-.action_hex.china_box.highlight, .turn_box.highlight { z-index: 100; }
-.action_hex.amph {  z-index: 999;pointer-events: none;}
-.action_hex.violation {  z-index: 999;pointer-events: none;}
-.action_hex.action {  z-index: 50;pointer-events: auto;}
-.action_hex.highlight {  z-index: 1000; pointer-events: none;}
-.zoi_hex { z-index: -1; }
-.action_hex { z-index: -100; }
-body.hex-clickable .action_hex { z-index: 50; }
-.space { z-index: -100; }
-*/
 
-#canvas { z-index: 80 }
-.action_hex.action {  z-index: 90; }
+.zoi_hex { z-index: 10 }
+.action_hex { z-index: 20 }
+.unit, .marker { z-index: 30 }
+#canvas { z-index: 50 }
+
+.action_hex.violation {  z-index: 60 }
+.action_hex.action {  z-index: 70 }
+.unit.highlight { z-index: 80 }
+.action_hex.highlight {  z-index: 90 }
+
 .stack.shadow:before { z-index: 100 }
+
+#measure { z-index: 200; }
 
 /* PANELS */
 
@@ -310,7 +307,6 @@ body.Allies #jp_hand { grid-row: 3; }
 
 .distance {
     position: absolute;
-    z-index: 1000;
     background-color: aliceblue;
     border-radius: 50%;
     text-align: center;
@@ -347,7 +343,6 @@ body.Allies #jp_hand { grid-row: 3; }
     height: 35px;
     background-size: 35px 35px;
     background-color: white;
-    background-clip: content-box;
     border: 2px solid lime;
     box-shadow: 0 0 0 1px green;
 }
