@@ -11058,7 +11058,9 @@ P.check_unit_supply = {
         canvas_show()
         canvas_draw_supply(LOCAL_STATE.supply_data)
         var focused = []
-        if (LOCAL_STATE.unit && pieces[LOCAL_STATE.unit].class === "hq" && G.location[LOCAL_STATE.unit] < LAST_BOARD_HEX) {
+        if (LOCAL_STATE.unit
+            && LOCAL_STATE.unit !== CHINA_BOX
+            && pieces[LOCAL_STATE.unit].class === "hq" && G.location[LOCAL_STATE.unit] < LAST_BOARD_HEX) {
             for_each_hex_in_range(G.location[LOCAL_STATE.unit], pieces[LOCAL_STATE.unit].cr, hex => set_add(focused, hex))
             focused = in_range_on_map(G.location[LOCAL_STATE.unit], pieces[LOCAL_STATE.unit].cr, focused, pieces[LOCAL_STATE.unit].faction)
         }
@@ -11122,7 +11124,7 @@ P.check_distance = {
     on_update() {
         var measure = document.getElementById("measure")
         LOCAL_STATE.points.forEach((hex, index) => {
-            var [ x, y ] = hex_center(hex)
+            var [x, y] = hex_center(hex)
             var e = document.createElement("div")
             e.className = "distance"
             e.style.top = y - 23 + "px"
@@ -11134,8 +11136,8 @@ P.check_distance = {
 }
 
 function find_shortest_path_as_the_eagle_flies(start, end) {
-    var seen = [ start, -1 ]
-    var queue = [ start ]
+    var seen = [start, -1]
+    var queue = [start]
     while (queue.length > 0) {
         var here = queue.shift()
         for (var next of get_edge_hexes(here)) {
