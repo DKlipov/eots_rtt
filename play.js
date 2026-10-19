@@ -10709,13 +10709,12 @@ function on_init(scenario, game_options, static_view) {
 
     SID = SCENARIO_DATA.find(s => s.name === scenario).id//scenario id
 
-    var mapwrap = document.getElementById("mapwrap")
     switch (scenario) {
         case "South Pacific": {
             nations.AUSTRALIAN_MANDATES.keys = nations.AUSTRALIAN_MANDATES.ports
             BOARD_ID = SOUTH_PACIFIC_SCENARIO
             map_layout = LAYOUT.southpac
-            mapwrap.classList.add("southpac")
+            document.body.classList.add("southpac_map")
             define_board("#map", 1275, 825, [12, 12, 12, 12])
             map_info = SOUTH_PAC_BOARD_INFO
 
@@ -10733,7 +10732,7 @@ function on_init(scenario, game_options, static_view) {
         case "Burma: The Forgotten War, 1943-1944": {
             BOARD_ID = BURMA_SCENARIO
             map_layout = LAYOUT.burma
-            mapwrap.classList.add("burma")
+            document.body.classList.add("burma_map")
             define_board("#map", 1275, 825, [12, 12, 12, 12])
             map_info = BURMA_BOARD_INFO
 
@@ -10751,7 +10750,7 @@ function on_init(scenario, game_options, static_view) {
         default: {
             BOARD_ID = FULL_CAMPAIGN_SCENARIO
             map_layout = LAYOUT.mainmap
-            mapwrap.classList.add("main")
+            document.body.classList.add("full_map")
             define_board("#map", 2550, 1650, [12, 12, 12, 12])
             map_info = MAIN_BOARD_INFO
             define_thing("road", events.JARHAT_ROAD.id).layout([578, 286, 60, 60], "jarhat control")

@@ -184,12 +184,21 @@ body.shift .unit-tip-list {
 
 /* MAPS */
 
-#mapwrap.main { width: 2550px; height: 1650px; }
-#mapwrap.southpac { width: 1275px; height: 825px; }
-#mapwrap.burma { width: 1275px; height: 825px; }
-#map { width: 100%; height: 100%; background-size: 100%; }
-#canvas { width: 100%; height: 100%; }
-#measure { width: 100%; height: 100%; }
+body.full_map {
+    & #map, & #canvas { width: 2550px; height: 1650px; }
+    & #panels { max-width: 2156px; }
+    @media (max-width: 800px) {
+        & #panels { min-width: 2156px; }
+    }
+}
+
+body.southpac_map, body.burma_map {
+    & #map, & #canvas{ width: 1275px; height: 825px; }
+    & #panels { max-width 1352px; }
+    @media (max-width: 800px) {
+        & #panels { min-width 1352px; }
+    }
+}
 
 #canvas { pointer-events: none; }
 #measure { pointer-events: none; }
@@ -215,7 +224,6 @@ body.shift .unit-tip-list {
 #panels {
     display: grid;
     grid-template-columns: 1fr;
-    max-width: 1275px;
     gap: 12px;
     margin: 0 auto;
     padding: 24px;
@@ -230,7 +238,7 @@ body.Allies #jp_hand { grid-row: 3; }
 }
 
 .panel-body {
-    min-height: 352px;
+    min-height: 356px;
 }
 
 /* CARDS */

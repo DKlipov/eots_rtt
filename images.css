@@ -1,13 +1,13 @@
 /* MAPS */
 
-#mapwrap.main > #map { background-image: url(images/map_eots.75.avif); }
-#mapwrap.southpac > #map  { background-image: url(images/map_south_pacific.75.avif); }
-#mapwrap.burma > #map  { background-image: url(images/map_burma.75.avif); }
+body.full_map #map { background-image: url(images/map_eots.75.avif); }
+body.southpac_map #map  { background-image: url(images/map_south_pacific.75.avif); }
+body.burma_map #map  { background-image: url(images/map_burma.75.avif); }
 
 @media (min-resolution: 97dpi) {
-#mapwrap.main > #map { background-image: url(images/map_eots.150.avif); }
-#mapwrap.southpac > #map { background-image: url(images/map_south_pacific.150.avif); }
-#mapwrap.burma > #map { background-image: url(images/map_burma.150.avif); }
+    body.full_map #map { background-image: url(images/map_eots.150.avif); }
+    body.southpac_map #map  { background-image: url(images/map_south_pacific.150.avif); }
+    body.burma_map #map  { background-image: url(images/map_burma.150.avif); }
 }
 
 /* ALPHABET COUNTERS */
