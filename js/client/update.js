@@ -14,21 +14,21 @@ function get_control_marker(h) {
 }
 
 function should_show_hex_control(i, all_control, vassal_control) {
-	var hn = HEX_BY_NATION[i]
-	var cont = is_space_controlled(i, JP) ? JP : AP
-	if ((cont === AP && set_has(G.capture, i) && !all_control) || !(G.supply_cache[i] & HEX_CONTROLLABLE))
-		return false
-	var default_condition =
-		(hn >= 0 && G.surrender[HEX_BY_NATION[i]] > 0 == cont) || (hn === -1 && cont === AP) || (hn < -1 && cont === JP)
-	var vassal_condition = set_has(JP_BOUNDARY_HEX, i) + 0 === cont
-	if (
-		map_info.hex_check(i) &&
-		cont !== null &&
-		(all_control || (!is_faction_units(i, AP) && !is_faction_units(i, JP))) &&
-		(all_control || (!vassal_control && default_condition) || (vassal_control && vassal_condition))
-	)
-		return true
-	return false
+    var hn = HEX_BY_NATION[i]
+    var cont = is_space_controlled(i, JP) ? JP : AP
+    if ((cont === AP && set_has(G.capture, i) && !all_control) || !(G.supply_cache[i] & HEX_CONTROLLABLE))
+        return false
+    var default_condition =
+        (hn >= 0 && G.surrender[HEX_BY_NATION[i]] > 0 == cont) || (hn === -1 && cont === AP) || (hn < -1 && cont === JP)
+    var vassal_condition = set_has(JP_BOUNDARY_HEX, i) + 0 === cont
+    if (
+        map_info.hex_check(i) &&
+        cont !== null &&
+        (all_control || (!is_faction_units(i, AP) && !is_faction_units(i, JP))) &&
+        (all_control || (!vassal_control && default_condition) || (vassal_control && vassal_condition))
+    )
+        return true
+    return false
 }
 
 function update_hand(side) {
@@ -248,12 +248,12 @@ function on_update() {
     var oos_hex_set = []
     for (i = 0; i < G.oos.length; i++) {
         var hex = G.location[G.oos[i]]
-        if (hex <= LAST_BOARD_HEX && !set_has(oos_hex_set, hex) && !set_has(supplied_hex, hex)) {
+        if (set_has(ALL_BOARD_HEXES, hex) && !set_has(oos_hex_set, hex) && !set_has(supplied_hex, hex)) {
             populate("s-loc", hex, "top", hex)
             if (hex < LAST_BOARD_HEX && HQ_LIST.some(hq =>
-                    G.location[hq] < LAST_BOARD_HEX &&
-                    pieces[hq].faction === pieces[G.oos[i]].faction &&
-                    in_range_on_map(G.location[hq], pieces[hq].cr, [hex], pieces[hq].faction).length
+                G.location[hq] < LAST_BOARD_HEX &&
+                pieces[hq].faction === pieces[G.oos[i]].faction &&
+                in_range_on_map(G.location[hq], pieces[hq].cr, [hex], pieces[hq].faction).length
             ))
                 update_keyword("top", hex, "oos")
             else
@@ -295,7 +295,7 @@ function on_update() {
     if (G.violations.length > 0) {
         for (var h of G.violations)
             update_keyword("action_hex", h, "violation")
-        update_text_html("violations", 0, "<b>STACKING VIOLATIONS:</B>\n" + escape_text(G.violations.map(h => "H"+h).join(", ")) + ".")
+        update_text_html("violations", 0, "<b>STACKING VIOLATIONS:</B>\n" + escape_text(G.violations.map(h => "H" + h).join(", ")) + ".")
     }
 
     // AMPHIBIOUS HEXES
@@ -307,7 +307,7 @@ function on_update() {
             piece.class === "ground" &&
             location < LAST_BOARD_HEX &&
             (!get_map_data(location).port || !is_space_controlled(location, G.offensive.attacker)) &&
-            map_get(G.offensive.paths, u, [ 0 ])[0] & AMPH_MOVE
+            map_get(G.offensive.paths, u, [0])[0] & AMPH_MOVE
         )
             update_keyword("action_hex", location, "amph")
     }
@@ -324,7 +324,7 @@ function on_update() {
         populate("s-loc", h, "battle", G.offensive.battle_names.indexOf(h))
 
     for (var h of G.offensive.landing_hexes)
-        if (get_map_data(h).named && is_space_controlled(h, 1 - G.offensive.attacker) && has_zoi(h, 1- G.offensive.attacker))
+        if (get_map_data(h).named && is_space_controlled(h, 1 - G.offensive.attacker) && has_zoi(h, 1 - G.offensive.attacker))
             populate("s-loc", h, "landing", G.offensive.battle_names.indexOf(h))
 
     // MISC MARKERS

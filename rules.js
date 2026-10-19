@@ -10067,6 +10067,7 @@ function with_state_as_G(state, apply) {
     // G.active = actual_g.active
     var log = G.log
     G.log = []
+    update_outdated_G()
     var result = apply()
     G.log = log
     G = actual_g
