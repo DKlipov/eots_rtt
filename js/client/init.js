@@ -429,10 +429,10 @@ function on_init(scenario, game_options, static_view) {
     for (i = 0; i < 35; i++) {
         var battle = define_thing("battle", i).keyword("marker conflict battle top").animate()
         battle.element.innerText = ALPHABET[i]
-        battle.element.index = i
+        battle.element.battle_index = i
         battle.element.addEventListener("mousedown", evt => {
-            if (event.button === 0) {
-                send_query("combat", evt.target.index)
+            if (evt.button === 0) {
+                send_query("combat", evt.target.battle_index)
                 if (world.focus === (evt.target.parentElement.thing))
                     evt.stopImmediatePropagation()
             }
@@ -440,10 +440,10 @@ function on_init(scenario, game_options, static_view) {
         battle.stackable()
         var landing = define_thing("landing", i).keyword("marker conflict landing top").animate()
         landing.element.innerText = ALPHABET[i]
-        landing.element.index = i
+        landing.element.landing_index = i
         landing.element.addEventListener("mousedown", evt => {
-            if (event.button === 0) {
-                send_query("combat", evt.target.index)
+            if (evt.button === 0) {
+                send_query("combat", evt.target.landing_index)
                 if (world.focus === (evt.target.parentElement.thing))
                     evt.stopImmediatePropagation()
             }
