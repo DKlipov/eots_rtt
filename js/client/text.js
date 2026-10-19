@@ -83,6 +83,29 @@ function format_hex_tooltip(h) {
 
 var focus_hq = 0
 var focus_hq_range = [0, 0]
+var focus_want_hq = 0
+var focus_want_hq_range = [0, 0]
+var focus_timer = 0
+
+function request_range_update() {
+    console.log("HQ range trigger", Date.now())
+    if (focus_timer) {
+        console.log("    delay existing timer")
+        clearTimeout(focus_timer)
+        focus_timer = 0
+    }
+    focus_timer = setTimeout(() => {
+        focus_timer = 0
+        if (focus_hq !== focus_want_hq) {
+            focus_hq = focus_want_hq
+            focus_hq_range = focus_want_hq_range
+            console.log("HQ range set", focus_hq)
+            on_update()
+        } else {
+            console.log("HQ range canceled")
+        }
+    }, 500)
+}
 
 function focus_unit(id) {
     const piece = pieces[id]
@@ -96,22 +119,22 @@ function focus_unit(id) {
     world.tip.innerHTML = html
 
     // show HQ range
-    if (piece.class === "hq" && G.location[id] < LAST_BOARD_HEX) {
-        focus_hq = id
+    if (piece.class === "hq" && G.location[id] < LAST_BOARD_HEX && focus_hq !== id) {
+        focus_want_hq = id
         if (id === HQ_CENTRAL_PACIFIC && G.sid === SOUTH_PACIFIC_SCENARIO)
-            focus_hq_range = [ hex_to_int(5226), 5 ]
+            focus_want_hq_range = [ hex_to_int(5226), 5 ]
         else
-            focus_hq_range = [ G.location[id], pieces[id].cr ]
-        on_update()
+            focus_want_hq_range = [ G.location[id], pieces[id].cr ]
+        request_range_update()
     }
 }
 
 function blur_unit(id) {
     // hide HQ range
-    focus_hq = 0
-    if (focus_hq_range[0]) {
-        focus_hq_range = [0, 0]
-        on_update()
+    focus_want_hq = 0
+    if (focus_want_hq_range[0]) {
+        focus_want_hq_range = [0, 0]
+        request_range_update()
     }
 }
 
