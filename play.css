@@ -1,12 +1,8 @@
 /* MAJOR COLORS */
 
 main { background-color: slategray;
-    -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none;   /* Chrome, Safari и Opera */
-    -khtml-user-select: none;    /* Konqueror */
-    -moz-user-select: none;      /* Firefox */
-    -ms-user-select: none;       /* Internet Explorer / Edge */
-    user-select: none;           /* Стандартный синтаксис */
+    user-select: none;
 }
 header { background-color: gainsboro }
 #turn_info { background-color: palegreen; color: black; }
