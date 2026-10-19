@@ -12566,23 +12566,18 @@ var focus_want_hq_range = [0, 0]
 var focus_timer = 0
 
 function request_range_update() {
-    console.log("HQ range trigger", Date.now())
-    // if (focus_timer) {
-    //     console.log("    delay existing timer")
-    //     clearTimeout(focus_timer)
-    //     focus_timer = 0
-    // }
-    // focus_timer = setTimeout(() => {
-    focus_timer = 0
-    if (focus_hq !== focus_want_hq) {
-        focus_hq = focus_want_hq
-        focus_hq_range = focus_want_hq_range
-        console.log("HQ range set", focus_hq)
-        on_update()
-    } else {
-        console.log("HQ range canceled")
+    if (focus_timer) {
+        clearTimeout(focus_timer)
+        focus_timer = 0
     }
-    // }, 500)
+    focus_timer = setTimeout(() => {
+        focus_timer = 0
+        if (focus_hq !== focus_want_hq) {
+            focus_hq = focus_want_hq
+            focus_hq_range = focus_want_hq_range
+            on_update()
+        }
+    }, 0)
 }
 
 function focus_unit(id) {
