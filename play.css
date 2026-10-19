@@ -16,6 +16,14 @@ body.Allies header.your_turn { background-color: lightsteelblue; }
 .marker.control { pointer-events: none }
 .transparent { border: none !important; box-shadow: none !important; opacity: 0.4; }
 
+/* VISIBILITY TOGGLES */
+
+body.hide-markers .marker:not(.road) { display: none }
+body.hide-pieces .space { display: none }
+body.hide-markers .zoi_hex { display: none }
+body.hide-pieces .piece { display: none }
+body.hide-pieces .marker:not(.control) { display: none }
+
 /* SPECIAL BUTTONS */
 
 button#to_unit_button {
