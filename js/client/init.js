@@ -371,7 +371,7 @@ function on_init(scenario, game_options, static_view) {
                 .tooltip(format_hex_tooltip)
             define_s_loc(i, center_rect(xy, 45, 45))
 
-            define_marker("top", i)
+            define_marker("top", i, "white")
         }
     }
 

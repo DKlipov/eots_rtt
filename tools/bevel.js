@@ -1,46 +1,39 @@
 const oklab = require("rally-the-troops/tools/oklab")
 
 console.log(oklab.css_bevel("button.green", "#90ee90"))
-console.log(oklab.css_bevel(".marker", "#303030"))
 
-console.log(oklab.css_bevel(".conflict.landing", "#ee82ee"))
-console.log(oklab.css_bevel(".conflict.battle", "#90ee90"))
-console.log(oklab.css_bevel(".marker.aa_small", "#007dc5"))
+console.log(oklab.css_bevel(".marker.conflict.landing", "#ee82ee"))
+console.log(oklab.css_bevel(".marker.conflict.battle", "#90ee90"))
+
+console.log(oklab.css_bevel(".marker.black", "#303030"))
 
 var sels = [
-    ".big_markers_blue",
-    ".big_markers_dkblue",
-    ".big_markers_white",
-    ".big_markers_yellow",
-    ".big_units_beige",
-    ".big_units_blue",
-    ".big_units_orange",
-    ".big_units_white",
-    ".small_markers_beige",
-    ".small_markers_black",
-    ".small_markers_brown",
-    ".small_markers_dkblue",
-    ".small_markers_green",
-    ".small_markers_red",
-    ".small_markers_white",
-    ".small_markers_yellow",
-    ".small_units_beige",
-    ".small_units_beige_air",
-    ".small_units_black",
-    ".small_units_blue",
-    ".small_units_brown",
-    ".small_units_dkblue",
-    ".small_units_green",
-    ".small_units_green_air",
-    ".small_units_ltblue",
-    ".small_units_ltyellow",
-    ".small_units_orange",
-    ".small_units_red",
-    ".small_units_turquoise",
-    ".small_units_white",
-    ".small_units_yellow",
-    ".small_units_yellow_air",
+    ".marker.white",
+    ".marker.yellow",
+    ".marker.beige",
+    ".marker.blue",
+    ".marker.orange",
+    ".marker.dkblue",
+    ".marker.green",
+    ".marker.red",
+    ".marker.brown",
+    ".marker.ltyellow",
+    ".marker.turquoise",
+    ".marker.ltblue",
+    ".unit.white",
+    ".unit.yellow",
+    ".unit.beige",
+    ".unit.blue",
+    ".unit.orange",
+    ".unit.dkblue",
+    ".unit.green",
+    ".unit.red",
+    ".unit.brown",
+    ".unit.ltyellow",
+    ".unit.turquoise",
+    ".unit.ltblue",
 ]
+
 
 var colors = [
     ["white","#f5f5f5"],
@@ -59,7 +52,7 @@ var colors = [
 
 for (var s of sels) {
     for (var [n,color] of colors) {
-        if (s.includes("_"+n))
+        if (s.includes("."+n))
             console.log(oklab.css_bevel(s, color))
     }
 }
