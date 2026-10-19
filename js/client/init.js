@@ -463,12 +463,13 @@ function on_init(scenario, game_options, static_view) {
     // Cards
     for (let i = 1; i < cards.length; ++i) {
         let card = cards[i]
-        card.element = define_card("card", i, `${card.faction ? "ap" : "jp"} c${card.num}`)
-        card.element.card = i
+        define_card("card", i, `${card.faction ? "ap" : "jp"} c${card.num}`)
+            .tooltip(card.name)
+            .animate()
     }
 
-    define_card("fo-card", JP, "jp c0").tooltip("Future Offensives Card")
-    define_card("fo-card", AP, "ap c0").tooltip("Future Offensives Card")
+    define_card("fo-card", JP, "jp c0").tooltip("Future Offensives Card").animate()
+    define_card("fo-card", AP, "ap c0").tooltip("Future Offensives Card").animate()
 
     define_marker("fo-marker", JP, counters.future_offensive_jp).tooltip("Future Offensives Card")
     define_marker("fo-marker", AP, counters.future_offensive_ap).tooltip("Future Offensives Card")
