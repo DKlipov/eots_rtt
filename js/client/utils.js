@@ -100,9 +100,9 @@ function get_element_weight(e) {
 
 function hex_center(i) {
     var map_layout = LAYOUT.mainmap
-    if (SID === SOUTH_PACIFIC_SCENARIO)
+    if (BOARD_ID === SOUTH_PACIFIC_SCENARIO)
         map_layout = LAYOUT.southpac
-    if (SID === BURMA_SCENARIO)
+    if (BOARD_ID === BURMA_SCENARIO)
             map_layout = LAYOUT.burma
 
     if (i === CHINA_BOX) {
@@ -111,7 +111,7 @@ function hex_center(i) {
     }
     var row = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
     var column = (Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB))
-    if (SID == BURMA_SCENARIO) {
+    if (BOARD_ID == BURMA_SCENARIO) {
         if (i == SINGAPORE) {
             const box = map_layout.label_singapore
             return center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
@@ -123,7 +123,7 @@ function hex_center(i) {
             sing_left_coord[0] -= 47
             return sing_left_coord
         }
-    } else if (SID === SOUTH_PACIFIC_SCENARIO && i >= OAHU) {
+    } else if (BOARD_ID === SOUTH_PACIFIC_SCENARIO && i >= OAHU) {
         const box = map_layout.h_5808
         return center_rect([box[0] + box[2]/2, box[1] + box[3]/2], box[2], box[3])
     }

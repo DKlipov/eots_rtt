@@ -181,7 +181,7 @@ P.check_distance = {
         this.redraw()
     },
     action_hex(h) {
-        if (SID === SOUTH_PACIFIC_SCENARIO && h === OAHU || SID === BURMA_SCENARIO && h === SINGAPORE || h > LAST_BOARD_HEX) {
+        if (BOARD_ID === SOUTH_PACIFIC_SCENARIO && h === OAHU || BOARD_ID === BURMA_SCENARIO && h === SINGAPORE || h > LAST_BOARD_HEX) {
             return
         }
         while (LOCAL_STATE.points.includes(h)) {

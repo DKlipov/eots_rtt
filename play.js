@@ -10156,9 +10156,9 @@ function get_element_weight(e) {
 
 function hex_center(i) {
     var map_layout = LAYOUT.mainmap
-    if (SID === SOUTH_PACIFIC_SCENARIO)
+    if (BOARD_ID === SOUTH_PACIFIC_SCENARIO)
         map_layout = LAYOUT.southpac
-    if (SID === BURMA_SCENARIO)
+    if (BOARD_ID === BURMA_SCENARIO)
             map_layout = LAYOUT.burma
 
     if (i === CHINA_BOX) {
@@ -10167,7 +10167,7 @@ function hex_center(i) {
     }
     var row = i % MAIN_BOARD_INFO.COLUMN_HEX_NB
     var column = (Math.floor(i / MAIN_BOARD_INFO.COLUMN_HEX_NB))
-    if (SID == BURMA_SCENARIO) {
+    if (BOARD_ID == BURMA_SCENARIO) {
         if (i == SINGAPORE) {
             const box = map_layout.label_singapore
             return center_rect([box[0] + box[2], box[1] + box[3]], box[2], box[3])
@@ -10179,7 +10179,7 @@ function hex_center(i) {
             sing_left_coord[0] -= 47
             return sing_left_coord
         }
-    } else if (SID === SOUTH_PACIFIC_SCENARIO && i >= OAHU) {
+    } else if (BOARD_ID === SOUTH_PACIFIC_SCENARIO && i >= OAHU) {
         const box = map_layout.h_5808
         return center_rect([box[0] + box[2]/2, box[1] + box[3]/2], box[2], box[3])
     }
@@ -10400,6 +10400,7 @@ const SOUTH_PAC_BOARD_INFO = {
 
 /* }}} */
 /* {{{ js/client/init.js */
+var BOARD_ID = FULL_CAMPAIGN_SCENARIO
 var SID = FULL_CAMPAIGN_SCENARIO
 var map_info = MAIN_BOARD_INFO
 const ALL_BOARD_HEXES = []
@@ -10659,7 +10660,7 @@ function on_init(scenario, game_options, static_view) {
     canvas_init(scenario)
 
     function define_s_loc(id, rect) {
-        define_stack("s-loc", id, rect, { ...VERTICAL_STACK_PARAMS, sort: sort_unit_stack })
+        define_stack("s-loc", id, rect, {...VERTICAL_STACK_PARAMS, sort: sort_unit_stack})
     }
 
     init_preference_checkbox("noroad", false)
@@ -10680,11 +10681,13 @@ function on_init(scenario, game_options, static_view) {
 
     define_html_thing("#turn_info", "violations", 0)
 
+    SID = SCENARIO_DATA.find(s => s.name === scenario).id//scenario id
+
     var mapwrap = document.getElementById("mapwrap")
     switch (scenario) {
         case "South Pacific": {
             nations.AUSTRALIAN_MANDATES.keys = nations.AUSTRALIAN_MANDATES.ports
-            SID = SOUTH_PACIFIC_SCENARIO
+            BOARD_ID = SOUTH_PACIFIC_SCENARIO
             map_layout = LAYOUT.southpac
             mapwrap.classList.add("southpac")
             define_board("#map", 1275, 825, [12, 12, 12, 12])
@@ -10702,7 +10705,7 @@ function on_init(scenario, game_options, static_view) {
             break
         }
         case "Burma: The Forgotten War, 1943-1944": {
-            SID = BURMA_SCENARIO
+            BOARD_ID = BURMA_SCENARIO
             map_layout = LAYOUT.burma
             mapwrap.classList.add("burma")
             define_board("#map", 1275, 825, [12, 12, 12, 12])
@@ -10720,7 +10723,7 @@ function on_init(scenario, game_options, static_view) {
             break
         }
         default: {
-            SID = FULL_CAMPAIGN_SCENARIO
+            BOARD_ID = FULL_CAMPAIGN_SCENARIO
             map_layout = LAYOUT.mainmap
             mapwrap.classList.add("main")
             define_board("#map", 2550, 1650, [12, 12, 12, 12])
@@ -10738,8 +10741,8 @@ function on_init(scenario, game_options, static_view) {
 
     document.getElementById("vp_check_button").hidden = CAMPAIGN_SCENARIOS.includes(SID)
 
-    document.getElementById("ap_deck_link").href += `&sid=${SID}`
-    document.getElementById("jp_deck_link").href += `&sid=${SID}`
+    document.getElementById("ap_deck_link").href += `&sid=${BOARD_ID}`
+    document.getElementById("jp_deck_link").href += `&sid=${BOARD_ID}`
 
     // used hexes
     var used_hex = []
@@ -10780,10 +10783,10 @@ function on_init(scenario, game_options, static_view) {
     define_s_loc(ELIMINATED_BOX, map_layout.box_eliminated)
     define_s_loc(AP_REINF, map_layout.box_ap_reinf)
     define_s_loc(JP_REINF, map_layout.box_jp_reinf)
-    if (SID !== BURMA_SCENARIO) {
+    if (BOARD_ID !== BURMA_SCENARIO) {
         define_s_loc(DELAYED_BOX, map_layout.box_delayed_reinf)
     }
-    define_stack("s-loc", CHINA_BOX, map_layout.box_air_unit_in_china, { ...TRACK_STACK_PARAMS, sort: sort_unit_stack })
+    define_stack("s-loc", CHINA_BOX, map_layout.box_air_unit_in_china, {...TRACK_STACK_PARAMS, sort: sort_unit_stack})
 
     define_space("action_hex", CHINA_BOX, map_layout.box_air_unit_in_china, "china_box")
         .tooltip("China Box")
@@ -10809,7 +10812,7 @@ function on_init(scenario, game_options, static_view) {
     define_layout_track_h("track-china", 5, 0, map_layout.track_chinese_government, 0)
 
     if (map_layout.track_japanese_divisions_available_china !== undefined) {
-        define_layout_track_h("track-divisions", 1, (SID == BURMA_SCENARIO ? 9 : 13), map_layout.track_japanese_divisions_available_china, 0)
+        define_layout_track_h("track-divisions", 1, (BOARD_ID == BURMA_SCENARIO ? 9 : 13), map_layout.track_japanese_divisions_available_china, 0)
     }
 
     // Battle and Landing markers
@@ -11096,7 +11099,7 @@ P.check_distance = {
         this.redraw()
     },
     action_hex(h) {
-        if (SID === SOUTH_PACIFIC_SCENARIO && h === OAHU || SID === BURMA_SCENARIO && h === SINGAPORE || h > LAST_BOARD_HEX) {
+        if (BOARD_ID === SOUTH_PACIFIC_SCENARIO && h === OAHU || BOARD_ID === BURMA_SCENARIO && h === SINGAPORE || h > LAST_BOARD_HEX) {
             return
         }
         while (LOCAL_STATE.points.includes(h)) {
@@ -11495,7 +11498,7 @@ function update_window_pw() {
     text.push(`<dt>US Political Will: ${G.political_will}`)
     text.push(print_icon(counters.pw))
 
-    if (SID === BURMA_SCENARIO) {
+    if (BOARD_ID === BURMA_SCENARIO) {
         print_nation_status(text, get_nation_info(nations.BURMA))
         print_nation_status(text, get_china_info())
         print_nation_status(text, get_india_info())
@@ -11691,7 +11694,7 @@ function update_window_vp() {
         text.push("<dd>" + escape_text(line))
 
     text.push("<dt>Summary:")
-    if (SID == BURMA_SCENARIO) {
+    if (BOARD_ID == BURMA_SCENARIO) {
         text.push("<dd>2 VP or less - Allied Decisive Victory.")
         text.push("<dd>3-4 VP Allied Tactical Victory.")
         text.push("<dd>5-8 VP Japanese Tactical Victory.")

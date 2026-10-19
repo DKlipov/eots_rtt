@@ -127,7 +127,7 @@ function update_window_pw() {
     text.push(`<dt>US Political Will: ${G.political_will}`)
     text.push(print_icon(counters.pw))
 
-    if (SID === BURMA_SCENARIO) {
+    if (BOARD_ID === BURMA_SCENARIO) {
         print_nation_status(text, get_nation_info(nations.BURMA))
         print_nation_status(text, get_china_info())
         print_nation_status(text, get_india_info())
@@ -323,7 +323,7 @@ function update_window_vp() {
         text.push("<dd>" + escape_text(line))
 
     text.push("<dt>Summary:")
-    if (SID == BURMA_SCENARIO) {
+    if (BOARD_ID == BURMA_SCENARIO) {
         text.push("<dd>2 VP or less - Allied Decisive Victory.")
         text.push("<dd>3-4 VP Allied Tactical Victory.")
         text.push("<dd>5-8 VP Japanese Tactical Victory.")
