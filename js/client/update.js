@@ -301,20 +301,6 @@ function on_update() {
         update_text_html("violations", 0, "<b>STACKING VIOLATIONS:</B>\n" + escape_text(G.violations.map(h => "H" + h).join(", ")) + ".")
     }
 
-    // AMPHIBIOUS HEXES
-    for (var u of G.offensive.active_units[G.offensive.attacker]) {
-        var piece = pieces[u]
-        var location = G.location[u]
-        if (
-            G.offensive.stage !== POST_BATTLE_STAGE &&
-            piece.class === "ground" &&
-            location < LAST_BOARD_HEX &&
-            (!get_map_data(location).port || !is_space_controlled(location, G.offensive.attacker)) &&
-            map_get(G.offensive.paths, u, [0])[0] & AMPH_MOVE
-        )
-            update_keyword("action_hex", location, "amph")
-    }
-
     // CARDS
     update_hand(JP)
     update_hand(AP)

@@ -11216,6 +11216,7 @@ P.move_to = script(`
       eval {
         after_unit_move()
       }
+      call confirm_aa
       call choose_attack_hex {move_hexes: L.L.allowed_hexes}
       call prepare_disengagement
       eval {
@@ -11224,6 +11225,25 @@ P.move_to = script(`
       set L.L.allowed_hexes []
       set G.active_stack []
       `)
+
+
+P.confirm_aa = {
+    _begin() {
+        var path = map_get(G.offensive.paths, G.active_stack[0], [0])
+        if (!(path[0] & AMPH_MOVE) || path.length > 7) {
+            end()
+            return
+        }
+    },
+    inactive: "confirm move",
+    prompt() {
+        prompt(`Confirm Amphibious Assault (${L.L.L.move_data.asp_points} ASP used).`)
+        button("confirm")
+    },
+    confirm() {
+        end()
+    },
+}
 
 P.move_offensive_units = {
     _begin() {
