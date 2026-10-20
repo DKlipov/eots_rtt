@@ -4,7 +4,7 @@ const LAYOUT = {
         "box_air_unit_in_china": [852,407,121,75],
         "box_isr_jp": [986,132,45,64],
         "box_isr_us": [1048,132,45,64],
-        "box_eliminated": [100,1280,200,50],
+        "box_eliminated": [40,1280,230,50],
         "box_ap_reinf": [2298,544,45,45],
         "box_jp_reinf": [1386,461,45,45],
         "track_chinese_government": [603,130,281,63],

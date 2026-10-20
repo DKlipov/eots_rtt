@@ -67,10 +67,10 @@ function update_hand(side) {
     }
 }
 
-function populate_unit_box(units, key) {
+function populate_unit_box(units, key, stacks) {
     console.log(world.things)
     for (var i = 0; i < units.length; i++) {
-        populate(key, i % 3, "unit", units[i])
+        populate(key, i % stacks, "unit", units[i])
     }
 }
 
@@ -245,8 +245,8 @@ function on_update() {
             update_unit(u, location)
         }
     }
-    populate_unit_box(eliminated, "eliminated")
-    populate_unit_box(delayed, "delayed")
+    populate_unit_box(eliminated, "eliminated", 4)
+    populate_unit_box(delayed, "delayed", BOARD_ID === SOUTH_PACIFIC_SCENARIO ? 2 : 3)
 
     if (G.unselect)
         for (var u of G.unselect)

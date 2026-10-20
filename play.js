@@ -10213,7 +10213,7 @@ const LAYOUT = {
         "box_air_unit_in_china": [852,407,121,75],
         "box_isr_jp": [986,132,45,64],
         "box_isr_us": [1048,132,45,64],
-        "box_eliminated": [100,1280,200,50],
+        "box_eliminated": [40,1280,230,50],
         "box_ap_reinf": [2298,544,45,45],
         "box_jp_reinf": [1386,461,45,45],
         "track_chinese_government": [603,130,281,63],
@@ -10807,14 +10807,14 @@ function on_init(scenario, game_options, static_view) {
         }
     }
 
-    define_stack_track_auto("eliminated", 3, 0, map_layout.box_eliminated, 0, {
+    define_stack_track_auto("eliminated", 0, 3, map_layout.box_eliminated, 0, {
         ...VERTICAL_STACK_PARAMS,
         sort: sort_unit_stack
     })
     define_s_loc(AP_REINF, map_layout.box_ap_reinf)
     define_s_loc(JP_REINF, map_layout.box_jp_reinf)
     if (BOARD_ID !== BURMA_SCENARIO) {
-        define_stack_track_auto("delayed", 3, 0, map_layout.box_delayed_reinf, 0, {
+        define_stack_track_auto("delayed", 0, BOARD_ID === SOUTH_PACIFIC_SCENARIO ? 1 : 2, map_layout.box_delayed_reinf, 0, {
             ...VERTICAL_STACK_PARAMS,
             sort: sort_unit_stack
         })
@@ -11974,10 +11974,10 @@ function update_hand(side) {
     }
 }
 
-function populate_unit_box(units, key) {
+function populate_unit_box(units, key, stacks) {
     console.log(world.things)
     for (var i = 0; i < units.length; i++) {
-        populate(key, i % 3, "unit", units[i])
+        populate(key, i % stacks, "unit", units[i])
     }
 }
 
@@ -12152,8 +12152,8 @@ function on_update() {
             update_unit(u, location)
         }
     }
-    populate_unit_box(eliminated, "eliminated")
-    populate_unit_box(delayed, "delayed")
+    populate_unit_box(eliminated, "eliminated", 4)
+    populate_unit_box(delayed, "delayed", BOARD_ID === SOUTH_PACIFIC_SCENARIO ? 2 : 3)
 
     if (G.unselect)
         for (var u of G.unselect)
