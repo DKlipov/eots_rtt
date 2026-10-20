@@ -67,67 +67,55 @@ function update_hand(side) {
     }
 }
 
+function populate_unit_box(units, key) {
+    console.log(world.things)
+    for (var i = 0; i < units.length; i++) {
+        populate(key, i % 3, "unit", units[i])
+    }
+}
+
 function update_unit(u, location) {
     var piece = pieces[u]
     var one_step = piece.notreplaceable && piece.start_reduced
-    var first_turn = Math.min(map_info.turn_a, map_info.turn_b)
-    var last_turn = Math.max(map_info.turn_a, map_info.turn_b)
+    populate("s-loc", location, "unit", u)
 
-    if (location > TURN_BOX) {
-        var turn = location - TURN_BOX
-        if (turn < first_turn || turn > last_turn)
-            populate("s-loc", ELIMINATED_BOX, "unit", u)
-        else
-            populate("turn", turn, "unit", u)
+    update_keyword("unit", u, "reduced",
+        (set_has(G.reduced, u) && !one_step) || location === ELIMINATED_BOX
+        || pieces[u].class === "hq" && G.inter_service[pieces[u].faction]
+    )
 
-        update_keyword("unit", u, set_has(G.reduced, u) && !one_step)
+    if (set_has(G.offensive.active_units[piece.faction], u))
+        update_keyword("unit", u, "activated")
 
-        return
+    if (G.active_stack.includes(u)) {
+        update_keyword("unit", u, "selected")
+        update_rotation("unit", u, 22.5)
     }
 
-    if (location === ELIMINATED_BOX && (!pieces[u].notreplaceable || is_action("unit", u))
-        || (location !== ELIMINATED_BOX && location >= 0 && location <= LAST_BOARD_HEX)
-        || (set_has(ON_MAP_PLACE, location))
-    ) {
-        populate("s-loc", location, "unit", u)
+    var battle = map_get(G.offensive.committed, u)
+    var battle_ix = battle ? G.offensive.battle_names.indexOf(battle) : 0
+    var path = map_get(G.offensive.paths, u)
+    if (path) path = path[0]
 
-        update_keyword("unit", u, "reduced",
-            (set_has(G.reduced, u) && !one_step) || location === ELIMINATED_BOX
-            || pieces[u].class === "hq" && G.inter_service[pieces[u].faction]
-        )
-
-        if (set_has(G.offensive.active_units[piece.faction], u))
-            update_keyword("unit", u, "activated")
-
-        if (G.active_stack.includes(u)) {
-            update_keyword("unit", u, "selected")
-            update_rotation("unit", u, 22.5)
-        }
-
-        var battle = map_get(G.offensive.committed, u)
-        var battle_ix = battle ? G.offensive.battle_names.indexOf(battle) : 0
-        var path = map_get(G.offensive.paths, u)
-        if (path) path = path[0]
-
-        if (battle && set_has(G.offensive.battle_hexes, battle)) {
-            populate_generic("unit", u, "marker conflict battle alpha" + battle_ix)
-        } else if (battle && set_has(G.offensive.landing_hexes, battle)) {
-            populate_generic("unit", u, "marker conflict landing alpha" + battle_ix)
-        } else if (battle && (piece.parenthetical || piece.class === "ground")) {
-            populate_generic("unit", u, "marker conflict battle gray alpha" + battle_ix)
-        } else if (piece.organic && !(path & STRAT_MOVE) && G.offensive.organic.includes(u)) {
-            populate_generic("unit", u, counters.organic_small)
-        } else if (set_has(G.oos, u)) {
-            populate_generic("unit", u, counters.oos_small)
-        } else {
-            for (var m of UNIT_MOVEMENT_MARKERS) {
-                if (m.condition(u, piece, path)) {
-                    populate_generic("unit", u, m.counter)
-                    break // only first one that matches
-                }
+    if (battle && set_has(G.offensive.battle_hexes, battle)) {
+        populate_generic("unit", u, "marker conflict battle alpha" + battle_ix)
+    } else if (battle && set_has(G.offensive.landing_hexes, battle)) {
+        populate_generic("unit", u, "marker conflict landing alpha" + battle_ix)
+    } else if (battle && (piece.parenthetical || piece.class === "ground")) {
+        populate_generic("unit", u, "marker conflict battle gray alpha" + battle_ix)
+    } else if (piece.organic && !(path & STRAT_MOVE) && G.offensive.organic.includes(u)) {
+        populate_generic("unit", u, counters.organic_small)
+    } else if (set_has(G.oos, u)) {
+        populate_generic("unit", u, counters.oos_small)
+    } else {
+        for (var m of UNIT_MOVEMENT_MARKERS) {
+            if (m.condition(u, piece, path)) {
+                populate_generic("unit", u, m.counter)
+                break // only first one that matches
             }
         }
     }
+
 }
 
 function update_role_info(who) {
@@ -237,11 +225,28 @@ function on_update() {
     }
 
     // UNITS
-    for (var i = 1; i < pieces.length; ++i) {
-        var loc = G.location[i]
-        if (loc > 0)
-            update_unit(i, G.location[i])
+    var first_turn = Math.min(map_info.turn_a, map_info.turn_b)
+    var last_turn = Math.max(map_info.turn_a, map_info.turn_b)
+    var eliminated = []
+    var delayed = []
+    for (var u = 1; u < pieces.length; ++u) {
+        var location = G.location[u]
+        var turn = location - TURN_BOX
+        if (location > TURN_BOX && (turn < first_turn || turn > last_turn)) {
+            eliminated.push(u)
+        } else if (location > TURN_BOX) {
+            populate("turn", turn, "unit", u)
+            update_keyword("unit", u, set_has(G.reduced, u))
+        } else if (location === ELIMINATED_BOX && (!pieces[u].notreplaceable || is_action("unit", u))) {
+            eliminated.push(u)
+        } else if (location === DELAYED_BOX) {
+            delayed.push(u)
+        } else if (location >= 0 && location <= LAST_BOARD_HEX || set_has(ON_MAP_PLACE, location)) {
+            update_unit(u, location)
+        }
     }
+    populate_unit_box(eliminated, "eliminated")
+    populate_unit_box(delayed, "delayed")
 
     if (G.unselect)
         for (var u of G.unselect)

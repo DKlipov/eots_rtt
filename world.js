@@ -166,7 +166,7 @@ class Thing {
             this.is_stackable = true
             if (!this.is_action)
                 this.element.addEventListener("mousedown", _on_click_stackable)
-            this.element.addEventListener("mouseenter", _on_focus_stackable)
+            this.element.addEventListener("mouseover", _on_focus_stackable)
         }
         return this
     }
@@ -219,41 +219,42 @@ class Thing {
 
     tooltip(tip) {
         var id = this.my_id
-        this.element.addEventListener("mouseenter", function () {
+        this.element.addEventListener("mouseover", function (evt) {
             try {
                 _push_status((typeof tip === "function") ? tip(id) : tip)
             } catch (err) {
                 _push_status(err.toString())
             }
+            evt.stopPropagation()
         })
-        this.element.addEventListener("mouseleave", _pop_status)
+        this.element.addEventListener("mouseout", _pop_status)
         return this
     }
 
     tip_magic(focus_callback, blur_callback) {
         var id = this.my_id
-        this.element.addEventListener("mouseenter", () => _tip_focus_magic(focus_callback, id))
-        this.element.addEventListener("mouseleave", () => _tip_blur_magic(blur_callback, id))
+        this.element.addEventListener("mouseover", () => _tip_focus_magic(focus_callback, id))
+        this.element.addEventListener("mouseout", () => _tip_blur_magic(blur_callback, id))
         return this
     }
 
     tip_clone(clone_action, clone_id) {
-        this.element.addEventListener("mouseenter", () => _tip_focus_clone(clone_action, clone_id))
-        this.element.addEventListener("mouseleave", _tip_blur_clone)
+        this.element.addEventListener("mouseover", () => _tip_focus_clone(clone_action, clone_id))
+        this.element.addEventListener("mouseout", _tip_blur_clone)
         return this
     }
 
     tip_class(class_names) {
         var id = this.my_id
-        this.element.addEventListener("mouseenter", () => _tip_focus_class(class_names[id]))
-        this.element.addEventListener("mouseleave", _tip_blur_class)
+        this.element.addEventListener("mouseover", () => _tip_focus_class(class_names[id]))
+        this.element.addEventListener("mouseout", _tip_blur_class)
         return this
     }
 
     tip_class_sub(class_name) {
         class_name = class_name.replace("$1", this.my_id)
-        this.element.addEventListener("mouseenter", () => _tip_focus_class(class_name))
-        this.element.addEventListener("mouseleave", _tip_blur_class)
+        this.element.addEventListener("mouseover", () => _tip_focus_class(class_name))
+        this.element.addEventListener("mouseout", _tip_blur_class)
         return this
     }
 
@@ -403,6 +404,7 @@ function _on_click_stackable(evt) {
 
 function _on_focus_stackable(evt) {
     if (world.mouse_focus) {
+        evt.stopPropagation()
         var thing = evt.currentTarget.thing
         _focus_stack(thing.element.parentElement.thing)
     }
@@ -1468,8 +1470,8 @@ function _tip_click_light(action, id) {
 function escape_tip_light(text, re, log_className, action, names) {
     return text.replace(re, (m,x) => `<span
         class="${log_className}"
-        onmouseenter="_tip_focus_light('${action}',${x})"
-        onmouseleave="_tip_blur_light('${action}',${x})"
+        onmouseover="_tip_focus_light('${action}',${x})"
+        onmouseout="_tip_blur_light('${action}',${x})"
         onmousedown="_tip_click_light('${action}',${x})"
         >${escape_typography(names[x])}</span>`
     )
@@ -1478,8 +1480,8 @@ function escape_tip_light(text, re, log_className, action, names) {
 function escape_tip_class(text, re, log_className, tip_classNames, names) {
     return text.replace(re, (m,x) => `<span
         class="${log_className}"
-        onmouseenter="_tip_focus_class('${tip_classNames[x]}')"
-        onmouseleave="_tip_blur_class()"
+        onmouseover="_tip_focus_class('${tip_classNames[x]}')"
+        onmouseout="_tip_blur_class()"
         >${escape_typography(names[x])}</span>`
     )
 }
@@ -1487,8 +1489,8 @@ function escape_tip_class(text, re, log_className, tip_classNames, names) {
 function escape_tip_class_sub(text, re, log_className, tip_className, names) {
     return text.replace(re, (m,x) => `<span
         class="${log_className}"
-        onmouseenter="_tip_focus_class('${tip_className.replace("$1",x)}')"
-        onmouseleave="_tip_blur_class()"
+        onmouseover="_tip_focus_class('${tip_className.replace("$1",x)}')"
+        onmouseout="_tip_blur_class()"
         >${escape_typography(names[x])}</span>`
     )
 }
@@ -1496,8 +1498,8 @@ function escape_tip_class_sub(text, re, log_className, tip_className, names) {
 function escape_tip_clone(text, re, log_className, action, names) {
     return text.replace(re, (m,x) => `<span
         class="${log_className}"
-        onmouseenter="_tip_focus_clone('${action}',${x})"
-        onmouseleave="_tip_blur_clone()"
+        onmouseover="_tip_focus_clone('${action}',${x})"
+        onmouseout="_tip_blur_clone()"
         >${escape_typography(names[x])}</span>`
     )
 }

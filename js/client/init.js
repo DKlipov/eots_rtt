@@ -389,11 +389,17 @@ function on_init(scenario, game_options, static_view) {
         }
     }
 
-    define_s_loc(ELIMINATED_BOX, map_layout.box_eliminated)
+    define_stack_track_auto("eliminated", 3, 0, map_layout.box_eliminated, 0, {
+        ...VERTICAL_STACK_PARAMS,
+        sort: sort_unit_stack
+    })
     define_s_loc(AP_REINF, map_layout.box_ap_reinf)
     define_s_loc(JP_REINF, map_layout.box_jp_reinf)
     if (BOARD_ID !== BURMA_SCENARIO) {
-        define_s_loc(DELAYED_BOX, map_layout.box_delayed_reinf)
+        define_stack_track_auto("delayed", 3, 0, map_layout.box_delayed_reinf, 0, {
+            ...VERTICAL_STACK_PARAMS,
+            sort: sort_unit_stack
+        })
     }
     define_stack("s-loc", CHINA_BOX, map_layout.box_air_unit_in_china, {...TRACK_STACK_PARAMS, sort: sort_unit_stack})
 
