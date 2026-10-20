@@ -223,7 +223,6 @@ class Thing {
             } catch (err) {
                 _push_status(err.toString())
             }
-            evt.stopPropagation()
         })
         this.element.addEventListener("mouseout", _pop_status)
         return this
