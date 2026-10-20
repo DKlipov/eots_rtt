@@ -85,7 +85,10 @@ function update_unit(u, location) {
         return
     }
 
-    if (location === ELIMINATED_BOX && (!pieces[u].notreplaceable || is_action("unit", u)) || (location !== ELIMINATED_BOX && location >= 0 && location <= LAST_BOARD_HEX)) {
+    if (location === ELIMINATED_BOX && (!pieces[u].notreplaceable || is_action("unit", u))
+        || (location !== ELIMINATED_BOX && location >= 0 && location <= LAST_BOARD_HEX)
+        || (set_has(ON_MAP_PLACE, location))
+    ) {
         populate("s-loc", location, "unit", u)
 
         update_keyword("unit", u, "reduced",
@@ -360,7 +363,7 @@ function on_update() {
                 value = -value
             if (value >= first_turn && value <= last_turn)
                 populate("turn", value, "nation-marker-turn", nation.id)
-            if (hex && value && !vassal_control && map_info.hex_check(hex_to_int(hex)))
+            if (hex && value > 0 && !vassal_control && map_info.hex_check(hex_to_int(hex)))
                 populate("s-loc", hex_to_int(hex), "nation-marker-map", nation.id)
         }
     }

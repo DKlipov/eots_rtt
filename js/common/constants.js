@@ -134,6 +134,8 @@ const NOT_USED = 1488
 const TURN_BOX = 1490
 const TUNNEL_BOX = 1600
 
+const ON_MAP_PLACE = [DELAYED_BOX, CHINA_BOX, AP_REINF, JP_REINF]
+
 
 //Regions
 const KWAI_HQ_MOD = ["NIndia", "Burma", "Ceylon"]
