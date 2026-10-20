@@ -19,6 +19,12 @@ body.Allies header.your_turn { background-color: lightsteelblue; }
 .marker.control { pointer-events: none }
 .transparent { border: none !important; box-shadow: none !important; opacity: 0.4; }
 
+/* LOCAL STATUS */
+
+header.local-status {
+    background-image: repeating-linear-gradient(135deg, palegreen, palegreen 40px, lightgreen 40px, lightgreen 80px);
+}
+
 /* VISIBILITY TOGGLES */
 
 body.hide-markers .marker:not(.road) { display: none }

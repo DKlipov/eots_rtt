@@ -11023,10 +11023,16 @@ function on_update_local_actions() {
             delete G.actions.con_eliminate
         }
     }
+
     document.body.classList.remove("hex-clickable")
+
     if (LOCAL_STATUS) {
         P[LOCAL_STATUS].prompt()
+        document.querySelector("header").classList.add("local-status")
+    } else {
+        document.querySelector("header").classList.remove("local-status")
     }
+
     if (!G.proxy) {
         STORED_STATE = JSON.parse(JSON.stringify(G))
         G.proxy = 1
