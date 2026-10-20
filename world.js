@@ -105,7 +105,6 @@ const world = {
     log_boxes: [],
     window_list: [],
     focus: null,
-    mouse_focus: false,
     last_focus: null,
     generic_unused: {},
     generic_used: {},
@@ -166,7 +165,6 @@ class Thing {
             this.is_stackable = true
             if (!this.is_action)
                 this.element.addEventListener("mousedown", _on_click_stackable)
-            this.element.addEventListener("mouseover", _on_focus_stackable)
         }
         return this
     }
@@ -219,7 +217,7 @@ class Thing {
 
     tooltip(tip) {
         var id = this.my_id
-        this.element.addEventListener("mouseover", function (evt) {
+        this.element.addEventListener("mouseover", function () {
             try {
                 _push_status((typeof tip === "function") ? tip(id) : tip)
             } catch (err) {
@@ -384,38 +382,32 @@ function lookup_thing(action, id) {
     return thing
 }
 
-function _on_click_thing(evt) {
-    if (evt.button === 0) {
-        var thing = evt.currentTarget.thing
-        evt.stopPropagation()
+function _on_click_thing() {
+    if (event.button === 0) {
+        var thing = event.currentTarget.thing
+        event.stopPropagation()
         if (_focus_stack(thing.element.parentElement.thing))
             if (!send_action(thing.my_action, thing.my_id))
                 _blur_stack()
     }
 }
 
-function _on_click_stackable(evt) {
-    if (evt.button === 0) {
-        var thing = evt.currentTarget.thing
-        evt.stopPropagation()
-        _focus_stack(thing.element.parentElement.thing)
-    }
-}
-
-function _on_focus_stackable(evt) {
-    if (world.mouse_focus) {
-        evt.stopPropagation()
-        var thing = evt.currentTarget.thing
+function _on_click_stackable() {
+    if (event.button === 0) {
+        var thing = event.currentTarget.thing
+        event.stopPropagation()
         _focus_stack(thing.element.parentElement.thing)
     }
 }
 
 function _push_status(text) {
+    event.stopPropagation()
     world.status_nest.push(text)
     world.status.innerHTML = world.status_nest[world.status_nest.length-1]
 }
 
 function _pop_status() {
+    event.stopPropagation()
     if (world.status_nest.length > 0)
         world.status_nest.pop()
     if (world.status_nest.length > 0)
@@ -784,8 +776,8 @@ function update_text_html(action, id, text) {
 
 /* STACKS */
 
-$("main")?.addEventListener("mousedown", function (evt) {
-    if (evt.button === 0)
+$("main")?.addEventListener("mousedown", function () {
+    if (event.button === 0)
         _blur_stack()
 })
 
@@ -1417,12 +1409,14 @@ function escape_icon(text, re, icons) {
 }
 
 function _tip_focus_magic(callback, id) {
+    event.stopPropagation()
     world.tip.hidden = false
     if (callback)
         callback(id)
 }
 
 function _tip_blur_magic(callback, id) {
+    event.stopPropagation()
     world.tip.removeAttribute("style")
     world.tip.removeAttribute("class")
     world.tip.replaceChildren()
@@ -1432,16 +1426,19 @@ function _tip_blur_magic(callback, id) {
 }
 
 function _tip_focus_class(name) {
+    event.stopPropagation()
     world.tip.setAttribute("class", name)
     world.tip.hidden = false
 }
 
 function _tip_blur_class(action, id) {
+    event.stopPropagation()
     world.tip.removeAttribute("class")
     world.tip.hidden = true
 }
 
 function _tip_focus_clone(action, id) {
+    event.stopPropagation()
     var thing = lookup_thing(action, id)
     var clone = thing.element.cloneNode(true)
     clone.setAttribute("class", thing.my_keywords.join(" "))
@@ -1451,15 +1448,18 @@ function _tip_focus_clone(action, id) {
 }
 
 function _tip_blur_clone() {
+    event.stopPropagation()
     world.tip.replaceChildren()
     world.tip.hidden = true
 }
 
 function _tip_focus_light(action, id) {
+    event.stopPropagation()
     lookup_thing(action, id).element.classList.add("highlight")
 }
 
 function _tip_blur_light(action, id) {
+    event.stopPropagation()
     lookup_thing(action, id).element.classList.remove("highlight")
 }
 
