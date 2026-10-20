@@ -432,7 +432,6 @@ body.shift {
     top: 10px;
     right: 10px;
     transform: scale(1.333);
-    transform: scale(2); /* TODO - because chrome scales 1.333 badly */
     transform-origin: top right;
 }
 
