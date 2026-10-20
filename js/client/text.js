@@ -33,10 +33,9 @@ function format_unit_tooltip(u) {
         case "ground":
             break
         case "air":
-            tip += ""
             break
         case "naval":
-            return tip + `(${p.type.toUpperCase()} ${p.name})`
+            return tip + ` (${p.type.toUpperCase()} ${p.name})`
             break
     }
 
@@ -63,8 +62,8 @@ function format_hex_tooltip(h) {
     if (info) {
         if (info.name) tip += " " + info.name
         if (info.region) tip += " (" + info.region + ")"
+        if (is_controllable_hex(h)) tip += is_space_controlled(h, AP) ? " [AP]" : " [JP]"
         var props = []
-        if (is_controllable_hex(h)) props.push(is_space_controlled(h, AP) ? "[AP]" : "[JP]")
         if (info.city === CITY) props.push("city")
         if (info.city === JAPANESE_CITY) props.push("Japanese city")
         if (info.city === CHINESE_CITY) props.push("Chinese city")
