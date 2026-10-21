@@ -6400,7 +6400,7 @@ map.forEach(h => MAP_DATA[hex_to_int(h.id)] = h)
 
 var S_P_first_hex = []
 
-;(function(){
+;(function () {
 
     for (var i = 0; i < sp_map.length; i++) {
         var hex = hex_to_int(sp_map[i].id)
@@ -6496,7 +6496,7 @@ var S_P_first_hex = []
     B_F_W_MAP_DATA[hex_to_int(1912)].nh.length = 3
     B_F_W_MAP_DATA[hex_to_int(1912)].edges_int = (B_F_W_MAP_DATA[hex_to_int(1912)].edges_int % (1 << 5 * 3))
 
-    var t1 = 1
+    var t1 = [1]
     for (var i = 0; i < TUNNELING.length; i++) {
         var tunnel = TUNNELING[i]
         create_tunnel(tunnel, t1)
@@ -6604,19 +6604,19 @@ function apply_burma(hex) {
 
 function create_tunnel(data, t1) {
     data.map[data.from].edges_int |= (WATER | UNPLAYABLE_WATER) << (5 * data.map[data.from].nh.length)
-    data.map[data.from].nh.push(TUNNEL_BOX + t1)
+    data.map[data.from].nh.push(TUNNEL_BOX + t1[0])
     for (var i = 0; i < data.distance; i++) {
         var hex = {
-            id: TUNNEL_BOX + t1,
+            id: TUNNEL_BOX + t1[0],
             terrain: OCEAN,
             region: "Ocean",
             edges_int: WATER | UNPLAYABLE_WATER,
-            nh: [TUNNEL_BOX + t1 + 1]
+            nh: [TUNNEL_BOX + t1[0] + 1]
         }
-        data.map[TUNNEL_BOX + t1] = hex
-        t1++
+        data.map[TUNNEL_BOX + t1[0]] = hex
+        t1[0]++
     }
-    data.map[TUNNEL_BOX + t1 - 1].nh[0] = data.to
+    data.map[TUNNEL_BOX + t1[0] - 1].nh[0] = data.to
 }
 
 function get_near_hexes(hex) {
