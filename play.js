@@ -11234,7 +11234,11 @@ P.check_hq_range = {
         var focused = []
         var piece = pieces[LOCAL_STATE.unit]
         if (LOCAL_STATE.mode === "isolation") {
-            for_each_hex_in_range(G.location[LOCAL_STATE.unit], piece.cr, hex => set_add(focused, hex))
+            if (G.sid === SOUTH_PACIFIC_SCENARIO && LOCAL_STATE.unit === HQ_CENTRAL_PACIFIC) {
+                for_each_hex_in_range(hex_to_int(4825), 3, hex => set_add(focused, hex))
+            } else {
+                for_each_hex_in_range(G.location[LOCAL_STATE.unit], piece.cr, hex => set_add(focused, hex))
+            }
             focused = in_range_on_map(G.location[LOCAL_STATE.unit], piece.cr, focused, piece.faction)
         } else if (LOCAL_STATE.mode === "activation") {
             mark_activation_zone(LOCAL_STATE.unit)
