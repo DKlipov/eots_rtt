@@ -79,27 +79,6 @@ function format_hex_tooltip(h) {
 
 /* UNIT ZOOMED TOOLTIP & HQ RANGE DISPLAY TOGGLE */
 
-var focus_hq = 0
-var focus_hq_range = [0, 0]
-var focus_want_hq = 0
-var focus_want_hq_range = [0, 0]
-var focus_timer = 0
-
-function request_range_update() {
-    if (focus_timer) {
-        clearTimeout(focus_timer)
-        focus_timer = 0
-    }
-    focus_timer = setTimeout(() => {
-        focus_timer = 0
-        if (focus_hq !== focus_want_hq) {
-            focus_hq = focus_want_hq
-            focus_hq_range = focus_want_hq_range
-            on_update()
-        }
-    }, 0)
-}
-
 function focus_unit(id) {
     const piece = pieces[id]
 
@@ -110,25 +89,6 @@ function focus_unit(id) {
     html += "</div>"
     world.tip.className = "unit-tip"
     world.tip.innerHTML = html
-
-    // show HQ range
-    if (piece.class === "hq" && G.location[id] < LAST_BOARD_HEX && focus_hq !== id) {
-        focus_want_hq = id
-        if (id === HQ_CENTRAL_PACIFIC && G.sid === SOUTH_PACIFIC_SCENARIO)
-            focus_want_hq_range = [hex_to_int(5226), 5]
-        else
-            focus_want_hq_range = [G.location[id], pieces[id].cr]
-        request_range_update()
-    }
-}
-
-function blur_unit(id) {
-    // hide HQ range
-    focus_want_hq = 0
-    if (focus_want_hq_range[0]) {
-        focus_want_hq_range = [0, 0]
-        request_range_update()
-    }
 }
 
 /* LOG & PROMT TEXT FORMATTING */

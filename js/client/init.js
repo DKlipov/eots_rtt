@@ -461,7 +461,7 @@ function on_init(scenario, game_options, static_view) {
     for (let i = 1; i < pieces.length; ++i) {
         let piece = pieces[i]
         piece.element = define_piece("unit", i, (piece.faction ? "ap " : "jp ") + piece.counter)
-            .tip_magic(focus_unit, blur_unit)
+            .tip_magic(focus_unit)
             .tooltip(format_unit_tooltip)
     }
 

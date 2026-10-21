@@ -68,7 +68,6 @@ function update_hand(side) {
 }
 
 function populate_unit_box(units, key, stacks) {
-    console.log(world.things)
     for (var i = 0; i < units.length; i++) {
         populate(key, i % stacks, "unit", units[i])
     }
@@ -116,6 +115,12 @@ function update_unit(u, location) {
         }
     }
 
+}
+
+function draw_range(hexes){
+    for (var hex of hexes)
+        if (set_has(ALL_BOARD_HEXES, hex))
+            update_keyword("zoi_hex", hex, "range")
 }
 
 function update_role_info(who) {
@@ -281,24 +286,6 @@ function on_update() {
         }
     }
 
-    // HQ RANGE
-    // TODO: focused has invalid hexes, so need to filter by ALL_BOARD_HEXES
-    if (focus_hq_range[0] && focus_hq && G.location[focus_hq] < LAST_BOARD_HEX) {
-        mark_activation_zone(focus_hq)
-        for_each_hex_in_range(G.location[focus_hq], pieces[focus_hq].cr, hex => {
-            if (G.supply_cache[hex] & HEX_TEMP_FLAG3)
-                if (set_has(ALL_BOARD_HEXES, hex))
-                    update_keyword("zoi_hex", hex, "range")
-        })
-    } else {
-        var focused = []
-        for_each_hex_in_range(focus_hq_range[0], focus_hq_range[1], hex => set_add(focused, hex))
-        focused = in_range_on_map(focus_hq_range[0], focus_hq_range[1], focused, AP)
-        for (var hex of focused)
-            if (set_has(ALL_BOARD_HEXES, hex))
-                update_keyword("zoi_hex", hex, "range")
-    }
-
     // STACKING VIOLATIONS
     if (G.violations.length > 0) {
         for (var h of G.violations)
@@ -437,6 +424,9 @@ function on_update() {
     action_button("ground_move", "Ground")
     action_button("extended_air", "Extended range")
     action_button("barges", "Barges")
+    action_button("supply", "Supply")
+    action_button("activation", "Activation")
+    action_button("isolation", "Isolation")
 
     action_button("redo", "Redo")
     action_button("undo", "Undo")

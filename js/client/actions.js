@@ -43,6 +43,14 @@ function menu_check_distance() {
     on_update()
 }
 
+function menu_show_hq_range() {
+    LOCAL_STATUS = "check_hq_range"
+    LOCAL_STATE = {}
+    P.check_hq_range._begin()
+    update_header()
+    on_update()
+}
+
 function array_equals(a, b) {
     if (a.length !== b.length) {
         return false
@@ -148,16 +156,6 @@ P.check_unit_supply = {
         }
         canvas_show()
         canvas_draw_supply(LOCAL_STATE.supply_data)
-        var focused = []
-        if (LOCAL_STATE.unit
-            && LOCAL_STATE.unit !== CHINA_BOX
-            && pieces[LOCAL_STATE.unit].class === "hq" && G.location[LOCAL_STATE.unit] < LAST_BOARD_HEX) {
-            for_each_hex_in_range(G.location[LOCAL_STATE.unit], pieces[LOCAL_STATE.unit].cr, hex => set_add(focused, hex))
-            focused = in_range_on_map(G.location[LOCAL_STATE.unit], pieces[LOCAL_STATE.unit].cr, focused, pieces[LOCAL_STATE.unit].faction)
-        }
-        for (var hex of ALL_BOARD_HEXES) {
-            update_keyword("zoi_hex", hex, "yellow", set_has(focused, hex))
-        }
     },
 }
 
@@ -205,11 +203,6 @@ P.check_distance = {
         this.redraw()
     },
     redraw() {
-        if (LOCAL_STATE.range && LOCAL_STATE.points.length > 1) {
-            focus_hq_range = [LOCAL_STATE.points[0], LOCAL_STATE.points.length - 1]
-        } else {
-            focus_hq_range = [0, 0]
-        }
         on_update()
     },
     on_update() {
@@ -223,6 +216,81 @@ P.check_distance = {
             e.innerHTML = `<big>${index}</big><small>${int_to_hex(hex)}</small>`
             measure.appendChild(e)
         })
+        if (LOCAL_STATE.range && LOCAL_STATE.points.length > 1) {
+            var focused = []
+            for_each_hex_in_range(LOCAL_STATE.points[0], LOCAL_STATE.points.length - 1, hex => set_add(focused, hex))
+            focused = in_range_on_map(LOCAL_STATE.points[0], LOCAL_STATE.points.length - 1, focused, AP)
+            draw_range(focused)
+        }
+    },
+}
+
+P.check_hq_range = {
+    _begin() {
+        LOCAL_STATE.unit = 0
+        LOCAL_STATE.mode = "activation"
+    },
+    prompt() {
+        LOCAL_STATE.actions = {
+            "done": 1,
+            "unit": HQ_LIST.filter(u => G.location[u] <= LAST_BOARD_HEX && u !== LOCAL_STATE.unit),
+            "undo": LOCAL_STATE.unit ? 1 : 0,
+        }
+        if (!LOCAL_STATE.unit) {
+            LOCAL_STATE.prompt = "Select HQ to check range."
+        } else {
+            LOCAL_STATE.prompt = `${pieces[LOCAL_STATE.unit].name} ${LOCAL_STATE.mode} range.`
+            if (LOCAL_STATE.mode !== "supply") {
+                LOCAL_STATE.actions.supply = 1
+            }
+            if (LOCAL_STATE.mode !== "activation") {
+                LOCAL_STATE.actions.activation = 1
+            }
+            if (LOCAL_STATE.mode !== "isolation") {
+                LOCAL_STATE.actions.isolation = 1
+            }
+        }
+    },
+    supply() {
+        LOCAL_STATE.mode = "supply"
+        on_update()
+    },
+    activation() {
+        LOCAL_STATE.mode = "activation"
+        on_update()
+    },
+    isolation() {
+        LOCAL_STATE.mode = "isolation"
+        on_update()
+    },
+    undo() {
+        LOCAL_STATE.unit = 0
+        on_update()
+    },
+    unit(u) {
+        if (pieces[u].class === "hq" && G.location[u] < LAST_BOARD_HEX) {
+            LOCAL_STATE.unit = u
+            on_update()
+        }
+    },
+    on_update() {
+        if (!LOCAL_STATE.unit)
+            return
+        var focused = []
+        var piece = pieces[LOCAL_STATE.unit]
+        if (LOCAL_STATE.mode === "isolation") {
+            for_each_hex_in_range(G.location[LOCAL_STATE.unit], piece.cr, hex => set_add(focused, hex))
+            focused = in_range_on_map(G.location[LOCAL_STATE.unit], piece.cr, focused, piece.faction)
+        } else if (LOCAL_STATE.mode === "activation") {
+            mark_activation_zone(LOCAL_STATE.unit)
+            for_each_hex_in_range(G.location[LOCAL_STATE.unit], pieces[LOCAL_STATE.unit].cr, hex => {
+                if (G.supply_cache[hex] & HEX_TEMP_FLAG3)
+                    set_add(focused, hex)
+            })
+        } else if (LOCAL_STATE.mode === "supply") {
+            focused = with_unmodified_supply(() => hq_supply_zone(LOCAL_STATE.unit))
+        }
+        draw_range(focused)
     },
 }
 
@@ -412,6 +480,35 @@ function supply_query(unit) {
             trace_kunming(result)
         }
     }
+    return result
+}
+
+function hq_supply_zone(unit) {
+    L = {supply: {}}
+
+    var result = []
+    var piece = pieces[unit]
+    var location = G.location[unit]
+    clear_supply_cache(CLEAN_ALL_MASK)
+    for_each_unit_on_map((i, p) => (!set_has(G.oos, i)) ? mark_unit(i, p) : null)
+    place_virtual_units()
+    check_infrastructure()
+    for_each_unit_on_map((i, p) => (!set_has(G.oos, i)) ? set_zoi(i, p, [G.oos, G.oos]) : null)
+    indian_zoi_hack((i, p) => (!set_has(G.oos, i)) ? set_zoi(i, p, [G.oos, G.oos]) : null)
+    var hq = HQ_LIST.filter(hq => {
+        return (piece.faction === pieces[hq].faction && G.location[hq] < LAST_BOARD_HEX)
+    })
+    mark_supply_ports_oversea(hq)
+    L.supply = {}
+    mark_supply_ports_overland(hq)
+    L.supply = {}
+    mark_hexes_supplied_from([unit], l => true)
+    L.supply = {}
+    for_each_hex_in_range(G.location[unit], piece.cr, h => {
+        if (G.supply_cache[h] & piece.supply) {
+            set_add(result, h)
+        }
+    })
     return result
 }
 

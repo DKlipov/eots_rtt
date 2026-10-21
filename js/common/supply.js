@@ -553,7 +553,7 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
                 overland_ports.push(nh)
             }
             oversea_set[nh] = (distance)
-            if (md1.terrain > 0) {
+            if (md1.terrain >= 0) {
                 G.supply_cache[nh] = G.supply_cache[nh] | supply_type
             }
         }
@@ -609,7 +609,7 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
             L.supply.queue.push(nh)
             L.supply.retracing.push(item)
             oversea_set[nh] = (distance)
-            if (get_map_data(nh).terrain > 0) {
+            if (get_map_data(nh).terrain >= 0) {
                 G.supply_cache[nh] = G.supply_cache[nh] | supply_type
             }
         }

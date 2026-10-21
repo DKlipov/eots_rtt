@@ -26,7 +26,7 @@
             <menu>
                 <li><label><input type=checkbox name="noroad">Default road markers</label>
                 <li><label><input type=checkbox name="nopath">Hide unit path</label>
-                <li><label><input type=checkbox name="fullcontrol">Vassal like control</label>
+                <li><label><input type=checkbox name="fullcontrol">Transparent flags</label>
                 <li><label><input type=checkbox name="hidezoi">Hide ZOI</label>
                 <li><a href="info/readme.html" target="_blank">Read me!</a>
                 <li><a href="https://gmtwebsiteassets.s3.us-west-2.amazonaws.com/nneots/EOTS+2025+Rules_v1.1.pdf"
@@ -50,9 +50,11 @@
             <summary><img src="images/compass.svg"></summary>
             <menu>
                 <li onclick="menu_check_unit_supply()">
-                    <div>Trace unit supply...</div>
+                    <div>Trace unit supply</div>
                 <li onclick="menu_check_distance()">
-                    <div>Measure distance...</div>
+                    <div>Measure distance</div>
+                <li onclick="menu_show_hq_range()">
+                    <div>Show HQ range</div>
             </menu>
         </details>
         <button onclick="toggle_markers_and_pieces()"><img src="/images/earth-asia-oceania.svg"></button>

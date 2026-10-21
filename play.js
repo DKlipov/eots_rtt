@@ -7783,7 +7783,7 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
                 overland_ports.push(nh)
             }
             oversea_set[nh] = (distance)
-            if (md1.terrain > 0) {
+            if (md1.terrain >= 0) {
                 G.supply_cache[nh] = G.supply_cache[nh] | supply_type
             }
         }
@@ -7839,7 +7839,7 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
             L.supply.queue.push(nh)
             L.supply.retracing.push(item)
             oversea_set[nh] = (distance)
-            if (get_map_data(nh).terrain > 0) {
+            if (get_map_data(nh).terrain >= 0) {
                 G.supply_cache[nh] = G.supply_cache[nh] | supply_type
             }
         }
@@ -10879,7 +10879,7 @@ function on_init(scenario, game_options, static_view) {
     for (let i = 1; i < pieces.length; ++i) {
         let piece = pieces[i]
         piece.element = define_piece("unit", i, (piece.faction ? "ap " : "jp ") + piece.counter)
-            .tip_magic(focus_unit, blur_unit)
+            .tip_magic(focus_unit)
             .tooltip(format_unit_tooltip)
     }
 
@@ -10998,6 +10998,14 @@ function menu_check_distance() {
     on_update()
 }
 
+function menu_show_hq_range() {
+    LOCAL_STATUS = "check_hq_range"
+    LOCAL_STATE = {}
+    P.check_hq_range._begin()
+    update_header()
+    on_update()
+}
+
 function array_equals(a, b) {
     if (a.length !== b.length) {
         return false
@@ -11103,16 +11111,6 @@ P.check_unit_supply = {
         }
         canvas_show()
         canvas_draw_supply(LOCAL_STATE.supply_data)
-        var focused = []
-        if (LOCAL_STATE.unit
-            && LOCAL_STATE.unit !== CHINA_BOX
-            && pieces[LOCAL_STATE.unit].class === "hq" && G.location[LOCAL_STATE.unit] < LAST_BOARD_HEX) {
-            for_each_hex_in_range(G.location[LOCAL_STATE.unit], pieces[LOCAL_STATE.unit].cr, hex => set_add(focused, hex))
-            focused = in_range_on_map(G.location[LOCAL_STATE.unit], pieces[LOCAL_STATE.unit].cr, focused, pieces[LOCAL_STATE.unit].faction)
-        }
-        for (var hex of ALL_BOARD_HEXES) {
-            update_keyword("zoi_hex", hex, "yellow", set_has(focused, hex))
-        }
     },
 }
 
@@ -11160,11 +11158,6 @@ P.check_distance = {
         this.redraw()
     },
     redraw() {
-        if (LOCAL_STATE.range && LOCAL_STATE.points.length > 1) {
-            focus_hq_range = [LOCAL_STATE.points[0], LOCAL_STATE.points.length - 1]
-        } else {
-            focus_hq_range = [0, 0]
-        }
         on_update()
     },
     on_update() {
@@ -11178,6 +11171,81 @@ P.check_distance = {
             e.innerHTML = `<big>${index}</big><small>${int_to_hex(hex)}</small>`
             measure.appendChild(e)
         })
+        if (LOCAL_STATE.range && LOCAL_STATE.points.length > 1) {
+            var focused = []
+            for_each_hex_in_range(LOCAL_STATE.points[0], LOCAL_STATE.points.length - 1, hex => set_add(focused, hex))
+            focused = in_range_on_map(LOCAL_STATE.points[0], LOCAL_STATE.points.length - 1, focused, AP)
+            draw_range(focused)
+        }
+    },
+}
+
+P.check_hq_range = {
+    _begin() {
+        LOCAL_STATE.unit = 0
+        LOCAL_STATE.mode = "activation"
+    },
+    prompt() {
+        LOCAL_STATE.actions = {
+            "done": 1,
+            "unit": HQ_LIST.filter(u => G.location[u] <= LAST_BOARD_HEX && u !== LOCAL_STATE.unit),
+            "undo": LOCAL_STATE.unit ? 1 : 0,
+        }
+        if (!LOCAL_STATE.unit) {
+            LOCAL_STATE.prompt = "Select HQ to check range."
+        } else {
+            LOCAL_STATE.prompt = `${pieces[LOCAL_STATE.unit].name} ${LOCAL_STATE.mode} range.`
+            if (LOCAL_STATE.mode !== "supply") {
+                LOCAL_STATE.actions.supply = 1
+            }
+            if (LOCAL_STATE.mode !== "activation") {
+                LOCAL_STATE.actions.activation = 1
+            }
+            if (LOCAL_STATE.mode !== "isolation") {
+                LOCAL_STATE.actions.isolation = 1
+            }
+        }
+    },
+    supply() {
+        LOCAL_STATE.mode = "supply"
+        on_update()
+    },
+    activation() {
+        LOCAL_STATE.mode = "activation"
+        on_update()
+    },
+    isolation() {
+        LOCAL_STATE.mode = "isolation"
+        on_update()
+    },
+    undo() {
+        LOCAL_STATE.unit = 0
+        on_update()
+    },
+    unit(u) {
+        if (pieces[u].class === "hq" && G.location[u] < LAST_BOARD_HEX) {
+            LOCAL_STATE.unit = u
+            on_update()
+        }
+    },
+    on_update() {
+        if (!LOCAL_STATE.unit)
+            return
+        var focused = []
+        var piece = pieces[LOCAL_STATE.unit]
+        if (LOCAL_STATE.mode === "isolation") {
+            for_each_hex_in_range(G.location[LOCAL_STATE.unit], piece.cr, hex => set_add(focused, hex))
+            focused = in_range_on_map(G.location[LOCAL_STATE.unit], piece.cr, focused, piece.faction)
+        } else if (LOCAL_STATE.mode === "activation") {
+            mark_activation_zone(LOCAL_STATE.unit)
+            for_each_hex_in_range(G.location[LOCAL_STATE.unit], pieces[LOCAL_STATE.unit].cr, hex => {
+                if (G.supply_cache[hex] & HEX_TEMP_FLAG3)
+                    set_add(focused, hex)
+            })
+        } else if (LOCAL_STATE.mode === "supply") {
+            focused = with_unmodified_supply(() => hq_supply_zone(LOCAL_STATE.unit))
+        }
+        draw_range(focused)
     },
 }
 
@@ -11367,6 +11435,35 @@ function supply_query(unit) {
             trace_kunming(result)
         }
     }
+    return result
+}
+
+function hq_supply_zone(unit) {
+    L = {supply: {}}
+
+    var result = []
+    var piece = pieces[unit]
+    var location = G.location[unit]
+    clear_supply_cache(CLEAN_ALL_MASK)
+    for_each_unit_on_map((i, p) => (!set_has(G.oos, i)) ? mark_unit(i, p) : null)
+    place_virtual_units()
+    check_infrastructure()
+    for_each_unit_on_map((i, p) => (!set_has(G.oos, i)) ? set_zoi(i, p, [G.oos, G.oos]) : null)
+    indian_zoi_hack((i, p) => (!set_has(G.oos, i)) ? set_zoi(i, p, [G.oos, G.oos]) : null)
+    var hq = HQ_LIST.filter(hq => {
+        return (piece.faction === pieces[hq].faction && G.location[hq] < LAST_BOARD_HEX)
+    })
+    mark_supply_ports_oversea(hq)
+    L.supply = {}
+    mark_supply_ports_overland(hq)
+    L.supply = {}
+    mark_hexes_supplied_from([unit], l => true)
+    L.supply = {}
+    for_each_hex_in_range(G.location[unit], piece.cr, h => {
+        if (G.supply_cache[h] & piece.supply) {
+            set_add(result, h)
+        }
+    })
     return result
 }
 
@@ -11975,7 +12072,6 @@ function update_hand(side) {
 }
 
 function populate_unit_box(units, key, stacks) {
-    console.log(world.things)
     for (var i = 0; i < units.length; i++) {
         populate(key, i % stacks, "unit", units[i])
     }
@@ -12023,6 +12119,12 @@ function update_unit(u, location) {
         }
     }
 
+}
+
+function draw_range(hexes){
+    for (var hex of hexes)
+        if (set_has(ALL_BOARD_HEXES, hex))
+            update_keyword("zoi_hex", hex, "range")
 }
 
 function update_role_info(who) {
@@ -12188,24 +12290,6 @@ function on_update() {
         }
     }
 
-    // HQ RANGE
-    // TODO: focused has invalid hexes, so need to filter by ALL_BOARD_HEXES
-    if (focus_hq_range[0] && focus_hq && G.location[focus_hq] < LAST_BOARD_HEX) {
-        mark_activation_zone(focus_hq)
-        for_each_hex_in_range(G.location[focus_hq], pieces[focus_hq].cr, hex => {
-            if (G.supply_cache[hex] & HEX_TEMP_FLAG3)
-                if (set_has(ALL_BOARD_HEXES, hex))
-                    update_keyword("zoi_hex", hex, "range")
-        })
-    } else {
-        var focused = []
-        for_each_hex_in_range(focus_hq_range[0], focus_hq_range[1], hex => set_add(focused, hex))
-        focused = in_range_on_map(focus_hq_range[0], focus_hq_range[1], focused, AP)
-        for (var hex of focused)
-            if (set_has(ALL_BOARD_HEXES, hex))
-                update_keyword("zoi_hex", hex, "range")
-    }
-
     // STACKING VIOLATIONS
     if (G.violations.length > 0) {
         for (var h of G.violations)
@@ -12344,6 +12428,9 @@ function on_update() {
     action_button("ground_move", "Ground")
     action_button("extended_air", "Extended range")
     action_button("barges", "Barges")
+    action_button("supply", "Supply")
+    action_button("activation", "Activation")
+    action_button("isolation", "Isolation")
 
     action_button("redo", "Redo")
     action_button("undo", "Undo")
@@ -12566,27 +12653,6 @@ function format_hex_tooltip(h) {
 
 /* UNIT ZOOMED TOOLTIP & HQ RANGE DISPLAY TOGGLE */
 
-var focus_hq = 0
-var focus_hq_range = [0, 0]
-var focus_want_hq = 0
-var focus_want_hq_range = [0, 0]
-var focus_timer = 0
-
-function request_range_update() {
-    if (focus_timer) {
-        clearTimeout(focus_timer)
-        focus_timer = 0
-    }
-    focus_timer = setTimeout(() => {
-        focus_timer = 0
-        if (focus_hq !== focus_want_hq) {
-            focus_hq = focus_want_hq
-            focus_hq_range = focus_want_hq_range
-            on_update()
-        }
-    }, 0)
-}
-
 function focus_unit(id) {
     const piece = pieces[id]
 
@@ -12597,25 +12663,6 @@ function focus_unit(id) {
     html += "</div>"
     world.tip.className = "unit-tip"
     world.tip.innerHTML = html
-
-    // show HQ range
-    if (piece.class === "hq" && G.location[id] < LAST_BOARD_HEX && focus_hq !== id) {
-        focus_want_hq = id
-        if (id === HQ_CENTRAL_PACIFIC && G.sid === SOUTH_PACIFIC_SCENARIO)
-            focus_want_hq_range = [hex_to_int(5226), 5]
-        else
-            focus_want_hq_range = [G.location[id], pieces[id].cr]
-        request_range_update()
-    }
-}
-
-function blur_unit(id) {
-    // hide HQ range
-    focus_want_hq = 0
-    if (focus_want_hq_range[0]) {
-        focus_want_hq_range = [0, 0]
-        request_range_update()
-    }
 }
 
 /* LOG & PROMT TEXT FORMATTING */
