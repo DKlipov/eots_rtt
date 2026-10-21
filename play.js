@@ -12076,8 +12076,24 @@ function update_hand(side) {
 }
 
 function populate_unit_box(units, key, stacks) {
-    for (var i = 0; i < units.length; i++) {
-        populate(key, i % stacks, "unit", units[i])
+    var unit_category = ["faction", "class", "service"]
+    var sorted_units = units.sort((f, s) => {
+        var f_piece = pieces[f]
+        var s_piece = pieces[s]
+        return unit_category.reduce((sum, a, i) => {
+            var mod = 0
+            if (f_piece[a] === s_piece[a]) {
+                mod = 0
+            } else if (f_piece[a] > s_piece[a]) {
+                mod = -1
+            } else {
+                mod = 1
+            }
+            return sum + Math.pow(10, unit_category.length - i) * mod
+        }, 0)
+    })
+    for (var i = 0; i < sorted_units.length; i++) {
+        populate(key, Math.ceil((i + 1) / (sorted_units.length / stacks)) - 1, "unit", sorted_units[i])
     }
 }
 
@@ -12125,7 +12141,7 @@ function update_unit(u, location) {
 
 }
 
-function draw_range(hexes){
+function draw_range(hexes) {
     for (var hex of hexes)
         if (set_has(ALL_BOARD_HEXES, hex))
             update_keyword("zoi_hex", hex, "range")
