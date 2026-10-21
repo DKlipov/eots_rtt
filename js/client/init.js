@@ -345,8 +345,7 @@ function on_init(scenario, game_options, static_view) {
         }
     }
 
-    if (!SCENARIO_DATA[SID].original_control)
-        SCENARIO_DATA[SID].original_control = static_view.original_control
+    SCENARIO_DATA[SID].original_control = original_control[SCENARIO_DATA[SID].name]
 
     document.getElementById("vp_check_button").hidden = CAMPAIGN_SCENARIOS.includes(SID)
 

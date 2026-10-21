@@ -10,3 +10,4 @@ Contact me with mail danklipov97@gmail.com, tg @dklipov or discord fomelg#4134
 
 compile original hex owners
 replace filter.forEach
+reduce logs
