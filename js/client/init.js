@@ -436,10 +436,10 @@ function on_init(scenario, game_options, static_view) {
         battle.element.innerText = ALPHABET[i]
         battle.element.battle_index = i
         battle.element.addEventListener("mousedown", evt => {
-            if (evt.button === 0) {
+            if (evt.button === 0 && (world.focus === (evt.target.parentElement.thing) ||
+                evt.target.parentElement.thing.element.childElementCount <= 1)) {
                 send_query("combat", evt.target.battle_index)
-                if (world.focus === (evt.target.parentElement.thing))
-                    evt.stopImmediatePropagation()
+                evt.stopImmediatePropagation()
             }
         })
         battle.stackable()
@@ -447,10 +447,10 @@ function on_init(scenario, game_options, static_view) {
         landing.element.innerText = ALPHABET[i]
         landing.element.landing_index = i
         landing.element.addEventListener("mousedown", evt => {
-            if (evt.button === 0) {
-                send_query("combat", evt.target.landing_index)
-                if (world.focus === (evt.target.parentElement.thing))
-                    evt.stopImmediatePropagation()
+            if (evt.button === 0 && (world.focus === (evt.target.parentElement.thing) ||
+                evt.target.parentElement.thing.element.childElementCount <= 1)) {
+                send_query("combat", evt.target.battle_index)
+                evt.stopImmediatePropagation()
             }
         })
         landing.stackable()
