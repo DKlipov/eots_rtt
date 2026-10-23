@@ -12,6 +12,29 @@ const DIGIT_SUPERSCRIPT = [
     "\u2078",
     "\u2079",
 ]
+const REGION_MAP = {
+    "Ceylon": "Indian Isl.",
+    "Sumatra": "Sumatra (DEI)",
+    "NIndia": "North India",
+    "Java": "Java (DEI)",
+    "DEI": "DEI",
+    "Borneo": "Borneo (DEI)",
+    "IChina": "China",
+    "Celebes": "Celebes (DEI)",
+    "Formosa": "Formosa",
+    "Guinea": "New Guinea",
+    "Manchuria": "Manchuria",
+    "Korea": "Korea",
+    "JMandates": "Ocean",
+    "Caroline": "Ocean",
+    "AMandates": "Aus. Mandates",
+    "Oceania": "Ocean",
+    "Sakhalin": "Sakhalin",
+    "Marshall": "Marshall Isl.",
+    "Alaska": "Alaska",
+    "Hebrides": "New Hebrides"
+}
+
 
 function format_unit_tooltip(u) {
     var p = pieces[u]
@@ -61,7 +84,8 @@ function format_hex_tooltip(h) {
     var info = get_map_data(h)
     if (info) {
         if (info.name) tip += " " + info.name
-        if (info.region) tip += " (" + info.region + ")"
+        var reg = REGION_MAP[info.region]
+        if (info.region) tip += " (" + (reg ? reg : info.region) + ")"
         if (is_controllable_hex(h)) tip += is_space_controlled(h, AP) ? " [AP]" : " [JP]"
         var props = []
         if (info.city === CITY) props.push("city")
