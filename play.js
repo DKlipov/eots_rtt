@@ -10855,7 +10855,7 @@ function on_init(scenario, game_options, static_view) {
         battle.stackable()
         var landing = define_thing("landing", i).keyword("marker conflict landing top").animate()
         landing.element.innerText = ALPHABET[i]
-        landing.element.landing_index = i
+        landing.element.battle_index = i
         landing.element.addEventListener("mousedown", evt => {
             if (evt.button === 0 && (world.focus === (evt.target.parentElement.thing) ||
                 evt.target.parentElement.thing.element.childElementCount <= 1)) {
