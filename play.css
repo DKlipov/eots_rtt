@@ -28,7 +28,6 @@ header.local-status {
 /* VISIBILITY TOGGLES */
 
 body.hide-markers .marker:not(.road) { display: none }
-body.hide-pieces .space { display: none }
 body.hide-markers .zoi_hex { display: none }
 body.hide-pieces .piece { display: none }
 body.hide-pieces .marker:not(.control) { display: none }
