@@ -477,7 +477,8 @@ function on_init(scenario, game_options, static_view) {
 
     define_marker("fo-marker", JP, counters.future_offensive_jp).tooltip("Future Offensives Card")
     define_marker("fo-marker", AP, counters.future_offensive_ap).tooltip("Future Offensives Card")
-    define_marker("fo-marker", 2, counters.future_offensive_inactive).tooltip("Future Offensives Card")
+    define_marker("fo-marker", JP + 2, counters.future_offensive_inactive).tooltip("Future Offensives Card")
+    define_marker("fo-marker", AP + 2, counters.future_offensive_inactive).tooltip("Future Offensives Card")
 
     for (let key in nations) {
         var nation = nations[key]

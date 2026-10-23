@@ -46,7 +46,7 @@ function update_hand(side) {
     }
 
     if (G.events[events.FUTURE_OFFENSIVE_JP.id + side] === G.turn) {
-        populate(fo_card, fo_card_id, "fo-marker", 2)
+        populate(fo_card, fo_card_id, "fo-marker", side + 2)
     } else if (G.events[events.FUTURE_OFFENSIVE_JP.id + side] > 0) {
         if (side === AP)
             populate(fo_card, fo_card_id, "fo-marker", AP)

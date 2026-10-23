@@ -10887,7 +10887,8 @@ function on_init(scenario, game_options, static_view) {
 
     define_marker("fo-marker", JP, counters.future_offensive_jp).tooltip("Future Offensives Card")
     define_marker("fo-marker", AP, counters.future_offensive_ap).tooltip("Future Offensives Card")
-    define_marker("fo-marker", 2, counters.future_offensive_inactive).tooltip("Future Offensives Card")
+    define_marker("fo-marker", JP + 2, counters.future_offensive_inactive).tooltip("Future Offensives Card")
+    define_marker("fo-marker", AP + 2, counters.future_offensive_inactive).tooltip("Future Offensives Card")
 
     for (let key in nations) {
         var nation = nations[key]
@@ -12045,7 +12046,7 @@ function update_hand(side) {
     }
 
     if (G.events[events.FUTURE_OFFENSIVE_JP.id + side] === G.turn) {
-        populate(fo_card, fo_card_id, "fo-marker", 2)
+        populate(fo_card, fo_card_id, "fo-marker", side + 2)
     } else if (G.events[events.FUTURE_OFFENSIVE_JP.id + side] > 0) {
         if (side === AP)
             populate(fo_card, fo_card_id, "fo-marker", AP)
