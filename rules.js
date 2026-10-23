@@ -7090,24 +7090,16 @@ function for_each_hex_in_range(hex, range, lambda) {
 }
 
 
-function get_distance(first_hex, second_hex) {
-    if (first_hex > LAST_BOARD_HEX || second_hex > LAST_BOARD_HEX) {
-        return 500
-    }
-    var yf = first_hex % 29
-    var ys = second_hex % 29
-    var xf = (first_hex - yf) / 29
-    var xs = (second_hex - ys) / 29
-    var rx = Math.abs(xs - xf)
-    var ry = ys - yf - (rx & 1) * (xf & 1)
-    if (ry <= (-rx >> 1)) {
-        ry = Math.abs(ry) - (rx & 1)
-    } else if (ry < rx >> 1) {
-        const c = (rx >> 1) - ry
-        ry = (rx >> 1) + ((c + (rx & 2)) >> 1)
-        rx -= c
-    }
-    return rx + ry - (rx >> 1)
+function get_distance(a, b) {
+    const colA = Math.floor(a / 29);
+    const rowA = a % 29;
+    const colB = Math.floor(b / 29);
+    const rowB = b % 29;
+
+    const dx = colB - colA;
+    const dy = 2 * (rowB - rowA) + (colB % 2) - (colA % 2);
+
+    return Math.max(Math.abs(dx), Math.abs(dy + dx) / 2, Math.abs(dy - dx) / 2);
 }
 
 function in_range_on_map(first_hex, range, hexes, faction = AP) {
