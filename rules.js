@@ -7551,16 +7551,13 @@ function mark_supply_ports_overland(hq, piece) {
             }
             const occupied_land = G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
             var distance = base_distance + get_ground_mp_cost(item, nh, faction)
-            if (distance > SUPPLY_PORT_RANGE || distance >= map_get(distance_map, nh, 100) || occupied_land) {
+            if (distance >= map_get(distance_map, nh, 100) || occupied_land) {
                 continue
             }
             map_set(distance_map, nh, distance)
-
-            if (distance < SUPPLY_PORT_RANGE) {
-                L.supply.queue.push(nh)
-                L.supply.retracing.push(item)
-            }
-            if (get_map_data(nh).port && is_space_controlled(nh, faction)) {
+            L.supply.queue.push(nh)
+            L.supply.retracing.push(item)
+            if (distance <= SUPPLY_PORT_RANGE && get_map_data(nh).port && is_space_controlled(nh, faction)) {
                 G.supply_cache[nh] = G.supply_cache[nh] | JP_SUPPLY_PORT << faction
             }
             if (get_map_data(nh).airfield && is_space_controlled(nh, faction)) {
