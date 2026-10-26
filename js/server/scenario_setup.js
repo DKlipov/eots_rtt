@@ -1357,7 +1357,10 @@ P.japan_init_1942 = {
             button("done")
         } else {
             var has_3_ops = G.hand[JP].some(c => cards[c].ops >= 3)
-            G.hand[JP].filter(c => cards[c].ops >= 3 || !has_3_ops).forEach(c => action_card(c))
+            G.hand[JP].forEach(c => {
+                if (cards[c].ops >= 3 || !has_3_ops)
+                    action_card(c)
+            })
             button("skip")
         }
     },

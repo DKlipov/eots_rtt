@@ -340,7 +340,11 @@ cards[find_card(JP, 17)].before_battle_roll = function (faction) {
         return
     }
     var modifier = 0
-    G.offensive.battle.air_naval[JP].filter(u => unit_on_board(u)).map(u => pieces[u]).forEach(piece => {
+    G.offensive.battle.air_naval[JP].forEach(u => {
+        var piece = pieces[u]
+        if (!unit_on_board(u)) {
+            return
+        }
         if (piece.type === "ca" || piece.type === "cl" || piece.type === "apd") {
             G.offensive.battle.strength[faction] += 2
             modifier += 2
@@ -484,7 +488,11 @@ cards[find_card(JP, 25)].before_battle_roll = function (faction) {
         return
     }
     var modifier = 0
-    G.offensive.battle.air_naval[AP].filter(u => unit_on_board(u)).map(u => pieces[u]).forEach(piece => {
+    G.offensive.battle.air_naval[AP].forEach(u => {
+        if (!unit_on_board(u)) {
+            return
+        }
+        var piece = pieces[u]
         if (piece.type === "cv" && is_us_unit(piece)) {
             G.offensive.battle.strength[faction] -= 2
             modifier -= 2
@@ -549,7 +557,11 @@ cards[find_card(JP, 29)].before_battle_roll = function (faction) {
         return
     }
     var modifier = 0
-    G.offensive.battle.air_naval[JP].filter(u => unit_on_board(u)).map(u => pieces[u]).forEach(piece => {
+    G.offensive.battle.air_naval[JP].forEach(u => {
+        if (!unit_on_board(u)) {
+            return
+        }
+        var piece = pieces[u]
         if (piece.class === "naval" && piece.br) {
             G.offensive.battle.strength[faction] += 2
             modifier += 2
@@ -964,7 +976,11 @@ cards[find_card(JP, 47)].before_battle_roll = function (faction) {
         return
     }
     var modifier = 0
-    G.offensive.battle.air_naval[JP].filter(u => unit_on_board(u)).map(u => pieces[u]).forEach(piece => {
+    G.offensive.battle.air_naval[JP].forEach(u => {
+        if (!unit_on_board(u)) {
+            return
+        }
+        var piece = pieces[u]
         if (piece.type === "ca") {
             G.offensive.battle.strength[faction] += 2
             modifier += 2
@@ -1143,8 +1159,11 @@ P.attack_b29_base = {
     _begin() {
         L.allowed_units = []
         var b29 = [B_29_1, B_29_2]
-        b29.filter(u => unit_on_board(u) && get_distance(G.location[u], TOKYO) <= 8 || G.location[u] === CHINA_BOX)
-            .forEach(u => set_add(L.allowed_units, u))
+        b29.forEach(u => {
+            if (unit_on_board(u) && get_distance(G.location[u], TOKYO) <= 8 || G.location[u] === CHINA_BOX) {
+                set_add(L.allowed_units, u)
+            }
+        })
         if (L.allowed_units.length <= 0) {
             return
         }
@@ -1384,7 +1403,11 @@ cards[find_card(JP, 83)].before_battle_roll = function (faction) {
         return
     }
     var modifier = 0
-    G.offensive.battle.air_naval[JP].filter(u => unit_on_board(u)).map(u => pieces[u]).forEach(piece => {
+    G.offensive.battle.air_naval[JP].forEach(u => {
+        if (!unit_on_board(u)) {
+            return
+        }
+        var piece = pieces[u]
         if (piece.type === "ca" || piece.type === "cl" || piece.type === "apd") {
             G.offensive.battle.strength[faction] += 2
             modifier += 2
@@ -1781,10 +1804,11 @@ function cache_skip_bombing() {
         }
     })
     G.offensive.skip_bomb_able = []
-    G.offensive.active_units[JP].filter(u => {
+    G.offensive.active_units[JP].forEach(u => {
         var piece = pieces[u]
-        return piece.type === "ca" || piece.type === "cl" || piece.type === "apd"
-    }).forEach(u => {
+        if (!(piece.type === "ca" || piece.type === "cl" || piece.type === "apd")) {
+            return;
+        }
         var path = map_get(G.offensive.paths, u, [0, 0, 0])
         for (var i = 3; i < path.length; i++) {
             var location = path[i]
@@ -1856,7 +1880,11 @@ cards[find_card(AP, 25)].before_battle_roll = function (faction) {
         return
     }
     var modifier = 0
-    G.offensive.battle.ground[AP].filter(u => unit_on_board(u)).map(u => pieces[u]).forEach(piece => {
+    G.offensive.battle.ground[AP].forEach(u => {
+        if (!unit_on_board(u)) {
+            return
+        }
+        var piece = pieces[u]
         if (piece.class === "ground" && (piece.service === "navy" || piece.service === "army")) {
             G.offensive.battle.strength[faction] -= 1
             modifier -= 1
@@ -1907,9 +1935,11 @@ P.chronicle = {
                 set_add(landing_hexes, path[path.length - 1])
             }
         })
-        landing_hexes.filter(l => get_map_data(l).island && !set_has(G.offensive.chronicle, l) && !is_faction_units(l, JP)
-            && get_map_data(l).nh.some(nh => this.condition(nh))
-        ).forEach(l => set_add(L.allowed_hexes, l))
+        landing_hexes.forEach(l => {
+            if (get_map_data(l).island && !set_has(G.offensive.chronicle, l) && !is_faction_units(l, JP)
+                && get_map_data(l).nh.some(nh => this.condition(nh)))
+                set_add(L.allowed_hexes, l)
+        })
     },
     prompt() {
         if (L.allowed_hexes.length) {
@@ -2017,7 +2047,7 @@ cards[find_card(AP, 33)].before_unit_activation = function () {
     filter_activation_units((u, piece) => piece.class !== "naval", AP)
 }
 
-;(function(){
+;(function () {
     for (var i = 1; i < cards.length; i++) {
         var always_true = () => true
         const card = cards[i]
@@ -2055,8 +2085,9 @@ cards[find_card(AP, 36)].before_battle_roll = function (faction) {
         return
     }
     var modifier = 0
-    G.offensive.battle.air_naval[AP].filter(u => unit_on_board(u)).map(u => pieces[u]).forEach(piece => {
-        if (piece.type === "ca" && piece.service === "navy") {
+    G.offensive.battle.air_naval[AP].forEach(u => {
+        var piece = pieces[u]
+        if (unit_on_board(u) && piece.type === "ca" && piece.service === "navy") {
             G.offensive.battle.strength[faction] += 2
             modifier += 2
         }
@@ -2087,7 +2118,7 @@ cards[find_card(AP, 38)].can_play = function () {
             hqs.push(hq)
         }
     })
-    return hqs.length === 0 || hqs.filter(hq => !set_has(G.oos, hq)).length > 0
+    return hqs.length === 0 || hqs.find(hq => !set_has(G.oos, hq))
 }
 
 cards[find_card(AP, 38)].before_choose_hq = function () {
@@ -2096,7 +2127,7 @@ cards[find_card(AP, 38)].before_choose_hq = function () {
         var piece = pieces[hq]
         if (G.location[hq] < LAST_BOARD_HEX && piece.faction === AP
             && !set_has(G.oos, hq)
-            && get_activatable_units(hq, piece.supply).filter(u => pieces[u].service === "ch").length) {
+            && get_activatable_units(hq, piece.supply).find(u => pieces[u].service === "ch")) {
             G.offensive.tarzan = true
             hqs.push(hq)
         }
@@ -2153,7 +2184,7 @@ cards[find_card(AP, 48)].after_unit_activation = function (u) {
     if (R === JP) {
         return
     }
-    L.hq_bonus += G.offensive.active_units[R].filter(u => pieces[u].service === "ch").length
+    L.hq_bonus += array_count(G.offensive.active_units[R], u => pieces[u].service === "ch")
 }
 
 cards[find_card(AP, 50)].after_unit_activation = function () {
@@ -2241,8 +2272,9 @@ cards[find_card(AP, 55)].before_battle_roll = function (faction) {
         return
     }
     var modifier = 0
-    G.offensive.battle.air_naval[JP].filter(u => unit_on_board(u)).map(u => pieces[u]).forEach(piece => {
-        if (piece.class === "naval" && piece.br) {
+    G.offensive.battle.air_naval[JP].forEach(u => {
+        var piece = pieces[u]
+        if (unit_on_board(u) && piece.class === "naval" && piece.br) {
             G.offensive.battle.strength[faction] -= 2
             modifier -= 2
         }
@@ -2332,7 +2364,7 @@ cards[KING_II].before_commit_offensive = function () {
     if (G.offensive.stage !== ATTACK_STAGE || G.active === JP) {
         return
     }
-    if (!G.offensive.battle_hexes.filter(h => get_map_data(h).region === "Philippines").length) {
+    if (!G.offensive.battle_hexes.find(h => get_map_data(h).region === "Philippines")) {
         return "At least one battle hex should be Philippines"
     }
 }

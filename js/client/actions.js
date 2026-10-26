@@ -525,12 +525,12 @@ function trace_kunming(result) {
         check_burma_road()
         result.path.to_source = retrace_supply_path(L.supply.queue[L.supply.queue.length - 1])
     } else {
-        var airfields = [DACCA, JARHAT].filter(h => G.supply_cache[h] & AP_SUPPLY_AIRFIELD)
-        if (airfields.length) {
+        var airfields = [DACCA, JARHAT].find(h => G.supply_cache[h] & AP_SUPPLY_AIRFIELD)
+        if (airfields) {
             L.supply.queue = L.supply_ports.queue
             L.supply.retracing = L.supply_ports.retracing
-            result.path.from_port = retrace_supply_path(airfields[0])
-            result.path.to_port = [KUNMING, airfields[0]]
+            result.path.from_port = retrace_supply_path(airfields)
+            result.path.to_port = [KUNMING, airfields]
         }
     }
 }

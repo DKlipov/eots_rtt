@@ -66,7 +66,10 @@ function indian_zoi_hack(apply) {
     if (!(G.supply_cache[hex_to_int(1005)] & AP_ZOI)) {
         remove_zoi(hex_to_int(1205))
     }
-    G.offensive.active_units[AP].filter(u => G.location[u] !== MADRAS).forEach(u => apply(u, pieces[u]))
+    G.offensive.active_units[AP].forEach(u => {
+        if (G.location[u] !== MADRAS)
+            apply(u, pieces[u])
+    })
     for_each_hex_in_range(KUNMING, 1, h => {
         if (has_zoi(h, JP)) {
             G.supply_cache[h] -= JP_ZOI
@@ -122,7 +125,11 @@ function place_virtual_units() {
 }
 
 function check_infrastructure() {
-    ROAD_EVENTS.filter(e => !is_event_active(e)).forEach(e => e.keys.forEach(h => G.supply_cache[h] |= TRANSPORT_ROUTE_DISABLED))
+    ROAD_EVENTS.forEach(e => {
+        if (!is_event_active(e)) {
+            e.keys.forEach(h => G.supply_cache[h] |= TRANSPORT_ROUTE_DISABLED)
+        }
+    })
 }
 
 function check_hump() {

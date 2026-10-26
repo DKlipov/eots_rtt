@@ -234,7 +234,10 @@ P.reinforcement_segment = {
             prompt(`Place reinforcements. (Done).`)
         }
         var hq_in_list = false
-        L.hq_reinforcement.filter(hq => L.unit_reinforcement.includes(hq)).forEach(hq => {
+        L.hq_reinforcement.forEach(hq => {
+            if (!L.unit_reinforcement.includes(hq)) {
+                return
+            }
             hq_in_list = true
             if (G.active_stack.length && G.active_stack[0] !== hq) {
                 action_unit(hq)
@@ -347,8 +350,14 @@ P.replacement_segment = {
         if (G.active_stack.length > 0) {
             prompt(`Choose hex to place ${piece_get_log_str(G.active_stack[0])}${not_used_unground ? "" : "(Ground replacements should be spent)"}.`)
             L.allowed_hexes.forEach(h => action_hex(h))
-            ru.filter(u => G.location[u] === ELIMINATED_BOX).forEach(u => action_unit(u))
-            L.returned.filter(u => G.active_stack[0] !== u).forEach(u => action_unit(u))
+            ru.forEach(u => {
+                if (G.location[u] === ELIMINATED_BOX)
+                    action_unit(u)
+            })
+            L.returned.forEach(u => {
+                if (G.active_stack[0] !== u)
+                    action_unit(u)
+            })
             return
         }
         if (!ru.length) {
