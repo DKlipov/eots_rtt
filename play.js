@@ -10661,7 +10661,7 @@ const TURN_MARKERS = [
     {
         tooltip: "Strategic Bombing",
         counter: counters.strat_bombing,
-        value: G => G.events[events.STRAT_BOMBING_CAMPAIGN.id]
+        value: G => G.events[events.STRAT_BOMBING.id]
     },
     {
         tooltip: "China Offensive",
@@ -12369,7 +12369,13 @@ function on_update() {
     for (i = 0; i < TURN_MARKERS.length; i++) {
         const marker = TURN_MARKERS[i]
         var v = marker.value(G)
-        if (v >= first_turn && v <= last_turn) {
+        if (Array.isArray(v)) {
+            v.forEach(val => {
+                if (val >= first_turn && val <= last_turn) {
+                    populate_generic("turn", val, "turn-marker " + marker.counter)
+                }
+            })
+        } else if (v >= first_turn && v <= last_turn) {
             populate("turn", v, "turn-marker", i)
             if (marker.reduced?.(G))
                 update_keyword("turn-marker", i, "reduced")

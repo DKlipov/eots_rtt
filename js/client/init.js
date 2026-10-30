@@ -247,7 +247,7 @@ const TURN_MARKERS = [
     {
         tooltip: "Strategic Bombing",
         counter: counters.strat_bombing,
-        value: G => G.events[events.STRAT_BOMBING_CAMPAIGN.id]
+        value: G => G.events[events.STRAT_BOMBING.id]
     },
     {
         tooltip: "China Offensive",
