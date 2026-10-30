@@ -19937,8 +19937,9 @@ exports.action = function (state, role, action, argument) {
                     G.burma_road = argument[offset]
                     offset += 1
                 }
-                var oos_len = (type >> 1) - 1
+                var oos_len = (type >> 1)
                 if (oos_len > 0) {
+                    oos_len -= 1
                     G.oos = argument.slice(offset, offset + oos_len)
                     offset += oos_len
                 }
