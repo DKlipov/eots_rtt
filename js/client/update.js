@@ -99,7 +99,7 @@ function update_unit(u, location) {
         || pieces[u].class === "hq" && G.inter_service[pieces[u].faction]
     )
 
-    if (set_has(G.offensive.active_units[piece.faction], u))
+    if (set_has(G.offensive.active_units[piece.faction], u) || piece.class === "hq" && G.offensive.active_hq.includes(u))
         update_keyword("unit", u, "activated")
 
     if (G.active_stack.includes(u)) {

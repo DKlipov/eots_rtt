@@ -93,7 +93,7 @@ function format_hex_tooltip(h) {
         if (info.city === CHINESE_CITY) props.push("Chinese city")
         if (info.airfield) props.push("airfield")
         if (info.port) props.push("port")
-        if (info.island) props.push("island")
+        if (info.island && info.terrain !== ATOLL) props.push("island")
         if (info.resource) props.push("resource")
         if (info.terrain) props.push(TERRAIN_NAME[info.terrain])
         if (props.length > 0) tip += " - " + props.join(", ")

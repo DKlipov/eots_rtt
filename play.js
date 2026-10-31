@@ -12113,7 +12113,7 @@ function update_unit(u, location) {
         || pieces[u].class === "hq" && G.inter_service[pieces[u].faction]
     )
 
-    if (set_has(G.offensive.active_units[piece.faction], u))
+    if (set_has(G.offensive.active_units[piece.faction], u) || piece.class === "hq" && G.offensive.active_hq.includes(u))
         update_keyword("unit", u, "activated")
 
     if (G.active_stack.includes(u)) {
@@ -12699,7 +12699,7 @@ function format_hex_tooltip(h) {
         if (info.city === CHINESE_CITY) props.push("Chinese city")
         if (info.airfield) props.push("airfield")
         if (info.port) props.push("port")
-        if (info.island) props.push("island")
+        if (info.island && info.terrain !== ATOLL) props.push("island")
         if (info.resource) props.push("resource")
         if (info.terrain) props.push(TERRAIN_NAME[info.terrain])
         if (props.length > 0) tip += " - " + props.join(", ")
