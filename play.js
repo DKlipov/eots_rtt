@@ -10626,22 +10626,26 @@ const TURN_MARKERS = [
     {
         tooltip: "-1 PW (Ground)",
         counter: counters.pw_casualties,
-        value: G => G.events[events.US_CASUALTIES.id]
+        value: G => G.events[events.US_CASUALTIES.id],
+        multiple: true
     },
     {
         tooltip: "-1 PW (BB)",
         counter: counters.pw_bb,
-        value: G => G.events[events.LACK_US_BB.id]
+        value: G => G.events[events.LACK_US_BB.id],
+        multiple: true
     },
     {
         tooltip: "-1 PW (CV)",
         counter: counters.pw_cv,
-        value: G => G.events[events.LACK_US_CV.id]
+        value: G => G.events[events.LACK_US_CV.id],
+        multiple: true
     },
     {
         tooltip: "-1 PW (Progress of the War)",
         counter: counters.pw_failed_pow,
-        value: G => G.events[events.FAILED_POW.id]
+        value: G => G.events[events.FAILED_POW.id],
+        multiple: true
     },
     {
         tooltip: "US Sub - No Escorts",
@@ -10661,7 +10665,8 @@ const TURN_MARKERS = [
     {
         tooltip: "Strategic Bombing",
         counter: counters.strat_bombing,
-        value: G => G.events[events.STRAT_BOMBING.id]
+        value: G => G.events[events.STRAT_BOMBING.id],
+        multiple: true
     },
     {
         tooltip: "China Offensive",
@@ -10939,6 +10944,11 @@ function on_init(scenario, game_options, static_view) {
 
     TURN_MARKERS.forEach(function (m, i) {
         define_marker("turn-marker", i, m.counter).tooltip(m.tooltip)
+        if (m.multiple) {
+            for (var j = 0; j < 12; j++) {
+                define_marker("turn-marker" + i, j, m.counter).tooltip(m.tooltip)
+            }
+        }
     })
 
     for (var event of Object.values(events))
@@ -12370,9 +12380,9 @@ function on_update() {
         const marker = TURN_MARKERS[i]
         var v = marker.value(G)
         if (Array.isArray(v)) {
-            v.forEach(val => {
+            v.forEach((val) => {
                 if (val >= first_turn && val <= last_turn) {
-                    populate_generic("turn", val, "turn-marker " + marker.counter)
+                    populate("turn", val, "turn-marker" + i, val)
                 }
             })
         } else if (v >= first_turn && v <= last_turn) {

@@ -366,9 +366,9 @@ function on_update() {
         const marker = TURN_MARKERS[i]
         var v = marker.value(G)
         if (Array.isArray(v)) {
-            v.forEach(val => {
+            v.forEach((val) => {
                 if (val >= first_turn && val <= last_turn) {
-                    populate_generic("turn", val, "turn-marker " + marker.counter)
+                    populate("turn", val, "turn-marker" + i, val)
                 }
             })
         } else if (v >= first_turn && v <= last_turn) {
