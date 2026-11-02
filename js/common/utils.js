@@ -168,7 +168,7 @@ function get_china_offensive_modifiers() {
         divisions: G.china_divisions
     }
     result.burma_road = (G.sid === SOUTH_PACIFIC_SCENARIO) ? 0 : ((2 - G.burma_road) * 4)
-    result.log.push(`Japanese divisions ${G.china_divisions}.`)
+    result.log.push(`JP divisions in China ${G.china_divisions}.`)
     result.log.push(`+${result.burma_road} (Burma road).`)
 
     if (G.sid === SOUTH_PACIFIC_SCENARIO) {
