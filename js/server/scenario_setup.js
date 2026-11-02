@@ -845,9 +845,8 @@ function deal_cards() {
     }
     if (G.strategic_warfare) {
         jp_cards = Math.max(jp_cards - G.strategic_warfare, 4)
-        log(`Strategic warfare reduces JP draw (-${G.strategic_warfare}).`)
     }
-    log(`JP draw ${jp_cards} cards ${source}.`)
+    log(`JP drew ${jp_cards} cards ${source}.`)
     G.passes[JP] = 0
     if (jp_cards === 6) {
         G.passes[JP] = 1
@@ -855,7 +854,7 @@ function deal_cards() {
         G.passes[JP] = 2
     }
     if (G.passes[JP]) {
-        log(`JP receive ${G.passes[JP]} passes.`)
+        log(`JP received ${G.passes[JP]} passes.`)
     }
     while (G.hand[JP].length < jp_cards) {
         draw_card(JP)
@@ -894,9 +893,9 @@ function deal_cards() {
     }
     ap_cards = Math.max(ap_cards, 4)
     G.passes[AP] = Math.min(G.passes[AP], 2)
-    log(`AP draw ${ap_cards} cards.`)
+    log(`AP drew ${ap_cards} cards.`)
     if (G.passes[AP]) {
-        log(`AP receive ${G.passes[AP]} passes.`)
+        log(`AP received ${G.passes[AP]} passes.`)
     }
     while (G.hand[AP].length < ap_cards) {
         draw_card(AP)
@@ -908,12 +907,11 @@ function S_P_deal_cards() {
     G.passes[JP] = 0
     if (G.strategic_warfare) {
         jp_cards -= G.strategic_warfare
-        log(`Strategic warfare reduces JP draw to ${jp_cards} (-${G.strategic_warfare}).`)
         G.passes[JP] = 1
     }
-    log(`JP draw ${jp_cards} cards.`)
+    log(`JP drew ${jp_cards} cards.`)
     if (G.passes[JP]) {
-        log(`JP receive ${G.passes[JP]} passes.`)
+        log(`JP received ${G.passes[JP]} passes.`)
     }
     while (G.hand[JP].length < jp_cards) {
         draw_card(JP)
@@ -926,7 +924,7 @@ function S_P_deal_cards() {
         G.passes[AP]++
         log(`AP draw reduced by 1 due to China's surrender.`)
     }
-    log(`AP draw ${ap_cards} cards.`)
+    log(`AP drew ${ap_cards} cards.`)
     if (G.passes[AP]) {
         log(`AP receive ${G.passes[AP]} passes.`)
     }
@@ -940,12 +938,11 @@ function B_F_W_deal_cards() {
     G.passes[JP] = 0
     if (G.strategic_warfare) {
         jp_cards -= G.strategic_warfare
-        log(`Strategic warfare reduces JP draw to ${jp_cards} (-${G.strategic_warfare}).`)
         G.passes[JP] = G.strategic_warfare
     }
-    log(`JP draw ${jp_cards} cards.`)
+    log(`JP drew ${jp_cards} cards.`)
     if (G.passes[JP]) {
-        log(`JP receive ${G.passes[JP]} passes.`)
+        log(`JP received ${G.passes[JP]} passes.`)
     }
     while (G.hand[JP].length < jp_cards) {
         draw_card(JP)
@@ -976,9 +973,9 @@ function B_F_W_deal_cards() {
             log(`AP draw reduced by 1 due to Diverted Logistics.`)
         }
     }
-    log(`AP draw ${ap_cards} cards.`)
+    log(`AP drew ${ap_cards} cards.`)
     if (G.passes[AP]) {
-        log(`AP receive ${G.passes[AP]} passes.`)
+        log(`AP received ${G.passes[AP]} passes.`)
     }
     while (G.hand[AP].length < ap_cards) {
         draw_card(AP)
@@ -1199,7 +1196,7 @@ P.operation_z = {
         G.offensive.active_units[JP].forEach(u => {
             set_location(u, h, true)
         })
-        log(`${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(u => piece_get_log_str(u)))} moved to ${hex_get_log_str(h)}.`)
+        log(`>1${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(u => piece_get_log_str(u)))} to ${hex_get_log_str(h)}.`)
         create_battle_hex(OAHU)
         G.offensive.active_units[JP].forEach(u => commit_to_attack(u, OAHU))
         goto("operation_z_battle")
@@ -1223,7 +1220,7 @@ P.operation_z_pbm = {
             set_location(u, h, true)
             map_set(G.offensive.paths, u, map_get(L.allowed_hexes, h))
         })
-        log(`${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(u => piece_get_log_str(u)))} moved to ${hex_get_log_str(h)}.`)
+        log(`>1${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(u => piece_get_log_str(u)))} to ${hex_get_log_str(h)}.`)
         G.active_stack = []
         end()
     },
@@ -1235,16 +1232,16 @@ P.operation_z_battle = script(`
       set G.offensive.battle.ground_stage 0
       call execute_attack {active: JP}
       call assign_hits
-      set G.offensive.battle {}
       eval {
         change_political_will(8, "Operation Z")
       }
+      set G.offensive.battle {}
       
       set G.offensive.stage POST_BATTLE_STAGE
       eval {
         set_location(find_piece("lexington"), OAHU, true)
         set_location(find_piece("enterprise"), OAHU, true)
-        log (piece_get_log_str(find_piece("lexington"))+", "+piece_get_log_str(find_piece("enterprise"))+" moved to "+hex_get_log_str(OAHU)+".")
+        log (">1"+piece_get_log_str(find_piece("lexington"))+", "+piece_get_log_str(find_piece("enterprise"))+" to "+hex_get_log_str(OAHU)+".")
       }
       set G.active JP
       call operation_z_pbm
@@ -1268,6 +1265,7 @@ P.operation_no_1 = {
         G.offensive.intelligence = SURPRISE
         G.offensive.logistic = 20
         G.offensive.active_hq = [HQ_YAMAMOTO, HQ_SOUTH_SEAS, HQ_JP_SOUTH]
+        check_units()
         end()
     },
 }
@@ -1303,7 +1301,7 @@ P.arcadia = {
     },
     hold() {
         clear_undo()
-        log(`AP chooses Arcadia +4 random cards.`)
+        log(`AP chose Arcadia +4 random cards.`)
         while (G.hand[AP].length < 5) {
             draw_card(AP)
         }
@@ -1311,7 +1309,7 @@ P.arcadia = {
     discard() {
         G.hand[AP] = []
         G.draw[AP].push(find_card(AP, 4))
-        log(`AP chooses 5 random cards.`)
+        log(`AP chose 5 random cards.`)
         clear_undo()
         while (G.hand[AP].length < 5) {
             draw_card(AP)
@@ -1332,7 +1330,7 @@ P.arcadia = {
 
 function draw_hist_cards() {
     var hist = [find_card(JP, 3), find_card(JP, 47), find_card(JP, 59)]
-    log(`JP draws historical hand ${hist.map(c => card_get_log_str(c)).join(", ")} + 4 random cards.`)
+    log(`JP drew historical hand ${hist.map(c => card_get_log_str(c)).join(", ")} + 4 random cards.`)
     hist.forEach(c => draw_specific_card(c))
 }
 
@@ -1366,7 +1364,7 @@ P.japan_init_1942 = {
     card(c) {
         push_undo()
         discard_card(c)
-        log(`JP discard ${card_get_log_str(c)} and draw ${card_get_log_str(find_card(JP, 47))}.`)
+        log(`JP discarded ${card_get_log_str(c)} and drew ${card_get_log_str(find_card(JP, 47))}.`)
         draw_specific_card(find_card(JP, 47))
     },
     skip() {

@@ -362,7 +362,7 @@ function eliminate(unit, no_log = false) {
         return
     }
     if (!no_log) {
-        log(`${piece_get_log_str(unit)} eliminated.`)
+        log(`>1${piece_get_log_str(unit)} eliminated.`)
     }
     G.location[unit] = ELIMINATED_BOX
     set_delete(G.reduced, unit)
@@ -379,7 +379,7 @@ function damage_unit(unit) {
 
 function reduce_unit(unit, no_log = false) {
     if (!no_log) {
-        log(`${piece_get_log_str(unit)} reduced.`)
+        log(`>1${piece_get_log_str(unit)} reduced.`)
     }
     set_add(G.reduced, unit)
 }
@@ -537,12 +537,12 @@ function change_political_will(diff, cause) {
     if (diff > 0) {
         diff = "+" + diff
     }
-    log(`Political will changed to ${G.political_will} (${diff}) - ${cause}.`)
+    log(`PW to ${G.political_will} (${diff}) - ${cause}.`)
 }
 
 function change_wie(diff, cause) {
     if (diff === undefined) {
-        log(`No war in europe changed.`)
+        log(`No WIE changed.`)
         return
     }
     G.wie = Math.max(G.wie + diff, 0)
@@ -550,7 +550,7 @@ function change_wie(diff, cause) {
     if (diff > 0) {
         diff = "+" + diff
     }
-    log(`War in europe changed to ${get_wie_level()} (${3 - G.wie}), ${cause} (${diff}).`)
+    log(`WIE to ${get_wie_level()} (${3 - G.wie}), ${cause} (${diff}).`)
 }
 
 
@@ -726,13 +726,14 @@ function get_named_intelligence(int) {
 function play_event(c) {
     var faction = cards[c].faction
     if (G.future_offensive[faction] === c) {
-        log(`${side_get_log_str(faction)} played FO card.`)
+        log(`${side_get_log_str(faction)} revealed FO card.`)
     }
-    var ec = ""
     if (cards[c].type === MILITARY) {
-        ec = ` (${cards[c].ops} EC)`
+        log(`${card_get_log_str(c)} (${cards[c].ops} EC) played.`)
+    }else{
+        log(`${card_get_log_str(c)} played as event.`)
     }
-    log(`${card_get_log_str(c)}${ec} played as event.`)
+
     if (cards[c].draw) {
         into_turn_draw(faction)
     }
@@ -756,7 +757,7 @@ function activate_card(c) {
     G.offensive.active_cards.push(c)
     G.offensive.offensive_card = c
     if (G.future_offensive[faction] === c) {
-        log(`${side_get_log_str(faction)} played FO card.`)
+        log(`${side_get_log_str(faction)} revealed FO card.`)
     }
     discard_card(c)
     set_add(G.discard[faction], c)
@@ -808,7 +809,7 @@ function change_asp(faction, count) {
         G.asp[faction][0] += count
     }
     if (size !== G.asp[faction][0]) {
-        log(`${side_get_log_str(faction)} amphibious shipping points changed to ${G.asp[faction][0]} (${count}).`)
+        log(`${side_get_log_str(faction)} ASP changed to ${G.asp[faction][0]} (${count}).`)
     }
 }
 

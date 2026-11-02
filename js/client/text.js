@@ -188,7 +188,7 @@ function escape_text(text) {
 }
 
 function escape_list(match, head, body) {
-    if (body.split(",").length <= 3)
+    if (body.split(",").length <= 2)
         return body
     return `<span class="expand-list" onclick="expand_list()">${head}</span><span hidden>${body}</span></span>`
 }
@@ -300,10 +300,15 @@ function on_log(text, i) {
             p.classList.add(text[1] === "J" ? "jp" : "ap")
             text = m
             break
-        case ">":
-            p.className = "i"
-            text = text.substring(1)
-            break
+    }
+    if (text[0] === '>') {
+        var code = text[1]
+        if (code === "1") {
+            p.classList.add("i")
+        } else if (code === "2") {
+            p.classList.add("ii")
+        }
+        text = text.substring(2)
     }
     p.innerHTML = escape_text(text)
 

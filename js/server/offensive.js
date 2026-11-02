@@ -943,9 +943,6 @@ P.move_offensive_units = {
             G.asp[R][1] += L.move_data.asp_points
         }
         move_units(G.active_stack, curr_path)
-        if (L.move_type === AMPH_MOVE) {
-            log(`${side_get_log_str(G.active)} ASP used ${L.move_data.asp_points} (${G.asp[R][1]}/${G.asp[R][0]}).`)
-        }
         L.move_type = ANY_MOVE
         L.spec_move = 0
         call("move_to", {hex})
@@ -1104,7 +1101,7 @@ function attack_hex(hex) {
         move_units(non_cv, path_to_bh)
         non_cv.forEach(u => set_delete(distant, u))
     }
-    log(`${units_str(distant)} assigned to attack ${hex_get_log_str(hex)}.`)
+    log(`>1${units_str(distant)} attack ${hex_get_log_str(hex)}.`)
 }
 
 P.check_overstacking = {
@@ -1563,11 +1560,14 @@ P.declare_battle_hexes = {
             return
         }
         check_amph_mod()
-        G.offensive.battle_names
-            .forEach(h => {
-                if (set_has(G.offensive.battle_hexes, h))
-                    log(`Battle ${String.fromCharCode(65 + G.offensive.battle_names.indexOf(h))} declared in ${hex_get_log_str(h)}.`)
-            })
+        if (G.offensive.battle_hexes.length) {
+            log(`Battles declared:`)
+            G.offensive.battle_names
+                .forEach(h => {
+                    if (set_has(G.offensive.battle_hexes, h))
+                        log(`>1${String.fromCharCode(65 + G.offensive.battle_names.indexOf(h))} in ${hex_get_log_str(h)}.`)
+                })
+        }
         compute_possible_battle_hexes()
         if (L.possible_units.length <= 0 && G.offensive.battle_hexes.length <= 0) {
             log("No battle hexes declared.")
@@ -1669,7 +1669,7 @@ P.assign_escort = {
         G.active_stack.forEach(u => {
             commit_to_attack(u, hex)
         })
-        log(`${units_str(G.active_stack)} assigned to attack ${hex_get_log_str(hex)}.`)
+        log(`>1${units_str(G.active_stack)} attack ${hex_get_log_str(hex)}.`)
         G.active_stack = []
         L.possible_hexes = []
         if (L.possible_units.length === 0) {
@@ -2030,7 +2030,6 @@ P.attack_reaction_cards = {
         push_undo()
         if (!L.logged) {
             L.logged = 1
-            log("#GOffensive reaction cards")
         }
         play_event(c)
     }
@@ -2242,38 +2241,38 @@ function get_ground_roll_modifiers(faction) {
         })
         if (air[faction] && !air[1 - faction]) {
             result += 2
-            log(`+2 Attacker Air support.`)
+            log(`>2+2 Attacker Air support.`)
         }
         if (naval[faction] && !naval[1 - faction]) {
             result += 2
-            log(`+2 Attacker Naval support.`)
+            log(`>2+2 Attacker Naval support.`)
         }
     }
     if (faction === G.offensive.attacker) {
         var terrain = get_map_data(battle.battle_hex).terrain
         if (terrain === JUNGLE) {
             result -= 1
-            log(`-1 Jungle.`)
+            log(`>2-1 Jungle.`)
         } else if (terrain === MIXED) {
             result -= 2
-            log(`-2 Mixed terrain.`)
+            log(`>2-2 Mixed terrain.`)
         }
         if (terrain === MOUNTAIN) {
             result -= 3
-            log(`-3 Mountains.`)
+            log(`>2-3 Mountains.`)
         }
     }
     if (faction !== G.offensive.attacker && set_has(G.offensive.amp_mod, battle.battle_hex) && array_count(battle.amph_ground, u => unit_on_board(u) && set_has(battle.ground[G.offensive.attacker], u))) {
         result += 3
-        log(`+3 Amphibious assault.`)
+        log(`>2+3 Amphibious assault.`)
     }
     if (faction === AP && G.location[ARMOR_BRIGADE] === battle.battle_hex) {
         result += 1
-        log(`+1 Armor brigade.`)
+        log(`>2+1 Armor brigade.`)
     }
     if (faction === JP && is_event_active(events.NEW_OPERATION_PLAN) && get_map_data(battle.battle_hex).island) {
         result += 1
-        log(`+1 Defensive doctrine.`)
+        log(`>2+1 Defensive doctrine.`)
     }
     return result
 }
@@ -2283,21 +2282,21 @@ function get_naval_roll_modifiers(faction) {
     var result = 0
     if (faction === AP && G.offensive.intelligence === AMBUSH) {
         result += 4
-        log(`+4 Ambush.`)
+        log(`>2+4 Ambush.`)
     }
     if (faction === G.offensive.attacker && G.offensive.intelligence === SURPRISE) {
         result += 3
-        log(`+3 Surprise attack.`)
+        log(`>2+3 Surprise attack.`)
     }
     var ap_air_superiority = faction === AP && battle.air_naval[AP].find(
         u => unit_on_board(u) && pieces[u].br && is_us_unit(pieces[u])
     )
     if (ap_air_superiority && G.turn >= 8) {
         result += 3
-        log(`+3 AP air superiority (1944-1945).`)
+        log(`>2+3 AP air superiority (1944-1945).`)
     } else if (ap_air_superiority && G.turn >= 5) {
         result += 1
-        log(`+1 AP air superiority (1943).`)
+        log(`>2+1 AP air superiority (1943).`)
     }
     return result
 }
@@ -2323,7 +2322,7 @@ function get_battle_modifiers(faction) {
     battle.roll_modifiers = 0
     if (battle.ground_stage && is_col_tsuji_applied(faction)) {
         battle.roll_modifiers = 4
-        log(`+4 Col.Tsuji.`)
+        log(`>2+4 Col.Tsuji.`)
     } else if (battle.ground_stage) {
         battle.roll_modifiers = get_ground_roll_modifiers(faction)
     } else {
@@ -2342,7 +2341,7 @@ P.execute_attack = function () {
         end()
         return
     }
-    log(`${side_get_log_str(faction)} fire (${battle.strength[faction]}).`)
+    log(`>1${side_get_log_str(faction)} fire (${battle.strength[faction]}).`)
     battle.roll[faction] = random(10)
     clear_undo()
     get_battle_modifiers(faction)
@@ -2567,7 +2566,7 @@ P.jp_cv_reassign = {
             if (unit_on_board(u)) {
                 set_delete(G.reduced, u)
                 map_delete(L.to_repair, u)
-                log(`${piece_get_log_str(u)} flipped to full strength.`)
+                log(`>1${piece_get_log_str(u)} to full strength.`)
             } else {
                 var location = G.offensive.battle.battle_hex
                 var path = map_get(G.offensive.paths, u)

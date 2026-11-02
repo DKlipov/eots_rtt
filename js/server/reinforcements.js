@@ -152,6 +152,7 @@ function update_reinf_active() {
 
 P.reinforcement_segment = {
     _begin() {
+        L.logged = 0
         check_supplied_hexes(G.active)
         L.oos = object_copy(G.oos)
         if (G.wie <= 7 && G.active === AP && G.sid !== BURMA_SCENARIO) {
@@ -283,6 +284,10 @@ P.reinforcement_segment = {
     },
     action_hex(hex) {
         push_undo()
+        if (!L.logged) {
+            log(`${G.active ? "AP" : "JP"} reinforcements:`)
+            L.logged = 1
+        }
         set_delete(L.unit_reinforcement, G.active_stack[0])
         set_location(G.active_stack[0], hex)
         if (pieces[G.active_stack[0]].class === "hq") {
@@ -293,6 +298,10 @@ P.reinforcement_segment = {
     },
     delay() {
         push_undo()
+        if (!L.logged) {
+            log(`${G.active ? "AP" : "JP"} reinforcements:`)
+            L.logged = 1
+        }
         set_location(G.active_stack[0], DELAYED_BOX)
         log(`${piece_get_log_str(G.active_stack[0])} voluntary delayed to next turn.`)
         if (could_sent_to_europe(G.active_stack[0])) {
@@ -309,6 +318,7 @@ P.reinforcement_segment = {
 
 P.replacement_segment = {
     _begin() {
+        L.logged = false
         if (G.active === JP && L.replacement_points && L.replacement_points[NAVAl_REP]) {
             G.reinforcements[NAVAl_REP] += L.replacement_points[NAVAl_REP]
         }
@@ -379,10 +389,14 @@ P.replacement_segment = {
     },
     divisions() {
         push_undo()
+        if (!L.logged) {
+            log(`${G.active ? "AP" : "JP"} replacements:`)
+            L.logged = 1
+        }
         L.divisions -= 1
         G.china_divisions -= 1
         L.divisions_used++
-        log(`JP divisions in China reduced to ${G.china_divisions}.`)
+        log(`>1Divisions in China to ${G.china_divisions}.`)
         if (L.replacement_points[GROUND_REP]) {
             L.replacement_points[GROUND_REP]++
         } else {
@@ -391,6 +405,10 @@ P.replacement_segment = {
     },
     action_hex(hex) {
         push_undo()
+        if (!L.logged) {
+            log(`${G.active ? "AP" : "JP"} replacements:`)
+            L.logged = 1
+        }
         set_location(G.active_stack[0], hex)
         set_delete(L.returned, G.active_stack[0])
         G.active_stack = []
@@ -409,10 +427,14 @@ P.replacement_segment = {
         }
 
         push_undo()
+        if (!L.logged) {
+            log(`${G.active ? "AP" : "JP"} replacements:`)
+            L.logged = 1
+        }
         if (set_has(G.reduced, u)) {
             set_delete(G.reduced, u)
             set_delete(L.replacable_units, u)
-            log(`${piece_get_log_str(u)} flipped to full strength.`)
+            log(`>1${piece_get_log_str(u)} to full strength.`)
         } else {
             set_add(G.reduced, u)
             G.active_stack = [u]

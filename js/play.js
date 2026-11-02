@@ -5,6 +5,7 @@ const CLIENT_SIDE_SUPPLY = 0
 /* dummies for client side supply and move pathing */
 function log() {}
 function capture_hex() {}
+function side_get_log_str(side) {}
 
 /** import common/constants.js */
 /** import common/data.js */

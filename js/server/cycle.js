@@ -3,21 +3,21 @@
 /** import server/surrender.js*/
 
 P.strategic_phase = script(`
-    log ("!Turn " + G.turn + " - " + get_year_season() + " " + get_year())
+    log ("@Turn " + G.turn + ". " + get_year_season() + " " + get_year())
     log ("@Turn " + G.turn + ". Strategic phase")
     eval {
         check_jp_resources_event()
     }
     set G.active AP 
-    log ("#AAP Reinforcement segment")
+    set L.todo 1    
     call reinforcement_segment
-    log ("#JJP Reinforcement segment")
+    set L.todo 1
     set G.active JP 
     call reinforcement_segment
-    log ("#AAP Replacement segment")
+    set L.todo 1
     set G.active AP 
     call replacement_segment {scheduled_points: 1}
-    log ("#JJP Replacement segment")
+    set L.todo 1
     set G.active JP
     call replacement_segment {scheduled_points: 1}
     log ("#AStrategic warfare segment")

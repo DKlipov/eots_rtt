@@ -64,6 +64,7 @@ button#play_card_button:enabled:active:hover {
 
 #log div { padding-left: 20px; text-indent: -12px; }
 #log div.i { padding-left: 32px; }
+#log div.ii { padding-left: 42px; }
 
 #log .h1, #log .h2, #log .h3, #log .h4, #log .h5 { margin: 8px 0; text-align: center; text-indent: 0; }
 #log .h1 { padding: 2px 8px; margin: 16px 0; font-variant: small-caps; }

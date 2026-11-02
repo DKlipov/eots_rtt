@@ -104,7 +104,7 @@ function build_road(card, event) {
     activate_card(card)
     check_event(event)
     log(`${card_get_log_str(card)} played.`)
-    log(`CBI infrastructure built ${event.name}.`)
+    log(`>1CBI infrastructure built ${event.name}.`)
     goto("end_action")
 }
 
@@ -149,7 +149,7 @@ P.offensive_segment_card_action = {
         push_undo()
         activate_card(L.c)
         G.offensive.type = OC
-        log(`${card_get_log_str(L.c)} (${cards[L.c].ops} OC) played as operation card.`)
+        log(`${card_get_log_str(L.c)} (${cards[L.c].ops} OC) played.`)
         goto("offensive_sequence")
     },
     event() {

@@ -6,6 +6,7 @@ const CLIENT_SIDE_SUPPLY = 0
 /* dummies for client side supply and move pathing */
 function log() {}
 function capture_hex() {}
+function side_get_log_str(side) {}
 
 /* {{{ js/common/constants.js */
 const ROLES = ["Japan", "Allies"]
@@ -8955,12 +8956,13 @@ function move_units(units, path) {
     var legs = 1
     i = 2
     var destination = path[path.length - 1]
-    log(`${units_list} moved to ${list_get_log_str(hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
+    log(`>1${units_list} to ${list_get_log_str(hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
     if (could_zoi_cross && zoi_cross_declared) {
         zoi_crossed()
         could_zoi_cross = false
         supply_checked = true
     }
+    var cap = []
     for (; i < path.length; i++) {
         var hex = path[i]
         if (i > 2 && !(path[0] & GROUND_DISENGAGEMENT) && path[0] & GROUND_MOVE) {
@@ -8993,8 +8995,14 @@ function move_units(units, path) {
             supply_checked = 0
         }
         if (path[0] & GROUND_MOVE && !is_faction_units(hex, 1 - R)) {
-            capture_hex(hex, faction)
+            if (get_map_data(hex).named && !is_space_controlled(hex, faction)) {
+                cap.push(hex)
+            }
+            capture_hex(hex, faction, true)
         }
+    }
+    if (cap.length) {
+        log(`>2Captured: ${list_get_log_str(cap.length + " hexes", cap.map(u => hex_get_log_str(u)))}.`)
     }
     if (path[0] & AIR_MOVE && (distance > L.move_data.extended_battle_range || legs > L.move_data.air_move_legs)
         || path[0] & GROUND_DISENGAGEMENT && distance > 1
@@ -9029,11 +9037,14 @@ function broken_hex_edge(move_type, from, to) {
 }
 
 function get_move_type(type) {
-    if (G.offensive.stage !== ATTACK_STAGE) {
+    if (G.offensive.stage !== ATTACK_STAGE && G.offensive.stage !== REACTION_STAGE) {
         return ""
     }
+    if (L.move_type === AMPH_MOVE) {
+        log(`${side_get_log_str(G.active)} ASP used  .`)
+    }
     if (type & STRAT_MOVE) {
-        return " (Strategic move)"
+        return " (Strategic)"
     } else if (type & AIR_EXTENDED_MOVE) {
         return " (Extended range)"
     } else if (type & GROUND_DISENGAGEMENT) {
@@ -9041,9 +9052,9 @@ function get_move_type(type) {
     } else if (type & BARGES_MOVE) {
         return " (Barges)"
     } else if (type & GROUND_MOVE) {
-        return " (Ground move)"
+        return " (Ground)"
     } else if (type & AMPH_MOVE) {
-        return " (Amphibious Assault)"
+        return ` (AA ${L.move_data.asp_points}/${L.move_data.asp_points + G.asp[R][0] - G.asp[R][1]})`
     }
     return ""
 }
@@ -9054,9 +9065,9 @@ function set_location(unit, location, no_logs) {
     var prev_out = prev_location > LAST_BOARD_HEX && prev_location !== CHINA_BOX
     var current_on_map = location <= LAST_BOARD_HEX || location === CHINA_BOX
     if (!no_logs && prev_out && current_on_map) {
-        log(`${piece_get_log_str(unit)} placed in ${hex_get_log_str(location)}.`)
+        log(`>1${piece_get_log_str(unit)} to ${hex_get_log_str(location)}.`)
     } else if (!no_logs && current_on_map) {
-        log(`${piece_get_log_str(unit)} moved to ${hex_get_log_str(location)}.`)
+        log(`>1${piece_get_log_str(unit)} to ${hex_get_log_str(location)}.`)
     }
     var pair_location = G.location[pieces[unit].pair]
     var size = get_overstack_size(unit)
@@ -12797,7 +12808,7 @@ function escape_text(text) {
 }
 
 function escape_list(match, head, body) {
-    if (body.split(",").length <= 3)
+    if (body.split(",").length <= 2)
         return body
     return `<span class="expand-list" onclick="expand_list()">${head}</span><span hidden>${body}</span></span>`
 }
@@ -12909,10 +12920,15 @@ function on_log(text, i) {
             p.classList.add(text[1] === "J" ? "jp" : "ap")
             text = m
             break
-        case ">":
-            p.className = "i"
-            text = text.substring(1)
-            break
+    }
+    if (text[0] === '>') {
+        var code = text[1]
+        if (code === "1") {
+            p.classList.add("i")
+        } else if (code === "2") {
+            p.classList.add("ii")
+        }
+        text = text.substring(2)
     }
     p.innerHTML = escape_text(text)
 
