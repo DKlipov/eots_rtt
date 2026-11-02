@@ -582,7 +582,7 @@ function could_air_stop_here() {
 }
 
 
-function create_battle_hex(hex) {
+function create_battle_hex(hex, log) {
     if (set_has(G.offensive.battle_hexes, hex)) {
         return
     }
@@ -923,14 +923,6 @@ P.move_offensive_units = {
             G.offensive.barges = 1
             log(`Barges ability used.`)
         }
-        if (G.offensive.organic.length && G.active_stack.some(u => G.offensive.organic.includes(u))) {
-            G.active_stack.forEach(u => {
-                var index = G.offensive.organic.indexOf(u)
-                if (index >= 0 && pieces[u].class === "naval") {
-                    log(`Organic transport used. ${piece_get_log_str(G.offensive.organic[index])} carried ${piece_get_log_str(G.offensive.organic[index + 1])}`)
-                }
-            })
-        }
 
         if (curr_path[0] & AMPH_MOVE && G.offensive.stage === REACTION_STAGE) {
             L.move_type = AMPH_MOVE
@@ -943,6 +935,14 @@ P.move_offensive_units = {
             G.asp[R][1] += L.move_data.asp_points
         }
         move_units(G.active_stack, curr_path)
+        if (G.offensive.organic.length && G.active_stack.some(u => G.offensive.organic.includes(u))) {
+            G.active_stack.forEach(u => {
+                var index = G.offensive.organic.indexOf(u)
+                if (index >= 0 && pieces[u].class === "naval") {
+                    log(`>2Organic transport\. ${piece_get_log_str(G.offensive.organic[index])} with ${piece_get_log_str(G.offensive.organic[index + 1])}`)
+                }
+            })
+        }
         L.move_type = ANY_MOVE
         L.spec_move = 0
         call("move_to", {hex})
@@ -1595,6 +1595,9 @@ P.declare_battle_hexes = {
         L.actual_hexes = []
         commit_to_attack(G.active_stack[0], hex)
         if (!set_has(G.offensive.battle_hexes, hex) && is_faction_units(hex, 1 - G.active)) {
+            if (!set_has(G.offensive.battle_hexes, hex)) {
+                log(`>1${String.fromCharCode(65 + G.offensive.battle_hexes.length + 1)} in ${hex_get_log_str(hex)}.`)
+            }
             create_battle_hex(hex)
             if (G.offensive.type === OC) {
                 L.possible_hexes = G.offensive.battle_hexes.slice()
@@ -1602,6 +1605,7 @@ P.declare_battle_hexes = {
                     target_in_battle_range(pieces[u].parenthetical ? pieces[u].br : pieces[u].ebr, G.location[u], L.possible_hexes))
             }
         }
+        log(`>1${piece_get_log_str(G.active_stack[0])} assigned to ${hex_get_log_str(hex)}.`)
         G.active_stack = []
         if (L.possible_units.length <= 0) {
             end()

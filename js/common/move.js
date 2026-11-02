@@ -928,9 +928,6 @@ function get_move_type(type) {
     if (G.offensive.stage !== ATTACK_STAGE && G.offensive.stage !== REACTION_STAGE) {
         return ""
     }
-    if (L.move_type === AMPH_MOVE) {
-        log(`${side_get_log_str(G.active)} ASP used  .`)
-    }
     if (type & STRAT_MOVE) {
         return " (Strategic)"
     } else if (type & AIR_EXTENDED_MOVE) {

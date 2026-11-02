@@ -140,8 +140,8 @@ P.coastal_artillery = {
     },
     unit(u) {
         push_undo()
-        log(`${piece_get_log_str(u)} hit by coastal defence.`)
-        damage_unit(u)
+        log(`>2${piece_get_log_str(u)} hit by coastal defence.`)
+        damage_unit(u,true)
         end()
     }
 }

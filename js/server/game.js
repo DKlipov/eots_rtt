@@ -369,11 +369,11 @@ function eliminate(unit, no_log = false) {
     set_delete(G.oos, unit)
 }
 
-function damage_unit(unit) {
+function damage_unit(unit, no_log) {
     if (set_has(G.reduced, unit)) {
-        eliminate(unit)
+        eliminate(unit, no_log)
     } else {
-        reduce_unit(unit)
+        reduce_unit(unit, no_log)
     }
 }
 
@@ -730,7 +730,7 @@ function play_event(c) {
     }
     if (cards[c].type === MILITARY) {
         log(`${card_get_log_str(c)} (${cards[c].ops} EC) played.`)
-    }else{
+    } else {
         log(`${card_get_log_str(c)} played as event.`)
     }
 

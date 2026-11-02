@@ -1147,7 +1147,6 @@ P.scenario_1941 = script(`
     call conquest_of_se_asia_reaction
     set G.offensive.stage BATTLE_STAGE
     set G.offensive.all_bh G.offensive.battle_hexes.slice()
-    log ("#GResolve battles")
     set G.active G.offensive.attacker
     call battle_sequence
     eval {

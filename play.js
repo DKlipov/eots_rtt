@@ -9040,9 +9040,6 @@ function get_move_type(type) {
     if (G.offensive.stage !== ATTACK_STAGE && G.offensive.stage !== REACTION_STAGE) {
         return ""
     }
-    if (L.move_type === AMPH_MOVE) {
-        log(`${side_get_log_str(G.active)} ASP used  .`)
-    }
     if (type & STRAT_MOVE) {
         return " (Strategic)"
     } else if (type & AIR_EXTENDED_MOVE) {
@@ -10151,9 +10148,9 @@ function get_element_weight(e) {
     if (piece.faction === AP) {
         value += 16000
     }
-    if (is_action("unit", unit) || set_has(G.active_stack, unit)) {
-        value += 4000
-    }
+    // if (is_action("unit", unit) || set_has(G.active_stack, unit)) {
+    //     value += 4000
+    // }
     if (piece.class === "naval") {
         value += 1000
     } else if (piece.class === "ground") {

@@ -72,9 +72,9 @@ function get_element_weight(e) {
     if (piece.faction === AP) {
         value += 16000
     }
-    if (is_action("unit", unit) || set_has(G.active_stack, unit)) {
-        value += 4000
-    }
+    // if (is_action("unit", unit) || set_has(G.active_stack, unit)) {
+    //     value += 4000
+    // }
     if (piece.class === "naval") {
         value += 1000
     } else if (piece.class === "ground") {

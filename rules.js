@@ -9045,9 +9045,6 @@ function get_move_type(type) {
     if (G.offensive.stage !== ATTACK_STAGE && G.offensive.stage !== REACTION_STAGE) {
         return ""
     }
-    if (L.move_type === AMPH_MOVE) {
-        log(`${side_get_log_str(G.active)} ASP used  .`)
-    }
     if (type & STRAT_MOVE) {
         return " (Strategic)"
     } else if (type & AIR_EXTENDED_MOVE) {
@@ -11168,7 +11165,7 @@ function could_air_stop_here() {
 }
 
 
-function create_battle_hex(hex) {
+function create_battle_hex(hex, log) {
     if (set_has(G.offensive.battle_hexes, hex)) {
         return
     }
@@ -11509,14 +11506,6 @@ P.move_offensive_units = {
             G.offensive.barges = 1
             log(`Barges ability used.`)
         }
-        if (G.offensive.organic.length && G.active_stack.some(u => G.offensive.organic.includes(u))) {
-            G.active_stack.forEach(u => {
-                var index = G.offensive.organic.indexOf(u)
-                if (index >= 0 && pieces[u].class === "naval") {
-                    log(`Organic transport used. ${piece_get_log_str(G.offensive.organic[index])} carried ${piece_get_log_str(G.offensive.organic[index + 1])}`)
-                }
-            })
-        }
 
         if (curr_path[0] & AMPH_MOVE && G.offensive.stage === REACTION_STAGE) {
             L.move_type = AMPH_MOVE
@@ -11529,6 +11518,14 @@ P.move_offensive_units = {
             G.asp[R][1] += L.move_data.asp_points
         }
         move_units(G.active_stack, curr_path)
+        if (G.offensive.organic.length && G.active_stack.some(u => G.offensive.organic.includes(u))) {
+            G.active_stack.forEach(u => {
+                var index = G.offensive.organic.indexOf(u)
+                if (index >= 0 && pieces[u].class === "naval") {
+                    log(`>2Organic transport\. ${piece_get_log_str(G.offensive.organic[index])} with ${piece_get_log_str(G.offensive.organic[index + 1])}`)
+                }
+            })
+        }
         L.move_type = ANY_MOVE
         L.spec_move = 0
         call("move_to", {hex})
@@ -12181,6 +12178,9 @@ P.declare_battle_hexes = {
         L.actual_hexes = []
         commit_to_attack(G.active_stack[0], hex)
         if (!set_has(G.offensive.battle_hexes, hex) && is_faction_units(hex, 1 - G.active)) {
+            if (!set_has(G.offensive.battle_hexes, hex)) {
+                log(`>1${String.fromCharCode(65 + G.offensive.battle_hexes.length + 1)} in ${hex_get_log_str(hex)}.`)
+            }
             create_battle_hex(hex)
             if (G.offensive.type === OC) {
                 L.possible_hexes = G.offensive.battle_hexes.slice()
@@ -12188,6 +12188,7 @@ P.declare_battle_hexes = {
                     target_in_battle_range(pieces[u].parenthetical ? pieces[u].br : pieces[u].ebr, G.location[u], L.possible_hexes))
             }
         }
+        log(`>1${piece_get_log_str(G.active_stack[0])} assigned to ${hex_get_log_str(hex)}.`)
         G.active_stack = []
         if (L.possible_units.length <= 0) {
             end()
@@ -15001,8 +15002,8 @@ P.coastal_artillery = {
     },
     unit(u) {
         push_undo()
-        log(`${piece_get_log_str(u)} hit by coastal defence.`)
-        damage_unit(u)
+        log(`>2${piece_get_log_str(u)} hit by coastal defence.`)
+        damage_unit(u,true)
         end()
     }
 }
@@ -17805,11 +17806,11 @@ function eliminate(unit, no_log = false) {
     set_delete(G.oos, unit)
 }
 
-function damage_unit(unit) {
+function damage_unit(unit, no_log) {
     if (set_has(G.reduced, unit)) {
-        eliminate(unit)
+        eliminate(unit, no_log)
     } else {
-        reduce_unit(unit)
+        reduce_unit(unit, no_log)
     }
 }
 
@@ -18166,7 +18167,7 @@ function play_event(c) {
     }
     if (cards[c].type === MILITARY) {
         log(`${card_get_log_str(c)} (${cards[c].ops} EC) played.`)
-    }else{
+    } else {
         log(`${card_get_log_str(c)} played as event.`)
     }
 
@@ -19509,7 +19510,6 @@ P.scenario_1941 = script(`
     call conquest_of_se_asia_reaction
     set G.offensive.stage BATTLE_STAGE
     set G.offensive.all_bh G.offensive.battle_hexes.slice()
-    log ("#GResolve battles")
     set G.active G.offensive.attacker
     call battle_sequence
     eval {
