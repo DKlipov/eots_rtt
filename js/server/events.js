@@ -651,14 +651,14 @@ P.draw_from_discard = {
                     G.offensive.active_cards.push(c)
                 }
             })
-            log(`${side_get_log_str(G.active)} discard ${card_get_log_str(c)}.`)
+            log(`${side_get_log_str(G.active)} discarded ${card_get_log_str(c)}.`)
             discard_card(c)
             return
         }
         set_delete(G.discard[G.active], c)
         G.hand[G.active].push(c)
         G.offensive.active_cards = []
-        log(`${side_get_log_str(G.active)} draw ${card_get_log_str(c)} from discard pile.`)
+        log(`${side_get_log_str(G.active)} drew ${card_get_log_str(c)} from discard pile.`)
         end()
     }
 }
@@ -1050,7 +1050,7 @@ P.paratroopers = {
     },
     action_hex(h) {
         push_undo()
-        log(`Paratroopers landing ${hex_get_log_str(h)}.`)
+        log(`Paratroopers dropped into ${hex_get_log_str(h)}.`)
         capture_hex(h)
         for_each_unit_on_map((u, piece, location) => {
             if (location === h) {

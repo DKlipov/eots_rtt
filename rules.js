@@ -8961,7 +8961,7 @@ function move_units(units, path) {
     var legs = 1
     i = 2
     var destination = path[path.length - 1]
-    log(`${units_list} moved ${list_get_log_str(hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
+    log(`${units_list} moved to ${list_get_log_str(hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
     if (could_zoi_cross && zoi_cross_declared) {
         zoi_crossed()
         could_zoi_cross = false
@@ -9060,7 +9060,7 @@ function set_location(unit, location, no_logs) {
     var prev_out = prev_location > LAST_BOARD_HEX && prev_location !== CHINA_BOX
     var current_on_map = location <= LAST_BOARD_HEX || location === CHINA_BOX
     if (!no_logs && prev_out && current_on_map) {
-        log(`${piece_get_log_str(unit)} placed to ${hex_get_log_str(location)}.`)
+        log(`${piece_get_log_str(unit)} placed in ${hex_get_log_str(location)}.`)
     } else if (!no_logs && current_on_map) {
         log(`${piece_get_log_str(unit)} moved to ${hex_get_log_str(location)}.`)
     }
@@ -10521,7 +10521,7 @@ P.replacement_segment = {
         if (set_has(G.reduced, u)) {
             set_delete(G.reduced, u)
             set_delete(L.replacable_units, u)
-            log(`${piece_get_log_str(u)} flipped to full size.`)
+            log(`${piece_get_log_str(u)} flipped to full strength.`)
         } else {
             set_add(G.reduced, u)
             G.active_stack = [u]
@@ -11481,7 +11481,7 @@ P.move_offensive_units = {
             G.active_stack.forEach(u => {
                 var index = G.offensive.organic.indexOf(u)
                 if (index >= 0 && pieces[u].class === "naval") {
-                    log(`Organic transport used. ${piece_get_log_str(G.offensive.organic[index])} carry ${piece_get_log_str(G.offensive.organic[index + 1])}`)
+                    log(`Organic transport used. ${piece_get_log_str(G.offensive.organic[index])} carried ${piece_get_log_str(G.offensive.organic[index + 1])}`)
                 }
             })
         }
@@ -11658,7 +11658,7 @@ function attack_hex(hex) {
         move_units(non_cv, path_to_bh)
         non_cv.forEach(u => set_delete(distant, u))
     }
-    log(`${units_str(distant)} assigned to attack to ${hex_get_log_str(hex)}.`)
+    log(`${units_str(distant)} assigned to attack ${hex_get_log_str(hex)}.`)
 }
 
 P.check_overstacking = {
@@ -11675,7 +11675,7 @@ P.check_overstacking = {
         L.hexes = []
         L.allowed_units.forEach(u => set_add(L.hexes, G.location[u]))
         if (L.remove_flag && L.allowed_units.length) {
-            log(`#G${side_get_log_str(G.active)} Check stacking`)
+            log(`#G${side_get_log_str(G.active)} checked stacking`)
         }
     },
     inactive: "check stacking",
@@ -11984,7 +11984,7 @@ P.retro_disengagement = {
     skip() {
         push_undo()
         var units = list_get_log_str(L.allowed_units.length + " units", L.allowed_units.map(u => set_has(G.reduced, u) ? `(${piece_get_log_str(u)})` : piece_get_log_str(u)))
-        log(`${units} skip disengagement.`)
+        log(`${units} skipped disengagement.`)
         this.next_disengagement()
     },
     reset_state() {
@@ -12223,7 +12223,7 @@ P.assign_escort = {
         G.active_stack.forEach(u => {
             commit_to_attack(u, hex)
         })
-        log(`${units_str(G.active_stack)} assigned to attack to ${hex_get_log_str(hex)}.`)
+        log(`${units_str(G.active_stack)} assigned to attack ${hex_get_log_str(hex)}.`)
         G.active_stack = []
         L.possible_hexes = []
         if (L.possible_units.length === 0) {
@@ -13121,7 +13121,7 @@ P.jp_cv_reassign = {
             if (unit_on_board(u)) {
                 set_delete(G.reduced, u)
                 map_delete(L.to_repair, u)
-                log(`${piece_get_log_str(u)} flipped to full size.`)
+                log(`${piece_get_log_str(u)} flipped to full strength.`)
             } else {
                 var location = G.offensive.battle.battle_hex
                 var path = map_get(G.offensive.paths, u)
@@ -14570,7 +14570,7 @@ P.offensive_segment = {
     pass() {
         push_undo()
         G.passes[R] -= 1
-        log(`Pass used, ${G.passes[R]} remains.`)
+        log(`Pass used, ${G.passes[R]} remaining.`)
         goto("end_action")
     },
 }
@@ -14586,7 +14586,7 @@ P.offensive_segment_card_action = {
         push_undo()
         activate_card(L.c)
         G.offensive.type = OC
-        log(`${card_get_log_str(L.c)} (${cards[L.c].ops} OV) played as operation card.`)
+        log(`${card_get_log_str(L.c)} (${cards[L.c].ops} OC) played as operation card.`)
         goto("offensive_sequence")
     },
     event() {
@@ -14604,7 +14604,7 @@ P.offensive_segment_card_action = {
     discard() {
         push_undo()
         activate_card(L.c)
-        log(`${side_get_log_str(R)} discards ${card_get_log_str(L.c)}.`)
+        log(`${side_get_log_str(R)} discarded ${card_get_log_str(L.c)}.`)
         goto("end_action")
     },
     inter_service() {
@@ -15481,14 +15481,14 @@ P.draw_from_discard = {
                     G.offensive.active_cards.push(c)
                 }
             })
-            log(`${side_get_log_str(G.active)} discard ${card_get_log_str(c)}.`)
+            log(`${side_get_log_str(G.active)} discarded ${card_get_log_str(c)}.`)
             discard_card(c)
             return
         }
         set_delete(G.discard[G.active], c)
         G.hand[G.active].push(c)
         G.offensive.active_cards = []
-        log(`${side_get_log_str(G.active)} draw ${card_get_log_str(c)} from discard pile.`)
+        log(`${side_get_log_str(G.active)} drew ${card_get_log_str(c)} from discard pile.`)
         end()
     }
 }
@@ -15880,7 +15880,7 @@ P.paratroopers = {
     },
     action_hex(h) {
         push_undo()
-        log(`Paratroopers landing ${hex_get_log_str(h)}.`)
+        log(`Paratroopers dropped into ${hex_get_log_str(h)}.`)
         capture_hex(h)
         for_each_unit_on_map((u, piece, location) => {
             if (location === h) {
@@ -17565,7 +17565,7 @@ function on_view(sherlock) {
     return create_view(sherlock)
 }
 
-function update_outdated_G(){
+function update_outdated_G() {
     //todo: remove
     if (!G.events[events.CHINA_STATUS.id]) {
         G.events[events.CHINA_STATUS.id] = G.surrender[nations.CHINA.id]
@@ -18021,7 +18021,7 @@ function resolve_into_turn_draw(faction) {
     }
     G.offensive.draw[faction] = G.offensive.draw[faction].filter(c => c >= 0)
     for (var i = 0; i < count; i++) {
-        log(`${side_get_log_str(faction)} draw additional card.`)
+        log(`${side_get_log_str(faction)} drew additional card.`)
         G.offensive.draw[faction].push(draw_card(faction, false))
     }
     clear_undo()
@@ -18133,7 +18133,11 @@ function play_event(c) {
     if (G.future_offensive[faction] === c) {
         log(`${side_get_log_str(faction)} played FO card.`)
     }
-    log(`${card_get_log_str(c)} (${cards[c].ops} OV) played as event.`)
+    var ec = ""
+    if (cards[c].type === MILITARY) {
+        ec = ` (${cards[c].ops} EC)`
+    }
+    log(`${card_get_log_str(c)}${ec} played as event.`)
     if (cards[c].draw) {
         into_turn_draw(faction)
     }

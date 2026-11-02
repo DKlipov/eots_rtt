@@ -481,7 +481,7 @@ function print_battle_box(text, faction, cf, rm, units, log) {
 
     if (log.length > 0) {
         for (var line of log) {
-            line = line.replace(/^[%&>]/g, "") // remove log formatting codes
+            line = line.replace(/^[%&>]./g, "") // remove log formatting codes
             text.push("<dt>" + escape_text(line))
         }
     }

@@ -8955,7 +8955,7 @@ function move_units(units, path) {
     var legs = 1
     i = 2
     var destination = path[path.length - 1]
-    log(`${units_list} moved ${list_get_log_str(hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
+    log(`${units_list} moved to ${list_get_log_str(hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
     if (could_zoi_cross && zoi_cross_declared) {
         zoi_crossed()
         could_zoi_cross = false
@@ -9054,7 +9054,7 @@ function set_location(unit, location, no_logs) {
     var prev_out = prev_location > LAST_BOARD_HEX && prev_location !== CHINA_BOX
     var current_on_map = location <= LAST_BOARD_HEX || location === CHINA_BOX
     if (!no_logs && prev_out && current_on_map) {
-        log(`${piece_get_log_str(unit)} placed to ${hex_get_log_str(location)}.`)
+        log(`${piece_get_log_str(unit)} placed in ${hex_get_log_str(location)}.`)
     } else if (!no_logs && current_on_map) {
         log(`${piece_get_log_str(unit)} moved to ${hex_get_log_str(location)}.`)
     }
@@ -12002,7 +12002,7 @@ function print_battle_box(text, faction, cf, rm, units, log) {
 
     if (log.length > 0) {
         for (var line of log) {
-            line = line.replace(/^[%&>]/g, "") // remove log formatting codes
+            line = line.replace(/^[%&>]./g, "") // remove log formatting codes
             text.push("<dt>" + escape_text(line))
         }
     }

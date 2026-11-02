@@ -412,7 +412,7 @@ P.replacement_segment = {
         if (set_has(G.reduced, u)) {
             set_delete(G.reduced, u)
             set_delete(L.replacable_units, u)
-            log(`${piece_get_log_str(u)} flipped to full size.`)
+            log(`${piece_get_log_str(u)} flipped to full strength.`)
         } else {
             set_add(G.reduced, u)
             G.active_stack = [u]

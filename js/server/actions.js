@@ -133,7 +133,7 @@ P.offensive_segment = {
     pass() {
         push_undo()
         G.passes[R] -= 1
-        log(`Pass used, ${G.passes[R]} remains.`)
+        log(`Pass used, ${G.passes[R]} remaining.`)
         goto("end_action")
     },
 }
@@ -149,7 +149,7 @@ P.offensive_segment_card_action = {
         push_undo()
         activate_card(L.c)
         G.offensive.type = OC
-        log(`${card_get_log_str(L.c)} (${cards[L.c].ops} OV) played as operation card.`)
+        log(`${card_get_log_str(L.c)} (${cards[L.c].ops} OC) played as operation card.`)
         goto("offensive_sequence")
     },
     event() {
@@ -167,7 +167,7 @@ P.offensive_segment_card_action = {
     discard() {
         push_undo()
         activate_card(L.c)
-        log(`${side_get_log_str(R)} discards ${card_get_log_str(L.c)}.`)
+        log(`${side_get_log_str(R)} discarded ${card_get_log_str(L.c)}.`)
         goto("end_action")
     },
     inter_service() {

@@ -160,7 +160,7 @@ function on_view(sherlock) {
     return create_view(sherlock)
 }
 
-function update_outdated_G(){
+function update_outdated_G() {
     //todo: remove
     if (!G.events[events.CHINA_STATUS.id]) {
         G.events[events.CHINA_STATUS.id] = G.surrender[nations.CHINA.id]
@@ -616,7 +616,7 @@ function resolve_into_turn_draw(faction) {
     }
     G.offensive.draw[faction] = G.offensive.draw[faction].filter(c => c >= 0)
     for (var i = 0; i < count; i++) {
-        log(`${side_get_log_str(faction)} draw additional card.`)
+        log(`${side_get_log_str(faction)} drew additional card.`)
         G.offensive.draw[faction].push(draw_card(faction, false))
     }
     clear_undo()
@@ -728,7 +728,11 @@ function play_event(c) {
     if (G.future_offensive[faction] === c) {
         log(`${side_get_log_str(faction)} played FO card.`)
     }
-    log(`${card_get_log_str(c)} (${cards[c].ops} OV) played as event.`)
+    var ec = ""
+    if (cards[c].type === MILITARY) {
+        ec = ` (${cards[c].ops} EC)`
+    }
+    log(`${card_get_log_str(c)}${ec} played as event.`)
     if (cards[c].draw) {
         into_turn_draw(faction)
     }

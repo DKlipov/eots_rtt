@@ -927,7 +927,7 @@ P.move_offensive_units = {
             G.active_stack.forEach(u => {
                 var index = G.offensive.organic.indexOf(u)
                 if (index >= 0 && pieces[u].class === "naval") {
-                    log(`Organic transport used. ${piece_get_log_str(G.offensive.organic[index])} carry ${piece_get_log_str(G.offensive.organic[index + 1])}`)
+                    log(`Organic transport used. ${piece_get_log_str(G.offensive.organic[index])} carried ${piece_get_log_str(G.offensive.organic[index + 1])}`)
                 }
             })
         }
@@ -1104,7 +1104,7 @@ function attack_hex(hex) {
         move_units(non_cv, path_to_bh)
         non_cv.forEach(u => set_delete(distant, u))
     }
-    log(`${units_str(distant)} assigned to attack to ${hex_get_log_str(hex)}.`)
+    log(`${units_str(distant)} assigned to attack ${hex_get_log_str(hex)}.`)
 }
 
 P.check_overstacking = {
@@ -1121,7 +1121,7 @@ P.check_overstacking = {
         L.hexes = []
         L.allowed_units.forEach(u => set_add(L.hexes, G.location[u]))
         if (L.remove_flag && L.allowed_units.length) {
-            log(`#G${side_get_log_str(G.active)} Check stacking`)
+            log(`#G${side_get_log_str(G.active)} checked stacking`)
         }
     },
     inactive: "check stacking",
@@ -1430,7 +1430,7 @@ P.retro_disengagement = {
     skip() {
         push_undo()
         var units = list_get_log_str(L.allowed_units.length + " units", L.allowed_units.map(u => set_has(G.reduced, u) ? `(${piece_get_log_str(u)})` : piece_get_log_str(u)))
-        log(`${units} skip disengagement.`)
+        log(`${units} skipped disengagement.`)
         this.next_disengagement()
     },
     reset_state() {
@@ -1669,7 +1669,7 @@ P.assign_escort = {
         G.active_stack.forEach(u => {
             commit_to_attack(u, hex)
         })
-        log(`${units_str(G.active_stack)} assigned to attack to ${hex_get_log_str(hex)}.`)
+        log(`${units_str(G.active_stack)} assigned to attack ${hex_get_log_str(hex)}.`)
         G.active_stack = []
         L.possible_hexes = []
         if (L.possible_units.length === 0) {
@@ -2567,7 +2567,7 @@ P.jp_cv_reassign = {
             if (unit_on_board(u)) {
                 set_delete(G.reduced, u)
                 map_delete(L.to_repair, u)
-                log(`${piece_get_log_str(u)} flipped to full size.`)
+                log(`${piece_get_log_str(u)} flipped to full strength.`)
             } else {
                 var location = G.offensive.battle.battle_hex
                 var path = map_get(G.offensive.paths, u)
