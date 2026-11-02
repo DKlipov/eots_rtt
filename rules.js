@@ -11235,7 +11235,9 @@ P.move_to = script(`
 P.confirm_aa = {
     _begin() {
         var path = map_get(G.offensive.paths, G.active_stack[0], [0])
-        if (!(path[0] & AMPH_MOVE) || get_distance(path[2], path[path.length - 1]) > 5) {
+        if (G.offensive.stage === POST_BATTLE_STAGE
+            || !(path[0] & AMPH_MOVE)
+            || get_distance(path[2], path[path.length - 1]) > 5) {
             end()
             return
         }
