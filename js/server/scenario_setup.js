@@ -1151,14 +1151,13 @@ P.scenario_1941 = script(`
     set G.offensive.stage BATTLE_STAGE
     set G.offensive.all_bh G.offensive.battle_hexes.slice()
     log ("#GResolve battles")
-    log ("#IIntelligence condition: "+get_named_intelligence(G.offensive.intelligence))
     set G.active G.offensive.attacker
     call battle_sequence
     eval {
         capture_landing_hexes()
     }
     set G.offensive.stage POST_BATTLE_STAGE
-    log ("#GPost battle movement")
+    
     set G.active G.offensive.attacker
     call move_offensive_units
     set G.offensive.active_units[G.offensive.attacker] []
@@ -1240,7 +1239,7 @@ P.operation_z_battle = script(`
       eval {
         change_political_will(8, "Operation Z")
       }
-      log ("#GPost battle movement")
+      
       set G.offensive.stage POST_BATTLE_STAGE
       eval {
         set_location(find_piece("lexington"), OAHU, true)

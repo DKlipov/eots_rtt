@@ -896,7 +896,7 @@ function move_units(units, path) {
 }
 
 function zoi_crossed() {
-    log("#IReaction zoi violated! -2 to reaction intelligence rolls")
+    log("#IIntelligence rolls -2!")
     G.offensive.zoi_intelligence_modifier = 1
 }
 

@@ -206,7 +206,7 @@ P.offensive_segment_card_action = {
     },
     future_offensive() {
         push_undo()
-        log(`${side_get_log_str(R)} played future offensive card.`)
+        log(`${side_get_log_str(R)} designated a FO card.`)
         future_offencive_card(L.c, G.turn)
         goto("end_action")
     }

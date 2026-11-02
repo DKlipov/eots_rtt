@@ -9007,7 +9007,7 @@ function move_units(units, path) {
 }
 
 function zoi_crossed() {
-    log("#IReaction zoi violated! -2 to reaction intelligence rolls")
+    log("#IIntelligence rolls -2!")
     G.offensive.zoi_intelligence_modifier = 1
 }
 
@@ -12178,7 +12178,7 @@ function on_update() {
     update_role_info(JP)
     update_role_info(AP)
 
-    // TODO: why are we mutating G here?
+    // Apply hidden from opponent unit damaged status
     map_for_each(G.offensive.damaged, (u, s) => {
         if (s > 2) {
             G.location[u] = ELIMINATED_BOX
@@ -12891,6 +12891,8 @@ function on_log(text, i) {
             } else if (code === "I") {
                 p.classList.add("h4")
                 p.classList.add("int")
+            } else if (code === "G") {
+                p.classList.add("h4")
             }
             text = m
             break

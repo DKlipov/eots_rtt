@@ -282,6 +282,8 @@ function on_log(text, i) {
             } else if (code === "I") {
                 p.classList.add("h4")
                 p.classList.add("int")
+            } else if (code === "G") {
+                p.classList.add("h4")
             }
             text = m
             break

@@ -9013,7 +9013,7 @@ function move_units(units, path) {
 }
 
 function zoi_crossed() {
-    log("#IReaction zoi violated! -2 to reaction intelligence rolls")
+    log("#IIntelligence rolls -2!")
     G.offensive.zoi_intelligence_modifier = 1
 }
 
@@ -10589,7 +10589,7 @@ P.offensive_sequence = script(`
     if (G.offensive.active_hq[G.active]) {
         call commit_offensive
     }
-    log ("#GResolve battles")
+    
     set G.active G.offensive.attacker
     call battle_sequence
     eval {
@@ -10598,7 +10598,7 @@ P.offensive_sequence = script(`
     eval {
         trigger_event("before_pbm")
     }
-    log ("#GPost battle movement")
+    
     set G.offensive.stage POST_BATTLE_STAGE
     set G.active 1-G.offensive.attacker
     call apply_attack_reaction
@@ -10708,7 +10708,7 @@ P.choose_hq = {
         if (G.offensive.type === EC && L.card > 0 && cards[L.card].logistic_alt && cards[L.card].logistic_alt[0].includes(u)) {
             G.offensive.logistic = cards[L.card].logistic_alt[1]
         }
-        log(`${piece_get_log_str(u)} activated for ${G.active === G.offensive.attacker ? "offensive" : "reaction"}.`)
+        log(`${piece_get_log_str(u)} activated.`)
         end()
     },
     unit(u) {
@@ -12547,7 +12547,7 @@ P.define_intelligence_condition = {
         var success = roll_intelligence_dice()
         if (success) {
             G.offensive.intelligence = INTERCEPT
-            log(`#IIntelligence condition changed to ${get_named_intelligence(G.offensive.intelligence)}`)
+            log(`#IIntelligence => ${get_named_intelligence(G.offensive.intelligence)}`)
         }
         L.rolled = 1
         if (success || !get_hand(G.active).includes(JN_25_SPECIAL)) {
@@ -14643,7 +14643,7 @@ P.offensive_segment_card_action = {
     },
     future_offensive() {
         push_undo()
-        log(`${side_get_log_str(R)} played future offensive card.`)
+        log(`${side_get_log_str(R)} designated a FO card.`)
         future_offencive_card(L.c, G.turn)
         goto("end_action")
     }
@@ -18114,7 +18114,7 @@ function play_reaction(c) {
     play_event(c)
     if (cards[c].intelligence && G.offensive.intelligence !== AMBUSH && G.offensive.intelligence !== cards[c].intelligence) {
         G.offensive.intelligence = cards[c].intelligence
-        log(`#IIntelligence condition changed to ${get_named_intelligence(G.offensive.intelligence)}`)
+        log(`#IIntelligence => ${get_named_intelligence(G.offensive.intelligence)}`)
     }
 }
 
@@ -19481,14 +19481,13 @@ P.scenario_1941 = script(`
     set G.offensive.stage BATTLE_STAGE
     set G.offensive.all_bh G.offensive.battle_hexes.slice()
     log ("#GResolve battles")
-    log ("#IIntelligence condition: "+get_named_intelligence(G.offensive.intelligence))
     set G.active G.offensive.attacker
     call battle_sequence
     eval {
         capture_landing_hexes()
     }
     set G.offensive.stage POST_BATTLE_STAGE
-    log ("#GPost battle movement")
+    
     set G.active G.offensive.attacker
     call move_offensive_units
     set G.offensive.active_units[G.offensive.attacker] []
@@ -19570,7 +19569,7 @@ P.operation_z_battle = script(`
       eval {
         change_political_will(8, "Operation Z")
       }
-      log ("#GPost battle movement")
+      
       set G.offensive.stage POST_BATTLE_STAGE
       eval {
         set_location(find_piece("lexington"), OAHU, true)

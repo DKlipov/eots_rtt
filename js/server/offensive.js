@@ -35,7 +35,7 @@ P.offensive_sequence = script(`
     if (G.offensive.active_hq[G.active]) {
         call commit_offensive
     }
-    log ("#GResolve battles")
+    
     set G.active G.offensive.attacker
     call battle_sequence
     eval {
@@ -44,7 +44,7 @@ P.offensive_sequence = script(`
     eval {
         trigger_event("before_pbm")
     }
-    log ("#GPost battle movement")
+    
     set G.offensive.stage POST_BATTLE_STAGE
     set G.active 1-G.offensive.attacker
     call apply_attack_reaction
@@ -154,7 +154,7 @@ P.choose_hq = {
         if (G.offensive.type === EC && L.card > 0 && cards[L.card].logistic_alt && cards[L.card].logistic_alt[0].includes(u)) {
             G.offensive.logistic = cards[L.card].logistic_alt[1]
         }
-        log(`${piece_get_log_str(u)} activated for ${G.active === G.offensive.attacker ? "offensive" : "reaction"}.`)
+        log(`${piece_get_log_str(u)} activated.`)
         end()
     },
     unit(u) {
@@ -1993,7 +1993,7 @@ P.define_intelligence_condition = {
         var success = roll_intelligence_dice()
         if (success) {
             G.offensive.intelligence = INTERCEPT
-            log(`#IIntelligence condition changed to ${get_named_intelligence(G.offensive.intelligence)}`)
+            log(`#IIntelligence => ${get_named_intelligence(G.offensive.intelligence)}`)
         }
         L.rolled = 1
         if (success || !get_hand(G.active).includes(JN_25_SPECIAL)) {

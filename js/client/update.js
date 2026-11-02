@@ -164,7 +164,7 @@ function on_update() {
     update_role_info(JP)
     update_role_info(AP)
 
-    // TODO: why are we mutating G here?
+    // Apply hidden from opponent unit damaged status
     map_for_each(G.offensive.damaged, (u, s) => {
         if (s > 2) {
             G.location[u] = ELIMINATED_BOX
