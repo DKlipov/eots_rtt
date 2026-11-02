@@ -12334,8 +12334,11 @@ function on_update() {
     for (var h of G.offensive.battle_hexes)
         populate("s-loc", h, "battle", G.offensive.battle_names.indexOf(h))
 
+    var commited_landing = []
+    map_for_each(G.offensive.committed, (k, v) => set_add(commited_landing, v))
     for (var h of G.offensive.landing_hexes)
-        if (get_map_data(h).named && is_space_controlled(h, 1 - G.offensive.attacker) && has_zoi(h, 1 - G.offensive.attacker))
+        if (get_map_data(h).named && is_space_controlled(h, 1 - G.offensive.attacker) && has_zoi(h, 1 - G.offensive.attacker)
+            || set_has(commited_landing, h))
             populate("s-loc", h, "landing", G.offensive.battle_names.indexOf(h))
 
     // MISC MARKERS
