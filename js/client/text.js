@@ -11,6 +11,8 @@ const DIGIT_SUPERSCRIPT = [
     "\u2077",
     "\u2078",
     "\u2079",
+    "\u207D",
+    "\u207E",
 ]
 const REGION_MAP = {
     "Ceylon": "Indian Isl.",
@@ -47,7 +49,9 @@ function format_unit_tooltip(u) {
     tip += `-${p.lf}`
     if (p.br)
         tip += `-${p.br}`
-    if (p.ebr)
+    if (p.parenthetical && p.ebr)
+        tip += " "+DIGIT_SUPERSCRIPT[10] + DIGIT_SUPERSCRIPT[p.ebr]+DIGIT_SUPERSCRIPT[11]
+    else if (p.ebr)
         tip += " " + DIGIT_SUPERSCRIPT[p.ebr]
 
     switch (p.class) {
@@ -120,7 +124,7 @@ function focus_unit(id) {
 const CARD_CLASSES = cards.map(c => `card ${c?.faction ? "ap" : "jp"} c${c?.num}`)
 const CARD_NAMES = cards.map(c => c?.name)
 
-const UNIT_NAMES = pieces.map(p => p?.name)
+const UNIT_NAMES = pieces.map(p => p?.short ? p?.short : p?.name)
 
 const HEX_NAMES = []
 ;(function () {

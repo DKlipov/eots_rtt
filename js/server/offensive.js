@@ -700,6 +700,7 @@ P.confirm_aa = {
 
 P.move_offensive_units = {
     _begin() {
+        L.logged = G.offensive.stage !== POST_BATTLE_STAGE
         L.log = []
         var clear_path = []
         map_for_each(G.offensive.paths, (u, path) => {
@@ -906,6 +907,10 @@ P.move_offensive_units = {
         if (!curr_path) {
             this.no_move()
             return
+        }
+        if (!L.logged) {
+            L.logged = 1
+            log(`${side_get_log_str(G.active)} post battle move:`)
         }
         var hex = curr_path[curr_path.length - 1]
         if (L.move_type === GROUND_MOVE) {
@@ -2696,6 +2701,9 @@ function apply_loss() {
     if (L.dmg_list[1].length) {
         d = d.concat(battle.damaged[1])
     }
+    if(d.length){
+        log(`Losses:`)
+    }
     for (var i = 1; i < d.length; i += 2) {
         var unit = d[i - 1]
         var step = (d[i] === 4) ? 2 : 1
@@ -2705,7 +2713,7 @@ function apply_loss() {
             reduce_unit(unit, true)
         }
         var dmg = map_get(dmg_map, unit, 0)
-        log(`${piece_get_log_str(unit)} ${d[i] > 2 ? "eliminated" : "reduced"} (${step}${dmg ? " x " + dmg : " step"}).`)
+        log(`>1${piece_get_log_str(unit)} ${d[i] > 2 ? "eliminated" : "reduced"} (${step}${dmg ? " x " + dmg : " step"}).`)
         var piece = pieces[unit]
         if (piece.faction === JP && is_cv_unit(piece)) {
             battle.jp_cv_damaged = 1
@@ -2858,7 +2866,7 @@ P.apply_ground_winner = function () {
     if (!battle.ground[G.offensive.attacker].find(unit_on_board)) {
         attacker_win = 0
     }
-    log(`${attacker_win ? "Attacker" : "Defender"} won in ground combat ${hex_get_log_str(battle.battle_hex)}.`)
+    log(`${attacker_win ? "Attacker" : "Defender"} won battle.`)
     battle.winner = (attacker_win == G.offensive.attacker) + 0
     if (attacker_win) {
         capture_hex(battle.battle_hex, G.offensive.attacker)
@@ -3202,13 +3210,20 @@ P.emergency_move = {
 }
 
 function capture_landing_hexes() {
+    var cap = []
     G.offensive.active_units[G.offensive.attacker].forEach(u => {
         var piece = pieces[u]
         var location = G.location[u]
-        if (piece.class === "ground" && !set_has(G.offensive.all_bh, location)) {
-            capture_hex(location, G.offensive.attacker)
+        if (location < LAST_BOARD_HEX &&
+            piece.class === "ground" && !set_has(G.offensive.all_bh, location) && get_map_data(location).named &&
+            !is_space_controlled(location, G.offensive.attacker)) {
+            set_add(cap, location)
         }
     })
+    if (cap.length) {
+        log(`Uncontested landings captured: ${list_get_log_str(cap.length + " hexes", cap.map(u => hex_get_log_str(u)))}.`)
+        cap.forEach(h => capture_hex(h, G.offensive.attacker, true))
+    }
     map_for_each(G.offensive.paths, (u, path) => {
         if (!set_has(G.offensive.all_bh, G.location[u]) && path[0] & AMPH_MOVE) {
             path[0] -= AMPH_MOVE
