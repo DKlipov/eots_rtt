@@ -1,40 +1,34 @@
 <div id="South Pacific" class="scenario_info">
 
+    Small introductory and tournament scenario, uses the South Pacific mini-map, four game turns long.
+    <hr>
+    <p>
     The scenario focuses on the Allied drives up the Solomon Islands and New Guinea. The game features a damaged but
     still powerful Imperial Japanese Navy (IJN) poised to slow and potentially stop the Allied advance. The game starts
     on the eve of Operation Watchtower (Guadalcanal Invasion), so this card begins in the opening Allied hand of cards.
     The Japanese hand begins with the Savo Island reaction card setting up the potential for the historical opening.
-
-    This scenario uses the South Pacific mini-map, is four game turns long (game turns 3, 4, 5, and 6) and begins on
-    game turn 3 at the beginning of the Offensives Phase with the US having the option to use their Future Offensive
-    card to pre-empt the Japanese going first. There is no Reinforcement, Replacement, or Strategic Warfare Segments
-    conducted for game turn 3. Victory is determined by the VP schedule outlined in the rulebook.
-
-    For new players to Empire of the Sun, this is the first of three scenarios to play when learning the game. Second
+    <p>
+    Victory is determined by the VP schedule outlined in the rulebook.
+    <p>
+    For new players to Empire of the Sun, this one is recommended to start with when learning the game. Second
     would be the 1943 scenario (17.3) and the last is the 1942 Shortened Campaign (17.8).
 </div>
 <div id="1942 One Year Scenario" class="scenario_info">
 
     This scenario is three game turns long (only covering the turns in 1942) and begins on game turn 2 at the beginning
-    of the Offensives Phase. There is no Reinforcement, Replacement, or Strategic Warfare Segments conducted for game
-    turn 2, as it has already been incorporated into the starting locations. The game is concluded at the end of game
-    turn 4 and victory is determined by the VP schedule outlined in the rulebook.
+    of the Offensives Phase. The game is concluded at the end of game turn 4 and victory is determined by the VP schedule outlined in the rulebook.
 </div>
 <div id="1943 One Year Scenario" class="scenario_info">
 
+    The 1943 scenario has become the main tournament scenario as player statistics indicate that it is very balanced. Good one to learn the game.
+    <hr>
     This scenario is three game turns long (only covering the turns in 1943) and begins on game turn 5 at the beginning
-    of the Offensives Phase. There is no Reinforcement, Replacement, or Strategic Warfare Segments conducted for game
-    turn 5, as it has already been incorporated into the starting locations. The game is concluded at the end of game
-    turn 7 and victory is determined by the VP schedule outlined in the rulebook.
-
-    For new players to Empire of the Sun, this is the second of three scenarios to play when learning the game. First
-    would be the South Pacific scenario (17.10) and the last is the 1942 Shortened Campaign (17.8).
+    of the Offensives Phase. The game is concluded at the end of game turn 7 and victory is determined by the VP schedule outlined in the rulebook.
 </div>
 <div id="1944 One Year Scenario" class="scenario_info">
 
     This scenario is three game turns long (only covering the turns in 1944) and begins on game turn 8 at the beginning
-    of the Offensives Phase. There is no Reinforcement, Replacement, or Strategic Warfare Segments conducted for game
-    turn 8, as it has already been incorporated into the starting locations. The game is concluded at the end of game
+    of the Offensives Phase. The game is concluded at the end of game
     turn 10 and victory is determined by the VP schedule outlined in the rulebook.
 </div>
 <div id="1941-1945 (The Full Campaign)" class="scenario_info">
@@ -51,9 +45,6 @@
     plays the rest of war, using the Campaign Scenario (17.1) conditions and length for everything else. It is
     essentially the Full Campaign without the December 1941 mini-turn and is commonly used in tournament play. Victory
     is determined as defined in 16.0 of the rulebook.
-
-    For new players to Empire of the Sun, this is the third of three scenarios to play when learning the game. First
-    would be the South Pacific scenario (17.10) and the second would be the 1943 scenario (17.3).
 </div>
 <div id="1943-1945 (The Even Shorter Campaign)" class="scenario_info">
 
@@ -77,7 +68,8 @@
     1944 VP schedule to determine victory.
 </div>
 <div id="Burma: The Forgotten War, 1943-1944" class="scenario_info">
-
+    Small introductory scenario, uses the Burma mini-map, four game turns long.
+    <hr>
     This scenario examines Burma, the lowest priority Allied theater.
     The scenario begins on turn 6 with each side receiving a reduced hand of cards. On turns 7, 8, and 9, each side
     begins with a base of four cards that can be reduced for both sides by a variety of reasons specific to a particular
@@ -89,23 +81,8 @@
             hand.</label>
 </div>
 <hr>
-<label><input type="checkbox" name="expert" id="async">Expert mode.</label>
+<label><input type="checkbox" name="expert" id="async">Expert mode (automate some actions)</label> (<a href="/empire-of-the-sun/info/expert.html">what is this?</a>)
 
-<div id="async_mode_desc">
-    <p>
-        The expert mode it is feature that allow experienced players play faster, if they live in
-        different time zones. Some interactions will be automatically applied if it is possible.
-        If you choose you SHOULD check opponent moves and log before your action. Important things could be missed!
-        What optimized:
-    <p> * Special reaction rolls automatically.
-    <p> * Reaction steps reduced when it is obvious that the Reaction player has no available cards for use.
-    <p> * Battle hexes checked automatically from A to Z, one by one.
-    <p> * Loss applied automatically if only one possible unit to assign hit (could be repeated multiple times), or all
-        units could be eliminated.
-    <p> * Submarine cards rolled automatically, hits applied automatically if only one unit possible.
-    <p> * Attrition loss automated.
-    <p> * Submarine warfare and B29 rolls automated.
-</div>
 <script>
     var scenario = document.querySelector("select[name='scenario']");
     scenario.onchange = function (evt) {
@@ -119,9 +96,4 @@
         }
     }
     scenario.onchange();
-    var fast_checkbox = document.querySelector("#async");
-    fast_checkbox.onchange = function (evt) {
-        document.querySelector("#async_mode_desc").hidden = !fast_checkbox.checked
-    }
-    fast_checkbox.onchange();
 </script>
