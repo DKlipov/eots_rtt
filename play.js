@@ -11208,11 +11208,6 @@ P.check_unit_supply = {
         LOCAL_STATE.actions = {
             "done": 1,
             "undo": LOCAL_STATE.unit ? 1 : 0,
-
-        }
-        if (!LOCAL_STATE.unit) {
-            LOCAL_STATE.actions.unit = [...Array(pieces.length).keys()].filter(u => G.location[u] <= LAST_BOARD_HEX)
-            LOCAL_STATE.actions.action_hex = [CHINA_BOX]
         }
         LOCAL_STATE.prompt = "Select unit to check supply."
     },
@@ -11230,7 +11225,7 @@ P.check_unit_supply = {
         if (h !== CHINA_BOX) {
             return
         }
-        LOCAL_STATE.unit = 1
+        LOCAL_STATE.unit = 0
         var result = with_unmodified_supply(() => supply_query(h))
         this.show_supply(result)
     },
@@ -11245,6 +11240,9 @@ P.check_unit_supply = {
         }
         canvas_show()
         canvas_draw_supply(LOCAL_STATE.supply_data)
+        if (LOCAL_STATE.unit && LOCAL_STATE.unit !== CHINA_BOX) {
+            update_keyword("unit", LOCAL_STATE.unit, "activated")
+        }
     },
 }
 
@@ -11383,7 +11381,11 @@ P.check_hq_range = {
         } else if (LOCAL_STATE.mode === "supply") {
             focused = with_unmodified_supply(() => hq_supply_zone(LOCAL_STATE.unit))
         }
+        if (piece.faction === JP) {
+            for_each_hex_in_range(KUNMING, 1, h => set_delete(focused, h))
+        }
         draw_range(focused)
+        update_keyword("unit", LOCAL_STATE.unit, "activated")
     },
 }
 
@@ -12236,6 +12238,14 @@ function populate_unit_box(units, key, stacks) {
     }
 }
 
+function is_active_unit(u, piece) {
+    if (LOCAL_STATUS) {
+        return LOCAL_STATE.active_units && set_has(LOCAL_STATE.active_units, u)
+    } else {
+        return set_has(G.offensive.active_units[piece.faction], u) || piece.class === "hq" && G.offensive.active_hq.includes(u)
+    }
+}
+
 function update_unit(u, location) {
     var piece = pieces[u]
     var one_step = piece.notreplaceable && piece.start_reduced
@@ -12246,7 +12256,7 @@ function update_unit(u, location) {
         || pieces[u].class === "hq" && G.inter_service[pieces[u].faction]
     )
 
-    if (set_has(G.offensive.active_units[piece.faction], u) || piece.class === "hq" && G.offensive.active_hq.includes(u))
+    if (is_active_unit(u, piece))
         update_keyword("unit", u, "activated")
 
     if (G.active_stack.includes(u)) {
