@@ -7285,16 +7285,16 @@ function get_china_offensive_modifiers() {
         divisions: G.china_divisions
     }
     result.burma_road = (G.sid === SOUTH_PACIFIC_SCENARIO) ? 0 : ((2 - G.burma_road) * 4)
-    result.log.push(`JP divisions in China ${G.china_divisions}.`)
-    result.log.push(`+${result.burma_road} (Burma road).`)
+    result.log.push(`>1JP divisions in China ${G.china_divisions}.`)
+    result.log.push(`>1+${result.burma_road} (Burma road).`)
 
     if (G.sid === SOUTH_PACIFIC_SCENARIO) {
         result.air_support++
-        result.log.push(`+1 ${piece_get_log_str(ap_air("14_lrb"))}.`)
+        result.log.push(`>1+1 ${piece_get_log_str(ap_air("14_lrb"))}.`)
     } else {
         for_each_unit((u, piece, location) => {
             if (location === CHINA_BOX && (piece.type !== "lrb" || u === LRB_14) && !set_has(G.oos, u)) {
-                result.log.push(`+1 ${piece_get_log_str(u)}.`)
+                result.log.push(`>1+1 ${piece_get_log_str(u)}.`)
                 result.air_support++
             }
         })
