@@ -8,16 +8,12 @@ P.strategic_phase = script(`
     eval {
         check_jp_resources_event()
     }
-    set G.active AP 
-    set L.todo 1    
+    set G.active AP  
     call reinforcement_segment
-    set L.todo 1
     set G.active JP 
     call reinforcement_segment
-    set L.todo 1
     set G.active AP 
     call replacement_segment {scheduled_points: 1}
-    set L.todo 1
     set G.active JP
     call replacement_segment {scheduled_points: 1}
     log ("#AStrategic warfare segment")
