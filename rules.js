@@ -13573,7 +13573,7 @@ P.apply_ground_winner = function () {
     if (!battle.ground[G.offensive.attacker].find(unit_on_board)) {
         attacker_win = 0
     }
-    log(`${attacker_win ? "Attacker" : "Defender"} won battle.`)
+    log(`${attacker_win ? "Attacker" : "Defender"} won ground battle.`)
     battle.winner = (attacker_win == G.offensive.attacker) + 0
     if (attacker_win) {
         capture_hex(battle.battle_hex, G.offensive.attacker)
