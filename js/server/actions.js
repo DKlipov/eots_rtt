@@ -1,11 +1,7 @@
-function is_china_coast_captured() {
-    return !CHINA_COAST.some(h => is_space_controlled(h, JP))
-}
-
 P.china_offensive = {
     inactive: "confirm China Offensive",
     _begin() {
-        if (G.sid !== SOUTH_PACIFIC_SCENARIO && is_china_coast_captured()) {
+        if (is_china_coast_captured()) {
             L.impossible = 1
         }
     },

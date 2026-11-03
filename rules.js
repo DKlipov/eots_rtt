@@ -10228,6 +10228,9 @@ function side_get_log_str(side) {
     return `${side === AP ? "AP" : "JP"}`
 }
 
+function is_china_coast_captured() {
+    return G.sid !== SOUTH_PACIFIC_SCENARIO && !CHINA_COAST.some(h => is_space_controlled(h, JP))
+}
 
 /* }}} */
 /* {{{ js/server/game.js */
@@ -14597,14 +14600,10 @@ P.attrition = {
 /* }}} */
 
 /* {{{ js/server/actions.js */
-function is_china_coast_captured() {
-    return !CHINA_COAST.some(h => is_space_controlled(h, JP))
-}
-
 P.china_offensive = {
     inactive: "confirm China Offensive",
     _begin() {
-        if (G.sid !== SOUTH_PACIFIC_SCENARIO && is_china_coast_captured()) {
+        if (is_china_coast_captured()) {
             L.impossible = 1
         }
     },
@@ -17050,7 +17049,7 @@ cards[find_card(AP, 33)].before_unit_activation = function () {
         } else if (!card.can_play && card.china < 0) {
             card.can_play = () => G.events[events.CHINA_STATUS.id] > 1 && G.events[events.CHINA_STATUS.id] < 5
         } else if (!card.can_play && card.china > 0) {
-            card.can_play = () => G.events[events.CHINA_STATUS.id] < 5
+            card.can_play = () => !is_china_coast_captured() && G.events[events.CHINA_STATUS.id] < 5
         } else if (!card.can_play) {
             card.can_play = always_true
         }

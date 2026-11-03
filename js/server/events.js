@@ -2058,7 +2058,7 @@ cards[find_card(AP, 33)].before_unit_activation = function () {
         } else if (!card.can_play && card.china < 0) {
             card.can_play = () => G.events[events.CHINA_STATUS.id] > 1 && G.events[events.CHINA_STATUS.id] < 5
         } else if (!card.can_play && card.china > 0) {
-            card.can_play = () => G.events[events.CHINA_STATUS.id] < 5
+            card.can_play = () => !is_china_coast_captured() && G.events[events.CHINA_STATUS.id] < 5
         } else if (!card.can_play) {
             card.can_play = always_true
         }

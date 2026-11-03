@@ -27,3 +27,6 @@ function side_get_log_str(side) {
     return `${side === AP ? "AP" : "JP"}`
 }
 
+function is_china_coast_captured() {
+    return G.sid !== SOUTH_PACIFIC_SCENARIO && !CHINA_COAST.some(h => is_space_controlled(h, JP))
+}

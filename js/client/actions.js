@@ -63,6 +63,52 @@ function array_equals(a, b) {
     return true
 }
 
+function light_pbm_supply_check(hex) {
+    var place = G.location[G.active_stack[0]]
+    G.active_stack.forEach(u => G.location[u] = hex)
+    var result = !G.active_stack.find(u => !check_unit_supply(hex, u, pieces[u]))
+    G.active_stack.forEach(u => G.location[u] = place)
+    return result
+}
+
+
+function pbm_supply_check(hex) {
+    return with_unmodified_supply(() => {
+        var place = G.location[G.active_stack[0]]
+        G.active_stack.forEach(u => G.location[u] = hex)
+        check_supplied_hexes(pieces[G.active_stack[0]].faction)
+        var result = !G.active_stack.find(u => !check_unit_supply(hex, u, pieces[u]))
+        G.active_stack.forEach(u => G.location[u] = place)
+        return result
+    })
+}
+
+function apply_pbm_restrictions() {
+    if (G.offensive.stage !== POST_BATTLE_STAGE || G.active_stack.length === 0 || L.allowed_hexes.length === 0) {
+        return
+    }
+    check_supplied_hexes(pieces[G.active_stack[0]].faction)
+    G.active_stack.forEach(u => set_delete(G.offensive.active_units[pieces[u].faction], u))
+    var zoi_unit = G.active_stack.find(u => pieces[u].br)
+    var ground_unit = G.active_stack.find(u => pieces[u].class === "ground")
+    var supply = pieces[G.active_stack[0]].supply
+    var result = []
+    map_for_each(L.allowed_hexes, (h, path) => {
+        var flag
+        if (zoi_unit) {
+            flag = pbm_supply_check(h)
+        } else {
+            flag = light_pbm_supply_check(h) || ground_unit && pbm_supply_check(h)
+        }
+        if (flag) {
+            map_set(result, h, path)
+        }
+    })
+    G.active_stack.forEach(u => set_add(G.offensive.active_units[pieces[u].faction], u))
+    if (result.length || G.active_stack.find(u => pieces[u].supply !== supply))
+        L.allowed_hexes = result
+}
+
 function on_update_local_actions() {
     document.getElementById("measure").replaceChildren()
 
@@ -79,10 +125,22 @@ function on_update_local_actions() {
         if (!G.actions.action_hex) {
             G.actions.action_hex = []
         }
-        map_for_each(L.allowed_hexes, h => set_add(G.actions.action_hex, h))
         if (L.allowed_hexes) {
             delete G.actions.con_eliminate
         }
+        apply_pbm_restrictions()
+        if (G.active_stack.length
+            && G.actions
+            && G.actions["no_move"]
+            && !map_has(L.allowed_hexes, G.location[G.active_stack[0]])) {
+            G.actions["no_move"] = 0
+        } else if (G.active_stack.length
+            && G.actions
+            && G.actions["no_move"]
+            && map_has(L.allowed_hexes, G.location[G.active_stack[0]])) {
+            map_delete(L.allowed_hexes, G.location[G.active_stack[0]])
+        }
+        map_for_each(L.allowed_hexes, h => set_add(G.actions.action_hex, h))
     }
 
     document.body.classList.remove("hex-clickable")
