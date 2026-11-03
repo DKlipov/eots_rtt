@@ -51,9 +51,9 @@ function set_pow() {
         G.pow = 2
     }
     if (G.pow) {
-        log(`Progress of war required - ${G.pow}.`)
+        log(`PoW required - ${G.pow}.`)
     } else {
-        log(`No progress of war required.`)
+        log(`No PoW required.`)
     }
 }
 
@@ -75,12 +75,12 @@ P.submarine_warfare = {
         log(`AP submarine warfare:`)
         if (G.turn <= 4) {
             modifiers += 1
-            log(`+1 Defective torpedoes (1942).`)
+            log(`>1+1 Defective torpedoes (1942).`)
         }
         var escort = is_event_active(events.JP_ESCORTS) >> 4
         if (escort) {
             modifiers += escort
-            log(`+${escort} JP Escort.`)
+            log(`>1+${escort} JP Escort.`)
         }
         var success = (result + modifiers - G.turn) <= 0
         log(`${dice_get_log_str(result, modifiers, AP)} <= ${G.turn} ${success ? "(SUCCESS)" : "(FAILED)"}.`)
@@ -338,15 +338,15 @@ P.political_will_segment = function () {
 
 function check_progress_of_war() {
     if (G.pow <= 0) {
-        log(`Progress of War not checked for turn ${G.turn}.`)
+        log(`PoW not checked for turn ${G.turn}.`)
         return
     }
     var pow_count = array_count(G.capture, h => is_space_controlled(h, AP))
     if (pow_count < G.pow) {
-        change_political_will(-1, `current progress of war ${pow_count} < ${G.pow}`)
+        change_political_will(-1, `current PoW ${pow_count} < ${G.pow}`)
         track_event(events.FAILED_POW)
     } else {
-        log(`Progress of War ${pow_count} >= ${G.pow}.`)
+        log(`PoW ${pow_count} >= ${G.pow}.`)
     }
 }
 

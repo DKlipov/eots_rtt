@@ -568,7 +568,7 @@ function displace_to_turn(unit, turns, not_delayed) {
             set_location(unit, PERM_ELIMINATED)
         }
     } else {
-        log(`${piece_get_log_str(unit)} displaced to turn box ${G.turn + turns}.`)
+        log(`>1${piece_get_log_str(unit)} to turn box ${G.turn + turns}.`)
         set_location(unit, TURN_BOX + G.turn + turns)
         if (not_delayed) {
             set_add(G.not_delayed, unit)

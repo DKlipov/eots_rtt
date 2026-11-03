@@ -1005,7 +1005,7 @@ function get_replacement_points() {
         } else {
             result[NAVAl_REP] = 1
         }
-        log(`+1 US Naval Replacement Point (AP controlled Oahu).`)
+        // log(`+1 US Naval Replacement Point (AP controlled Oahu).`)
     }
     if ([6, 9, 12].includes(G.turn) && COM_REPLACEMENT_POINTS.some(h => is_space_controlled(h, AP))) {
         result[COMMONWEALTH_REP] = 1

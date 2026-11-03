@@ -3159,7 +3159,7 @@ P.emergency_move = {
         if (!L.unit_to_retreat.length) {
             goto("check_overstacking")
         } else {
-            log("#GEmergency move:")
+            log("Emergency move:")
         }
     },
     inactive: "execute emergency move",
