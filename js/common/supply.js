@@ -253,6 +253,9 @@ function set_zoi(i, piece, oos_units) {
 function check_hq_in_supply(hq, piece, supply) {
     const faction = piece.faction
     const location = G.location[hq]
+    if (location < LAST_BOARD_HEX && G.offensive.active_hq.includes(hq)) {
+        return true
+    }
     L.supply.retracing = [location]
     L.supply.queue = [location]
     var overland_set = []
