@@ -68,7 +68,11 @@ function get_china_info() {
     var count_ap = array_count(draw[AP], c => cards[c].china)
     if (!surrender) {
         info.push(`Offensive ${(G.turn - offensive > 1) ? "" : "not "}possible${offensive > 0 ? ". Last launched turn " + offensive : ""}.`)
-        mods.log.forEach(l => info.push(l))
+        mods.log.forEach(line => {
+            line = line.replace(/^[%&>]./g, "") // remove log formatting codes
+            line = line.replace(/^>\d/g, "") // remove log formatting codes
+            info.push(line)
+        })
         info.push(`Not played JP cards to China Government Front Status: ${count_jp}.`)
         info.push(`Not played AP cards to China Government Front Status: ${count_ap}.`)
     }
@@ -183,7 +187,7 @@ function print_pow(text) {
     }
 
     text.push(`<dd>(${current_pow.length}/${G.pow}) `)
-    text.push(escape_text(current_pow.map(x=>"H"+x).join(", ")))
+    text.push(escape_text(current_pow.map(x => "H" + x).join(", ")))
 }
 
 function print_naval_situation(text) {
@@ -208,7 +212,7 @@ function print_naval_situation(text) {
         else {
             text.push(`<dd>${list.length} ${label}`)
             if (list.length <= 3)
-                text.push("<dd>" + escape_text(list.map(p=>"P"+p).join(", ")))
+                text.push("<dd>" + escape_text(list.map(p => "P" + p).join(", ")))
         }
     }
 
@@ -257,7 +261,7 @@ function print_occupation(text, response) {
         text.push(`<dd>Turns: ${G.turn - status + 1}/${nation.turns_to_control}`)
 
     if (nation.keys)
-        text.push("<dd>Keys: " + escape_text(nation.keys.map(k=>"H"+hex_to_int(k)).join(", ")))
+        text.push("<dd>Keys: " + escape_text(nation.keys.map(k => "H" + hex_to_int(k)).join(", ")))
 
     if (response.info)
         for (var line of response.info)
@@ -292,11 +296,11 @@ function print_nation_status(text, response) {
         text.push("<dd>")
         text.push(`(${control[JP].length}/${control[AP].length})`)
         if (control[JP].length)
-            text.push(" JP: " + escape_text(control[JP].map(x=>"H"+x).join(", ")))
+            text.push(" JP: " + escape_text(control[JP].map(x => "H" + x).join(", ")))
         if (control[AP].length && control[JP].length)
             text.push(";")
         if (control[AP].length)
-            text.push(" AP: " + escape_text(control[AP].map(x=>"H"+x).join(", ")))
+            text.push(" AP: " + escape_text(control[AP].map(x => "H" + x).join(", ")))
     }
 
     if (response.info)
@@ -389,7 +393,7 @@ function update_window_eliminated() {
 function update_combat_window(response) {
     var text = []
 
- //   console.log("COMBAT WINDOW", JSON.stringify(response))
+    //   console.log("COMBAT WINDOW", JSON.stringify(response))
 
     update_window_title("window_combat",
         escape_text(`Combat ${String.fromCharCode(65 + response.battle_name)}: H${response.battle_hex}`)
@@ -482,6 +486,7 @@ function print_battle_box(text, faction, cf, rm, units, log) {
     if (log.length > 0) {
         for (var line of log) {
             line = line.replace(/^[%&>]./g, "") // remove log formatting codes
+            line = line.replace(/^>\d/g, "") // remove log formatting codes
             text.push("<dt>" + escape_text(line))
         }
     }

@@ -504,7 +504,7 @@ function on_init(scenario, game_options, static_view) {
         .tooltip(() => "U.S. Political Will: " + G.political_will)
 
     define_marker("marker-wie", 0, counters.wie)
-        .tooltip(() => `War in Europe (${get_wie_level()}): ${G.wie - 3}`)
+        .tooltip(() => `War in Europe (${get_wie_level()}): ${3 - G.wie}`)
 
     define_marker("marker-india", 0, counters.india_status)
         .tooltip(() => G.surrender[nations.INDIA.id] ? "India Surrender" : "India - " + nations.INDIA.statuses[G.events[events.INDIA_STATUS.id]])
