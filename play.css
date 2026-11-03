@@ -203,9 +203,9 @@ body.full_map {
 
 body.southpac_map, body.burma_map {
     & #mapwrap, & #map, & #canvas { width: 1275px; height: 825px; }
-    & #panels { max-width 1352px; }
+    & #panels { max-width: 1352px; }
     @media (max-width: 800px) {
-        & #panels { min-width 1352px; }
+        & #panels { min-width: 1352px; }
     }
 }
 

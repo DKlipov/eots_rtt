@@ -11506,7 +11506,7 @@ P.move_offensive_units = {
     no_organic() {
         G.offensive.organic.pop()
         G.offensive.organic.pop()
-        // update_move_hex()
+        L.move_data = get_move_data()
     },
     con_eliminate() {
         push_undo()
