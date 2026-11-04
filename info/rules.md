@@ -3,9 +3,9 @@
 <link rel="stylesheet" href="/fonts/fonts.css">
 <title>Empire of the Sun</title>
 <style>
-html { padding: 16px; font-family: serif; }
+html { padding: 16px; font-family: "Source Serif", serif; }
 body { max-width: 600px; margin: 0 auto; }
-h1 { font-family: sans-serif; }
+h1 { font-family: "Source Sans", sans-serif; }
 h1 { font-size: 1.4rem; font-weight: bold; margin: 1rem 0; }
 h2 { font-size: 1.2rem; font-weight: bold; margin: 1rem 0; }
 h3 { font-size: 1.0rem; font-weight: bold; margin: 1rem 0; }
@@ -19,13 +19,19 @@ blockquote {
         padding: 0.1rem 1rem;
         background-color: aliceblue;
 }
-ol ol { list-style-type: lower-latin }
-li img { vertical-align: middle; height: 30px; margin: 5px; }
 p img { display: block; margin: 0 auto; max-width: 100%; }
-figcaption { display: none }
+img[data-align=right]{float:right;margin-left:1rem;}
+img.card{border-radius:8px;width:125px;border:1px solid black;}
+img.counter{display:inline;width:48px;margin:4px;border:1px solid black;}
+img[data-align=left]{float:left;margin-right:1rem;}
+hr { border: none; border-top: 5px solid skyblue; }
 </style>
 
-![COVER](images/cover.jpg)
+![](images/p01.avif)
+
+**V4.0** 
+
+------
 
 # Table of Contents 
 
@@ -48,27 +54,27 @@ figcaption { display: none }
 - [17.0 Scenarios]
 - [18.0 Master Scenario Setup List]
 - [19.0 Comprehensive Example Of Play]
-- [20.0 Designer’s Notes]
+- [20.0 Designer's Notes]
 - [21.0 Bibliography]
 - [Credits]
 
 > © 2025 GMT Games, LLC<br>P.O. Box 1308, Hanford, CA 93232-1308<br>[www.GMTGames.com](https://www.gmtgames.com/)
 
-**V4.0** 
+------
 
 # 1.0 Introduction 
 
-_Empire of the Sun_ is a game about the Pacific War during World War II. One player takes the side of the Japanese and the other the Western Allies. The Japanese try to out perform their historical counterpart and force the Allies into a negotiated end to the war, while the Allies try to destroy Japan’s military and place its industry within range of Allied B29s and Naval forces. If the Allies cannot keep pace with their historical counterpart, the only recourse is the invasion of the Japanese Home Islands themselves. 
+_Empire of the Sun_ is a game about the Pacific War during World War II. One player takes the side of the Japanese and the other the Western Allies. The Japanese try to out perform their historical counterpart and force the Allies into a negotiated end to the war, while the Allies try to destroy Japan's military and place its industry within range of Allied B29s and Naval forces. If the Allies cannot keep pace with their historical counterpart, the only recourse is the invasion of the Japanese Home Islands themselves. 
 
 ## 1.1 Causes of the War 
 
-The war in the Pacific during World War II had many underlying causes, the most notable being the Japanese view that they had a manifest right to become the dominant force in Asia. The Japanese psyche correctly saw themselves as the equals of any Western nation. It was the view in Tokyo that the only barrier to becoming a world class power was their lack of natural resources, denied to them by nature. Using the precedent of their Western mentors, they embraced the colonial model of empire, which made them desirous to dominate China and the Dutch East Indies. As a result of this viewpoint, the quasi-mutinous units of the Japanese Imperial Army with Imperial instigation presented Tokyo with a fait accompli when they attacked and conquered Manchuria in 1931. This foreign adventure, and attempts by succeeding Japanese governments to gain international recognition for their unique status on the Asian mainland, continued to bring consternation and friction to Japan’s relations with the Western powers. 
+The war in the Pacific during World War II had many underlying causes, the most notable being the Japanese view that they had a manifest right to become the dominant force in Asia. The Japanese psyche correctly saw themselves as the equals of any Western nation. It was the view in Tokyo that the only barrier to becoming a world class power was their lack of natural resources, denied to them by nature. Using the precedent of their Western mentors, they embraced the colonial model of empire, which made them desirous to dominate China and the Dutch East Indies. As a result of this viewpoint, the quasi-mutinous units of the Japanese Imperial Army with Imperial instigation presented Tokyo with a fait accompli when they attacked and conquered Manchuria in 1931. This foreign adventure, and attempts by succeeding Japanese governments to gain international recognition for their unique status on the Asian mainland, continued to bring consternation and friction to Japan's relations with the Western powers. 
 
-More significantly, this philosophy ran afoul of long standing, and long un-enforced, US policies for an ‘open door’ in China. The US had maintained a romantic image of their extensive trade relationship with China, which was not supported by economic reality. However, important families, such as the Roosevelt’s, had made their fortune in the China trade, and they fought diplomatically to maintain unfettered US access to the Chinese market. 
+More significantly, this philosophy ran afoul of long standing, and long un-enforced, US policies for an ‘open door' in China. The US had maintained a romantic image of their extensive trade relationship with China, which was not supported by economic reality. However, important families, such as the Roosevelt's, had made their fortune in the China trade, and they fought diplomatically to maintain unfettered US access to the Chinese market. 
 
 Continuous low-level offensives and the collapse of central authority in China exploded in 1937 into the full scale invasion of Northern China. This invasion was marked by significant Japanese brutality to the Chinese populace, as epitomized by the rape of Nanking. However, China was more than Japan could swallow and the Chinese Nationalist government under Chiang Kai Shek refused to surrender, to the extreme frustration of the Japanese government. 
 
-The German blitzkrieg of Europe in 1939-1941 defeated or laid low many of the Western colonial powers, whose far-flung empires became vulnerable to military conquest. Operation Barbarossa and the perceived imminent collapse of the Soviet Union, coupled with American economic sanctions, led the Japanese government to determine that the moment to strike had arrived. The Japanese felt that they had to act now or forever forfeit their dream to become a world power. Although US cryptanalysts were reading many of the Japanese diplomatic and low level military codes, they were still caught off guard on December 7, 1941, when the Imperial Japanese Navy attacked the US Pacific fleet in its Pearl Harbor anchorage. The impact of this attack would see the United States wreck terrible vengeance upon the Japanese Empire for their ‘day of infamy’ and their moment in the sun. 
+The German blitzkrieg of Europe in 1939-1941 defeated or laid low many of the Western colonial powers, whose far-flung empires became vulnerable to military conquest. Operation Barbarossa and the perceived imminent collapse of the Soviet Union, coupled with American economic sanctions, led the Japanese government to determine that the moment to strike had arrived. The Japanese felt that they had to act now or forever forfeit their dream to become a world power. Although US cryptanalysts were reading many of the Japanese diplomatic and low level military codes, they were still caught off guard on December 7, 1941, when the Imperial Japanese Navy attacked the US Pacific fleet in its Pearl Harbor anchorage. The impact of this attack would see the United States wreck terrible vengeance upon the Japanese Empire for their ‘day of infamy' and their moment in the sun. 
 
 ## 1.2 Components 
 
@@ -98,9 +104,15 @@ A complete game of _Empire of the Sun_ contains:
 
 - 1 die (10 sided) 
 
-![SAMPLE UNITS IMAGE]()
+---
 
-![SAMPLE CARD IMAGE]()
+![](images/p02.avif)
+
+---
+
+![](images/p03.avif)
+
+---
 
 ### 1.22 Die 
 
@@ -114,7 +126,7 @@ The single map sheet is an equal area projection of the Pacific Ocean and portio
 
 The counters represent the units that the players maneuver and with which they conduct combat to gain their victory conditions. The Ground units (interchangeably referred to as land units in the rules) represent a variety of different sized units from regiments up to armies. Air units represent large regional air forces. Naval units represent a large mix of Capital ships, some of whose names are used for the unit designation, and varying numbers of Cruisers, Light Cruisers, and Destroyers. Counters in play on the map are always viewable by both players. 
 
-**Example Counters:** The example counters below define what each numerical value on a counter represents as defined in the rules. HQ values represent their command range and efficiency used in activating combat units. Values on combat units represent attack, defense, and for air/ carrier units, their attack ranges. All unit’s hex designations are their starting locations for the December 1941turn. All other units enter on their indicated arrival game turn. If a unit has a white triangle in its upper right hand corner it begins the game on its reduced side where its set up or arrival information is located. All other numbers are historical designations and generally have no effect on play unless cited in card text. 
+**Example Counters:** The example counters below define what each numerical value on a counter represents as defined in the rules. HQ values represent their command range and efficiency used in activating combat units. Values on combat units represent attack, defense, and for air/ carrier units, their attack ranges. All unit's hex designations are their starting locations for the December 1941turn. All other units enter on their indicated arrival game turn. If a unit has a white triangle in its upper right hand corner it begins the game on its reduced side where its set up or arrival information is located. All other numbers are historical designations and generally have no effect on play unless cited in card text. 
 
 _PLAY NOTE: A full-strength unit is considered to have two steps and when it takes a step loss it is flipped to its reduced-strength side and now has one step. A one-step unit that takes a step loss is eliminated. Several units in the game, such as the Dutch Regiments and the British CVL Hermes, as stated in the rules, are one-step units and therefore do not have a reduced side._ 
 
@@ -126,8 +138,8 @@ There are two decks of Strategy cards, one Allied and one Japanese. A card has f
 
 **Aircraft Carrier:** All CV, CVL, and CVE type naval units are collectively known as aircraft carriers or carriers. When the rules reference aircraft carriers, they are referring to all three types. When distinctions are required in the rules, they are cited by their particular naval unit type letter designator. 
 
-**Aircraft Range:** Air units (land based aircraft units) have two range values (normal and extended) on their counter. An aircraft unit’s range is the distance in hexes that it can move from airfield to airfield, and the distance in hexes it can be from a battle that it participates in. When an aircraft uses its extended range in battle, its attack strength is halved for combat purposes. If an air unit’s extended range is in parentheses, it cannot use extended range to participate in battle; it can only join in a battle that is within its normal range. Also, a unit with extended range in parenthesis cannot participate in a battle if it 
-uses this range to move during an Offensive. Consequently, an aircraft unit cannot react using its parenthetical value, since all reaction units have to participate in a battle in order to reaction move. Skip Bombing range does not use a unit’s parenthetical extended range. 
+**Aircraft Range:** Air units (land based aircraft units) have two range values (normal and extended) on their counter. An aircraft unit's range is the distance in hexes that it can move from airfield to airfield, and the distance in hexes it can be from a battle that it participates in. When an aircraft uses its extended range in battle, its attack strength is halved for combat purposes. If an air unit's extended range is in parentheses, it cannot use extended range to participate in battle; it can only join in a battle that is within its normal range. Also, a unit with extended range in parenthesis cannot participate in a battle if it 
+uses this range to move during an Offensive. Consequently, an aircraft unit cannot react using its parenthetical value, since all reaction units have to participate in a battle in order to reaction move. Skip Bombing range does not use a unit's parenthetical extended range. 
 
 _DESIGN NOTE: The normal range is the operational range of the fighters in the air unit, whereas the extended range represents solely the two engine bombers traveling alone. Air units with parenthetical range represent units with short range tactical aircraft._ 
 
@@ -160,12 +172,17 @@ for use with the Manchurian Invasion special event card). The use of flags to de
 
 **Japanese Army:** Japanese army units are yellow with black type.
 
+![](images/counter_jparmy1.png){class=counter}
+![](images/counter_jparmy2.png){class=counter}
+
 **Japanese Navy:** Japanese navy units are white with red type. 
+
+![](images/counter_organic_naval.png){class=counter}
+![](images/counter_jpnavy2.png){class=counter}
 
 **Long Range Bomber (LRB):** Only the Allied player has LRB units. LRB units are all air units with ranges of 6 or greater. LRB units have distinct uses in the game and are so cited where appropriate. Note that though LRB units have the same historical unit ID number as their parent normal air unit, they are considered separate units for all game purposes unless specifically noted otherwise. Two of the Allied LRBs in the game have no parent air unit, 20BC and 21BC. These are B29 units and have the ability to conduct Strategic Bombing. Whenever the rules or card text refer to B29 units, they are referring to these two specific units. 
 
 **Named Location:** Cities, with or without intrinsic defense, Resource 
-
 hexes, and hexes with ports or airfields are named locations. 
 
 **Naval:** Rules references to naval units include carrier units unless specified as non-carrier naval. Exception: Japanese card 17 “Japanese Counterattack at Savo Island” text reference to naval are non-carrier naval. 
@@ -198,7 +215,13 @@ _DESIGN NOTE: Pre-war units were in two categories: professional soldiers and co
 
 **US Army:** US Army units are Green with black type. 
 
+![](images/counter_usarmy1.png){class=counter}
+![](images/counter_usarmy2.png){class=counter}
+
 **US Navy:** US Navy units are blue with black type. 
+
+![](images/counter_usnavy1.png){class=counter}
+![](images/counter_usnavy2.png){class=counter}
 
 # 2.0 Setting Up The Game 
 
@@ -208,7 +231,7 @@ _PLAY NOTE: It is suggested that you segregate counters according to their game 
 
 ## 2.1 Scenarios 
 
-The full campaign scenario is 12 turns long; with turn 1 (December ’41) as a special short turn (see rule 17.11 for details). The game can also be started on game turn 2, using an alternative setup, which starts with the January 1942 position. In addition, there are 3 yearly scenarios (1942, 1943, 1944) with alternate setups, and multi-year scenarios that use one of the yearly starts with the victory conditions of one of the later yearly scenarios. The 1943 scenario (17.3) is recommended for tournament and single sitting play situations. 
+The full campaign scenario is 12 turns long; with turn 1 (December '41) as a special short turn (see rule 17.11 for details). The game can also be started on game turn 2, using an alternative setup, which starts with the January 1942 position. In addition, there are 3 yearly scenarios (1942, 1943, 1944) with alternate setups, and multi-year scenarios that use one of the yearly starts with the victory conditions of one of the later yearly scenarios. The 1943 scenario (17.3) is recommended for tournament and single sitting play situations. 
 
 ## 2.2 Full Campaign Setup 
 
@@ -226,7 +249,7 @@ Each turn begins with each player bringing in reinforcement units and repairing 
 
 The heart of the game is the Offensives Phase, where the two opponents alternate playing a strategy card, thus conducting an offensive or implementing an event. When the players have exhausted all of the cards in their hand, the game turn enters the Political Phase. During the Political Phase players determine the status of each nation represented in the game to see if they surrender. The game turn ends with a determination of the supply status of units on the board and whether they will or will not feel the effects of attrition. At this time, if this was not the last turn of a scenario, another game turn is begun, or if it is the last turn of a scenario, victory is determined. 
 
-_PLAY NOTE: If this is the first time that you are reading these rules, then it is recommended that the player segregate the counters into a set that have hex setup locations and those that have a game turn of entry. Take the units with hex setups and place them on the map where indicated. After completing this go to the comprehensive example of play and move the counters according to the narrative. It is our belief that this ‘best practice’ will facilitate your introduction into the game system._ 
+_PLAY NOTE: If this is the first time that you are reading these rules, then it is recommended that the player segregate the counters into a set that have hex setup locations and those that have a game turn of entry. Take the units with hex setups and place them on the map where indicated. After completing this go to the comprehensive example of play and move the counters according to the narrative. It is our belief that this ‘best practice' will facilitate your introduction into the game system._ 
 
 # 4.0 Sequence of Play 
 
@@ -238,7 +261,7 @@ The following sequence represents all of the portions of a single game turn. It 
 
 Both players receiver their reinforcements and place them according to rules 10.1 (Reinforcements). 
 
-The Allied player places his reinforcements first. He receives delayed reinforcements from the previous game turn due to War In Europe effects (WIE, see 15.0), and either receives the current turn’s reinforcements (in case of no delay) or places them in the delay box due to the WIE or the effect of an event. If the WIE is at level 1 or greater, the Allied player rolls the die for certain classes of units that may be temporarily lost by being diverted to Europe. 
+The Allied player places his reinforcements first. He receives delayed reinforcements from the previous game turn due to War In Europe effects (WIE, see 15.0), and either receives the current turn's reinforcements (in case of no delay) or places them in the delay box due to the WIE or the effect of an event. If the WIE is at level 1 or greater, the Allied player rolls the die for certain classes of units that may be temporarily lost by being diverted to Europe. 
 
 Japanese player places his reinforcements second. Japanese reinforcements are never delayed or diverted. 
 
@@ -311,7 +334,7 @@ It should be noted that many Events enable Offensives, which are called EC Offen
 
 Played and discarded strategy cards are placed in a separate Discard pile for later reuse unless the card text specifies otherwise. The Discard piles are disclosed information and can be examined by either player. Some cards indicate that if played as an event (EC) they are completely removed from play. Note that a card that is played for an OC whose event text indicates that it is removed after being played as an event is placed in the Discard pile for possible reuse. 
 
-The number of cards in a player’s hand is public information, though not the card themselves. The Discard piles and the cards removed play are disclosed information and can be examined by either player. Draw piles cannot be examined by either player. 
+The number of cards in a player's hand is public information, though not the card themselves. The Discard piles and the cards removed play are disclosed information and can be examined by either player. Draw piles cannot be examined by either player. 
 
 
 
@@ -328,12 +351,14 @@ All Strategy cards have an OC, and possibly an EC, intelligence value on the car
 
 ## 5.3 Events 
 
+![](../cards/card_ap_72.100.avif){align=right class=card}
+
 Each Strategy card has an event. When a player uses a Strategy card as an Event card, the player follows the text of the event. If a portion of event text contradicts some rules then the text supercede those rules and no others. There are four classes of events: Military events, Reaction events, Resource events, and Political events. 
 
 
 ### 5.31 Military Events 
 
-Military events (also called EC Offensives) allow the player to conduct multi-battle hex Offensives unlike the one battle hex allowed on an OC play. All military events have a Logistic value. The number of units that may be activated by a military event is based on the Logistics (not the Operations value) value of the event. Military event cards often have a variety of activation, intelligence, and condition text. If a player cannot comply with all of an event’s clauses, except bonuses, the card may be played only as an OC Offensive or discarded, but it may not be used as an Event Card. 
+Military events (also called EC Offensives) allow the player to conduct multi-battle hex Offensives unlike the one battle hex allowed on an OC play. All military events have a Logistic value. The number of units that may be activated by a military event is based on the Logistics (not the Operations value) value of the event. Military event cards often have a variety of activation, intelligence, and condition text. If a player cannot comply with all of an event's clauses, except bonuses, the card may be played only as an OC Offensive or discarded, but it may not be used as an Event Card. 
 
 Military events can be played as OC cards to initiate an OC Offensive instead of Military event. In this case, rules for OC Offensives apply as normal and all card text is ignored. 
 
@@ -343,11 +368,13 @@ Many military events have Offensive restrictions on which named HQs can or canno
 
 #### B. Intelligence Conditions 
 
-If the Intelligence states ‘Surprise Attack’ the Reaction player cannot make an intelligence die roll to alter the intelligence condition (use OC value for special reaction, 7.27), but may still play a Reaction card in order to alter the intelligence condition from Surprise Attack. 
+If the Intelligence states ‘Surprise Attack' the Reaction player cannot make an intelligence die roll to alter the intelligence condition (use OC value for special reaction, 7.27), but may still play a Reaction card in order to alter the intelligence condition from Surprise Attack. 
 
 #### C. Reinforcement Units 
 
-Certain military events come with a special unit (e.g., _Slim’s Burma Offensive_ brings the British 7th Armor Brigade into play). Place the new unit according to the card text. 
+![](images/counter_armor_brigade.png){class=counter align=left}
+
+Certain military events come with a special unit (e.g., _Slim's Burma Offensive_ brings the British 7th Armor Brigade into play). Place the new unit according to the card text. 
 
 
 
@@ -359,9 +386,9 @@ _EXAMPLE: On Allied card 33, the text states, ...”this event ends a US inter-s
 
 
 
-
-
 ### 5.32 Reaction Events 
+
+![](../cards/card_ap_12.100.avif){align=right class=card}
 
 When a player is in the role of a Reaction player, the only strategy cards that may be played are those that state in their title they are a Reaction event. Only the player currently cast in the role of Reaction player may play Reaction cards. A Reaction event may be played in response to an Offensive after the Offensives player has completed moving all offensive units, provided there are one or more declared battle hexes or 
 the text of the card indicates the card may be played otherwise. A Reaction player is limited to playing a maximum of three Reaction events in response to a specific offensive, not per battle within that offensive. There are five general categories of Reaction events: intelligence, attack (submarine, kamikaze, and skip bombing), counteroffensive, weather, and personage. 
@@ -376,7 +403,7 @@ Attack Reaction cards indicate the potential for some amount of additional damag
 
 #### C. Counteroffensive 
 
-There are several general types of Reaction events that enable the Reaction player to activate more units in reaction than would be normally possible and alter the intelligence condition like Intelligence reaction cards. Counteroffensive cards have a logistics value, which the Reaction player uses for the number of units that can be activated, although the Reaction player still uses the Offensive card’s OC value for determining unit movement points. Only one Counteroffensive event may be played during an offensive. 
+There are several general types of Reaction events that enable the Reaction player to activate more units in reaction than would be normally possible and alter the intelligence condition like Intelligence reaction cards. Counteroffensive cards have a logistics value, which the Reaction player uses for the number of units that can be activated, although the Reaction player still uses the Offensive card's OC value for determining unit movement points. Only one Counteroffensive event may be played during an offensive. 
 
 #### D. Weather 
 
@@ -388,13 +415,14 @@ There are a few events that focus on the impact of a famous personage (e.g., Gan
 
 ### 5.33 Resource Events 
 
-
+![](../cards/card_jp_30.100.avif){align=right class=card}
 
 Only the Offensives player may play Resource events. Resource events give the player new units, capabilities, or replacements. If a Resource event gives the player a reinforcement unit, it is placed on the map using the same restrictions as for units arriving during the Reinforcement phase. If the event states that the replacements must be used immediately, then the player places the replacements as if it were currently the replacement phase, with all the same 
 restrictions. Sometimes the card text specifies a choice to either use the replacements immediately or save them for future use. If the player chooses to save them, record the amount on the strategic resource track with the appropriate marker. If for any reason, the Offensives player cannot fulfill the conditions under which the reinforcement unit is supplied, the unit is lost. Similarly, if for any reason the Offensives player cannot use or save all or some of the available replacements, unused replacements are permanently lost. 
 
 ### 5.34 Political Events 
 
+![](../cards/card_ap_47.100.avif){align=right class=card}
 
 Political events are those that move a marker on one of the game tracks. There are five kinds of political events: China OC Offensives, India Stability, War In Europe, US Political Will changes, and Inter-Service Rivalry. Each of these types of events specifies which game track is affected and the direction and distances the marker for that track is moved. 
 
@@ -416,7 +444,7 @@ If a Special Event is discarded due to the play of another event and the criteri
 
 # 6.0 Zones Of Influence, Supply, Activation, and Hex Control 
 
-Supply and activation are key concepts for units’ actions in EotS. To move or attack during an offensive or as a reaction to an offensive, a unit needs to be activated by an in-supply HQ. Inactivated units defend in battle if attacked, but cannot initiate attacks or move during an Offensive. One precondition (unless an EC specifies otherwise) for activation is that the unit is currently in supply. In addition to preventing activation, lack of supply may also cause attrition (6.24), prevents units from receiving replacements (11.0) and prevents air and carrier units from exerting ZOIs (6.4). However, out-of-supply units do retain their combat strength. Supply status is continuously evaluated, so units may fall in and out of supply as other units move and affect the supply lines. However, once a unit has been activated for an Offensive, it automatically remains in supply until the end of the Offensive even if it moves to a location where it would not be in supply. 
+Supply and activation are key concepts for units' actions in EotS. To move or attack during an offensive or as a reaction to an offensive, a unit needs to be activated by an in-supply HQ. Inactivated units defend in battle if attacked, but cannot initiate attacks or move during an Offensive. One precondition (unless an EC specifies otherwise) for activation is that the unit is currently in supply. In addition to preventing activation, lack of supply may also cause attrition (6.24), prevents units from receiving replacements (11.0) and prevents air and carrier units from exerting ZOIs (6.4). However, out-of-supply units do retain their combat strength. Supply status is continuously evaluated, so units may fall in and out of supply as other units move and affect the supply lines. However, once a unit has been activated for an Offensive, it automatically remains in supply until the end of the Offensive even if it moves to a location where it would not be in supply. 
 
 Both activation and supply are traced from an HQ, though they can be traced from different HQs. The criteria for tracing activation and supply are somewhat different with supply tracing being more restrictive (see 6.2 and 6.3) with the range of HQ being the maximum path length. In addition to these traces, intelligence and reaction determination use direct hex distance from the HQ as criteria regardless of blocking terrain or AZOIs. 
 
@@ -424,13 +452,15 @@ Aircraft Zones of Influence have a major impact for tracing supply and activatio
 
 ## 6.1 Headquarter Units 
 
+![](images/counter_hq.png){class=counter align=left}
+
 Headquarters (HQs) represent command infrastructure and are treated as ground units. Each side begins the game with a number of HQs in play and can receive new HQs as reinforcements or through card events. Most HQs cannot be eliminated permanently, as they represent a ubiquitous command infrastructure. HQs do not move per se, but can be repositioned voluntarily (by the play of an OC) or involuntarily due to opposing actions. A few of the Allied HQs cannot be returned to play if voluntarily or involuntarily removed and are indicated by a dot (Allied ABDA and Malaya HQs). HQs have two values: Command Range and Efficiency Rating. 
 
 ### 6.11 HQ Capabilities 
 
-**Command Range:** An HQ’s command range is used to determine the range at which it can supply units, trace activation for Offensives and Reaction moves, and where reinforcements and replacements can be placed. It is also used for determining whether the HQ can react to an offensive and if units that are out of supply can sustain themselves on the map if they are out of supply. 
+**Command Range:** An HQ's command range is used to determine the range at which it can supply units, trace activation for Offensives and Reaction moves, and where reinforcements and replacements can be placed. It is also used for determining whether the HQ can react to an offensive and if units that are out of supply can sustain themselves on the map if they are out of supply. 
 
-**Efficiency Rating:** An HQ’s efficiency rating is used in conjunction with an OC value or a Logistics value to determine the number of units the HQ can activate during an Offensive or Reaction. HQ’s efficiency rating can be modified in three situations: US or Joint HQ that cannot trace a supply line, in the manner HQs usually trace supply lines, to the East map edge Ultimate Supply Source has -1 modifier to its efficiency rating (to a minimum of 0) (6.25). Similarly, Japanese HQ that is used to activate units in Burma, Ceylon, or Northern India when the Bridge over Kwai River has not been built and the Japanese do not control Rangoon has –1 modifier to its efficiency rating (13.79). Under certain circumstances the Bridge over the River Kwai event can add +1 to a Japanese HQs efficiency rating (13.79). 
+**Efficiency Rating:** An HQ's efficiency rating is used in conjunction with an OC value or a Logistics value to determine the number of units the HQ can activate during an Offensive or Reaction. HQ's efficiency rating can be modified in three situations: US or Joint HQ that cannot trace a supply line, in the manner HQs usually trace supply lines, to the East map edge Ultimate Supply Source has -1 modifier to its efficiency rating (to a minimum of 0) (6.25). Similarly, Japanese HQ that is used to activate units in Burma, Ceylon, or Northern India when the Bridge over Kwai River has not been built and the Japanese do not control Rangoon has -1 modifier to its efficiency rating (13.79). Under certain circumstances the Bridge over the River Kwai event can add +1 to a Japanese HQs efficiency rating (13.79). 
 
 **Stacking:** HQs do not count toward stacking limits, but there may never be more than one HQ (of either side) in a hex at a time. HQs must always be located in a port hex. 
 
@@ -468,7 +498,7 @@ _PLAY NOTE: An HQ that returns to play as a reinforcement can be placed in any f
 
 **General concepts:** Both HQs and units must trace supply lines to be in supply. For HQs, a supply line of any length is traced from an Ultimate Supply Source (map edges for the Allies; Japanese controlled city hexes in the Home Islands for Japan (6.22); to the port in which the HQ sits. A supply path that traces from an ultimate supply source to an HQ can use multiple ports to enter, continue across land hexsides, and exit by port without overland or number of ports used restrictions. 
 
-Units, by contrast, trace supply lines from an in-supply HQ to the hex they occupy, limited by the HQ’s range. Air or carrier unit ZOI are assumed to exist when checking if a unit is in supply (see 6.4). As the rules below explain, the supply line may not traverse certain hexsides. Although there are a number of restrictions, in general units may trace supply 
+Units, by contrast, trace supply lines from an in-supply HQ to the hex they occupy, limited by the HQ's range. Air or carrier unit ZOI are assumed to exist when checking if a unit is in supply (see 6.4). As the rules below explain, the supply line may not traverse certain hexsides. Although there are a number of restrictions, in general units may trace supply 
 
 1. from the supplying HQ by sea to coastal hexes the units occupy; 
 
@@ -482,9 +512,9 @@ In addition, there are further restrictions for units tracing the last portion o
 
 #### A. Units 
 
-![SUPPLY LINE IMAGE]()
+![](images/p10a.avif){align=right}
 
-**Supply Line:** A unit is supplied if an unblocked hex path can be 2617 E traced from a supplied appropriate (6.12) activating HQ to the unit and the path length does not exceed the HQ’s range. A supply line can be traced across any hexside except the following:
+**Supply Line:** A unit is supplied if an unblocked hex path can be 2617 E traced from a supplied appropriate (6.12) activating HQ to the unit and the path length does not exceed the HQ's range. A supply line can be traced across any hexside except the following:
 
 (A) An unplayable hexside (see map). 
 
@@ -510,25 +540,25 @@ In addition, there are further restrictions for units tracing the last portion o
 
 For purposes of this check only, a hexside with strategic transport route (8.44) costs 1/2 MP if both of the hexes are unoccupied OR friendly occupied (with or without the presence of an enemy unit). A hex with a No Transport Route marker (see 13.77) is treated as if it had no transport route connections to any of the adjacent hexes. 
 
-**Port Limitation:** A supply line may include no more than one supply eligible port where the supply line switches between sea and land or vice versa, not including (i) the port in the HQ’s hex; or (ii) any port the unit occupies. 
+**Port Limitation:** A supply line may include no more than one supply eligible port where the supply line switches between sea and land or vice versa, not including (i) the port in the HQ's hex; or (ii) any port the unit occupies. 
 
 _PLAY NOTE: Note that the supply line itself may cross far more terrain overland than the 4 MP limitation and does not have to pass through the supply-eligible port required, there just has to be a valid port within the range. Also, note that if the last hexside crossed was_ 
 
-![SUPPLY EXAMPLE 1]()
+![](images/p10b.avif)
 
 _EXAMPLE: Japanese units B, C and D trace supply by land to the South HQ. All are within 12 hexes of the South HQ and 4 MPs of a Supply Eligible Port. Since the Transportation hexes in Jarhat and Ledo have not been constructed yet (13.77), unit A is out of supply since it is 5 MPs from Rangoon to its location._ 
 
-![SUPPLY EXAMPLE 2]()
+![](images/p10c.avif)
 
 _EXAMPLE: The five Japanese units marked A-E are tracing supply. The shaded hexes indicate non-neutralized Allied Air ZOI, which blocks supply paths by sea. Unit A is out of supply since it is more than 4 MPs from a Supply Eligible Port. All other units are in Supply. Note that Allied Air ZOI does not block land supply paths which allows unit C to trace to the adjacent port hex.Units D and E are on coastal hexes which can trace a supply path by sea back to the HQ. by sea, the overland limitation does not apply at all. This allows units in a location that can be supplied by sea more freedom of operation than units tied to overland supply network._ 
 
-_DESIGN NOTE: The overland logistical range requires that units operate relatively close to a logistical supply node represented by a port. The difficult jungle and mountain terrain in the many of the areas depicted in EotS severely limited the possibilities of overland supply. The overland supply lines in EotS should not be considered literal lines along which supply flows but rather as areas of HQ’s logistical ability and responsibility. In practical terms, units in such a situation would receive their supplies from nearest port to which the supplies are shipped to. Thus, the 4 MP limitation is enforced to nearest port and not to the HQ._ 
+_DESIGN NOTE: The overland logistical range requires that units operate relatively close to a logistical supply node represented by a port. The difficult jungle and mountain terrain in the many of the areas depicted in EotS severely limited the possibilities of overland supply. The overland supply lines in EotS should not be considered literal lines along which supply flows but rather as areas of HQ's logistical ability and responsibility. In practical terms, units in such a situation would receive their supplies from nearest port to which the supplies are shipped to. Thus, the 4 MP limitation is enforced to nearest port and not to the HQ._ 
 
 **_Important:_** During an Offensive, any activated unit remains supplied until the end of the Offensive. 
 
 **Kunming:** In some cases, Allied units can trace supply directly from Kunming instead of an HQ (see 13.75). 
 
-![SUPPLY EXAMPLE 3]()
+![](images/p11.avif)
 
 _Take the situation where the Allies have the Malaya air unit in Singapore and the Japanese have air units in Singora, Miri, and Tjilatjap. All of the Japanese air units are drawing their supply from the South HQ in Saigon and the Malaya air unit is drawing its supply from the Malaya HQ in Singapore. The Japanese Saigon HQ has an uninterrupted LOC to Japan. The Japanese air unit in Tjilatjap is OOS if the Malaya air unit has a ZOI. The Malaya HQ has an LOC (putting the Malaya air unit in supply) if the Malaya air units ZOI puts the Japanese Tjilatjap air unit OOS, but does not have a LOC if the Japanese air unit in Tjilatjap has a ZOI._ 
 
@@ -536,7 +566,7 @@ _The Malaya air unit and the Japanese Tjilatjap air units ZOI are therefore mutu
 
 _Taking the same example and moving the Japanese air unit from Tjilatjap to Batavia, changes the outcome. In this instance when all the air units have a ZOI, Batavia is in supply (not dependent on whether the Malaya air unit does or does not have a ZOI), so Malaya is OOS and the Malaya air unit then loses its air ZOI._ 
 
-In rare local situations where the ZOI of Japanese and Allied air units mutually render one another unsupplied (that is absent the ZOI projected by the Allied air unit, The Japanese player’s air unit would be in supply and thus exert a ZOI; but that Japanese ZOI, if projected would cut supply to the Allied air unit in question), only Allied air units are considered to exert a ZOI for supply status determination. 
+In rare local situations where the ZOI of Japanese and Allied air units mutually render one another unsupplied (that is absent the ZOI projected by the Allied air unit, The Japanese player's air unit would be in supply and thus exert a ZOI; but that Japanese ZOI, if projected would cut supply to the Allied air unit in question), only Allied air units are considered to exert a ZOI for supply status determination. 
 
 _PLAY NOTE: The best method to determine whether the situational placement of air ZOIs creates this situation is to do the following. Assuming that all of the air units are in range of an appropriate HQ, look at the situation with all of the air units in question projecting their ZOI. If any air units ZOI is contingent upon an enemy air unit not having a ZOI and vice versa then take away the offending Japanese air ZOI. If the Allied air unit is in supply then the Japanese air unit is OOS. If not, then this situation does not apply._ 
 
@@ -555,6 +585,8 @@ Ultimate Supply Source paths are used to determine the supply status of HQs. Eac
 Play of the China Airlift (Allied #17) card establishes a supply line between Kunming and any Allied controlled supply-eligible Northern India airfield (Jarhat and Dacca). This supply line exists as long as the Allies control a supply-eligible Northern India airfield and need not be traced as specified in 6.21. 
 
 #### Tokyo Express 
+
+![](images/counter_tokyo_express.png){class=counter align=left}
 
 Play of the Big Tokyo Express Operation (Japanese Tokyo #28) or the Tokyo Express (Japanese #44) card allows Express the Japanese player to place the Tokyo Express marker in play to create a temporary supply line between any one in-supply Japanese HQ and any one hex within range of that HQ for the rest of the turn. Air, ground, and naval units, not HQs, in the hex with the Tokyo Express marker are in supply for all game purposes to include re-establishing a ZOI. Nothing can sever a Tokyo Express marker supply. 
 
@@ -594,11 +626,11 @@ Only a single HQ per side can be used to activate units for one offensive and th
 
 All in supply air and carrier units project a 2 hex Zone Of Influence (ZOI) The ZOI is neutralized if an opposing Zone Of Influence is projected by non-LRB unit into the same hex. LRB units project ZOI like other air and carrier units, but cannot be used to neutralize enemy ZOI. Air or carrier unit ZOI is assumed to exist when checking if that unit is in supply. 
 
-![EXAMPLE AIR ZOI]()
+![](images/p12a.avif)
 
 _EXAMPLE: Both the Japanese and Allied Air ZOI are shown. The hexes where both sides have an Air ZOI are shown as neutralized._ 
 
-Out of supply air or aircraft carrier units do not have a ZOI and cannot neutralize enemy ZOIs. The supply status for determining whether a unit is in supply is determined anew every time the ZOI might have an effect (6.2). Thus, units may go out of supply and lose their ZOI (or vice versa) in middle of enemy’s move. Note, however, that once a unit has been activated for an offensive, it will remain in supply until the conclusion of the offensive regardless of any other factors. 
+Out of supply air or aircraft carrier units do not have a ZOI and cannot neutralize enemy ZOIs. The supply status for determining whether a unit is in supply is determined anew every time the ZOI might have an effect (6.2). Thus, units may go out of supply and lose their ZOI (or vice versa) in middle of enemy's move. Note, however, that once a unit has been activated for an offensive, it will remain in supply until the conclusion of the offensive regardless of any other factors. 
 
 An Air ZOI from an in-supply unit is in effect at all times when the unit is stationary and during non-strategic moves (thus moving air units and carriers neutralize opposing ZOIs as they go). An air or carrier unit using strategic move loses its ZOI during the movement and regains it after it has completed the move. 
 
@@ -614,7 +646,7 @@ A ZOI that is _un-neutralized_ impacts several game functions:
 
 In addition a ZOI has two effects even when neutralized: 
 
-- Offensive units entering, exiting, or moving within reaction side’s ZOI gives a -2 modifier to intelligence roll (7.25). 
+- Offensive units entering, exiting, or moving within reaction side's ZOI gives a -2 modifier to intelligence roll (7.25). 
 
 - Offensives unit making an amphibious landing within a ZOI of the Reaction player may allow special reaction (7.27). 
 
@@ -632,15 +664,11 @@ A ZOI does _not_ affect:
 
 ## 6.5 Hex Control 
 
-The last player to have a ground unit enter or pass through a hex controls the hex. Ground units that enter an unoccupied hex via ground movement gain control immediately. Ground units that enter a hex via amphib- 
+![](images/counter_hex_ctl.png){class=counter align=left}
 
+The last player to have a ground unit enter or pass through a hex controls the hex. Ground units that enter an unoccupied hex via ground movement gain control immediately. Ground units that enter a hex via amphibious assault (using an ASP, organic naval, or barge transport) and are not eliminated or forced to retreat in battle gain control of the hex just prior to post battle movement. 
 
-
-ious assault (using an ASP, organic naval, or barge transport) and are not eliminated or forced to retreat in battle gain control of the hex just prior to post battle movement. 
-
-
-
-![EXMAPLE CONTROL]()
+![](images/p12a.avif)
 
 _For example, during an Allied Offensive, Japanese controlled Guadalcanal (4423) is declared a battle hex and the Allies win, eliminating all Japanese ground units on Guadalcanal. The Allies have in the Guadalcanal hex US CA Northampton and 1st Marine Division, and on Espiritu Santo (4825) the 13th AF non-LRB air unit that participated in the battle. Just prior to post battle movement, the 1st Marine Division gains control of the Guadalcanal hex, making the hex legal destination for CA Northampton and 13th AF during the post battle movement._ 
 
@@ -664,11 +692,11 @@ Step 3. The Offensives player declares battle hexes (7.24).
 
 Step 4. Reaction player may cancel the Offensive using a Weather Reaction Event or cancelling a unit activation from a reaction card event text (e.g., Personage 5.32 E). If the Offensive is cancelled, place all units to their starting location, remove event reinforcements, remove event replacements, and place the used Offensive card in the discard pile; return any ASPs used during the offensive; the offensive is concluded (7.28). 
 
-Step 5. Implement possible event bonuses from Offensive player’s EC card that apply prior to reaction. 
+Step 5. Implement possible event bonuses from Offensive player's EC card that apply prior to reaction. 
 
 Step 6. If Special Reaction is possible, Reaction player may roll to attempt creating additional battle hexes via Special Reaction (7.27). If, after this, no battle hexes were declared nor created due to Special Reaction, Reaction player may play any applicable Attack Reaction cards, then skip to Step 13, Post Battle Movement. 
 
-Step 7. The Reaction player attempts to change the Offensive’s Intelligence Condition by playing an appropriate Reaction card or, as an alternative, making an intelligence die roll (7.25). If, at the conclusion of this Step, the Offensive’s Intelligence Condition is Surprise Attack, skip to Step 9. 
+Step 7. The Reaction player attempts to change the Offensive's Intelligence Condition by playing an appropriate Reaction card or, as an alternative, making an intelligence die roll (7.25). If, at the conclusion of this Step, the Offensive's Intelligence Condition is Surprise Attack, skip to Step 9. 
 
 Step 8. The Reaction player activates and moves units to participate in battle hexes either declared by Offensives player or created by Special Reaction (7.26). 
 
@@ -700,7 +728,7 @@ D. Japanese HQs can activate any Japanese unit.
 
 ### 7.22 Unit Movement Allowances 
 
-The distance Offensive or Reaction units may move is equal to the OC value of the Offensive card being played times the unit type’s base movement allowance (naval = 5, ground = 1, air = normal/ extended range). **_Exception:_** if the card is played as an EC, the event may allow unit movement greater than the OC value of the card and takes precedence. 
+The distance Offensive or Reaction units may move is equal to the OC value of the Offensive card being played times the unit type's base movement allowance (naval = 5, ground = 1, air = normal/ extended range). **_Exception:_** if the card is played as an EC, the event may allow unit movement greater than the OC value of the card and takes precedence. 
 
 Air units are further restricted in movement as they must end every “leg” of their movement in a friendly airbase (8.31). Naval units are limited in what hexes they can end their movement in (8.21). 
 
@@ -730,7 +758,7 @@ C. Second, if (but only if) the Reaction player did not play a card and the Offe
 
 D. The Intelligence die roll procedure is as follows. The card used to initiate the Offensive has an OC and possibly an EC intelligence value. If the Offense was initiated by the OC value of the card, then use the OC intelligence value. If the Offensive was initiated by an EC Offensive, then use the EC intelligence value. If the die roll is equal to or less than the appropriate Offensive card intelligence value (modified, if applicable per 7.25.E below), then the die roll is successful and the intelligence condition for the Offensive is intercept. If the die roll is greater than the specified value, then the roll is not successful, and the intelligence condition for the Offensive is surprise attack. 
 
-E. There is one way in which the intelligence die roll may be modified. If at any time during the movement of any of the Offensives player’s units, those units move into, through, or exit an opposing air ZOI (whether neutralized or not), the reaction player subtracts 2 from their intelligence die roll. However, an unmodified die roll of 9 is always considered a failed die roll and a surprise attack result, regardless of any die roll modifier. 
+E. There is one way in which the intelligence die roll may be modified. If at any time during the movement of any of the Offensives player's units, those units move into, through, or exit an opposing air ZOI (whether neutralized or not), the reaction player subtracts 2 from their intelligence die roll. However, an unmodified die roll of 9 is always considered a failed die roll and a surprise attack result, regardless of any die roll modifier. 
 
 _PLAY NOTE: Air/Carrier units that are activated within an enemy ZOI that do not move and declare a battle hex from that location do not trigger the intelligence die roll modifier. It is only triggered if a ZOI has been entered, moved into, through or exited._ 
 
@@ -738,7 +766,7 @@ _PLAY NOTE: Air/Carrier units that are activated within an enemy ZOI that do not
 
 If the intelligence condition is Surprise Attack there is no Reaction move and the Offensives player immediately resolves all battles initiated by the Offensive after the Reaction player has had an opportunity to play attack reaction cards. If the intelligence condition is Intercept or Ambush, the reaction player may designate one (and only one) in-supply HQ as the reacting HQ, which may activate units to react to battles. There must be at least one declared battle hex within range of this HQ (this range cannot be blocked by any means); if there are no such HQs, no reaction is possible. Any units the reacting HQ activates may join any declared battle that they can reach, including those that are out of range of the reacting HQ. 
 
-The Reaction player may activate a number of units equal to the HQ’s efficiency rating plus the defender’s logistics value. If a Counteroffensive Reaction card was played, the defender’s logistics value is the Counteroffensive’s logistics value. Else, it is the OC value of the Offensives player’s Strategy card (regardless of whether it was played as an OC or an EC). The Reaction HQ may only activate units that are in supply and have an activation path from the HQ. The activation path for reaction can be traced into (and through) a declared battle hex even if it contains enemy units. 
+The Reaction player may activate a number of units equal to the HQ's efficiency rating plus the defender's logistics value. If a Counteroffensive Reaction card was played, the defender's logistics value is the Counteroffensive's logistics value. Else, it is the OC value of the Offensives player's Strategy card (regardless of whether it was played as an OC or an EC). The Reaction HQ may only activate units that are in supply and have an activation path from the HQ. The activation path for reaction can be traced into (and through) a declared battle hex even if it contains enemy units. 
 
 All units that the Reaction player activates must participate in a declared battle. Any unit that cannot be moved such that it can participate in a battle may not be activated. Reaction units that are in a battle hex may be activated. Reaction player is not obligated to activate any units just because the intelligence condition is Intercept or Ambush. All restrictions that govern Offensive activation apply to Reaction activation. 
 
@@ -746,19 +774,17 @@ No more than one ASP may be used during Reaction movement. The use of Organic Na
 
 ### 7.27 Special Reaction (SR) Move 
 
-If an opposing ground unit ends its Offensive move in an unoccupied Reaction player controlled city, Resource hex, port, or airfield hex that is within range of a Reaction HQ and in a Reaction aircraft Zone Of Influence (whether neutralized or not), the Reaction player may attempt a Special Reaction on such hex(es). To make this Special Reaction the Reaction player must make a successful intelligence die roll (play of a Reaction card cannot be used; however the –2 ZOI modifier applies). If the roll is successful, the hex is declared a battle hex. This can occur whether the Offensives player declared a battle hex (or hexes) or not. If more than one hex is eligible for Special Reaction, separate roll must be done for each hex. 
+If an opposing ground unit ends its Offensive move in an unoccupied Reaction player controlled city, Resource hex, port, or airfield hex that is within range of a Reaction HQ and in a Reaction aircraft Zone Of Influence (whether neutralized or not), the Reaction player may attempt a Special Reaction on such hex(es). To make this Special Reaction the Reaction player must make a successful intelligence die roll (play of a Reaction card cannot be used; however the -2 ZOI modifier applies). If the roll is successful, the hex is declared a battle hex. This can occur whether the Offensives player declared a battle hex (or hexes) or not. If more than one hex is eligible for Special Reaction, separate roll must be done for each hex. 
 
 Hexes entered solely via ground movement alone are not eligible for Special Reaction. If a Special Reaction possibility occurs on a surprise attack EC event, use the OC intelligence value. Special Reaction by itself does not change the intelligence condition. 
 
 Any air and carrier units assigned to cover the landing where the new battle hex was created take part in that battle. If the newly created battle hex contains an air or carrier unit that was declared to take part in another battle within range and the enemy reacts into the hex then these air/carrier units will switch and resolve combat in the battle hex they occupy. Reacting units that attack this hex at range do not cause this to happen, there must be a reaction unit physically in the newly created battle hex. 
 
-It is possible that if the unit’s original battle hex has no other participating offensive units then there is no combat resolution in that location, but it still remains a battle hex and any units committed to that battle hex remain committed to a battle hex without combat resolution. Per the rules any reaction units in the original battle hex cannot participate in any other battles although if activated they can conduct Post Battle Movement. This situation where a declared battle hex does not experience combat resolution can occur in other ways such as a successful submarine attack eliminating all offensive units prior to combat resolution. 
+It is possible that if the unit's original battle hex has no other participating offensive units then there is no combat resolution in that location, but it still remains a battle hex and any units committed to that battle hex remain committed to a battle hex without combat resolution. Per the rules any reaction units in the original battle hex cannot participate in any other battles although if activated they can conduct Post Battle Movement. This situation where a declared battle hex does not experience combat resolution can occur in other ways such as a successful submarine attack eliminating all offensive units prior to combat resolution. 
 
+![](images/p15.avif)
 
-
-![EXAMPLE AMPHIB ASSAULT]()
-
-_EXAMPLE: The US SF Brigade uses Amphibious Assault to enter Hollandia and the 5th non-LRB AF supports the SF Brigade landing. The next unit moved is the CV Enterprise that moves into the Hollandia hex and declares it is attacking the Japanese air unit at two hex range in Biak. After offensive movement the Japanese using special reaction with the air units ZOI successfully creates a battle hex in Hollandia, then successfully changes the intelligence condition to intercept. During reaction activation/ movement the Japanese air unit activates but remains in Biak, while the BB Yamato enters Hollandia. The CV Enterprise now switches to the Hollandia battle hex and in conjunction with the 5th AF air unit conducts air-naval combat with the Yamato. The Yamato scores 18 hits and flips the CV Enterprise and the Allies score 11 hits, insufficient to damage the Yamato. As the Yamato’s strength of 18 equals the Allied 18 factors, the invasion fails. Biak remains a battle hex precluding the Japanese air unit from participating in another battle. All activated units then conduct Post Battle movement._ 
+_EXAMPLE: The US SF Brigade uses Amphibious Assault to enter Hollandia and the 5th non-LRB AF supports the SF Brigade landing. The next unit moved is the CV Enterprise that moves into the Hollandia hex and declares it is attacking the Japanese air unit at two hex range in Biak. After offensive movement the Japanese using special reaction with the air units ZOI successfully creates a battle hex in Hollandia, then successfully changes the intelligence condition to intercept. During reaction activation/ movement the Japanese air unit activates but remains in Biak, while the BB Yamato enters Hollandia. The CV Enterprise now switches to the Hollandia battle hex and in conjunction with the 5th AF air unit conducts air-naval combat with the Yamato. The Yamato scores 18 hits and flips the CV Enterprise and the Allies score 11 hits, insufficient to damage the Yamato. As the Yamato's strength of 18 equals the Allied 18 factors, the invasion fails. Biak remains a battle hex precluding the Japanese air unit from participating in another battle. All activated units then conduct Post Battle movement._ 
 
 ### 7.28 Battle and Concluding the Offensive 
 
@@ -768,7 +794,10 @@ _PLAY NOTE: Remember, even units that do not participate in battles can conduct 
 
 ### 7.29 Future Offensives 
 
-Once per game turn each player may desigFuture Future nate one Strategy card to be held over for a Offensives Offensives Card Card future game turn to conduct an Offensive, event, or a reaction. A player may never have more than one card designated as a Future Offensives card at any given time. A player cannot designate a card as a future offensive card if one is currently designated. To designate a Future Offensives card, the player, as the play of a strategy card, takes the card and places it face down next to the map and places the Future Offensives marker on top of the card to indicate its status. This is that player’s action and play alternates to the other player. A Future Offensive card is not counted for hand size purposes or initiative purposes. 
+![](images/counter_fo1.png){class=counter}
+![](images/counter_fo2.png){class=counter}
+
+Once per game turn each player may desigFuture Future nate one Strategy card to be held over for a Offensives Offensives Card Card future game turn to conduct an Offensive, event, or a reaction. A player may never have more than one card designated as a Future Offensives card at any given time. A player cannot designate a card as a future offensive card if one is currently designated. To designate a Future Offensives card, the player, as the play of a strategy card, takes the card and places it face down next to the map and places the Future Offensives marker on top of the card to indicate its status. This is that player's action and play alternates to the other player. A Future Offensive card is not counted for hand size purposes or initiative purposes. 
 
 #### A. Future Offensive Card Play to Win Initiative 
 
@@ -784,13 +813,13 @@ A player may keep the same Future Offensive card for multiple turns. The only dr
 
 ## 8.1 Base Movement Allowance 
 
-The distance a unit may move during an Offensive or Reaction is based on the unit type’s base movement allowance times the OC value of the Offensive card or an EC text that supersedes the OC value. All units have a base movement allowance. This Base Movement Allowance is: 
+The distance a unit may move during an Offensive or Reaction is based on the unit type's base movement allowance times the OC value of the Offensive card or an EC text that supersedes the OC value. All units have a base movement allowance. This Base Movement Allowance is: 
 
 GROUND: 1 movement point. 
 
 NAVAL: 5 movement points. 
 
-AIR: Equal to the unit’s range in movement points. If two ranges are on the counter, use either value. EXCEPTION: Some units have a parenthetical extended range. If a player uses the parenthetical extended range, the air unit cannot participate in a battle. To use an air unit with a parenthetical extended range in a battle, the unit would have to be moved using the normal range. 
+AIR: Equal to the unit's range in movement points. If two ranges are on the counter, use either value. EXCEPTION: Some units have a parenthetical extended range. If a player uses the parenthetical extended range, the air unit cannot participate in a battle. To use an air unit with a parenthetical extended range in a battle, the unit would have to be moved using the normal range. 
 
 ### 8.11 Movement through Enemy-Occupied Hexes 
 
@@ -810,13 +839,13 @@ A naval unit expends one movement point for each hex entered. The player moves o
 
 
 
-![EXAMPLE NAVAL MOVE 1]()
+![](images/p16a.avif)
 
 _EXAMPLE: Hex 2220 Soerabaja cannot be entered by a naval unit from hexes 2119, 2120, or 2221, but could be entered from hexes 2219, 2319, and 2320._ 
 
 Naval units can normally enter and move through un-neutralized opposing ZOI, but may not do so if they are moving with a ground unit conducting amphibious assault or are conducting strategic naval movement. Carriers at sea neutralize enemy Zones of Influence during normal movement, but not do so while using Strategic Naval Movement. 
 
-![EXAMPLE NAVAL MOVE 2]()
+![](images/p16b.avif)
 
 _Naval Movement Illustration_ 
 
@@ -866,6 +895,9 @@ A second form of strategic transport is available for air units. Any time the Of
 
 During an offensive or battle, any number of air units may be stacked in a hex. Stacking is evaluated at the conclusion of any strategy card play whether it was played as an offensive or event. No more than three friendly air and/or ground units (of any size) may be stacked in a hex. If there are overstacked units, the owning player removes the excess units, air units first, from play until the hex is within the stacking limits. If the units were in supply when so removed, they are placed on the game turn record track to be returned to play the turn after the next turn as reinforcements (which cannot be delayed). If the overstacked units were out of supply, they are eliminated. 
 
+![](images/counter_airstack1.png){class=counter}
+![](images/counter_airstack2.png){class=counter}
+
 Note that several pairs of US air units and the Commonwealth SEAC air units have the same unit designations, but one of these air units will always be a Long Range Bomber air unit while the other is not. Two air units with the same designation count as one unit for stacking purposes, but not for any other purpose (e.g., there are two US 7th Air Force air units). 
 
 ### 8.35 Air Ferry in Hex 5408 
@@ -902,11 +934,11 @@ A ground unit using ground movement must cease movement when it enters a hex con
 
 ### 8.43 Ground Disengagement 
 
-The Reaction player’s ground unit(s) may move from a hex containing an opposing Offensives ground unit(s) that just entered the hex if all of the following conditions apply: 
+The Reaction player's ground unit(s) may move from a hex containing an opposing Offensives ground unit(s) that just entered the hex if all of the following conditions apply: 
 
 - The unit(s) can move to a hex that is not the one from which the opposing unit(s) entered the hex and that contains no opposing units. 
 
-- The Reaction player’s attack strength in the hex is greater than (not equal to) that of the opposing unit(s) in the hex. 
+- The Reaction player's attack strength in the hex is greater than (not equal to) that of the opposing unit(s) in the hex. 
 
 If a successful ground disengagement occurs, the disengaging unit(s) are moved into a valid adjacent hex (regardless of MP cost) and the moving unit may continue to move if it has remaining movement points. 
 
@@ -933,6 +965,7 @@ An amphibious assault may enter any non-mountain coastal hex (exception: Port Mo
 One Amphibious Shipping Point (ASP) is used by each ground unit of division size (XX) or smaller that conducts an Amphibious Assault. Each Corps or Army sized unit (XXX or XXXX) uses one ASP for each step (e.g., a reduced Corps or Army sized unit requires one ASP and a full strength Corps or Army unit requires two ASP). 
 
 
+![](images/counter_kor.png){class=counter align=left}
 
 Exception: The Japanese Korean Army costs two ASP, not 1 ASP, per step (e.g., A full strength Korean Army costs 4 ASP to move by Amphibious Assault). 
 
@@ -960,17 +993,21 @@ If at the conclusion of battle resolution containing an amphibious assault, the 
 
 There is a special restriction for US Army ground units. They may only conduct amphibious assault movement into a Japanese controlled and occupied one hex island if they end their movement in a hex containing a US Marine unit that also just completed amphibious assault movement into that hex. In all other circumstances, the presence of a US Marine unit is not required for a US Army unit to conduct Amphibious Assault. Nor are there any restrictions on US Army ground units for amphibious assaults on multi-hex islands or during Reaction. 
 
-_DESIGN NOTE: Besides Marine units whose raison d’etre is amphibious assault, many Allied army units were trained in this operational art during the war. The US Army restriction maintains the role the US Marines had in late war amphibious invasions, although there were some solely Army invasions during the New Guinea and Philippines campaigns._ 
+_DESIGN NOTE: Besides Marine units whose raison d'etre is amphibious assault, many Allied army units were trained in this operational art during the war. The US Army restriction maintains the role the US Marines had in late war amphibious invasions, although there were some solely Army invasions during the New Guinea and Philippines campaigns._ 
 
 ### 8.46 Japanese Organic Naval Unit Transport Capability 
 
+![](images/counter_organic_naval.png){class=counter align=left}
+
 The Japanese have five brigade sized land units (1st, 2nd, 3rd, and 4th SN and the SS). These units can conduct 4-6 amphibious assault by either using one amphibious shipping point per unit, or they can conduct amphibious assault by beginning the offensive stacked with and moving their entire move with a CA, CL, or APD naval unit at no cost in amphibious shipping points. Each naval unit of these types, at either reduced or full strength, can move one of these five brigade sized units. If the naval unit is eliminated prior to Ground Combat resolution, the ground unit it was transporting is also eliminated and does not land. If the naval unit loses a step there is no effect on the transported unit.
 
-_EXAMPLE: On the December ’41 game turn, the Japanese CA Aoba can enable the South Seas (SS Brigade) detachment to conduct Amphibious Assault by moving as a stack from Truk to Rabaul, New Britain. Units transporting and units to be transported must start the move in the same location._ 
+_EXAMPLE: On the December '41 game turn, the Japanese CA Aoba can enable the South Seas (SS Brigade) detachment to conduct Amphibious Assault by moving as a stack from Truk to Rabaul, New Britain. Units transporting and units to be transported must start the move in the same location._ 
 
 _PLAY NOTE: There are only a handful of naval and ground unit combinations that can conduct this type of move, but it is a useful way to cheaply capture unoccupied opposing bases, especially early in the war._ 
 
 ### 8.47 Japanese Barges 
+
+![](images/counter_asp.png){class=counter align=left}
 
 When the Japanese play the Japanese Barge event, ASP the Japanese flip their ASP marker onto its Barges side and the Barges marker should be placed near the Barges Japanese player. During any Offensive (only, not for a Reaction) that has a 3 OC value card (even if played as an Event), the Japanese can move 1 ground unit of any size as an amphibious assault at the cost of zero ASP, across one all sea hex side as its entire move. This move can initiate a battle, and is treated like any other amphibious assault. If forced to retreat, the Offensives unit uses barge movement to return to its original hex. The Japanese lose this capability or have it superseded for the remainder of the game by the play of the Allied PT Boat event card. 
 
@@ -979,6 +1016,8 @@ When the Japanese play the Japanese Barge event, ASP the Japanese flip their ASP
 During an offensive or battle, any number of ground units may be stacked in a hex. Stacking is evaluated at the conclusion of any strategy card play whether it was played as an offensive or event. No more than three friendly air and/or ground units (of any size) may be stacked in a hex. If there are overstacked units, the owning player removes the excess units from play, air units first, until the hex is within the stacking limits. If the units were in supply when so removed, they are placed on the game turn record track to be returned to play two turns later as reinforcements (which cannot be delayed). If the overstacked units were out of supply, they are eliminated. 
 
 ### 8.49 British Armor Brigade 
+
+![](images/counter_armor_brigade.png){class=counter align=left}
 
 The Allied player can receive the 7th Armor Brigade 回X through the play of an event card. The 7th Armor Bri4-10 gade may not use Amphibious Assault, but may use Strategic Ground transport. The 7th Armor Brigade may not enter Mountain Hexes except via a transportation route or Strategic Ground transport. 
 
@@ -1022,7 +1061,7 @@ _DESIGN NOTE: Land based air units that are operating at extended range are usin
 
 _Player Note on calculating combat strength: In order to avoid players counting factors, the game system gives equal weight to all factors brought into a battle. The flip side of this is that there are times that you must sum a string of small numbers that add up to a large value, occasionally in excess of one hundred. To avoid the need for having a calculator handy we have created a graphical abacus. There are two US Stars (dark blue and a lighter blue) that can be used in conjunction with the Strategic record track. To use this, designate one counter as a 1s (lighter blue) and another as a 10s (darker blue). Physically move the ones counter one box for each available combat factor, moving the 10 counter one space forward each time ten combat factors have been counted. When you are finished you will have a direct read out of the total number of combat factors. We have also supplied a number matrix to handle the CRT combat multiplier calculation. Between these two techniques a player can make the occasional larger calculation without a calculator. Also feel free to do these mathematical operations in your head, or, should you desire, use a calculator._ 
 
-B. Roll a die (modifying as appropriate) for each player to determine the combat effectiveness rating. Each player’s total attack strength times effectiveness rating results in the total hits made by the player. 
+B. Roll a die (modifying as appropriate) for each player to determine the combat effectiveness rating. Each player's total attack strength times effectiveness rating results in the total hits made by the player. 
 
 #### Die Roll Modifiers 
 
@@ -1058,9 +1097,9 @@ C. If the intelligence condition was Intercept, both players simultaneously appl
 
 _EXAMPLE: The Allied player has a 12 attack strength CV unit, a 4 attack strength LRB unit, a 10 attack strength air unit at normal range, a 10 attack strength air unit at extended range, and a 16 attack strength BB unit in the battle hex. The Allied strength total would be 47 (12+4+10+5+16). The intelligence condition is intercept, so there is no die roll modifier. On a roll of 2 or less, 12 hits would be assessed against Japanese units, on a die roll of 3-5, 24 hits would be assessed, and on a roll of 6 or greater, 47 hits would be assessed._ 
 
-D. If the intelligence condition was surprise attack, the Offensives player applies all hits first. Surviving Reaction player units in the battle hex then calculate their combat strength, make a die roll on the CRT, and apply any hits to the Offensives player’s units. 
+D. If the intelligence condition was surprise attack, the Offensives player applies all hits first. Surviving Reaction player units in the battle hex then calculate their combat strength, make a die roll on the CRT, and apply any hits to the Offensives player's units. 
 
-E. If the intelligence condition was ambush (only possible on the play of a reaction card), the Reaction player applies all hits first. Only surviving Offensives player units then calculate a result and apply hits to the Reaction player’s units. 
+E. If the intelligence condition was ambush (only possible on the play of a reaction card), the Reaction player applies all hits first. Only surviving Offensives player units then calculate a result and apply hits to the Reaction player's units. 
 
 **F. How to Apply Hits.** The player who rolled the die applies all hits against opposing units. Hits can be applied to units participating in the battle and non-aircraft carrier naval units that are not in a battle hex, but stacked with an aircraft carrier unit that participates in the battle. Hits may be applied in any manner desired within the following restrictions. 
 
@@ -1068,7 +1107,7 @@ _PLAY NOTE: The combat system generates hits. The nuances of the combat system a
 
 _HISTORICAL NOTE: The common perception is that the Pacific War was dominated by carrier warfare. At the macro level this is a true statement, but in fact by late 1942 the pre-war carrier forces had hunted each other into virtual extinction. This is why the signature surface battles of the Solomons campaign became the dominant form of naval combat until US shipyards began to turn out an unending stream of Essex class carriers. Players will often see a similar ebb and flow pattern develop regarding their available carrier forces._ 
 
-**1.** If a number of hits equal to an opposing unit’s defense strength are applied, the unit is flipped to its reduced side or eliminated if already on its reduced side. 
+**1.** If a number of hits equal to an opposing unit's defense strength are applied, the unit is flipped to its reduced side or eliminated if already on its reduced side. 
 
 **2.** All full strength units must be reduced before any units can be eliminated. Units that have only one side are considered to be reduced units. Non-aircraft carrier naval units that are not in a battle hex, but stacked with an aircraft carrier naval unit that participates in the battle, must also be reduced before any reduced strength unit can be eliminated. 
 
@@ -1096,7 +1135,7 @@ _DESIGN NOTE: This rule is intended to capture two effects. First the Japanese n
 
 > **Comprehensive Offensive Example:** 
 >
-> ![OFFENSIVE EXAMPLE]()
+> ![](images/p22.avif)
 > 
 > At the beginning of the 1942 scenario the Malaya Peninsula has the Japanse 38th Army in Kuala Lumpur (1913) and the 25th Army (reduced) in Kota Bharu (2112). In support are air and naval forces in French Indo-China (22nd Air Flotilla in Saigon hex 2212 and the BB Kongo and CA Mogami naval units in Cam Ranh (2311).. The Allied player has the 3rd Indian Corps in Kuantan (2014) and the 8th Australian Division, Malaya Air unit and Malaya HQ in Singapore (2015). 
 > 
@@ -1155,13 +1194,13 @@ All modifiers are cumulative except for the modifier for Japanese card Col. Tsuj
 
 _PLAY NOTE: An unopposed offensive carrier unit in the battle hex (e.g., CVE) generates both the shore bombardment and air superiority die roll modifiers for a +4._ 
 
-3. Certain terrain types modify the Offensive player’s die roll: 
+3. Certain terrain types modify the Offensive player's die roll: 
 
-- JUNGLE: subtract one from the die roll (–1). 
+- JUNGLE: subtract one from the die roll (-1). 
 
-- MIXED: subtract two from the die roll (–2). 
+- MIXED: subtract two from the die roll (-2). 
 
-- MOUNTAINS: subtract three from the die roll (–3). 
+- MOUNTAINS: subtract three from the die roll (-3). 
 
 Note: There is no modifier for City type terrain. 
 
@@ -1192,7 +1231,7 @@ Each player applies to the opposing units a number of hits equal to their combat
 
 1. Only ground units can be hit. Non-activated ground units in the battle hex can be hit. 
 
-2. If a number of hits equal to an opposing unit’s defense strength are applied, the unit is flipped to its reduced side or eliminated if already on its reduced side. 
+2. If a number of hits equal to an opposing unit's defense strength are applied, the unit is flipped to its reduced side or eliminated if already on its reduced side. 
 
 3. Full strength units must be reduced before reduced units can be eliminated. 
 
@@ -1206,7 +1245,7 @@ Each player applies to the opposing units a number of hits equal to their combat
 
 2. It is possible for both sides to be eliminated in a ground combat. If this happens, the Reaction player maintains control of the hex, but all forces are still eliminated. 
 
-_DESIGN NOTE: What is being simulated here is that both sides’ units are no longer combat effective and a remnant force remains in the defender’s hex._ 
+_DESIGN NOTE: What is being simulated here is that both sides' units are no longer combat effective and a remnant force remains in the defender's hex._ 
 
 3. If the Offensives player is the only one with surviving ground units in the battle hex, the hex is now controlled by that player. If the Reaction player is the only one with surviving ground units in the battle hex, the Reaction player maintains control of the hex. 
 
@@ -1274,7 +1313,7 @@ HQ units and US B29 Air units can never be delayed.
 
 ### 10.24 Sent to Europe Die Roll 
 
-A die roll is made individually for each eligible unit when it is placed in the Delayed Reinforcement box, even if this occurred due to an event. If the Sent to Europe die roll for a unit falls in the indicated range (determined by the current War In Europe level), the reinforcement is placed on the game turn track 3 turns later, to re-enter play as a reinforcement. When a Sent to Europe unit re-enters play as a reinforcement, it is as if it were attempting to enter play for the first time. A unit can be Sent to Europe multiple times per game. The die roll is modified by –1 for Inter-Service Rivalry. 
+A die roll is made individually for each eligible unit when it is placed in the Delayed Reinforcement box, even if this occurred due to an event. If the Sent to Europe die roll for a unit falls in the indicated range (determined by the current War In Europe level), the reinforcement is placed on the game turn track 3 turns later, to re-enter play as a reinforcement. When a Sent to Europe unit re-enters play as a reinforcement, it is as if it were attempting to enter play for the first time. A unit can be Sent to Europe multiple times per game. The die roll is modified by -1 for Inter-Service Rivalry. 
 
 |**_WIE Level:_**|**_Die Roll Result Range_**|
 |---|---|
@@ -1288,7 +1327,9 @@ A die roll is made individually for each eligible unit when it is placed in the 
 
 ## 10.3 Amphibious Shipping Points (ASPs) 
 
-At the start of each scenario both sides begin with a number of Amphibious Shipping Points (ASPs) as indicated by the scenario. Each ASP can only be used once per turn. Each time an ASP is used, move the owner’s ASP Used marker on the Strategic Record track as a way of recording how many of the available ASPs were used during the current turn. At the start of a new turn, reset the markers to indicate the full level. 
+![](images/counter_amph_shipping_used.png){class=counter align=left}
+
+At the start of each scenario both sides begin with a number of Amphibious Shipping Points (ASPs) as indicated by the scenario. Each ASP can only be used once per turn. Each time an ASP is used, move the owner's ASP Used marker on the Strategic Record track as a way of recording how many of the available ASPs were used during the current turn. At the start of a new turn, reset the markers to indicate the full level. 
 
 ### 10.31 Allied ASPs 
 
@@ -1320,15 +1361,19 @@ Pre-War units from the Allied and Japanese sides cannot accept replacements (exc
 
 ### 11.21 Japanese Naval Unit Scheduled Replacements 
 
+![](images/counter_naval_repl.png){class=counter align=left}
+
 The Japanese player receives a limited number of naval replacements during the course of the game as indicated on the Replacements Chart. These may be used to either bring reduced naval units to full strength or bring eligible naval units from the eliminated unit pile back into play. Japanese naval unit replacement steps are not lost if not used and may be carried over from game turn to game turn. Keep track of them with the naval replacement marker on Strategic track. 
 
 ### 11.22 Japanese Air Unit Replacements 
 
+![](images/counter_air_repl.png){class=counter align=left}
+
 There are no scheduled replacements for Japanese air units. The Japanese player may receive a small number of air replacements through the play of certain events. 
 
-
-
 ### 11.23 Japanese Ground Unit Replacements 
+
+![](images/counter_jp_divs.png){class=counter align=left}
 
 There are no scheduled replacements for Japanese ground units. During the replacement segment, the Japanese player may bring up to two replacement steps from China. This is done by reducing the available number of Japanese divisions in China by one or two, which gives one or two ground replacement steps accordingly. These points must be used immediately. If no Japanese divisions in China are available, the Japanese player may not receive ground unit replacements. The available Japanese divisions in China are recorded by moving the marker on the China Divisions track. 
 
@@ -1364,7 +1409,9 @@ Strategic Warfare is all about determining Japanese and Allied Strategy Card han
 
 ### 12.11 Resource Hexes 
 
-The Japanese player is entitled to draw one Strategy card for each 2 resource hexes under Japanese control (See 6.5 Hex Control), rounding up, at the start of the Strategic Warfare Segment as the base Japanese draw; however, the draw is always at least 4 cards regardless of number of resource hexes. The number of cards drawn can be modified by Strategic Warfare (12.2, 12.3) The 14 resource hexes are: 
+The Japanese player is entitled to draw one Strategy card for each 2 resource hexes under Japanese control (See 6.5 Hex Control), rounding up, at the start of the Strategic Warfare Segment as the base Japanese draw; however, the draw is always at least 4 cards regardless of number of resource hexes. The number of cards drawn can be modified by Strategic Warfare (12.2, 12.3)
+
+The 14 resource hexes are: 
 
 - 1813, 1916, 2017: Sumatra
 - 2008: Burma
@@ -1398,6 +1445,8 @@ There are two potential modifiers to the Allied submarine warfare die roll:
 
 ### 12.31 B29 Availability 
 
+![](images/counter_b29.png){class=counter align=left}
+
 Only US B29 LRB units may conduct Strategic Bombing (the 20th BC arrives on turn 9 and the 21st BC arrives on turn 10). A B29 must be in supply and either in an airfield within its 8 hex range of Tokyo or in the Air units in China box in order to conduct Strategic Bombing. B29 reinforcements cannot be delayed and they may conduct strategic bombing on their turn of entry if they meet all of the appropriate conditions. A B29 returned to play through replacements may not conduct strategic bombing during the turn it was returned from elimination. B29s that conduct Strategic Bombing cannot participate in Battles during Offensives, but may activate in reaction if opposing units enter their hex. 
 
 _PLAY NOTE: If, through a combination of event cards or military successes, the Japanese player manages to eliminate a B29 unit, it will not be available for strategic bombing the next game turn even if the Allies use air replacements to bring it back into play._ 
@@ -1412,13 +1461,15 @@ There are Allied event cards that reference B29 unit locations that may reduce t
 
 ## 12.4 Japanese Draws and Passes 
 
+![](images/counter_jp_passes.png){class=counter align=left}
+
 If the Japanese receive 6 cards (not including a possible Future Offensive Card) they receive one pass, if they receive 5 (not including a possible Future Offensive Card) or less cards they receive 2 passes. The Japanese cannot receive less than 4 cards during the Strategy draw phase. A pass may be used instead of the play of a card during the Offensives phase. Unused passes are lost at the end of the Offensives phase. 
 
 ## 12.5 Allied Strategy Cards 
 
 ### 12.51 Allied Draw 
 
-The Allied player base Strategy card draw is 7 cards per turn, except during the first three game turns. On game turn one the Allied player receives no cards. On game turn 2 the Allied player base draw is 5 cards and 2 passes. On game turn 3 the Allied player base draw is 6 cards and 1 pass. Thereafter the Allied player base draw is 7 cards per game turn. The Allied player’s minimum Strategy card draw is 4 cards per turn, even if the conditions would dictate a smaller hand. Allied passes are used in the same way as passes for the Japanese player, and, as with the Japanese player, cannot be accumulated. 
+The Allied player base Strategy card draw is 7 cards per turn, except during the first three game turns. On game turn one the Allied player receives no cards. On game turn 2 the Allied player base draw is 5 cards and 2 passes. On game turn 3 the Allied player base draw is 6 cards and 1 pass. Thereafter the Allied player base draw is 7 cards per game turn. The Allied player's minimum Strategy card draw is 4 cards per turn, even if the conditions would dictate a smaller hand. Allied passes are used in the same way as passes for the Japanese player, and, as with the Japanese player, cannot be accumulated. 
 
 ### 12.52 Allied Draw Limitations 
 
@@ -1436,7 +1487,7 @@ The Allied player loses one card draw per turn for each of the following conditi
 
 ## 13.1 National Surrender 
 
-A nation surrenders if the opposing player controls certain hexes of that nation during the National Status Segment. If Japan surrenders the game is over and the Allied player wins the game. If an Allied nation surrenders, the Japanese player automatically gains control of all of its on map airfields and ports that are not occupied by Allied units unless the specific rules for country’s surrender below specify otherwise. An Allied nation can only surrender once per game. Allies can retake surrendered country by recapturing the locations that the Japanese player had to capture to make the nation surrender. If they do, they regain control of all of that nation’s airfields and ports except for those that have a Japanese unit (of any type) in the hex. However, this does not cancel the card draw effect from surrender. 
+A nation surrenders if the opposing player controls certain hexes of that nation during the National Status Segment. If Japan surrenders the game is over and the Allied player wins the game. If an Allied nation surrenders, the Japanese player automatically gains control of all of its on map airfields and ports that are not occupied by Allied units unless the specific rules for country's surrender below specify otherwise. An Allied nation can only surrender once per game. Allies can retake surrendered country by recapturing the locations that the Japanese player had to capture to make the nation surrender. If they do, they regain control of all of that nation's airfields and ports except for those that have a Japanese unit (of any type) in the hex. However, this does not cancel the card draw effect from surrender. 
 
 _PLAY NOTE: Surrender markers have been supplied to keep track of which nations have surrendered over the course of the game._ 
 
@@ -1498,9 +1549,11 @@ India is defined as having three parts. Northern India consists of Jarhat (2104)
 
 ### 13.62 India Surrender 
 
+![](images/counter_india.png){class=counter align=left}
+
 The India Status Track consists of 5 boxes that are from right to left: Stable (at start), Unrest, Strikes, Unstable, and Revolts. If the Japanese player controls all hexes of 
 
-Northern India, move the India marker from right to left to the next box in the India Status track during the National Status Segment. If the marker is in the India Revolts box during a National Status Segment India surrenders (flip the marker to its surrendered side). Other events may also move the India marker forward; however, they can’t move the marker beyond the India Revolts box and cannot directly cause Indian surrender. 
+Northern India, move the India marker from right to left to the next box in the India Status track during the National Status Segment. If the marker is in the India Revolts box during a National Status Segment India surrenders (flip the marker to its surrendered side). Other events may also move the India marker forward; however, they can't move the marker beyond the India Revolts box and cannot directly cause Indian surrender. 
 
 Once India has surrendered the India Status marker never moves from the surrender box. The India Status track marker is returned to the Stable position under one of two conditions. 
 
@@ -1510,7 +1563,7 @@ Once India has surrendered the India Status marker never moves from the surrende
 
 ### 13.63 Implications of India Surrendering 
 
-All Indian Commonwealth units are removed from the game. All other Commonwealth units in Mainland India are either placed on Ceylon or the Maldive Islands (1005), or are permanently removed from the game if all of Ceylon and the Maldive Islands are Japanese controlled. Commonwealth HQs in India are involuntarily repositioned (6.14). US units in India do not have to move although they can by treating them like Commonwealth units. Hexes the units that are moved to must be supply eligible and not within an un-neutralized Japanese aircraft Zone Of Influence. Units that would overstack or have no legal location to move to are permanently removed from play (by the Allied player’s choice). 
+All Indian Commonwealth units are removed from the game. All other Commonwealth units in Mainland India are either placed on Ceylon or the Maldive Islands (1005), or are permanently removed from the game if all of Ceylon and the Maldive Islands are Japanese controlled. Commonwealth HQs in India are involuntarily repositioned (6.14). US units in India do not have to move although they can by treating them like Commonwealth units. Hexes the units that are moved to must be supply eligible and not within an un-neutralized Japanese aircraft Zone Of Influence. Units that would overstack or have no legal location to move to are permanently removed from play (by the Allied player's choice). 
 
 Control of hexes in Mainland India does not switch to Japanese as a result of India surrendering. Allies can return to Mainland India via Amphibious Assault or ground movement. The Mainland India hexes are not eligible to Japanese Special Reaction nor do the hexes count for Progress of War if re-occupied by Allied units. 
 
@@ -1525,6 +1578,8 @@ Hong Kong, hex 2709, and the island of Formosa (Taiwan) are not considered to be
 If the Allies control all Chinese coastal ports and both Korean port hexes, the Japanese can no longer remove Japanese China divisions from China and cannot conduct any further China Offensives (OC or EC, see 13.72). 
 
 ### 13.72 China Offensives 
+
+![](images/counter_china_offensive.png){class=counter align=left}
 
 The Japanese player may launch OC and EC China Offensives. EC China offensives are based on the play of a particular event card. A China OC offensive is due to the Japanese player playing any 3OC card and successfully conducting a China OC Card Offensive (13.72A). An OC China offensive can occur no more than once per two turns, but there is no limit to the number of Chinese Offensive Event cards that can be played during any game turn. 
 
@@ -1546,7 +1601,7 @@ _DESIGN NOTE: China was always too much for the Japanese to swallow. Surrender i
 
 Up to two Allied air units may be in the Air Units in China box (hereafter called China Box) at any one time, but only one of these air units may be a B29. Allied air units are in supply in the China Box if the Burma Road is open or the HUMP is active and there is a supply eligible airfield in Northern India (regardless of road status). An Allied HQ can activate in-supply air units in the China Box if it can trace an activation path to Kunming or if the HUMP active to any supply eligible friendly controlled airfield in Northern India. 
 
-If China has not surrendered and the Burma Road is open, the Allied player may place Allied Air units as reinforcements directly into the China box. Allied air units (including B29s) that are activated during an offensive (to include reaction) can fly from a Northern India supply eligible airfield to the China Box and vice versa. The distance between the China box and any airfield in Northern India is considered one ‘leg’ (8.31) regardless of the air unit’s actual range factor. A B29 unit in China is considered to be in range of Tokyo only for Strategic Bombing (12.3) and Allied Victory purposes (16.2). 
+If China has not surrendered and the Burma Road is open, the Allied player may place Allied Air units as reinforcements directly into the China box. Allied air units (including B29s) that are activated during an offensive (to include reaction) can fly from a Northern India supply eligible airfield to the China Box and vice versa. The distance between the China box and any airfield in Northern India is considered one ‘leg' (8.31) regardless of the air unit's actual range factor. A B29 unit in China is considered to be in range of Tokyo only for Strategic Bombing (12.3) and Allied Victory purposes (16.2). 
 
 If an Allied air unit in the Air Units in China box is out of supply it cannot be activated, does not generate a die roll modifier for a China Offensive, and suffers attrition, but cannot be eliminated due to attrition. 
 
@@ -1567,7 +1622,7 @@ _NOTE: Hong Kong (hex 2709) begins the 1941 Campaign Scenario as Allied controll
 **A. CBI Infrastructure:** At the start of the 1941 Campaign Scenario the three hexes Jarhat, Imphal, and Ledo have a marker placed on them denoting that the strategic transportation route printed on the map is not yet constructed. Later scenarios will give instructions on whether these markers are in place or removed to show that the strategic transport route has or has not been constructed. 
 
 
-![EXAMPLE CBI INFRA]()
+![](images/p29.avif)
 
 **B.** If the Allies control all of Northern India plus Akyab, the Allies can construct one of the three strategic transport routes in Jarhat, Imphal, or Ledo with the complete play of a 3 OC card. The Jarhat strategic transport route must always be constructed by the Allies first and is required to subsequently construct the Ledo or Imphal routes. The Allied player can decide to build the other two strategic transport routes in any order for the cost of a 3OC play each. Construction occurs upon the play of the 3 OC by removing the appropriate marker revealing the strategic transport route printed on the map that is immediately useable for the ½ MP cost for all game purposes. The 3 OC card cannot be used to activate any units. Construction is permanent and cannot be altered for the remainder of the game. 
 
@@ -1575,9 +1630,9 @@ _NOTE: Hong Kong (hex 2709) begins the 1941 Campaign Scenario as Allied controll
 
 ### 13.78 Burma Road 
 
-The Burma Road is the strategic transport route in Burma Road hexes 2206, 2306, and 2407. The following rules deterNo Hump mine the status of the Burma Road marker on the Bur- 
+![](images/counter_burma_road.png){class=counter align=left}
 
-ma Road status track. The Burma Road can be in one of three status boxes, Open, Closed/HUMP, Closed/No HUMP each of which as a value that is the Chinese offensive strength modifier. The status on the Burma Road status track determines whether Kunming is a supply source (13.75) and the Chinese offensive strength modifier (13.72). 
+The Burma Road is the strategic transport route in Burma Road hexes 2206, 2306, and 2407. The following rules deterNo Hump mine the status of the Burma Road marker on the Burma Road status track. The Burma Road can be in one of three status boxes, Open, Closed/HUMP, Closed/No HUMP each of which as a value that is the Chinese offensive strength modifier. The status on the Burma Road status track determines whether Kunming is a supply source (13.75) and the Chinese offensive strength modifier (13.72). 
 
 **A.** The Burma Road is open if a strategic transport route can be traced from Kunming to Rangoon and then via sea to Madras or by sea to a map edge. The sea portion of the route cannot pass through an unneutralized enemy AZOI. 
 
@@ -1595,7 +1650,7 @@ OR
 
 The Bangkok to Rangoon transportation route (also referred to as the Bangkok to Rangoon RR) can only be constructed through the play of the _Bridge over the River Kwai_ card (Japanese card 18) as an event. When activating any Japanese units in Burma, Northern India, Ceylon or any combination thereof, the efficiency value of the activating HQ is modified depending on the status of Japanese logistical network. 
 
-1. If Bridge Over the River Kwai event has not been played and Rangoon is Allied controlled, the efficiency value is modified by –1 (to minimum of 0). 
+1. If Bridge Over the River Kwai event has not been played and Rangoon is Allied controlled, the efficiency value is modified by -1 (to minimum of 0). 
 
 2. If Bridge Over the River Kwai event has been played AND Rangoon is Japanese controlled with at least one Japanese activating unit tracing a supply line via the Bangkok to Rangoon transportation route, the activating HQs efficiency value is modified by +1. 
 
@@ -1603,7 +1658,7 @@ The Bangkok to Rangoon transportation route (also referred to as the Bangkok to 
 
 The above modifiers are applied if at least one unit activated during the offensive starts in Burma, Northern India, or Ceylon. The modifiers are not applied if all units activated start outside these areas, even if some of the units enter Burma, Northern India, or Ceylon during the offensive. 
 
-_DESIGN NOTE: Long time players of EotS will note that I have incorporated an earlier supply rule variant directly into the China rules. The small amount of rules overhead adds a great deal of historical realism that I eschewed a decade ago, but at this point I think now needs to be in the core system. Burma was a logistical nightmare and these rules better represent the situation and the engineering struggle that are a large piece of this theater’s history._ 
+_DESIGN NOTE: Long time players of EotS will note that I have incorporated an earlier supply rule variant directly into the China rules. The small amount of rules overhead adds a great deal of historical realism that I eschewed a decade ago, but at this point I think now needs to be in the core system. Burma was a logistical nightmare and these rules better represent the situation and the engineering struggle that are a large piece of this theater's history._ 
 
 ## 13.8 Australia 
 
@@ -1617,7 +1672,7 @@ If all Australian coastal airfields and ports on mainland Australia (not the Man
 
 ### 13.83 Effects of Australian Surrender 
 
-Australia can only surrender once per game. Allied units can regain control of Australian mainland hexes later in the game and use them, but it doesn’t undo the earlier surrender. Any Australian reinforcements that would arrive after Australia surrenders are permanently lost. Australian units already in play remain in play. Reduced Australian units that remain in play may receive replacements, but if eliminated, they are removed from the game. 
+Australia can only surrender once per game. Allied units can regain control of Australian mainland hexes later in the game and use them, but it doesn't undo the earlier surrender. Any Australian reinforcements that would arrive after Australia surrenders are permanently lost. Australian units already in play remain in play. Reduced Australian units that remain in play may receive replacements, but if eliminated, they are removed from the game. 
 
 ### 13.84 Mandate Control 
 
@@ -1631,9 +1686,7 @@ Whoever controls all the ports plus the resource hex on New Guinea during Nation
 
 Japan consists of six parts: Honshu, Hokkaido, Kyushu, Shikoku, Manchuko (hexes 3302 and 3303 plus all adjacent hexes except 3304), Korea (3305 and adjacent hexes), and the Mandates (Formosa, Sakhalin Is, the Kuriles, Okinawa, Iwo Jima, Marcus, the Marianas minus Guam, the Carolines, and the Marshall Islands); see the map boundary. The Japanese Home Islands consist of only Honshu, Hokkaido, Kyushu, and Shikoku. Note: Card text references to Japanese islands means Japanese Home Islands. 
 
-
-
-![JAPAN]()
+![](images/p30.avif)
 
 ### 13.91 Manchukuo 
 
@@ -1652,6 +1705,9 @@ Japan surrenders when all hexes on Honshu are Allied controlled or if no ultimat
 Each city hex in the Japanese Home Islands, that is Honshu, Hokkaido, Kyushu, and Shikoku, is considered to contain an intrinsic 12-12, one step ground unit with no stacking affect. This step is always the last one eliminated in the hex. Once an Allied control marker is placed in a Japanese hex, this intrinsic ground step is permanently eliminated, even if the Japanese later regain control of the hex. 
 
 # 14.0 Inter-Service Rivalry 
+
+![](images/counter_isr2.png){class=counter}
+![](images/counter_isr1.png){class=counter}
 
 Both sides experienced inter-service rivalry during the war. When these conditions were present, the coordination of military units and logistics was less effective. To simulate this, certain events create inter-service rivalry, which is denoted by flipping the appropriate Inter-Service rivalry marker to its Inter-Service rivalry side on the map. When an Event card (or one year scenario special rule 17.26, 17.37, and 17.47) ends Inter-Service Rivalry, flip the appropriate marker to its Strategic Agreement side to designate this condition. 
 
@@ -1673,14 +1729,9 @@ A. An HQ cannot activate both army and navy units in the same offensive or in re
 
 B. The Japanese can only use one half (round up) of their total amphibious shipping points while this condition persists. 
 
-
-
-
-
-
-
-
 # 15.0 War In Europe 
+
+![](images/counter_wie.png){class=counter align=left}
 
 The War In Europe (WIE) level is denoted by the WIE track. The current WIE status is either No Effect or a level from 1 to 4, based on the location of the WIE marker on the track. War In Europe Event cards increase (Allied) or decrease (Japanese) the WIE level. Different levels of WIE have varying game effects as follows. 
 
@@ -1692,7 +1743,7 @@ No impact on play.
 
 ## 15.2 Level 1 
 
-Level 1: WIE Level of 0 to –2 
+Level 1: WIE Level of 0 to -2 
 
 A. Allied reinforcements delayed. 
 
@@ -1700,7 +1751,7 @@ B. US Sent to Europe range is 0-1.
 
 ## 15.3 Level 2 
 
-Level 2: WIE Level of –3 to –4
+Level 2: WIE Level of -3 to -4
 
 A. Allied reinforcements delayed.
 
@@ -1708,7 +1759,7 @@ B. US Sent to Europe range is 0-3.
 
 ## 15.4 Level 3 
 
-Level 3: WIE Level of –5 to –6
+Level 3: WIE Level of -5 to -6
 
 A. Allied reinforcements delayed. 
 
@@ -1718,7 +1769,7 @@ C. Allies lose their Amphibious Shipping point reinforcement.
 
 ## 15.5 Level 4 
 
-Level 4: WIE Level of –7
+Level 4: WIE Level of -7
 
 A. Allied reinforcements delayed. 
 
@@ -1734,7 +1785,7 @@ Die rolls that are less than zero are treated as zero. Die rolls that are greate
 
 ## 15.7 Maximum Levels 
 
-The WIE level may never increase beyond +3 or decrease beyond –7. Actions that would exceed these limits are ignored and do not accumulate. 
+The WIE level may never increase beyond +3 or decrease beyond -7. Actions that would exceed these limits are ignored and do not accumulate. 
 
 # 16.0 Winning The Campaign Scenarios 
 
@@ -1755,6 +1806,8 @@ _DESIGN NOTE: The most difficult part of this design was how to determine Allied
 If the Allied player does not win by the conclusion of game turn 12, the Japanese player wins. 
 
 ## 16.4 US Political Will 
+
+![](images/counter_pw.png){class=counter align=left}
 
 The US Political Will marker moves due to the play of an event or during the National Status Segment when the following conditions occur. 
 
@@ -1782,7 +1835,7 @@ Any other locations that are not mentioned above have no impact on US Political 
 
 ### 16.42 Occupation of Alaska or Hawaii 
 
-Alaska is considered occupied if a Japanese unit has continuously occupied any single hex in Aleutian Islands (Hexes 4600–5100) at the end of any third consecutive US Political Will Segment: Reduce US Political Will by 1. This result can be earned only one time per game. 
+Alaska is considered occupied if a Japanese unit has continuously occupied any single hex in Aleutian Islands (Hexes 4600-5100) at the end of any third consecutive US Political Will Segment: Reduce US Political Will by 1. This result can be earned only one time per game. 
 
 Hawaii is considered occupied if a Japanese unit has continuously occupied any hex in the major Hawaiian Islands (Hexes 5708, 5808, 5908) or Midway (5108) at the end of second consecutive US Political Will Segments: Reduce US Political Will by 1. This result also can be earned only one time per game. 
 
@@ -1807,6 +1860,8 @@ If, as a result of a combat when the Allies are the Offensives player, the entir
 If at the end of any game turn there are no US carrier units on the map, the Allied player loses 1 US political will point, moving the marker one box to the left. The Allied player loses an additional US political will point if there are no US naval units of any type on the map. 
 
 ### 16.47 Progress of the War 
+
+![](images/counter_pow.png){class=counter align=left}
 
 From game turn 4 until the end of the game, the Allies have a requirement for capturing and holding until the Political Will segment of the turn a certain number of hexes that began the turn under Japanese control. The required number of hexes is 4 or the number of ASPs available at the conclusion of the reinforcement phase, whichever is smaller. 
 
@@ -1861,7 +1916,7 @@ _DESIGN NOTE: The 1942 campaign scenario and the yearly scenarios were intended 
 
 [ See the full PDF for the example of play ](https://gmtwebsiteassets.s3.us-west-2.amazonaws.com/nneots/EOTS+2025+Rules_v1.1.pdf#page=49)
 
-# 20.0 Designer’s Notes 
+# 20.0 Designer's Notes 
 
 [ See the full PDF for the designer notes ](https://gmtwebsiteassets.s3.us-west-2.amazonaws.com/nneots/EOTS+2025+Rules_v1.1.pdf#page=53)
 

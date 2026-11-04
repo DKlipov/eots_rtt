@@ -5,7 +5,7 @@ JS := $(shell find js -type f -name '*.js')
 rules.js play.js &: tools/inline.js $(JS)
 	node tools/inline.js
 
-info/rules.html: info/rules.md
+info/%.html: info/%.md
 	pandoc -o $@ $^
 
 tags: $(JS)

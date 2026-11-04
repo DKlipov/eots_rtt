@@ -5,9 +5,9 @@
 Empire of the Sun
 </title>
 <style>
-html { padding: 16px; font-family: serif; }
+html { padding: 16px; font-family: "Source Serif", serif; }
 body { max-width: 600px; margin: 0 auto; }
-h1 { font-family: sans-serif; }
+h1 { font-family: "Source Sans", sans-serif; }
 h1 { font-size: 1.4rem; font-weight: bold; margin: 1rem 0; }
 h2 { font-size: 1.2rem; font-weight: bold; margin: 1rem 0; }
 h3 { font-size: 1.0rem; font-weight: bold; margin: 1rem 0; }
@@ -21,15 +21,16 @@ blockquote {
         padding: 0.1rem 1rem;
         background-color: aliceblue;
 }
-ol ol { list-style-type: lower-latin }
-li img { vertical-align: middle; height: 30px; margin: 5px; }
 p img { display: block; margin: 0 auto; max-width: 100%; }
-figcaption { display: none }
+img[data-align=right]{float:right;margin-left:1rem;}
+img.card{border-radius:8px;width:125px;border:1px solid black;}
+img.counter{display:inline;width:48px;margin:4px;border:1px solid black;}
+img[data-align=left]{float:left;margin-right:1rem;}
+hr { border: none; border-top: 5px solid skyblue; }
 </style>
-<figure>
-<img src="images/cover.jpg" alt="COVER" />
-<figcaption aria-hidden="true">COVER</figcaption>
-</figure>
+<p><img src="images/p01.avif" /></p>
+<p><strong>V4.0</strong></p>
+<hr />
 <h1 id="table-of-contents">Table of Contents</h1>
 <ul>
 <li><a href="#introduction">1.0 Introduction</a></li>
@@ -65,7 +66,7 @@ Of Play</a></li>
 <p>© 2025 GMT Games, LLC<br>P.O. Box 1308, Hanford, CA 93232-1308<br><a
 href="https://www.gmtgames.com/">www.GMTGames.com</a></p>
 </blockquote>
-<p><strong>V4.0</strong></p>
+<hr />
 <h1 id="introduction">1.0 Introduction</h1>
 <p><em>Empire of the Sun</em> is a game about the Pacific War during
 World War II. One player takes the side of the Japanese and the other
@@ -134,14 +135,11 @@ of infamy’ and their moment in the sun.</p>
 <li><p>2 Erasmus Tri-folds (1 Japanese and 1 Allied)</p></li>
 <li><p>1 die (10 sided)</p></li>
 </ul>
-<figure>
-<img src="" alt="SAMPLE UNITS IMAGE" />
-<figcaption aria-hidden="true">SAMPLE UNITS IMAGE</figcaption>
-</figure>
-<figure>
-<img src="" alt="SAMPLE CARD IMAGE" />
-<figcaption aria-hidden="true">SAMPLE CARD IMAGE</figcaption>
-</figure>
+<hr />
+<p><img src="images/p02.avif" /></p>
+<hr />
+<p><img src="images/p03.avif" /></p>
+<hr />
 <h3 id="die">1.22 Die</h3>
 <p><em>Empire of the Sun</em> uses a single ten sided die for all random
 number functions. The number 0 represents results equal to zero. A zero
@@ -301,8 +299,12 @@ Scenario as Allied controlled and should be so indicated by an Allied
 flag.</p>
 <p><strong>Japanese Army:</strong> Japanese army units are yellow with
 black type.</p>
+<p><img src="images/counter_jparmy1.png" class="counter" /> <img
+src="images/counter_jparmy2.png" class="counter" /></p>
 <p><strong>Japanese Navy:</strong> Japanese navy units are white with
 red type.</p>
+<p><img src="images/counter_organic_naval.png" class="counter" /> <img
+src="images/counter_jpnavy2.png" class="counter" /></p>
 <p><strong>Long Range Bomber (LRB):</strong> Only the Allied player has
 LRB units. LRB units are all air units with ranges of 6 or greater. LRB
 units have distinct uses in the game and are so cited where appropriate.
@@ -314,8 +316,8 @@ units and have the ability to conduct Strategic Bombing. Whenever the
 rules or card text refer to B29 units, they are referring to these two
 specific units.</p>
 <p><strong>Named Location:</strong> Cities, with or without intrinsic
-defense, Resource</p>
-<p>hexes, and hexes with ports or airfields are named locations.</p>
+defense, Resource hexes, and hexes with ports or airfields are named
+locations.</p>
 <p><strong>Naval:</strong> Rules references to naval units include
 carrier units unless specified as non-carrier naval. Exception: Japanese
 card 17 “Japanese Counterattack at Savo Island” text reference to naval
@@ -372,7 +374,11 @@ across an unplayable Ocean hexside.</p>
 that are American.</p>
 <p><strong>US Army:</strong> US Army units are Green with black
 type.</p>
+<p><img src="images/counter_usarmy1.png" class="counter" /> <img
+src="images/counter_usarmy2.png" class="counter" /></p>
 <p><strong>US Navy:</strong> US Navy units are blue with black type.</p>
+<p><img src="images/counter_usnavy1.png" class="counter" /> <img
+src="images/counter_usnavy2.png" class="counter" /></p>
 <h1 id="setting-up-the-game">2.0 Setting Up The Game</h1>
 <p><em>Empire of the Sun</em> has a wide variety of scenarios to play
 based on the duration of the gaming experience you are seeking.
@@ -601,6 +607,8 @@ specifies both OC and EC intelligence numbers, the OC value is used if
 the card was played for OC Offensive and EC value if it was played for
 EC Offensive.</p>
 <h2 id="events">5.3 Events</h2>
+<p><img src="../cards/card_ap_72.100.avif" class="card"
+data-align="right" /></p>
 <p>Each Strategy card has an event. When a player uses a Strategy card
 as an Event card, the player follows the text of the event. If a portion
 of event text contradicts some rules then the text supercede those rules
@@ -629,6 +637,8 @@ cannot make an intelligence die roll to alter the intelligence condition
 card in order to alter the intelligence condition from Surprise
 Attack.</p>
 <h4 id="c.-reinforcement-units">C. Reinforcement Units</h4>
+<p><img src="images/counter_armor_brigade.png" class="counter"
+data-align="left" /></p>
 <p>Certain military events come with a special unit (e.g., <em>Slim’s
 Burma Offensive</em> brings the British 7th Armor Brigade into play).
 Place the new unit according to the card text.</p>
@@ -654,6 +664,8 @@ in effect, Draw one Strategy card.” Effectively, this card can be played
 to draw a card regardless of the US inter-service rivalry
 status.</em></p>
 <h3 id="reaction-events">5.32 Reaction Events</h3>
+<p><img src="../cards/card_ap_12.100.avif" class="card"
+data-align="right" /></p>
 <p>When a player is in the role of a Reaction player, the only strategy
 cards that may be played are those that state in their title they are a
 Reaction event. Only the player currently cast in the role of Reaction
@@ -708,6 +720,8 @@ removed from play if played as an event.</p>
 (e.g., Gandhi, Wingate). Follow the text instructions to resolve these
 Reaction cards.</p>
 <h3 id="resource-events">5.33 Resource Events</h3>
+<p><img src="../cards/card_jp_30.100.avif" class="card"
+data-align="right" /></p>
 <p>Only the Offensives player may play Resource events. Resource events
 give the player new units, capabilities, or replacements. If a Resource
 event gives the player a reinforcement unit, it is placed on the map
@@ -724,6 +738,8 @@ supplied, the unit is lost. Similarly, if for any reason the Offensives
 player cannot use or save all or some of the available replacements,
 unused replacements are permanently lost.</p>
 <h3 id="political-events">5.34 Political Events</h3>
+<p><img src="../cards/card_ap_47.100.avif" class="card"
+data-align="right" /></p>
 <p>Political events are those that move a marker on one of the game
 tracks. There are five kinds of political events: China OC Offensives,
 India Stability, War In Europe, US Political Will changes, and
@@ -793,6 +809,8 @@ terrain or AZOIs.</p>
 and activation. They also affect reaction possibilities and amphibious
 movement of ground units.</p>
 <h2 id="headquarter-units">6.1 Headquarter Units</h2>
+<p><img src="images/counter_hq.png" class="counter"
+data-align="left" /></p>
 <p>Headquarters (HQs) represent command infrastructure and are treated
 as ground units. Each side begins the game with a number of HQs in play
 and can receive new HQs as reinforcements or through card events. Most
@@ -819,7 +837,7 @@ supply lines, to the East map edge Ultimate Supply Source has -1
 modifier to its efficiency rating (to a minimum of 0) (6.25). Similarly,
 Japanese HQ that is used to activate units in Burma, Ceylon, or Northern
 India when the Bridge over Kwai River has not been built and the
-Japanese do not control Rangoon has –1 modifier to its efficiency rating
+Japanese do not control Rangoon has -1 modifier to its efficiency rating
 (13.79). Under certain circumstances the Bridge over the River Kwai
 event can add +1 to a Japanese HQs efficiency rating (13.79).</p>
 <p><strong>Stacking:</strong> HQs do not count toward stacking limits,
@@ -944,10 +962,7 @@ or out of supply that can trace a legal overland supply path (6.21) up
 to 4 movement points in length OR by sea of any length to a friendly
 controlled port makes that port supply eligible.</p>
 <h4 id="a.-units">A. Units</h4>
-<figure>
-<img src="" alt="SUPPLY LINE IMAGE" />
-<figcaption aria-hidden="true">SUPPLY LINE IMAGE</figcaption>
-</figure>
+<p><img src="images/p10a.avif" data-align="right" /></p>
 <p><strong>Supply Line:</strong> A unit is supplied if an unblocked hex
 path can be 2617 E traced from a supplied appropriate (6.12) activating
 HQ to the unit and the path length does not exceed the HQ’s range. A
@@ -989,19 +1004,13 @@ terrain overland than the 4 MP limitation and does not have to pass
 through the supply-eligible port required, there just has to be a valid
 port within the range. Also, note that if the last hexside crossed
 was</em></p>
-<figure>
-<img src="" alt="SUPPLY EXAMPLE 1" />
-<figcaption aria-hidden="true">SUPPLY EXAMPLE 1</figcaption>
-</figure>
+<p><img src="images/p10b.avif" /></p>
 <p><em>EXAMPLE: Japanese units B, C and D trace supply by land to the
 South HQ. All are within 12 hexes of the South HQ and 4 MPs of a Supply
 Eligible Port. Since the Transportation hexes in Jarhat and Ledo have
 not been constructed yet (13.77), unit A is out of supply since it is 5
 MPs from Rangoon to its location.</em></p>
-<figure>
-<img src="" alt="SUPPLY EXAMPLE 2" />
-<figcaption aria-hidden="true">SUPPLY EXAMPLE 2</figcaption>
-</figure>
+<p><img src="images/p10c.avif" /></p>
 <p><em>EXAMPLE: The five Japanese units marked A-E are tracing supply.
 The shaded hexes indicate non-neutralized Allied Air ZOI, which blocks
 supply paths by sea. Unit A is out of supply since it is more than 4 MPs
@@ -1026,10 +1035,7 @@ not to the HQ.</em></p>
 activated unit remains supplied until the end of the Offensive.</p>
 <p><strong>Kunming:</strong> In some cases, Allied units can trace
 supply directly from Kunming instead of an HQ (see 13.75).</p>
-<figure>
-<img src="" alt="SUPPLY EXAMPLE 3" />
-<figcaption aria-hidden="true">SUPPLY EXAMPLE 3</figcaption>
-</figure>
+<p><img src="images/p11.avif" /></p>
 <p><em>Take the situation where the Allies have the Malaya air unit in
 Singapore and the Japanese have air units in Singora, Miri, and
 Tjilatjap. All of the Japanese air units are drawing their supply from
@@ -1085,6 +1091,8 @@ airfield (Jarhat and Dacca). This supply line exists as long as the
 Allies control a supply-eligible Northern India airfield and need not be
 traced as specified in 6.21.</p>
 <h4 id="tokyo-express">Tokyo Express</h4>
+<p><img src="images/counter_tokyo_express.png" class="counter"
+data-align="left" /></p>
 <p>Play of the Big Tokyo Express Operation (Japanese Tokyo #28) or the
 Tokyo Express (Japanese #44) card allows Express the Japanese player to
 place the Tokyo Express marker in play to create a temporary supply line
@@ -1151,10 +1159,7 @@ projected by non-LRB unit into the same hex. LRB units project ZOI like
 other air and carrier units, but cannot be used to neutralize enemy ZOI.
 Air or carrier unit ZOI is assumed to exist when checking if that unit
 is in supply.</p>
-<figure>
-<img src="" alt="EXAMPLE AIR ZOI" />
-<figcaption aria-hidden="true">EXAMPLE AIR ZOI</figcaption>
-</figure>
+<p><img src="images/p12a.avif" /></p>
 <p><em>EXAMPLE: Both the Japanese and Allied Air ZOI are shown. The
 hexes where both sides have an Air ZOI are shown as
 neutralized.</em></p>
@@ -1203,17 +1208,15 @@ land hex side (6.3).</p></li>
 Attrition phase (6.24).</p></li>
 </ul>
 <h2 id="hex-control">6.5 Hex Control</h2>
+<p><img src="images/counter_hex_ctl.png" class="counter"
+data-align="left" /></p>
 <p>The last player to have a ground unit enter or pass through a hex
 controls the hex. Ground units that enter an unoccupied hex via ground
 movement gain control immediately. Ground units that enter a hex via
-amphib-</p>
-<p>ious assault (using an ASP, organic naval, or barge transport) and
+amphibious assault (using an ASP, organic naval, or barge transport) and
 are not eliminated or forced to retreat in battle gain control of the
 hex just prior to post battle movement.</p>
-<figure>
-<img src="" alt="EXMAPLE CONTROL" />
-<figcaption aria-hidden="true">EXMAPLE CONTROL</figcaption>
-</figure>
+<p><img src="images/p12a.avif" /></p>
 <p><em>For example, during an Allied Offensive, Japanese controlled
 Guadalcanal (4423) is declared a battle hex and the Allies win,
 eliminating all Japanese ground units on Guadalcanal. The Allies have in
@@ -1450,7 +1453,7 @@ that is within range of a Reaction HQ and in a Reaction aircraft Zone Of
 Influence (whether neutralized or not), the Reaction player may attempt
 a Special Reaction on such hex(es). To make this Special Reaction the
 Reaction player must make a successful intelligence die roll (play of a
-Reaction card cannot be used; however the –2 ZOI modifier applies). If
+Reaction card cannot be used; however the -2 ZOI modifier applies). If
 the roll is successful, the hex is declared a battle hex. This can occur
 whether the Offensives player declared a battle hex (or hexes) or not.
 If more than one hex is eligible for Special Reaction, separate roll
@@ -1477,10 +1480,7 @@ conduct Post Battle Movement. This situation where a declared battle hex
 does not experience combat resolution can occur in other ways such as a
 successful submarine attack eliminating all offensive units prior to
 combat resolution.</p>
-<figure>
-<img src="" alt="EXAMPLE AMPHIB ASSAULT" />
-<figcaption aria-hidden="true">EXAMPLE AMPHIB ASSAULT</figcaption>
-</figure>
+<p><img src="images/p15.avif" /></p>
 <p><em>EXAMPLE: The US SF Brigade uses Amphibious Assault to enter
 Hollandia and the 5th non-LRB AF supports the SF Brigade landing. The
 next unit moved is the CV Enterprise that moves into the Hollandia hex
@@ -1507,6 +1507,8 @@ both players are out of cards.</p>
 <p><em>PLAY NOTE: Remember, even units that do not participate in
 battles can conduct post battle movement.</em></p>
 <h3 id="future-offensives">7.29 Future Offensives</h3>
+<p><img src="images/counter_fo1.png" class="counter" /> <img
+src="images/counter_fo2.png" class="counter" /></p>
 <p>Once per game turn each player may desigFuture Future nate one
 Strategy card to be held over for a Offensives Offensives Card Card
 future game turn to conduct an Offensive, event, or a reaction. A player
@@ -1591,10 +1593,7 @@ land hex side. Certain land hexes in the game have two hex sides of
 coastline separated by an un-crossable land mass. In these cases one of
 these coastlines has graphically been shown to be unplayable ocean.
 Naval units may not enter a hex through an unplayable ocean hexside.</p>
-<figure>
-<img src="" alt="EXAMPLE NAVAL MOVE 1" />
-<figcaption aria-hidden="true">EXAMPLE NAVAL MOVE 1</figcaption>
-</figure>
+<p><img src="images/p16a.avif" /></p>
 <p><em>EXAMPLE: Hex 2220 Soerabaja cannot be entered by a naval unit
 from hexes 2119, 2120, or 2221, but could be entered from hexes 2219,
 2319, and 2320.</em></p>
@@ -1603,10 +1602,7 @@ opposing ZOI, but may not do so if they are moving with a ground unit
 conducting amphibious assault or are conducting strategic naval
 movement. Carriers at sea neutralize enemy Zones of Influence during
 normal movement, but not do so while using Strategic Naval Movement.</p>
-<figure>
-<img src="" alt="EXAMPLE NAVAL MOVE 2" />
-<figcaption aria-hidden="true">EXAMPLE NAVAL MOVE 2</figcaption>
-</figure>
+<p><img src="images/p16b.avif" /></p>
 <p><em>Naval Movement Illustration</em></p>
 <p>Naval units must end their movement either in a hex with enemy units
 (see examples A and B in the Naval Movement illustration below), or in a
@@ -1743,6 +1739,8 @@ limits. If the units were in supply when so removed, they are placed on
 the game turn record track to be returned to play the turn after the
 next turn as reinforcements (which cannot be delayed). If the
 overstacked units were out of supply, they are eliminated.</p>
+<p><img src="images/counter_airstack1.png" class="counter" /> <img
+src="images/counter_airstack2.png" class="counter" /></p>
 <p>Note that several pairs of US air units and the Commonwealth SEAC air
 units have the same unit designations, but one of these air units will
 always be a Long Range Bomber air unit while the other is not. Two air
@@ -1874,6 +1872,8 @@ division size (XX) or smaller that conducts an Amphibious Assault. Each
 Corps or Army sized unit (XXX or XXXX) uses one ASP for each step (e.g.,
 a reduced Corps or Army sized unit requires one ASP and a full strength
 Corps or Army unit requires two ASP).</p>
+<p><img src="images/counter_kor.png" class="counter"
+data-align="left" /></p>
 <p>Exception: The Japanese Korean Army costs two ASP, not 1 ASP, per
 step (e.g., A full strength Korean Army costs 4 ASP to move by
 Amphibious Assault).</p>
@@ -1950,6 +1950,8 @@ were some solely Army invasions during the New Guinea and Philippines
 campaigns.</em></p>
 <h3 id="japanese-organic-naval-unit-transport-capability">8.46 Japanese
 Organic Naval Unit Transport Capability</h3>
+<p><img src="images/counter_organic_naval.png" class="counter"
+data-align="left" /></p>
 <p>The Japanese have five brigade sized land units (1st, 2nd, 3rd, and
 4th SN and the SS). These units can conduct 4-6 amphibious assault by
 either using one amphibious shipping point per unit, or they can conduct
@@ -1971,6 +1973,8 @@ combinations that can conduct this type of move, but it is a useful way
 to cheaply capture unoccupied opposing bases, especially early in the
 war.</em></p>
 <h3 id="japanese-barges">8.47 Japanese Barges</h3>
+<p><img src="images/counter_asp.png" class="counter"
+data-align="left" /></p>
 <p>When the Japanese play the Japanese Barge event, ASP the Japanese
 flip their ASP marker onto its Barges side and the Barges marker should
 be placed near the Barges Japanese player. During any Offensive (only,
@@ -1994,6 +1998,8 @@ they are placed on the game turn record track to be returned to play two
 turns later as reinforcements (which cannot be delayed). If the
 overstacked units were out of supply, they are eliminated.</p>
 <h3 id="british-armor-brigade">8.49 British Armor Brigade</h3>
+<p><img src="images/counter_armor_brigade.png" class="counter"
+data-align="left" /></p>
 <p>The Allied player can receive the 7th Armor Brigade 回X through the
 play of an event card. The 7th Armor Bri4-10 gade may not use Amphibious
 Assault, but may use Strategic Ground transport. The 7th Armor Brigade
@@ -2301,10 +2307,7 @@ expending their ordnance without finding the larger fleet
 carriers.</em></p>
 <blockquote>
 <p><strong>Comprehensive Offensive Example:</strong></p>
-<figure>
-<img src="" alt="OFFENSIVE EXAMPLE" />
-<figcaption aria-hidden="true">OFFENSIVE EXAMPLE</figcaption>
-</figure>
+<p><img src="images/p22.avif" /></p>
 <p>At the beginning of the 1942 scenario the Malaya Peninsula has the
 Japanse 38th Army in Kuala Lumpur (1913) and the 25th Army (reduced) in
 Kota Bharu (2112). In support are air and naval forces in French
@@ -2434,9 +2437,9 @@ roll modifiers for a +4.</em></p>
 <li>Certain terrain types modify the Offensive player’s die roll:</li>
 </ol>
 <ul>
-<li><p>JUNGLE: subtract one from the die roll (–1).</p></li>
-<li><p>MIXED: subtract two from the die roll (–2).</p></li>
-<li><p>MOUNTAINS: subtract three from the die roll (–3).</p></li>
+<li><p>JUNGLE: subtract one from the die roll (-1).</p></li>
+<li><p>MIXED: subtract two from the die roll (-2).</p></li>
+<li><p>MOUNTAINS: subtract three from the die roll (-3).</p></li>
 </ul>
 <p>Note: There is no modifier for City type terrain.</p>
 <h4 id="reaction-player-modifiers">Reaction Player Modifiers</h4>
@@ -2630,7 +2633,7 @@ is placed on the game turn track 3 turns later, to re-enter play as a
 reinforcement. When a Sent to Europe unit re-enters play as a
 reinforcement, it is as if it were attempting to enter play for the
 first time. A unit can be Sent to Europe multiple times per game. The
-die roll is modified by –1 for Inter-Service Rivalry.</p>
+die roll is modified by -1 for Inter-Service Rivalry.</p>
 <table>
 <thead>
 <tr>
@@ -2663,6 +2666,8 @@ die roll is modified by –1 for Inter-Service Rivalry.</p>
 </table>
 <h2 id="amphibious-shipping-points-asps">10.3 Amphibious Shipping Points
 (ASPs)</h2>
+<p><img src="images/counter_amph_shipping_used.png" class="counter"
+data-align="left" /></p>
 <p>At the start of each scenario both sides begin with a number of
 Amphibious Shipping Points (ASPs) as indicated by the scenario. Each ASP
 can only be used once per turn. Each time an ASP is used, move the
@@ -2729,6 +2734,8 @@ they are considered eliminated and cannot return to play.</p>
 <h2 id="japanese-replacements">11.2 Japanese Replacements</h2>
 <h3 id="japanese-naval-unit-scheduled-replacements">11.21 Japanese Naval
 Unit Scheduled Replacements</h3>
+<p><img src="images/counter_naval_repl.png" class="counter"
+data-align="left" /></p>
 <p>The Japanese player receives a limited number of naval replacements
 during the course of the game as indicated on the Replacements Chart.
 These may be used to either bring reduced naval units to full strength
@@ -2738,11 +2745,15 @@ may be carried over from game turn to game turn. Keep track of them with
 the naval replacement marker on Strategic track.</p>
 <h3 id="japanese-air-unit-replacements">11.22 Japanese Air Unit
 Replacements</h3>
+<p><img src="images/counter_air_repl.png" class="counter"
+data-align="left" /></p>
 <p>There are no scheduled replacements for Japanese air units. The
 Japanese player may receive a small number of air replacements through
 the play of certain events.</p>
 <h3 id="japanese-ground-unit-replacements">11.23 Japanese Ground Unit
 Replacements</h3>
+<p><img src="images/counter_jp_divs.png" class="counter"
+data-align="left" /></p>
 <p>There are no scheduled replacements for Japanese ground units. During
 the replacement segment, the Japanese player may bring up to two
 replacement steps from China. This is done by reducing the available
@@ -2803,7 +2814,8 @@ resource hexes under Japanese control (See 6.5 Hex Control), rounding
 up, at the start of the Strategic Warfare Segment as the base Japanese
 draw; however, the draw is always at least 4 cards regardless of number
 of resource hexes. The number of cards drawn can be modified by
-Strategic Warfare (12.2, 12.3) The 14 resource hexes are:</p>
+Strategic Warfare (12.2, 12.3)</p>
+<p>The 14 resource hexes are:</p>
 <ul>
 <li>1813, 1916, 2017: Sumatra</li>
 <li>2008: Burma</li>
@@ -2845,6 +2857,8 @@ turns due to defective torpedoes.</p></li>
 </ul>
 <h2 id="strategic-bombing">12.3 Strategic Bombing</h2>
 <h3 id="b29-availability">12.31 B29 Availability</h3>
+<p><img src="images/counter_b29.png" class="counter"
+data-align="left" /></p>
 <p>Only US B29 LRB units may conduct Strategic Bombing (the 20th BC
 arrives on turn 9 and the 21st BC arrives on turn 10). A B29 must be in
 supply and either in an airfield within its 8 hex range of Tokyo or in
@@ -2883,6 +2897,8 @@ are in addition to any Strategic bombing effects. Note: The Japanese can
 lose at most two cards during Strategic Bombing, but may lose additional
 cards due to B29 events during the game turn.</p>
 <h2 id="japanese-draws-and-passes">12.4 Japanese Draws and Passes</h2>
+<p><img src="images/counter_jp_passes.png" class="counter"
+data-align="left" /></p>
 <p>If the Japanese receive 6 cards (not including a possible Future
 Offensive Card) they receive one pass, if they receive 5 (not including
 a possible Future Offensive Card) or less cards they receive 2 passes.
@@ -3011,6 +3027,8 @@ hexes on that island. Japanese units may never enter Mainland India,
 although Japanese air and naval units may attack Mainland India hexes
 that are within range. Allied units may enter any hex in India.</p>
 <h3 id="india-surrender">13.62 India Surrender</h3>
+<p><img src="images/counter_india.png" class="counter"
+data-align="left" /></p>
 <p>The India Status Track consists of 5 boxes that are from right to
 left: Stable (at start), Unrest, Strikes, Unstable, and Revolts. If the
 Japanese player controls all hexes of</p>
@@ -3063,6 +3081,8 @@ hexes, the Japanese can no longer remove Japanese China divisions from
 China and cannot conduct any further China Offensives (OC or EC, see
 13.72).</p>
 <h3 id="china-offensives">13.72 China Offensives</h3>
+<p><img src="images/counter_china_offensive.png" class="counter"
+data-align="left" /></p>
 <p>The Japanese player may launch OC and EC China Offensives. EC China
 offensives are based on the play of a particular event card. A China OC
 offensive is due to the Japanese player playing any 3OC card and
@@ -3181,10 +3201,7 @@ placed on them denoting that the strategic transportation route printed
 on the map is not yet constructed. Later scenarios will give
 instructions on whether these markers are in place or removed to show
 that the strategic transport route has or has not been constructed.</p>
-<figure>
-<img src="" alt="EXAMPLE CBI INFRA" />
-<figcaption aria-hidden="true">EXAMPLE CBI INFRA</figcaption>
-</figure>
+<p><img src="images/p29.avif" /></p>
 <p><strong>B.</strong> If the Allies control all of Northern India plus
 Akyab, the Allies can construct one of the three strategic transport
 routes in Jarhat, Imphal, or Ledo with the complete play of a 3 OC card.
@@ -3205,14 +3222,16 @@ to a Japanese controlled Rangoon, provided it is Supply Eligible. Unlike
 the Allies the Japanese do not require that the Jarhat route have been
 previously constructed.</p>
 <h3 id="burma-road">13.78 Burma Road</h3>
+<p><img src="images/counter_burma_road.png" class="counter"
+data-align="left" /></p>
 <p>The Burma Road is the strategic transport route in Burma Road hexes
 2206, 2306, and 2407. The following rules deterNo Hump mine the status
-of the Burma Road marker on the Bur-</p>
-<p>ma Road status track. The Burma Road can be in one of three status
-boxes, Open, Closed/HUMP, Closed/No HUMP each of which as a value that
-is the Chinese offensive strength modifier. The status on the Burma Road
-status track determines whether Kunming is a supply source (13.75) and
-the Chinese offensive strength modifier (13.72).</p>
+of the Burma Road marker on the Burma Road status track. The Burma Road
+can be in one of three status boxes, Open, Closed/HUMP, Closed/No HUMP
+each of which as a value that is the Chinese offensive strength
+modifier. The status on the Burma Road status track determines whether
+Kunming is a supply source (13.75) and the Chinese offensive strength
+modifier (13.72).</p>
 <p><strong>A.</strong> The Burma Road is open if a strategic transport
 route can be traced from Kunming to Rangoon and then via sea to Madras
 or by sea to a map edge. The sea portion of the route cannot pass
@@ -3248,7 +3267,7 @@ any combination thereof, the efficiency value of the activating HQ is
 modified depending on the status of Japanese logistical network.</p>
 <ol type="1">
 <li><p>If Bridge Over the River Kwai event has not been played and
-Rangoon is Allied controlled, the efficiency value is modified by –1 (to
+Rangoon is Allied controlled, the efficiency value is modified by -1 (to
 minimum of 0).</p></li>
 <li><p>If Bridge Over the River Kwai event has been played AND Rangoon
 is Japanese controlled with at least one Japanese activating unit
@@ -3311,10 +3330,7 @@ Carolines, and the Marshall Islands); see the map boundary. The Japanese
 Home Islands consist of only Honshu, Hokkaido, Kyushu, and Shikoku.
 Note: Card text references to Japanese islands means Japanese Home
 Islands.</p>
-<figure>
-<img src="" alt="JAPAN" />
-<figcaption aria-hidden="true">JAPAN</figcaption>
-</figure>
+<p><img src="images/p30.avif" /></p>
 <h3 id="manchukuo">13.91 Manchukuo</h3>
 <p>Japanese and Allied units of any type may not enter Manchukuo.
 Manchuko may be conquered by the play of the Soviet Manchurian Offensive
@@ -3340,6 +3356,8 @@ one eliminated in the hex. Once an Allied control marker is placed in a
 Japanese hex, this intrinsic ground step is permanently eliminated, even
 if the Japanese later regain control of the hex.</p>
 <h1 id="inter-service-rivalry">14.0 Inter-Service Rivalry</h1>
+<p><img src="images/counter_isr2.png" class="counter" /> <img
+src="images/counter_isr1.png" class="counter" /></p>
 <p>Both sides experienced inter-service rivalry during the war. When
 these conditions were present, the coordination of military units and
 logistics was less effective. To simulate this, certain events create
@@ -3370,6 +3388,8 @@ offensive or in reaction to the same offensive.</p>
 <p>B. The Japanese can only use one half (round up) of their total
 amphibious shipping points while this condition persists.</p>
 <h1 id="war-in-europe">15.0 War In Europe</h1>
+<p><img src="images/counter_wie.png" class="counter"
+data-align="left" /></p>
 <p>The War In Europe (WIE) level is denoted by the WIE track. The
 current WIE status is either No Effect or a level from 1 to 4, based on
 the location of the WIE marker on the track. War In Europe Event cards
@@ -3379,20 +3399,20 @@ of WIE have varying game effects as follows.</p>
 <p>No Effect: Level of +1 to +3</p>
 <p>No impact on play.</p>
 <h2 id="level-1">15.2 Level 1</h2>
-<p>Level 1: WIE Level of 0 to –2</p>
+<p>Level 1: WIE Level of 0 to -2</p>
 <p>A. Allied reinforcements delayed.</p>
 <p>B. US Sent to Europe range is 0-1.</p>
 <h2 id="level-2">15.3 Level 2</h2>
-<p>Level 2: WIE Level of –3 to –4</p>
+<p>Level 2: WIE Level of -3 to -4</p>
 <p>A. Allied reinforcements delayed.</p>
 <p>B. US Sent to Europe range is 0-3.</p>
 <h2 id="level-3">15.4 Level 3</h2>
-<p>Level 3: WIE Level of –5 to –6</p>
+<p>Level 3: WIE Level of -5 to -6</p>
 <p>A. Allied reinforcements delayed.</p>
 <p>B. US Sent to Europe range is 0-5.</p>
 <p>C. Allies lose their Amphibious Shipping point reinforcement.</p>
 <h2 id="level-4">15.5 Level 4</h2>
-<p>Level 4: WIE Level of –7</p>
+<p>Level 4: WIE Level of -7</p>
 <p>A. Allied reinforcements delayed.</p>
 <p>B. US Sent to Europe range is 0-7.</p>
 <p>C. Allies lose their Amphibious Shipping point reinforcement.</p>
@@ -3401,7 +3421,7 @@ of WIE have varying game effects as follows.</p>
 <p>Die rolls that are less than zero are treated as zero. Die rolls that
 are greater than nine are treated as a modified nine.</p>
 <h2 id="maximum-levels">15.7 Maximum Levels</h2>
-<p>The WIE level may never increase beyond +3 or decrease beyond –7.
+<p>The WIE level may never increase beyond +3 or decrease beyond -7.
 Actions that would exceed these limits are ignored and do not
 accumulate.</p>
 <h1 id="winning-the-campaign-scenarios">16.0 Winning The Campaign
@@ -3449,6 +3469,8 @@ resulting in a pyrrhic Japanese victory.</em></p>
 <p>If the Allied player does not win by the conclusion of game turn 12,
 the Japanese player wins.</p>
 <h2 id="us-political-will">16.4 US Political Will</h2>
+<p><img src="images/counter_pw.png" class="counter"
+data-align="left" /></p>
 <p>The US Political Will marker moves due to the play of an event or
 during the National Status Segment when the following conditions
 occur.</p>
@@ -3473,7 +3495,7 @@ Political Will when they surrender.</p>
 <h3 id="occupation-of-alaska-or-hawaii">16.42 Occupation of Alaska or
 Hawaii</h3>
 <p>Alaska is considered occupied if a Japanese unit has continuously
-occupied any single hex in Aleutian Islands (Hexes 4600–5100) at the end
+occupied any single hex in Aleutian Islands (Hexes 4600-5100) at the end
 of any third consecutive US Political Will Segment: Reduce US Political
 Will by 1. This result can be earned only one time per game.</p>
 <p>Hawaii is considered occupied if a Japanese unit has continuously
@@ -3511,6 +3533,8 @@ marker one box to the left. The Allied player loses an additional US
 political will point if there are no US naval units of any type on the
 map.</p>
 <h3 id="progress-of-the-war">16.47 Progress of the War</h3>
+<p><img src="images/counter_pow.png" class="counter"
+data-align="left" /></p>
 <p>From game turn 4 until the end of the game, the Allies have a
 requirement for capturing and holding until the Political Will segment
 of the turn a certain number of hexes that began the turn under Japanese
