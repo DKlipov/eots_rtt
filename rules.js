@@ -1512,7 +1512,7 @@ var pieces = [
         id: "casia",
         "faction": AP,
         "name": "US Asia (Cruiser)",
-        "short": "Asia (CA)",
+        "short": "Asia",
         "counter": "blue unit big_units_blue big unit_ix_2",
         "class": "naval",
         "type": "ca",
@@ -1527,7 +1527,7 @@ var pieces = [
         id: "dasia",
         "faction": AP,
         "name": "US Asia (Destroyer)",
-        "short": "Asia (DD)",
+        "short": "Asia",
         "counter": "blue unit big_units_blue big unit_ix_1",
         "class": "naval",
         "type": "dd",
@@ -10280,7 +10280,7 @@ function sent_to_europe(u) {
     var roll = random(10)
     clear_undo()
     result = roll <= modifier
-    log(`>1${piece_get_log_str(u)}: ${dice_get_log_str(roll, 0, AP)} ${result ? "<=" : ">"} ${modifier}${G.inter_service[AP] ? " (ISR active)" : ""}.`)
+    log(`>1${piece_get_log_str(u)}: ${dice_get_log_str(roll, 0, AP)} > ${modifier}${result ? " (FAILED)" : ""}.`)
     if (result) {
         displace_to_turn(u, 3)
     }
@@ -10497,7 +10497,7 @@ P.reinforcement_segment = {
         }
     },
     roll() {
-        log(`Sent to Europe roll:`)
+        log(`Sent to Europe, ${wie_roll_result()}(WIE)${G.inter_service[AP] ? " +1(ISR)" : ""}:`)
         if (L.europe1.length) {
             L.europe = L.europe1
         }
@@ -11651,7 +11651,7 @@ P.move_offensive_units = {
             G.active_stack.forEach(u => {
                 var index = G.offensive.organic.indexOf(u)
                 if (index >= 0 && pieces[u].class === "naval") {
-                    log(`>2Organic transport\. ${piece_get_log_str(G.offensive.organic[index])} with ${piece_get_log_str(G.offensive.organic[index + 1])}`)
+                    log(`>2Organic tr. ${piece_get_log_str(G.offensive.organic[index])} with ${piece_get_log_str(G.offensive.organic[index + 1])}`)
                 }
             })
         }

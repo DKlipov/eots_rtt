@@ -40,7 +40,7 @@ function sent_to_europe(u) {
     var roll = random(10)
     clear_undo()
     result = roll <= modifier
-    log(`>1${piece_get_log_str(u)}: ${dice_get_log_str(roll, 0, AP)} ${result ? "<=" : ">"} ${modifier}${G.inter_service[AP] ? " (ISR active)" : ""}.`)
+    log(`>1${piece_get_log_str(u)}: ${dice_get_log_str(roll, 0, AP)} > ${modifier}${result ? " (FAILED)" : ""}.`)
     if (result) {
         displace_to_turn(u, 3)
     }
@@ -257,7 +257,7 @@ P.reinforcement_segment = {
         }
     },
     roll() {
-        log(`Sent to Europe roll:`)
+        log(`Sent to Europe, ${wie_roll_result()}(WIE)${G.inter_service[AP] ? " +1(ISR)" : ""}:`)
         if (L.europe1.length) {
             L.europe = L.europe1
         }

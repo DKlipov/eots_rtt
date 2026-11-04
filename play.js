@@ -1507,7 +1507,7 @@ var pieces = [
         id: "casia",
         "faction": AP,
         "name": "US Asia (Cruiser)",
-        "short": "Asia (CA)",
+        "short": "Asia",
         "counter": "blue unit big_units_blue big unit_ix_2",
         "class": "naval",
         "type": "ca",
@@ -1522,7 +1522,7 @@ var pieces = [
         id: "dasia",
         "faction": AP,
         "name": "US Asia (Destroyer)",
-        "short": "Asia (DD)",
+        "short": "Asia",
         "counter": "blue unit big_units_blue big unit_ix_1",
         "class": "naval",
         "type": "dd",
@@ -12862,7 +12862,7 @@ function format_unit_tooltip(u) {
     if (p.br)
         tip += `-${p.br}`
     if (p.parenthetical && p.ebr)
-        tip += " "+DIGIT_SUPERSCRIPT[10] + DIGIT_SUPERSCRIPT[p.ebr]+DIGIT_SUPERSCRIPT[11]
+        tip += " " + DIGIT_SUPERSCRIPT[10] + DIGIT_SUPERSCRIPT[p.ebr] + DIGIT_SUPERSCRIPT[11]
     else if (p.ebr)
         tip += " " + DIGIT_SUPERSCRIPT[p.ebr]
 
@@ -12936,7 +12936,15 @@ function focus_unit(id) {
 const CARD_CLASSES = cards.map(c => `card ${c?.faction ? "ap" : "jp"} c${c?.num}`)
 const CARD_NAMES = cards.map(c => c?.name)
 
-const UNIT_NAMES = pieces.map(p => p?.short ? p?.short : p?.name)
+const UNIT_NAMES = pieces.map(p => piece_log_name(p))
+
+function piece_log_name(p) {
+    var name = p?.short ? p?.short : p?.name
+    if (p.class === "naval") {
+        return p.type.toUpperCase() + " " + name
+    }
+    return name
+}
 
 const HEX_NAMES = []
 ;(function () {

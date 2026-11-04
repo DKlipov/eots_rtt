@@ -944,7 +944,7 @@ P.move_offensive_units = {
             G.active_stack.forEach(u => {
                 var index = G.offensive.organic.indexOf(u)
                 if (index >= 0 && pieces[u].class === "naval") {
-                    log(`>2Organic transport\. ${piece_get_log_str(G.offensive.organic[index])} with ${piece_get_log_str(G.offensive.organic[index + 1])}`)
+                    log(`>2Organic tr. ${piece_get_log_str(G.offensive.organic[index])} with ${piece_get_log_str(G.offensive.organic[index + 1])}`)
                 }
             })
         }
