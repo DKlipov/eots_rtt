@@ -11297,35 +11297,30 @@ P.check_unit_supply = {
     },
     undo() {
         LOCAL_STATE.unit = 0
-        LOCAL_STATE.supply_data = null
         on_update()
     },
     unit(u) {
         if (LOCAL_STATE.unit === u)
             return end_local_status()
         LOCAL_STATE.unit = u
-        var result = with_unmodified_supply(() => supply_query(u))
-        this.show_supply(result)
+        on_update()
     },
     action_hex(h) {
         if (h !== CHINA_BOX) {
             return
         }
         LOCAL_STATE.unit = 0
-        var result = with_unmodified_supply(() => supply_query(h))
-        this.show_supply(result)
-    },
-    show_supply(supply_data) {
-        LOCAL_STATE.unit = supply_data.unit
-        LOCAL_STATE.supply_data = supply_data
         on_update()
     },
     on_update() {
-        if (!LOCAL_STATE.supply_data) {
+        canvas_show()
+        canvas_clear_paths()
+        if (!LOCAL_STATE.unit || G.location[LOCAL_STATE.unit] > LAST_BOARD_HEX && G.location[LOCAL_STATE.unit] !== CHINA_BOX) {
             return
         }
-        canvas_show()
-        canvas_draw_supply(LOCAL_STATE.supply_data)
+        var result = with_unmodified_supply(() => supply_query(LOCAL_STATE.unit))
+
+        canvas_draw_supply(result)
         if (LOCAL_STATE.unit && LOCAL_STATE.unit !== CHINA_BOX) {
             update_keyword("unit", LOCAL_STATE.unit, "highlight")
         }
@@ -11489,7 +11484,7 @@ P.check_hq_range = {
         }
     },
     on_update() {
-        if (!LOCAL_STATE.unit)
+        if (!LOCAL_STATE.unit || G.location[LOCAL_STATE.unit] > LAST_BOARD_HEX)
             return
         var focused = []
         var piece = pieces[LOCAL_STATE.unit]
