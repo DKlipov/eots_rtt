@@ -53,6 +53,23 @@ button#play_card_button:enabled:active:hover {
     border-color: #58b55a #bbffbb #bbffbb #58b55a;
 }
 
+button#hqr_supply_button,
+button#hqr_activation_button,
+button#hqr_isolation_button
+{
+    margin-left: -7px;
+}
+
+button#hqr_supply_button:disabled,
+button#hqr_activation_button:disabled,
+button#hqr_isolation_button:disabled
+{
+    background-color: hsl(51,100%,60%);
+    border-color: hsl(51,100%,80%) hsl(51,100%,40%) hsl(51,100%,40%) hsl(51,100%,80%);
+    color: black;
+    outline-color: black;
+}
+
 /* LOG & PROMPT TEXT */
 
 #log > .full_log {
@@ -224,11 +241,12 @@ body.southpac_map, body.burma_map {
 .action_hex { z-index: 2 }
 .unit, .marker { z-index: 10 }
 
-#canvas { z-index: 50 }
 .action_hex.violation {  z-index: 51 }
 .action_hex.action {  z-index: 52 }
 .unit.highlight { z-index: 53 }
 .action_hex.highlight {  z-index: 54 }
+
+#canvas { z-index: 99 }
 
 .stack.shadow:before { z-index: 100 }
 

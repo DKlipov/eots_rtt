@@ -11147,6 +11147,14 @@ function menu_show_hq_range() {
     on_update()
 }
 
+function menu_show_any_range() {
+    LOCAL_STATUS = "check_any_range"
+    LOCAL_STATE = {}
+    P.check_any_range._begin()
+    update_header()
+    on_update()
+}
+
 function array_equals(a, b) {
     if (a.length !== b.length) {
         return false
@@ -11157,6 +11165,16 @@ function array_equals(a, b) {
         }
     }
     return true
+}
+
+function end_local_status() {
+    if (LOCAL_STATUS) {
+        LOCAL_STATUS = null
+        LOCAL_STATE = null
+        view = STORED_STATE
+        update_header()
+        on_update()
+    }
 }
 
 function light_pbm_supply_check(hex) {
@@ -11265,16 +11283,17 @@ function on_update_local_actions() {
     }
 }
 
-
 P.check_unit_supply = {
     _begin() {
     },
     prompt() {
         LOCAL_STATE.actions = {
             "done": 1,
-            "undo": LOCAL_STATE.unit ? 1 : 0,
         }
-        LOCAL_STATE.prompt = "Select unit to check supply."
+        if (LOCAL_STATE.unit)
+            LOCAL_STATE.prompt = "Showing P" + LOCAL_STATE.unit + " supply lines."
+        else
+            LOCAL_STATE.prompt = "Select unit to check supply."
     },
     undo() {
         LOCAL_STATE.unit = 0
@@ -11282,6 +11301,8 @@ P.check_unit_supply = {
         on_update()
     },
     unit(u) {
+        if (LOCAL_STATE.unit === u)
+            return end_local_status()
         LOCAL_STATE.unit = u
         var result = with_unmodified_supply(() => supply_query(u))
         this.show_supply(result)
@@ -11306,51 +11327,44 @@ P.check_unit_supply = {
         canvas_show()
         canvas_draw_supply(LOCAL_STATE.supply_data)
         if (LOCAL_STATE.unit && LOCAL_STATE.unit !== CHINA_BOX) {
-            update_keyword("unit", LOCAL_STATE.unit, "activated")
+            update_keyword("unit", LOCAL_STATE.unit, "highlight")
         }
     },
 }
 
-P.check_distance = {
+P.check_any_range = {
     _begin() {
         LOCAL_STATE.points = []
-        LOCAL_STATE.range = 0
     },
     prompt() {
         document.body.classList.add("hex-clickable")
         LOCAL_STATE.actions = {
             "done": 1,
-            "range": LOCAL_STATE.points.length > 1,
-            "undo": LOCAL_STATE.points.length ? 1 : 0,
         }
-        LOCAL_STATE.prompt = "Click hex to check distance."
-    },
-    undo() {
-        LOCAL_STATE.points = []
-        this.redraw()
+        if (LOCAL_STATE.points.length === 0)
+            LOCAL_STATE.prompt = "Select a hex to measure range from."
+        else if (LOCAL_STATE.points.length === 1)
+            LOCAL_STATE.prompt = "Select a hex to measure range from H" + LOCAL_STATE.points[0] + "."
+        else
+            LOCAL_STATE.prompt = "Showing range from H" + LOCAL_STATE.points[0] +
+                " to H" + LOCAL_STATE.points[LOCAL_STATE.points.length-1] + "."
     },
     unit(u) {
         this.action_hex(G.location[u])
-    },
-    range() {
-        LOCAL_STATE.range = !LOCAL_STATE.range
-        this.redraw()
     },
     action_hex(h) {
         if (BOARD_ID === SOUTH_PACIFIC_SCENARIO && h === OAHU || BOARD_ID === BURMA_SCENARIO && h === SINGAPORE || h > LAST_BOARD_HEX) {
             return
         }
-        while (LOCAL_STATE.points.includes(h)) {
-            if (LOCAL_STATE.points.pop() === h) {
-                this.redraw()
-                return
-            }
-        }
-        if (LOCAL_STATE.points.length) {
-            for (var hex of find_shortest_path_as_the_eagle_flies(LOCAL_STATE.points[LOCAL_STATE.points.length - 1], h))
-                LOCAL_STATE.points.push(hex)
-        } else {
+        if (LOCAL_STATE.points.length === 0) {
             LOCAL_STATE.points.push(h)
+        } else {
+            if (h == LOCAL_STATE.points[0])
+                return end_local_status()
+            LOCAL_STATE.points.length = 1
+            for (var hex of find_shortest_path_as_the_eagle_flies(LOCAL_STATE.points[0], h)) {
+                LOCAL_STATE.points.push(hex)
+            }
         }
         this.redraw()
     },
@@ -11368,12 +11382,70 @@ P.check_distance = {
             e.innerHTML = `<big>${index}</big><small>${int_to_hex(hex)}</small>`
             measure.appendChild(e)
         })
-        if (LOCAL_STATE.range && LOCAL_STATE.points.length > 1) {
+        if (LOCAL_STATE.points.length > 1) {
             var focused = []
             for_each_hex_in_range(LOCAL_STATE.points[0], LOCAL_STATE.points.length - 1, hex => set_add(focused, hex))
             focused = in_range_on_map(LOCAL_STATE.points[0], LOCAL_STATE.points.length - 1, focused, AP)
             draw_range(focused)
         }
+    },
+}
+
+P.check_distance = {
+    _begin() {
+        LOCAL_STATE.points = []
+    },
+    prompt() {
+        document.body.classList.add("hex-clickable")
+        LOCAL_STATE.actions = {
+            "done": 1,
+        }
+        if (LOCAL_STATE.points.length === 0)
+            LOCAL_STATE.prompt = "Select a hex to measure distance from."
+        else if (LOCAL_STATE.points.length === 1)
+            LOCAL_STATE.prompt = "Select a hex to measure distance from H" + LOCAL_STATE.points[0] + "."
+        else
+            LOCAL_STATE.prompt = "Showing distance from H" + LOCAL_STATE.points[0] +
+                " to H" + LOCAL_STATE.points[LOCAL_STATE.points.length-1] + "."
+    },
+    unit(u) {
+        this.action_hex(G.location[u])
+    },
+    action_hex(h) {
+        if (BOARD_ID === SOUTH_PACIFIC_SCENARIO && h === OAHU || BOARD_ID === BURMA_SCENARIO && h === SINGAPORE || h > LAST_BOARD_HEX) {
+            return
+        }
+        var ix = LOCAL_STATE.points.indexOf(h)
+        if (ix >= 0) {
+            LOCAL_STATE.points.length = ix
+        } else {
+            if (LOCAL_STATE.points.length > 0) {
+                for (var hex of find_shortest_path_as_the_eagle_flies(LOCAL_STATE.points[LOCAL_STATE.points.length - 1], h)) {
+                    LOCAL_STATE.points.push(hex)
+                }
+            } else {
+                LOCAL_STATE.points.push(h)
+            }
+        }
+        if (LOCAL_STATE.points.length === 0)
+            end_local_status()
+        else
+            this.redraw()
+    },
+    redraw() {
+        on_update()
+    },
+    on_update() {
+        var measure = document.getElementById("measure")
+        LOCAL_STATE.points.forEach((hex, index) => {
+            var [x, y] = hex_center(hex)
+            var e = document.createElement("div")
+            e.className = "distance"
+            e.style.top = y - 23 + "px"
+            e.style.left = x - 23 + "px"
+            e.innerHTML = `<big>${index}</big><small>${int_to_hex(hex)}</small>`
+            measure.appendChild(e)
+        })
     },
 }
 
@@ -11385,41 +11457,32 @@ P.check_hq_range = {
     prompt() {
         LOCAL_STATE.actions = {
             "done": 1,
-            "unit": HQ_LIST.filter(u => G.location[u] <= LAST_BOARD_HEX && u !== LOCAL_STATE.unit),
-            "undo": LOCAL_STATE.unit ? 1 : 0,
+            "unit": HQ_LIST.filter(u => G.location[u] <= LAST_BOARD_HEX),
         }
         if (!LOCAL_STATE.unit) {
             LOCAL_STATE.prompt = "Select HQ to check range."
         } else {
-            LOCAL_STATE.prompt = `${pieces[LOCAL_STATE.unit].name} ${LOCAL_STATE.mode} range.`
-            if (LOCAL_STATE.mode !== "supply") {
-                LOCAL_STATE.actions.supply = 1
-            }
-            if (LOCAL_STATE.mode !== "activation") {
-                LOCAL_STATE.actions.activation = 1
-            }
-            if (LOCAL_STATE.mode !== "isolation") {
-                LOCAL_STATE.actions.isolation = 1
-            }
+            LOCAL_STATE.prompt = `P${LOCAL_STATE.unit} ${LOCAL_STATE.mode} range.`
+            LOCAL_STATE.actions.hqr_supply = +(LOCAL_STATE.mode !== "supply")
+            LOCAL_STATE.actions.hqr_activation = +(LOCAL_STATE.mode !== "activation")
+            LOCAL_STATE.actions.hqr_isolation = +(LOCAL_STATE.mode !== "isolation")
         }
     },
-    supply() {
+    hqr_supply() {
         LOCAL_STATE.mode = "supply"
         on_update()
     },
-    activation() {
+    hqr_activation() {
         LOCAL_STATE.mode = "activation"
         on_update()
     },
-    isolation() {
+    hqr_isolation() {
         LOCAL_STATE.mode = "isolation"
         on_update()
     },
-    undo() {
-        LOCAL_STATE.unit = 0
-        on_update()
-    },
     unit(u) {
+        if (u === LOCAL_STATE.unit)
+            return end_local_status()
         if (pieces[u].class === "hq" && G.location[u] < LAST_BOARD_HEX) {
             LOCAL_STATE.unit = u
             on_update()
@@ -11450,7 +11513,7 @@ P.check_hq_range = {
             for_each_hex_in_range(KUNMING, 1, h => set_delete(focused, h))
         }
         draw_range(focused)
-        update_keyword("unit", LOCAL_STATE.unit, "activated")
+        update_keyword("unit", LOCAL_STATE.unit, "highlight")
     },
 }
 
@@ -11537,11 +11600,7 @@ function proxy_send_action(a, b) {
         return
     }
     if (LOCAL_STATUS && a === "done") {
-        LOCAL_STATUS = null
-        LOCAL_STATE = null
-        view = STORED_STATE
-        update_header()
-        on_update()
+        end_local_status()
         return true
     }
     if (LOCAL_STATUS) {
@@ -12662,7 +12721,6 @@ function on_update() {
 
     action_button("confirm", "Confirm")
     action_button("next", "Next")
-    action_button("done", "Done")
     action_button("delay", "Delay")
     action_button("no_organic", "Disable organic")
     action_button("avoid_zoi", "Avoid ZOI")
@@ -12671,9 +12729,13 @@ function on_update() {
     action_button("ground_move", "Ground")
     action_button("extended_air", "Extended range")
     action_button("barges", "Barges")
-    action_button("supply", "Supply")
-    action_button("activation", "Activation")
-    action_button("isolation", "Isolation")
+
+    // client modes
+    action_button("hqr_supply", "Supply")
+    action_button("hqr_activation", "Activation")
+    action_button("hqr_isolation", "Isolation")
+
+    action_button("done", "Done")
 
     action_button("redo", "Redo")
     action_button("undo", "Undo")

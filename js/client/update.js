@@ -448,7 +448,6 @@ function on_update() {
 
     action_button("confirm", "Confirm")
     action_button("next", "Next")
-    action_button("done", "Done")
     action_button("delay", "Delay")
     action_button("no_organic", "Disable organic")
     action_button("avoid_zoi", "Avoid ZOI")
@@ -457,9 +456,13 @@ function on_update() {
     action_button("ground_move", "Ground")
     action_button("extended_air", "Extended range")
     action_button("barges", "Barges")
-    action_button("supply", "Supply")
-    action_button("activation", "Activation")
-    action_button("isolation", "Isolation")
+
+    // client modes
+    action_button("hqr_supply", "Supply")
+    action_button("hqr_activation", "Activation")
+    action_button("hqr_isolation", "Isolation")
+
+    action_button("done", "Done")
 
     action_button("redo", "Redo")
     action_button("undo", "Undo")
