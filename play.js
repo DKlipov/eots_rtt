@@ -10818,6 +10818,15 @@ const TURN_MARKERS = [
 
 // DEFINE WORLD
 
+function flush_counter_size_cache() {
+    for (var type in world.things) {
+        for (var thing of Object.values(world.things[type])) {
+            delete thing.stack_w
+            delete thing.stack_h
+        }
+    }
+}
+
 function on_init(scenario, game_options, static_view) {
     var map_layout = LAYOUT.mainmap
 
@@ -10827,10 +10836,11 @@ function on_init(scenario, game_options, static_view) {
         define_stack("s-loc", id, rect, {...VERTICAL_STACK_PARAMS, sort: sort_unit_stack})
     }
 
-    init_preference_checkbox("noroad", false)
-    init_preference_checkbox("nopath", false)
-    init_preference_checkbox("fullcontrol", false)
-    init_preference_checkbox("hidezoi", false)
+    init_preference_checkbox("show_paths", true)
+    init_preference_checkbox("show_zoi", true)
+    init_preference_checkbox("road_markers", true)
+    init_preference_checkbox("vassal_control", false)
+    init_preference_checkbox("flat", false, flush_counter_size_cache)
 
     create_window("window_cards_jp", "Japanese Event Cards", update_window_cards_jp)
     create_window("window_cards_ap", "Allied Event Cards", update_window_cards_ap)
@@ -12469,7 +12479,7 @@ function on_update() {
     // ^^^^
 
     // OVERLAY PATHS
-    if (!get_preference("nopath", false) && G.offensive.paths.length > 0) {
+    if (get_preference("show_paths") && G.offensive.paths.length > 0) {
         canvas_show()
         canvas_draw_paths()
     } else {
@@ -12478,7 +12488,7 @@ function on_update() {
 
     // CONTROL MARKERS
     var all_control = document.body.classList.contains("hide-pieces")
-    var vassal_control = get_preference("fullcontrol", false)
+    var vassal_control = get_preference("vassal_control")
     for (var i = 0; i < LAST_BOARD_HEX; i++) {
         if (should_show_hex_control(i, all_control, vassal_control)) {
             if (vassal_control)
@@ -12502,7 +12512,7 @@ function on_update() {
     })
 
     // ROADS
-    var base_road_counters = get_preference("noroad", false)
+    var base_road_counters = get_preference("road_markers")
     for (var event of ROAD_EVENTS) {
         if (map_info.hex_check(event.keys[0])) {
             var is_road_event_active = G.events[event.id]
@@ -12573,7 +12583,7 @@ function on_update() {
     }
 
     // ZONE OF INFLUENCE
-    if (!get_preference("hidezoi", false)) {
+    if (get_preference("show_zoi")) {
         for (var hex of ALL_BOARD_HEXES) {
             const zoi_state = G.supply_cache[hex]
             update_keyword("zoi_hex", hex, "lrb", (zoi_state & 7) === 3)

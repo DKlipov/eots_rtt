@@ -196,7 +196,7 @@ function on_update() {
     // ^^^^
 
     // OVERLAY PATHS
-    if (!get_preference("nopath", false) && G.offensive.paths.length > 0) {
+    if (get_preference("show_paths") && G.offensive.paths.length > 0) {
         canvas_show()
         canvas_draw_paths()
     } else {
@@ -205,7 +205,7 @@ function on_update() {
 
     // CONTROL MARKERS
     var all_control = document.body.classList.contains("hide-pieces")
-    var vassal_control = get_preference("fullcontrol", false)
+    var vassal_control = get_preference("vassal_control")
     for (var i = 0; i < LAST_BOARD_HEX; i++) {
         if (should_show_hex_control(i, all_control, vassal_control)) {
             if (vassal_control)
@@ -229,7 +229,7 @@ function on_update() {
     })
 
     // ROADS
-    var base_road_counters = get_preference("noroad", false)
+    var base_road_counters = get_preference("road_markers")
     for (var event of ROAD_EVENTS) {
         if (map_info.hex_check(event.keys[0])) {
             var is_road_event_active = G.events[event.id]
@@ -300,7 +300,7 @@ function on_update() {
     }
 
     // ZONE OF INFLUENCE
-    if (!get_preference("hidezoi", false)) {
+    if (get_preference("show_zoi")) {
         for (var hex of ALL_BOARD_HEXES) {
             const zoi_state = G.supply_cache[hex]
             update_keyword("zoi_hex", hex, "lrb", (zoi_state & 7) === 3)

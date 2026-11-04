@@ -399,6 +399,12 @@ body.Allies #jp_hand { grid-row: 3; }
     box-shadow: 0 0 0 1px green;
 }
 
+body[data-flat=true] {
+    & .unit, & .marker {
+        border: none;
+    }
+}
+
 .unit.big, .marker.big {
     width: 43px;
     height: 43px;

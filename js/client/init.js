@@ -269,6 +269,15 @@ const TURN_MARKERS = [
 
 // DEFINE WORLD
 
+function flush_counter_size_cache() {
+    for (var type in world.things) {
+        for (var thing of Object.values(world.things[type])) {
+            delete thing.stack_w
+            delete thing.stack_h
+        }
+    }
+}
+
 function on_init(scenario, game_options, static_view) {
     var map_layout = LAYOUT.mainmap
 
@@ -278,10 +287,11 @@ function on_init(scenario, game_options, static_view) {
         define_stack("s-loc", id, rect, {...VERTICAL_STACK_PARAMS, sort: sort_unit_stack})
     }
 
-    init_preference_checkbox("noroad", false)
-    init_preference_checkbox("nopath", false)
-    init_preference_checkbox("fullcontrol", false)
-    init_preference_checkbox("hidezoi", false)
+    init_preference_checkbox("show_paths", true)
+    init_preference_checkbox("show_zoi", true)
+    init_preference_checkbox("road_markers", true)
+    init_preference_checkbox("vassal_control", false)
+    init_preference_checkbox("flat", false, flush_counter_size_cache)
 
     create_window("window_cards_jp", "Japanese Event Cards", update_window_cards_jp)
     create_window("window_cards_ap", "Allied Event Cards", update_window_cards_ap)

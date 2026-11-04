@@ -1595,7 +1595,17 @@ function apply_log_boxes(ix, div, common) {
 
 /* PREFERENCES (WIP) */
 
-function get_preference(name, fallback) {
+function get_preference(name) {
+    var p = world.prefs[name]
+    if (p instanceof HTMLInputElement)
+        return p.checked
+    if (typeof p === "object")
+        for (var key in p)
+            if (p[key].checked)
+                return key
+}
+
+function _get_preference(name, fallback) {
     var key = params.title_id + "/" + name
     var value = window.localStorage.getItem(key)
     if (value)
@@ -1629,7 +1639,7 @@ function set_preference_radio(name, value) {
 }
 
 function init_preference_checkbox(name, initial, onchange) {
-    var value = get_preference(name, initial)
+    var value = _get_preference(name, initial)
     var input = document.querySelector(`input[name="${name}"]`)
     world.prefs[name] = input
     input.checked = value
