@@ -251,7 +251,7 @@ P.check_any_range = {
             LOCAL_STATE.prompt = "Select a hex to measure range from H" + LOCAL_STATE.points[0] + "."
         else
             LOCAL_STATE.prompt = "Showing range from H" + LOCAL_STATE.points[0] +
-                " to H" + LOCAL_STATE.points[LOCAL_STATE.points.length-1] + "."
+                " to H" + LOCAL_STATE.points[LOCAL_STATE.points.length - 1] + "."
     },
     unit(u) {
         this.action_hex(G.location[u])
@@ -310,7 +310,7 @@ P.check_distance = {
             LOCAL_STATE.prompt = "Select a hex to measure distance from H" + LOCAL_STATE.points[0] + "."
         else
             LOCAL_STATE.prompt = "Showing distance from H" + LOCAL_STATE.points[0] +
-                " to H" + LOCAL_STATE.points[LOCAL_STATE.points.length-1] + "."
+                " to H" + LOCAL_STATE.points[LOCAL_STATE.points.length - 1] + "."
     },
     unit(u) {
         this.action_hex(G.location[u])
@@ -558,11 +558,11 @@ function supply_query(unit) {
     })
     mark_supply_ports_oversea(hq)
     L.supply_ports = L.supply
-    L.supply = {}
+    L.supply = {queue: []}
     mark_supply_ports_overland(hq)
     L.supply_ports.queue.push(...L.supply.queue)
     L.supply_ports.retracing.push(...L.supply.retracing)
-    L.supply = {}
+    L.supply = {queue: []}
     if (unit === CHINA_BOX) {
         trace_kunming(result)
         return result
@@ -592,10 +592,15 @@ function supply_query(unit) {
             }
         }
     })
-    L.supply = {}
+    L.supply = {queue: []}
     if (result.hq) {
+        var sh = G.offensive.active_hq
+        G.offensive.active_hq = []
         check_hq_in_supply(result.hq, pieces[result.hq], piece.faction === AP ? JOINT_SUPPLIED_HEX : JP_SUPPLIED_HEX)
-        result.path.to_source = retrace_supply_path(L.supply.queue[L.supply.queue.length - 1])
+        G.offensive.active_hq = sh
+        if (L.supply.queue.length) {
+            result.path.to_source = retrace_supply_path(L.supply.queue[L.supply.queue.length - 1])
+        }
     } else if (piece.faction === AP && (G.burma_road < 2 || result.oos)) {
         mark_hexes_supplied_kunming()
         if (G.supply_cache[location] & piece.supply) {
