@@ -31,9 +31,9 @@
                 <li><label><input type=checkbox name="vassal_control">Vassal style control</label>
                 <li><label><input type=checkbox name="flat">Flat counters</label>
                 <li class="separator">
-                <li><a href="info/readme.html" target="_blank">Read me!</a>
-                <li><a href="https://gmtwebsiteassets.s3.us-west-2.amazonaws.com/nneots/EOTS+2025+Rules_v1.1.pdf"
-                       target="_blank">Rules</a>
+                <li><a href="info/readme.html" target="_blank"><b>Read me!</b></a>
+                <li><a href="info/rules.html" target="_blank">Rules (HTML)</a>
+                <li><a href="https://gmtwebsiteassets.s3.us-west-2.amazonaws.com/nneots/EOTS+2025+Rules_v1.1.pdf" target="_blank">Rules (PDF)</a>
                 <li><a href="info/charts.html" target="_blank">Charts</a>
                 <li><a href="info/cards.html?faction=ap" target="_blank" id="ap_deck_link">Allied Deck</a>
                 <li><a href="info/cards.html?faction=jp" target="_blank" id="jp_deck_link">Japanese Deck</a>
@@ -52,14 +52,10 @@
         <details id="supply_menu">
             <summary><img src="images/compass.svg"></summary>
             <menu>
-                <li onclick="menu_check_distance()">
-                    <div>Measure distance</div>
-                <li onclick="menu_show_any_range()">
-                    <div>Measure range</div>
-                <li onclick="menu_show_hq_range()">
-                    <div>Show HQ range</div>
-                <li onclick="menu_check_unit_supply()">
-                    <div>Trace unit supply</div>
+                <li onclick="menu_measure_distance()"> Measure distance
+                <li onclick="menu_measure_range()"> Measure range
+                <li onclick="menu_show_hq_range()"> Show HQ range
+                <li onclick="menu_show_unit_supply()"> Show supply lines
             </menu>
         </details>
         <button onclick="toggle_markers_and_pieces()"><img src="/images/earth-asia-oceania.svg"></button>

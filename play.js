@@ -11133,18 +11133,10 @@ function check_supply() {
     G.client_supply = 1
 }
 
-function menu_check_unit_supply() {
+function menu_show_unit_supply() {
     LOCAL_STATUS = "check_unit_supply"
     LOCAL_STATE = {}
     P.check_unit_supply._begin()
-    update_header()
-    on_update()
-}
-
-function menu_check_distance() {
-    LOCAL_STATUS = "check_distance"
-    LOCAL_STATE = {}
-    P.check_distance._begin()
     update_header()
     on_update()
 }
@@ -11157,10 +11149,18 @@ function menu_show_hq_range() {
     on_update()
 }
 
-function menu_show_any_range() {
-    LOCAL_STATUS = "check_any_range"
+function menu_measure_distance() {
+    LOCAL_STATUS = "measure_distance"
     LOCAL_STATE = {}
-    P.check_any_range._begin()
+    P.measure_distance._begin()
+    update_header()
+    on_update()
+}
+
+function menu_measure_range() {
+    LOCAL_STATUS = "measure_range"
+    LOCAL_STATE = {}
+    P.measure_range._begin()
     update_header()
     on_update()
 }
@@ -11303,7 +11303,7 @@ P.check_unit_supply = {
         if (LOCAL_STATE.unit)
             LOCAL_STATE.prompt = "Showing P" + LOCAL_STATE.unit + " supply lines."
         else
-            LOCAL_STATE.prompt = "Select unit to check supply."
+            LOCAL_STATE.prompt = "Select a unit to show supply lines."
     },
     undo() {
         LOCAL_STATE.unit = 0
@@ -11336,7 +11336,7 @@ P.check_unit_supply = {
     },
 }
 
-P.check_any_range = {
+P.measure_range = {
     _begin() {
         LOCAL_STATE.points = []
     },
@@ -11396,7 +11396,7 @@ P.check_any_range = {
     },
 }
 
-P.check_distance = {
+P.measure_distance = {
     _begin() {
         LOCAL_STATE.points = []
     },
@@ -11466,7 +11466,7 @@ P.check_hq_range = {
             "unit": HQ_LIST.filter(u => G.location[u] <= LAST_BOARD_HEX),
         }
         if (!LOCAL_STATE.unit) {
-            LOCAL_STATE.prompt = "Select HQ to check range."
+            LOCAL_STATE.prompt = "Select HQ to show range."
         } else {
             LOCAL_STATE.prompt = `P${LOCAL_STATE.unit} ${LOCAL_STATE.mode} range.`
             LOCAL_STATE.actions.hqr_supply = +(LOCAL_STATE.mode !== "supply")
