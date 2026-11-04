@@ -198,7 +198,7 @@ function piece_get_log_str(p) {
 }
 
 function list_get_log_str(header, items) {
-    return `^${header}|${items.join(", ")}^`
+    return `^${header}|${items.join(" > ")}^`
 }
 
 function units_str(units) {

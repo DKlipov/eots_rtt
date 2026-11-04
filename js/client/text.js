@@ -200,7 +200,7 @@ function escape_text(text) {
 }
 
 function escape_list(match, head, body) {
-    if (body.split(",").length <= 2)
+    if (body.split(/[,/>]/).length <= 2)
         return body
     return `<span class="expand-list" onclick="expand_list()">${head}</span><span hidden>${body}</span></span>`
 }
