@@ -54,7 +54,7 @@ function canvas_draw_paths() {
         var finish
         var line_color = pieces[k].faction ? "blue" : "firebrick"
         var spot_color = pieces[k].faction ? "deepskyblue" : "tomato"
-        var d = pieces[k].faction ? -2 : 2
+        var d = pieces[k].faction ? -4 : 4
         CANVAS_CTX.strokeStyle = line_color
         CANVAS_CTX.fillStyle = spot_color
         CANVAS_CTX.lineWidth = 3
@@ -68,8 +68,8 @@ function canvas_draw_paths() {
             if (G.location[k] === v[j - 1] && j === v.length - 1) {
                 CANVAS_CTX.setLineDash([5, 3])
             }
-            CANVAS_CTX.moveTo(start[0], start[1] + d)
-            CANVAS_CTX.lineTo(finish[0], finish[1] + d)
+            CANVAS_CTX.moveTo(d + start[0], start[1])
+            CANVAS_CTX.lineTo(d + finish[0], finish[1])
             CANVAS_CTX.stroke()
             CANVAS_CTX.setLineDash([])
         }
@@ -80,14 +80,14 @@ function canvas_draw_paths() {
             finish = hex_center(v[j])
             if (v[j - 1] === v[j] || j === 3) {
                 CANVAS_CTX.beginPath()
-                CANVAS_CTX.arc(start[0], start[1] + d, 6, 0, 2 * Math.PI)
+                CANVAS_CTX.arc(d + start[0], start[1], 6, 0, 2 * Math.PI)
                 CANVAS_CTX.fill()
                 CANVAS_CTX.stroke()
             }
         }
         if (finish) {
             CANVAS_CTX.beginPath()
-            CANVAS_CTX.rect(finish[0] - 6, finish[1] - 6 + d, 12, 12)
+            CANVAS_CTX.rect(d + finish[0] - 6, finish[1] - 6, 12, 12)
             CANVAS_CTX.fill()
             CANVAS_CTX.stroke()
         }
@@ -101,7 +101,7 @@ function canvas_draw_supply(supply_data) {
         var start = hex_center(v[0])
         var finish
         var color = SUPPLY_COLORS[type]
-        var d = index * 2 - 3
+        var d = index * 4 - 4
         CANVAS_CTX.strokeStyle = color
         CANVAS_CTX.fillStyle = color
         CANVAS_CTX.lineWidth = 3
@@ -112,14 +112,14 @@ function canvas_draw_supply(supply_data) {
             if (supply_data.oos) {
                 CANVAS_CTX.setLineDash([5, 3])
             }
-            CANVAS_CTX.moveTo(start[0], start[1] + d)
-            CANVAS_CTX.lineTo(finish[0], finish[1] + d)
+            CANVAS_CTX.moveTo(d + start[0], start[1])
+            CANVAS_CTX.lineTo(d + finish[0], finish[1])
             CANVAS_CTX.stroke()
             CANVAS_CTX.setLineDash([])
         }
         if (finish) {
             CANVAS_CTX.beginPath()
-            CANVAS_CTX.fillRect(finish[0] - 4, finish[1] - 4 + d, 8, 8)
+            CANVAS_CTX.fillRect(d + finish[0] - 4, finish[1] - 4, 8, 8)
             CANVAS_CTX.stroke()
         }
     })
