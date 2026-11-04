@@ -217,13 +217,12 @@ P.check_unit_supply = {
         on_update()
     },
     on_update() {
-        canvas_show()
-        canvas_clear_paths()
         if (!LOCAL_STATE.unit || G.location[LOCAL_STATE.unit] > LAST_BOARD_HEX && G.location[LOCAL_STATE.unit] !== CHINA_BOX) {
+            canvas_hide()
             return
         }
         var result = with_unmodified_supply(() => supply_query(LOCAL_STATE.unit))
-
+        canvas_show()
         canvas_draw_supply(result)
         if (LOCAL_STATE.unit && LOCAL_STATE.unit !== CHINA_BOX) {
             update_keyword("unit", LOCAL_STATE.unit, "highlight")
@@ -271,6 +270,7 @@ P.check_any_range = {
         on_update()
     },
     on_update() {
+        canvas_hide()
         var measure = document.getElementById("measure")
         LOCAL_STATE.points.forEach((hex, index) => {
             var [x, y] = hex_center(hex)
@@ -335,6 +335,7 @@ P.check_distance = {
         on_update()
     },
     on_update() {
+        canvas_hide()
         var measure = document.getElementById("measure")
         LOCAL_STATE.points.forEach((hex, index) => {
             var [x, y] = hex_center(hex)
@@ -388,6 +389,7 @@ P.check_hq_range = {
         }
     },
     on_update() {
+        canvas_hide()
         if (!LOCAL_STATE.unit || G.location[LOCAL_STATE.unit] > LAST_BOARD_HEX)
             return
         var focused = []
