@@ -232,12 +232,16 @@ class Thing {
         var id = this.my_id
         this.element.addEventListener("mouseover", () => _tip_focus_magic(focus_callback, id))
         this.element.addEventListener("mouseout", () => _tip_blur_magic(blur_callback, id))
+        this.element.addEventListener("touchstart", _tip_touch_start)
+        this.element.addEventListener("touchend", _tip_touch_end)
         return this
     }
 
     tip_clone(clone_action, clone_id) {
         this.element.addEventListener("mouseover", () => _tip_focus_clone(clone_action, clone_id))
         this.element.addEventListener("mouseout", _tip_blur_clone)
+        this.element.addEventListener("touchstart", _tip_touch_start)
+        this.element.addEventListener("touchend", _tip_touch_end)
         return this
     }
 
@@ -245,6 +249,8 @@ class Thing {
         var id = this.my_id
         this.element.addEventListener("mouseover", () => _tip_focus_class(class_names[id]))
         this.element.addEventListener("mouseout", _tip_blur_class)
+        this.element.addEventListener("touchstart", _tip_touch_start)
+        this.element.addEventListener("touchend", _tip_touch_end)
         return this
     }
 
@@ -252,6 +258,8 @@ class Thing {
         class_name = class_name.replace("$1", this.my_id)
         this.element.addEventListener("mouseover", () => _tip_focus_class(class_name))
         this.element.addEventListener("mouseout", _tip_blur_class)
+        this.element.addEventListener("touchstart", _tip_touch_start)
+        this.element.addEventListener("touchend", _tip_touch_end)
         return this
     }
 
@@ -1405,6 +1413,35 @@ function escape_dice(text, re = /\b([BW])([0-6])\b/g) {
 
 function escape_icon(text, re, icons) {
     return text.replace(re, (m) => icons[m] ?? m)
+}
+
+var _tip_touch_timer = 0
+var _tip_touch_target = null
+
+function _tip_touch_start() {
+    var element = event.currentTarget
+    if (_tip_touch_timer)
+        clearTimeout(_tip_touch_timer)
+    _tip_touch_target = element.thing
+    _tip_touch_timer = setTimeout(_tip_touch_trigger, 250)
+}
+
+function _tip_touch_end() {
+    if (_tip_touch_timer) {
+        clearTimeout(_tip_touch_timer)
+        _tip_touch_timer = 0
+        _tip_touch_target = null
+    }
+    document.body.classList.remove("long-tap")
+}
+
+function _tip_touch_trigger() {
+    if (_tip_touch_target) {
+        _tip_touch_target.element.dispatchEvent(new MouseEvent("mouseover"))
+        document.body.classList.add("long-tap")
+    }
+    _tip_touch_timer = 0
+    _tip_touch_target = null
 }
 
 function _tip_focus_magic(callback, id) {

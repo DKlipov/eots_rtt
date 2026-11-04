@@ -176,12 +176,18 @@ button#play_card_button:enabled:active:hover {
     transform: scale(2);
     transform-origin: top right;
 }
+body.long-tap .unit-tip-list {
+    visibility: visible;
+}
 body.shift .unit-tip-list {
     visibility: visible;
 }
 @media (max-width: 800px) {
+    #tip.unit-tip {
+        margin-top: 115px;
+    }
     .unit-tip-list {
-        transform-origin: center;
+        transform-origin: top center;
     }
 }
 
