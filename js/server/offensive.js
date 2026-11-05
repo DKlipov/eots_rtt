@@ -1768,8 +1768,11 @@ P.end_action = {
     },
     inactive: "end action",
     prompt() {
-        prompt(`End action.`)
-        button("done")
+        prompt(`Offensives Segment: Action done.`)
+        button("end_action")
+    },
+    end_action() {
+        end()
     },
     done() {
         end()

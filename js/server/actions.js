@@ -7,10 +7,10 @@ P.china_offensive = {
     },
     prompt() {
         if (L.impossible) {
-            prompt(`China Offensive is not allowed. All ports AP captured.`)
+            prompt(`China Offensive is not allowed -- all ports captured by the Allies.`)
             return
         }
-        prompt(`China Offensive Roll.`)
+        prompt(`China Offensive: Roll the die.`)
         button("roll")
     },
     roll() {
@@ -35,9 +35,9 @@ P.china_offensive = {
 }
 
 P.displace_hq = {
-    inactive: "choose HQ",
+    inactive: "withdraw an HQ",
     prompt() {
-        prompt(`Choose HQ to displace.`)
+        prompt(`Choose an HQ to withdraw.`)
         HQ_LIST.forEach(u => {
             if (unit_on_board(u) && pieces[u].faction === R && (G.sid !== SOUTH_PACIFIC_SCENARIO || u !== HQ_CENTRAL_PACIFIC)) {
                 action_unit(u)
@@ -55,20 +55,20 @@ P.displace_hq = {
 }
 
 P.return_hq = {
-    inactive: "choose HQ",
+    inactive: "return an HQ",
     _begin() {
         check_supplied_hexes()
     },
     prompt() {
         if (!G.active_stack.length) {
-            prompt(`Choose returning HQ.`)
+            prompt(`Choose an HQ to return.`)
             HQ_LIST.forEach(u => {
                 if (G.location[u] > TURN_BOX && pieces[u].faction === R) {
                     action_unit(u)
                 }
             })
         } else {
-            prompt(`Hex to place ${piece_get_log_str(G.active_stack[0])}.`)
+            prompt(`Return ${piece_get_log_str(G.active_stack[0])} to a friendly controlled port.`)
             G.allowed_hexes.forEach(h => action_hex(h))
         }
     },
@@ -110,9 +110,10 @@ P.offensive_segment = {
             G.offensive.weather_rollback = copy_state()
         }
     },
-    inactive: "select card to play",
+    inactive: "play a card",
     prompt() {
-        prompt("Turn " + G.turn + " Select card to play.")
+        // prompt("Turn " + G.turn + " - Offensives Segment: Play a card.")
+        prompt("Offensives Segment: Play a card.")
         if (G.passes[R] > 0) {
             button("pass")
         }
@@ -137,7 +138,7 @@ P.offensive_segment = {
 P.offensive_segment_card_action = {
     inactive: "select action",
     prompt() {
-        prompt(`${card_get_log_str(L.c)}: Select action.`)
+        prompt(`Perform action with ${card_get_log_str(L.c)}.`)
         V.selected_card = L.c
         get_allowed_actions(L.c).forEach(a => button(a))
     },
@@ -191,13 +192,13 @@ P.offensive_segment_card_action = {
     displace_hq() {
         push_undo()
         activate_card(L.c)
-        log(`${card_get_log_str(L.c)} played for withdraw HQ.`)
+        log(`${card_get_log_str(L.c)} played to withdraw HQ.`)
         goto("displace_hq")
     },
     return_hq() {
         push_undo()
         activate_card(L.c)
-        log(`${card_get_log_str(L.c)} played for return HQ.`)
+        log(`${card_get_log_str(L.c)} played to return HQ.`)
         goto("return_hq")
     },
     future_offensive() {
@@ -246,7 +247,7 @@ P.future_offensive = {
     },
     inactive: "play future offensive card",
     prompt() {
-        prompt("Play future offensive card or skip.")
+        prompt("Initiative Segment: You may play your future offensives card to go first.")
         if (L.impossible) {
             button("skip")
             return

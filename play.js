@@ -12778,8 +12778,8 @@ function on_update() {
     action_button("awaiting", "Prompt")
     action_button("continue", "Continue")
     action_button("bonus", "Use Bonus")
-    action_button("event", "Play Event")
-    action_button("ops", "Play for Operations")
+    action_button("event", "Event")
+    action_button("ops", "Operations")
     action_button("hold", "Hold")
     action_button("advanced_move", "More options")
     action_button("no_move", "No move")
@@ -12790,14 +12790,14 @@ function on_update() {
     action_button("divisions_button", "Reduce divisions track")
 
 
-    action_button("displace_hq", "HQ Withdrawal")
+    action_button("displace_hq", "Withdraw HQ")
     action_button("return_hq", "Early HQ Return")
     action_button("inter_service", "Remove Inter-Service Rivalry")
     action_button("china_offensive", "China Offensive")
     action_button("future_offensive", "Future Offensive")
-    action_button("jarhat", "Build Jarhat Road")
-    action_button("imphal", "Build Imphal Road")
-    action_button("ledo", "Build Ledo Road")
+    action_button("jarhat", "Jarhat road")
+    action_button("imphal", "Imphal road")
+    action_button("ledo", "Ledo road")
     action_button("discard", "Discard")
 
 
@@ -12822,6 +12822,7 @@ function on_update() {
     action_button("hqr_activation", "Activation")
     action_button("hqr_isolation", "Isolation")
 
+    action_button("end_action", "End action")
     action_button("done", "Done")
 
     action_button("redo", "Redo")
