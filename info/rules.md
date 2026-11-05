@@ -797,7 +797,7 @@ _PLAY NOTE: Remember, even units that do not participate in battles can conduct 
 ![](images/counter_fo1.png){class=counter}
 ![](images/counter_fo2.png){class=counter}
 
-Once per game turn each player may desigFuture Future nate one Strategy card to be held over for a Offensives Offensives Card Card future game turn to conduct an Offensive, event, or a reaction. A player may never have more than one card designated as a Future Offensives card at any given time. A player cannot designate a card as a future offensive card if one is currently designated. To designate a Future Offensives card, the player, as the play of a strategy card, takes the card and places it face down next to the map and places the Future Offensives marker on top of the card to indicate its status. This is that player's action and play alternates to the other player. A Future Offensive card is not counted for hand size purposes or initiative purposes. 
+Once per game turn each player may designate one Strategy card to be held over for a Offensives Offensives Card Card future game turn to conduct an Offensive, event, or a reaction. A player may never have more than one card designated as a Future Offensives card at any given time. A player cannot designate a card as a future offensive card if one is currently designated. To designate a Future Offensives card, the player, as the play of a strategy card, takes the card and places it face down next to the map and places the Future Offensives marker on top of the card to indicate its status. This is that player's action and play alternates to the other player. A Future Offensive card is not counted for hand size purposes or initiative purposes. 
 
 #### A. Future Offensive Card Play to Win Initiative 
 
