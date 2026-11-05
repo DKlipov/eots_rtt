@@ -10462,24 +10462,24 @@ P.reinforcement_segment = {
     inactive: "place reinforcements",
     prompt() {
         if (L.europe.length) {
-            prompt(`Sent to Europe die roll. ${L.europe.length} delayed units eligible.`)
+            prompt(`Reinforcements: Sent to Europe die roll for ${L.europe.length} eligible delayed units.`)
             button("roll")
             return
         }
         if (G.active_stack.length) {
             L.allowed_hexes.forEach(hex => action_hex(hex))
             if (L.allowed_hexes.length === 0) {
-                prompt(`It's not possible to place ${piece_get_log_str(G.active_stack[0])} as a reinforcement. Press delay to move on to the next reinforcement.`)
+                prompt(`Reinforcements: Cannot place ${piece_get_log_str(G.active_stack[0])} anywhere.`)
                 button("delay")
             } else {
-                prompt(`Choose hex to place ${piece_get_log_str(G.active_stack[0])} as a reinforcement.`)
+                prompt(`Reinforcements: Place ${piece_get_log_str(G.active_stack[0])}.`)
             }
         } else if (L.europe1.length > 0) {
-            prompt(`Sent to Europe die roll. ${L.europe1.length} delayed units eligible.`)
+            prompt(`Reinforcements: Sent to Europe die roll for ${L.europe1.length} eligible delayed units.`)
             button("roll")
             return
         } else {
-            prompt(`Place reinforcements. (Done).`)
+            prompt(`Reinforcements: Done.`)
         }
         var hq_in_list = false
         L.hq_reinforcement.forEach(hq => {
@@ -10598,14 +10598,17 @@ P.replacement_segment = {
     inactive: "use replacements",
     prompt() {
         if (L.skip) {
-            prompt("Confirm skip replacements.")
+            prompt("Replacements: Are you sure you want to skip placing replacements?")
             button("confirm")
             return
         }
         var ru = L.replacable_units.filter(u => L.replacement_points[pieces[u].replacement] > 0)
         var not_used_unground = L.divisions_used <= 0 || L.replacement_points[GROUND_REP] <= 0
         if (G.active_stack.length > 0) {
-            prompt(`Choose hex to place ${piece_get_log_str(G.active_stack[0])}${not_used_unground ? "" : "(Ground replacements should be spent)"}.`)
+            prompt(`Replacements: Place ${piece_get_log_str(G.active_stack[0])}.`)
+            if (not_used_unground)
+                V.prompt += " Ground replacements should be spent."
+
             L.allowed_hexes.forEach(h => action_hex(h))
             ru.forEach(u => {
                 if (G.location[u] === ELIMINATED_BOX)
@@ -10627,7 +10630,10 @@ P.replacement_segment = {
             button("divisions_button")
         }
 
-        prompt(`Choose unit to reinforce ${print_reinforcements()}${ru.length || L.divisions ? "" : " (Done)"}.`)
+        if (ru.length === 0 && !L.divisions)
+            prompt(`Replacements: Done.`)
+        else
+            prompt(`Replacements: Reinforce ${print_reinforcements()}.`)
         ru.forEach(u => action_unit(u))
 
     },
@@ -10710,6 +10716,7 @@ P.replacement_segment = {
         end()
     }
 }
+
 /* }}} */
 /* {{{ js/server/offensive.js */
 P.offensive_sequence = script(`
