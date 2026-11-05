@@ -51,7 +51,7 @@ P.india_surrender = {
     inactive: "execute India surrender sequence",
     prompt() {
         if (G.active_stack.length) {
-            prompt(`India surrenders. Choose space to move.`)
+            prompt(`India Surrender: Emergency move P${G.active_stack[0]}.`)
             L.hex_to_retreat.forEach(u => action_hex(u))
 
             var piece = pieces[G.active_stack[0]]
@@ -61,13 +61,13 @@ P.india_surrender = {
                 button("eliminate")
             }
         } else if (L.unit_to_retreat.length) {
-            prompt(`India surrenders. Choose unit to emergency move.`)
+            prompt(`India Surrender: Choose unit to emergency move.`)
             L.unit_to_retreat.forEach(u => action_unit(u))
         }
         if (!G.active_stack.length && (!L.unit_to_retreat.length ||
             array_count(L.unit_to_retreat,
                 u => pieces[u].service === "army" || pieces[u].service === "navy" || pieces[u].service === "us") === L.unit_to_retreat.length)) {
-            prompt(`India surrenders. Confirm emergency move.`)
+            prompt(`India Surrender: Confirm emergency moves.`)
             button("done")
         }
     },

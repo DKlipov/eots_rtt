@@ -1103,10 +1103,10 @@ P.burma_choose_offensive = {
     },
     prompt() {
         if (L.confirm_card) {
-            prompt(`Confirm ` + card_get_log_str(L.confirm_card) + ` as Future Offensive?`)
+            prompt(`Setup: Confirm ` + card_get_log_str(L.confirm_card) + ` as Future Offensive?`)
             button("confirm")
         } else {
-            prompt(`Choose Military Event to use as Future Offensive.`)
+            prompt(`Setup: Designate a Military Event to use as Future Offensive.`)
             BURMA_JAPANESE_OFF.forEach(c => {
                 c = find_card(JP, c)
                 if (!G.hand[JP].includes(c)) {

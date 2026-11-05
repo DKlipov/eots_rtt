@@ -690,7 +690,7 @@ P.confirm_aa = {
     },
     inactive: "confirm move",
     prompt() {
-        prompt(`Confirm Amphibious Assault (${L.L.L.move_data.asp_points} ASP used).`)
+        prompt(`${offensive_card_header()} Confirm Amphibious Assault (${L.L.L.move_data.asp_points} ASP used).`)
         button("confirm")
     },
     confirm() {
@@ -1060,10 +1060,11 @@ P.choose_attack_hex = {
     prompt() {
         var could_pass = could_stack_stop_here() && G.offensive.stage === ATTACK_STAGE
         if (!L.move_data.battle_range) {
-            prompt(`${offensive_card_header()} Assign units to escort. (They will NOT contribute attack strength to the battle, only their defense strength!).`)
+            prompt(`${offensive_card_header()} Assign units to escort. (They will NOT contribute attack strength to the battle, only defense strength!)`)
         } else {
-            prompt(`${offensive_card_header()} Assign units to battle.${(!could_pass && G.offensive.stage === REACTION_STAGE && L.allowed_hexes.length === 0
-            ) ? " (Reaction units must be assigned to battle)." : ""}`)
+            prompt(`${offensive_card_header()} Assign units to battle.`)
+            if (!could_pass && G.offensive.stage === REACTION_STAGE && L.allowed_hexes.length === 0)
+                V.prompt += " (Reaction units must be assigned to battle)."
         }
 
         if (could_pass || globalThis.RTT_FUZZER) {
@@ -1129,11 +1130,11 @@ P.check_overstacking = {
     inactive: "check stacking",
     prompt() {
         if (!L.remove_flag) {
-            prompt(`Review overstacked units. Hexes: ${L.hexes.map(h => hex_get_log_str(h)).join(", ")}.`)
+            prompt(`${offensive_card_header()} Overstacked units in ${L.hexes.map(h => hex_get_log_str(h)).join(" and ")}.`)
             button("done")
             return
         }
-        prompt(`Remove overstacked units.`)
+        prompt(`${offensive_card_header()} Remove overstacked units.`)
         L.allowed_units.forEach(u => action_unit(u))
         if (L.allowed_units.length === 0) {
             button("done")
@@ -1183,7 +1184,7 @@ P.notify_overstacking = {
     },
     inactive: "check stacking",
     prompt() {
-        prompt(`Review overstacked units. Hexes: ${L.hexes.map(h => hex_get_log_str(h)).join(", ")}.`)
+        prompt(`${offensive_card_header()} Overstacked units in ${L.hexes.map(h => hex_get_log_str(h)).join(" and ")}.`)
         button("done")
     },
     done() {
@@ -1394,7 +1395,7 @@ P.retro_disengagement = {
     },
     inactive: "choose disengagement",
     prompt() {
-        prompt(`Choose hex to move disengaging unit${L.allowed_units.length > 1 ? "s" : ""} or skip.`)
+        prompt(`You may move disengaging unit${L.allowed_units.length > 1 ? "s" : ""}.`)
         if (L.conflicted || L.next_d >= G.offensive.disengagement.length) {
             button("done")
             return
@@ -1660,10 +1661,10 @@ P.assign_escort = {
             return
         }
     },
-    inactive: "assign units to escorting",
+    inactive: "assign escorts",
     prompt() {
         if (G.active_stack.length === 0) {
-            prompt(`${offensive_card_header()} Select unit to escorting.`)
+            prompt(`${offensive_card_header()} Choose escorting units.`)
             L.possible_units.forEach(u => action_unit(u))
         } else {
             prompt(`${offensive_card_header()} Assign units to battle hex.`)

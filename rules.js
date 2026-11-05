@@ -11404,7 +11404,7 @@ P.confirm_aa = {
     },
     inactive: "confirm move",
     prompt() {
-        prompt(`Confirm Amphibious Assault (${L.L.L.move_data.asp_points} ASP used).`)
+        prompt(`${offensive_card_header()} Confirm Amphibious Assault (${L.L.L.move_data.asp_points} ASP used).`)
         button("confirm")
     },
     confirm() {
@@ -11774,10 +11774,11 @@ P.choose_attack_hex = {
     prompt() {
         var could_pass = could_stack_stop_here() && G.offensive.stage === ATTACK_STAGE
         if (!L.move_data.battle_range) {
-            prompt(`${offensive_card_header()} Assign units to escort. (They will NOT contribute attack strength to the battle, only their defense strength!).`)
+            prompt(`${offensive_card_header()} Assign units to escort. (They will NOT contribute attack strength to the battle, only defense strength!)`)
         } else {
-            prompt(`${offensive_card_header()} Assign units to battle.${(!could_pass && G.offensive.stage === REACTION_STAGE && L.allowed_hexes.length === 0
-            ) ? " (Reaction units must be assigned to battle)." : ""}`)
+            prompt(`${offensive_card_header()} Assign units to battle.`)
+            if (!could_pass && G.offensive.stage === REACTION_STAGE && L.allowed_hexes.length === 0)
+                V.prompt += " (Reaction units must be assigned to battle)."
         }
 
         if (could_pass || globalThis.RTT_FUZZER) {
@@ -11843,11 +11844,11 @@ P.check_overstacking = {
     inactive: "check stacking",
     prompt() {
         if (!L.remove_flag) {
-            prompt(`Review overstacked units. Hexes: ${L.hexes.map(h => hex_get_log_str(h)).join(", ")}.`)
+            prompt(`${offensive_card_header()} Overstacked units in ${L.hexes.map(h => hex_get_log_str(h)).join(" and ")}.`)
             button("done")
             return
         }
-        prompt(`Remove overstacked units.`)
+        prompt(`${offensive_card_header()} Remove overstacked units.`)
         L.allowed_units.forEach(u => action_unit(u))
         if (L.allowed_units.length === 0) {
             button("done")
@@ -11897,7 +11898,7 @@ P.notify_overstacking = {
     },
     inactive: "check stacking",
     prompt() {
-        prompt(`Review overstacked units. Hexes: ${L.hexes.map(h => hex_get_log_str(h)).join(", ")}.`)
+        prompt(`${offensive_card_header()} Overstacked units in ${L.hexes.map(h => hex_get_log_str(h)).join(" and ")}.`)
         button("done")
     },
     done() {
@@ -12108,7 +12109,7 @@ P.retro_disengagement = {
     },
     inactive: "choose disengagement",
     prompt() {
-        prompt(`Choose hex to move disengaging unit${L.allowed_units.length > 1 ? "s" : ""} or skip.`)
+        prompt(`You may move disengaging unit${L.allowed_units.length > 1 ? "s" : ""}.`)
         if (L.conflicted || L.next_d >= G.offensive.disengagement.length) {
             button("done")
             return
@@ -12374,10 +12375,10 @@ P.assign_escort = {
             return
         }
     },
-    inactive: "assign units to escorting",
+    inactive: "assign escorts",
     prompt() {
         if (G.active_stack.length === 0) {
-            prompt(`${offensive_card_header()} Select unit to escorting.`)
+            prompt(`${offensive_card_header()} Choose escorting units.`)
             L.possible_units.forEach(u => action_unit(u))
         } else {
             prompt(`${offensive_card_header()} Assign units to battle hex.`)
@@ -14003,7 +14004,7 @@ P.india_surrender = {
     inactive: "execute India surrender sequence",
     prompt() {
         if (G.active_stack.length) {
-            prompt(`India surrenders. Choose space to move.`)
+            prompt(`India Surrender: Emergency move P${G.active_stack[0]}.`)
             L.hex_to_retreat.forEach(u => action_hex(u))
 
             var piece = pieces[G.active_stack[0]]
@@ -14013,13 +14014,13 @@ P.india_surrender = {
                 button("eliminate")
             }
         } else if (L.unit_to_retreat.length) {
-            prompt(`India surrenders. Choose unit to emergency move.`)
+            prompt(`India Surrender: Choose unit to emergency move.`)
             L.unit_to_retreat.forEach(u => action_unit(u))
         }
         if (!G.active_stack.length && (!L.unit_to_retreat.length ||
             array_count(L.unit_to_retreat,
                 u => pieces[u].service === "army" || pieces[u].service === "navy" || pieces[u].service === "us") === L.unit_to_retreat.length)) {
-            prompt(`India surrenders. Confirm emergency move.`)
+            prompt(`India Surrender: Confirm emergency moves.`)
             button("done")
         }
     },
@@ -14262,7 +14263,7 @@ P.strategic_bombing = {
             button("done")
             return
         }
-        prompt("Choose units that wll conduct strategic bombing.")
+        prompt("Choose units to conduct strategic bombing.")
         if (G.active_stack.length > 0) {
             button("roll")
         } else {
@@ -19589,10 +19590,10 @@ P.burma_choose_offensive = {
     },
     prompt() {
         if (L.confirm_card) {
-            prompt(`Confirm ` + card_get_log_str(L.confirm_card) + ` as Future Offensive?`)
+            prompt(`Setup: Confirm ` + card_get_log_str(L.confirm_card) + ` as Future Offensive?`)
             button("confirm")
         } else {
-            prompt(`Choose Military Event to use as Future Offensive.`)
+            prompt(`Setup: Designate a Military Event to use as Future Offensive.`)
             BURMA_JAPANESE_OFF.forEach(c => {
                 c = find_card(JP, c)
                 if (!G.hand[JP].includes(c)) {

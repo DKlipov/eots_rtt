@@ -126,7 +126,7 @@ P.strategic_bombing = {
             button("done")
             return
         }
-        prompt("Choose units that wll conduct strategic bombing.")
+        prompt("Choose units to conduct strategic bombing.")
         if (G.active_stack.length > 0) {
             button("roll")
         } else {
