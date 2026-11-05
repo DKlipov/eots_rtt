@@ -714,7 +714,7 @@ Step 14. Conduct all necessary emergency naval movement (8.22) and emergency air
 
 ### 7.21 Offensives Player Unit Activation 
 
-The Offensives player selects the in-supply HQ chosen for the offensive. A player may activate a number of units equal to the efficiency rating of the HQ being used to conduct the offensive PLUS either the OC value or the Event logistic value. The efficiency value of any HQ may be modified by lack of connection to the Eastern map edge for US and Joint HQs (6.25) or for lack of CBI infrastructure for Japanese HQs (13.79). The units to be activated must be in supply. In order to be activated, an activation path has to exist from the HQ used to the unit being activated (6.3). Inter-Servie Rivalry (14.0) can also limit the units eligible to be activated. 
+The Offensives player selects the in-supply HQ chosen for the offensive. A player may activate a number of units equal to the efficiency rating of the HQ being used to conduct the offensive PLUS either the OC value or the Event logistic value. The efficiency value of any HQ may be modified by lack of connection to the Eastern map edge for US and Joint HQs (6.25) or for lack of CBI infrastructure for Japanese HQs (13.79). The units to be activated must be in supply. In order to be activated, an activation path has to exist from the HQ used to the unit being activated (6.3). Inter-Service Rivalry (14.0) can also limit the units eligible to be activated. 
 
 Allied HQs have specific nationalities they can activate, unless excepted by an events card text: US (e.g., Central, South (Ghormley or Halsey), and Southwest), Commonwealth (e.g., Malaya, SEAC), or Joint (e.g. ANZAC, ABDA). The Japanese have only one type of HQ. 
 
