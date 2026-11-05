@@ -1,4 +1,4 @@
-default: rules.js info/rules.html
+default: rules.js info/rules.html info/readme.html
 
 JS := $(shell find js -type f -name '*.js')
 

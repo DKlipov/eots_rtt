@@ -1,91 +1,253 @@
-<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Empire of the Sun - Read Me!</title>
-<style>
-h1{text-align:center}body{max-width:50rem;margin:0 auto;}
-</style>
+<title>
+Empire of the Sun - Read Me!
+</title>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/style.css">
+<style>h1{text-align:center}body{max-width:80ch;margin:0 auto;}</style>
 <body>
 <article>
-
-<h1>Empire of the Sun: Read Me!</h1>
-
-<hr>
-
-<p><b>Offensive Unit Activation & Movement</b></p>
-
-<p>Select a highlighted card and choose a play option button in the upper right taskbar. To start building an Offensive, choose an HQ and activate & move units from there.</p>
-<p>When activating units, you click to add them or click them again to remove them. Clicking the undo button will step you back to the Choose HQ step.<p/>
-<p>With unit movement, it is not required to count hexes or legs (in the case of air units) to move a unit on the board. The module will highlight all the eligible destinations available for the unit selected to move to. All that is required is to choose a destination and the unit will move there. For check all movement options, click the "More options" button to open up options for japanese barges or strategic movement.</p>
-<p>To move a stack of the same type of unit, simply click on multiple units in the hex before choosing a destination hex. </p>
-<p><i>Important note:</i> By default, the module assumes that the unit will use the regular movement type that allows for battle. For ground units that move by Amphibious Assault, it will automatically increase the Amphib Shipping Used marker when clicking on an overseas destination that isn't a friendly port. For air units with parenthetical ranges, it will not move by extended range unless Extended is clicked in the Advanced Move sub-menu to open up those destinations to be selected.</p>
-<p><i>Undo.</i> At any time during Offensive planning, every step can be Undo-ed all the way back to the card play itself until the Next button is clicked when "Confirm offensive" is in the taskbar. When that happens, everything is committed and play is passed to the Reaction player. Undo even works with reaction disengagement (more on that below).</p>
-<p><i>Offensive Sequence.</i> All the steps of the offensive sequence in 7.2 are strictly followed by the module, but the module will declare/assign battle hexes as units are being moved as an aid to planning. Just understand that battle hexes are not technically declared until after all units have completed moving and this is important for the disengagement rules (more on that below)</p>
-
-<p><b>Reaction Activation & Movement</b></p>
-
-<p>This will work the same as Offensive movement, but the module will not assume that a unit activated by the player can actually react to a battle hex. During unit movement, however, it will only allow legal destinations to participate in battle hexes. If you run into a situation where a unit you activated can't be moved, just Undo back and correct the activation.</p>
-<p><i>Reaction card play.</i> The module will only allow reaction cards to be played during the offensive sequence step that they would be played in. Therefore the module will prompt multiple times at various points to ask if you would like to play reaction cards. Many times, this step can be skipped, but be sure to pay attention if any cards are highlighted in yellow in the Hand section. If you skip and play passes back to the Offensive player, that step can't be Undo-ed.</p>
-
-<hr>
-
-<p><b>Reaction Disengagement</b></p>
-
-<p>The ground disengagement rules in 8.43 can be triggered during an offensive if a ground unit of a lower CF value that ground moves into an enemy unit with a higher CF value. This can also happen if two or more ground units are moving as a stack. When this happens, the module will show "Reaction player could use disengagement ability after this move." in the taskbar and two buttons: Prompt and Continue.</p>
-<p><i>Prompt:</i> When clicked, this will immediately switch control to the Reaction player where they can choose to either disengage or remain in the hex.</p>
-<p><i>Continue:</i> When clicked, this will not switch control to the Reaction player and allow the Offensive player to continue moving units. At the end of all movement the module will switch control to the Reaction player to decide whether to disengage or not at that original point. The module will remember in which order the ground units moved into which hexes to preserve the disengagement choice for the reaction player.</p>
-<p>In either case, the module will revert back to the Offensive player to continue moving or to commit the offensive. </p>
-<p><i>Important note:</i> This whole sequence can be fully undo-ed at any time by the Offensive player, including re-prompting the Reaction player to disengage if the ground unit move is re-done. Undo functionality is preserved until the offensive is committed.</p>
-
-<hr>
-
-<p><b>Custom Markers</b></p>
-
-<p>- <i>Grey ASP marker:</i> This is found on the general records track and designates how many ASP points are available for the JP when not under ISR conditions.</p>
-<p>- <i>Progress of the War:</i> A blue marker with a white star will appear on Allied captured hexes for Progress of the War tracking. This marker will also appear on the General Records track to keep count.</p>
-<p>- <i>Battle/SR Hex marker:</i> A green square highlighted marker with a letter that can be on a hex or in the upper right of a unit. It designates the battle hex itself or which battle hex the unit is assigned to. For a potential battle hex that is waiting for Special Reaction resolution, it will initially present with a magenta highlighted background. For air units that have parenthetical extended range they will show a gray background during post battle movement to indicate they cannot use extended range</p>
-<p>- <i>Movement type marker:</i> Naval movement marker that is found on the upper right of ground units or naval units. Blue = Amphibious Assault movement; Red = JP Organic Transport; Black = Strategic movement; Light blue = JP Barge movement</p>
-<p>- <i>Out of Supply marker:</i> Will be found in the upper right of a unit that is out of supply. Also, a regular OOS marker will appear on the hex to designate that there are one or more units in that hex that are OOS. It is possible that there will be units of different supply statuses in the same hex, so be sure to click the hex to expand the units and figure out which units are actually OOS. </p>
-<p>- <i>Isolated marker:</i> Unit OOS and out of range any friendly HQ. Could be eliminated attrition step. </p>
-<p>- <i>Intrinsic Defense:</i> One or more JP ground units (either 9-12 or 12-12) with no unit ID will appear during a battle resolution that includes intrinsic defense. If a JP home islands hex is captured, the 12-12 unit will remain with a Red X through it to designate that it has been eliminated and won't return if re-captured.</p>
-
-<hr>
-
-<p><b>Hex borders</b></p>
-
-<p>- <i>Yellow:</i> Hex is clickable and allowed for current action.</p>
-<p>- <i>Magenta:</i> Your units in this hex could be overstacked after current offensive.</p>
-
-<hr>
-
-<p><b>Tips & Tricks</b></p>
-
-<p>- Clicking on a Battle Hex marker will bring up the Battle Info dialog. This will show all the CF values and modifiers of the attacker and defender for that battle.</p>
-<p>- A long press on a unit or mouse hovering while holding Ctrl over a unit will show both sides of that unit. Also, an HQ will display a highlighted hex grid of that HQ's range. To remove it, click the large HQ icon in the upper right. </p>
-<p>- Returnable eliminated units can be found in the lower left of the map under the Turn track. They will become selectable during the Replacements phase. </p>
-<p>- <i>Supply Checker</i>: Click the gas can icon on the taskbar and then click on a unit to display its supply path or how it is blocked. Click Done button to exit out of the checker. Supply path could be shown up to 4 lines with different colour. Yellow - trace from HQ to ultimate supply source. Blue - path from HQ or Kunming to unit. Green - path from unit to supply eligible port. Red - path from HQ to port (supply eligible condition).</p>
-<p>- <i>Distance Checker</i>: Click the gas can icon on the taskbar and then click on the hexes to check the distance. A second click on the first marker will remove them. Click Done button to exit out of the checker. </p>
-
-<hr>
-
-<p><b>Card Notes</b></p>
-
-<p><i>Tokyo Express:</i> Friendly hex - controlled named hex or occupied. The module will show which hexes are allowed for the Tokyo Express marker placement.</p>
-<p><i>Orde Wingate:</i> Selected unit will return to its initial hex and a Battle Hex marker may be removed if no other Offensive units are committed to that battle.</p>
-<p><i>Operation Chronicle:</i> Event triggers could be triggered for one island that did not contain ANY unit before offensive. Any offensive player ground unit should use AA to move here.</p>
-<p><i>Fuel Shortage:</i> HQ could be moved to friendly controlled port in range of ANY controlled resource hex.</p>
-
-<hr>
-
-<p><b>Other notes</b></p>
-
-<p>- <i>VP Scoring:</i> All the yearly scenarios and the South Pacific Scenario use the VP scoring schedules for Tournament play. Use the Inspect Victory Points dialog in the Sign icon menu to check the current score. </p>
-<p>- <i>Burma Scenario:</i> Surrender of India counts as JP auto victory condition. Oversea path from Saigon to Indian ocean EXISTS (according to main map distances).</p>
-<p>- <i>South Pacific Scenario:</i> Only VP schedule victory condition supported.</p>
-<p>- <i>Supply:</i> Unit supply is checked continuously throughout the offensive sequence and especially during unit movement. If unexpected supply changes happen during movement, be sure to Undo back to adjust the move.</p>
-<p>- <i>Isolated:</i> Isolated marker with red circle means that units in this hex out of supply and out of any friendly HQ command range. It is a reminder that units could be removed due attrition phase.</p>
-<p>- <i>Control Markers:</i> Control marker presentation is supported in two modes. Vassal-like, where the markers are more prevalent, but opaque; and Default, where the markers look like a normal marker, but only Allied markers will be shown for occupied countries. Non-occupied countries will show according to the imperial border. At any time, Nation status can be checked in the Poltical Status view in the Sign menu. </p>
-<p>- Some markers for the General Records Track (i.e. Cards Drawn markers, PotW, etc) won't appear until they are actually needed to track something. They will also disappear when they get to zero.</p>
-
-<hr>
-<p style="text-align:center">
-<img src="../thumbnail.png" width="72">
+<h1 id="empire-of-the-sun---read-me">Empire of the Sun - Read Me!</h1>
+<hr />
+<h2 id="offensive-unit-activation-movement">Offensive Unit Activation
+&amp; Movement</h2>
+<p>Select a highlighted card and choose a play option button in the
+upper right taskbar. To start building an Offensive, choose an HQ and
+activate &amp; move units from there.</p>
+<p>When activating units, you click to add them or click them again to
+remove them. Clicking the undo button will step you back to the Choose
+HQ step.</p>
+<p>With unit movement, it is not required to count hexes or legs (in the
+case of air units) to move a unit on the board. The module will
+highlight all the eligible destinations available for the unit selected
+to move to. All that is required is to choose a destination and the unit
+will move there. For check all movement options, click the “More
+options” button to open up options for japanese barges or strategic
+movement.</p>
+<p>To move a stack of the same type of unit, simply click on multiple
+units in the hex before choosing a destination hex.</p>
+<blockquote>
+<p><em>Important note:</em> By default, the module assumes that the unit
+will use the regular movement type that allows for battle. For ground
+units that move by Amphibious Assault, it will automatically increase
+the Amphib Shipping Used marker when clicking on an overseas destination
+that isn’t a friendly port. For air units with parenthetical ranges, it
+will not move by extended range unless Extended is clicked in the
+Advanced Move sub-menu to open up those destinations to be selected.</p>
+</blockquote>
+<h3 id="undo">Undo</h3>
+<p>At any time during Offensive planning, every step can be undone all
+the way back to the card play itself until the Next button is clicked
+when “Confirm offensive” is in the taskbar. When that happens,
+everything is committed and play is passed to the Reaction player. Undo
+even works with reaction disengagement (more on that below).</p>
+<h3 id="offensive-sequence">Offensive Sequence</h3>
+<p>All the steps of the offensive sequence in 7.2 are strictly followed
+by the module, but the module will declare/assign battle hexes as units
+are being moved as an aid to planning. Just understand that battle hexes
+are not technically declared until after all units have completed moving
+and this is important for the disengagement rules (more on that
+below)</p>
+<h2 id="reaction-activation-movement">Reaction Activation &amp;
+Movement</h2>
+<p>This will work the same as Offensive movement, but the module will
+not assume that a unit activated by the player can actually react to a
+battle hex. During unit movement, however, it will only allow legal
+destinations to participate in battle hexes. If you run into a situation
+where a unit you activated can’t be moved, just Undo back and correct
+the activation.</p>
+<h3 id="reaction-card-play">Reaction card play</h3>
+<p>The module will only allow reaction cards to be played during the
+offensive sequence step that they would be played in. Therefore the
+module will prompt multiple times at various points to ask if you would
+like to play reaction cards. Many times, this step can be skipped, but
+be sure to pay attention if any cards are highlighted in yellow in the
+Hand section. If you skip and play passes back to the Offensive player,
+that step can’t be undone.</p>
+<h2 id="reaction-disengagement">Reaction Disengagement</h2>
+<p>The ground disengagement rules in 8.43 can be triggered during an
+offensive if a ground unit of a lower CF value that ground moves into an
+enemy unit with a higher CF value. This can also happen if two or more
+ground units are moving as a stack. When this happens, the module will
+show “Reaction player could use disengagement ability after this move.”
+in the taskbar and two buttons: Prompt and Continue.</p>
+<h3 id="prompt">Prompt</h3>
+<p>When clicked, this will immediately switch control to the Reaction
+player where they can choose to either disengage or remain in the
+hex.</p>
+<h3 id="continue">Continue</h3>
+<p>When clicked, this will not switch control to the Reaction player and
+allow the Offensive player to continue moving units. At the end of all
+movement the module will switch control to the Reaction player to decide
+whether to disengage or not at that original point. The module will
+remember in which order the ground units moved into which hexes to
+preserve the disengagement choice for the reaction player.</p>
+<p>In either case, the module will revert back to the Offensive player
+to continue moving or to commit the offensive.</p>
+<blockquote>
+<p><em>Important note:</em> This whole sequence can be fully undone at
+any time by the Offensive player, including re-prompting the Reaction
+player to disengage if the ground unit move is re-done. Undo
+functionality is preserved until the offensive is committed.</p>
+</blockquote>
+<h2 id="custom-markers">Custom Markers</h2>
+<dl>
+<dt>Grey ASP marker:</dt>
+<dd>
+This is found on the general records track and designates how many ASP
+points are available for the JP when not under ISR conditions.
+</dd>
+<dt>Progress of the War:</dt>
+<dd>
+A blue marker with a white star will appear on Allied captured hexes for
+Progress of the War tracking. This marker will also appear on the
+General Records track to keep count.
+</dd>
+<dt>Battle/SR Hex marker:</dt>
+<dd>
+A green square highlighted marker with a letter that can be on a hex or
+in the upper right of a unit. It designates the battle hex itself or
+which battle hex the unit is assigned to. For a potential battle hex
+that is waiting for Special Reaction resolution, it will initially
+present with a magenta highlighted background. For air units that have
+parenthetical extended range they will show a gray background during
+post battle movement to indicate they cannot use extended range
+</dd>
+<dt>Movement type marker:</dt>
+<dd>
+Naval movement marker that is found on the upper right of ground units
+or naval units. Blue = Amphibious Assault movement; Red = JP Organic
+Transport; Black = Strategic movement; Light blue = JP Barge movement
+</dd>
+<dt>Out of Supply marker:</dt>
+<dd>
+Will be found in the upper right of a unit that is out of supply. Also,
+a regular OOS marker will appear on the hex to designate that there are
+one or more units in that hex that are OOS. It is possible that there
+will be units of different supply statuses in the same hex, so be sure
+to click the hex to expand the units and figure out which units are
+actually OOS.
+</dd>
+<dt>Isolated marker:</dt>
+<dd>
+Unit OOS and out of range any friendly HQ. Could be eliminated attrition
+step.
+</dd>
+<dt>Intrinsic Defense:</dt>
+<dd>
+One or more JP ground units (either 9-12 or 12-12) with no unit ID will
+appear during a battle resolution that includes intrinsic defense. If a
+JP home islands hex is captured, the 12-12 unit will remain with a Red X
+through it to designate that it has been eliminated and won’t return if
+re-captured.
+</dd>
+</dl>
+<h2 id="hex-borders">Hex borders</h2>
+<p>Hexes are outlined with a border color to indicate:</p>
+<dl>
+<dt>Yellow:</dt>
+<dd>
+Hex is clickable and allowed for current action.
+</dd>
+<dt>Magenta:</dt>
+<dd>
+Your units in this hex could be overstacked after current offensive.
+</dd>
+<dt>Green:</dt>
+<dd>
+The corresponding hex lights up in green when you mouse-over a hex
+number in the log.
+</dd>
+</dl>
+<h2 id="tips-tricks">Tips &amp; Tricks</h2>
+<p>Clicking on a Battle Hex marker will bring up the Battle Info dialog.
+This will show all the CF values and modifiers of the attacker and
+defender for that battle.</p>
+<p>A long press on a unit or mouse hovering while holding Shift or Ctrl
+over a unit will show both sides of that unit. Also, an HQ will display
+a highlighted hex grid of that HQ’s range. To remove it, click the large
+HQ icon in the upper right.</p>
+<p>Returnable eliminated units can be found in the lower left of the map
+under the Turn track. They will become selectable during the
+Replacements phase.</p>
+<h2 id="measurement-tools">Measurement Tools</h2>
+<p>The compass icon in the toolbar shows a menu with several useful
+tools.</p>
+<h3 id="measure-distance">Measure distance</h3>
+<p>To measure the shortest distance between two (or more) points.</p>
+<p>Click a hex to start measuring, and click other hexes to add or
+remove waypoints.</p>
+<h3 id="measure-range">Measure range</h3>
+<p>Show which hexes are within a given distance from a hex.</p>
+<p>Click a first hex to measure from, then click another hex and see all
+other hexes at the same range.</p>
+<h3 id="show-hq-range">Show HQ range</h3>
+<p>Use this to show which hexes are within range of an HQ.</p>
+<p>Select an HQ to see which hexes are in range. You can use the buttons
+to toggle between displaying activation, supply, and isolation
+ranges.</p>
+<h3 id="show-supply-lines">Show supply lines</h3>
+<p>Choose a unit to show the supply lines for that unit.</p>
+<p>The different types of supply path are shown with colored lines:</p>
+<ul>
+<li>White from supply source to HQ;</li>
+<li>gold from HQ to unit;</li>
+<li>blue from HQ to supply eligible port;</li>
+<li>green from supply eligible port to unit.</li>
+</ul>
+<h2 id="card-notes">Card Notes</h2>
+<p><em>Tokyo Express:</em> Friendly hex - controlled named hex or
+occupied. The module will show which hexes are allowed for the Tokyo
+Express marker placement.</p>
+<p><em>Orde Wingate:</em> Selected unit will return to its initial hex
+and a Battle Hex marker may be removed if no other Offensive units are
+committed to that battle.</p>
+<p><em>Operation Chronicle:</em> Event triggers could be triggered for
+one island that did not contain ANY unit before offensive. Any offensive
+player ground unit should use AA to move here.</p>
+<p><em>Fuel Shortage:</em> HQ could be moved to friendly controlled port
+in range of ANY controlled resource hex.</p>
+<h2 id="other-notes">Other notes</h2>
+<dl>
+<dt>VP Scoring:</dt>
+<dd>
+All the yearly scenarios and the South Pacific Scenario use the VP
+scoring schedules for Tournament play. Use the Inspect Victory Points
+dialog in the Sign icon menu to check the current score.
+</dd>
+<dt>Burma Scenario:</dt>
+<dd>
+Surrender of India counts as JP auto victory condition. Oversea path
+from Saigon to Indian ocean EXISTS (according to main map distances).
+</dd>
+<dt>South Pacific Scenario:</dt>
+<dd>
+Only VP schedule victory condition supported.
+</dd>
+<dt>Supply:</dt>
+<dd>
+Unit supply is checked continuously throughout the offensive sequence
+and especially during unit movement. If unexpected supply changes happen
+during movement, be sure to Undo back to adjust the move.
+</dd>
+<dt>Isolated:</dt>
+<dd>
+Isolated marker with red circle means that units in this hex out of
+supply and out of any friendly HQ command range. It is a reminder that
+units could be removed due attrition phase.
+</dd>
+<dt>Control Markers:</dt>
+<dd>
+Control marker presentation is supported in two modes. Vassal-like,
+where the markers are more prevalent, but opaque; and Default, where the
+markers look like a normal marker, but only Allied markers will be shown
+for occupied countries. Non-occupied countries will show according to
+the imperial border. At any time, Nation status can be checked in the
+Poltical Status view in the Sign menu.
+</dd>
+</dl>
+<p>Some markers for the General Records Track (i.e. Cards Drawn markers,
+PotW, etc) won’t appear until they are actually needed to track
+something. They will also disappear when they get to zero.</p>
+<hr />
+<p><img src="../page_logo.svg" width=64 style="display:block;margin:16px auto"></p>
