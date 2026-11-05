@@ -12801,7 +12801,6 @@ P.apply_attack_reaction = {
         }
     },
     done() {
-        push_undo()
         end()
     },
     card(c) {
