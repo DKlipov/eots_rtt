@@ -9303,7 +9303,7 @@ function victory_burma() {
     var result = {
         vp: 0,
         text: [],
-        won_side: "",
+        won_side: -1,
         won_text: "",
     }
 
@@ -9400,7 +9400,7 @@ function victory_1942() {
     var result = {
         vp: 0,
         text: [],
-        won_side: "",
+        won_side: -1,
         won_text: "",
     }
     adjust_vp(result, G.events[events.CHINA_STATUS.id], "China Government Front Status")
@@ -9463,7 +9463,7 @@ function victory_1942() {
         `Japan control 12 resource hexes or less`,
         "Japan control more than 12 resource hexes", RESOURCE_HEX)
     if (get_jp_resources() < 12) {
-        result.won_side = "Allies"
+        result.won_side = AP
         result.won_text = "Japan captured less than 12 resource hexes"
     }
     return result
@@ -9529,7 +9529,7 @@ function victory_1943() {
     var result = {
         vp: 0,
         text: [],
-        won_side: "",
+        won_side: -1,
         won_text: "",
     }
     binary_vp(result, G.events[events.CHINA_STATUS.id] >= 5, 5, "China surrendered", `China did not surrender`)
@@ -9629,7 +9629,7 @@ function victory_1944() {
     var result = {
         vp: 0,
         text: [],
-        won_side: "",
+        won_side: -1,
         won_text: "",
     }
     binary_vp(result, G.events[events.CHINA_STATUS.id] >= 5, 5, "China surrendered", `China did not surrender`)
@@ -9709,15 +9709,15 @@ function victory_1945() {
     var result = {
         vp: 0,
         text: [],
-        won_side: "",
+        won_side: -1,
         won_text: "",
     }
     if (japan_surrenders) {
-        result.won_side = "Allies"
+        result.won_side = AP
         result.won_text = `Japan surrenders by strategic bombing campaign`
-        finish("Allies", "Japan surrenders by strategic bombing campaign.")
+        finish(AP, "Japan surrenders by strategic bombing campaign.")
     } else {
-        result.won_side = "Japan"
+        result.won_side = JP
         result.won_text = `Japan did not surrender`
     }
     return result
@@ -9775,7 +9775,7 @@ function victory_south_pacific() {
     var result = {
         vp: 0,
         text: [],
-        won_side: "",
+        won_side: -1,
         won_text: "",
     }
 
@@ -9883,17 +9883,17 @@ function get_victory() {
     var data = scenario_data()
     set_supply_control()
     var vp = data.victory()
-    if (!vp.won_side && vp.vp <= 2) {
-        vp.won_side = "Allies"
+    if (vp.won_side < 0 && vp.vp <= 2) {
+        vp.won_side = AP
         vp.won_text = `Allied Decisive Victory`
-    } else if (!vp.won_side && vp.vp <= (G.sid !== BURMA_SCENARIO ? 5 : 4)) {
-        vp.won_side = "Allies"
+    } else if (vp.won_side < 0 && vp.vp <= (G.sid !== BURMA_SCENARIO ? 5 : 4)) {
+        vp.won_side = AP
         vp.won_text = `Allied Tactical Victory`
-    } else if (!vp.won_side && vp.vp <= (G.sid !== BURMA_SCENARIO ? 9 : 8)) {
-        vp.won_side = "Japan"
+    } else if (vp.won_side < 0 && vp.vp <= (G.sid !== BURMA_SCENARIO ? 9 : 8)) {
+        vp.won_side = JP
         vp.won_text = `Japanese Tactical Victory`
-    } else if (!vp.won_side) {
-        vp.won_side = "Japan"
+    } else if (vp.won_side < 0) {
+        vp.won_side = JP
         vp.won_text = `Japanese Decisive Victory`
     }
     restore_original_control()
@@ -9935,7 +9935,7 @@ function before_victory_check() {
 
 function victory_check() {
     if (G.political_will <= 0) {
-        finish("Japan", "Japanese Victory by Treaty Negotiations.")
+        finish(JP, "Japanese Victory by Treaty Negotiations.")
     }
     if (G.sid == BURMA_SCENARIO && scenario_data().last_turn <= G.turn) {
         before_victory_check()
@@ -10628,7 +10628,7 @@ const TRACK_MARKERS = [
     },
     {
         counter: counters.asp_ap,
-        tooltip: () => "Allies ASP",
+        tooltip: () => "Allied ASP",
         value: () => G.asp[1][0]
     },
     {
@@ -10690,7 +10690,7 @@ const TRACK_MARKERS = [
     },
     {
         counter: counters.aspu_ap,
-        tooltip: () => "Allies ASP Used",
+        tooltip: () => "Allied ASP Used",
         always_show: G => true,
         value: () => G.asp[1][1]
     },
@@ -12177,7 +12177,7 @@ function update_window_vp() {
     var response = get_victory()
 
     text.push("<dt>" + response.won_text)
-    if (response.won_side === "Japan")
+    if (response.won_side === JP)
         text.push(print_flag(JP))
     else
         text.push(print_flag(AP))

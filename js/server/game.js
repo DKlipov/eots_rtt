@@ -568,10 +568,10 @@ function check_sudden_death() {
         }
     })
     if (check[JP] <= 0) {
-        finish("Allies", "Allies Victory - All Japanese HQ displaced.")
+        finish(AP, "Allied Victory - All Japanese HQ displaced.")
         return true
     } else if (check[AP] <= 0) {
-        finish("Japan", "Japanese Victory - All Allies HQ displaced.")
+        finish(JP, "Japanese Victory - All Allies HQ displaced.")
         return true
     }
     return false

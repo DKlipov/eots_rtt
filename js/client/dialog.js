@@ -317,7 +317,7 @@ function update_window_vp() {
     var response = get_victory()
 
     text.push("<dt>" + response.won_text)
-    if (response.won_side === "Japan")
+    if (response.won_side === JP)
         text.push(print_flag(JP))
     else
         text.push(print_flag(AP))

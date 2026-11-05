@@ -9308,7 +9308,7 @@ function victory_burma() {
     var result = {
         vp: 0,
         text: [],
-        won_side: "",
+        won_side: -1,
         won_text: "",
     }
 
@@ -9405,7 +9405,7 @@ function victory_1942() {
     var result = {
         vp: 0,
         text: [],
-        won_side: "",
+        won_side: -1,
         won_text: "",
     }
     adjust_vp(result, G.events[events.CHINA_STATUS.id], "China Government Front Status")
@@ -9468,7 +9468,7 @@ function victory_1942() {
         `Japan control 12 resource hexes or less`,
         "Japan control more than 12 resource hexes", RESOURCE_HEX)
     if (get_jp_resources() < 12) {
-        result.won_side = "Allies"
+        result.won_side = AP
         result.won_text = "Japan captured less than 12 resource hexes"
     }
     return result
@@ -9534,7 +9534,7 @@ function victory_1943() {
     var result = {
         vp: 0,
         text: [],
-        won_side: "",
+        won_side: -1,
         won_text: "",
     }
     binary_vp(result, G.events[events.CHINA_STATUS.id] >= 5, 5, "China surrendered", `China did not surrender`)
@@ -9634,7 +9634,7 @@ function victory_1944() {
     var result = {
         vp: 0,
         text: [],
-        won_side: "",
+        won_side: -1,
         won_text: "",
     }
     binary_vp(result, G.events[events.CHINA_STATUS.id] >= 5, 5, "China surrendered", `China did not surrender`)
@@ -9714,15 +9714,15 @@ function victory_1945() {
     var result = {
         vp: 0,
         text: [],
-        won_side: "",
+        won_side: -1,
         won_text: "",
     }
     if (japan_surrenders) {
-        result.won_side = "Allies"
+        result.won_side = AP
         result.won_text = `Japan surrenders by strategic bombing campaign`
-        finish("Allies", "Japan surrenders by strategic bombing campaign.")
+        finish(AP, "Japan surrenders by strategic bombing campaign.")
     } else {
-        result.won_side = "Japan"
+        result.won_side = JP
         result.won_text = `Japan did not surrender`
     }
     return result
@@ -9780,7 +9780,7 @@ function victory_south_pacific() {
     var result = {
         vp: 0,
         text: [],
-        won_side: "",
+        won_side: -1,
         won_text: "",
     }
 
@@ -9888,17 +9888,17 @@ function get_victory() {
     var data = scenario_data()
     set_supply_control()
     var vp = data.victory()
-    if (!vp.won_side && vp.vp <= 2) {
-        vp.won_side = "Allies"
+    if (vp.won_side < 0 && vp.vp <= 2) {
+        vp.won_side = AP
         vp.won_text = `Allied Decisive Victory`
-    } else if (!vp.won_side && vp.vp <= (G.sid !== BURMA_SCENARIO ? 5 : 4)) {
-        vp.won_side = "Allies"
+    } else if (vp.won_side < 0 && vp.vp <= (G.sid !== BURMA_SCENARIO ? 5 : 4)) {
+        vp.won_side = AP
         vp.won_text = `Allied Tactical Victory`
-    } else if (!vp.won_side && vp.vp <= (G.sid !== BURMA_SCENARIO ? 9 : 8)) {
-        vp.won_side = "Japan"
+    } else if (vp.won_side < 0 && vp.vp <= (G.sid !== BURMA_SCENARIO ? 9 : 8)) {
+        vp.won_side = JP
         vp.won_text = `Japanese Tactical Victory`
-    } else if (!vp.won_side) {
-        vp.won_side = "Japan"
+    } else if (vp.won_side < 0) {
+        vp.won_side = JP
         vp.won_text = `Japanese Decisive Victory`
     }
     restore_original_control()
@@ -9940,7 +9940,7 @@ function before_victory_check() {
 
 function victory_check() {
     if (G.political_will <= 0) {
-        finish("Japan", "Japanese Victory by Treaty Negotiations.")
+        finish(JP, "Japanese Victory by Treaty Negotiations.")
     }
     if (G.sid == BURMA_SCENARIO && scenario_data().last_turn <= G.turn) {
         before_victory_check()
@@ -13992,7 +13992,7 @@ P.india_surrender = {
             log("#GVP Scoring")
             vp.text.forEach(t => log(t))
             log(`#GTotal VP: ${vp.vp}`)
-            finish("Japan", "Japanese Victory - India Surrender.")
+            finish(JP, "Japanese Victory - India Surrender.")
             return
         }
     },
@@ -14131,6 +14131,7 @@ function india_stable() {
         G.events[events.INDIA_STATUS.id] = 0
     }
 }
+
 /* }}} */
 
 P.strategic_phase = script(`
@@ -14420,7 +14421,7 @@ P.national_status_segment = function () {
         log("AP captured Marshall islands.")
     }
     if (check_nation_controlled(nations.JAPAN, AP)) {
-        finish("Allies", "Allies Victory - Japanese mainland islands captured.")
+        finish(AP, "Allied Victory - Japanese mainland islands captured.")
         return
     }
     if (check_japan_resource_trace()) {
@@ -14429,7 +14430,7 @@ P.national_status_segment = function () {
         }
         G.events[events.JAPAN_TRACE_RESOURCES.id] = 0
     } else if (is_event_active(events.JAPAN_TRACE_RESOURCES) && is_event_active(events.JAPAN_TRACE_RESOURCES) <= G.turn - 2) {
-        finish("Allies", "Allies Victory by blockade.")
+        finish(AP, "Allied Victory by blockade.")
         return
     } else {
         check_event(events.JAPAN_TRACE_RESOURCES)
@@ -18141,10 +18142,10 @@ function check_sudden_death() {
         }
     })
     if (check[JP] <= 0) {
-        finish("Allies", "Allies Victory - All Japanese HQ displaced.")
+        finish(AP, "Allied Victory - All Japanese HQ displaced.")
         return true
     } else if (check[AP] <= 0) {
-        finish("Japan", "Japanese Victory - All Allies HQ displaced.")
+        finish(JP, "Japanese Victory - All Allies HQ displaced.")
         return true
     }
     return false
