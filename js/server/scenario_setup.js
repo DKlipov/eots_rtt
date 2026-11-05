@@ -1171,10 +1171,11 @@ P.operation_z = {
     inactive: "start a war",
     prompt() {
         if (G.hand[JP].length === 2) {
-            prompt(`Play Operation Z.`)
-            action_card(find_card(JP, 1))
+            var c = find_card(JP, 1)
+            prompt(`Operation Z: Play C${c}.`)
+            action_card(c)
         } else {
-            prompt(`Move activated units.`)
+            prompt(`Operation Z: Move activated units.`)
             var hexes = [5506, 5507, 5508, 5509]
             hexes.forEach(h => action_hex(hex_to_int(h)))
         }
@@ -1210,7 +1211,7 @@ P.operation_z_pbm = {
     },
     inactive: "return units",
     prompt() {
-        prompt(`${offensive_card_header()} Choose hex for post battle movement.`)
+        prompt(`${offensive_card_header()} Choose destination for post battle movement.`)
         L.allowed_hexes.forEach(h => action_hex(h))
     },
     action_hex(h) {
@@ -1254,8 +1255,9 @@ P.operation_no_1 = {
     },
     inactive: "start offensive",
     prompt() {
-        prompt(`Play Operation No. 1.`)
-        action_card(find_card(JP, 2))
+        var c = find_card(JP, 2)
+        prompt(`Operation No. 1: Play C${c}.`)
+        action_card(c)
     },
     card(c) {
         push_undo()
@@ -1286,16 +1288,21 @@ P.arcadia = {
     },
     inactive: "apply card effect",
     prompt() {
+        var c = find_card(AP, 4)
         if (G.hand[AP].length === 1) {
-            prompt(`Hold Arcadia or discard and replace with random card.`)
+            prompt(`Setup: You may take and declare C${c} as one of your five card draws.`)
+            V.selected_card = c
             button("hold")
             button("discard")
         } else {
-            prompt(`Play Arcadia or pass.`)
-            if (G.hand[AP].includes(find_card(AP, 4))) {
+            if (G.hand[AP].includes(c)) {
+                prompt(`Setup: You may play C${c} now.`)
                 button("event")
+                button("skip")
+            } else {
+                prompt(`Setup: C${c} done.`)
+                button("done")
             }
-            button("done")
         }
     },
     hold() {
@@ -1324,6 +1331,9 @@ P.arcadia = {
     },
     done() {
         end()
+    },
+    skip() {
+        end()
     }
 }
 
@@ -1348,8 +1358,9 @@ P.japan_init_1942 = {
     },
     inactive: "choose card",
     prompt() {
-        prompt(`Discard one card to draw JP 47: VADM Kondo or pass.`)
-        if (G.hand[JP].includes(find_card(JP, 47))) {
+        var c = find_card(JP, 47)
+        prompt(`Setup: You may discard one card to draw ${c}.`)
+        if (G.hand[JP].includes(c)) {
             button("done")
         } else {
             var has_3_ops = G.hand[JP].some(c => cards[c].ops >= 3)
@@ -1381,7 +1392,6 @@ SCENARIO_DATA[SOUTH_PACIFIC_SCENARIO].before_commit_offensive = function () {
         set_has(G.offensive.landing_hexes, TRUK) || is_faction_units(TRUK, AP))) {
         return "The Allied player cannot declare Truk a battle hex during game turn 3."
     }
-
 }
 
 SCENARIO_DATA[SOUTH_PACIFIC_SCENARIO].before_unit_activation = function () {

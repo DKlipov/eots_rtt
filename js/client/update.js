@@ -420,7 +420,7 @@ function on_update() {
     action_button("bonus", "Use Bonus")
     action_button("event", "Event")
     action_button("ops", "Operations")
-    action_button("hold", "Hold")
+    action_button("hold", "Take")
     action_button("advanced_move", "More options")
     action_button("no_move", "No move")
     action_button("eliminate", "Eliminate")
