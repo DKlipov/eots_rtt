@@ -8660,10 +8660,11 @@ function mark_attack_zone(location, battle_range) {
 }
 
 function mark_participate_attack_hex() {
+    var range = L.move_data.battle_range
     var base_location = L.move_data.location
-    var base_distance = G.offensive.naval_move_distance + L.move_data.battle_range
+    var base_distance = G.offensive.naval_move_distance + range
     if (G.offensive.stage === REACTION_STAGE && set_has(G.offensive.battle_hexes, base_location)) {
-        mark_attack_zone(base_location, L.move_data.battle_range)
+        mark_attack_zone(base_location, range)
         return
     }
     if (!L.move_data.is_ground_present) {
@@ -8675,16 +8676,17 @@ function mark_participate_attack_hex() {
             }
         })
     }
-    G.offensive.battle_hexes.forEach(h => mark_attack_zone(h, L.move_data.battle_range))
+    G.offensive.battle_hexes.forEach(h => mark_attack_zone(h, range))
     if (G.offensive.stage === ATTACK_STAGE) {
-        G.offensive.landing_hexes.forEach(h => mark_attack_zone(h, L.move_data.battle_range))
+        G.offensive.landing_hexes.forEach(h => mark_attack_zone(h, range))
     }
     if (!L.move_data.is_new_battle_allowed) {
         return
     }
+
     for_each_hex_in_range(base_location, base_distance, h => {
         if (is_faction_units(h, 1 - R) && !(G.supply_cache[h] & HEX_TEMP_FLAG2)) {
-            mark_attack_zone(h, L.move_data.battle_range)
+            mark_attack_zone(h, range)
         }
     })
 }
@@ -11804,19 +11806,19 @@ function attack_hex(hex) {
     if (is_faction_units(hex, 1 - G.active)) {
         create_battle_hex(hex)
     }
-    var path_to_bh = map_get(L.move_hexes ? L.move_hexes : [], hex, 0)
+    var cv = []
     var non_cv = []
     G.active_stack.forEach(u => {
-        if (!path_to_bh || is_cv_unit(pieces[u])) {
+        if (is_cv_unit(pieces[u])) {
+            set_add(cv, u)
             commit_to_attack(u, hex)
         } else {
             set_add(non_cv, u)
         }
     })
     var distant = G.active_stack.slice()
-    if (non_cv.length && path_to_bh && non_cv.length < G.active_stack.length) {
-        move_units(non_cv, path_to_bh)
-        non_cv.forEach(u => set_delete(distant, u))
+    if (non_cv.length && !cv.length) {
+        non_cv.forEach(u => commit_to_attack(u, hex))
     }
     log(`>1${units_str(distant)} attack ${hex_get_log_str(hex)}.`)
 }
@@ -12363,7 +12365,7 @@ P.assign_escort = {
         G.offensive.active_units[G.active].forEach(u => {
             var piece = pieces[u]
             var location = G.location[u]
-            if (piece.class === "naval" && !piece.br && set_has(cv_hexes, location)) {
+            if (piece.class === "naval" && !piece.br && set_has(cv_hexes, location) && !map_has(G.offensive.committed, u)) {
                 set_add(L.possible_units, u)
             }
         })
@@ -13413,7 +13415,7 @@ function apply_loss() {
     if (L.dmg_list[1].length) {
         d = d.concat(battle.damaged[1])
     }
-    if(d.length){
+    if (d.length) {
         log(`Losses:`)
     }
     for (var i = 1; i < d.length; i += 2) {

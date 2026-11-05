@@ -8655,10 +8655,11 @@ function mark_attack_zone(location, battle_range) {
 }
 
 function mark_participate_attack_hex() {
+    var range = L.move_data.battle_range
     var base_location = L.move_data.location
-    var base_distance = G.offensive.naval_move_distance + L.move_data.battle_range
+    var base_distance = G.offensive.naval_move_distance + range
     if (G.offensive.stage === REACTION_STAGE && set_has(G.offensive.battle_hexes, base_location)) {
-        mark_attack_zone(base_location, L.move_data.battle_range)
+        mark_attack_zone(base_location, range)
         return
     }
     if (!L.move_data.is_ground_present) {
@@ -8670,16 +8671,17 @@ function mark_participate_attack_hex() {
             }
         })
     }
-    G.offensive.battle_hexes.forEach(h => mark_attack_zone(h, L.move_data.battle_range))
+    G.offensive.battle_hexes.forEach(h => mark_attack_zone(h, range))
     if (G.offensive.stage === ATTACK_STAGE) {
-        G.offensive.landing_hexes.forEach(h => mark_attack_zone(h, L.move_data.battle_range))
+        G.offensive.landing_hexes.forEach(h => mark_attack_zone(h, range))
     }
     if (!L.move_data.is_new_battle_allowed) {
         return
     }
+
     for_each_hex_in_range(base_location, base_distance, h => {
         if (is_faction_units(h, 1 - R) && !(G.supply_cache[h] & HEX_TEMP_FLAG2)) {
-            mark_attack_zone(h, L.move_data.battle_range)
+            mark_attack_zone(h, range)
         }
     })
 }
