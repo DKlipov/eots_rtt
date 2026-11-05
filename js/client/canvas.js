@@ -50,7 +50,8 @@ function canvas_init(scenario) {
 }
 
 function canvas_clear_paths() {
-    CANVAS_CTX.clearRect(0, 0, CANVAS.width, CANVAS.height)
+    //set extra size, to clear paths around Oahu
+    CANVAS_CTX.clearRect(0, 0, 2600, 1700)
 }
 
 const move_stroke = [ "tomato", "deepskyblue" ]
