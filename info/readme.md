@@ -213,9 +213,9 @@ Choose a unit to show the supply lines for that unit.
 The different types of supply path are shown with colored lines:
 
 - White from supply source to HQ;
-- gold from HQ to unit;
-- blue from HQ to supply eligible port;
-- green from supply eligible port to unit.
+- Gold from HQ to unit;
+- Blue from HQ to supply eligible port;
+- Green from supply eligible port to unit.
 
 ## Card Notes
 
