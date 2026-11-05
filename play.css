@@ -214,7 +214,10 @@ body.shift .unit-tip-list {
 
 /* MAPS */
 
-#map { background-size: 100%; }
+#map {
+    background-size: 100%;
+    background-color: #a8a89e;
+}
 
 body.full_map {
     & #mapwrap, & #map, & #canvas { width: 2550px; height: 1650px; }
@@ -333,7 +336,6 @@ body.Allies #jp_hand { grid-row: 3; }
     border-radius: 50%;
 }
 
-.action_hex.amph { background-image: url(images/hex_amph.svg) }
 .action_hex.violation { background-image: url(images/hex_violation.svg); pointer-events: none }
 .action_hex.action { background-image: url(images/hex_action.svg) }
 .action_hex.highlight { background-image: url(images/hex_highlight.svg); pointer-events: none }
