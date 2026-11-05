@@ -1623,7 +1623,7 @@ function _set_preference(name, value, onchange) {
     on_update()
 }
 
-function toggle_preference_checkbox(name, value) {
+function toggle_preference_checkbox(name) {
     world.prefs[name].checked = !world.prefs[name].checked
     world.prefs[name].dispatchEvent(new Event("change"))
 }
