@@ -194,10 +194,11 @@ P.check_unit_supply = {
         LOCAL_STATE.actions = {
             "done": 1,
         }
-        if (LOCAL_STATE.unit)
+        if (LOCAL_STATE.unit) {
             LOCAL_STATE.prompt = "Showing P" + LOCAL_STATE.unit + " supply lines."
-        else
+        } else {
             LOCAL_STATE.prompt = "Select a unit to show supply lines."
+        }
     },
     undo() {
         LOCAL_STATE.unit = 0
