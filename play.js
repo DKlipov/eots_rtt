@@ -10643,12 +10643,12 @@ const TRACK_MARKERS = [
     },
     {
         counter: counters.naval_repl,
-        tooltip: () => "Japanese Naval Replacement Point",
+        tooltip: () => "Japanese Naval Replacement Points",
         value: () => G.reinforcements[0]
     },
     {
         counter: counters.air_repl,
-        tooltip: () => "Japanese Air Replacement Point",
+        tooltip: () => "Japanese Air Replacement Points",
         value: () => G.reinforcements[1]
     },
     {
@@ -10658,7 +10658,7 @@ const TRACK_MARKERS = [
     },
     {
         counter: counters.drawn_ap,
-        tooltip: () => "Allies Drawn Cards",
+        tooltip: () => "Allied Drawn Cards",
         value: () => G.draw_counter[1]
     },
     {
@@ -10668,17 +10668,17 @@ const TRACK_MARKERS = [
     },
     {
         counter: counters.pass_ap,
-        tooltip: () => "Allies Passes",
+        tooltip: () => "Allied Passes",
         value: () => G.passes[1]
     },
     {
         counter: counters.pow_target,
-        tooltip: () => "Allies Progress of War Target",
+        tooltip: () => "Allied Progress of War Target",
         value: () => G.pow
     },
     {
         counter: counters.pow,
-        tooltip: () => "Allies Progress of War Value",
+        tooltip: () => "Allied Progress of War Value",
         always_show: G => G.pow > 0,
         value: () => (G.pow > 0) ? current_pow(G) : 0
     },
@@ -11057,7 +11057,7 @@ function on_init(scenario, game_options, static_view) {
     define_marker("marker-isr", JP, counters.rivalry_jp)
         .tooltip(() => G.inter_service[JP] ? "Japan Inter-Service Rivalry" : "Japan Strategic Agreement")
     define_marker("marker-isr", AP, counters.rivalry_ap)
-        .tooltip(() => G.inter_service[AP] ? "Allies Inter-Service Rivalry" : "Allies Strategic Agreement")
+        .tooltip(() => G.inter_service[AP] ? "US Inter-Service Rivalry" : "US Strategic Agreement")
 
     define_marker("marker-pw", 0, counters.pw)
         .tooltip(() => "U.S. Political Will: " + G.political_will)
