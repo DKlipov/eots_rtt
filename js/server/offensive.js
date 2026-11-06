@@ -1307,7 +1307,7 @@ function get_just_entered() {
 
 function get_disengagement_units(units) {
     if (!(map_get(G.offensive.paths, units[0], [0])[0] & GROUND_MOVE) || G.offensive.stage !== ATTACK_STAGE) {
-        return []
+        return null
     }
     var hex = G.location[units[0]]
     var cf_sum = [0, 0]
@@ -1321,18 +1321,17 @@ function get_disengagement_units(units) {
             }
         }
     })
-    if (cf_sum[1 - G.offensive.attacker] > cf_sum[G.offensive.attacker]) {
+    if (result.length > 0 && cf_sum[1 - G.offensive.attacker] > cf_sum[G.offensive.attacker]) {
         return result
     }
-    return []
+    return null
 }
 
 P.prepare_disengagement = {
     _begin() {
         var allowed_units = get_disengagement_units(L.L.active)
-        if (allowed_units.length <= 0) {
+        if (!allowed_units) {
             end()
-            return
         }
     },
     inactive: "choose disengagement",
@@ -1383,12 +1382,12 @@ P.retro_disengagement = {
             var allowed_units = []
             var allowed_hexes = []
             with_state_as_G(undo_stack[G.offensive.disengagement[L.next_d]], () => {
-                allowed_units = get_disengagement_units(G.L.L.active)
-                if (allowed_units.length > 0) {
+                allowed_units = get_disengagement_units(L.L.active)
+                if (allowed_units) {
                     allowed_hexes = compute_ground_disengagement(allowed_units[0])
                 }
             })
-            if (!allowed_units.length || !allowed_hexes.length) {
+            if (!allowed_units || !allowed_hexes.length) {
                 continue
             }
             L.allowed_units = allowed_units
