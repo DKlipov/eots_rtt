@@ -14631,12 +14631,10 @@ P.china_offensive = {
             return
         }
         var r = L.mods.divisions - L.mods.burma_road - L.mods.air_support
-        if(r>=0){
-            r=`Less or equal ${r} to success.`
-        }else{
-            r=`Could not be rolled successfully.`
-        }
-        prompt(`China Offensive: Roll the die. ${r}`)
+        if (r >= 0)
+            prompt(`China Offensive: Roll ${r} or lower. (${L.mods.divisions} divisions - ${L.mods.burma_road} Burma road - ${L.mods.air_support} air support)`)
+        else
+            prompt(`China Offensive: Roll below zero. (${L.mods.divisions} divisions - ${L.mods.burma_road} Burma road - ${L.mods.air_support} air support)`)
         button("roll")
     },
     roll() {
