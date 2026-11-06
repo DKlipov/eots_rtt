@@ -1120,8 +1120,8 @@ function attack_hex(hex) {
 
 P.check_overstacking = {
     _begin() {
-        L.remove_flag = G.offensive.stage === EVENT_STAGE || G.offensive.stage === EMERGENCY_STAGE || G.offensive.stage === POST_BATTLE_STAGE && G.active === G.offensive.attacker
-        if (!L.remove_flag) {
+        var remove_flag = G.offensive.stage === EVENT_STAGE || G.offensive.stage === EMERGENCY_STAGE || G.offensive.stage === POST_BATTLE_STAGE && G.active === G.offensive.attacker
+        if (!remove_flag) {
             goto("notify_overstacking")
             return
         }
@@ -1131,18 +1131,13 @@ P.check_overstacking = {
         }
         L.hexes = []
         L.allowed_units.forEach(u => set_add(L.hexes, G.location[u]))
-        if (L.remove_flag && L.allowed_units.length) {
+        if (L.allowed_units.length) {
             log(`#G${side_get_log_str(G.active)} checked stacking`)
         }
     },
     inactive: "check stacking",
     prompt() {
-        if (!L.remove_flag) {
-            offensive_prompt(`Overstacked units in ${format_hexes(L.hexes, " and ")}.`)
-            button("done")
-            return
-        }
-        offensive_prompt(`Remove overstacked units.`)
+        prompt(`Rules Violation: Remove excess units from overstacked hexes.`)
         L.allowed_units.forEach(u => action_unit(u))
         if (L.allowed_units.length === 0) {
             button("done")
