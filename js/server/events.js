@@ -1530,10 +1530,10 @@ P.place_abda = {
     prompt() {
         if (L.allowed_hexes.length <= 0) {
             button("skip")
-            prompt(`ABDA HQ could not be placed.`)
+            prompt(`Arcadia Conference: ABDA HQ can not be placed.`)
             return
         }
-        prompt(`Choose hex to place ${piece_get_log_str(HQ_ABDA)}.`)
+        prompt(`Arcadia Conference: Place ${piece_get_log_str(HQ_ABDA)}.`)
         L.allowed_hexes.forEach(h => action_hex(h))
     },
     skip() {
@@ -1645,7 +1645,10 @@ P.us_raiders = {
     },
     inactive: "apply card effect",
     prompt() {
-        prompt(`Choose unit to damage.${L.allowed_units.length ? "" : "(Not possible)."}`)
+        if (L.allowed_units.length > 0)
+            prompt(`US Raiders: Reduce one Japanese air unit.`)
+        else
+            prompt(`US Raiders: No Japanese air units in range.`)
         L.allowed_units.forEach(h => action_unit(h))
     },
     unit(u) {
@@ -1681,10 +1684,10 @@ P.repair_avg = {
     prompt() {
         if (L.allowed_units.length <= 0) {
             button("skip")
-            prompt(`Bonus could not be used.`)
+            prompt(`China Airlift: Bonus can not be used.`)
             return
         }
-        prompt(`Choose unit to repair.`)
+        prompt(`China Airlift: Add replacement step to the AVG or a 14th AF air unit.`)
         if (G.active_stack.length) {
             L.allowed_hexes.forEach(h => action_hex(h))
         } else {
@@ -1761,7 +1764,7 @@ P.wingate = {
     },
     inactive: "apply card effect",
     prompt() {
-        prompt(`Choose unit to cancel.`)
+        prompt(`Orde Wingate: Cancel the activation of one ground unit.`)
         map_for_each(L.allowed_units, k => action_unit(k))
     },
     unit(u) {
@@ -1838,10 +1841,10 @@ P.skip_bombing = {
     prompt() {
         if (G.offensive.skip_bomb_able.length === 0) {
             button("skip")
-            prompt(`${card_get_log_str(SKIP_BOMBING)}. Choose unit to assign hit. (No possible units).`)
+            prompt(`Skip Bombing Attack: No active CA, CL, or APD naval units within range.`)
             return
         }
-        prompt(`${card_get_log_str(SKIP_BOMBING)}. Choose unit to assign hit.`)
+        prompt(`Skip Bombing Attack: Apply one step loss to an active Japanese CA, CL, or APD naval unit.`)
         if (L.done) {
             button("done")
         } else {
@@ -1949,9 +1952,9 @@ P.chronicle = {
     },
     prompt() {
         if (L.allowed_hexes.length) {
-            prompt("Choose hex to apply offensive card bonus.")
+            prompt("Operation Chronicle: Choose hex to apply offensive card bonus.")
         } else {
-            prompt("Offensive card bonus could not be applied.")
+            prompt("Operation Chronicle: Offensive card bonus can not be applied.")
         }
         button("skip")
         L.allowed_hexes.forEach(h => action_hex(h))
@@ -2012,11 +2015,11 @@ P.build_road = {
     inactive: "choose hex to build CBI",
     prompt() {
         if (!get_infrastructure_actions().length) {
-            prompt("CBI could not be built.")
+            prompt(`Burma Road: Can not construct CBI.`)
             button("skip")
             return
         }
-        prompt(`Choose hex to build CBI.`)
+        prompt(`Burma Road: Construct CBI for no cost.`)
         if (L.done) {
             button("done")
         } else {
@@ -2239,7 +2242,7 @@ P.place_14_air = {
     },
     inactive: "place unit",
     prompt() {
-        prompt(`Choose hex to place ${piece_get_log_str(AP_AIR_14)}.`)
+        prompt(`14th Air Force Offensive: Place ${piece_get_log_str(AP_AIR_14)}.`)
         if (L.allowed_hexes.length === 0) {
             button("eliminate")
         }
@@ -2312,7 +2315,7 @@ P.turkey_shoot = {
     },
     inactive: "apply card effect",
     prompt() {
-        prompt(`The Great Marianas Turkey Shoot. Choose unit to hit.`)
+        prompt(`The Great Marianas Turkey Shoot: Apply one step loss to a Japanese air unit.`)
         if (L.done || L.allowed_units.length === 0) {
             button("done")
         } else {
@@ -2434,7 +2437,7 @@ P.airborne_landing = {
         if (L.allowed_hexes.length <= 0) {
             button("skip")
         }
-        prompt(`Choose hex to place ${piece_get_log_str(ap_army("11_d"))}.`)
+        prompt(`Invasion of Luzon: Place ${piece_get_log_str(ap_army("11_d"))}.`)
         L.allowed_hexes.forEach(h => action_hex(h))
     },
     skip() {
@@ -2467,10 +2470,10 @@ P.place_armor = {
     prompt() {
         if (L.allowed_hexes.length <= 0) {
             button("eliminate")
-            prompt(`Could not place ${piece_get_log_str(ARMOR_BRIGADE)}.`)
+            prompt(`Slim's Burma Offensive: Can not place ${piece_get_log_str(ARMOR_BRIGADE)}.`)
             return
         }
-        prompt(`Choose hex to place ${piece_get_log_str(ARMOR_BRIGADE)}.`)
+        prompt(`Slim's Burma Offensive: Place ${piece_get_log_str(ARMOR_BRIGADE)}.`)
         if (L.done) {
             button("done")
         } else {
