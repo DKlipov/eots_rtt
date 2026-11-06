@@ -1211,7 +1211,7 @@ P.operation_z_pbm = {
     },
     inactive: "return units",
     prompt() {
-        prompt(`${offensive_card_header()} Choose destination for post battle movement.`)
+        prompt(`Operation Z: Choose destination for post battle movement.`)
         L.allowed_hexes.forEach(h => action_hex(h))
     },
     action_hex(h) {

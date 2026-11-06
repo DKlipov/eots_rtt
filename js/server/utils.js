@@ -11,10 +11,6 @@ function with_state_as_G(state, apply) {
     return result
 }
 
-function offensive_card_header() {
-    return `${G.offensive.type === EC ? "EC" : "OC"}: ${cards[G.offensive.active_cards[0]].ops} Ops.`
-}
-
 function card_get_log_str(c) {
     return `C${c}`
 }

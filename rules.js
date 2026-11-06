@@ -10217,10 +10217,6 @@ function with_state_as_G(state, apply) {
     return result
 }
 
-function offensive_card_header() {
-    return `${G.offensive.type === EC ? "EC" : "OC"}: ${cards[G.offensive.active_cards[0]].ops} Ops.`
-}
-
 function card_get_log_str(c) {
     return `C${c}`
 }
@@ -10715,6 +10711,14 @@ P.replacement_segment = {
 
 /* }}} */
 /* {{{ js/server/offensive.js */
+function offensive_prompt(msg) {
+    var ops = cards[G.offensive.active_cards[0]].ops
+    if (G.offensive.type === EC)
+        V.prompt = `EC: ${ops} Ops. ${msg}`
+    else
+        V.prompt = `OC: ${ops} Ops. ${msg}`
+}
+
 P.offensive_sequence = script(`
     set G.offensive.stage ATTACK_STAGE
     eval {
@@ -10856,7 +10860,7 @@ P.choose_hq = {
     },
     inactive: "choose HQ",
     prompt() {
-        prompt(`${offensive_card_header()} Choose HQ.`)
+        offensive_prompt(`Choose HQ.`)
         L.possible_units.forEach(u => action_unit(u))
         if (!L.possible_units.length) {
             button("skip")
@@ -11211,7 +11215,7 @@ P.activate_units = {
         } else if (too_much <= 0) {
             button("skip")
         }
-        prompt(`${offensive_card_header()} Activate units: ${G.offensive.active_units[G.active].length} of  ${G.offensive.logistic + L.hq_bonus} (${hint}).`)
+        offensive_prompt(`Activate units: ${G.offensive.active_units[G.active].length} of  ${G.offensive.logistic + L.hq_bonus} (${hint}).`)
 
         if (!globalThis.RTT_FUZZER || too_much < 0) {
             L.allowed_units.forEach(u => action_unit(u))
@@ -11407,7 +11411,7 @@ P.confirm_aa = {
     },
     inactive: "confirm move",
     prompt() {
-        prompt(`${offensive_card_header()} Confirm Amphibious Assault (${L.L.L.move_data.asp_points} ASP used).`)
+        offensive_prompt(`Confirm Amphibious Assault (${L.L.L.move_data.asp_points} ASP used).`)
         button("confirm")
     },
     confirm() {
@@ -11453,7 +11457,7 @@ P.move_offensive_units = {
     },
     inactive: "move units",
     prompt() {
-        prompt(`${offensive_card_header()} Move units (${L.max_movable - L.movable_units.length}/${L.max_movable}).`)
+        offensive_prompt(`Move units (${L.max_movable - L.movable_units.length}/${L.max_movable}).`)
         if (G.active_stack.length === 0 &&
             (G.offensive.stage === ATTACK_STAGE
                 || G.offensive.stage === POST_BATTLE_STAGE && !G.active_stack.length && !L.movable_units.some(u => !could_unit_stop_here(u))
@@ -11777,9 +11781,9 @@ P.choose_attack_hex = {
     prompt() {
         var could_pass = could_stack_stop_here() && G.offensive.stage === ATTACK_STAGE
         if (!L.move_data.battle_range) {
-            prompt(`${offensive_card_header()} Assign units to escort. (They will NOT contribute attack strength to the battle, only defense strength!)`)
+            offensive_prompt(`Assign units to escort. (They will NOT contribute attack strength to the battle, only defense strength!)`)
         } else {
-            prompt(`${offensive_card_header()} Assign units to battle.`)
+            offensive_prompt(`Assign units to battle.`)
             if (!could_pass && G.offensive.stage === REACTION_STAGE && L.allowed_hexes.length === 0)
                 V.prompt += " (Reaction units must be assigned to battle)."
         }
@@ -11847,11 +11851,11 @@ P.check_overstacking = {
     inactive: "check stacking",
     prompt() {
         if (!L.remove_flag) {
-            prompt(`${offensive_card_header()} Overstacked units in ${L.hexes.map(h => hex_get_log_str(h)).join(" and ")}.`)
+            offensive_prompt(`Overstacked units in ${L.hexes.map(h => hex_get_log_str(h)).join(" and ")}.`)
             button("done")
             return
         }
-        prompt(`${offensive_card_header()} Remove overstacked units.`)
+        offensive_prompt(`Remove overstacked units.`)
         L.allowed_units.forEach(u => action_unit(u))
         if (L.allowed_units.length === 0) {
             button("done")
@@ -11901,7 +11905,7 @@ P.notify_overstacking = {
     },
     inactive: "check stacking",
     prompt() {
-        prompt(`${offensive_card_header()} Overstacked units in ${L.hexes.map(h => hex_get_log_str(h)).join(" and ")}.`)
+        offensive_prompt(`Overstacked units in ${L.hexes.map(h => hex_get_log_str(h)).join(" and ")}.`)
         button("done")
     },
     done() {
@@ -12302,9 +12306,9 @@ P.declare_battle_hexes = {
     inactive: "assign units to battle",
     prompt() {
         if (G.active_stack.length === 0 && L.possible_units.length === 0) {
-            prompt(`${offensive_card_header()} Confirm declared battle hexes.`)
+            offensive_prompt(`Confirm declared battle hexes.`)
         } else {
-            prompt(`${offensive_card_header()} Assign units to battle.`)
+            offensive_prompt(`Assign units to battle.`)
         }
         if (G.active_stack.length === 0) {
             L.possible_units.forEach(u => action_unit(u))
@@ -12381,10 +12385,10 @@ P.assign_escort = {
     inactive: "assign escorts",
     prompt() {
         if (G.active_stack.length === 0) {
-            prompt(`${offensive_card_header()} Choose escorting units.`)
+            offensive_prompt(`Choose escorting units.`)
             L.possible_units.forEach(u => action_unit(u))
         } else {
-            prompt(`${offensive_card_header()} Assign units to battle hex.`)
+            offensive_prompt(`Assign units to battle hex.`)
             L.possible_units.forEach(u => {
                 if (G.location[u] === G.location[G.active_stack[0]])
                     action_unit(u)
@@ -12467,10 +12471,10 @@ P.commit_offensive_confirm = {
             action = "post battle move"
         }
         if (!L.L.verify_error || globalThis.RTT_FUZZER) {
-            prompt(`${offensive_card_header()} Confirm ${action}.`)
+            offensive_prompt(`Confirm ${action}.`)
             button("confirm")
         } else {
-            prompt(`${offensive_card_header()} Confirm ${action}. ` + L.L.verify_error)
+            offensive_prompt(`Confirm ${action}. ` + L.L.verify_error)
         }
     },
     confirm() {
@@ -12553,7 +12557,7 @@ P.special_reaction = {
     },
     inactive: "roll to special reaction",
     prompt() {
-        prompt(`${offensive_card_header()} Choose hex to roll for special reaction.`)
+        offensive_prompt(`Choose hex to roll for special reaction.`)
         button("pass")
         L.possible_hexes.forEach(h => action_hex(h))
     },
@@ -12594,7 +12598,7 @@ P.cancel_offensive = {
     },
     inactive: "react",
     prompt() {
-        prompt(`${offensive_card_header()} Cancel offensive.`)
+        offensive_prompt(`Cancel offensive.`)
         if (L.reactions_card > 0) {
             button("done")
             return
@@ -12668,7 +12672,7 @@ P.define_intelligence_condition = {
     },
     inactive: "react",
     prompt() {
-        prompt(`${offensive_card_header()} Change intelligence condition.`)
+        offensive_prompt(`Change intelligence condition.`)
         if (!G.offensive.battle_hexes.length) {
             button("done")
             return
@@ -12743,7 +12747,7 @@ P.attack_reaction_cards = {
     inactive: "react",
     prompt() {
         var played_cards = array_count(G.offensive.active_cards, (c => cards[c].faction === G.active))
-        prompt(`${offensive_card_header()} Play reaction cards.${played_cards >= 3 ? " (No more than 3 reaction cards may be played per Offensive)." : ""}`)
+        offensive_prompt(`Play reaction cards.${played_cards >= 3 ? " (No more than 3 reaction cards may be played per Offensive)." : ""}`)
         if (played_cards < 3) {
             get_hand(G.active).forEach(c => {
                 if (cards[c].type === REACTION && cards[c].can_play())
@@ -12801,7 +12805,7 @@ P.apply_attack_reaction = {
     },
     inactive: "apply reaction cards",
     prompt() {
-        prompt(`${offensive_card_header()} Apply reaction cards.`)
+        offensive_prompt(`Apply reaction cards.`)
         L.allowed_cards.forEach(c => action_card(c))
         if (L.allowed_cards.length <= 0) {
             button("done")
@@ -13758,16 +13762,16 @@ P.retreat = {
     inactive: "perform retreats",
     prompt() {
         if (G.active_stack.length) {
-            prompt(`${offensive_card_header()} Choose space to retreat.`)
+            offensive_prompt(`Choose space to retreat.`)
             L.hex_to_retreat.forEach(u => action_hex(u))
             if (!L.hex_to_retreat.length) {
                 button("eliminate")
             }
         } else if (L.unit_to_retreat.length) {
-            prompt(`${offensive_card_header()} Choose unit to retreat.`)
+            offensive_prompt(`Choose unit to retreat.`)
             L.unit_to_retreat.forEach(u => action_unit(u))
         } else {
-            prompt(`${offensive_card_header()} Confirm retreat.`)
+            offensive_prompt(`Confirm retreat.`)
             button("done")
         }
     },
@@ -13885,7 +13889,11 @@ P.emergency_move = {
     inactive: "execute emergency move",
     prompt() {
         if (G.active_stack.length) {
-            prompt(`Choose space to move.`)
+            var u = G.active_stack[0]
+            if (pieces[u].class === "air")
+                prompt(`Emergency Air Move: Move P${u} to a friendly airfield.`)
+            else
+                prompt(`Emergency Naval Move: Move P${u} to a friendly port.`)
             L.hex_to_retreat.forEach(u => action_hex(u))
             if (!L.hex_to_retreat.length) {
                 button("eliminate")
@@ -13893,13 +13901,13 @@ P.emergency_move = {
                 button("no_move")
             }
         } else if (L.unit_to_retreat.length) {
-            prompt(`Choose unit to emergency move.`)
+            prompt(`Emergency Movement: Units must make an emergency move.`)
             L.unit_to_retreat.forEach(u => action_unit(u))
             if (!L.unit_to_retreat.find(u => !is_space_controlled(G.location[u], pieces[u].faction))) {
                 button("done")
             }
         } else {
-            prompt(`Confirm emergency move.`)
+            prompt(`Emergency Movement: Confirm emergency moves.`)
             button("done")
         }
     },
@@ -15185,13 +15193,13 @@ P.conquest_of_se_asia_reaction = {
     inactive: "react",
     prompt() {
         if (G.active_stack.length <= 0) {
-            prompt(`${offensive_card_header()} Choose units for reaction movement.`)
+            offensive_prompt(`Choose units for reaction movement.`)
             L.allowed_units.forEach(u => action_unit(u))
             if (L.allowed_units.length <= 0) {
                 button("done")
             }
         } else {
-            prompt(`${offensive_card_header()} React with P${G.active_stack[0]}.`)
+            offensive_prompt(`React with P${G.active_stack[0]}.`)
             L.allowed_hexes.forEach(u => action_hex(u))
         }
     },
@@ -19736,7 +19744,7 @@ P.operation_z_pbm = {
     },
     inactive: "return units",
     prompt() {
-        prompt(`${offensive_card_header()} Choose destination for post battle movement.`)
+        prompt(`Operation Z: Choose destination for post battle movement.`)
         L.allowed_hexes.forEach(h => action_hex(h))
     },
     action_hex(h) {

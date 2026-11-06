@@ -171,13 +171,13 @@ P.conquest_of_se_asia_reaction = {
     inactive: "react",
     prompt() {
         if (G.active_stack.length <= 0) {
-            prompt(`${offensive_card_header()} Choose units for reaction movement.`)
+            offensive_prompt(`Choose units for reaction movement.`)
             L.allowed_units.forEach(u => action_unit(u))
             if (L.allowed_units.length <= 0) {
                 button("done")
             }
         } else {
-            prompt(`${offensive_card_header()} React with P${G.active_stack[0]}.`)
+            offensive_prompt(`React with P${G.active_stack[0]}.`)
             L.allowed_hexes.forEach(u => action_hex(u))
         }
     },
