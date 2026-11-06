@@ -206,7 +206,6 @@ function create_view(sherlock) {
         }
     })
 
-
     if (sherlock || R === JP) {
         V.hand[JP] = G.hand[JP].slice()
         G.offensive.draw[JP].forEach(c => V.hand[JP].push(c))
@@ -596,11 +595,33 @@ function resolve_into_turn_draw(faction) {
         return
     }
     G.offensive.draw[faction] = G.offensive.draw[faction].filter(c => c >= 0)
+    var cards = []
     for (var i = 0; i < count; i++) {
         log(`${side_get_log_str(faction)} drew additional card.`)
-        G.offensive.draw[faction].push(draw_card(faction, false))
+        var card = draw_card(faction, false)
+        cards.push(card)
+        G.offensive.draw[faction].push(card)
     }
     clear_undo()
+    call("review_drew", {cards})
+}
+
+P.review_drew = {
+    _begin() {
+        if (!L.cards || L.cards.length === 0) {
+            end()
+            return
+        }
+        G.active = cards[L.cards[0]].faction
+    },
+    inactive: "review cards",
+    prompt() {
+        prompt(`Review new drawn cards: ${L.cards.map(c => card_get_log_str(c)).join(", ")}.`)
+        button("done")
+    },
+    done() {
+        end()
+    },
 }
 
 function commit_into_turn_draw() {
@@ -608,7 +629,7 @@ function commit_into_turn_draw() {
     resolve_into_turn_draw(AP)
     G.offensive.draw[AP].forEach(c => G.hand[AP].push(c))
     G.offensive.draw[JP].forEach(c => G.hand[JP].push(c))
-    G.offensive.draw = []
+    G.offensive.draw = [[],[]]
 }
 
 function capture_hex(hex, side = G.active, no_log = false) {

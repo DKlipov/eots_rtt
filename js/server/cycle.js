@@ -169,6 +169,8 @@ P.offensive_phase = script(`
     call initiative_segment
     eval {
         end_of_offensive_check()
+    }
+    eval {
         G.active = G.first_active 
         reset_offensive()
         G.offensive.attacker = G.active
@@ -182,6 +184,8 @@ P.offensive_phase = script(`
         }
         eval {
             end_of_offensive_check()
+        }
+        eval {
             G.active = 1 - G.offensive.attacker
             reset_offensive()
             G.offensive.attacker = G.active

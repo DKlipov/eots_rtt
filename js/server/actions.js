@@ -219,8 +219,8 @@ P.offensive_segment_card_action = {
 
 
 function end_of_offensive_check() {
-    commit_into_turn_draw()
     check_occupation()
+    commit_into_turn_draw()
 }
 
 P.initiative_segment = script(`

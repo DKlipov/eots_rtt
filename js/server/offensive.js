@@ -1757,9 +1757,9 @@ P.commit_offensive_confirm = {
         }
     },
     confirm() {
+        end()
         resolve_into_turn_draw(JP)
         resolve_into_turn_draw(AP)
-        end()
     },
 }
 
