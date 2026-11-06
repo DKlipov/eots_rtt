@@ -14625,6 +14625,8 @@ P.china_offensive = {
     _begin() {
         if (is_china_coast_captured()) {
             L.impossible = 1
+        } else {
+            L.mods = get_china_offensive_modifiers()
         }
     },
     prompt() {
@@ -14632,7 +14634,13 @@ P.china_offensive = {
             prompt(`China Offensive is not allowed -- all ports captured by the Allies.`)
             return
         }
-        prompt(`China Offensive: Roll the die.`)
+        var r = L.mods.divisions - L.mods.burma_road - L.mods.air_support
+        if(r>=0){
+            r=`Less or equal ${r} to success.`
+        }else{
+            r=`Could not be rolled successfully.`
+        }
+        prompt(`China Offensive: Roll the die. ${r}`)
         button("roll")
     },
     roll() {
@@ -14642,7 +14650,7 @@ P.china_offensive = {
         }
         var result = random(10)
         G.events[events.CHINA_OFFENSIVE.id] = G.turn
-        var mods = get_china_offensive_modifiers()
+        var mods = L.mods
         mods.log.forEach(l => log(l))
         var success = result <= (mods.divisions - mods.burma_road - mods.air_support)
         log(`${dice_get_log_str(result, mods.burma_road + mods.air_support, JP)} <= ${mods.divisions} (${success ? "SUCCESS" : "FAILED"})`)
@@ -14991,7 +14999,7 @@ function get_allowed_actions(num) {
         if (G.sid !== SOUTH_PACIFIC_SCENARIO) {
             get_infrastructure_actions().forEach(a => result.push(a))
         }
-        if (R === JP && G.turn - G.events[events.CHINA_OFFENSIVE.id] > 1 &&  G.events[events.CHINA_STATUS.id] < 5) {
+        if (R === JP && G.turn - G.events[events.CHINA_OFFENSIVE.id] > 1 && G.events[events.CHINA_STATUS.id] < 5) {
             result.push("china_offensive")
         }
     }
