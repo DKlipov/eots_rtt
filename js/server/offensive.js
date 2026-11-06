@@ -1839,11 +1839,11 @@ P.special_reaction = {
     },
     inactive: "roll to special reaction",
     prompt() {
-        button("pass")
         offensive_prompt(`Special Reaction: You may attempt to create additional battle hexes.`)
+        button("skip")
         L.possible_hexes.forEach(h => action_hex(h))
     },
-    pass() {
+    skip() {
         push_undo()
         end()
     },
