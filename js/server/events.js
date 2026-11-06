@@ -700,7 +700,7 @@ P.guadalcanal_evacuation = {
             if (L.allowed_hexes.length === 0)
                 prompt(`Operation KE: No ports to evacuate to.`)
             else
-                prompt(`Operation KE: Evacuate ${G.offensive.active_units[JP].map(u=>"P"+u).join(" and ")} to a port.`)
+                prompt(`Operation KE: Evacuate ${format_units(G.offensive.active_units[JP])} to a port.`)
             L.allowed_hexes.forEach(c => action_hex(c))
         }
     },

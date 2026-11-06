@@ -17,6 +17,18 @@ function for_each_card(apply) {
     }
 }
 
+function format_cards(cards, sep=", ") {
+    return cards.map(c => "C" + c).join(sep)
+}
+
+function format_units(units, sep=", ") {
+    return units.map(u => "P" + u).join(sep)
+}
+
+function format_hexes(hexes, sep=", ") {
+    return hexes.map(h => "H" + h).join(sep)
+}
+
 function hex_to_int(i) {
     return (Math.floor(i / 100) - 10) * 29 + i % 100
 }

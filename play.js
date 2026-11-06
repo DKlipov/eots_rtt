@@ -7124,6 +7124,18 @@ function for_each_card(apply) {
     }
 }
 
+function format_cards(cards, sep=", ") {
+    return cards.map(c => "C" + c).join(sep)
+}
+
+function format_units(units, sep=", ") {
+    return units.map(u => "P" + u).join(sep)
+}
+
+function format_hexes(hexes, sep=", ") {
+    return hexes.map(h => "H" + h).join(sep)
+}
+
 function hex_to_int(i) {
     return (Math.floor(i / 100) - 10) * 29 + i % 100
 }
@@ -9744,13 +9756,13 @@ function get_hex_control_log(hex_control) {
     })
     var hex_log = " (Unsupplied hexes count as "
     if (ap.length > 0) {
-        hex_log += "AP control: " + ap.map(h => hex_get_log_str(h)).join(", ")
+        hex_log += "AP control: " + format_hexes(ap)
         if (jp.length > 0) {
             hex_log += ", "
         }
     }
     if (jp.length > 0) {
-        hex_log += "JP control: " + jp.map(h => hex_get_log_str(h)).join(", ")
+        hex_log += "JP control: " + format_hexes(jp)
     }
     hex_log += ")"
     if (ap.length === 0 && jp.length === 0) {

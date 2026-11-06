@@ -1339,7 +1339,7 @@ P.arcadia = {
 
 function draw_hist_cards() {
     var hist = [find_card(JP, 3), find_card(JP, 47), find_card(JP, 59)]
-    log(`JP drew historical hand ${hist.map(c => card_get_log_str(c)).join(", ")} + 4 random cards.`)
+    log(`JP drew historical hand ${format_cards(hist)} + 4 random cards.`)
     hist.forEach(c => draw_specific_card(c))
 }
 

@@ -7129,6 +7129,18 @@ function for_each_card(apply) {
     }
 }
 
+function format_cards(cards, sep=", ") {
+    return cards.map(c => "C" + c).join(sep)
+}
+
+function format_units(units, sep=", ") {
+    return units.map(u => "P" + u).join(sep)
+}
+
+function format_hexes(hexes, sep=", ") {
+    return hexes.map(h => "H" + h).join(sep)
+}
+
 function hex_to_int(i) {
     return (Math.floor(i / 100) - 10) * 29 + i % 100
 }
@@ -9749,13 +9761,13 @@ function get_hex_control_log(hex_control) {
     })
     var hex_log = " (Unsupplied hexes count as "
     if (ap.length > 0) {
-        hex_log += "AP control: " + ap.map(h => hex_get_log_str(h)).join(", ")
+        hex_log += "AP control: " + format_hexes(ap)
         if (jp.length > 0) {
             hex_log += ", "
         }
     }
     if (jp.length > 0) {
-        hex_log += "JP control: " + jp.map(h => hex_get_log_str(h)).join(", ")
+        hex_log += "JP control: " + format_hexes(jp)
     }
     hex_log += ")"
     if (ap.length === 0 && jp.length === 0) {
@@ -11163,7 +11175,7 @@ function log_units_activated() {
     var activated = G.offensive.active_units[G.active].length
     var limit = G.offensive.logistic + L.hq_bonus
     if (activated) {
-        log(`Activated ^${activated} units|${G.offensive.active_units[G.active].map(u => piece_get_log_str(u)).join(", ")}^, ${limit} limit.`)
+        log(`Activated ^${activated} units|${format_units(G.offensive.active_units[G.active])}^, ${limit} limit.`)
     } else {
         log(`No units activated.`)
     }
@@ -11851,7 +11863,7 @@ P.check_overstacking = {
     inactive: "check stacking",
     prompt() {
         if (!L.remove_flag) {
-            offensive_prompt(`Overstacked units in ${L.hexes.map(h => hex_get_log_str(h)).join(" and ")}.`)
+            offensive_prompt(`Overstacked units in ${format_hexes(L.hexes, " and ")}.`)
             button("done")
             return
         }
@@ -11905,7 +11917,7 @@ P.notify_overstacking = {
     },
     inactive: "check stacking",
     prompt() {
-        offensive_prompt(`Overstacked units in ${L.hexes.map(h => hex_get_log_str(h)).join(" and ")}.`)
+        offensive_prompt(`Overstacked units in ${format_hexes(L.hexes, " and ")}.`)
         button("done")
     },
     done() {
@@ -15722,7 +15734,7 @@ P.guadalcanal_evacuation = {
             if (L.allowed_hexes.length === 0)
                 prompt(`Operation KE: No ports to evacuate to.`)
             else
-                prompt(`Operation KE: Evacuate ${G.offensive.active_units[JP].map(u=>"P"+u).join(" and ")} to a port.`)
+                prompt(`Operation KE: Evacuate ${format_units(G.offensive.active_units[JP])} to a port.`)
             L.allowed_hexes.forEach(c => action_hex(c))
         }
     },
@@ -18222,7 +18234,7 @@ P.review_drew = {
     },
     inactive: "review cards",
     prompt() {
-        prompt(`Review new drawn cards: ${L.cards.map(c => card_get_log_str(c)).join(", ")}.`)
+        prompt(`Review new drawn cards: ${format_cards(L.cards)}.`)
         button("done")
     },
     done() {
@@ -19872,7 +19884,7 @@ P.arcadia = {
 
 function draw_hist_cards() {
     var hist = [find_card(JP, 3), find_card(JP, 47), find_card(JP, 59)]
-    log(`JP drew historical hand ${hist.map(c => card_get_log_str(c)).join(", ")} + 4 random cards.`)
+    log(`JP drew historical hand ${format_cards(hist)} + 4 random cards.`)
     hist.forEach(c => draw_specific_card(c))
 }
 

@@ -450,7 +450,7 @@ function log_units_activated() {
     var activated = G.offensive.active_units[G.active].length
     var limit = G.offensive.logistic + L.hq_bonus
     if (activated) {
-        log(`Activated ^${activated} units|${G.offensive.active_units[G.active].map(u => piece_get_log_str(u)).join(", ")}^, ${limit} limit.`)
+        log(`Activated ^${activated} units|${format_units(G.offensive.active_units[G.active])}^, ${limit} limit.`)
     } else {
         log(`No units activated.`)
     }
@@ -1138,7 +1138,7 @@ P.check_overstacking = {
     inactive: "check stacking",
     prompt() {
         if (!L.remove_flag) {
-            offensive_prompt(`Overstacked units in ${L.hexes.map(h => hex_get_log_str(h)).join(" and ")}.`)
+            offensive_prompt(`Overstacked units in ${format_hexes(L.hexes, " and ")}.`)
             button("done")
             return
         }
@@ -1192,7 +1192,7 @@ P.notify_overstacking = {
     },
     inactive: "check stacking",
     prompt() {
-        offensive_prompt(`Overstacked units in ${L.hexes.map(h => hex_get_log_str(h)).join(" and ")}.`)
+        offensive_prompt(`Overstacked units in ${format_hexes(L.hexes, " and ")}.`)
         button("done")
     },
     done() {

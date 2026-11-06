@@ -616,7 +616,7 @@ P.review_drew = {
     },
     inactive: "review cards",
     prompt() {
-        prompt(`Review new drawn cards: ${L.cards.map(c => card_get_log_str(c)).join(", ")}.`)
+        prompt(`Review new drawn cards: ${format_cards(L.cards)}.`)
         button("done")
     },
     done() {

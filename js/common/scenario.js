@@ -539,13 +539,13 @@ function get_hex_control_log(hex_control) {
     })
     var hex_log = " (Unsupplied hexes count as "
     if (ap.length > 0) {
-        hex_log += "AP control: " + ap.map(h => hex_get_log_str(h)).join(", ")
+        hex_log += "AP control: " + format_hexes(ap)
         if (jp.length > 0) {
             hex_log += ", "
         }
     }
     if (jp.length > 0) {
-        hex_log += "JP control: " + jp.map(h => hex_get_log_str(h)).join(", ")
+        hex_log += "JP control: " + format_hexes(jp)
     }
     hex_log += ")"
     if (ap.length === 0 && jp.length === 0) {
