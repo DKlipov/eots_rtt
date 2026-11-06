@@ -135,7 +135,7 @@ P.coastal_artillery = {
     },
     inactive: "apply coastal artillery damage",
     prompt() {
-        prompt(`Coastal artillery and mines. Reduce one naval unit.`)
+        prompt(`Coastal artillery and mines: Reduce one naval unit.`)
         L.allowed_units.forEach(u => action_unit(u))
     },
     unit(u) {
@@ -171,13 +171,13 @@ P.conquest_of_se_asia_reaction = {
     inactive: "react",
     prompt() {
         if (G.active_stack.length <= 0) {
-            prompt(`${offensive_card_header()} Choose unit to reaction.`)
+            prompt(`${offensive_card_header()} Choose units for reaction movement.`)
             L.allowed_units.forEach(u => action_unit(u))
             if (L.allowed_units.length <= 0) {
                 button("done")
             }
         } else {
-            prompt(`${offensive_card_header()} Choose hex to reaction.`)
+            prompt(`${offensive_card_header()} React with P${G.active_stack[0]}.`)
             L.allowed_hexes.forEach(u => action_hex(u))
         }
     },
@@ -310,7 +310,7 @@ cards[find_card(JP, 17)].after_unit_activation = function (u) {
         return
     }
     if (G.offensive.active_units[JP].some(u => is_cv_unit(pieces[u]))) {
-        call("rule_violation", {rule: SAVO_RULE})
+        call("savo_rule_violation")
         return
     }
     var service = null
@@ -322,18 +322,13 @@ cards[find_card(JP, 17)].after_unit_activation = function (u) {
     })
 }
 
-const SAVO_RULE = 0
-
-const VIOLATIONS = [
-    `Carriers can't be activated with this card. Check 1.3 "Naval.`
-]
-P.rule_violation = {
-    inactive: "undo wrong action",
+P.savo_rule_violation = {
+    inactive: "fix rule violation",
     prompt() {
-        prompt(VIOLATIONS[L.rule])
+        var c = find_card(JP, 17)
+        prompt(`Rules Violation: Carrier units may not be activated with C${c}. See rulebook section 1.3 "Naval".`)
     },
 }
-
 
 cards[find_card(JP, 17)].before_battle_roll = function (faction) {
     if (faction === AP || G.offensive.battle.ground_stage) {
@@ -397,7 +392,7 @@ P.naval_battle_guadalcanal = {
     },
     inactive: "airfield bombardment",
     prompt() {
-        prompt(`Choose airfield bombardment target.`)
+        prompt(`Naval Battle of Guadalcanal: Choose airfield bombardment target.`)
         L.allowed_units.forEach(u => action_unit(u))
         if (L.allowed_units.length <= 0) {
             button("skip")
@@ -432,10 +427,13 @@ P.worker_strikes_unit = {
     },
     inactive: "apply card effect",
     prompt() {
-        prompt(`Worker strikes. Choose unit.${L.allowed_units.length <= 0 ? " (No full strength Indian corps present)." : ""}`)
-        if (L.allowed_units.length <= 0) {
+        if (L.allowed_units.length > 0) {
+            prompt(`Worker Strikes in India: Reduce one full strength Indian corps.`)
+        } else {
+            prompt(`Worker Strikes in India: No full strength Indian corps to reduce.`)
             button("skip")
         }
+
         L.allowed_units.forEach(u => action_unit(u))
     },
     skip() {
@@ -522,7 +520,7 @@ P.tokyo_express = {
     },
     inactive: "place Tokyo Express marker",
     prompt() {
-        prompt(`Place Tokyo Express marker.`)
+        prompt(`Tokyo Express: Place marker in any Japanese controlled hex.`)
         if (L.first) {
             for_each_unit_on_map((u, piece, location) => {
                 if (piece.class === "hq" && piece.faction === JP && !set_has(G.oos, u)) {
@@ -602,7 +600,7 @@ cards[find_card(JP, 32)].before_battle_roll = function (faction) {
 }
 
 cards[find_card(JP, 33)].event = function () {
-    call("draw_from_discard")
+    call("draw_from_discard", { active_card: find_card(JP, 33) })
 }
 
 P.draw_from_discard = {
@@ -617,20 +615,21 @@ P.draw_from_discard = {
     },
     inactive: "choose card to draw from discard",
     prompt() {
+        V.prompt = "C" + L.active_card + ": "
         if (L.skip === 1) {
-            prompt(`Discard pile is empty, could not replace card.`)
+            V.prompt += `Your discard pile is empty, so you cannot replace a card.`
             button("skip")
             return
         } else if (L.skip === 2) {
-            prompt(`Have no card to discard, could not replace card.`)
+            V.prompt += `Your hand is empty, so you cannot replace a card.`
             button("skip")
             return
         }
         if (L.card) {
-            prompt(`Choose card to draw.`)
+            v.prompt += `Take a card from the discard pile.`
             G.discard[G.active].forEach(c => action_card(c))
         } else {
-            prompt(`Choose card to discard.`)
+            v.prompt += `You may discard a card to replace it with a card from the discard pile.`
             L.cards.forEach(c => action_card(c))
             button("skip")
         }
@@ -686,19 +685,24 @@ P.guadalcanal_evacuation = {
             return
         }
         if (L.stage === 1) {
-            prompt(`Choose coastal hex.`)
+            prompt(`Operation KE: Choose a coastal hex to evacuate.`)
             L.allowed_hexes.forEach(c => action_hex(c))
         } else if (L.stage === 2) {
-            prompt(`Choose units to evacuation.${G.offensive.active_units[JP].length === 0 && L.allowed_units.length === 0 ? " (No possible units)." : ""}`)
+            if (G.offensive.active_units[JP].length === 0 && L.allowed_units.length === 0)
+                prompt(`Operation KE: No units to evacuate.`)
+            else
+                prompt(`Operation KE: Evacuate units from H${L.from}.`)
             if (G.offensive.active_units[JP].length) {
                 button("done")
             }
             L.allowed_units.forEach(u => action_unit(u))
         } else {
-            prompt(`Choose destination port hex.${L.allowed_hexes.length === 0 ? " (No possible hex)." : ""}`)
+            if (L.allowed_hexes.length === 0)
+                prompt(`Operation KE: No ports to evacuate to.`)
+            else
+                prompt(`Operation KE: Evacuate ${G.offensive.active_units[JP].map(u=>"P"+u).join(" and ")} to a port.`)
             L.allowed_hexes.forEach(c => action_hex(c))
         }
-
     },
     skip() {
         goto("check_overstacking")
@@ -710,6 +714,7 @@ P.guadalcanal_evacuation = {
     action_hex(h) {
         push_undo()
         if (L.stage === 1) {
+            L.from = h
             L.allowed_hexes = get_guadalcanal_evacuation_destination(h)
             L.stage++
             for_each_unit_on_map((u, piece, location) => {
@@ -873,15 +878,15 @@ P.kamikaze_attack = {
     inactive: "launch kamikaze attack",
     prompt() {
         if (L.allowed_units.length <= 0) {
-            prompt(`No kamikaze attack possible. No air units.`)
+            prompt(`Kamikaze Attack: No air units.`)
             button("skip")
             return
         }
         if (L.stage === 1) {
-            prompt(`Kamikaze attack. Choose air unit.`)
+            prompt(`Kamikaze Attack: Choose Japanese air unit.`)
             L.allowed_units.forEach(u => action_unit(u))
         } else {
-            prompt(`Kamikaze attack. Choose target. Hits: ${L.hits}.`)
+            prompt(`Kamikaze Attack: Eliminate ${L.hits} Allied naval steps.`)
             var has_non_damaged = []
             L.allowed_units.forEach(u => {
                 if (!set_has(G.reduced, u)) {
@@ -1039,7 +1044,7 @@ P.paratroopers = {
     },
     inactive: "choose paratroopers landing hex",
     prompt() {
-        prompt(`Choose paratroopers landing hex.`)
+        prompt(`Paratroopers: Choose landing hex.`)
         L.allowed_hexes.forEach(u => action_hex(u))
         button("skip")
     },
@@ -1079,7 +1084,7 @@ P.halsey_typhoon = {
     },
     inactive: "apply card effect",
     prompt() {
-        prompt(`Choose unit to flip.`)
+        prompt(`Halsey's Typhoon: Reduce one activated full strength Allied CA or DD naval unit.`)
         L.allowed_units.forEach(u => action_unit(u))
     },
     unit(u) {
@@ -1109,7 +1114,8 @@ P.yamato_loss = {
     },
     inactive: "apply card effect",
     prompt() {
-        prompt(`Yamato run. Reduce one step.`)
+        var yamato = find_piece("yamato")
+        prompt(`Yamato Suicide Run: Reduce P${yamato} one step.`)
         action_unit(find_piece("yamato"))
     },
     unit(u) {
@@ -1179,11 +1185,11 @@ P.attack_b29_base = {
     inactive: "apply card effect",
     prompt() {
         if (L.allowed_units.length <= 0) {
-            prompt(`No B-29 base attacked.`)
+            prompt(`Operation Tsurugi: No B29 base within range.`)
             button("skip")
             return
         }
-        prompt(`Attack to B-29 base. Choose unit.`)
+        prompt(`Operation Tsurugi: Attack one B29 base.`)
         if (L.hits) {
             L.allowed_units.forEach(u => action_unit(u))
         } else {
@@ -1324,7 +1330,7 @@ P.fuel_shortage = {
     },
     inactive: "apply card effect",
     prompt() {
-        prompt(`Move units. Units could be selected: ${5 - L.moved.length}.`)
+        prompt(`Fuel Shortage: You may re-deploy the Combined Fleet HQ and up to ${5 - L.moved.length} naval units.`)
         L.allowed_units.forEach(u => action_unit(u))
         L.allowed_hexes.forEach(h => action_hex(h))
         if (L.moved.length && !G.active_stack.length) {
@@ -1369,7 +1375,7 @@ P.event_unit = {
     },
     inactive: "place unit",
     prompt() {
-        prompt(`Choose hex to place ${piece_get_log_str(L.unit)}.`)
+        prompt(`Tainan Air Unit: Place ${piece_get_log_str(L.unit)} on any friendly, in supply, airfield.`)
         if (L.done) {
             button("done")
         } else {
@@ -1440,10 +1446,10 @@ P.submarine_attack = {
         var roll = random(10)
         L.hits = 0
         if (roll <= L.success) {
-            log(`${dice_get_log_str(roll, 0, cards[L.card].faction)} - Loss one naval step.`)
+            log(`${dice_get_log_str(roll, 0, cards[L.card].faction)} - Lose one naval step.`)
             L.hits = 1
         } else if (L.critical && roll <= L.critical) {
-            log(`${dice_get_log_str(roll, 0, cards[L.card].faction)} - Loss two naval steps.`)
+            log(`${dice_get_log_str(roll, 0, cards[L.card].faction)} - Lose two naval steps.`)
             L.hits = 2
         } else {
             log(`${dice_get_log_str(roll, 0, cards[L.card].faction)} - No effect.`)
@@ -1471,7 +1477,7 @@ P.submarine_attack = {
     },
     inactive: "apply card effect",
     prompt() {
-        prompt(`Submarine attack. Apply hits: ${L.hits}.`)
+        prompt(`Submarine Attack: Lose ${L.hits} naval steps.`)
         if (L.allowed_units.length === 0 || L.hits <= 0) {
             button("done")
         } else {
@@ -1603,7 +1609,7 @@ cards[find_card(AP, 9)].before_commit_offensive = function () {
 }
 
 cards[find_card(AP, 10)].event = function () {
-    call("draw_from_discard")
+    call("draw_from_discard", { active_card: find_card(AP, 10) })
 }
 
 only_one_ground_unit(find_card(AP, 13))
@@ -2264,7 +2270,7 @@ cards[find_card(AP, 51)].before_unit_activation = function () {
 }
 
 cards[find_card(AP, 52)].event = function () {
-    call("draw_from_discard")
+    call("draw_from_discard", { active_card: find_card(AP, 52) })
 }
 
 cards[find_card(AP, 55)].before_battle_roll = function (faction) {
