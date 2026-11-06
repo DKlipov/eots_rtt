@@ -496,7 +496,7 @@ function victory_1944() {
 }
 
 function victory_1945() {
-    var japan_surrenders = is_event_active(events.STRAT_BOMBING_CAMPAIGN) > 0 && is_event_active(events.STRAT_BOMBING_CAMPAIGN) <= 9
+    var japan_surrenders = array_equals(G.events[events.STRAT_BOMBING.id], [9, 10, 11, 12])
         && get_jp_resources() <= 1 && (get_distance(G.location[B_29_1], TOKYO) <= 6 || G.location[B_29_1] === CHINA_BOX
             || get_distance(G.location[B_29_2], TOKYO) <= 6 || G.location[B_29_2] === CHINA_BOX)
     var result = {

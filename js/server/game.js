@@ -792,7 +792,6 @@ function bombing(u, close_air_base) {
     if (success) {
         G.strategic_warfare++
         track_event(events.STRAT_BOMBING)
-        check_event(events.STRAT_BOMBING_CAMPAIGN)
     }
     clear_undo()
     return success

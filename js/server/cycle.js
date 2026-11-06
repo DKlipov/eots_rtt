@@ -114,7 +114,6 @@ P.strategic_bombing = {
             if (G.turn >= 9) {
                 log(`Strategic bombing not possible.`)
             }
-            G.events[events.STRAT_BOMBING_CAMPAIGN.id] = 0
             end()
             return
         }
@@ -150,14 +149,11 @@ P.strategic_bombing = {
     },
     done() {
         log(`No units assigned to strategic bombing.`)
-        G.events[events.STRAT_BOMBING_CAMPAIGN.id] = 0
         end()
     },
     roll() {
         var close_air_base = TOKYO_AIR_BASES.some(h => is_space_controlled(h, AP) && (G.supply_cache[h] & AP_SUPPLY_AIRFIELD))
-        if (!G.active_stack.map(u => bombing(u, close_air_base)).reduce((a, b) => a || b, false)) {
-            G.events[events.STRAT_BOMBING_CAMPAIGN.id] = 0
-        }
+        G.active_stack.map(u => bombing(u, close_air_base))
         G.active_stack = []
         clear_undo()
         end()

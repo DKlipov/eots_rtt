@@ -206,6 +206,10 @@ const nations = {
 }
 
 const events = {
+    FAILED_POW: {
+        id: 0,
+        counter: counters.pw_failed_pow,
+    },
     ALLIED_NATIONS_SURRENDERS: {
         id: 1,
         cause: "allied nations surrendered [16.41]",
@@ -241,9 +245,11 @@ const events = {
         pw: 1,
         cause: "successful strategic bombing",
     },
-    STRAT_BOMBING_CAMPAIGN: {
+    LACK_US_CV: {
         id: 6,
-        cause: "strategic bombing campaign started",
+        cause: "no US CV units",
+        counter: counters.pw_cv,
+        pw: -1,
     },
     US_CASUALTIES: {
         id: 7,
@@ -351,16 +357,6 @@ const events = {
         cause: "no US naval units",
         counter: counters.pw_bb,
         pw: -1,
-    },
-    LACK_US_CV: {
-        id: 34,
-        cause: "no US CV units",
-        counter: counters.pw_cv,
-        pw: -1,
-    },
-    FAILED_POW: {
-        id: 35,
-        counter: counters.pw_failed_pow,
     },
 }
 

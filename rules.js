@@ -142,7 +142,7 @@ const LAST_BOARD_HEX = 1478
 const NON_PLACED_BOX = 1481
 const ELIMINATED_BOX = 1482
 const DELAYED_BOX = 1483
-const CHINA_BOX = 1484
+const CHINA_BOX = 1479
 const PERM_ELIMINATED = 1485
 const AP_REINF = 1486
 const JP_REINF = 1487
@@ -6948,6 +6948,10 @@ const nations = {
 }
 
 const events = {
+    FAILED_POW: {
+        id: 0,
+        counter: counters.pw_failed_pow,
+    },
     ALLIED_NATIONS_SURRENDERS: {
         id: 1,
         cause: "allied nations surrendered [16.41]",
@@ -6983,9 +6987,11 @@ const events = {
         pw: 1,
         cause: "successful strategic bombing",
     },
-    STRAT_BOMBING_CAMPAIGN: {
+    LACK_US_CV: {
         id: 6,
-        cause: "strategic bombing campaign started",
+        cause: "no US CV units",
+        counter: counters.pw_cv,
+        pw: -1,
     },
     US_CASUALTIES: {
         id: 7,
@@ -7093,16 +7099,6 @@ const events = {
         cause: "no US naval units",
         counter: counters.pw_bb,
         pw: -1,
-    },
-    LACK_US_CV: {
-        id: 34,
-        cause: "no US CV units",
-        counter: counters.pw_cv,
-        pw: -1,
-    },
-    FAILED_POW: {
-        id: 35,
-        counter: counters.pw_failed_pow,
     },
 }
 
@@ -9710,7 +9706,7 @@ function victory_1944() {
 }
 
 function victory_1945() {
-    var japan_surrenders = is_event_active(events.STRAT_BOMBING_CAMPAIGN) > 0 && is_event_active(events.STRAT_BOMBING_CAMPAIGN) <= 9
+    var japan_surrenders = array_equals(G.events[events.STRAT_BOMBING.id], [9, 10, 11, 12])
         && get_jp_resources() <= 1 && (get_distance(G.location[B_29_1], TOKYO) <= 6 || G.location[B_29_1] === CHINA_BOX
             || get_distance(G.location[B_29_2], TOKYO) <= 6 || G.location[B_29_2] === CHINA_BOX)
     var result = {
@@ -14258,7 +14254,6 @@ P.strategic_bombing = {
             if (G.turn >= 9) {
                 log(`Strategic bombing not possible.`)
             }
-            G.events[events.STRAT_BOMBING_CAMPAIGN.id] = 0
             end()
             return
         }
@@ -14294,14 +14289,11 @@ P.strategic_bombing = {
     },
     done() {
         log(`No units assigned to strategic bombing.`)
-        G.events[events.STRAT_BOMBING_CAMPAIGN.id] = 0
         end()
     },
     roll() {
         var close_air_base = TOKYO_AIR_BASES.some(h => is_space_controlled(h, AP) && (G.supply_cache[h] & AP_SUPPLY_AIRFIELD))
-        if (!G.active_stack.map(u => bombing(u, close_air_base)).reduce((a, b) => a || b, false)) {
-            G.events[events.STRAT_BOMBING_CAMPAIGN.id] = 0
-        }
+        G.active_stack.map(u => bombing(u, close_air_base))
         G.active_stack = []
         clear_undo()
         end()
@@ -18391,7 +18383,6 @@ function bombing(u, close_air_base) {
     if (success) {
         G.strategic_warfare++
         track_event(events.STRAT_BOMBING)
-        check_event(events.STRAT_BOMBING_CAMPAIGN)
     }
     clear_undo()
     return success

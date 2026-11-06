@@ -107,7 +107,7 @@ function get_japan_info() {
     info.info.push(`Could ${resource_trace ? "" : "NOT "}trace path to Resource hex${resorce_info}.`)
     var b29_in_range = get_distance(TOKYO, G.location[B_29_1]) <= 8 || get_distance(TOKYO, G.location[B_29_2]) <= 8
     var resource_count = get_jp_resources()
-    var campaign = is_event_active(events.STRAT_BOMBING_CAMPAIGN) ? (G.turn - is_event_active(events.STRAT_BOMBING_CAMPAIGN) + 1) : 0
+    var campaign = is_event_active(events.STRAT_BOMBING) ? (G.turn - G.events[events.STRAT_BOMBING.id][0] + 1) : 0
     if (CAMPAIGN_SCENARIOS.includes(G.sid)) {
         info.info.push(`Strategical Bombing Campaign: ${campaign}/4 turns.`)
         info.info.push(b29_in_range ? "B-29 is in range of Tokyo." : "B-29 is not in range of Tokyo.")
