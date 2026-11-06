@@ -62,7 +62,7 @@ P.submarine_warfare = {
     },
     inactive: "roll for submarine warfare",
     prompt() {
-        prompt("Roll for submarine warfare.")
+        prompt("Strategic Warfare: Roll for submarine warfare.")
         button("roll")
     },
     roll() {
@@ -121,18 +121,18 @@ P.strategic_bombing = {
     inactive: "roll to strategic bombing",
     prompt() {
         if (L.done) {
-            prompt("No strategic bombing this turn.")
+            prompt("Strategic Warfare: No strategic bombing this turn.")
             button("done")
             return
         }
-        prompt("Choose units to conduct strategic bombing.")
+        prompt("Strategic Warfare: Choose units to conduct strategic bombing.")
         if (G.active_stack.length > 0) {
             button("roll")
         } else {
+            button("all")
             button("skip")
         }
         L.allowed_units.forEach(u => action_unit(u))
-        button("all")
     },
     unit(u) {
         push_undo()
@@ -161,7 +161,7 @@ P.strategic_bombing = {
 }
 
 P.offensive_phase = script(`
-    log ("@Turn "+ G.turn+". Offensives phase")
+    log ("@Turn "+ G.turn+" -- Offensives Phase")
     call initiative_segment
     eval {
         end_of_offensive_check()
@@ -191,7 +191,7 @@ P.offensive_phase = script(`
 `)
 
 P.political_phase = script(`
-    log ("@Turn "+G.turn+". Political phase")
+    log ("@Turn "+G.turn+" -- Political Phase")
   
     call national_status_segment
     call india_surrender
@@ -370,7 +370,7 @@ P.attrition_phase = script(`
     if (G.turn ===1) {
         goto end_of_turn_phase
     }
-    log ("@Turn "+G.turn+". Attrition phase")
+    log ("@Turn "+G.turn+" -- Attrition Phase")
     eval {
         if(G.oos.length){
             basic_check_supply()
@@ -392,7 +392,7 @@ P.attrition_phase = script(`
 `)
 
 P.end_of_turn_phase = script(`
-    log ("@Turn " + G.turn + ". End of turn phase")
+    log ("@Turn " + G.turn + " -- End of Turn Phase")
     eval {
         victory_check()
         reset_events()
@@ -454,7 +454,7 @@ P.attrition = {
     },
     inactive: "apply attrition losses",
     prompt() {
-        prompt(`Apply attrition for not-supplied units`)
+        prompt(`Attrition: Reduce or eliminate ground and air units that are out of supply.`)
         if (!L.unit_to_attrition.length) {
             button("done")
         }
