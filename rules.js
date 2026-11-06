@@ -11621,6 +11621,7 @@ P.move_offensive_units = {
         set_delete(L.movable_units, u)
     },
     pass() {
+        // TODO: can this ever trigger?
         L.allowed_hexes = []
         G.active_stack = []
         if (L.movable_units.length <= 0) {
