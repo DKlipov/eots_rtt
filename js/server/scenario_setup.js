@@ -1189,14 +1189,14 @@ P.operation_z = {
         set_add(G.offensive.active_units[JP], find_piece("soryu"))
         set_add(G.offensive.active_units[JP], find_piece("shokaku"))
         set_add(G.offensive.active_units[JP], find_piece("hiei"))
-        log(`${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(piece_get_log_str))} activated.`)
+        log(`${format_details("Mobile Strike Force", format_units(G.offensive.active_units[JP]))} activated.`)
     },
     action_hex(h) {
         push_undo()
         G.offensive.active_units[JP].forEach(u => {
             set_location(u, h, true)
         })
-        log(`>${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(piece_get_log_str))} to ${hex_get_log_str(h)}.`)
+        log(`>${format_details("Mobile Strike Force", format_units(G.offensive.active_units[JP]))} to ${hex_get_log_str(h)}.`)
         create_battle_hex(OAHU)
         G.offensive.active_units[JP].forEach(u => commit_to_attack(u, OAHU))
         goto("operation_z_battle")
@@ -1220,7 +1220,7 @@ P.operation_z_pbm = {
             set_location(u, h, true)
             map_set(G.offensive.paths, u, map_get(L.allowed_hexes, h))
         })
-        log(`>${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(piece_get_log_str))} to ${hex_get_log_str(h)}.`)
+        log(`>${format_details("Mobile Strike Force", format_units(G.offensive.active_units[JP]))} to ${hex_get_log_str(h)}.`)
         G.active_stack = []
         end()
     },

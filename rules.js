@@ -7321,12 +7321,18 @@ function piece_get_log_str(p) {
     return `P${p}`
 }
 
-function list_get_log_str(header, items) {
-    return `^${header}|${items.join(" > ")}^`
+function format_move(header, path) {
+    return `^${header}|${path.join(" >\xa0")}^`
+}
+
+function format_details(header, items) {
+    if (Array.isArray(items))
+        items = items.join(", ")
+    return `^${header}|${items}^`
 }
 
 function units_str(units) {
-    return list_get_log_str(`${piece_get_log_str(units[0])} with ${units.length - 1} units`, units.map(piece_get_log_str))
+    return format_details(`${piece_get_log_str(units[0])} with ${units.length - 1} units`, format_units(units))
 }
 
 function scenario_data() {
@@ -9097,7 +9103,7 @@ function move_units(units, path) {
         log(`>${units_list} from ${point_to_point[0]} to ${point_to_point[1]}${get_move_type(path[0])}.`)
     } else {
         point_to_point[0] = "from " + point_to_point[0]
-        log(`>${units_list} ${list_get_log_str("to " + hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
+        log(`>${units_list} ${format_move("to " + hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
     }
     if (could_zoi_cross && zoi_cross_declared) {
         zoi_crossed()
@@ -9144,7 +9150,7 @@ function move_units(units, path) {
         }
     }
     if (cap.length) {
-        log(`>>Captured: ${list_get_log_str(cap.length + " hexes", cap.map(hex_get_log_str))}.`)
+        log(`>>Captured: ${format_details(cap.length + " hexes", format_hexes(cap))}.`)
     }
     if (path[0] & AIR_MOVE && (distance > L.move_data.extended_battle_range || legs > L.move_data.air_move_legs)
         || path[0] & GROUND_DISENGAGEMENT && distance > 1
@@ -12159,7 +12165,7 @@ P.retro_disengagement = {
     },
     skip() {
         push_undo()
-        var units = list_get_log_str(L.allowed_units.length + " units", L.allowed_units.map(u => set_has(G.reduced, u) ? `(${piece_get_log_str(u)})` : piece_get_log_str(u)))
+        var units = format_details(L.allowed_units.length + " units", L.allowed_units.map(u => set_has(G.reduced, u) ? `(${piece_get_log_str(u)})` : piece_get_log_str(u)))
         log(`${units} skipped disengagement.`)
         this.next_disengagement()
     },
@@ -13181,7 +13187,7 @@ P.apply_hits = {
     },
     inactive: "apply hits",
     prompt() {
-        battle_prompt(`Assign ${Math.max(G.offensive.battle.hits[R], 0)} step losses.`)
+        battle_prompt(`Assign ${Math.max(G.offensive.battle.hits[R], 0)} hits.`)
         map_for_each(G.offensive.battle.hit_able_units[R], action_unit)
         button("undo", L.dmg_list[R].length)
         if (!G.offensive.battle.hit_able_units[R].length) {
@@ -13476,7 +13482,7 @@ P.apply_naval_winner = function () {
             set_add(G.offensive.ground_pbm, u)
         })
         if (battle.amph_ground.length) {
-            log(`${list_get_log_str(battle.amph_ground.length + " units", battle.amph_ground.map(piece_get_log_str))} could not participate ground combat.`)
+            log(`${format_details(battle.amph_ground.length + " units", format_units(battle.amph_ground))} could not participate ground combat.`)
         }
     }
     end()
@@ -13690,7 +13696,7 @@ function log_in_battle_units(faction) {
     if (!att.length) {
         return "no units"
     }
-    return list_get_log_str(att.length + " units", att.map(u => set_has(G.reduced, u) ? `(${piece_get_log_str(u)})` : piece_get_log_str(u)))
+    return format_details(att.length + " units", att.map(u => set_has(G.reduced, u) ? `(${piece_get_log_str(u)})` : piece_get_log_str(u)))
 }
 
 function get_garrison(hex) {
@@ -13952,7 +13958,7 @@ function capture_landing_hexes() {
         }
     })
     if (cap.length) {
-        log(`Uncontested landings captured: ${list_get_log_str(cap.length + " hexes", cap.map(hex_get_log_str))}.`)
+        log(`Uncontested landings captured: ${format_details(cap.length + " hexes", format_hexes(cap))}.`)
         cap.forEach(h => capture_hex(h, G.offensive.attacker, true))
     }
     map_for_each(G.offensive.paths, (u, path) => {
@@ -14111,7 +14117,7 @@ function set_control_over_nation(nation, only_ground = true) {
         }
     }
     if (captured.length) {
-        log(`>${side_get_log_str(faction)} captured: ${list_get_log_str(captured.length + " hexes", captured.map(hex_get_log_str))}.`)
+        log(`>${side_get_log_str(faction)} captured: ${format_details(captured.length + " hexes", format_hexes(captured))}.`)
     }
 }
 
@@ -17008,7 +17014,7 @@ P.chronicle = {
                 set_add(captured, h)
             }
         })
-        log(`Offensive card bonus used for ${hex_get_log_str(hex)}, Allied captured: ${list_get_log_str(captured.length + " hexes", captured.map(hex_get_log_str))}.`)
+        log(`Offensive card bonus used for ${hex_get_log_str(hex)}, Allied captured: ${format_details(captured.length + " hexes", format_hexes(captured))}.`)
         end()
     },
     skip() {
@@ -19736,14 +19742,14 @@ P.operation_z = {
         set_add(G.offensive.active_units[JP], find_piece("soryu"))
         set_add(G.offensive.active_units[JP], find_piece("shokaku"))
         set_add(G.offensive.active_units[JP], find_piece("hiei"))
-        log(`${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(piece_get_log_str))} activated.`)
+        log(`${format_details("Mobile Strike Force", format_units(G.offensive.active_units[JP]))} activated.`)
     },
     action_hex(h) {
         push_undo()
         G.offensive.active_units[JP].forEach(u => {
             set_location(u, h, true)
         })
-        log(`>${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(piece_get_log_str))} to ${hex_get_log_str(h)}.`)
+        log(`>${format_details("Mobile Strike Force", format_units(G.offensive.active_units[JP]))} to ${hex_get_log_str(h)}.`)
         create_battle_hex(OAHU)
         G.offensive.active_units[JP].forEach(u => commit_to_attack(u, OAHU))
         goto("operation_z_battle")
@@ -19767,7 +19773,7 @@ P.operation_z_pbm = {
             set_location(u, h, true)
             map_set(G.offensive.paths, u, map_get(L.allowed_hexes, h))
         })
-        log(`>${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(piece_get_log_str))} to ${hex_get_log_str(h)}.`)
+        log(`>${format_details("Mobile Strike Force", format_units(G.offensive.active_units[JP]))} to ${hex_get_log_str(h)}.`)
         G.active_stack = []
         end()
     },

@@ -209,12 +209,18 @@ function piece_get_log_str(p) {
     return `P${p}`
 }
 
-function list_get_log_str(header, items) {
-    return `^${header}|${items.join(" > ")}^`
+function format_move(header, path) {
+    return `^${header}|${path.join(" >\xa0")}^`
+}
+
+function format_details(header, items) {
+    if (Array.isArray(items))
+        items = items.join(", ")
+    return `^${header}|${items}^`
 }
 
 function units_str(units) {
-    return list_get_log_str(`${piece_get_log_str(units[0])} with ${units.length - 1} units`, units.map(piece_get_log_str))
+    return format_details(`${piece_get_log_str(units[0])} with ${units.length - 1} units`, format_units(units))
 }
 
 function scenario_data() {

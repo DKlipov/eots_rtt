@@ -1971,7 +1971,7 @@ P.chronicle = {
                 set_add(captured, h)
             }
         })
-        log(`Offensive card bonus used for ${hex_get_log_str(hex)}, Allied captured: ${list_get_log_str(captured.length + " hexes", captured.map(hex_get_log_str))}.`)
+        log(`Offensive card bonus used for ${hex_get_log_str(hex)}, Allied captured: ${format_details(captured.length + " hexes", format_hexes(captured))}.`)
         end()
     },
     skip() {

@@ -850,7 +850,7 @@ function move_units(units, path) {
         log(`>${units_list} from ${point_to_point[0]} to ${point_to_point[1]}${get_move_type(path[0])}.`)
     } else {
         point_to_point[0] = "from " + point_to_point[0]
-        log(`>${units_list} ${list_get_log_str("to " + hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
+        log(`>${units_list} ${format_move("to " + hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
     }
     if (could_zoi_cross && zoi_cross_declared) {
         zoi_crossed()
@@ -897,7 +897,7 @@ function move_units(units, path) {
         }
     }
     if (cap.length) {
-        log(`>>Captured: ${list_get_log_str(cap.length + " hexes", cap.map(hex_get_log_str))}.`)
+        log(`>>Captured: ${format_details(cap.length + " hexes", format_hexes(cap))}.`)
     }
     if (path[0] & AIR_MOVE && (distance > L.move_data.extended_battle_range || legs > L.move_data.air_move_legs)
         || path[0] & GROUND_DISENGAGEMENT && distance > 1

@@ -1427,7 +1427,7 @@ P.retro_disengagement = {
     },
     skip() {
         push_undo()
-        var units = list_get_log_str(L.allowed_units.length + " units", L.allowed_units.map(u => set_has(G.reduced, u) ? `(${piece_get_log_str(u)})` : piece_get_log_str(u)))
+        var units = format_details(L.allowed_units.length + " units", L.allowed_units.map(u => set_has(G.reduced, u) ? `(${piece_get_log_str(u)})` : piece_get_log_str(u)))
         log(`${units} skipped disengagement.`)
         this.next_disengagement()
     },
@@ -2449,7 +2449,7 @@ P.apply_hits = {
     },
     inactive: "apply hits",
     prompt() {
-        battle_prompt(`Assign ${Math.max(G.offensive.battle.hits[R], 0)} step losses.`)
+        battle_prompt(`Assign ${Math.max(G.offensive.battle.hits[R], 0)} hits.`)
         map_for_each(G.offensive.battle.hit_able_units[R], action_unit)
         button("undo", L.dmg_list[R].length)
         if (!G.offensive.battle.hit_able_units[R].length) {
@@ -2744,7 +2744,7 @@ P.apply_naval_winner = function () {
             set_add(G.offensive.ground_pbm, u)
         })
         if (battle.amph_ground.length) {
-            log(`${list_get_log_str(battle.amph_ground.length + " units", battle.amph_ground.map(piece_get_log_str))} could not participate ground combat.`)
+            log(`${format_details(battle.amph_ground.length + " units", format_units(battle.amph_ground))} could not participate ground combat.`)
         }
     }
     end()
@@ -2958,7 +2958,7 @@ function log_in_battle_units(faction) {
     if (!att.length) {
         return "no units"
     }
-    return list_get_log_str(att.length + " units", att.map(u => set_has(G.reduced, u) ? `(${piece_get_log_str(u)})` : piece_get_log_str(u)))
+    return format_details(att.length + " units", att.map(u => set_has(G.reduced, u) ? `(${piece_get_log_str(u)})` : piece_get_log_str(u)))
 }
 
 function get_garrison(hex) {
@@ -3220,7 +3220,7 @@ function capture_landing_hexes() {
         }
     })
     if (cap.length) {
-        log(`Uncontested landings captured: ${list_get_log_str(cap.length + " hexes", cap.map(hex_get_log_str))}.`)
+        log(`Uncontested landings captured: ${format_details(cap.length + " hexes", format_hexes(cap))}.`)
         cap.forEach(h => capture_hex(h, G.offensive.attacker, true))
     }
     map_for_each(G.offensive.paths, (u, path) => {
