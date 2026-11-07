@@ -3,8 +3,8 @@
 /** import server/surrender.js*/
 
 P.strategic_phase = script(`
-    log ("@Turn " + G.turn + ". " + get_year_season() + " " + get_year())
-    log ("@Turn " + G.turn + ". Strategic phase")
+    log ("@Turn " + G.turn + " -- " + get_year_season() + " " + get_year())
+    log ("@Turn " + G.turn + " -- Strategic phase")
     eval {
         check_jp_resources_event()
     }
@@ -161,7 +161,7 @@ P.strategic_bombing = {
 }
 
 P.offensive_phase = script(`
-    log ("@Turn "+ G.turn+" -- Offensives Phase")
+    log ("@Turn "+ G.turn + " -- Offensives Phase")
     call initiative_segment
     eval {
         end_of_offensive_check()
@@ -172,7 +172,6 @@ P.offensive_phase = script(`
         G.offensive.attacker = G.active
     }
     while (G.hand[AP].length > 0 || G.hand[JP].length > 0) {
-        log (G.offensive.attacker === JP ? "#JJapan" : "#AAllies")
         if (G.hand[G.active].length > 0){
             call offensive_segment
         } else {

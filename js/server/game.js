@@ -728,12 +728,12 @@ function get_named_intelligence(int) {
 function play_event(c) {
     var faction = cards[c].faction
     if (G.future_offensive[faction] === c) {
-        log(`${side_get_log_str(faction)} revealed FO card.`)
+        log(`Revealed FO card.`)
     }
     if (cards[c].type === MILITARY) {
-        log(`${card_get_log_str(c)} (${cards[c].ops} EC) played.`)
+        log(`Played for ${cards[c].ops} EC.`)
     } else {
-        log(`${card_get_log_str(c)} played as event.`)
+        log(`Played for event.`)
     }
 
     if (cards[c].draw) {

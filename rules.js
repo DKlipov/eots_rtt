@@ -14154,8 +14154,8 @@ function india_stable() {
 /* }}} */
 
 P.strategic_phase = script(`
-    log ("@Turn " + G.turn + ". " + get_year_season() + " " + get_year())
-    log ("@Turn " + G.turn + ". Strategic phase")
+    log ("@Turn " + G.turn + " -- " + get_year_season() + " " + get_year())
+    log ("@Turn " + G.turn + " -- Strategic phase")
     eval {
         check_jp_resources_event()
     }
@@ -14312,7 +14312,7 @@ P.strategic_bombing = {
 }
 
 P.offensive_phase = script(`
-    log ("@Turn "+ G.turn+" -- Offensives Phase")
+    log ("@Turn "+ G.turn + " -- Offensives Phase")
     call initiative_segment
     eval {
         end_of_offensive_check()
@@ -14323,7 +14323,6 @@ P.offensive_phase = script(`
         G.offensive.attacker = G.active
     }
     while (G.hand[AP].length > 0 || G.hand[JP].length > 0) {
-        log (G.offensive.attacker === JP ? "#JJapan" : "#AAllies")
         if (G.hand[G.active].length > 0){
             call offensive_segment
         } else {
@@ -14734,7 +14733,7 @@ function build_road(card, event) {
     push_undo()
     activate_card(card)
     check_event(event)
-    log(`${card_get_log_str(card)} played.`)
+    log(`Played to build CBI.`)
     log(`>CBI infrastructure built ${event.name}.`)
     goto("end_action")
 }
@@ -14763,10 +14762,21 @@ P.offensive_segment = {
     },
     pass() {
         push_undo()
+        if (G.active === JP)
+            log(`#JPassed`)
+        else
+            log(`#APassed`)
         G.passes[R] -= 1
-        log(`Pass used, ${G.passes[R]} remaining.`)
+        log(`${G.passes[R]} passes left.`)
         goto("end_action")
     },
+}
+
+function log_offensive_card() {
+    if (G.active === JP)
+        log(`#J${card_get_log_str(L.c)}`)
+    else
+        log(`#A${card_get_log_str(L.c)}`)
 }
 
 P.offensive_segment_card_action = {
@@ -14778,13 +14788,15 @@ P.offensive_segment_card_action = {
     },
     ops() {
         push_undo()
+        log_offensive_card()
         activate_card(L.c)
         G.offensive.type = OC
-        log(`${card_get_log_str(L.c)} (${cards[L.c].ops} OC) played.`)
+        log(`Played for ${cards[L.c].ops} OC.`)
         goto("offensive_sequence")
     },
     event() {
         push_undo()
+        log_offensive_card()
         if (cards[L.c].type === MILITARY) {
             play_event(L.c)
             goto("offensive_sequence")
@@ -14797,47 +14809,59 @@ P.offensive_segment_card_action = {
     },
     discard() {
         push_undo()
+        log_offensive_card()
         activate_card(L.c)
         log(`${side_get_log_str(R)} discarded ${card_get_log_str(L.c)}.`)
         goto("end_action")
     },
     inter_service() {
         push_undo()
+        log_offensive_card()
         activate_card(L.c)
-        log(`${side_get_log_str(R)} played ${card_get_log_str(L.c)} to resolve ISR.`)
+        log(`Played to resolve Inter-Service Rivalry.`)
         set_inter_service(cards[L.c].faction, 0)
         goto("end_action")
     },
     jarhat() {
+        log_offensive_card()
         build_road(L.c, events.JARHAT_ROAD)
     },
     imphal() {
+        log_offensive_card()
         build_road(L.c, events.IMPHAL_ROAD)
     },
     ledo() {
+        log_offensive_card()
         build_road(L.c, events.LEDO_ROAD)
     },
     china_offensive() {
         push_undo()
+        log_offensive_card()
         activate_card(L.c)
-        log(`${card_get_log_str(L.c)} played for Chinese Offensive.`)
+        log(`Played for Chinese Offensive.`)
         goto("china_offensive")
     },
     displace_hq() {
         push_undo()
+        log_offensive_card()
         activate_card(L.c)
-        log(`${card_get_log_str(L.c)} played to withdraw HQ.`)
+        log(`Played to withdraw HQ.`)
         goto("displace_hq")
     },
     return_hq() {
         push_undo()
+        log_offensive_card()
         activate_card(L.c)
-        log(`${card_get_log_str(L.c)} played to return HQ.`)
+        log(`Played to return HQ.`)
         goto("return_hq")
     },
     future_offensive() {
         push_undo()
-        log(`${side_get_log_str(R)} designated a FO card.`)
+        if (G.active === JP)
+            log(`#JFuture Offensive`)
+        else
+            log(`#AFuture Offensive`)
+        log(`Designated FO card.`)
         future_offencive_card(L.c, G.turn)
         goto("end_action")
     }
@@ -14873,10 +14897,6 @@ P.future_offensive = {
             end()
             return
         }
-        if (G.active === JP)
-            log("#JJapanese Future Offensive")
-        else
-            log("#AAllied Future Offensive")
         var card = cards[G.future_offensive[G.active] > 0 ? G.future_offensive[G.active] : 0]
         if (card.type !== MILITARY || !event_hq_check(card)) {
             L.impossible = true
@@ -14885,34 +14905,25 @@ P.future_offensive = {
     inactive: "play future offensive card",
     prompt() {
         prompt("Initiative Segment: You may play your future offensives card to go first.")
-        if (L.impossible) {
-            button("skip")
-            return
-        }
-        if (L.pass) {
-            button("done")
-        } else {
-            button("skip")
+        V.selected_card = G.future_offensive[G.active]
+        if (!L.impossible)
             button("event")
-        }
+        button("skip")
     },
     event() {
         push_undo()
+        if (G.active === JP)
+            log(`#J${card_get_log_str(G.future_offensive[G.active])} (FO)`)
+        else
+            log(`#A${card_get_log_str(G.future_offensive[G.active])} (FO)`)
         play_event(G.future_offensive[G.active])
         goto("offensive_sequence")
     },
     skip() {
-        if (L.impossible) {
-            end()
-            return
-        }
-        push_undo()
-        log(`${side_get_log_str(G.active)} pass.`)
-        L.pass = true
-    },
-    done() {
+        if (!L.impossible)
+            log(`${side_get_log_str(G.active)} did not play FO card.`)
         end()
-    }
+    },
 }
 
 function event_hq_check(card) {
@@ -18339,12 +18350,12 @@ function get_named_intelligence(int) {
 function play_event(c) {
     var faction = cards[c].faction
     if (G.future_offensive[faction] === c) {
-        log(`${side_get_log_str(faction)} revealed FO card.`)
+        log(`Revealed FO card.`)
     }
     if (cards[c].type === MILITARY) {
-        log(`${card_get_log_str(c)} (${cards[c].ops} EC) played.`)
+        log(`Played for ${cards[c].ops} EC.`)
     } else {
-        log(`${card_get_log_str(c)} played as event.`)
+        log(`Played for event.`)
     }
 
     if (cards[c].draw) {

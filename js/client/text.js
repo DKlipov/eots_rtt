@@ -234,7 +234,7 @@ function show_full_log() {
 function on_init_log(log) {
     var turns = []
     for (var i = 0; i < log.length; ++i) {
-        if (log[i][0] === "!" || log[i][0] === "@" || log[i] === "#AAllies" || log[i] === "#JJapan")
+        if (log[i][0] === "!" || log[i][0] === "@" || log[i].startsWith("#A") || log[i].startsWith("#J"))
             turns.push(i)
     }
     if (turns.length >= 8)
