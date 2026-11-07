@@ -115,14 +115,13 @@ button#hqr_isolation_button:disabled
     margin: 0 -2px;
 }
 
-.tip {
-    cursor: help;
-    font-style: italic;
-}
+.tip { cursor: help; }
 
-#log :not(.h3) .ctip { color: brown; }
-#log .utip { color: green; }
-#log .htip { color: blue; }
+.ctip { font-style: italic; }
+
+#log .htip { color: teal; }
+#log .utip_jp { color: firebrick; }
+#log .utip_ap { color: blue; }
 
 .utip, .htip { white-space: pre; }
 

@@ -212,7 +212,7 @@ function print_naval_situation(text) {
         else {
             text.push(`<dd>${list.length} ${label}`)
             if (list.length <= 3)
-                text.push("<dd>" + escape_text(list.map(piece_get_log_str).join(", ")))
+                text.push("<dd>" + escape_text(list.map(unit_get_log_str).join(", ")))
         }
     }
 

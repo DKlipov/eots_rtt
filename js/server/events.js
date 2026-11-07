@@ -140,7 +140,7 @@ P.coastal_artillery = {
     },
     unit(u) {
         push_undo()
-        log(`>>${piece_get_log_str(u)} hit by coastal defence.`)
+        log(`>>${unit_get_log_str(u)} hit by coastal defence.`)
         damage_unit(u,true)
         end()
     }
@@ -443,7 +443,7 @@ P.worker_strikes_unit = {
     },
     unit(u) {
         push_undo()
-        log(`Worker strikes: ${piece_get_log_str(u)}.`)
+        log(`Worker strikes: ${unit_get_log_str(u)}.`)
         damage_unit(u)
         end()
     }
@@ -467,7 +467,7 @@ cards[find_card(JP, 23)].before_battle_roll = function (faction) {
     })
     if (any_com_unit) {
         G.offensive.battle.roll_modifiers += 1
-        log(`>>+1 Operation RE (${piece_get_log_str(any_com_unit)}).`)
+        log(`>>+1 Operation RE (${unit_get_log_str(any_com_unit)}).`)
     }
 }
 
@@ -931,7 +931,7 @@ P.kamikaze_attack = {
         push_undo()
         if (L.stage === 1) {
             var location = G.location[u]
-            log(`${piece_get_log_str(u)} launch kamikaze attack.`)
+            log(`${unit_get_log_str(u)} launch kamikaze attack.`)
             damage_unit(u)
             L.allowed_units = []
             var hexes_range = in_range_on_map(location, pieces[u].ebr, G.offensive.kamikaze, JP)
@@ -1089,7 +1089,7 @@ P.halsey_typhoon = {
     },
     unit(u) {
         push_undo()
-        log(`Halsey\`s Typhoon: ${piece_get_log_str(u)}.`)
+        log(`Halsey\`s Typhoon: ${unit_get_log_str(u)}.`)
         damage_unit(u)
         end()
     }
@@ -1375,7 +1375,7 @@ P.event_unit = {
     },
     inactive: "place unit",
     prompt() {
-        prompt(`Tainan Air Unit: Place ${piece_get_log_str(L.unit)} on any friendly, in supply, airfield.`)
+        prompt(`Tainan Air Unit: Place ${unit_get_log_str(L.unit)} on any friendly, in supply, airfield.`)
         if (L.done) {
             button("done")
         } else {
@@ -1486,7 +1486,7 @@ P.submarine_attack = {
     },
     unit(u) {
         push_undo()
-        log(`Submarine attack: ${piece_get_log_str(u)}.`)
+        log(`Submarine attack: ${unit_get_log_str(u)}.`)
         damage_unit(u)
         if (!unit_on_board(u)) {
             set_delete(L.allowed_units, u)
@@ -1533,7 +1533,7 @@ P.place_abda = {
             prompt(`Arcadia Conference: ABDA HQ can not be placed.`)
             return
         }
-        prompt(`Arcadia Conference: Place ${piece_get_log_str(HQ_ABDA)}.`)
+        prompt(`Arcadia Conference: Place ${unit_get_log_str(HQ_ABDA)}.`)
         L.allowed_hexes.forEach(action_hex)
     },
     skip() {
@@ -1653,7 +1653,7 @@ P.us_raiders = {
     },
     unit(u) {
         push_undo()
-        log(`US raiders: ${piece_get_log_str(u)}.`)
+        log(`US raiders: ${unit_get_log_str(u)}.`)
         damage_unit(u)
         end()
     }
@@ -1703,7 +1703,7 @@ P.repair_avg = {
         push_undo()
         if (set_has(G.reduced, u)) {
             set_delete(G.reduced, u)
-            log(`${piece_get_log_str(u)} repaired.`)
+            log(`${unit_get_log_str(u)} repaired.`)
             end()
         } else {
             G.active_stack = [u]
@@ -1773,7 +1773,7 @@ P.wingate = {
         set_location(u, map_get(L.allowed_units, u))
         set_delete(G.offensive.active_units[JP], u)
         map_delete(G.offensive.paths, u)
-        log(`${piece_get_log_str(u)} deactivated.`)
+        log(`${unit_get_log_str(u)} deactivated.`)
         var committed = []
         map_for_each(G.offensive.committed, (u, h) => {
             if (h === loc) {
@@ -2242,7 +2242,7 @@ P.place_14_air = {
     },
     inactive: "place unit",
     prompt() {
-        prompt(`14th Air Force Offensive: Place ${piece_get_log_str(AP_AIR_14)}.`)
+        prompt(`14th Air Force Offensive: Place ${unit_get_log_str(AP_AIR_14)}.`)
         if (L.allowed_hexes.length === 0) {
             button("eliminate")
         }
@@ -2437,7 +2437,7 @@ P.airborne_landing = {
         if (L.allowed_hexes.length <= 0) {
             button("skip")
         }
-        prompt(`Invasion of Luzon: Place ${piece_get_log_str(ap_army("11_d"))}.`)
+        prompt(`Invasion of Luzon: Place ${unit_get_log_str(ap_army("11_d"))}.`)
         L.allowed_hexes.forEach(action_hex)
     },
     skip() {
@@ -2447,7 +2447,7 @@ P.airborne_landing = {
     },
     action_hex(h) {
         push_undo()
-        log(`${piece_get_log_str(ap_army("11_d"))} landed at ${hex_get_log_str(h)}.`)
+        log(`${unit_get_log_str(ap_army("11_d"))} landed at ${hex_get_log_str(h)}.`)
         set_location(ap_army("11_d"), h)
         capture_hex(h, AP)
         end()
@@ -2470,10 +2470,10 @@ P.place_armor = {
     prompt() {
         if (L.allowed_hexes.length <= 0) {
             button("eliminate")
-            prompt(`Slim's Burma Offensive: Can not place ${piece_get_log_str(ARMOR_BRIGADE)}.`)
+            prompt(`Slim's Burma Offensive: Can not place ${unit_get_log_str(ARMOR_BRIGADE)}.`)
             return
         }
-        prompt(`Slim's Burma Offensive: Place ${piece_get_log_str(ARMOR_BRIGADE)}.`)
+        prompt(`Slim's Burma Offensive: Place ${unit_get_log_str(ARMOR_BRIGADE)}.`)
         if (L.done) {
             button("done")
         } else {
@@ -2490,7 +2490,7 @@ P.place_armor = {
     },
     eliminate() {
         push_undo()
-        log(`Could not place ${piece_get_log_str(ARMOR_BRIGADE)}.`)
+        log(`Could not place ${unit_get_log_str(ARMOR_BRIGADE)}.`)
         eliminate_permanently(ARMOR_BRIGADE)
         end()
     }

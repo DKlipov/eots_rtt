@@ -319,7 +319,7 @@ function draw_specific_card(card) {
 
 function eliminate_permanently(unit) {
     if (G.location[unit] !== PERM_ELIMINATED && G.location[unit] !== NOT_USED) {
-        log(`${piece_get_log_str(unit)} removed from game.`)
+        log(`${unit_get_log_str(unit)} removed from game.`)
     }
     set_location(unit, PERM_ELIMINATED)
     set_delete(G.reduced, unit)
@@ -342,7 +342,7 @@ function eliminate(unit, no_log = false) {
         return
     }
     if (!no_log) {
-        log(`>${piece_get_log_str(unit)} eliminated.`)
+        log(`>${unit_get_log_str(unit)} eliminated.`)
     }
     G.location[unit] = ELIMINATED_BOX
     set_delete(G.reduced, unit)
@@ -359,7 +359,7 @@ function damage_unit(unit, no_log) {
 
 function reduce_unit(unit, no_log = false) {
     if (!no_log) {
-        log(`>${piece_get_log_str(unit)} reduced.`)
+        log(`>${unit_get_log_str(unit)} reduced.`)
     }
     set_add(G.reduced, unit)
 }
@@ -535,19 +535,19 @@ function change_wie(diff, cause) {
 
 function displace_to_turn(unit, turns, not_delayed) {
     if (pieces[unit].notreplaceable && unit_on_board(unit)) {
-        log(`${piece_get_log_str(unit)} not replaceable, could not be displaced to turn box.`)
+        log(`${unit_get_log_str(unit)} not replaceable, could not be displaced to turn box.`)
         eliminate(unit)
         return
     }
     if (G.turn + turns > 12 || G.sid === SOUTH_PACIFIC_SCENARIO && G.turn + turns > 6 || G.sid === BURMA_SCENARIO && G.turn + turns > 9) {
-        log(`${piece_get_log_str(unit)} should be displaced to turn box ${G.turn + turns} but permanently eliminated instead.`)
+        log(`${unit_get_log_str(unit)} should be displaced to turn box ${G.turn + turns} but permanently eliminated instead.`)
         if (pieces[unit].class === "hq") {
             set_location(unit, TURN_BOX + 13)
         } else {
             set_location(unit, PERM_ELIMINATED)
         }
     } else {
-        log(`>${piece_get_log_str(unit)} to turn box ${G.turn + turns}.`)
+        log(`>${unit_get_log_str(unit)} to turn box ${G.turn + turns}.`)
         set_location(unit, TURN_BOX + G.turn + turns)
         if (not_delayed) {
             set_add(G.not_delayed, unit)
@@ -778,7 +778,7 @@ function bombing(u, close_air_base) {
     var success = result < success_rate
     var damaged = result >= 9 && !close_air_base
     var modifier = 0
-    log(`${piece_get_log_str(u)} strategic bombing (${close_air_base ? "Air" : "No air"} base withing range of Tokyo):`)
+    log(`${unit_get_log_str(u)} strategic bombing (${close_air_base ? "Air" : "No air"} base withing range of Tokyo):`)
     if (is_event_active(events.INTERCEPTORS) && !close_air_base) {
         log(`+1 High altitude interceptors.`)
         modifier++

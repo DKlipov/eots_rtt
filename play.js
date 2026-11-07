@@ -7129,7 +7129,7 @@ function format_cards(cards, sep=", ") {
 }
 
 function format_units(units, sep=", ") {
-    return units.map(piece_get_log_str).join(sep)
+    return units.map(unit_get_log_str).join(sep)
 }
 
 function format_hexes(hexes, sep=", ") {
@@ -7292,11 +7292,11 @@ function get_china_offensive_modifiers() {
 
     if (G.sid === SOUTH_PACIFIC_SCENARIO) {
         result.air_support++
-        result.log.push(`>+1 ${piece_get_log_str(ap_air("14_lrb"))}.`)
+        result.log.push(`>+1 ${unit_get_log_str(ap_air("14_lrb"))}.`)
     } else {
         for_each_unit((u, piece, location) => {
             if (location === CHINA_BOX && (piece.type !== "lrb" || u === LRB_14) && !set_has(G.oos, u)) {
-                result.log.push(`>+1 ${piece_get_log_str(u)}.`)
+                result.log.push(`>+1 ${unit_get_log_str(u)}.`)
                 result.air_support++
             }
         })
@@ -7308,12 +7308,18 @@ function get_china_offensive_modifiers() {
 
 // below are all functions for pretty formatting (tooltips, hover to piece on click etc) in the log
 
+function card_get_log_str(c) {
+    return `C${c}`
+}
+
 function hex_get_log_str(h) {
     return `H${h}`
 }
 
-function piece_get_log_str(p) {
-    return `P${p}`
+function unit_get_log_str(p) {
+    if (pieces[p].faction === JP)
+        return "u" + p
+    return "U" + p
 }
 
 function format_move(header, path) {
@@ -7327,7 +7333,7 @@ function format_details(header, items) {
 }
 
 function units_str(units) {
-    return format_details(`${piece_get_log_str(units[0])} with ${units.length - 1} units`, format_units(units))
+    return format_details(`${unit_get_log_str(units[0])} with ${units.length - 1} units`, format_units(units))
 }
 
 function scenario_data() {
@@ -9205,9 +9211,9 @@ function set_location(unit, location, no_logs) {
     var prev_out = prev_location > LAST_BOARD_HEX && prev_location !== CHINA_BOX
     var current_on_map = location <= LAST_BOARD_HEX || location === CHINA_BOX
     if (!no_logs && prev_out && current_on_map) {
-        log(`>${piece_get_log_str(unit)} to ${hex_get_log_str(location)}.`)
+        log(`>${unit_get_log_str(unit)} to ${hex_get_log_str(location)}.`)
     } else if (!no_logs && current_on_map) {
-        log(`>${piece_get_log_str(unit)} to ${hex_get_log_str(location)}.`)
+        log(`>${unit_get_log_str(unit)} to ${hex_get_log_str(location)}.`)
     }
     var pair_location = G.location[pieces[unit].pair]
     var size = get_overstack_size(unit)
@@ -12089,7 +12095,7 @@ function print_naval_situation(text) {
         else {
             text.push(`<dd>${list.length} ${label}`)
             if (list.length <= 3)
-                text.push("<dd>" + escape_text(list.map(piece_get_log_str).join(", ")))
+                text.push("<dd>" + escape_text(list.map(unit_get_log_str).join(", ")))
         }
     }
 
@@ -13317,13 +13323,6 @@ const ICONS = {
     R7: '<span class="xdice jp">7</span>',
     R8: '<span class="xdice jp">8</span>',
     R9: '<span class="xdice jp">9</span>',
-    W0: '<span class="dice white d0"></span>',
-    W1: '<span class="dice white d1"></span>',
-    W2: '<span class="dice white d2"></span>',
-    W3: '<span class="dice white d3"></span>',
-    W4: '<span class="dice white d4"></span>',
-    W5: '<span class="dice white d5"></span>',
-    W6: '<span class="dice white d6"></span>',
 }
 
 function escape_text(text) {
@@ -13334,11 +13333,12 @@ function escape_text(text) {
 
     text = text.replace(/\^(.*?)\|(.*?)\^/g, escape_list)
 
-    text = escape_icon(text, /\b[BRW]\d\b/g, ICONS)
+    text = escape_icon(text, /\b[BR]\d\b/g, ICONS)
 
     text = escape_tip_class(text, /C(\d+)/g, "tip ctip", CARD_CLASSES, CARD_NAMES)
     text = escape_tip_light(text, /H(\d+)/g, "tip htip", "action_hex", HEX_NAMES)
-    text = escape_tip_light(text, /P(\d+)/g, "tip utip", "unit", UNIT_NAMES)
+    text = escape_tip_light(text, /u(\d+)/g, "tip utip_jp", "unit", UNIT_NAMES)
+    text = escape_tip_light(text, /U(\d+)/g, "tip utip_ap", "unit", UNIT_NAMES)
 
     text = text.replace(/\b1 passes/g, "1 pass")
     text = text.replace(/\b1 cards/g, "1 card")

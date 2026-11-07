@@ -40,7 +40,7 @@ function sent_to_europe(u) {
     var roll = random(10)
     clear_undo()
     result = roll <= modifier
-    log(`>${piece_get_log_str(u)}: ${dice_get_log_str(roll, 0, AP)} > ${modifier}${result ? " (FAILED)" : ""}.`)
+    log(`>${unit_get_log_str(u)}: ${dice_get_log_str(roll, 0, AP)} > ${modifier}${result ? " (FAILED)" : ""}.`)
     if (result) {
         displace_to_turn(u, 3)
     }
@@ -222,10 +222,10 @@ P.reinforcement_segment = {
         if (G.active_stack.length) {
             L.allowed_hexes.forEach(action_hex)
             if (L.allowed_hexes.length === 0) {
-                prompt(`Reinforcements: Cannot place ${piece_get_log_str(G.active_stack[0])} anywhere.`)
+                prompt(`Reinforcements: Cannot place ${unit_get_log_str(G.active_stack[0])} anywhere.`)
                 button("delay")
             } else {
-                prompt(`Reinforcements: Place ${piece_get_log_str(G.active_stack[0])}.`)
+                prompt(`Reinforcements: Place ${unit_get_log_str(G.active_stack[0])}.`)
             }
         } else if (L.europe1.length > 0) {
             prompt(`Reinforcements: Sent to Europe die roll for ${L.europe1.length} eligible delayed units.`)
@@ -303,7 +303,7 @@ P.reinforcement_segment = {
             L.logged = 1
         }
         set_location(G.active_stack[0], DELAYED_BOX)
-        log(`${piece_get_log_str(G.active_stack[0])} voluntary delayed to next turn.`)
+        log(`${unit_get_log_str(G.active_stack[0])} voluntary delayed to next turn.`)
         if (could_sent_to_europe(G.active_stack[0])) {
             set_add(L.europe1, G.active_stack[0])
         }
@@ -358,7 +358,7 @@ P.replacement_segment = {
         var ru = L.replacable_units.filter(u => L.replacement_points[pieces[u].replacement] > 0)
         var not_used_unground = L.divisions_used <= 0 || L.replacement_points[GROUND_REP] <= 0
         if (G.active_stack.length > 0) {
-            prompt(`Replacements: Place ${piece_get_log_str(G.active_stack[0])}.`)
+            prompt(`Replacements: Place ${unit_get_log_str(G.active_stack[0])}.`)
             if (not_used_unground)
                 V.prompt += " Ground replacements should be spent."
 
@@ -440,7 +440,7 @@ P.replacement_segment = {
         if (set_has(G.reduced, u)) {
             set_delete(G.reduced, u)
             set_delete(L.replacable_units, u)
-            log(`>${piece_get_log_str(u)} to full strength.`)
+            log(`>${unit_get_log_str(u)} to full strength.`)
         } else {
             set_add(G.reduced, u)
             G.active_stack = [u]

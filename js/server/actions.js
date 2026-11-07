@@ -74,7 +74,7 @@ P.return_hq = {
                 }
             })
         } else {
-            prompt(`Return ${piece_get_log_str(G.active_stack[0])} to a friendly controlled port.`)
+            prompt(`Return ${unit_get_log_str(G.active_stack[0])} to a friendly controlled port.`)
             G.allowed_hexes.forEach(action_hex)
         }
     },
@@ -94,7 +94,7 @@ P.return_hq = {
     },
     action_hex(hex) {
         push_undo()
-        log(`${piece_get_log_str(G.active_stack[0])} selected for early return.`)
+        log(`${unit_get_log_str(G.active_stack[0])} selected for early return.`)
         set_location(G.active_stack[0], hex)
         G.active_stack = []
         goto("end_action")

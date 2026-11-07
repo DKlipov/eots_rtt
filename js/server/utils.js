@@ -11,10 +11,6 @@ function with_state_as_G(state, apply) {
     return result
 }
 
-function card_get_log_str(c) {
-    return `C${c}`
-}
-
 function dice_get_log_str(p, modifiers, faction = G.active) {
     var str = (faction === AP ? "B" : "R") + p
     if (modifiers) {

@@ -162,7 +162,7 @@ P.choose_hq = {
         if (G.offensive.type === EC && L.card > 0 && cards[L.card].logistic_alt && cards[L.card].logistic_alt[0].includes(u)) {
             G.offensive.logistic = cards[L.card].logistic_alt[1]
         }
-        log(`${piece_get_log_str(u)} activated.`)
+        log(`${unit_get_log_str(u)} activated.`)
         end()
     },
     unit(u) {
@@ -656,7 +656,7 @@ function after_unit_move() {
         G.offensive.active_units[G.offensive.attacker].forEach(u => {
             if (map_has(G.offensive.committed, u) && G.location[u] === hex) {
                 map_delete(G.offensive.committed, u)
-                log(`${piece_get_log_str(u)} turned back to battle hex ${get_bh_str(hex)}.`)
+                log(`${unit_get_log_str(u)} turned back to battle hex ${get_bh_str(hex)}.`)
             }
         })
     }
@@ -945,7 +945,7 @@ P.move_offensive_units = {
             G.active_stack.forEach(u => {
                 var index = G.offensive.organic.indexOf(u)
                 if (index >= 0 && pieces[u].class === "naval") {
-                    log(`>>Organic tr. ${piece_get_log_str(G.offensive.organic[index])} with ${piece_get_log_str(G.offensive.organic[index + 1])}`)
+                    log(`>>Organic tr. ${unit_get_log_str(G.offensive.organic[index])} with ${unit_get_log_str(G.offensive.organic[index + 1])}`)
                 }
             })
         }
@@ -1427,7 +1427,7 @@ P.retro_disengagement = {
     },
     skip() {
         push_undo()
-        var units = format_details(L.allowed_units.length + " units", L.allowed_units.map(u => set_has(G.reduced, u) ? `(${piece_get_log_str(u)})` : piece_get_log_str(u)))
+        var units = format_details(L.allowed_units.length + " units", L.allowed_units.map(u => set_has(G.reduced, u) ? `(${unit_get_log_str(u)})` : unit_get_log_str(u)))
         log(`${units} skipped disengagement.`)
         this.next_disengagement()
     },
@@ -1603,7 +1603,7 @@ P.declare_battle_hexes = {
                     target_in_battle_range(pieces[u].parenthetical ? pieces[u].br : pieces[u].ebr, G.location[u], L.possible_hexes))
             }
         }
-        log(`>${piece_get_log_str(G.active_stack[0])} assigned to ${hex_get_log_str(hex)}.`)
+        log(`>${unit_get_log_str(G.active_stack[0])} assigned to ${hex_get_log_str(hex)}.`)
         G.active_stack = []
         if (L.possible_units.length <= 0) {
             end()
@@ -2524,7 +2524,7 @@ P.jp_cv_reassign = {
     inactive: "use range advantage",
     prompt() {
         if (L.stage === 0) {
-            prompt(`Range Advantage: You may transfer carrier steps (${L.hits}).`) // XXX
+            prompt(`Range Advantage: You may transfer one carrier step.`) // XXX
             L.to_damage.forEach(u => {
                 if (L.to_repair.length > 2 || !map_has(L.to_repair, u))
                     action_unit(u)
@@ -2569,7 +2569,7 @@ P.jp_cv_reassign = {
             if (unit_on_board(u)) {
                 set_delete(G.reduced, u)
                 map_delete(L.to_repair, u)
-                log(`>${piece_get_log_str(u)} to full strength.`)
+                log(`>${unit_get_log_str(u)} to full strength.`)
             } else {
                 var location = G.offensive.battle.battle_hex
                 var path = map_get(G.offensive.paths, u)
@@ -2708,7 +2708,7 @@ function apply_loss() {
             reduce_unit(unit, true)
         }
         var dmg = map_get(dmg_map, unit, 0)
-        log(`>${piece_get_log_str(unit)} ${d[i] > 2 ? "eliminated" : "reduced"} (${step}${dmg ? " x " + dmg : " step"}).`)
+        log(`>${unit_get_log_str(unit)} ${d[i] > 2 ? "eliminated" : "reduced"} (${step}${dmg ? " x " + dmg : " step"}).`)
         var piece = pieces[unit]
         if (piece.faction === JP && is_cv_unit(piece)) {
             battle.jp_cv_damaged = 1
@@ -2958,7 +2958,7 @@ function log_in_battle_units(faction) {
     if (!att.length) {
         return "no units"
     }
-    return format_details(att.length + " units", att.map(u => set_has(G.reduced, u) ? `(${piece_get_log_str(u)})` : piece_get_log_str(u)))
+    return format_details(att.length + " units", att.map(u => set_has(G.reduced, u) ? `(${unit_get_log_str(u)})` : unit_get_log_str(u)))
 }
 
 function get_garrison(hex) {
@@ -3058,7 +3058,7 @@ P.retreat = {
             eliminate(G.active_stack[0])
         } else {
             set_location(G.active_stack[0], hex, true)
-            log(`${piece_get_log_str(G.active_stack[0])} retreat to ${hex_get_log_str(hex)}.`)
+            log(`${unit_get_log_str(G.active_stack[0])} retreat to ${hex_get_log_str(hex)}.`)
             capture_hex(hex, pieces[G.active_stack[0]].faction)
             if (set_has(G.offensive.battle_hexes, hex)) {
                 map_set(G.offensive.committed, G.active_stack[0], G.offensive.battle.battle_hex)

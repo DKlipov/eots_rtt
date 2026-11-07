@@ -187,7 +187,8 @@ function escape_text(text) {
 
     text = escape_tip_class(text, /C(\d+)/g, "tip ctip", CARD_CLASSES, CARD_NAMES)
     text = escape_tip_light(text, /H(\d+)/g, "tip htip", "action_hex", HEX_NAMES)
-    text = escape_tip_light(text, /P(\d+)/g, "tip utip", "unit", UNIT_NAMES)
+    text = escape_tip_light(text, /u(\d+)/g, "tip utip_jp", "unit", UNIT_NAMES)
+    text = escape_tip_light(text, /U(\d+)/g, "tip utip_ap", "unit", UNIT_NAMES)
 
     text = text.replace(/\b1 passes/g, "1 pass")
     text = text.replace(/\b1 cards/g, "1 card")

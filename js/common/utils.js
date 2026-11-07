@@ -22,7 +22,7 @@ function format_cards(cards, sep=", ") {
 }
 
 function format_units(units, sep=", ") {
-    return units.map(piece_get_log_str).join(sep)
+    return units.map(unit_get_log_str).join(sep)
 }
 
 function format_hexes(hexes, sep=", ") {
@@ -185,11 +185,11 @@ function get_china_offensive_modifiers() {
 
     if (G.sid === SOUTH_PACIFIC_SCENARIO) {
         result.air_support++
-        result.log.push(`>+1 ${piece_get_log_str(ap_air("14_lrb"))}.`)
+        result.log.push(`>+1 ${unit_get_log_str(ap_air("14_lrb"))}.`)
     } else {
         for_each_unit((u, piece, location) => {
             if (location === CHINA_BOX && (piece.type !== "lrb" || u === LRB_14) && !set_has(G.oos, u)) {
-                result.log.push(`>+1 ${piece_get_log_str(u)}.`)
+                result.log.push(`>+1 ${unit_get_log_str(u)}.`)
                 result.air_support++
             }
         })
@@ -201,12 +201,18 @@ function get_china_offensive_modifiers() {
 
 // below are all functions for pretty formatting (tooltips, hover to piece on click etc) in the log
 
+function card_get_log_str(c) {
+    return `C${c}`
+}
+
 function hex_get_log_str(h) {
     return `H${h}`
 }
 
-function piece_get_log_str(p) {
-    return `P${p}`
+function unit_get_log_str(p) {
+    if (pieces[p].faction === JP)
+        return "u" + p
+    return "U" + p
 }
 
 function format_move(header, path) {
@@ -220,7 +226,7 @@ function format_details(header, items) {
 }
 
 function units_str(units) {
-    return format_details(`${piece_get_log_str(units[0])} with ${units.length - 1} units`, format_units(units))
+    return format_details(`${unit_get_log_str(units[0])} with ${units.length - 1} units`, format_units(units))
 }
 
 function scenario_data() {
