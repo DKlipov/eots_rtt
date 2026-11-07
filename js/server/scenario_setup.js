@@ -1307,7 +1307,7 @@ P.arcadia = {
     },
     hold() {
         clear_undo()
-        log(`Allies took Arcadia + 4 random cards.`)
+        log(`Allies took ${card_get_log_str(find_card(AP, 4))} + 4 random cards.`)
         while (G.hand[AP].length < 5) {
             draw_card(AP)
         }
