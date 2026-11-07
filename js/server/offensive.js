@@ -2407,8 +2407,9 @@ P.assign_hits = script(`
 
 function battle_prompt(msg) {
     if (G.offensive.battle.ground_stage)
-        return "Ground combat in H" + G.offensive.battle.battle_hex + ": " + msg
-    return "Air/naval combat in H" + G.offensive.battle.battle_hex + ": " + msg
+        V.prompt = "Ground combat in H" + G.offensive.battle.battle_hex + ": " + msg
+    else
+        V.prompt = "Air/naval combat in H" + G.offensive.battle.battle_hex + ": " + msg
 }
 
 P.apply_hits = {
