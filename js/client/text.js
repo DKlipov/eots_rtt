@@ -173,13 +173,6 @@ const ICONS = {
     R7: '<span class="xdice jp">7</span>',
     R8: '<span class="xdice jp">8</span>',
     R9: '<span class="xdice jp">9</span>',
-    W0: '<span class="dice white d0"></span>',
-    W1: '<span class="dice white d1"></span>',
-    W2: '<span class="dice white d2"></span>',
-    W3: '<span class="dice white d3"></span>',
-    W4: '<span class="dice white d4"></span>',
-    W5: '<span class="dice white d5"></span>',
-    W6: '<span class="dice white d6"></span>',
 }
 
 function escape_text(text) {
@@ -190,7 +183,7 @@ function escape_text(text) {
 
     text = text.replace(/\^(.*?)\|(.*?)\^/g, escape_list)
 
-    text = escape_icon(text, /\b[BRW]\d\b/g, ICONS)
+    text = escape_icon(text, /\b[BR]\d\b/g, ICONS)
 
     text = escape_tip_class(text, /C(\d+)/g, "tip", CARD_CLASSES, CARD_NAMES)
     text = escape_tip_light(text, /H(\d+)/g, "tip", "action_hex", HEX_NAMES)
