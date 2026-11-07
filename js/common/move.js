@@ -847,10 +847,10 @@ function move_units(units, path) {
     i = 2
     var destination = path[path.length - 1]
     if (point_to_point.length === 2) {
-        log(`>1${units_list} from ${point_to_point[0]} to ${point_to_point[1]}${get_move_type(path[0])}.`)
+        log(`>${units_list} from ${point_to_point[0]} to ${point_to_point[1]}${get_move_type(path[0])}.`)
     } else {
         point_to_point[0] = "path: " + point_to_point[0]
-        log(`>1${units_list} ${list_get_log_str("to " + hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
+        log(`>${units_list} ${list_get_log_str("to " + hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
     }
     if (could_zoi_cross && zoi_cross_declared) {
         zoi_crossed()
@@ -897,7 +897,7 @@ function move_units(units, path) {
         }
     }
     if (cap.length) {
-        log(`>2Captured: ${list_get_log_str(cap.length + " hexes", cap.map(u => hex_get_log_str(u)))}.`)
+        log(`>>Captured: ${list_get_log_str(cap.length + " hexes", cap.map(u => hex_get_log_str(u)))}.`)
     }
     if (path[0] & AIR_MOVE && (distance > L.move_data.extended_battle_range || legs > L.move_data.air_move_legs)
         || path[0] & GROUND_DISENGAGEMENT && distance > 1
@@ -957,9 +957,9 @@ function set_location(unit, location, no_logs) {
     var prev_out = prev_location > LAST_BOARD_HEX && prev_location !== CHINA_BOX
     var current_on_map = location <= LAST_BOARD_HEX || location === CHINA_BOX
     if (!no_logs && prev_out && current_on_map) {
-        log(`>1${piece_get_log_str(unit)} to ${hex_get_log_str(location)}.`)
+        log(`>${piece_get_log_str(unit)} to ${hex_get_log_str(location)}.`)
     } else if (!no_logs && current_on_map) {
-        log(`>1${piece_get_log_str(unit)} to ${hex_get_log_str(location)}.`)
+        log(`>${piece_get_log_str(unit)} to ${hex_get_log_str(location)}.`)
     }
     var pair_location = G.location[pieces[unit].pair]
     var size = get_overstack_size(unit)

@@ -140,7 +140,7 @@ P.coastal_artillery = {
     },
     unit(u) {
         push_undo()
-        log(`>2${piece_get_log_str(u)} hit by coastal defence.`)
+        log(`>>${piece_get_log_str(u)} hit by coastal defence.`)
         damage_unit(u,true)
         end()
     }
@@ -240,7 +240,7 @@ cards[find_card(JP, 8)].before_battle_roll = function (faction) {
     })
     if (any_com_unit) {
         G.offensive.battle.roll_modifiers += 1
-        log(`>2+1 Operation C.`)
+        log(`>>+1 Operation C.`)
     }
 }
 
@@ -346,7 +346,7 @@ cards[find_card(JP, 17)].before_battle_roll = function (faction) {
         }
     })
     if (modifier) {
-        log(`>2+${modifier} attack strength (Night Fighting Advantage).`)
+        log(`>>+${modifier} attack strength (Night Fighting Advantage).`)
     }
 }
 
@@ -467,7 +467,7 @@ cards[find_card(JP, 23)].before_battle_roll = function (faction) {
     })
     if (any_com_unit) {
         G.offensive.battle.roll_modifiers += 1
-        log(`>2+1 Operation RE (${piece_get_log_str(any_com_unit)}).`)
+        log(`>>+1 Operation RE (${piece_get_log_str(any_com_unit)}).`)
     }
 }
 
@@ -497,7 +497,7 @@ cards[find_card(JP, 25)].before_battle_roll = function (faction) {
         }
     })
     if (modifier) {
-        log(`>2${modifier} attack strength (Allied Tactical Confusion).`)
+        log(`>>${modifier} attack strength (Allied Tactical Confusion).`)
     }
 }
 
@@ -566,7 +566,7 @@ cards[find_card(JP, 29)].before_battle_roll = function (faction) {
         }
     })
     if (modifier) {
-        log(`>2+${modifier} attack strength (Effective Aerial Torpedo Tactics).`)
+        log(`>>+${modifier} attack strength (Effective Aerial Torpedo Tactics).`)
     }
 }
 
@@ -595,7 +595,7 @@ cards[find_card(JP, 32)].before_battle_roll = function (faction) {
     })
     if (in_range_on_map(battle, 6, cv_hex, JP).length) {
         G.offensive.battle.roll_modifiers += 1
-        log(`>2+1 Air Shuttle.`)
+        log(`>>+1 Air Shuttle.`)
     }
 }
 
@@ -992,7 +992,7 @@ cards[find_card(JP, 47)].before_battle_roll = function (faction) {
         }
     })
     if (modifier) {
-        log(`>2+${modifier} Attack strength (Float Plane Tactics).`)
+        log(`>>+${modifier} Attack strength (Float Plane Tactics).`)
     }
 }
 
@@ -1420,7 +1420,7 @@ cards[find_card(JP, 83)].before_battle_roll = function (faction) {
         }
     })
     if (modifier) {
-        log(`>2+${modifier} Attack strength (Long Lance Torpedoes).`)
+        log(`>>+${modifier} Attack strength (Long Lance Torpedoes).`)
     }
 }
 
@@ -1442,7 +1442,7 @@ P.submarine_attack = {
         if (L.card === DARTER_DACE) {
             G.active = JP
         }
-        log(`>1${card_get_log_str(L.card)} applied.`)
+        log(`>${card_get_log_str(L.card)} applied.`)
         var roll = random(10)
         L.hits = 0
         if (roll <= L.success) {
@@ -1576,7 +1576,7 @@ cards[find_card(AP, 7)].before_battle_roll = function (faction) {
         return
     }
     G.offensive.battle.roll_modifiers += 2
-    log(`>2+2 Merrill\`s Marauders.`)
+    log(`>>+2 Merrill\`s Marauders.`)
 }
 
 cards[find_card(AP, 8)].can_play = function () {
@@ -1900,7 +1900,7 @@ cards[find_card(AP, 25)].before_battle_roll = function (faction) {
         }
     })
     if (modifier) {
-        log(`>2${modifier} Attack strength (US Reservists).`)
+        log(`>>${modifier} Attack strength (US Reservists).`)
     }
 }
 
@@ -1910,7 +1910,7 @@ cards[find_card(AP, 26)].before_battle_roll = function (faction) {
         return
     }
     G.offensive.battle.roll_modifiers += 4
-    log(`>2+4 Broken Army Codes.`)
+    log(`>>+4 Broken Army Codes.`)
 }
 
 cards[find_card(AP, 27)].event = function () {
@@ -1986,7 +1986,7 @@ cards[find_card(AP, 29)].before_battle_roll = function (faction) {
         return
     }
     G.offensive.battle.roll_modifiers += 1
-    log(`>2+1 Artillery Support.`)
+    log(`>>+1 Artillery Support.`)
 }
 
 cards[SANDCRAB].can_play = function () {
@@ -2102,7 +2102,7 @@ cards[find_card(AP, 36)].before_battle_roll = function (faction) {
         }
     })
     if (modifier) {
-        log(`>2+${modifier} attack strength (Arleigh Burke).`)
+        log(`>>+${modifier} attack strength (Arleigh Burke).`)
     }
 }
 
@@ -2114,7 +2114,7 @@ cards[find_card(AP, 37)].before_battle_roll = function (faction) {
     }
     if (get_map_data(G.offensive.battle.battle_hex).island) {
         G.offensive.battle.roll_modifiers += 2
-        log(`>2+2 Banzai Charge.`)
+        log(`>>+2 Banzai Charge.`)
     }
 }
 
@@ -2289,7 +2289,7 @@ cards[find_card(AP, 55)].before_battle_roll = function (faction) {
         }
     })
     if (modifier) {
-        log(`>2${modifier} Attack strength (The Great Marianas Turkey Shoot).`)
+        log(`>>${modifier} Attack strength (The Great Marianas Turkey Shoot).`)
     }
 }
 

@@ -106,7 +106,7 @@ function build_road(card, event) {
     activate_card(card)
     check_event(event)
     log(`${card_get_log_str(card)} played.`)
-    log(`>1CBI infrastructure built ${event.name}.`)
+    log(`>CBI infrastructure built ${event.name}.`)
     goto("end_action")
 }
 

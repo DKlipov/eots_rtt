@@ -71,12 +71,12 @@ P.submarine_warfare = {
         log(`Allied submarine warfare:`)
         if (G.turn <= 4) {
             modifiers += 1
-            log(`>1+1 Defective torpedoes (1942).`)
+            log(`>+1 Defective torpedoes (1942).`)
         }
         var escort = is_event_active(events.JP_ESCORTS) >> 4
         if (escort) {
             modifiers += escort
-            log(`>1+${escort} Japanese escort.`)
+            log(`>+${escort} Japanese escort.`)
         }
         var success = (result + modifiers - G.turn) <= 0
         log(`${dice_get_log_str(result, modifiers, AP)} <= ${G.turn} ${success ? "(SUCCESS)" : "(FAILED)"}.`)

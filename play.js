@@ -7287,16 +7287,16 @@ function get_china_offensive_modifiers() {
         divisions: G.china_divisions
     }
     result.burma_road = (G.sid === SOUTH_PACIFIC_SCENARIO) ? 0 : ((2 - G.burma_road) * 4)
-    result.log.push(`>1Japanese divisions in China ${G.china_divisions}.`)
-    result.log.push(`>1+${result.burma_road} (Burma road).`)
+    result.log.push(`>Japanese divisions in China ${G.china_divisions}.`)
+    result.log.push(`>+${result.burma_road} (Burma road).`)
 
     if (G.sid === SOUTH_PACIFIC_SCENARIO) {
         result.air_support++
-        result.log.push(`>1+1 ${piece_get_log_str(ap_air("14_lrb"))}.`)
+        result.log.push(`>+1 ${piece_get_log_str(ap_air("14_lrb"))}.`)
     } else {
         for_each_unit((u, piece, location) => {
             if (location === CHINA_BOX && (piece.type !== "lrb" || u === LRB_14) && !set_has(G.oos, u)) {
-                result.log.push(`>1+1 ${piece_get_log_str(u)}.`)
+                result.log.push(`>+1 ${piece_get_log_str(u)}.`)
                 result.air_support++
             }
         })
@@ -9089,10 +9089,10 @@ function move_units(units, path) {
     i = 2
     var destination = path[path.length - 1]
     if (point_to_point.length === 2) {
-        log(`>1${units_list} from ${point_to_point[0]} to ${point_to_point[1]}${get_move_type(path[0])}.`)
+        log(`>${units_list} from ${point_to_point[0]} to ${point_to_point[1]}${get_move_type(path[0])}.`)
     } else {
         point_to_point[0] = "path: " + point_to_point[0]
-        log(`>1${units_list} ${list_get_log_str("to " + hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
+        log(`>${units_list} ${list_get_log_str("to " + hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
     }
     if (could_zoi_cross && zoi_cross_declared) {
         zoi_crossed()
@@ -9139,7 +9139,7 @@ function move_units(units, path) {
         }
     }
     if (cap.length) {
-        log(`>2Captured: ${list_get_log_str(cap.length + " hexes", cap.map(u => hex_get_log_str(u)))}.`)
+        log(`>>Captured: ${list_get_log_str(cap.length + " hexes", cap.map(u => hex_get_log_str(u)))}.`)
     }
     if (path[0] & AIR_MOVE && (distance > L.move_data.extended_battle_range || legs > L.move_data.air_move_legs)
         || path[0] & GROUND_DISENGAGEMENT && distance > 1
@@ -9199,9 +9199,9 @@ function set_location(unit, location, no_logs) {
     var prev_out = prev_location > LAST_BOARD_HEX && prev_location !== CHINA_BOX
     var current_on_map = location <= LAST_BOARD_HEX || location === CHINA_BOX
     if (!no_logs && prev_out && current_on_map) {
-        log(`>1${piece_get_log_str(unit)} to ${hex_get_log_str(location)}.`)
+        log(`>${piece_get_log_str(unit)} to ${hex_get_log_str(location)}.`)
     } else if (!no_logs && current_on_map) {
-        log(`>1${piece_get_log_str(unit)} to ${hex_get_log_str(location)}.`)
+        log(`>${piece_get_log_str(unit)} to ${hex_get_log_str(location)}.`)
     }
     var pair_location = G.location[pieces[unit].pair]
     var size = get_overstack_size(unit)
@@ -9213,6 +9213,7 @@ function set_location(unit, location, no_logs) {
     }
     G.location[unit] = location
 }
+
 /* }}} */
 /* {{{ js/common/scenario.js */
 const S_P_DECK = S_P_deck()
@@ -11940,7 +11941,7 @@ function get_china_info() {
         info.push(`Offensive ${(G.turn - offensive > 1) ? "" : "not "}possible${offensive > 0 ? ". Last launched turn " + offensive : ""}.`)
         mods.log.forEach(line => {
             line = line.replace(/^[%&>]./g, "") // remove log formatting codes
-            line = line.replace(/^>\d/g, "") // remove log formatting codes
+            line = line.replace(/^>>?/g, "") // remove log formatting codes
             info.push(line)
         })
         info.push(`Not played Japanese cards to China Government Front Status: ${count_jp}.`)
@@ -12356,7 +12357,7 @@ function print_battle_box(text, faction, cf, rm, units, log) {
     if (log.length > 0) {
         for (var line of log) {
             line = line.replace(/^[%&>]./g, "") // remove log formatting codes
-            line = line.replace(/^>\d/g, "") // remove log formatting codes
+            line = line.replace(/^>>?/g, "") // remove log formatting codes
             text.push("<dt>" + escape_text(line))
         }
     }
@@ -13452,15 +13453,17 @@ function on_log(text, i) {
             text = m
             break
     }
-    if (text[0] === '>') {
-        var code = text[1]
-        if (code === "1") {
-            p.classList.add("i")
-        } else if (code === "2") {
+
+    if (text[0] === ">") {
+        if (text[1] === '>') {
+            text = text.substring(2)
             p.classList.add("ii")
+        } else {
+            text = text.substring(1)
+            p.classList.add("i")
         }
-        text = text.substring(2)
     }
+
     p.innerHTML = escape_text(text)
 
     return p

@@ -342,7 +342,7 @@ function eliminate(unit, no_log = false) {
         return
     }
     if (!no_log) {
-        log(`>1${piece_get_log_str(unit)} eliminated.`)
+        log(`>${piece_get_log_str(unit)} eliminated.`)
     }
     G.location[unit] = ELIMINATED_BOX
     set_delete(G.reduced, unit)
@@ -359,7 +359,7 @@ function damage_unit(unit, no_log) {
 
 function reduce_unit(unit, no_log = false) {
     if (!no_log) {
-        log(`>1${piece_get_log_str(unit)} reduced.`)
+        log(`>${piece_get_log_str(unit)} reduced.`)
     }
     set_add(G.reduced, unit)
 }
@@ -548,7 +548,7 @@ function displace_to_turn(unit, turns, not_delayed) {
             set_location(unit, PERM_ELIMINATED)
         }
     } else {
-        log(`>1${piece_get_log_str(unit)} to turn box ${G.turn + turns}.`)
+        log(`>${piece_get_log_str(unit)} to turn box ${G.turn + turns}.`)
         set_location(unit, TURN_BOX + G.turn + turns)
         if (not_delayed) {
             set_add(G.not_delayed, unit)

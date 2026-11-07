@@ -70,7 +70,7 @@ function get_china_info() {
         info.push(`Offensive ${(G.turn - offensive > 1) ? "" : "not "}possible${offensive > 0 ? ". Last launched turn " + offensive : ""}.`)
         mods.log.forEach(line => {
             line = line.replace(/^[%&>]./g, "") // remove log formatting codes
-            line = line.replace(/^>\d/g, "") // remove log formatting codes
+            line = line.replace(/^>>?/g, "") // remove log formatting codes
             info.push(line)
         })
         info.push(`Not played Japanese cards to China Government Front Status: ${count_jp}.`)
@@ -486,7 +486,7 @@ function print_battle_box(text, faction, cf, rm, units, log) {
     if (log.length > 0) {
         for (var line of log) {
             line = line.replace(/^[%&>]./g, "") // remove log formatting codes
-            line = line.replace(/^>\d/g, "") // remove log formatting codes
+            line = line.replace(/^>>?/g, "") // remove log formatting codes
             text.push("<dt>" + escape_text(line))
         }
     }

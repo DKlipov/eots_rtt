@@ -40,7 +40,7 @@ function sent_to_europe(u) {
     var roll = random(10)
     clear_undo()
     result = roll <= modifier
-    log(`>1${piece_get_log_str(u)}: ${dice_get_log_str(roll, 0, AP)} > ${modifier}${result ? " (FAILED)" : ""}.`)
+    log(`>${piece_get_log_str(u)}: ${dice_get_log_str(roll, 0, AP)} > ${modifier}${result ? " (FAILED)" : ""}.`)
     if (result) {
         displace_to_turn(u, 3)
     }
@@ -402,7 +402,7 @@ P.replacement_segment = {
         L.divisions -= 1
         G.china_divisions -= 1
         L.divisions_used++
-        log(`>1Divisions in China to ${G.china_divisions}.`)
+        log(`>Divisions in China to ${G.china_divisions}.`)
         if (L.replacement_points[GROUND_REP]) {
             L.replacement_points[GROUND_REP]++
         } else {
@@ -440,7 +440,7 @@ P.replacement_segment = {
         if (set_has(G.reduced, u)) {
             set_delete(G.reduced, u)
             set_delete(L.replacable_units, u)
-            log(`>1${piece_get_log_str(u)} to full strength.`)
+            log(`>${piece_get_log_str(u)} to full strength.`)
         } else {
             set_add(G.reduced, u)
             G.active_stack = [u]

@@ -1196,7 +1196,7 @@ P.operation_z = {
         G.offensive.active_units[JP].forEach(u => {
             set_location(u, h, true)
         })
-        log(`>1${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(u => piece_get_log_str(u)))} to ${hex_get_log_str(h)}.`)
+        log(`>${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(u => piece_get_log_str(u)))} to ${hex_get_log_str(h)}.`)
         create_battle_hex(OAHU)
         G.offensive.active_units[JP].forEach(u => commit_to_attack(u, OAHU))
         goto("operation_z_battle")
@@ -1220,7 +1220,7 @@ P.operation_z_pbm = {
             set_location(u, h, true)
             map_set(G.offensive.paths, u, map_get(L.allowed_hexes, h))
         })
-        log(`>1${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(u => piece_get_log_str(u)))} to ${hex_get_log_str(h)}.`)
+        log(`>${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(u => piece_get_log_str(u)))} to ${hex_get_log_str(h)}.`)
         G.active_stack = []
         end()
     },
@@ -1241,7 +1241,7 @@ P.operation_z_battle = script(`
       eval {
         set_location(find_piece("lexington"), OAHU, true)
         set_location(find_piece("enterprise"), OAHU, true)
-        log (">1"+piece_get_log_str(find_piece("lexington"))+", "+piece_get_log_str(find_piece("enterprise"))+" to "+hex_get_log_str(OAHU)+".")
+        log (">"+piece_get_log_str(find_piece("lexington"))+", "+piece_get_log_str(find_piece("enterprise"))+" to "+hex_get_log_str(OAHU)+".")
       }
       set G.active JP
       call operation_z_pbm

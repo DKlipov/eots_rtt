@@ -315,15 +315,17 @@ function on_log(text, i) {
             text = m
             break
     }
-    if (text[0] === '>') {
-        var code = text[1]
-        if (code === "1") {
-            p.classList.add("i")
-        } else if (code === "2") {
+
+    if (text[0] === ">") {
+        if (text[1] === '>') {
+            text = text.substring(2)
             p.classList.add("ii")
+        } else {
+            text = text.substring(1)
+            p.classList.add("i")
         }
-        text = text.substring(2)
     }
+
     p.innerHTML = escape_text(text)
 
     return p

@@ -144,7 +144,7 @@ function set_control_over_nation(nation, only_ground = true) {
         }
     }
     if (captured.length) {
-        log(`>1${side_get_log_str(faction)} captured: ${list_get_log_str(captured.length + " hexes", captured.map(u => hex_get_log_str(u)))}.`)
+        log(`>${side_get_log_str(faction)} captured: ${list_get_log_str(captured.length + " hexes", captured.map(u => hex_get_log_str(u)))}.`)
     }
 }
 

@@ -7292,16 +7292,16 @@ function get_china_offensive_modifiers() {
         divisions: G.china_divisions
     }
     result.burma_road = (G.sid === SOUTH_PACIFIC_SCENARIO) ? 0 : ((2 - G.burma_road) * 4)
-    result.log.push(`>1Japanese divisions in China ${G.china_divisions}.`)
-    result.log.push(`>1+${result.burma_road} (Burma road).`)
+    result.log.push(`>Japanese divisions in China ${G.china_divisions}.`)
+    result.log.push(`>+${result.burma_road} (Burma road).`)
 
     if (G.sid === SOUTH_PACIFIC_SCENARIO) {
         result.air_support++
-        result.log.push(`>1+1 ${piece_get_log_str(ap_air("14_lrb"))}.`)
+        result.log.push(`>+1 ${piece_get_log_str(ap_air("14_lrb"))}.`)
     } else {
         for_each_unit((u, piece, location) => {
             if (location === CHINA_BOX && (piece.type !== "lrb" || u === LRB_14) && !set_has(G.oos, u)) {
-                result.log.push(`>1+1 ${piece_get_log_str(u)}.`)
+                result.log.push(`>+1 ${piece_get_log_str(u)}.`)
                 result.air_support++
             }
         })
@@ -9094,10 +9094,10 @@ function move_units(units, path) {
     i = 2
     var destination = path[path.length - 1]
     if (point_to_point.length === 2) {
-        log(`>1${units_list} from ${point_to_point[0]} to ${point_to_point[1]}${get_move_type(path[0])}.`)
+        log(`>${units_list} from ${point_to_point[0]} to ${point_to_point[1]}${get_move_type(path[0])}.`)
     } else {
         point_to_point[0] = "path: " + point_to_point[0]
-        log(`>1${units_list} ${list_get_log_str("to " + hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
+        log(`>${units_list} ${list_get_log_str("to " + hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
     }
     if (could_zoi_cross && zoi_cross_declared) {
         zoi_crossed()
@@ -9144,7 +9144,7 @@ function move_units(units, path) {
         }
     }
     if (cap.length) {
-        log(`>2Captured: ${list_get_log_str(cap.length + " hexes", cap.map(u => hex_get_log_str(u)))}.`)
+        log(`>>Captured: ${list_get_log_str(cap.length + " hexes", cap.map(u => hex_get_log_str(u)))}.`)
     }
     if (path[0] & AIR_MOVE && (distance > L.move_data.extended_battle_range || legs > L.move_data.air_move_legs)
         || path[0] & GROUND_DISENGAGEMENT && distance > 1
@@ -9204,9 +9204,9 @@ function set_location(unit, location, no_logs) {
     var prev_out = prev_location > LAST_BOARD_HEX && prev_location !== CHINA_BOX
     var current_on_map = location <= LAST_BOARD_HEX || location === CHINA_BOX
     if (!no_logs && prev_out && current_on_map) {
-        log(`>1${piece_get_log_str(unit)} to ${hex_get_log_str(location)}.`)
+        log(`>${piece_get_log_str(unit)} to ${hex_get_log_str(location)}.`)
     } else if (!no_logs && current_on_map) {
-        log(`>1${piece_get_log_str(unit)} to ${hex_get_log_str(location)}.`)
+        log(`>${piece_get_log_str(unit)} to ${hex_get_log_str(location)}.`)
     }
     var pair_location = G.location[pieces[unit].pair]
     var size = get_overstack_size(unit)
@@ -9218,6 +9218,7 @@ function set_location(unit, location, no_logs) {
     }
     G.location[unit] = location
 }
+
 /* }}} */
 /* {{{ js/common/scenario.js */
 const S_P_DECK = S_P_deck()
@@ -10297,7 +10298,7 @@ function sent_to_europe(u) {
     var roll = random(10)
     clear_undo()
     result = roll <= modifier
-    log(`>1${piece_get_log_str(u)}: ${dice_get_log_str(roll, 0, AP)} > ${modifier}${result ? " (FAILED)" : ""}.`)
+    log(`>${piece_get_log_str(u)}: ${dice_get_log_str(roll, 0, AP)} > ${modifier}${result ? " (FAILED)" : ""}.`)
     if (result) {
         displace_to_turn(u, 3)
     }
@@ -10659,7 +10660,7 @@ P.replacement_segment = {
         L.divisions -= 1
         G.china_divisions -= 1
         L.divisions_used++
-        log(`>1Divisions in China to ${G.china_divisions}.`)
+        log(`>Divisions in China to ${G.china_divisions}.`)
         if (L.replacement_points[GROUND_REP]) {
             L.replacement_points[GROUND_REP]++
         } else {
@@ -10697,7 +10698,7 @@ P.replacement_segment = {
         if (set_has(G.reduced, u)) {
             set_delete(G.reduced, u)
             set_delete(L.replacable_units, u)
-            log(`>1${piece_get_log_str(u)} to full strength.`)
+            log(`>${piece_get_log_str(u)} to full strength.`)
         } else {
             set_add(G.reduced, u)
             G.active_stack = [u]
@@ -11676,7 +11677,7 @@ P.move_offensive_units = {
             G.active_stack.forEach(u => {
                 var index = G.offensive.organic.indexOf(u)
                 if (index >= 0 && pieces[u].class === "naval") {
-                    log(`>2Organic tr. ${piece_get_log_str(G.offensive.organic[index])} with ${piece_get_log_str(G.offensive.organic[index + 1])}`)
+                    log(`>>Organic tr. ${piece_get_log_str(G.offensive.organic[index])} with ${piece_get_log_str(G.offensive.organic[index + 1])}`)
                 }
             })
         }
@@ -11839,7 +11840,7 @@ function attack_hex(hex) {
     if (non_cv.length && !cv.length) {
         non_cv.forEach(u => commit_to_attack(u, hex))
     }
-    log(`>1${units_str(distant)} attack ${hex_get_log_str(hex)}.`)
+    log(`>${units_str(distant)} attack ${hex_get_log_str(hex)}.`)
 }
 
 P.check_overstacking = {
@@ -12297,7 +12298,7 @@ P.declare_battle_hexes = {
             G.offensive.battle_names
                 .forEach(h => {
                     if (set_has(G.offensive.battle_hexes, h))
-                        log(`>1${String.fromCharCode(65 + G.offensive.battle_names.indexOf(h))} in ${hex_get_log_str(h)}.`)
+                        log(`>${String.fromCharCode(65 + G.offensive.battle_names.indexOf(h))} in ${hex_get_log_str(h)}.`)
                 })
         }
         compute_possible_battle_hexes()
@@ -12325,7 +12326,7 @@ P.declare_battle_hexes = {
         commit_to_attack(G.active_stack[0], hex)
         if (!set_has(G.offensive.battle_hexes, hex) && is_faction_units(hex, 1 - G.active)) {
             if (!set_has(G.offensive.battle_hexes, hex)) {
-                log(`>1${String.fromCharCode(65 + G.offensive.battle_hexes.length + 1)} in ${hex_get_log_str(hex)}.`)
+                log(`>${String.fromCharCode(65 + G.offensive.battle_hexes.length + 1)} in ${hex_get_log_str(hex)}.`)
             }
             create_battle_hex(hex)
             if (G.offensive.type === OC) {
@@ -12334,7 +12335,7 @@ P.declare_battle_hexes = {
                     target_in_battle_range(pieces[u].parenthetical ? pieces[u].br : pieces[u].ebr, G.location[u], L.possible_hexes))
             }
         }
-        log(`>1${piece_get_log_str(G.active_stack[0])} assigned to ${hex_get_log_str(hex)}.`)
+        log(`>${piece_get_log_str(G.active_stack[0])} assigned to ${hex_get_log_str(hex)}.`)
         G.active_stack = []
         if (L.possible_units.length <= 0) {
             end()
@@ -12402,7 +12403,7 @@ P.assign_escort = {
         G.active_stack.forEach(u => {
             commit_to_attack(u, hex)
         })
-        log(`>1${units_str(G.active_stack)} attack ${hex_get_log_str(hex)}.`)
+        log(`>${units_str(G.active_stack)} attack ${hex_get_log_str(hex)}.`)
         G.active_stack = []
         L.possible_hexes = []
         if (L.possible_units.length === 0) {
@@ -12975,38 +12976,38 @@ function get_ground_roll_modifiers(faction) {
         })
         if (air[faction] && !air[1 - faction]) {
             result += 2
-            log(`>2+2 Attacker Air support.`)
+            log(`>>+2 Attacker Air support.`)
         }
         if (naval[faction] && !naval[1 - faction]) {
             result += 2
-            log(`>2+2 Attacker Naval support.`)
+            log(`>>+2 Attacker Naval support.`)
         }
     }
     if (faction === G.offensive.attacker) {
         var terrain = get_map_data(battle.battle_hex).terrain
         if (terrain === JUNGLE) {
             result -= 1
-            log(`>2-1 Jungle.`)
+            log(`>>-1 Jungle.`)
         } else if (terrain === MIXED) {
             result -= 2
-            log(`>2-2 Mixed terrain.`)
+            log(`>>-2 Mixed terrain.`)
         }
         if (terrain === MOUNTAIN) {
             result -= 3
-            log(`>2-3 Mountains.`)
+            log(`>>-3 Mountains.`)
         }
     }
     if (faction !== G.offensive.attacker && set_has(G.offensive.amp_mod, battle.battle_hex) && array_count(battle.amph_ground, u => unit_on_board(u) && set_has(battle.ground[G.offensive.attacker], u))) {
         result += 3
-        log(`>2+3 Amphibious assault.`)
+        log(`>>+3 Amphibious assault.`)
     }
     if (faction === AP && G.location[ARMOR_BRIGADE] === battle.battle_hex) {
         result += 1
-        log(`>2+1 Armor brigade.`)
+        log(`>>+1 Armor brigade.`)
     }
     if (faction === JP && is_event_active(events.NEW_OPERATION_PLAN) && get_map_data(battle.battle_hex).island) {
         result += 1
-        log(`>2+1 Defensive doctrine.`)
+        log(`>>+1 Defensive doctrine.`)
     }
     return result
 }
@@ -13016,21 +13017,21 @@ function get_naval_roll_modifiers(faction) {
     var result = 0
     if (faction === AP && G.offensive.intelligence === AMBUSH) {
         result += 4
-        log(`>2+4 Ambush.`)
+        log(`>>+4 Ambush.`)
     }
     if (faction === G.offensive.attacker && G.offensive.intelligence === SURPRISE) {
         result += 3
-        log(`>2+3 Surprise attack.`)
+        log(`>>+3 Surprise attack.`)
     }
     var ap_air_superiority = faction === AP && battle.air_naval[AP].find(
         u => unit_on_board(u) && pieces[u].br && is_us_unit(pieces[u])
     )
     if (ap_air_superiority && G.turn >= 8) {
         result += 3
-        og(`>2+3 Allied air superiority (1944-1945).`)
+        og(`>>+3 Allied air superiority (1944-1945).`)
     } else if (ap_air_superiority && G.turn >= 5) {
         result += 1
-        log(`>2+1 Allied air superiority (1943).`)
+        log(`>>+1 Allied air superiority (1943).`)
     }
     return result
 }
@@ -13056,7 +13057,7 @@ function get_battle_modifiers(faction) {
     battle.roll_modifiers = 0
     if (battle.ground_stage && is_col_tsuji_applied(faction)) {
         battle.roll_modifiers = 4
-        log(`>2+4 Col.Tsuji.`)
+        log(`>>+4 Col.Tsuji.`)
     } else if (battle.ground_stage) {
         battle.roll_modifiers = get_ground_roll_modifiers(faction)
     } else {
@@ -13075,7 +13076,7 @@ P.execute_attack = function () {
         end()
         return
     }
-    log(`>1${side_get_log_str(faction)} fire (${battle.strength[faction]}).`)
+    log(`>${side_get_log_str(faction)} fire (${battle.strength[faction]}).`)
     battle.roll[faction] = random(10)
     clear_undo()
     get_battle_modifiers(faction)
@@ -13300,7 +13301,7 @@ P.jp_cv_reassign = {
             if (unit_on_board(u)) {
                 set_delete(G.reduced, u)
                 map_delete(L.to_repair, u)
-                log(`>1${piece_get_log_str(u)} to full strength.`)
+                log(`>${piece_get_log_str(u)} to full strength.`)
             } else {
                 var location = G.offensive.battle.battle_hex
                 var path = map_get(G.offensive.paths, u)
@@ -13439,7 +13440,7 @@ function apply_loss() {
             reduce_unit(unit, true)
         }
         var dmg = map_get(dmg_map, unit, 0)
-        log(`>1${piece_get_log_str(unit)} ${d[i] > 2 ? "eliminated" : "reduced"} (${step}${dmg ? " x " + dmg : " step"}).`)
+        log(`>${piece_get_log_str(unit)} ${d[i] > 2 ? "eliminated" : "reduced"} (${step}${dmg ? " x " + dmg : " step"}).`)
         var piece = pieces[unit]
         if (piece.faction === JP && is_cv_unit(piece)) {
             battle.jp_cv_damaged = 1
@@ -14110,7 +14111,7 @@ function set_control_over_nation(nation, only_ground = true) {
         }
     }
     if (captured.length) {
-        log(`>1${side_get_log_str(faction)} captured: ${list_get_log_str(captured.length + " hexes", captured.map(u => hex_get_log_str(u)))}.`)
+        log(`>${side_get_log_str(faction)} captured: ${list_get_log_str(captured.length + " hexes", captured.map(u => hex_get_log_str(u)))}.`)
     }
 }
 
@@ -14221,12 +14222,12 @@ P.submarine_warfare = {
         log(`Allied submarine warfare:`)
         if (G.turn <= 4) {
             modifiers += 1
-            log(`>1+1 Defective torpedoes (1942).`)
+            log(`>+1 Defective torpedoes (1942).`)
         }
         var escort = is_event_active(events.JP_ESCORTS) >> 4
         if (escort) {
             modifiers += escort
-            log(`>1+${escort} Japanese escort.`)
+            log(`>+${escort} Japanese escort.`)
         }
         var success = (result + modifiers - G.turn) <= 0
         log(`${dice_get_log_str(result, modifiers, AP)} <= ${G.turn} ${success ? "(SUCCESS)" : "(FAILED)"}.`)
@@ -14734,7 +14735,7 @@ function build_road(card, event) {
     activate_card(card)
     check_event(event)
     log(`${card_get_log_str(card)} played.`)
-    log(`>1CBI infrastructure built ${event.name}.`)
+    log(`>CBI infrastructure built ${event.name}.`)
     goto("end_action")
 }
 
@@ -15166,7 +15167,7 @@ P.coastal_artillery = {
     },
     unit(u) {
         push_undo()
-        log(`>2${piece_get_log_str(u)} hit by coastal defence.`)
+        log(`>>${piece_get_log_str(u)} hit by coastal defence.`)
         damage_unit(u,true)
         end()
     }
@@ -15266,7 +15267,7 @@ cards[find_card(JP, 8)].before_battle_roll = function (faction) {
     })
     if (any_com_unit) {
         G.offensive.battle.roll_modifiers += 1
-        log(`>2+1 Operation C.`)
+        log(`>>+1 Operation C.`)
     }
 }
 
@@ -15372,7 +15373,7 @@ cards[find_card(JP, 17)].before_battle_roll = function (faction) {
         }
     })
     if (modifier) {
-        log(`>2+${modifier} attack strength (Night Fighting Advantage).`)
+        log(`>>+${modifier} attack strength (Night Fighting Advantage).`)
     }
 }
 
@@ -15493,7 +15494,7 @@ cards[find_card(JP, 23)].before_battle_roll = function (faction) {
     })
     if (any_com_unit) {
         G.offensive.battle.roll_modifiers += 1
-        log(`>2+1 Operation RE (${piece_get_log_str(any_com_unit)}).`)
+        log(`>>+1 Operation RE (${piece_get_log_str(any_com_unit)}).`)
     }
 }
 
@@ -15523,7 +15524,7 @@ cards[find_card(JP, 25)].before_battle_roll = function (faction) {
         }
     })
     if (modifier) {
-        log(`>2${modifier} attack strength (Allied Tactical Confusion).`)
+        log(`>>${modifier} attack strength (Allied Tactical Confusion).`)
     }
 }
 
@@ -15592,7 +15593,7 @@ cards[find_card(JP, 29)].before_battle_roll = function (faction) {
         }
     })
     if (modifier) {
-        log(`>2+${modifier} attack strength (Effective Aerial Torpedo Tactics).`)
+        log(`>>+${modifier} attack strength (Effective Aerial Torpedo Tactics).`)
     }
 }
 
@@ -15621,7 +15622,7 @@ cards[find_card(JP, 32)].before_battle_roll = function (faction) {
     })
     if (in_range_on_map(battle, 6, cv_hex, JP).length) {
         G.offensive.battle.roll_modifiers += 1
-        log(`>2+1 Air Shuttle.`)
+        log(`>>+1 Air Shuttle.`)
     }
 }
 
@@ -16018,7 +16019,7 @@ cards[find_card(JP, 47)].before_battle_roll = function (faction) {
         }
     })
     if (modifier) {
-        log(`>2+${modifier} Attack strength (Float Plane Tactics).`)
+        log(`>>+${modifier} Attack strength (Float Plane Tactics).`)
     }
 }
 
@@ -16446,7 +16447,7 @@ cards[find_card(JP, 83)].before_battle_roll = function (faction) {
         }
     })
     if (modifier) {
-        log(`>2+${modifier} Attack strength (Long Lance Torpedoes).`)
+        log(`>>+${modifier} Attack strength (Long Lance Torpedoes).`)
     }
 }
 
@@ -16468,7 +16469,7 @@ P.submarine_attack = {
         if (L.card === DARTER_DACE) {
             G.active = JP
         }
-        log(`>1${card_get_log_str(L.card)} applied.`)
+        log(`>${card_get_log_str(L.card)} applied.`)
         var roll = random(10)
         L.hits = 0
         if (roll <= L.success) {
@@ -16602,7 +16603,7 @@ cards[find_card(AP, 7)].before_battle_roll = function (faction) {
         return
     }
     G.offensive.battle.roll_modifiers += 2
-    log(`>2+2 Merrill\`s Marauders.`)
+    log(`>>+2 Merrill\`s Marauders.`)
 }
 
 cards[find_card(AP, 8)].can_play = function () {
@@ -16926,7 +16927,7 @@ cards[find_card(AP, 25)].before_battle_roll = function (faction) {
         }
     })
     if (modifier) {
-        log(`>2${modifier} Attack strength (US Reservists).`)
+        log(`>>${modifier} Attack strength (US Reservists).`)
     }
 }
 
@@ -16936,7 +16937,7 @@ cards[find_card(AP, 26)].before_battle_roll = function (faction) {
         return
     }
     G.offensive.battle.roll_modifiers += 4
-    log(`>2+4 Broken Army Codes.`)
+    log(`>>+4 Broken Army Codes.`)
 }
 
 cards[find_card(AP, 27)].event = function () {
@@ -17012,7 +17013,7 @@ cards[find_card(AP, 29)].before_battle_roll = function (faction) {
         return
     }
     G.offensive.battle.roll_modifiers += 1
-    log(`>2+1 Artillery Support.`)
+    log(`>>+1 Artillery Support.`)
 }
 
 cards[SANDCRAB].can_play = function () {
@@ -17128,7 +17129,7 @@ cards[find_card(AP, 36)].before_battle_roll = function (faction) {
         }
     })
     if (modifier) {
-        log(`>2+${modifier} attack strength (Arleigh Burke).`)
+        log(`>>+${modifier} attack strength (Arleigh Burke).`)
     }
 }
 
@@ -17140,7 +17141,7 @@ cards[find_card(AP, 37)].before_battle_roll = function (faction) {
     }
     if (get_map_data(G.offensive.battle.battle_hex).island) {
         G.offensive.battle.roll_modifiers += 2
-        log(`>2+2 Banzai Charge.`)
+        log(`>>+2 Banzai Charge.`)
     }
 }
 
@@ -17315,7 +17316,7 @@ cards[find_card(AP, 55)].before_battle_roll = function (faction) {
         }
     })
     if (modifier) {
-        log(`>2${modifier} Attack strength (The Great Marianas Turkey Shoot).`)
+        log(`>>${modifier} Attack strength (The Great Marianas Turkey Shoot).`)
     }
 }
 
@@ -17952,7 +17953,7 @@ function eliminate(unit, no_log = false) {
         return
     }
     if (!no_log) {
-        log(`>1${piece_get_log_str(unit)} eliminated.`)
+        log(`>${piece_get_log_str(unit)} eliminated.`)
     }
     G.location[unit] = ELIMINATED_BOX
     set_delete(G.reduced, unit)
@@ -17969,7 +17970,7 @@ function damage_unit(unit, no_log) {
 
 function reduce_unit(unit, no_log = false) {
     if (!no_log) {
-        log(`>1${piece_get_log_str(unit)} reduced.`)
+        log(`>${piece_get_log_str(unit)} reduced.`)
     }
     set_add(G.reduced, unit)
 }
@@ -18158,7 +18159,7 @@ function displace_to_turn(unit, turns, not_delayed) {
             set_location(unit, PERM_ELIMINATED)
         }
     } else {
-        log(`>1${piece_get_log_str(unit)} to turn box ${G.turn + turns}.`)
+        log(`>${piece_get_log_str(unit)} to turn box ${G.turn + turns}.`)
         set_location(unit, TURN_BOX + G.turn + turns)
         if (not_delayed) {
             set_add(G.not_delayed, unit)
@@ -19733,7 +19734,7 @@ P.operation_z = {
         G.offensive.active_units[JP].forEach(u => {
             set_location(u, h, true)
         })
-        log(`>1${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(u => piece_get_log_str(u)))} to ${hex_get_log_str(h)}.`)
+        log(`>${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(u => piece_get_log_str(u)))} to ${hex_get_log_str(h)}.`)
         create_battle_hex(OAHU)
         G.offensive.active_units[JP].forEach(u => commit_to_attack(u, OAHU))
         goto("operation_z_battle")
@@ -19757,7 +19758,7 @@ P.operation_z_pbm = {
             set_location(u, h, true)
             map_set(G.offensive.paths, u, map_get(L.allowed_hexes, h))
         })
-        log(`>1${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(u => piece_get_log_str(u)))} to ${hex_get_log_str(h)}.`)
+        log(`>${list_get_log_str("Mobile Strike Force", G.offensive.active_units[JP].map(u => piece_get_log_str(u)))} to ${hex_get_log_str(h)}.`)
         G.active_stack = []
         end()
     },
@@ -19778,7 +19779,7 @@ P.operation_z_battle = script(`
       eval {
         set_location(find_piece("lexington"), OAHU, true)
         set_location(find_piece("enterprise"), OAHU, true)
-        log (">1"+piece_get_log_str(find_piece("lexington"))+", "+piece_get_log_str(find_piece("enterprise"))+" to "+hex_get_log_str(OAHU)+".")
+        log (">"+piece_get_log_str(find_piece("lexington"))+", "+piece_get_log_str(find_piece("enterprise"))+" to "+hex_get_log_str(OAHU)+".")
       }
       set G.active JP
       call operation_z_pbm
