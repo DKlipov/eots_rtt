@@ -9061,7 +9061,7 @@ function move_units(units, path) {
     })
     var units_list = units_str(units)
     if (path.length === 3) {
-        log(`${units_list} skipped move.`)
+        log(`${units_list} did not move.`)
         return
     }
     var i = 2
@@ -9091,7 +9091,7 @@ function move_units(units, path) {
     if (point_to_point.length === 2) {
         log(`>${units_list} from ${point_to_point[0]} to ${point_to_point[1]}${get_move_type(path[0])}.`)
     } else {
-        point_to_point[0] = "path: " + point_to_point[0]
+        point_to_point[0] = "from " + point_to_point[0]
         log(`>${units_list} ${list_get_log_str("to " + hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
     }
     if (could_zoi_cross && zoi_cross_declared) {

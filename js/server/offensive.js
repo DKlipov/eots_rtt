@@ -1584,7 +1584,7 @@ P.declare_battle_hexes = {
             L.possible_units.forEach(action_unit)
             button("skip")
         } else {
-            offensive_prompt(`Assign P${G.active_stack[u]} to a battle.`)
+            offensive_prompt(`Assign P${G.active_stack[0]} to a battle.`)
             L.actual_hexes.forEach(action_hex)
         }
     },
@@ -3154,7 +3154,7 @@ P.emergency_move = {
         if (!L.unit_to_retreat.length) {
             goto("check_overstacking")
         } else {
-            log("Emergency move:")
+            log("Emergency moved:")
         }
     },
     inactive: "execute emergency move",

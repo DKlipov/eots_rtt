@@ -9066,7 +9066,7 @@ function move_units(units, path) {
     })
     var units_list = units_str(units)
     if (path.length === 3) {
-        log(`${units_list} skipped move.`)
+        log(`${units_list} did not move.`)
         return
     }
     var i = 2
@@ -9096,7 +9096,7 @@ function move_units(units, path) {
     if (point_to_point.length === 2) {
         log(`>${units_list} from ${point_to_point[0]} to ${point_to_point[1]}${get_move_type(path[0])}.`)
     } else {
-        point_to_point[0] = "path: " + point_to_point[0]
+        point_to_point[0] = "from " + point_to_point[0]
         log(`>${units_list} ${list_get_log_str("to " + hex_get_log_str(destination) + ", " + (point_to_point.length - 1), point_to_point)}${get_move_type(path[0])}.`)
     }
     if (could_zoi_cross && zoi_cross_declared) {
@@ -12316,7 +12316,7 @@ P.declare_battle_hexes = {
             L.possible_units.forEach(action_unit)
             button("skip")
         } else {
-            offensive_prompt(`Assign P${G.active_stack[u]} to a battle.`)
+            offensive_prompt(`Assign P${G.active_stack[0]} to a battle.`)
             L.actual_hexes.forEach(action_hex)
         }
     },
@@ -13886,7 +13886,7 @@ P.emergency_move = {
         if (!L.unit_to_retreat.length) {
             goto("check_overstacking")
         } else {
-            log("Emergency move:")
+            log("Emergency moved:")
         }
     },
     inactive: "execute emergency move",
@@ -14873,7 +14873,7 @@ P.future_offensive = {
             end()
             return
         }
-        if (G.active === JP) 
+        if (G.active === JP)
             log("#JJapanese Future Offensive")
         else
             log("#AAllied Future Offensive")
@@ -19845,7 +19845,7 @@ P.arcadia = {
     },
     hold() {
         clear_undo()
-        log(`Allies chose Arcadia +4 random cards.`)
+        log(`Allies took Arcadia + 4 random cards.`)
         while (G.hand[AP].length < 5) {
             draw_card(AP)
         }
@@ -19853,7 +19853,7 @@ P.arcadia = {
     discard() {
         G.hand[AP] = []
         G.draw[AP].push(find_card(AP, 4))
-        log(`Allies chose 5 random cards.`)
+        log(`Allies drew 5 random cards.`)
         clear_undo()
         while (G.hand[AP].length < 5) {
             draw_card(AP)

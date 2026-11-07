@@ -1307,7 +1307,7 @@ P.arcadia = {
     },
     hold() {
         clear_undo()
-        log(`Allies chose Arcadia +4 random cards.`)
+        log(`Allies took Arcadia + 4 random cards.`)
         while (G.hand[AP].length < 5) {
             draw_card(AP)
         }
@@ -1315,7 +1315,7 @@ P.arcadia = {
     discard() {
         G.hand[AP] = []
         G.draw[AP].push(find_card(AP, 4))
-        log(`Allies chose 5 random cards.`)
+        log(`Allies drew 5 random cards.`)
         clear_undo()
         while (G.hand[AP].length < 5) {
             draw_card(AP)
