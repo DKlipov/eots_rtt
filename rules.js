@@ -13262,7 +13262,7 @@ P.jp_cv_reassign = {
     inactive: "use range advantage",
     prompt() {
         if (L.stage === 0) {
-            prompt(`Japanese naval aircraft range advantage. Choose units to damage. Chosen: ${L.hits}`)
+            prompt(`Range Advantage: You may transfer carrier steps (${L.hits}).`) // XXX
             L.to_damage.forEach(u => {
                 if (L.to_repair.length > 2 || !map_has(L.to_repair, u))
                     action_unit(u)
@@ -13274,7 +13274,7 @@ P.jp_cv_reassign = {
             }
 
         } else {
-            prompt(`Japanese naval aircraft range advantage. Choose units to repair. Chosen: ${L.hits}`)
+            prompt(`Range Advantage: Add carrier ${L.hits} steps.`)
             if (L.hits === 0) {
                 button("done")
             } else {
