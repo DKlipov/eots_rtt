@@ -11620,14 +11620,6 @@ P.move_offensive_units = {
         L.move_data = get_move_data()
         set_delete(L.movable_units, u)
     },
-    pass() {
-        // TODO: can this ever trigger?
-        L.allowed_hexes = []
-        G.active_stack = []
-        if (L.movable_units.length <= 0) {
-            end()
-        }
-    },
     stop() {
         var path = object_copy(map_get(G.offensive.paths, G.active_stack[0]))
         G.active_stack.forEach(u => map_get(G.offensive.paths, u, []).length = 3)
