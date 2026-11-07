@@ -158,10 +158,10 @@ P.reinforcement_segment = {
         if (G.wie <= 7 && G.active === AP && G.sid !== BURMA_SCENARIO) {
             change_asp(AP, 1)
         } else if (G.active === AP && G.wie >= 7) {
-            log(`War in europe prevent from AP amphibious shipping reinforcement.`)
+            log(`War in Europe prevented Allies from amphibious shipping reinforcements.`)
         }
         if (G.active === AP && (is_event_active(events.PANAMA_CANAL) === G.turn - 1) && G.wie < 3) {
-            log(`AP reinforcements delayed due to Panama canal attack.`)
+            log(`Allied reinforcements delayed due to Panama canal attack.`)
         }
         L.hq_reinforcement = []
         L.unit_reinforcement = []
@@ -203,7 +203,7 @@ P.reinforcement_segment = {
             L.allowed_hexes = get_hq_reinforcement_hexes()
         }
         if (delayed_units) {
-            log(`AP reinforcements delayed.`)
+            log(`Allied reinforcements delayed.`)
         }
         update_reinf_active()
         if (L.hq_reinforcement.length === 0 && L.unit_reinforcement.length === 0) {
@@ -285,7 +285,7 @@ P.reinforcement_segment = {
     action_hex(hex) {
         push_undo()
         if (!L.logged) {
-            log(`${G.active ? "AP" : "JP"} reinforcements:`)
+            log(`${G.active ? "Allied" : "Japanese"} reinforcements:`)
             L.logged = 1
         }
         set_delete(L.unit_reinforcement, G.active_stack[0])
@@ -299,7 +299,7 @@ P.reinforcement_segment = {
     delay() {
         push_undo()
         if (!L.logged) {
-            log(`${G.active ? "AP" : "JP"} reinforcements:`)
+            log(`${G.active ? "Allied" : "Japanese"} reinforcements:`)
             L.logged = 1
         }
         set_location(G.active_stack[0], DELAYED_BOX)
@@ -396,7 +396,7 @@ P.replacement_segment = {
     divisions() {
         push_undo()
         if (!L.logged) {
-            log(`${G.active ? "AP" : "JP"} replacements:`)
+            log(`${G.active ? "Allied" : "Japanese"} replacements:`)
             L.logged = 1
         }
         L.divisions -= 1
@@ -412,7 +412,7 @@ P.replacement_segment = {
     action_hex(hex) {
         push_undo()
         if (!L.logged) {
-            log(`${G.active ? "AP" : "JP"} replacements:`)
+            log(`${G.active ? "Allied" : "Japanese"} replacements:`)
             L.logged = 1
         }
         set_location(G.active_stack[0], hex)
@@ -434,7 +434,7 @@ P.replacement_segment = {
 
         push_undo()
         if (!L.logged) {
-            log(`${G.active ? "AP" : "JP"} replacements:`)
+            log(`${G.active ? "Allied" : "Japanese"} replacements:`)
             L.logged = 1
         }
         if (set_has(G.reduced, u)) {

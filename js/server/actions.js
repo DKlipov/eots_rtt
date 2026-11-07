@@ -20,7 +20,7 @@ P.china_offensive = {
         button("roll")
     },
     roll() {
-        log(`JP started China offensive.`)
+        log(`Japan started China offensive.`)
         if (!CLIENT_SIDE_SUPPLY) {
             check_supply()
         }
@@ -118,7 +118,6 @@ P.offensive_segment = {
     },
     inactive: "play a card",
     prompt() {
-        // prompt("Turn " + G.turn + " - Offensives Segment: Play a card.")
         prompt("Offensives Segment: Play a card.")
         if (G.passes[R] > 0) {
             button("pass")
@@ -245,7 +244,10 @@ P.future_offensive = {
             end()
             return
         }
-        log("#" + (G.active === JP ? "JJP" : "AAP") + " Future Offensive")
+        if (G.active === JP)
+            log("#JJapanese Future Offensive")
+        else
+            log("#AAllied Future Offensive")
         var card = cards[G.future_offensive[G.active] > 0 ? G.future_offensive[G.active] : 0]
         if (card.type !== MILITARY || !event_hq_check(card)) {
             L.impossible = true

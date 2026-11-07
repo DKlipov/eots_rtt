@@ -406,12 +406,12 @@ function set_inter_service(faction, rivalry) {
 
 function reshuffle() {
     if (G.discard[AP].includes(SOVIET_INVADE)) {
-        log(`AP deck reshuffled due to Soviet invasion discarded.`)
+        log(`Allied deck reshuffled due to Soviet invasion discarded.`)
         G.draw[AP].push(...G.discard[AP])
         G.discard[AP] = []
     }
     if (G.discard[JP].includes(TOJO_RESIGNS)) {
-        log(`JP deck reshuffled due to Tojo resign discarded.`)
+        log(`Japanese deck reshuffled due to Tojo resign discarded.`)
         G.draw[JP].push(...G.discard[JP])
         G.discard[JP] = []
     }
@@ -643,13 +643,13 @@ function capture_hex(hex, side = G.active, no_log = false) {
     if (G.non_control) {
         set_delete(G.non_control, hex)
         if (!no_log) {
-            log(`AP captured ${int_to_hex(hex)}.`)
+            log(`Allies captured ${int_to_hex(hex)}.`)
         }
     }
     var md = get_map_data(hex)
     if (side && !is_space_controlled(hex, AP)) {
         if (!no_log) {
-            log(`AP captured ${hex_get_log_str(hex)}.`)
+            log(`Allies captured ${hex_get_log_str(hex)}.`)
         }
         G.supply_cache[hex] -= JP_CONTROLLED
         if (md.region === "NIndia") {
@@ -663,7 +663,7 @@ function capture_hex(hex, side = G.active, no_log = false) {
     } else if (!side && !is_space_controlled(hex, JP)) {
         if (!no_log) {
 
-            log(`JP captured ${hex_get_log_str(hex)}.`)
+            log(`Japan captured ${hex_get_log_str(hex)}.`)
         }
         G.supply_cache[hex] += JP_CONTROLLED
     } else {

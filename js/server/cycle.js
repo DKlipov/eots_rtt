@@ -68,7 +68,7 @@ P.submarine_warfare = {
     roll() {
         var result = random(10)
         var modifiers = 0
-        log(`AP submarine warfare:`)
+        log(`Allied submarine warfare:`)
         if (G.turn <= 4) {
             modifiers += 1
             log(`>1+1 Defective torpedoes (1942).`)
@@ -76,7 +76,7 @@ P.submarine_warfare = {
         var escort = is_event_active(events.JP_ESCORTS) >> 4
         if (escort) {
             modifiers += escort
-            log(`>1+${escort} JP Escort.`)
+            log(`>1+${escort} Japanese escort.`)
         }
         var success = (result + modifiers - G.turn) <= 0
         log(`${dice_get_log_str(result, modifiers, AP)} <= ${G.turn} ${success ? "(SUCCESS)" : "(FAILED)"}.`)
@@ -172,7 +172,7 @@ P.offensive_phase = script(`
         G.offensive.attacker = G.active
     }
     while (G.hand[AP].length > 0 || G.hand[JP].length > 0) {
-        log ("#"+(G.offensive.attacker===JP?"JJP":"AAP")+" Action")
+        log (G.offensive.attacker === JP ? "#JJapan" : "#AAllies")
         if (G.hand[G.active].length > 0){
             call offensive_segment
         } else {
@@ -228,7 +228,7 @@ P.national_status_segment = function () {
         var surr = G.surrender[nations.AUSTRALIAN_MANDATES.id]
         if (!nations.AUSTRALIAN_MANDATES.ports.some(h => is_space_controlled(hex_to_int(h), surr ? JP : AP))) {
             G.surrender[nations.AUSTRALIAN_MANDATES.id] = (surr) ? 0 : G.turn
-            log(`${nations.AUSTRALIAN_MANDATES.name} controlled ${surr ? "AP" : "JP"}.`)
+            log(`${nations.AUSTRALIAN_MANDATES.name} controlled ${surr ? "Allied" : "Japanese"}.`)
         }
         change_political_will(L.pw, "National status")
         end()
@@ -286,7 +286,7 @@ P.national_status_segment = function () {
         G.surrender[nations.MARSHALL.id] = 0
         set_control_over_nation(nations.MARSHALL)
         check_event(events.MARSHALL_CAPTURED)
-        log("AP captured Marshall islands.")
+        log("Allies captured Marshall islands.")
     }
     if (check_nation_controlled(nations.JAPAN, AP)) {
         finish(AP, "Allied Victory - Japanese mainland islands captured.")
@@ -294,7 +294,7 @@ P.national_status_segment = function () {
     }
     if (check_japan_resource_trace()) {
         if (is_event_active(events.JAPAN_TRACE_RESOURCES)) {
-            log(`JP mainland city traced path to resource hex. Capitulation timer reset.`)
+            log(`Japanese mainland city traced path to resource hex. Capitulation timer reset.`)
         }
         G.events[events.JAPAN_TRACE_RESOURCES.id] = 0
     } else if (is_event_active(events.JAPAN_TRACE_RESOURCES) && is_event_active(events.JAPAN_TRACE_RESOURCES) <= G.turn - 2) {
@@ -302,7 +302,7 @@ P.national_status_segment = function () {
         return
     } else {
         check_event(events.JAPAN_TRACE_RESOURCES)
-        log(`JP mainland city could not trace path to resource hex (${G.turn + 1 - is_event_active(events.JAPAN_TRACE_RESOURCES)}/3).`)
+        log(`Japanese mainland city could not trace path to resource hex (${G.turn + 1 - is_event_active(events.JAPAN_TRACE_RESOURCES)}/3).`)
     }
     change_political_will(L.pw, "National status")
     end()

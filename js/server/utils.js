@@ -16,11 +16,17 @@ function card_get_log_str(c) {
 }
 
 function dice_get_log_str(p, modifiers, faction = G.active) {
-    return `${faction === AP ? "B" : "R"}${p} ${modifiers > 0 ? "+" : ""}${modifiers ? modifiers : ""}`
+    var str = (faction === AP ? "B" : "R") + p
+    if (modifiers) {
+        if (modifiers > 0)
+            str += "+"
+        str += modifiers
+    }
+    return str
 }
 
 function side_get_log_str(side) {
-    return `${side === AP ? "AP" : "JP"}`
+    return side === AP ? "Allies" : "Japan"
 }
 
 function is_china_coast_captured() {

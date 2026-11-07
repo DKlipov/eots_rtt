@@ -90,7 +90,7 @@ function format_hex_tooltip(h) {
         if (info.name) tip += " " + info.name
         var reg = REGION_MAP[info.region]
         if (info.region) tip += " (" + (reg ? reg : info.region) + ")"
-        if (is_controllable_hex(h)) tip += is_space_controlled(h, AP) ? " [AP]" : " [JP]"
+        if (is_controllable_hex(h)) tip += is_space_controlled(h, AP) ? " [Allies]" : " [Japan]"
         var props = []
         if (info.city === CITY) props.push("city")
         if (info.city === JAPANESE_CITY) props.push("Japanese city")
@@ -183,6 +183,8 @@ const ICONS = {
 }
 
 function escape_text(text) {
+    text = escape_typography(text)
+
     text = text.replace(/\^(.*?)\|(.*?)\^/g, escape_list)
 
     text = escape_icon(text, /\b[BRW]\d\b/g, ICONS)
@@ -232,7 +234,7 @@ function show_full_log() {
 function on_init_log(log) {
     var turns = []
     for (var i = 0; i < log.length; ++i) {
-        if (log[i][0] === "!" || log[i][0] === "@" || log[i] === "#AAP Action" || log[i] === "#JJP Action")
+        if (log[i][0] === "!" || log[i][0] === "@" || log[i] === "#AAllies" || log[i] === "#JJapan")
             turns.push(i)
     }
     if (turns.length >= 8)

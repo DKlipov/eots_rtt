@@ -271,7 +271,7 @@ cards[find_card(JP, 12)].before_intelligence_roll = function () {
         }
     })
     if ((G.supply_cache[FRENCH_FRIGATE_SHOALS] & AP_ZOI) === 0 && !ca_in_shoals) {
-        log(`+4 JP superior information security.`)
+        log(`+4 Japanese superior information security.`)
         return 4
     }
 }
@@ -497,7 +497,7 @@ cards[find_card(JP, 25)].before_battle_roll = function (faction) {
         }
     })
     if (modifier) {
-        log(`>2${modifier} attack strength (AP Tactical Confusion).`)
+        log(`>2${modifier} attack strength (Allied Tactical Confusion).`)
     }
 }
 
@@ -780,14 +780,14 @@ cards[find_card(JP, 36)].before_battles = function () {
 
 cards[find_card(JP, 37)].before_activation = function () {
     if (is_event_active(events.SUBMARINE_DOCTRINE)) {
-        log(`US Submarine Doctrine suppress JP Escorts.`)
+        log(`US Submarine Doctrine suppressed Japanese Escorts.`)
         return
     }
     if (is_event_active(events.JP_ESCORTS)) {
-        log(`JP gains +4 escort bonus.`)
+        log(`Japan gained +4 escort bonus.`)
         G.events[events.JP_ESCORTS.id] = G.turn + (4 << 4)
     } else {
-        log(`JP gains +2 escort bonus.`)
+        log(`Japan gained +2 escort bonus.`)
         G.events[events.JP_ESCORTS.id] = G.turn + (2 << 4)
     }
 }
@@ -813,7 +813,7 @@ cards[TOJO_RESIGNS].event = function () {
 
 cards[find_card(JP, 44)].before_activation = function () {
     G.jp_asp = G.asp[JP][1]
-    log('JP gain 2 temporary ASPs.')
+    log('Japan gained 2 temporary ASPs.')
     G.asp[JP][0] += 2
     if (G.inter_service[JP]) {
         G.asp[JP][0] += 2
@@ -1140,7 +1140,7 @@ cards[find_card(JP, 72)].event = function () {
 
 cards[find_card(JP, 73)].before_activation = function () {
     if (!is_event_active(events.PT_BOATS)) {
-        log(`JP barges active.`)
+        log(`Japanese barges active.`)
         check_event(events.BARGES)
     }
 }
@@ -1173,7 +1173,7 @@ P.attack_b29_base = {
         if (L.allowed_units.length <= 0) {
             return
         }
-        log(`JP attack to B-29 base:`)
+        log(`Japan attacked B29 base:`)
         var roll = random(10)
         L.hits = roll <= 4
         log(`${roll} - ${L.hits ? "success" : "No effect"}`)
@@ -1585,7 +1585,7 @@ cards[find_card(AP, 8)].can_play = function () {
 
 cards[find_card(AP, 9)].before_activation = function () {
     G.temp_asp = G.asp[AP][1]
-    log('AP gain 4 temporary ASPs.')
+    log('Allies gained 4 temporary ASPs.')
     G.asp[AP][0] += 4
 }
 
@@ -1971,7 +1971,7 @@ P.chronicle = {
                 set_add(captured, h)
             }
         })
-        log(`Offensive card bonus used for ${hex_get_log_str(hex)}, AP captured: ${list_get_log_str(captured.length + " hexes", captured.map(u => hex_get_log_str(u)))}.`)
+        log(`Offensive card bonus used for ${hex_get_log_str(hex)}, Allied captured: ${list_get_log_str(captured.length + " hexes", captured.map(u => hex_get_log_str(u)))}.`)
         end()
     },
     skip() {
@@ -2576,7 +2576,7 @@ cards[SOVIET_INVADE].event = function () {
 cards[find_card(AP, 80)].event = function () {
     check_event(events.SUBMARINE_DOCTRINE)
     if (is_event_active(events.JP_ESCORTS)) {
-        log(`JP lose escort bonus.`)
+        log(`Japan lost escort bonus.`)
         G.events[events.JP_ESCORTS.id] = 0
     }
 }

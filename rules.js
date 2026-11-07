@@ -7292,7 +7292,7 @@ function get_china_offensive_modifiers() {
         divisions: G.china_divisions
     }
     result.burma_road = (G.sid === SOUTH_PACIFIC_SCENARIO) ? 0 : ((2 - G.burma_road) * 4)
-    result.log.push(`>1JP divisions in China ${G.china_divisions}.`)
+    result.log.push(`>1Japanese divisions in China ${G.china_divisions}.`)
     result.log.push(`>1+${result.burma_road} (Burma road).`)
 
     if (G.sid === SOUTH_PACIFIC_SCENARIO) {
@@ -9360,7 +9360,7 @@ function victory_burma() {
     }
     //F. For controlling each hex of Northern India, +1 VP per hex
     var india = array_count(nations.INDIA.keys, i => is_space_controlled(hex_to_int(i), JP))
-    adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
+    adjust_vp(result, india, "Japanese controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
     //G. For India Unrest or Strikes, +1 Victory Point (awarded on the last game turn)
     var india_status = G.events[events.INDIA_STATUS.id]
     if (india_status > 0 && india_status <= 2) {
@@ -9373,24 +9373,24 @@ function victory_burma() {
     } else {
         result.text.push(`0 VP - India ${nations.INDIA.statuses[india_status]}.`)
     }
-    //I. Rangoon is Allied Control: –2 VP (no additional VPs for theResource hex).
+    //I. Rangoon is Allied control: –2 VP (no additional VPs for the resource hex).
     if (is_space_controlled(RANGOON, AP)) {
         result.vp -= 2
-        result.text.push(`-2 VP - Rangoon is AP Control.`)
+        result.text.push(`-2 VP - Rangoon is Allied controlled.`)
         //J. Rangoon is Japanese Control: +2 VP
     } else {
         result.vp += 2
-        result.text.push(`2 VP - Rangoon is JP Control.`)
+        result.text.push(`2 VP - Rangoon is Japanese controlled.`)
     }
     //K. If the Allies are under ISR at the end of the game +1 VP.
     if (G.inter_service[AP]) {
         result.vp += 1
-        result.text.push(`1 VP - AP are under ISR.`)
+        result.text.push(`1 VP - Allies are under ISR.`)
     }
     //L. If the Japanese are under ISR at the end of the game –1 VP
     if (G.inter_service[JP]) {
         result.vp -= 1
-        result.text.push(`-1 VP - JP are under ISR.`)
+        result.text.push(`-1 VP - Japan is under ISR.`)
     }
 
     return result
@@ -9428,7 +9428,7 @@ function victory_1942() {
         "Townsville was not isolated", [hex_to_int(3727), OAHU])
 
     var india = array_count(nations.INDIA.keys, i => is_space_controlled(hex_to_int(i), JP))
-    adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
+    adjust_vp(result, india, "Japanese controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
     var india_status = G.events[events.INDIA_STATUS.id]
     if (india_status > 0 && india_status <= 2) {
         result.vp += 1
@@ -9439,15 +9439,15 @@ function victory_1942() {
     } else {
         result.text.push(`0 VP - India ${nations.INDIA.statuses[india_status]}.`)
     }
-    binary_vp(result, get_mandate_control() === JP, 1, "JP Control of Australian Mandates", `AP Control of Australian Mandates`)
+    binary_vp(result, get_mandate_control() === JP, 1, "Japanese control of Australian Mandates", `Allied control of Australian Mandates`)
     var new_guinea = 0
     nations.NEW_GUINEA.keys.map(k => hex_to_int(k)).forEach(h => {
         if (is_space_controlled(h, JP) && get_map_data(h).port && get_map_data(h).region === "Guinea") {
             new_guinea++
         }
     })
-    binary_vp(result, new_guinea >= 4, 2, `JP Control of ${new_guinea} >= 4 New Guinea ports`,
-        `JP Control of ${new_guinea} < 4 New Guinea ports`, nations.NEW_GUINEA.keys.map(h => hex_to_int(h)).filter(h => h !== VOGELKOP))
+    binary_vp(result, new_guinea >= 4, 2, `Japanese control of ${new_guinea} >= 4 New Guinea ports`,
+        `Japanese control of ${new_guinea} < 4 New Guinea ports`, nations.NEW_GUINEA.keys.map(h => hex_to_int(h)).filter(h => h !== VOGELKOP))
     if (G.political_will <= 5) {
         result.vp += 6 - G.political_will
         result.text.push(`+${6 - G.political_will} VP - Political will`)
@@ -9553,7 +9553,7 @@ function victory_1943() {
         "Townsville was not isolated", [hex_to_int(3727), OAHU])
 
     var india = array_count(nations.INDIA.keys, i => is_space_controlled(hex_to_int(i), JP))
-    adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
+    adjust_vp(result, india, "Japanese controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
     var india_status = G.events[events.INDIA_STATUS.id]
     if (india_status > 0 && india_status <= 2) {
         result.vp += 1
@@ -9583,7 +9583,7 @@ function victory_1943() {
             }
         })
         binary_vp(result, mandate_count >= 4,
-            -1, "AP control more than 3 Australian Mandate hexes", `AP do not control 4 Australian Mandate hexes`,
+            -1, "Allies control more than 3 Australian Mandate hexes", `Allies do not control 4 Australian Mandate hexes`,
             mandate_hexes
         )
     }
@@ -9601,19 +9601,19 @@ function victory_1943() {
     binary_vp(result, set_has(G.captured_once, hex_to_int(5908)), 1, `Hawaii was captured`,
         "Hawaii was not captured")
     binary_vp(result, check_nation_controlled(nations.MARSHALL, AP),
-        -3, "AP control Marshall Islands", `AP do not control Marshall Islands`,
+        -3, "Allies control Marshall Islands", `Allies do not control Marshall Islands`,
         nations.MARSHALL.keys.map(h => hex_to_int(h))
     )
     var ng_ap = check_nation_controlled(nations.NEW_GUINEA, AP)
     binary_vp(result, ng_ap,
-        -3, "AP control New Guinea", `AP do not control New Guinea`,
+        -3, "Allies control New Guinea", `Allies do not control New Guinea`,
         nations.NEW_GUINEA.keys.map(h => hex_to_int(h))
     )
     if (!ng_ap) {
         var new_guinea = array_count(nations.NEW_GUINEA.keys.map(k => hex_to_int(k)),
             h => get_map_data(h).port && is_space_controlled(h, AP))
-        binary_vp(result, new_guinea >= 4, -1, `AP Control of ${new_guinea} >= 4 New Guinea ports`,
-            `AP Control of ${new_guinea} < 4 New Guinea ports`, nations.NEW_GUINEA.keys.map(h => hex_to_int(h)).filter(h => h !== VOGELKOP))
+        binary_vp(result, new_guinea >= 4, -1, `Allied control of ${new_guinea} >= 4 New Guinea ports`,
+            `Allied control of ${new_guinea} < 4 New Guinea ports`, nations.NEW_GUINEA.keys.map(h => hex_to_int(h)).filter(h => h !== VOGELKOP))
     }
     var tokyo_ports = 0
     var tokyo_ports_list = []
@@ -9626,10 +9626,10 @@ function victory_1943() {
             tokyo_ports++
         }
     })
-    binary_vp(result, tokyo_ports, -3, `AP control a port that is 11 or less hexes from Tokyo`,
-        `AP do not control a port that is 11 or less hexes from Tokyo`,
+    binary_vp(result, tokyo_ports, -3, `Allies control a port that is 11 or less hexes from Tokyo`,
+        `Allies do not control a port that is 11 or less hexes from Tokyo`,
         tokyo_ports_list)
-    adjust_vp(result, -(14 - get_jp_resources()), "AP controlled resource hexes",
+    adjust_vp(result, -(14 - get_jp_resources()), "Allied controlled resource hexes",
         RESOURCE_HEX)
     return result
 }
@@ -9653,7 +9653,7 @@ function victory_1944() {
         "Townsville was not isolated", [hex_to_int(3727), OAHU])
 
     var india = array_count(nations.INDIA.keys, i => is_space_controlled(hex_to_int(i), JP))
-    adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
+    adjust_vp(result, india, "Japanese controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
     var india_status = G.events[events.INDIA_STATUS.id]
     if (india_status > 0 && india_status <= 2) {
         result.vp += 1
@@ -9664,8 +9664,8 @@ function victory_1944() {
     } else {
         result.text.push(`0 VP - India ${nations.INDIA.statuses[india_status]}.`)
     }
-    binary_vp(result, get_mandate_control() === JP, 1, "JP Control of the Australian Mandates",
-        "JP don't control the Australian Mandates")
+    binary_vp(result, get_mandate_control() === JP, 1, "Japanese control of the Australian Mandates",
+        "Japan doesn't control the Australian Mandates")
     if (G.political_will <= 5) {
         result.vp += 6 - G.political_will
         result.text.push(`+${6 - G.political_will} VP - Political will`)
@@ -9681,11 +9681,11 @@ function victory_1944() {
     } else if (!check_nation_controlled(nations.NEW_GUINEA, AP)) {
         ng_diff = 3
     }
-    adjust_vp(result, ng_diff, "Control of New Guinea (JP: +5 / Neither: +3 / AP: 0)",
+    adjust_vp(result, ng_diff, "Control of New Guinea (Japan: +5 / Neither: +3 / Allies: 0)",
         nations.NEW_GUINEA.keys.map(h => hex_to_int(h)))
     binary_vp(result, is_space_controlled(RABAUL, JP) && (G.supply_cache[RABAUL] & JP_SUPPLIED_HEX), 3,
-        "Rabaul is JP controlled and supplied",
-        `Rabaul is ${is_space_controlled(RABAUL, AP) ? "AP controlled" : "out of supply"}`)
+        "Rabaul is Japanese controlled and supplied",
+        `Rabaul is ${is_space_controlled(RABAUL, AP) ? "Allied controlled" : "out of supply"}`)
 
     var philipine_ports = [MANILA, hex_to_int(3014), hex_to_int(2915), hex_to_int(2715)]
     var pp = array_count(philipine_ports, h => is_space_controlled(h, AP) && (G.supply_cache[h] & AP_SUPPLIED_HEX))
@@ -9697,7 +9697,7 @@ function victory_1944() {
     } else if (pp >= 2) {
         phillipine_diff = 0
     }
-    adjust_vp(result, phillipine_diff, "AP Control of Philippines ports (0: +5 / 1: +3 / 2+: 0) ",
+    adjust_vp(result, phillipine_diff, "Allied control of Philippine ports (0: +5 / 1: +3 / 2+: 0) ",
         philipine_ports)
 
     var tokyo_ports = 0
@@ -9711,8 +9711,8 @@ function victory_1944() {
             tokyo_ports++
         }
     })
-    binary_vp(result, tokyo_ports <= 0, 5, `AP do not control a port that is 8 or less hexes from Tokyo`,
-        `AP control a port that is 8 or less hexes from Tokyo`,
+    binary_vp(result, tokyo_ports <= 0, 5, `Allies do not control a port that is 8 or less hexes from Tokyo`,
+        `Allies control a port that is 8 or less hexes from Tokyo`,
         tokyo_ports_list)
     return result
 }
@@ -9761,13 +9761,13 @@ function get_hex_control_log(hex_control) {
     })
     var hex_log = " (Unsupplied hexes count as "
     if (ap.length > 0) {
-        hex_log += "AP control: " + format_hexes(ap)
+        hex_log += "Allied control: " + format_hexes(ap)
         if (jp.length > 0) {
             hex_log += ", "
         }
     }
     if (jp.length > 0) {
-        hex_log += "JP control: " + format_hexes(jp)
+        hex_log += "Japanese control: " + format_hexes(jp)
     }
     hex_log += ")"
     if (ap.length === 0 && jp.length === 0) {
@@ -9816,13 +9816,13 @@ function victory_south_pacific() {
             amh++
         }
     })
-    adjust_vp(result, amh, "JP control of Australian Mandates ports", nations.AUSTRALIAN_MANDATES.ports.map(h => hex_to_int(h)))
+    adjust_vp(result, amh, "Japanese control of Australian Mandates ports", nations.AUSTRALIAN_MANDATES.ports.map(h => hex_to_int(h)))
     if (!nations.AUSTRALIAN_MANDATES.ports.some(h => !is_space_controlled(hex_to_int(h), JP))) {
         result.vp += 3
-        result.text.push(`+3 VP - JP control of Australian Mandates.`)
+        result.text.push(`+3 VP - Japanese control of Australian Mandates.`)
     } else if (!nations.AUSTRALIAN_MANDATES.ports.some(h => !is_space_controlled(hex_to_int(h), AP))) {
         result.vp -= 3
-        result.text.push(`-3 VP - AP control of Australian Mandates.`)
+        result.text.push(`-3 VP - Allied control of Australian Mandates.`)
     } else {
         result.text.push(`0 VP -  No one controls the Australian Mandates.`)
     }
@@ -9833,24 +9833,24 @@ function victory_south_pacific() {
             new_guinea++
         }
     })
-    adjust_vp(result, new_guinea, "JP control of New Guinea ports", nations.NEW_GUINEA.keys.map(h => hex_to_int(h)).filter(h => h !== VOGELKOP))
-    binary_vp(result, is_space_controlled(VOGELKOP, AP), -1, "AP control of Vogelkop",
-        "JP control of Vogelkop", [VOGELKOP])
+    adjust_vp(result, new_guinea, "Japanese control of New Guinea ports", nations.NEW_GUINEA.keys.map(h => hex_to_int(h)).filter(h => h !== VOGELKOP))
+    binary_vp(result, is_space_controlled(VOGELKOP, AP), -1, "Allied control of Vogelkop",
+        "Japanese control of Vogelkop", [VOGELKOP])
     if (check_nation_controlled(nations.NEW_GUINEA, JP)) {
         result.vp += 3
-        result.text.push(`+3 VP - JP control of New Guinea.`)
+        result.text.push(`+3 VP - Japanese control of New Guinea.`)
     } else if (check_nation_controlled(nations.NEW_GUINEA, AP)) {
         result.vp -= 3
-        result.text.push(`-3 VP - AP control of New Guinea.`)
+        result.text.push(`-3 VP - Allied control of New Guinea.`)
     } else {
         result.text.push(`0 VP - No one controls New Guinea.`)
     }
     var heb = array_count(NEW_HEBRIDES, h => is_space_controlled(h, JP) && get_map_data(h).port)
-    binary_vp(result, heb, 1, "JP control of New Hebrides port",
-        "No JP control of any New Hebrides port", NEW_HEBRIDES.filter(h => is_space_controlled(h, JP)))
+    binary_vp(result, heb, 1, "Japanese control of New Hebrides port",
+        "No Japanese control of any New Hebrides port", NEW_HEBRIDES.filter(h => is_space_controlled(h, JP)))
     var aus = array_count(nations.AUSTRALIA.keys.map(k => hex_to_int(k)), h => is_space_controlled(h, JP) && get_map_data(h).port)
-    binary_vp(result, aus, 1, "JP control of Australia mainland port",
-        "No JP control of any Australia mainland port", nations.AUSTRALIA.keys.map(k => hex_to_int(k)).filter(h => is_space_controlled(h, JP)))
+    binary_vp(result, aus, 1, "Japanese control of Australia mainland port",
+        "No Japanese control of any Australia mainland port", nations.AUSTRALIA.keys.map(k => hex_to_int(k)).filter(h => is_space_controlled(h, JP)))
     return result
 }
 
@@ -9936,7 +9936,7 @@ function before_victory_check() {
         }
     }
     if (no_capture) {
-        change_political_will(-1, "no AP control of any hex originally controlled by the JP")
+        change_political_will(-1, "no Allied control of any hex originally controlled by Japan")
     }
     //17.11.26. At the end of the game if the War in Europe is in a box with a
     //negative number the US PW is reduced by one prior to scoring.
@@ -10234,11 +10234,17 @@ function card_get_log_str(c) {
 }
 
 function dice_get_log_str(p, modifiers, faction = G.active) {
-    return `${faction === AP ? "B" : "R"}${p} ${modifiers > 0 ? "+" : ""}${modifiers ? modifiers : ""}`
+    var str = (faction === AP ? "B" : "R") + p
+    if (modifiers) {
+        if (modifiers > 0)
+            str += "+"
+        str += modifiers
+    }
+    return str
 }
 
 function side_get_log_str(side) {
-    return `${side === AP ? "AP" : "JP"}`
+    return side === AP ? "Allies" : "Japan"
 }
 
 function is_china_coast_captured() {
@@ -10409,10 +10415,10 @@ P.reinforcement_segment = {
         if (G.wie <= 7 && G.active === AP && G.sid !== BURMA_SCENARIO) {
             change_asp(AP, 1)
         } else if (G.active === AP && G.wie >= 7) {
-            log(`War in europe prevent from AP amphibious shipping reinforcement.`)
+            log(`War in Europe prevented Allies from amphibious shipping reinforcements.`)
         }
         if (G.active === AP && (is_event_active(events.PANAMA_CANAL) === G.turn - 1) && G.wie < 3) {
-            log(`AP reinforcements delayed due to Panama canal attack.`)
+            log(`Allied reinforcements delayed due to Panama canal attack.`)
         }
         L.hq_reinforcement = []
         L.unit_reinforcement = []
@@ -10454,7 +10460,7 @@ P.reinforcement_segment = {
             L.allowed_hexes = get_hq_reinforcement_hexes()
         }
         if (delayed_units) {
-            log(`AP reinforcements delayed.`)
+            log(`Allied reinforcements delayed.`)
         }
         update_reinf_active()
         if (L.hq_reinforcement.length === 0 && L.unit_reinforcement.length === 0) {
@@ -10536,7 +10542,7 @@ P.reinforcement_segment = {
     action_hex(hex) {
         push_undo()
         if (!L.logged) {
-            log(`${G.active ? "AP" : "JP"} reinforcements:`)
+            log(`${G.active ? "Allied" : "Japanese"} reinforcements:`)
             L.logged = 1
         }
         set_delete(L.unit_reinforcement, G.active_stack[0])
@@ -10550,7 +10556,7 @@ P.reinforcement_segment = {
     delay() {
         push_undo()
         if (!L.logged) {
-            log(`${G.active ? "AP" : "JP"} reinforcements:`)
+            log(`${G.active ? "Allied" : "Japanese"} reinforcements:`)
             L.logged = 1
         }
         set_location(G.active_stack[0], DELAYED_BOX)
@@ -10647,7 +10653,7 @@ P.replacement_segment = {
     divisions() {
         push_undo()
         if (!L.logged) {
-            log(`${G.active ? "AP" : "JP"} replacements:`)
+            log(`${G.active ? "Allied" : "Japanese"} replacements:`)
             L.logged = 1
         }
         L.divisions -= 1
@@ -10663,7 +10669,7 @@ P.replacement_segment = {
     action_hex(hex) {
         push_undo()
         if (!L.logged) {
-            log(`${G.active ? "AP" : "JP"} replacements:`)
+            log(`${G.active ? "Allied" : "Japanese"} replacements:`)
             L.logged = 1
         }
         set_location(G.active_stack[0], hex)
@@ -10685,7 +10691,7 @@ P.replacement_segment = {
 
         push_undo()
         if (!L.logged) {
-            log(`${G.active ? "AP" : "JP"} replacements:`)
+            log(`${G.active ? "Allied" : "Japanese"} replacements:`)
             L.logged = 1
         }
         if (set_has(G.reduced, u)) {
@@ -13021,10 +13027,10 @@ function get_naval_roll_modifiers(faction) {
     )
     if (ap_air_superiority && G.turn >= 8) {
         result += 3
-        log(`>2+3 AP air superiority (1944-1945).`)
+        og(`>2+3 Allied air superiority (1944-1945).`)
     } else if (ap_air_superiority && G.turn >= 5) {
         result += 1
-        log(`>2+1 AP air superiority (1943).`)
+        log(`>2+1 Allied air superiority (1943).`)
     }
     return result
 }
@@ -14212,7 +14218,7 @@ P.submarine_warfare = {
     roll() {
         var result = random(10)
         var modifiers = 0
-        log(`AP submarine warfare:`)
+        log(`Allied submarine warfare:`)
         if (G.turn <= 4) {
             modifiers += 1
             log(`>1+1 Defective torpedoes (1942).`)
@@ -14220,7 +14226,7 @@ P.submarine_warfare = {
         var escort = is_event_active(events.JP_ESCORTS) >> 4
         if (escort) {
             modifiers += escort
-            log(`>1+${escort} JP Escort.`)
+            log(`>1+${escort} Japanese escort.`)
         }
         var success = (result + modifiers - G.turn) <= 0
         log(`${dice_get_log_str(result, modifiers, AP)} <= ${G.turn} ${success ? "(SUCCESS)" : "(FAILED)"}.`)
@@ -14316,7 +14322,7 @@ P.offensive_phase = script(`
         G.offensive.attacker = G.active
     }
     while (G.hand[AP].length > 0 || G.hand[JP].length > 0) {
-        log ("#"+(G.offensive.attacker===JP?"JJP":"AAP")+" Action")
+        log (G.offensive.attacker === JP ? "#JJapan" : "#AAllies")
         if (G.hand[G.active].length > 0){
             call offensive_segment
         } else {
@@ -14372,7 +14378,7 @@ P.national_status_segment = function () {
         var surr = G.surrender[nations.AUSTRALIAN_MANDATES.id]
         if (!nations.AUSTRALIAN_MANDATES.ports.some(h => is_space_controlled(hex_to_int(h), surr ? JP : AP))) {
             G.surrender[nations.AUSTRALIAN_MANDATES.id] = (surr) ? 0 : G.turn
-            log(`${nations.AUSTRALIAN_MANDATES.name} controlled ${surr ? "AP" : "JP"}.`)
+            log(`${nations.AUSTRALIAN_MANDATES.name} controlled ${surr ? "Allied" : "Japanese"}.`)
         }
         change_political_will(L.pw, "National status")
         end()
@@ -14430,7 +14436,7 @@ P.national_status_segment = function () {
         G.surrender[nations.MARSHALL.id] = 0
         set_control_over_nation(nations.MARSHALL)
         check_event(events.MARSHALL_CAPTURED)
-        log("AP captured Marshall islands.")
+        log("Allies captured Marshall islands.")
     }
     if (check_nation_controlled(nations.JAPAN, AP)) {
         finish(AP, "Allied Victory - Japanese mainland islands captured.")
@@ -14438,7 +14444,7 @@ P.national_status_segment = function () {
     }
     if (check_japan_resource_trace()) {
         if (is_event_active(events.JAPAN_TRACE_RESOURCES)) {
-            log(`JP mainland city traced path to resource hex. Capitulation timer reset.`)
+            log(`Japanese mainland city traced path to resource hex. Capitulation timer reset.`)
         }
         G.events[events.JAPAN_TRACE_RESOURCES.id] = 0
     } else if (is_event_active(events.JAPAN_TRACE_RESOURCES) && is_event_active(events.JAPAN_TRACE_RESOURCES) <= G.turn - 2) {
@@ -14446,7 +14452,7 @@ P.national_status_segment = function () {
         return
     } else {
         check_event(events.JAPAN_TRACE_RESOURCES)
-        log(`JP mainland city could not trace path to resource hex (${G.turn + 1 - is_event_active(events.JAPAN_TRACE_RESOURCES)}/3).`)
+        log(`Japanese mainland city could not trace path to resource hex (${G.turn + 1 - is_event_active(events.JAPAN_TRACE_RESOURCES)}/3).`)
     }
     change_political_will(L.pw, "National status")
     end()
@@ -14642,7 +14648,7 @@ P.china_offensive = {
         button("roll")
     },
     roll() {
-        log(`JP started China offensive.`)
+        log(`Japan started China offensive.`)
         if (!CLIENT_SIDE_SUPPLY) {
             check_supply()
         }
@@ -14740,7 +14746,6 @@ P.offensive_segment = {
     },
     inactive: "play a card",
     prompt() {
-        // prompt("Turn " + G.turn + " - Offensives Segment: Play a card.")
         prompt("Offensives Segment: Play a card.")
         if (G.passes[R] > 0) {
             button("pass")
@@ -14867,7 +14872,10 @@ P.future_offensive = {
             end()
             return
         }
-        log("#" + (G.active === JP ? "JJP" : "AAP") + " Future Offensive")
+        if (G.active === JP) 
+            log("#JJapanese Future Offensive")
+        else
+            log("#AAllied Future Offensive")
         var card = cards[G.future_offensive[G.active] > 0 ? G.future_offensive[G.active] : 0]
         if (card.type !== MILITARY || !event_hq_check(card)) {
             L.impossible = true
@@ -15289,7 +15297,7 @@ cards[find_card(JP, 12)].before_intelligence_roll = function () {
         }
     })
     if ((G.supply_cache[FRENCH_FRIGATE_SHOALS] & AP_ZOI) === 0 && !ca_in_shoals) {
-        log(`+4 JP superior information security.`)
+        log(`+4 Japanese superior information security.`)
         return 4
     }
 }
@@ -15515,7 +15523,7 @@ cards[find_card(JP, 25)].before_battle_roll = function (faction) {
         }
     })
     if (modifier) {
-        log(`>2${modifier} attack strength (AP Tactical Confusion).`)
+        log(`>2${modifier} attack strength (Allied Tactical Confusion).`)
     }
 }
 
@@ -15798,14 +15806,14 @@ cards[find_card(JP, 36)].before_battles = function () {
 
 cards[find_card(JP, 37)].before_activation = function () {
     if (is_event_active(events.SUBMARINE_DOCTRINE)) {
-        log(`US Submarine Doctrine suppress JP Escorts.`)
+        log(`US Submarine Doctrine suppressed Japanese Escorts.`)
         return
     }
     if (is_event_active(events.JP_ESCORTS)) {
-        log(`JP gains +4 escort bonus.`)
+        log(`Japan gained +4 escort bonus.`)
         G.events[events.JP_ESCORTS.id] = G.turn + (4 << 4)
     } else {
-        log(`JP gains +2 escort bonus.`)
+        log(`Japan gained +2 escort bonus.`)
         G.events[events.JP_ESCORTS.id] = G.turn + (2 << 4)
     }
 }
@@ -15831,7 +15839,7 @@ cards[TOJO_RESIGNS].event = function () {
 
 cards[find_card(JP, 44)].before_activation = function () {
     G.jp_asp = G.asp[JP][1]
-    log('JP gain 2 temporary ASPs.')
+    log('Japan gained 2 temporary ASPs.')
     G.asp[JP][0] += 2
     if (G.inter_service[JP]) {
         G.asp[JP][0] += 2
@@ -16158,7 +16166,7 @@ cards[find_card(JP, 72)].event = function () {
 
 cards[find_card(JP, 73)].before_activation = function () {
     if (!is_event_active(events.PT_BOATS)) {
-        log(`JP barges active.`)
+        log(`Japanese barges active.`)
         check_event(events.BARGES)
     }
 }
@@ -16191,7 +16199,7 @@ P.attack_b29_base = {
         if (L.allowed_units.length <= 0) {
             return
         }
-        log(`JP attack to B-29 base:`)
+        log(`Japan attacked B29 base:`)
         var roll = random(10)
         L.hits = roll <= 4
         log(`${roll} - ${L.hits ? "success" : "No effect"}`)
@@ -16603,7 +16611,7 @@ cards[find_card(AP, 8)].can_play = function () {
 
 cards[find_card(AP, 9)].before_activation = function () {
     G.temp_asp = G.asp[AP][1]
-    log('AP gain 4 temporary ASPs.')
+    log('Allies gained 4 temporary ASPs.')
     G.asp[AP][0] += 4
 }
 
@@ -16989,7 +16997,7 @@ P.chronicle = {
                 set_add(captured, h)
             }
         })
-        log(`Offensive card bonus used for ${hex_get_log_str(hex)}, AP captured: ${list_get_log_str(captured.length + " hexes", captured.map(u => hex_get_log_str(u)))}.`)
+        log(`Offensive card bonus used for ${hex_get_log_str(hex)}, Allied captured: ${list_get_log_str(captured.length + " hexes", captured.map(u => hex_get_log_str(u)))}.`)
         end()
     },
     skip() {
@@ -17594,7 +17602,7 @@ cards[SOVIET_INVADE].event = function () {
 cards[find_card(AP, 80)].event = function () {
     check_event(events.SUBMARINE_DOCTRINE)
     if (is_event_active(events.JP_ESCORTS)) {
-        log(`JP lose escort bonus.`)
+        log(`Japan lost escort bonus.`)
         G.events[events.JP_ESCORTS.id] = 0
     }
 }
@@ -18008,12 +18016,12 @@ function set_inter_service(faction, rivalry) {
 
 function reshuffle() {
     if (G.discard[AP].includes(SOVIET_INVADE)) {
-        log(`AP deck reshuffled due to Soviet invasion discarded.`)
+        log(`Allied deck reshuffled due to Soviet invasion discarded.`)
         G.draw[AP].push(...G.discard[AP])
         G.discard[AP] = []
     }
     if (G.discard[JP].includes(TOJO_RESIGNS)) {
-        log(`JP deck reshuffled due to Tojo resign discarded.`)
+        log(`Japanese deck reshuffled due to Tojo resign discarded.`)
         G.draw[JP].push(...G.discard[JP])
         G.discard[JP] = []
     }
@@ -18245,13 +18253,13 @@ function capture_hex(hex, side = G.active, no_log = false) {
     if (G.non_control) {
         set_delete(G.non_control, hex)
         if (!no_log) {
-            log(`AP captured ${int_to_hex(hex)}.`)
+            log(`Allies captured ${int_to_hex(hex)}.`)
         }
     }
     var md = get_map_data(hex)
     if (side && !is_space_controlled(hex, AP)) {
         if (!no_log) {
-            log(`AP captured ${hex_get_log_str(hex)}.`)
+            log(`Allies captured ${hex_get_log_str(hex)}.`)
         }
         G.supply_cache[hex] -= JP_CONTROLLED
         if (md.region === "NIndia") {
@@ -18265,7 +18273,7 @@ function capture_hex(hex, side = G.active, no_log = false) {
     } else if (!side && !is_space_controlled(hex, JP)) {
         if (!no_log) {
 
-            log(`JP captured ${hex_get_log_str(hex)}.`)
+            log(`Japan captured ${hex_get_log_str(hex)}.`)
         }
         G.supply_cache[hex] += JP_CONTROLLED
     } else {
@@ -18695,7 +18703,7 @@ function setup_scenario_burma() {
 
     prepare_game_log()
     log_scenario()
-    log(`@Turn ${G.turn} - ${get_year_season()} ${get_year()}`)
+    log(`@Turn ${G.turn} -- ${get_year_season()} ${get_year()}`)
     call("burma_choose_offensive")
 }
 
@@ -18819,7 +18827,7 @@ function setup_scenario_1942(options) {
     G.china_divisions = 11
     prepare_game_log()
     log_scenario()
-    log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
+    log("@Turn " + G.turn + " -- " + get_year_season() + " " + get_year())
     call("scenario_1942")
 }
 
@@ -19039,7 +19047,7 @@ function setup_scenario_1943() {
     }
     prepare_game_log()
     log_scenario()
-    log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
+    log("@Turn " + G.turn + " -- " + get_year_season() + " " + get_year())
     call("offensive_phase")
 }
 
@@ -19226,7 +19234,7 @@ function setup_scenario_1944() {
     }
     prepare_game_log()
     log_scenario()
-    log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
+    log("@Turn " + G.turn + " -- " + get_year_season() + " " + get_year())
     call("offensive_phase")
 }
 
@@ -19358,7 +19366,7 @@ function setup_scenario_south_pacific() {
 
     prepare_game_log()
     log_scenario()
-    log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
+    log("@Turn " + G.turn + " -- " + get_year_season() + " " + get_year())
     call("offensive_phase")
 }
 
@@ -19375,7 +19383,7 @@ function deal_cards() {
     if (G.strategic_warfare) {
         jp_cards = Math.max(jp_cards - G.strategic_warfare, 4)
     }
-    log(`JP drew ${jp_cards} cards ${source}.`)
+    log(`Japan drew ${jp_cards} cards ${source}.`)
     G.passes[JP] = 0
     if (jp_cards === 6) {
         G.passes[JP] = 1
@@ -19383,7 +19391,7 @@ function deal_cards() {
         G.passes[JP] = 2
     }
     if (G.passes[JP]) {
-        log(`JP received ${G.passes[JP]} passes.`)
+        log(`Japan received ${G.passes[JP]} passes.`)
     }
     while (G.hand[JP].length < jp_cards) {
         draw_card(JP)
@@ -19403,28 +19411,28 @@ function deal_cards() {
     if (G.surrender[nations.CHINA.id]) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by 1 due to China's surrender.`)
+        log(`Allied draw reduced by 1 due to China's surrender.`)
     }
     if (G.surrender[nations.INDIA.id]) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by 1 due to India's surrender.`)
+        log(`Allied draw reduced by 1 due to India's surrender.`)
     }
     if (G.surrender[nations.AUSTRALIA.id]) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by 1 due to Australia's surrender.`)
+        log(`Allied draw reduced by 1 due to Australia's surrender.`)
     }
     if (G.wie >= 10) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by 1 due to War in Europe at Level 4.`)
+        log(`Allied draw reduced by 1 due to War in Europe at Level 4.`)
     }
     ap_cards = Math.max(ap_cards, 4)
     G.passes[AP] = Math.min(G.passes[AP], 2)
-    log(`AP drew ${ap_cards} cards.`)
+    log(`Allies drew ${ap_cards} cards.`)
     if (G.passes[AP]) {
-        log(`AP received ${G.passes[AP]} passes.`)
+        log(`Allies received ${G.passes[AP]} passes.`)
     }
     while (G.hand[AP].length < ap_cards) {
         draw_card(AP)
@@ -19438,9 +19446,9 @@ function S_P_deal_cards() {
         jp_cards -= G.strategic_warfare
         G.passes[JP] = 1
     }
-    log(`JP drew ${jp_cards} cards.`)
+    log(`Japan drew ${jp_cards} cards.`)
     if (G.passes[JP]) {
-        log(`JP received ${G.passes[JP]} passes.`)
+        log(`Japan received ${G.passes[JP]} passes.`)
     }
     while (G.hand[JP].length < jp_cards) {
         draw_card(JP)
@@ -19451,11 +19459,11 @@ function S_P_deal_cards() {
     if (G.surrender[nations.CHINA.id]) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by 1 due to China's surrender.`)
+        log(`Allied draw reduced by 1 due to China's surrender.`)
     }
-    log(`AP drew ${ap_cards} cards.`)
+    log(`Allies drew ${ap_cards} cards.`)
     if (G.passes[AP]) {
-        log(`AP receive ${G.passes[AP]} passes.`)
+        log(`Allies receive ${G.passes[AP]} passes.`)
     }
     while (G.hand[AP].length < ap_cards) {
         draw_card(AP)
@@ -19469,9 +19477,9 @@ function B_F_W_deal_cards() {
         jp_cards -= G.strategic_warfare
         G.passes[JP] = G.strategic_warfare
     }
-    log(`JP drew ${jp_cards} cards.`)
+    log(`Japan drew ${jp_cards} cards.`)
     if (G.passes[JP]) {
-        log(`JP received ${G.passes[JP]} passes.`)
+        log(`Japan received ${G.passes[JP]} passes.`)
     }
     while (G.hand[JP].length < jp_cards) {
         draw_card(JP)
@@ -19482,12 +19490,12 @@ function B_F_W_deal_cards() {
     if (G.surrender[nations.CHINA.id]) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by 1 due to China's surrender.`)
+        log(`Allied draw reduced by 1 due to China's surrender.`)
     }
     if (G.surrender[nations.INDIA.id]) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by 1 due to India surrender.`)
+        log(`Allied draw reduced by 1 due to India surrender.`)
     }
     if (ap_cards === 4 && is_space_controlled(hex_to_int(2006), AP) && is_space_controlled(hex_to_int(2105), AP)
         && is_space_controlled(hex_to_int(2205), AP)) {
@@ -19499,12 +19507,12 @@ function B_F_W_deal_cards() {
         if (!success) {
             ap_cards -= 1
             G.passes[AP]++
-            log(`AP draw reduced by 1 due to Diverted Logistics.`)
+            log(`Allied draw reduced by 1 due to Diverted Logistics.`)
         }
     }
-    log(`AP drew ${ap_cards} cards.`)
+    log(`Allies drew ${ap_cards} cards.`)
     if (G.passes[AP]) {
-        log(`AP received ${G.passes[AP]} passes.`)
+        log(`Allies received ${G.passes[AP]} passes.`)
     }
     while (G.hand[AP].length < ap_cards) {
         draw_card(AP)
@@ -19534,7 +19542,7 @@ function get_replacement_points() {
         } else {
             result[NAVAl_REP] = 1
         }
-        // log(`+1 US Naval Replacement Point (AP controlled Oahu).`)
+        // log(`+1 US Naval Replacement Point (Allied controlled Oahu).`)
     }
     if ([6, 9, 12].includes(G.turn) && COM_REPLACEMENT_POINTS.some(h => is_space_controlled(h, AP))) {
         result[COMMONWEALTH_REP] = 1
@@ -19546,7 +19554,7 @@ function get_replacement_points() {
     }
     if (is_event_active(events.INDEPENDENCE_CAMPAIGN)) {
         result[GROUND_REP] = Math.max(0, result[GROUND_REP] - is_event_active(events.INDEPENDENCE_CAMPAIGN))
-        log(`-${is_event_active(events.INDEPENDENCE_CAMPAIGN)} AP ground replacement, Indian independence campaign (no commonwealth units could be replaced).`)
+        log(`-${is_event_active(events.INDEPENDENCE_CAMPAIGN)} Allied ground replacement, Indian independence campaign (no commonwealth units could be replaced).`)
         G.events[events.INDEPENDENCE_CAMPAIGN.id] = 0
         L.INDEPENDENCE_CAMPAIGN = 1
     }
@@ -19594,7 +19602,7 @@ function get_B_F_W_replacement_points() {
     }
     if (is_event_active(events.INDEPENDENCE_CAMPAIGN)) {
         result[GROUND_REP] = Math.max(0, result[GROUND_REP] - is_event_active(events.INDEPENDENCE_CAMPAIGN))
-        log(`-${is_event_active(events.INDEPENDENCE_CAMPAIGN)} AP ground replacement, Indian independence campaign (no commonwealth units could be replaced).`)
+        log(`-${is_event_active(events.INDEPENDENCE_CAMPAIGN)} Allied ground replacement, Indian independence campaign (no commonwealth units could be replaced).`)
         G.events[events.INDEPENDENCE_CAMPAIGN.id] = 0
         L.INDEPENDENCE_CAMPAIGN = 1
     }
@@ -19656,8 +19664,8 @@ P.burma_choose_offensive = {
 }
 
 P.scenario_1941 = script(`
-    log ("@Turn 1 - December 7, 1941")
-    log ("#JJP Action. Operation Z")
+    log ("@Turn 1 -- December 7, 1941")
+    log ("#JOperation Z")
     set G.active JP
     call operation_z
     eval {
@@ -19665,7 +19673,7 @@ P.scenario_1941 = script(`
         reset_offensive()
         G.offensive.attacker = JP
     }
-    log ("#JJP Action. Operation No. 1")
+    log ("#JOperation No. 1")
     set G.offensive.stage ATTACK_STAGE
     call operation_no_1
     call activate_units
@@ -19836,7 +19844,7 @@ P.arcadia = {
     },
     hold() {
         clear_undo()
-        log(`AP chose Arcadia +4 random cards.`)
+        log(`Allies chose Arcadia +4 random cards.`)
         while (G.hand[AP].length < 5) {
             draw_card(AP)
         }
@@ -19844,7 +19852,7 @@ P.arcadia = {
     discard() {
         G.hand[AP] = []
         G.draw[AP].push(find_card(AP, 4))
-        log(`AP chose 5 random cards.`)
+        log(`Allies chose 5 random cards.`)
         clear_undo()
         while (G.hand[AP].length < 5) {
             draw_card(AP)
@@ -19868,7 +19876,7 @@ P.arcadia = {
 
 function draw_hist_cards() {
     var hist = [find_card(JP, 3), find_card(JP, 47), find_card(JP, 59)]
-    log(`JP drew historical hand ${format_cards(hist)} + 4 random cards.`)
+    log(`Japan drew historical hand ${format_cards(hist)} + 4 random cards.`)
     hist.forEach(c => draw_specific_card(c))
 }
 
@@ -19903,7 +19911,7 @@ P.japan_init_1942 = {
     card(c) {
         push_undo()
         discard_card(c)
-        log(`JP discarded ${card_get_log_str(c)} and drew ${card_get_log_str(find_card(JP, 47))}.`)
+        log(`Japan discarded ${card_get_log_str(c)} and drew ${card_get_log_str(find_card(JP, 47))}.`)
         draw_specific_card(find_card(JP, 47))
     },
     skip() {

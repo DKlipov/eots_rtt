@@ -2296,10 +2296,10 @@ function get_naval_roll_modifiers(faction) {
     )
     if (ap_air_superiority && G.turn >= 8) {
         result += 3
-        log(`>2+3 AP air superiority (1944-1945).`)
+        og(`>2+3 Allied air superiority (1944-1945).`)
     } else if (ap_air_superiority && G.turn >= 5) {
         result += 1
-        log(`>2+1 AP air superiority (1943).`)
+        log(`>2+1 Allied air superiority (1943).`)
     }
     return result
 }

@@ -138,7 +138,7 @@ function victory_burma() {
     }
     //F. For controlling each hex of Northern India, +1 VP per hex
     var india = array_count(nations.INDIA.keys, i => is_space_controlled(hex_to_int(i), JP))
-    adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
+    adjust_vp(result, india, "Japanese controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
     //G. For India Unrest or Strikes, +1 Victory Point (awarded on the last game turn)
     var india_status = G.events[events.INDIA_STATUS.id]
     if (india_status > 0 && india_status <= 2) {
@@ -151,24 +151,24 @@ function victory_burma() {
     } else {
         result.text.push(`0 VP - India ${nations.INDIA.statuses[india_status]}.`)
     }
-    //I. Rangoon is Allied Control: –2 VP (no additional VPs for theResource hex).
+    //I. Rangoon is Allied control: –2 VP (no additional VPs for the resource hex).
     if (is_space_controlled(RANGOON, AP)) {
         result.vp -= 2
-        result.text.push(`-2 VP - Rangoon is AP Control.`)
+        result.text.push(`-2 VP - Rangoon is Allied controlled.`)
         //J. Rangoon is Japanese Control: +2 VP
     } else {
         result.vp += 2
-        result.text.push(`2 VP - Rangoon is JP Control.`)
+        result.text.push(`2 VP - Rangoon is Japanese controlled.`)
     }
     //K. If the Allies are under ISR at the end of the game +1 VP.
     if (G.inter_service[AP]) {
         result.vp += 1
-        result.text.push(`1 VP - AP are under ISR.`)
+        result.text.push(`1 VP - Allies are under ISR.`)
     }
     //L. If the Japanese are under ISR at the end of the game –1 VP
     if (G.inter_service[JP]) {
         result.vp -= 1
-        result.text.push(`-1 VP - JP are under ISR.`)
+        result.text.push(`-1 VP - Japan is under ISR.`)
     }
 
     return result
@@ -206,7 +206,7 @@ function victory_1942() {
         "Townsville was not isolated", [hex_to_int(3727), OAHU])
 
     var india = array_count(nations.INDIA.keys, i => is_space_controlled(hex_to_int(i), JP))
-    adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
+    adjust_vp(result, india, "Japanese controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
     var india_status = G.events[events.INDIA_STATUS.id]
     if (india_status > 0 && india_status <= 2) {
         result.vp += 1
@@ -217,15 +217,15 @@ function victory_1942() {
     } else {
         result.text.push(`0 VP - India ${nations.INDIA.statuses[india_status]}.`)
     }
-    binary_vp(result, get_mandate_control() === JP, 1, "JP Control of Australian Mandates", `AP Control of Australian Mandates`)
+    binary_vp(result, get_mandate_control() === JP, 1, "Japanese control of Australian Mandates", `Allied control of Australian Mandates`)
     var new_guinea = 0
     nations.NEW_GUINEA.keys.map(k => hex_to_int(k)).forEach(h => {
         if (is_space_controlled(h, JP) && get_map_data(h).port && get_map_data(h).region === "Guinea") {
             new_guinea++
         }
     })
-    binary_vp(result, new_guinea >= 4, 2, `JP Control of ${new_guinea} >= 4 New Guinea ports`,
-        `JP Control of ${new_guinea} < 4 New Guinea ports`, nations.NEW_GUINEA.keys.map(h => hex_to_int(h)).filter(h => h !== VOGELKOP))
+    binary_vp(result, new_guinea >= 4, 2, `Japanese control of ${new_guinea} >= 4 New Guinea ports`,
+        `Japanese control of ${new_guinea} < 4 New Guinea ports`, nations.NEW_GUINEA.keys.map(h => hex_to_int(h)).filter(h => h !== VOGELKOP))
     if (G.political_will <= 5) {
         result.vp += 6 - G.political_will
         result.text.push(`+${6 - G.political_will} VP - Political will`)
@@ -331,7 +331,7 @@ function victory_1943() {
         "Townsville was not isolated", [hex_to_int(3727), OAHU])
 
     var india = array_count(nations.INDIA.keys, i => is_space_controlled(hex_to_int(i), JP))
-    adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
+    adjust_vp(result, india, "Japanese controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
     var india_status = G.events[events.INDIA_STATUS.id]
     if (india_status > 0 && india_status <= 2) {
         result.vp += 1
@@ -361,7 +361,7 @@ function victory_1943() {
             }
         })
         binary_vp(result, mandate_count >= 4,
-            -1, "AP control more than 3 Australian Mandate hexes", `AP do not control 4 Australian Mandate hexes`,
+            -1, "Allies control more than 3 Australian Mandate hexes", `Allies do not control 4 Australian Mandate hexes`,
             mandate_hexes
         )
     }
@@ -379,19 +379,19 @@ function victory_1943() {
     binary_vp(result, set_has(G.captured_once, hex_to_int(5908)), 1, `Hawaii was captured`,
         "Hawaii was not captured")
     binary_vp(result, check_nation_controlled(nations.MARSHALL, AP),
-        -3, "AP control Marshall Islands", `AP do not control Marshall Islands`,
+        -3, "Allies control Marshall Islands", `Allies do not control Marshall Islands`,
         nations.MARSHALL.keys.map(h => hex_to_int(h))
     )
     var ng_ap = check_nation_controlled(nations.NEW_GUINEA, AP)
     binary_vp(result, ng_ap,
-        -3, "AP control New Guinea", `AP do not control New Guinea`,
+        -3, "Allies control New Guinea", `Allies do not control New Guinea`,
         nations.NEW_GUINEA.keys.map(h => hex_to_int(h))
     )
     if (!ng_ap) {
         var new_guinea = array_count(nations.NEW_GUINEA.keys.map(k => hex_to_int(k)),
             h => get_map_data(h).port && is_space_controlled(h, AP))
-        binary_vp(result, new_guinea >= 4, -1, `AP Control of ${new_guinea} >= 4 New Guinea ports`,
-            `AP Control of ${new_guinea} < 4 New Guinea ports`, nations.NEW_GUINEA.keys.map(h => hex_to_int(h)).filter(h => h !== VOGELKOP))
+        binary_vp(result, new_guinea >= 4, -1, `Allied control of ${new_guinea} >= 4 New Guinea ports`,
+            `Allied control of ${new_guinea} < 4 New Guinea ports`, nations.NEW_GUINEA.keys.map(h => hex_to_int(h)).filter(h => h !== VOGELKOP))
     }
     var tokyo_ports = 0
     var tokyo_ports_list = []
@@ -404,10 +404,10 @@ function victory_1943() {
             tokyo_ports++
         }
     })
-    binary_vp(result, tokyo_ports, -3, `AP control a port that is 11 or less hexes from Tokyo`,
-        `AP do not control a port that is 11 or less hexes from Tokyo`,
+    binary_vp(result, tokyo_ports, -3, `Allies control a port that is 11 or less hexes from Tokyo`,
+        `Allies do not control a port that is 11 or less hexes from Tokyo`,
         tokyo_ports_list)
-    adjust_vp(result, -(14 - get_jp_resources()), "AP controlled resource hexes",
+    adjust_vp(result, -(14 - get_jp_resources()), "Allied controlled resource hexes",
         RESOURCE_HEX)
     return result
 }
@@ -431,7 +431,7 @@ function victory_1944() {
         "Townsville was not isolated", [hex_to_int(3727), OAHU])
 
     var india = array_count(nations.INDIA.keys, i => is_space_controlled(hex_to_int(i), JP))
-    adjust_vp(result, india, "JP controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
+    adjust_vp(result, india, "Japanese controlled hexes of Northern India", nations.INDIA.keys.map(i => hex_to_int(i)))
     var india_status = G.events[events.INDIA_STATUS.id]
     if (india_status > 0 && india_status <= 2) {
         result.vp += 1
@@ -442,8 +442,8 @@ function victory_1944() {
     } else {
         result.text.push(`0 VP - India ${nations.INDIA.statuses[india_status]}.`)
     }
-    binary_vp(result, get_mandate_control() === JP, 1, "JP Control of the Australian Mandates",
-        "JP don't control the Australian Mandates")
+    binary_vp(result, get_mandate_control() === JP, 1, "Japanese control of the Australian Mandates",
+        "Japan doesn't control the Australian Mandates")
     if (G.political_will <= 5) {
         result.vp += 6 - G.political_will
         result.text.push(`+${6 - G.political_will} VP - Political will`)
@@ -459,11 +459,11 @@ function victory_1944() {
     } else if (!check_nation_controlled(nations.NEW_GUINEA, AP)) {
         ng_diff = 3
     }
-    adjust_vp(result, ng_diff, "Control of New Guinea (JP: +5 / Neither: +3 / AP: 0)",
+    adjust_vp(result, ng_diff, "Control of New Guinea (Japan: +5 / Neither: +3 / Allies: 0)",
         nations.NEW_GUINEA.keys.map(h => hex_to_int(h)))
     binary_vp(result, is_space_controlled(RABAUL, JP) && (G.supply_cache[RABAUL] & JP_SUPPLIED_HEX), 3,
-        "Rabaul is JP controlled and supplied",
-        `Rabaul is ${is_space_controlled(RABAUL, AP) ? "AP controlled" : "out of supply"}`)
+        "Rabaul is Japanese controlled and supplied",
+        `Rabaul is ${is_space_controlled(RABAUL, AP) ? "Allied controlled" : "out of supply"}`)
 
     var philipine_ports = [MANILA, hex_to_int(3014), hex_to_int(2915), hex_to_int(2715)]
     var pp = array_count(philipine_ports, h => is_space_controlled(h, AP) && (G.supply_cache[h] & AP_SUPPLIED_HEX))
@@ -475,7 +475,7 @@ function victory_1944() {
     } else if (pp >= 2) {
         phillipine_diff = 0
     }
-    adjust_vp(result, phillipine_diff, "AP Control of Philippines ports (0: +5 / 1: +3 / 2+: 0) ",
+    adjust_vp(result, phillipine_diff, "Allied control of Philippine ports (0: +5 / 1: +3 / 2+: 0) ",
         philipine_ports)
 
     var tokyo_ports = 0
@@ -489,8 +489,8 @@ function victory_1944() {
             tokyo_ports++
         }
     })
-    binary_vp(result, tokyo_ports <= 0, 5, `AP do not control a port that is 8 or less hexes from Tokyo`,
-        `AP control a port that is 8 or less hexes from Tokyo`,
+    binary_vp(result, tokyo_ports <= 0, 5, `Allies do not control a port that is 8 or less hexes from Tokyo`,
+        `Allies control a port that is 8 or less hexes from Tokyo`,
         tokyo_ports_list)
     return result
 }
@@ -539,13 +539,13 @@ function get_hex_control_log(hex_control) {
     })
     var hex_log = " (Unsupplied hexes count as "
     if (ap.length > 0) {
-        hex_log += "AP control: " + format_hexes(ap)
+        hex_log += "Allied control: " + format_hexes(ap)
         if (jp.length > 0) {
             hex_log += ", "
         }
     }
     if (jp.length > 0) {
-        hex_log += "JP control: " + format_hexes(jp)
+        hex_log += "Japanese control: " + format_hexes(jp)
     }
     hex_log += ")"
     if (ap.length === 0 && jp.length === 0) {
@@ -594,13 +594,13 @@ function victory_south_pacific() {
             amh++
         }
     })
-    adjust_vp(result, amh, "JP control of Australian Mandates ports", nations.AUSTRALIAN_MANDATES.ports.map(h => hex_to_int(h)))
+    adjust_vp(result, amh, "Japanese control of Australian Mandates ports", nations.AUSTRALIAN_MANDATES.ports.map(h => hex_to_int(h)))
     if (!nations.AUSTRALIAN_MANDATES.ports.some(h => !is_space_controlled(hex_to_int(h), JP))) {
         result.vp += 3
-        result.text.push(`+3 VP - JP control of Australian Mandates.`)
+        result.text.push(`+3 VP - Japanese control of Australian Mandates.`)
     } else if (!nations.AUSTRALIAN_MANDATES.ports.some(h => !is_space_controlled(hex_to_int(h), AP))) {
         result.vp -= 3
-        result.text.push(`-3 VP - AP control of Australian Mandates.`)
+        result.text.push(`-3 VP - Allied control of Australian Mandates.`)
     } else {
         result.text.push(`0 VP -  No one controls the Australian Mandates.`)
     }
@@ -611,24 +611,24 @@ function victory_south_pacific() {
             new_guinea++
         }
     })
-    adjust_vp(result, new_guinea, "JP control of New Guinea ports", nations.NEW_GUINEA.keys.map(h => hex_to_int(h)).filter(h => h !== VOGELKOP))
-    binary_vp(result, is_space_controlled(VOGELKOP, AP), -1, "AP control of Vogelkop",
-        "JP control of Vogelkop", [VOGELKOP])
+    adjust_vp(result, new_guinea, "Japanese control of New Guinea ports", nations.NEW_GUINEA.keys.map(h => hex_to_int(h)).filter(h => h !== VOGELKOP))
+    binary_vp(result, is_space_controlled(VOGELKOP, AP), -1, "Allied control of Vogelkop",
+        "Japanese control of Vogelkop", [VOGELKOP])
     if (check_nation_controlled(nations.NEW_GUINEA, JP)) {
         result.vp += 3
-        result.text.push(`+3 VP - JP control of New Guinea.`)
+        result.text.push(`+3 VP - Japanese control of New Guinea.`)
     } else if (check_nation_controlled(nations.NEW_GUINEA, AP)) {
         result.vp -= 3
-        result.text.push(`-3 VP - AP control of New Guinea.`)
+        result.text.push(`-3 VP - Allied control of New Guinea.`)
     } else {
         result.text.push(`0 VP - No one controls New Guinea.`)
     }
     var heb = array_count(NEW_HEBRIDES, h => is_space_controlled(h, JP) && get_map_data(h).port)
-    binary_vp(result, heb, 1, "JP control of New Hebrides port",
-        "No JP control of any New Hebrides port", NEW_HEBRIDES.filter(h => is_space_controlled(h, JP)))
+    binary_vp(result, heb, 1, "Japanese control of New Hebrides port",
+        "No Japanese control of any New Hebrides port", NEW_HEBRIDES.filter(h => is_space_controlled(h, JP)))
     var aus = array_count(nations.AUSTRALIA.keys.map(k => hex_to_int(k)), h => is_space_controlled(h, JP) && get_map_data(h).port)
-    binary_vp(result, aus, 1, "JP control of Australia mainland port",
-        "No JP control of any Australia mainland port", nations.AUSTRALIA.keys.map(k => hex_to_int(k)).filter(h => is_space_controlled(h, JP)))
+    binary_vp(result, aus, 1, "Japanese control of Australia mainland port",
+        "No Japanese control of any Australia mainland port", nations.AUSTRALIA.keys.map(k => hex_to_int(k)).filter(h => is_space_controlled(h, JP)))
     return result
 }
 
@@ -714,7 +714,7 @@ function before_victory_check() {
         }
     }
     if (no_capture) {
-        change_political_will(-1, "no AP control of any hex originally controlled by the JP")
+        change_political_will(-1, "no Allied control of any hex originally controlled by Japan")
     }
     //17.11.26. At the end of the game if the War in Europe is in a box with a
     //negative number the US PW is reduced by one prior to scoring.

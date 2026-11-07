@@ -166,7 +166,7 @@ function setup_scenario_burma() {
 
     prepare_game_log()
     log_scenario()
-    log(`@Turn ${G.turn} - ${get_year_season()} ${get_year()}`)
+    log(`@Turn ${G.turn} -- ${get_year_season()} ${get_year()}`)
     call("burma_choose_offensive")
 }
 
@@ -290,7 +290,7 @@ function setup_scenario_1942(options) {
     G.china_divisions = 11
     prepare_game_log()
     log_scenario()
-    log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
+    log("@Turn " + G.turn + " -- " + get_year_season() + " " + get_year())
     call("scenario_1942")
 }
 
@@ -510,7 +510,7 @@ function setup_scenario_1943() {
     }
     prepare_game_log()
     log_scenario()
-    log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
+    log("@Turn " + G.turn + " -- " + get_year_season() + " " + get_year())
     call("offensive_phase")
 }
 
@@ -697,7 +697,7 @@ function setup_scenario_1944() {
     }
     prepare_game_log()
     log_scenario()
-    log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
+    log("@Turn " + G.turn + " -- " + get_year_season() + " " + get_year())
     call("offensive_phase")
 }
 
@@ -829,7 +829,7 @@ function setup_scenario_south_pacific() {
 
     prepare_game_log()
     log_scenario()
-    log("@Turn " + G.turn + " - " + get_year_season() + " " + get_year())
+    log("@Turn " + G.turn + " -- " + get_year_season() + " " + get_year())
     call("offensive_phase")
 }
 
@@ -846,7 +846,7 @@ function deal_cards() {
     if (G.strategic_warfare) {
         jp_cards = Math.max(jp_cards - G.strategic_warfare, 4)
     }
-    log(`JP drew ${jp_cards} cards ${source}.`)
+    log(`Japan drew ${jp_cards} cards ${source}.`)
     G.passes[JP] = 0
     if (jp_cards === 6) {
         G.passes[JP] = 1
@@ -854,7 +854,7 @@ function deal_cards() {
         G.passes[JP] = 2
     }
     if (G.passes[JP]) {
-        log(`JP received ${G.passes[JP]} passes.`)
+        log(`Japan received ${G.passes[JP]} passes.`)
     }
     while (G.hand[JP].length < jp_cards) {
         draw_card(JP)
@@ -874,28 +874,28 @@ function deal_cards() {
     if (G.surrender[nations.CHINA.id]) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by 1 due to China's surrender.`)
+        log(`Allied draw reduced by 1 due to China's surrender.`)
     }
     if (G.surrender[nations.INDIA.id]) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by 1 due to India's surrender.`)
+        log(`Allied draw reduced by 1 due to India's surrender.`)
     }
     if (G.surrender[nations.AUSTRALIA.id]) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by 1 due to Australia's surrender.`)
+        log(`Allied draw reduced by 1 due to Australia's surrender.`)
     }
     if (G.wie >= 10) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by 1 due to War in Europe at Level 4.`)
+        log(`Allied draw reduced by 1 due to War in Europe at Level 4.`)
     }
     ap_cards = Math.max(ap_cards, 4)
     G.passes[AP] = Math.min(G.passes[AP], 2)
-    log(`AP drew ${ap_cards} cards.`)
+    log(`Allies drew ${ap_cards} cards.`)
     if (G.passes[AP]) {
-        log(`AP received ${G.passes[AP]} passes.`)
+        log(`Allies received ${G.passes[AP]} passes.`)
     }
     while (G.hand[AP].length < ap_cards) {
         draw_card(AP)
@@ -909,9 +909,9 @@ function S_P_deal_cards() {
         jp_cards -= G.strategic_warfare
         G.passes[JP] = 1
     }
-    log(`JP drew ${jp_cards} cards.`)
+    log(`Japan drew ${jp_cards} cards.`)
     if (G.passes[JP]) {
-        log(`JP received ${G.passes[JP]} passes.`)
+        log(`Japan received ${G.passes[JP]} passes.`)
     }
     while (G.hand[JP].length < jp_cards) {
         draw_card(JP)
@@ -922,11 +922,11 @@ function S_P_deal_cards() {
     if (G.surrender[nations.CHINA.id]) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by 1 due to China's surrender.`)
+        log(`Allied draw reduced by 1 due to China's surrender.`)
     }
-    log(`AP drew ${ap_cards} cards.`)
+    log(`Allies drew ${ap_cards} cards.`)
     if (G.passes[AP]) {
-        log(`AP receive ${G.passes[AP]} passes.`)
+        log(`Allies receive ${G.passes[AP]} passes.`)
     }
     while (G.hand[AP].length < ap_cards) {
         draw_card(AP)
@@ -940,9 +940,9 @@ function B_F_W_deal_cards() {
         jp_cards -= G.strategic_warfare
         G.passes[JP] = G.strategic_warfare
     }
-    log(`JP drew ${jp_cards} cards.`)
+    log(`Japan drew ${jp_cards} cards.`)
     if (G.passes[JP]) {
-        log(`JP received ${G.passes[JP]} passes.`)
+        log(`Japan received ${G.passes[JP]} passes.`)
     }
     while (G.hand[JP].length < jp_cards) {
         draw_card(JP)
@@ -953,12 +953,12 @@ function B_F_W_deal_cards() {
     if (G.surrender[nations.CHINA.id]) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by 1 due to China's surrender.`)
+        log(`Allied draw reduced by 1 due to China's surrender.`)
     }
     if (G.surrender[nations.INDIA.id]) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`AP draw reduced by 1 due to India surrender.`)
+        log(`Allied draw reduced by 1 due to India surrender.`)
     }
     if (ap_cards === 4 && is_space_controlled(hex_to_int(2006), AP) && is_space_controlled(hex_to_int(2105), AP)
         && is_space_controlled(hex_to_int(2205), AP)) {
@@ -970,12 +970,12 @@ function B_F_W_deal_cards() {
         if (!success) {
             ap_cards -= 1
             G.passes[AP]++
-            log(`AP draw reduced by 1 due to Diverted Logistics.`)
+            log(`Allied draw reduced by 1 due to Diverted Logistics.`)
         }
     }
-    log(`AP drew ${ap_cards} cards.`)
+    log(`Allies drew ${ap_cards} cards.`)
     if (G.passes[AP]) {
-        log(`AP received ${G.passes[AP]} passes.`)
+        log(`Allies received ${G.passes[AP]} passes.`)
     }
     while (G.hand[AP].length < ap_cards) {
         draw_card(AP)
@@ -1005,7 +1005,7 @@ function get_replacement_points() {
         } else {
             result[NAVAl_REP] = 1
         }
-        // log(`+1 US Naval Replacement Point (AP controlled Oahu).`)
+        // log(`+1 US Naval Replacement Point (Allied controlled Oahu).`)
     }
     if ([6, 9, 12].includes(G.turn) && COM_REPLACEMENT_POINTS.some(h => is_space_controlled(h, AP))) {
         result[COMMONWEALTH_REP] = 1
@@ -1017,7 +1017,7 @@ function get_replacement_points() {
     }
     if (is_event_active(events.INDEPENDENCE_CAMPAIGN)) {
         result[GROUND_REP] = Math.max(0, result[GROUND_REP] - is_event_active(events.INDEPENDENCE_CAMPAIGN))
-        log(`-${is_event_active(events.INDEPENDENCE_CAMPAIGN)} AP ground replacement, Indian independence campaign (no commonwealth units could be replaced).`)
+        log(`-${is_event_active(events.INDEPENDENCE_CAMPAIGN)} Allied ground replacement, Indian independence campaign (no commonwealth units could be replaced).`)
         G.events[events.INDEPENDENCE_CAMPAIGN.id] = 0
         L.INDEPENDENCE_CAMPAIGN = 1
     }
@@ -1065,7 +1065,7 @@ function get_B_F_W_replacement_points() {
     }
     if (is_event_active(events.INDEPENDENCE_CAMPAIGN)) {
         result[GROUND_REP] = Math.max(0, result[GROUND_REP] - is_event_active(events.INDEPENDENCE_CAMPAIGN))
-        log(`-${is_event_active(events.INDEPENDENCE_CAMPAIGN)} AP ground replacement, Indian independence campaign (no commonwealth units could be replaced).`)
+        log(`-${is_event_active(events.INDEPENDENCE_CAMPAIGN)} Allied ground replacement, Indian independence campaign (no commonwealth units could be replaced).`)
         G.events[events.INDEPENDENCE_CAMPAIGN.id] = 0
         L.INDEPENDENCE_CAMPAIGN = 1
     }
@@ -1127,8 +1127,8 @@ P.burma_choose_offensive = {
 }
 
 P.scenario_1941 = script(`
-    log ("@Turn 1 - December 7, 1941")
-    log ("#JJP Action. Operation Z")
+    log ("@Turn 1 -- December 7, 1941")
+    log ("#JOperation Z")
     set G.active JP
     call operation_z
     eval {
@@ -1136,7 +1136,7 @@ P.scenario_1941 = script(`
         reset_offensive()
         G.offensive.attacker = JP
     }
-    log ("#JJP Action. Operation No. 1")
+    log ("#JOperation No. 1")
     set G.offensive.stage ATTACK_STAGE
     call operation_no_1
     call activate_units
@@ -1307,7 +1307,7 @@ P.arcadia = {
     },
     hold() {
         clear_undo()
-        log(`AP chose Arcadia +4 random cards.`)
+        log(`Allies chose Arcadia +4 random cards.`)
         while (G.hand[AP].length < 5) {
             draw_card(AP)
         }
@@ -1315,7 +1315,7 @@ P.arcadia = {
     discard() {
         G.hand[AP] = []
         G.draw[AP].push(find_card(AP, 4))
-        log(`AP chose 5 random cards.`)
+        log(`Allies chose 5 random cards.`)
         clear_undo()
         while (G.hand[AP].length < 5) {
             draw_card(AP)
@@ -1339,7 +1339,7 @@ P.arcadia = {
 
 function draw_hist_cards() {
     var hist = [find_card(JP, 3), find_card(JP, 47), find_card(JP, 59)]
-    log(`JP drew historical hand ${format_cards(hist)} + 4 random cards.`)
+    log(`Japan drew historical hand ${format_cards(hist)} + 4 random cards.`)
     hist.forEach(c => draw_specific_card(c))
 }
 
@@ -1374,7 +1374,7 @@ P.japan_init_1942 = {
     card(c) {
         push_undo()
         discard_card(c)
-        log(`JP discarded ${card_get_log_str(c)} and drew ${card_get_log_str(find_card(JP, 47))}.`)
+        log(`Japan discarded ${card_get_log_str(c)} and drew ${card_get_log_str(find_card(JP, 47))}.`)
         draw_specific_card(find_card(JP, 47))
     },
     skip() {

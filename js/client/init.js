@@ -159,12 +159,12 @@ const TURN_MARKERS = [
         value: G => SCENARIO_LENGTH[G.sid][1]
     },
     {
-        tooltip: "Future Offensives Card (JP)",
+        tooltip: "Future Offensives Card (Japan)",
         counter: counters.future_offensive_jp,
         value: G => G.events[events.FUTURE_OFFENSIVE_JP.id]
     },
     {
-        tooltip: "Future Offensives Card (AP)",
+        tooltip: "Future Offensives Card (Allies)",
         counter: counters.future_offensive_ap,
         value: G => G.events[events.FUTURE_OFFENSIVE_AP.id]
     },

@@ -73,8 +73,8 @@ function get_china_info() {
             line = line.replace(/^>\d/g, "") // remove log formatting codes
             info.push(line)
         })
-        info.push(`Not played JP cards to China Government Front Status: ${count_jp}.`)
-        info.push(`Not played AP cards to China Government Front Status: ${count_ap}.`)
+        info.push(`Not played Japanese cards to China Government Front Status: ${count_jp}.`)
+        info.push(`Not played Allied cards to China Government Front Status: ${count_ap}.`)
     }
     return {
         id, control: surrender ? JP : AP, info,
@@ -111,7 +111,7 @@ function get_japan_info() {
     if (CAMPAIGN_SCENARIOS.includes(G.sid)) {
         info.info.push(`Strategical Bombing Campaign: ${campaign}/4 turns.`)
         info.info.push(b29_in_range ? "B-29 is in range of Tokyo." : "B-29 is not in range of Tokyo.")
-        info.info.push(`JP control ${resource_count} ${resource_count <= 1 ? "<=" : ">"} 1 resource spaces.`)
+        info.info.push(`Japan controls ${resource_count} ${resource_count <= 1 ? "<=" : ">"} 1 resource spaces.`)
     }
     return info
 }
@@ -233,11 +233,11 @@ function print_casualties(text) {
 
 function print_resources(text) {
     if (G.events[events.JAPAN_LACK_OF_RESOURCES.id]) {
-        text.push("<dt>JP control 3 or fewer resource hexes -- completed (-3 PW)")
+        text.push("<dt>Japan controls 3 or fewer resource hexes -- completed (-3 PW)")
         text.push(print_icon(counters.resource_jp))
     } else {
         var value = array_count(RESOURCE_HEX, h => is_space_controlled(h, JP))
-        text.push(`<dt>JP control ${value} > 3 resource hexes.`)
+        text.push(`<dt>Japan controls ${value} > 3 resource hexes.`)
         text.push(print_icon("gray " + counters.resource_jp))
     }
 }
@@ -296,11 +296,11 @@ function print_nation_status(text, response) {
         text.push("<dd>")
         text.push(`(${control[JP].length}/${control[AP].length})`)
         if (control[JP].length)
-            text.push(" JP: " + escape_text(control[JP].map(x => "H" + x).join(", ")))
+            text.push(" Japan: " + escape_text(control[JP].map(x => "H" + x).join(", ")))
         if (control[AP].length && control[JP].length)
             text.push(";")
         if (control[AP].length)
-            text.push(" AP: " + escape_text(control[AP].map(x => "H" + x).join(", ")))
+            text.push(" Allies: " + escape_text(control[AP].map(x => "H" + x).join(", ")))
     }
 
     if (response.info)
