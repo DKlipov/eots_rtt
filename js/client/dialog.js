@@ -187,7 +187,7 @@ function print_pow(text) {
     }
 
     text.push(`<dd>(${current_pow.length}/${G.pow}) `)
-    text.push(escape_text(current_pow.map(x => "H" + x).join(", ")))
+    text.push(escape_text(current_pow.map(hex_get_log_str).join(", ")))
 }
 
 function print_naval_situation(text) {
@@ -212,7 +212,7 @@ function print_naval_situation(text) {
         else {
             text.push(`<dd>${list.length} ${label}`)
             if (list.length <= 3)
-                text.push("<dd>" + escape_text(list.map(p => "P" + p).join(", ")))
+                text.push("<dd>" + escape_text(list.map(piece_get_log_str).join(", ")))
         }
     }
 
@@ -296,11 +296,11 @@ function print_nation_status(text, response) {
         text.push("<dd>")
         text.push(`(${control[JP].length}/${control[AP].length})`)
         if (control[JP].length)
-            text.push(" Japan: " + escape_text(control[JP].map(x => "H" + x).join(", ")))
+            text.push(" Japan: " + escape_text(control[JP].map(hex_get_log_str).join(", ")))
         if (control[AP].length && control[JP].length)
             text.push(";")
         if (control[AP].length)
-            text.push(" Allies: " + escape_text(control[AP].map(x => "H" + x).join(", ")))
+            text.push(" Allies: " + escape_text(control[AP].map(hex_get_log_str).join(", ")))
     }
 
     if (response.info)

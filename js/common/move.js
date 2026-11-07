@@ -897,7 +897,7 @@ function move_units(units, path) {
         }
     }
     if (cap.length) {
-        log(`>>Captured: ${list_get_log_str(cap.length + " hexes", cap.map(u => hex_get_log_str(u)))}.`)
+        log(`>>Captured: ${list_get_log_str(cap.length + " hexes", cap.map(hex_get_log_str))}.`)
     }
     if (path[0] & AIR_MOVE && (distance > L.move_data.extended_battle_range || legs > L.move_data.air_move_legs)
         || path[0] & GROUND_DISENGAGEMENT && distance > 1

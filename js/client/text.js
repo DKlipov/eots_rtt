@@ -124,7 +124,7 @@ function focus_unit(id) {
 const CARD_CLASSES = cards.map(c => `card ${c?.faction ? "ap" : "jp"} c${c?.num}`)
 const CARD_NAMES = cards.map(c => c?.name)
 
-const UNIT_NAMES = pieces.map(p => piece_log_name(p))
+const UNIT_NAMES = pieces.map(piece_log_name)
 
 function piece_log_name(p) {
     var name = p?.short ? p?.short : p?.name

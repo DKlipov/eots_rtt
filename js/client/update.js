@@ -314,7 +314,7 @@ function on_update() {
     if (G.violations.length > 0) {
         for (var h of G.violations)
             update_keyword("action_hex", h, "violation")
-        update_text_html("violations", 0, "<b>STACKING VIOLATIONS:</B>\n" + escape_text(G.violations.map(h => "H" + h).join(", ")) + ".")
+        update_text_html("violations", 0, "<b>STACKING VIOLATIONS:</B>\n" + escape_text(G.violations.map(hex_get_log_str).join(", ")) + ".")
     }
 
     // CARDS

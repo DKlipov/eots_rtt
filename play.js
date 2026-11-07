@@ -7125,15 +7125,15 @@ function for_each_card(apply) {
 }
 
 function format_cards(cards, sep=", ") {
-    return cards.map(c => "C" + c).join(sep)
+    return cards.map(card_get_log_str).join(sep)
 }
 
 function format_units(units, sep=", ") {
-    return units.map(u => "P" + u).join(sep)
+    return units.map(piece_get_log_str).join(sep)
 }
 
 function format_hexes(hexes, sep=", ") {
-    return hexes.map(h => "H" + h).join(sep)
+    return hexes.map(hex_get_log_str).join(sep)
 }
 
 function hex_to_int(i) {
@@ -7321,7 +7321,7 @@ function list_get_log_str(header, items) {
 }
 
 function units_str(units) {
-    return list_get_log_str(`${piece_get_log_str(units[0])} with ${units.length - 1} units`, units.map(u => piece_get_log_str(u)))
+    return list_get_log_str(`${piece_get_log_str(units[0])} with ${units.length - 1} units`, units.map(piece_get_log_str))
 }
 
 function scenario_data() {
@@ -9139,7 +9139,7 @@ function move_units(units, path) {
         }
     }
     if (cap.length) {
-        log(`>>Captured: ${list_get_log_str(cap.length + " hexes", cap.map(u => hex_get_log_str(u)))}.`)
+        log(`>>Captured: ${list_get_log_str(cap.length + " hexes", cap.map(hex_get_log_str))}.`)
     }
     if (path[0] & AIR_MOVE && (distance > L.move_data.extended_battle_range || legs > L.move_data.air_move_legs)
         || path[0] & GROUND_DISENGAGEMENT && distance > 1
@@ -12058,7 +12058,7 @@ function print_pow(text) {
     }
 
     text.push(`<dd>(${current_pow.length}/${G.pow}) `)
-    text.push(escape_text(current_pow.map(x => "H" + x).join(", ")))
+    text.push(escape_text(current_pow.map(hex_get_log_str).join(", ")))
 }
 
 function print_naval_situation(text) {
@@ -12083,7 +12083,7 @@ function print_naval_situation(text) {
         else {
             text.push(`<dd>${list.length} ${label}`)
             if (list.length <= 3)
-                text.push("<dd>" + escape_text(list.map(p => "P" + p).join(", ")))
+                text.push("<dd>" + escape_text(list.map(piece_get_log_str).join(", ")))
         }
     }
 
@@ -12167,11 +12167,11 @@ function print_nation_status(text, response) {
         text.push("<dd>")
         text.push(`(${control[JP].length}/${control[AP].length})`)
         if (control[JP].length)
-            text.push(" Japan: " + escape_text(control[JP].map(x => "H" + x).join(", ")))
+            text.push(" Japan: " + escape_text(control[JP].map(hex_get_log_str).join(", ")))
         if (control[AP].length && control[JP].length)
             text.push(";")
         if (control[AP].length)
-            text.push(" Allies: " + escape_text(control[AP].map(x => "H" + x).join(", ")))
+            text.push(" Allies: " + escape_text(control[AP].map(hex_get_log_str).join(", ")))
     }
 
     if (response.info)
@@ -12683,7 +12683,7 @@ function on_update() {
     if (G.violations.length > 0) {
         for (var h of G.violations)
             update_keyword("action_hex", h, "violation")
-        update_text_html("violations", 0, "<b>STACKING VIOLATIONS:</B>\n" + escape_text(G.violations.map(h => "H" + h).join(", ")) + ".")
+        update_text_html("violations", 0, "<b>STACKING VIOLATIONS:</B>\n" + escape_text(G.violations.map(hex_get_log_str).join(", ")) + ".")
     }
 
     // CARDS
@@ -13262,7 +13262,7 @@ function focus_unit(id) {
 const CARD_CLASSES = cards.map(c => `card ${c?.faction ? "ap" : "jp"} c${c?.num}`)
 const CARD_NAMES = cards.map(c => c?.name)
 
-const UNIT_NAMES = pieces.map(p => piece_log_name(p))
+const UNIT_NAMES = pieces.map(piece_log_name)
 
 function piece_log_name(p) {
     var name = p?.short ? p?.short : p?.name

@@ -18,15 +18,15 @@ function for_each_card(apply) {
 }
 
 function format_cards(cards, sep=", ") {
-    return cards.map(c => "C" + c).join(sep)
+    return cards.map(card_get_log_str).join(sep)
 }
 
 function format_units(units, sep=", ") {
-    return units.map(u => "P" + u).join(sep)
+    return units.map(piece_get_log_str).join(sep)
 }
 
 function format_hexes(hexes, sep=", ") {
-    return hexes.map(h => "H" + h).join(sep)
+    return hexes.map(hex_get_log_str).join(sep)
 }
 
 function hex_to_int(i) {
@@ -214,7 +214,7 @@ function list_get_log_str(header, items) {
 }
 
 function units_str(units) {
-    return list_get_log_str(`${piece_get_log_str(units[0])} with ${units.length - 1} units`, units.map(u => piece_get_log_str(u)))
+    return list_get_log_str(`${piece_get_log_str(units[0])} with ${units.length - 1} units`, units.map(piece_get_log_str))
 }
 
 function scenario_data() {

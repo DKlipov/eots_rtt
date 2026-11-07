@@ -2744,7 +2744,7 @@ P.apply_naval_winner = function () {
             set_add(G.offensive.ground_pbm, u)
         })
         if (battle.amph_ground.length) {
-            log(`${list_get_log_str(battle.amph_ground.length + " units", battle.amph_ground.map(u => piece_get_log_str(u)))} could not participate ground combat.`)
+            log(`${list_get_log_str(battle.amph_ground.length + " units", battle.amph_ground.map(piece_get_log_str))} could not participate ground combat.`)
         }
     }
     end()
@@ -3220,7 +3220,7 @@ function capture_landing_hexes() {
         }
     })
     if (cap.length) {
-        log(`Uncontested landings captured: ${list_get_log_str(cap.length + " hexes", cap.map(u => hex_get_log_str(u)))}.`)
+        log(`Uncontested landings captured: ${list_get_log_str(cap.length + " hexes", cap.map(hex_get_log_str))}.`)
         cap.forEach(h => capture_hex(h, G.offensive.attacker, true))
     }
     map_for_each(G.offensive.paths, (u, path) => {
