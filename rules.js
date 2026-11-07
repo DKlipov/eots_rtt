@@ -13122,7 +13122,7 @@ P.choose_battle = {
     },
     action_hex(hex) {
         set_delete(G.offensive.battle_hexes, hex)
-        log(`%${G.offensive.attacker === JP ? "J" : "A"}Battle hex ${String.fromCharCode(65 + G.offensive.battle_names.indexOf(hex))} (${hex_get_log_str(hex)})`)
+        log(`%${G.offensive.attacker === JP ? "J" : "A"}Battle ${String.fromCharCode(65 + G.offensive.battle_names.indexOf(hex))} -- ${hex_get_log_str(hex)}`)
         G.offensive.battle = {
             battle_hex: hex,
         }

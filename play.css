@@ -105,6 +105,9 @@ button#hqr_isolation_button:disabled
 #log .group.jp { background-color: hsl(0, 20%, 90%) }
 #log .group.ap { background-color: hsl(214, 30%, 90%) }
 
+#log .group.h5 { margin-top: 8px; }
+#log .group + :not(.group) { margin-top: 8px; }
+
 #log .expand-list {
     background-color: #0001;
     border-radius: 6px;
@@ -116,6 +119,12 @@ button#hqr_isolation_button:disabled
     cursor: help;
     font-style: italic;
 }
+
+#log :not(.h3) .ctip { color: brown; }
+#log .utip { color: green; }
+#log .htip { color: blue; }
+
+.utip, .htip { white-space: pre; }
 
 /* ICONS */
 
