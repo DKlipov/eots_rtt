@@ -1910,10 +1910,9 @@ P.cancel_offensive = {
         G.offensive.cancelled = {}
         G.offensive.cancelled.active_units = G.offensive.active_units
         G.active = JP
-        goto("end_action")
         play_event(reaction_card)
         log(`${card_get_log_str(offensive_card)} discarded.`)
-        call("default_event")
+        goto("default_event")
     }
 }
 

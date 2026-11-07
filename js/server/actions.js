@@ -174,9 +174,8 @@ P.offensive_segment_card_action = {
             goto("offensive_sequence")
         } else {
             G.offensive.offensive_card = L.c
-            goto("end_action")
             play_event(G.offensive.offensive_card)
-            call("default_event")
+            goto("default_event")
         }
     },
     discard() {
