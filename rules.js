@@ -11855,7 +11855,7 @@ P.check_overstacking = {
     },
     inactive: "check stacking",
     prompt() {
-        prompt(`Rules Violation: Remove excess units from overstacked hexes.`)
+        prompt(`Remove excess units from overstacked hexes.`)
         L.allowed_units.forEach(u => action_unit(u))
         if (L.allowed_units.length === 0) {
             button("done")
@@ -12054,7 +12054,7 @@ P.prepare_disengagement = {
     },
     inactive: "choose disengagement",
     prompt() {
-        prompt(`Reaction player could use disengagement ability after this move.`)
+        prompt(`Reaction player's ground units may disengage after this move.`)
         button("awaiting")
         button("continue")
     },
@@ -12115,7 +12115,7 @@ P.retro_disengagement = {
     },
     inactive: "choose disengagement",
     prompt() {
-        prompt(`You may move disengaging unit${L.allowed_units.length > 1 ? "s" : ""}.`)
+        prompt(`Ground Disengagement: You may move disengaging units.`)
         if (L.conflicted || L.next_d >= G.offensive.disengagement.length) {
             button("done")
             return
@@ -12439,7 +12439,7 @@ P.commit_offensive = script(`
 P.disengagement_confirm = {
     inactive: "choose disengagement",
     prompt() {
-        prompt(`Reaction player could use disengagement ability with some of his units.`) // XXX
+        prompt(`Reaction player's ground units may disengage after this move.`)
         button("awaiting")
     },
     awaiting() {
@@ -12923,7 +12923,7 @@ function fill_hit_able_units(faction) {
         result = reduced
     }
     if (ground_bomb && hit_limit >= total_lf) {
-        battle.ground_disperced = 1
+        battle.ground_dispersed = 1
     } else if (result.length <= 0 && critical && lower_lf_unit[0] >= 0 && !battle.damaged[faction].length) {
         for (var i = 1; i < lower_lf_unit.length; i++) {
             map_set(result, lower_lf_unit[i], hit_limit)
@@ -13119,7 +13119,7 @@ P.choose_battle = {
 }
 
 P.assign_hits = script(`
-      if (G.offensive.battle.ground_disperced) {
+      if (G.offensive.battle.ground_dispersed) {
         call ground_bombardment
       }
       if (G.offensive.battle.at_crit_only && G.offensive.battle.hit_able_units[G.offensive.attacker].length > 2) {
@@ -13174,12 +13174,12 @@ P.apply_hits = {
     },
     inactive: "apply hits",
     prompt() {
+        battle_prompt(`Assign ${Math.max(G.offensive.battle.hits[R], 0)} step losses.`)
         map_for_each(G.offensive.battle.hit_able_units[R], u => action_unit(u))
         button("undo", L.dmg_list[R].length)
         if (!G.offensive.battle.hit_able_units[R].length) {
             button("done")
         }
-        battle_prompt(`Assign ${Math.max(G.offensive.battle.hits[R], 0)} step losses.`)
     },
     undo() {
         var battle = G.offensive.battle
@@ -13359,7 +13359,7 @@ P.ground_bombardment = {
     inactive: "assign hits (the Reaction player chooses which reduced unit will be the last ground step)",
     prompt() {
         get_ground_bomb_units().forEach(u => action_unit(u))
-        prompt(`Assign hits. (One step should survive).`)
+        prompt(`Apply air and naval hits to ground units. The last ground step cannot be eliminated.`)
         if (!L.allowed_units.length) {
             button("done")
         }
@@ -13387,9 +13387,10 @@ P.assign_crit = {
     },
     inactive: "choose unit reduced by critical hit (in case of ties, Reaction players choice)",
     prompt() {
-        map_for_each(G.offensive.battle.hit_able_units[G.offensive.attacker], u => action_unit(u))
-        prompt(`Choose one step applied by critical hit.`)
-        if (!G.offensive.battle.hit_able_units[G.offensive.attacker].length) {
+        var list = G.offensive.battle.hit_able_units[G.offensive.attacker]
+        prompt(`Apply critical hit.`)
+        map_for_each(list, action_unit)
+        if (list.length === 0) {
             button("done")
         }
     },
@@ -13507,7 +13508,7 @@ P.broken_aa = {
     inactive: "amphibiously assaulting units are turned back",
     prompt() {
         L.allowed_units.forEach(u => action_unit(u))
-        prompt(`Amphibious Assault failed. Apply losses.`)
+        prompt(`Amphibiously assaulting units turned back: Apply step losses.`)
         if (!L.allowed_units.length) {
             button("done")
         }
@@ -13542,7 +13543,7 @@ P.broken_organic = {
     inactive: "organic transport units eliminated",
     prompt() {
         L.allowed_units.forEach(u => action_unit(u))
-        prompt(`Remove units that lost organic transport.`)
+        prompt(`Organic naval transport eliminated: Eliminate transported units.`)
         if (!L.allowed_units.length) {
             button("done")
         }
