@@ -148,7 +148,7 @@ P.choose_hq = {
     inactive: "choose HQ",
     prompt() {
         offensive_prompt(`Choose HQ.`)
-        L.possible_units.forEach(u => action_unit(u))
+        L.possible_units.forEach(action_unit)
         if (!L.possible_units.length) {
             button("skip")
         }
@@ -505,7 +505,7 @@ P.activate_units = {
         offensive_prompt(`Activate units: ${G.offensive.active_units[G.active].length} of  ${G.offensive.logistic + L.hq_bonus} (${hint}).`)
 
         if (!globalThis.RTT_FUZZER || too_much < 0) {
-            L.allowed_units.forEach(u => action_unit(u))
+            L.allowed_units.forEach(action_unit)
         }
         if (!globalThis.RTT_FUZZER) {
             G.offensive.active_units[G.active].forEach(u => unselect_unit(u))
@@ -758,7 +758,7 @@ P.move_offensive_units = {
         }
 
         if (G.active_stack.length === 0) {
-            L.movable_units.forEach(u => action_unit(u))
+            L.movable_units.forEach(action_unit)
         } else {
             var buttons = get_move_buttons()
             if (array_count(buttons, b => !ALWAYS_SHOW_BUTTONS.includes(b)) > 3 && !L.spec_move) {
@@ -1131,7 +1131,7 @@ P.check_overstacking = {
     inactive: "check stacking",
     prompt() {
         prompt(`Remove excess units from overstacked hexes.`)
-        L.allowed_units.forEach(u => action_unit(u))
+        L.allowed_units.forEach(action_unit)
         if (L.allowed_units.length === 0) {
             button("done")
         }
@@ -1395,7 +1395,7 @@ P.retro_disengagement = {
             button("done")
             return
         }
-        L.allowed_hexes.forEach(h => action_hex(h))
+        L.allowed_hexes.forEach(action_hex)
         button("skip")
     },
     done() {
@@ -1581,11 +1581,11 @@ P.declare_battle_hexes = {
     prompt() {
         if (G.active_stack.length === 0) {
             offensive_prompt(`Assign units to battles.`)
-            L.possible_units.forEach(u => action_unit(u))
+            L.possible_units.forEach(action_unit)
             button("skip")
         } else {
             offensive_prompt(`Assign P${G.active_stack[u]} to a battle.`)
-            L.actual_hexes.forEach(loc => action_hex(loc))
+            L.actual_hexes.forEach(action_hex)
         }
     },
     action_hex(hex) {
@@ -1657,14 +1657,14 @@ P.assign_escort = {
     prompt() {
         if (G.active_stack.length === 0) {
             offensive_prompt(`Assign escort units to battles.`)
-            L.possible_units.forEach(u => action_unit(u))
+            L.possible_units.forEach(action_unit)
         } else {
             offensive_prompt(`Assign escort P${G.active_stack[0]} to a battle.`)
             L.possible_units.forEach(u => {
                 if (G.location[u] === G.location[G.active_stack[0]])
                     action_unit(u)
             })
-            L.possible_hexes.forEach(h => action_hex(h))
+            L.possible_hexes.forEach(action_hex)
         }
     },
     action_hex(hex) {
@@ -1828,7 +1828,7 @@ P.special_reaction = {
     prompt() {
         offensive_prompt(`Special Reaction: You may attempt to create additional battle hexes.`)
         button("skip")
-        L.possible_hexes.forEach(h => action_hex(h))
+        L.possible_hexes.forEach(action_hex)
     },
     skip() {
         push_undo()
@@ -2076,7 +2076,7 @@ P.apply_attack_reaction = {
     inactive: "apply reaction cards",
     prompt() {
         offensive_prompt(`Apply reaction cards.`)
-        L.allowed_cards.forEach(c => action_card(c))
+        L.allowed_cards.forEach(action_card)
         if (L.allowed_cards.length <= 0) {
             button("done")
         }
@@ -2450,7 +2450,7 @@ P.apply_hits = {
     inactive: "apply hits",
     prompt() {
         battle_prompt(`Assign ${Math.max(G.offensive.battle.hits[R], 0)} step losses.`)
-        map_for_each(G.offensive.battle.hit_able_units[R], u => action_unit(u))
+        map_for_each(G.offensive.battle.hit_able_units[R], action_unit)
         button("undo", L.dmg_list[R].length)
         if (!G.offensive.battle.hit_able_units[R].length) {
             button("done")
@@ -2633,7 +2633,7 @@ P.ground_bombardment = {
     },
     inactive: "assign hits (the Reaction player chooses which reduced unit will be the last ground step)",
     prompt() {
-        get_ground_bomb_units().forEach(u => action_unit(u))
+        get_ground_bomb_units().forEach(action_unit)
         prompt(`Apply air and naval hits to ground units. The last ground step cannot be eliminated.`)
         if (!L.allowed_units.length) {
             button("done")
@@ -2782,7 +2782,7 @@ P.broken_aa = {
     },
     inactive: "amphibiously assaulting units are turned back",
     prompt() {
-        L.allowed_units.forEach(u => action_unit(u))
+        L.allowed_units.forEach(action_unit)
         prompt(`Amphibiously assaulting units turned back: Apply step losses.`)
         if (!L.allowed_units.length) {
             button("done")
@@ -2817,7 +2817,7 @@ P.broken_organic = {
     },
     inactive: "organic transport units eliminated",
     prompt() {
-        L.allowed_units.forEach(u => action_unit(u))
+        L.allowed_units.forEach(action_unit)
         prompt(`Organic naval transport eliminated: Eliminate transported units.`)
         if (!L.allowed_units.length) {
             button("done")
@@ -3034,13 +3034,13 @@ P.retreat = {
     prompt() {
         if (G.active_stack.length) {
             offensive_prompt(`Retreat: Move P${G.active_stack[0]}.`)
-            L.hex_to_retreat.forEach(u => action_hex(u))
+            L.hex_to_retreat.forEach(action_hex)
             if (!L.hex_to_retreat.length) {
                 button("eliminate")
             }
         } else if (L.unit_to_retreat.length) {
             offensive_prompt(`Retreat: Move retreating units.`)
-            L.unit_to_retreat.forEach(u => action_unit(u))
+            L.unit_to_retreat.forEach(action_unit)
         } else {
             offensive_prompt(`Retreat: Done.`)
             button("done")
@@ -3165,7 +3165,7 @@ P.emergency_move = {
                 prompt(`Emergency Air Move: Move P${u} to a friendly airfield.`)
             else
                 prompt(`Emergency Naval Move: Move P${u} to a friendly port.`)
-            L.hex_to_retreat.forEach(u => action_hex(u))
+            L.hex_to_retreat.forEach(action_hex)
             if (!L.hex_to_retreat.length) {
                 button("eliminate")
             } else if (set_has(L.hex_to_retreat, G.location[G.active_stack[0]])) {
@@ -3173,7 +3173,7 @@ P.emergency_move = {
             }
         } else if (L.unit_to_retreat.length) {
             prompt(`Emergency Movement: Units must make an emergency move.`)
-            L.unit_to_retreat.forEach(u => action_unit(u))
+            L.unit_to_retreat.forEach(action_unit)
             if (!L.unit_to_retreat.find(u => !is_space_controlled(G.location[u], pieces[u].faction))) {
                 button("done")
             }

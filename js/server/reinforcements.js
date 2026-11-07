@@ -220,7 +220,7 @@ P.reinforcement_segment = {
             return
         }
         if (G.active_stack.length) {
-            L.allowed_hexes.forEach(hex => action_hex(hex))
+            L.allowed_hexes.forEach(action_hex)
             if (L.allowed_hexes.length === 0) {
                 prompt(`Reinforcements: Cannot place ${piece_get_log_str(G.active_stack[0])} anywhere.`)
                 button("delay")
@@ -362,7 +362,7 @@ P.replacement_segment = {
             if (not_used_unground)
                 V.prompt += " Ground replacements should be spent."
 
-            L.allowed_hexes.forEach(h => action_hex(h))
+            L.allowed_hexes.forEach(action_hex)
             ru.forEach(u => {
                 if (G.location[u] === ELIMINATED_BOX)
                     action_unit(u)
@@ -387,7 +387,7 @@ P.replacement_segment = {
             prompt(`Replacements: Done.`)
         else
             prompt(`Replacements: Reinforce ${print_reinforcements()}.`)
-        ru.forEach(u => action_unit(u))
+        ru.forEach(action_unit)
 
     },
     divisions_button() {

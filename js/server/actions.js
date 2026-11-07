@@ -75,7 +75,7 @@ P.return_hq = {
             })
         } else {
             prompt(`Return ${piece_get_log_str(G.active_stack[0])} to a friendly controlled port.`)
-            G.allowed_hexes.forEach(h => action_hex(h))
+            G.allowed_hexes.forEach(action_hex)
         }
     },
     unit(u) {

@@ -132,7 +132,7 @@ P.strategic_bombing = {
             button("all")
             button("skip")
         }
-        L.allowed_units.forEach(u => action_unit(u))
+        L.allowed_units.forEach(action_unit)
     },
     unit(u) {
         push_undo()
@@ -458,7 +458,7 @@ P.attrition = {
         if (!L.unit_to_attrition.length) {
             button("done")
         }
-        L.unit_to_attrition.forEach(u => action_unit(u))
+        L.unit_to_attrition.forEach(action_unit)
     },
     unit(u) {
         if (set_has(G.reduced, u)) {

@@ -136,7 +136,7 @@ P.coastal_artillery = {
     inactive: "apply coastal artillery damage",
     prompt() {
         prompt(`Coastal artillery and mines: Reduce one naval unit.`)
-        L.allowed_units.forEach(u => action_unit(u))
+        L.allowed_units.forEach(action_unit)
     },
     unit(u) {
         push_undo()
@@ -172,13 +172,13 @@ P.conquest_of_se_asia_reaction = {
     prompt() {
         if (G.active_stack.length <= 0) {
             offensive_prompt(`Choose units for reaction movement.`)
-            L.allowed_units.forEach(u => action_unit(u))
+            L.allowed_units.forEach(action_unit)
             if (L.allowed_units.length <= 0) {
                 button("done")
             }
         } else {
             offensive_prompt(`React with P${G.active_stack[0]}.`)
-            L.allowed_hexes.forEach(u => action_hex(u))
+            L.allowed_hexes.forEach(action_hex)
         }
     },
     done() {
@@ -393,7 +393,7 @@ P.naval_battle_guadalcanal = {
     inactive: "airfield bombardment",
     prompt() {
         prompt(`Naval Battle of Guadalcanal: Choose airfield bombardment target.`)
-        L.allowed_units.forEach(u => action_unit(u))
+        L.allowed_units.forEach(action_unit)
         if (L.allowed_units.length <= 0) {
             button("skip")
         }
@@ -434,7 +434,7 @@ P.worker_strikes_unit = {
             button("skip")
         }
 
-        L.allowed_units.forEach(u => action_unit(u))
+        L.allowed_units.forEach(action_unit)
     },
     skip() {
         push_undo()
@@ -627,10 +627,10 @@ P.draw_from_discard = {
         }
         if (L.card) {
             v.prompt += `Take a card from the discard pile.`
-            G.discard[G.active].forEach(c => action_card(c))
+            G.discard[G.active].forEach(action_card)
         } else {
             v.prompt += `You may discard a card to replace it with a card from the discard pile.`
-            L.cards.forEach(c => action_card(c))
+            L.cards.forEach(action_card)
             button("skip")
         }
     },
@@ -686,7 +686,7 @@ P.guadalcanal_evacuation = {
         }
         if (L.stage === 1) {
             prompt(`Operation KE: Choose a coastal hex to evacuate.`)
-            L.allowed_hexes.forEach(c => action_hex(c))
+            L.allowed_hexes.forEach(action_hex)
         } else if (L.stage === 2) {
             if (G.offensive.active_units[JP].length === 0 && L.allowed_units.length === 0)
                 prompt(`Operation KE: No units to evacuate.`)
@@ -695,13 +695,13 @@ P.guadalcanal_evacuation = {
             if (G.offensive.active_units[JP].length) {
                 button("done")
             }
-            L.allowed_units.forEach(u => action_unit(u))
+            L.allowed_units.forEach(action_unit)
         } else {
             if (L.allowed_hexes.length === 0)
                 prompt(`Operation KE: No ports to evacuate to.`)
             else
                 prompt(`Operation KE: Evacuate ${format_units(G.offensive.active_units[JP])} to a port.`)
-            L.allowed_hexes.forEach(c => action_hex(c))
+            L.allowed_hexes.forEach(action_hex)
         }
     },
     skip() {
@@ -884,7 +884,7 @@ P.kamikaze_attack = {
         }
         if (L.stage === 1) {
             prompt(`Kamikaze Attack: Choose Japanese air unit.`)
-            L.allowed_units.forEach(u => action_unit(u))
+            L.allowed_units.forEach(action_unit)
         } else {
             prompt(`Kamikaze Attack: Eliminate ${L.hits} Allied naval steps.`)
             var has_non_damaged = []
@@ -1045,7 +1045,7 @@ P.paratroopers = {
     inactive: "choose paratroopers landing hex",
     prompt() {
         prompt(`Paratroopers: Choose landing hex.`)
-        L.allowed_hexes.forEach(u => action_hex(u))
+        L.allowed_hexes.forEach(action_hex)
         button("skip")
     },
     skip() {
@@ -1085,7 +1085,7 @@ P.halsey_typhoon = {
     inactive: "apply card effect",
     prompt() {
         prompt(`Halsey's Typhoon: Reduce one activated full strength Allied CA or DD naval unit.`)
-        L.allowed_units.forEach(u => action_unit(u))
+        L.allowed_units.forEach(action_unit)
     },
     unit(u) {
         push_undo()
@@ -1191,7 +1191,7 @@ P.attack_b29_base = {
         }
         prompt(`Operation Tsurugi: Attack one B29 base.`)
         if (L.hits) {
-            L.allowed_units.forEach(u => action_unit(u))
+            L.allowed_units.forEach(action_unit)
         } else {
             button("done")
         }
@@ -1331,8 +1331,8 @@ P.fuel_shortage = {
     inactive: "apply card effect",
     prompt() {
         prompt(`Fuel Shortage: You may re-deploy the Combined Fleet HQ and up to ${5 - L.moved.length} naval units.`)
-        L.allowed_units.forEach(u => action_unit(u))
-        L.allowed_hexes.forEach(h => action_hex(h))
+        L.allowed_units.forEach(action_unit)
+        L.allowed_hexes.forEach(action_hex)
         if (L.moved.length && !G.active_stack.length) {
             button("done")
         }
@@ -1379,7 +1379,7 @@ P.event_unit = {
         if (L.done) {
             button("done")
         } else {
-            get_unit_reinforcement_hexes(L.unit).forEach(h => action_hex(h))
+            get_unit_reinforcement_hexes(L.unit).forEach(action_hex)
         }
     },
     done() {
@@ -1481,7 +1481,7 @@ P.submarine_attack = {
         if (L.allowed_units.length === 0 || L.hits <= 0) {
             button("done")
         } else {
-            L.allowed_units.forEach(u => action_unit(u))
+            L.allowed_units.forEach(action_unit)
         }
     },
     unit(u) {
@@ -1534,7 +1534,7 @@ P.place_abda = {
             return
         }
         prompt(`Arcadia Conference: Place ${piece_get_log_str(HQ_ABDA)}.`)
-        L.allowed_hexes.forEach(h => action_hex(h))
+        L.allowed_hexes.forEach(action_hex)
     },
     skip() {
         push_undo()
@@ -1649,7 +1649,7 @@ P.us_raiders = {
             prompt(`US Raiders: Reduce one Japanese air unit.`)
         else
             prompt(`US Raiders: No Japanese air units in range.`)
-        L.allowed_units.forEach(h => action_unit(h))
+        L.allowed_units.forEach(action_unit)
     },
     unit(u) {
         push_undo()
@@ -1689,9 +1689,9 @@ P.repair_avg = {
         }
         prompt(`China Airlift: Add replacement step to the AVG or a 14th AF air unit.`)
         if (G.active_stack.length) {
-            L.allowed_hexes.forEach(h => action_hex(h))
+            L.allowed_hexes.forEach(action_hex)
         } else {
-            L.allowed_units.forEach(h => action_unit(h))
+            L.allowed_units.forEach(action_unit)
         }
     },
     skip() {
@@ -1765,7 +1765,7 @@ P.wingate = {
     inactive: "apply card effect",
     prompt() {
         prompt(`Orde Wingate: Cancel the activation of one ground unit.`)
-        map_for_each(L.allowed_units, k => action_unit(k))
+        map_for_each(L.allowed_units, action_unit)
     },
     unit(u) {
         push_undo()
@@ -1848,7 +1848,7 @@ P.skip_bombing = {
         if (L.done) {
             button("done")
         } else {
-            map_for_each(G.offensive.skip_bomb_able, k => action_unit(k))
+            map_for_each(G.offensive.skip_bomb_able, action_unit)
         }
     },
     unit(u) {
@@ -1957,7 +1957,7 @@ P.chronicle = {
             prompt("Operation Chronicle: Offensive card bonus can not be applied.")
         }
         button("skip")
-        L.allowed_hexes.forEach(h => action_hex(h))
+        L.allowed_hexes.forEach(action_hex)
     },
     condition(h) {
         return get_map_data(h).island && !is_faction_units(h, JP) && is_controllable_hex(h) && is_space_controlled(h, JP)
@@ -2031,7 +2031,7 @@ P.build_road = {
                 } else {
                     return LEDO
                 }
-            }).forEach(h => action_hex(h))
+            }).forEach(action_hex)
             button("skip")
         }
     },
@@ -2249,7 +2249,7 @@ P.place_14_air = {
         if (L.done) {
             button("done")
         } else {
-            L.allowed_hexes.forEach(h => action_hex(h))
+            L.allowed_hexes.forEach(action_hex)
         }
     },
     action_hex(h) {
@@ -2319,7 +2319,7 @@ P.turkey_shoot = {
         if (L.done || L.allowed_units.length === 0) {
             button("done")
         } else {
-            L.allowed_units.forEach(u => action_unit(u))
+            L.allowed_units.forEach(action_unit)
         }
 
     },
@@ -2438,7 +2438,7 @@ P.airborne_landing = {
             button("skip")
         }
         prompt(`Invasion of Luzon: Place ${piece_get_log_str(ap_army("11_d"))}.`)
-        L.allowed_hexes.forEach(h => action_hex(h))
+        L.allowed_hexes.forEach(action_hex)
     },
     skip() {
         push_undo()
@@ -2477,7 +2477,7 @@ P.place_armor = {
         if (L.done) {
             button("done")
         } else {
-            L.allowed_hexes.forEach(h => action_hex(h))
+            L.allowed_hexes.forEach(action_hex)
         }
     },
     action_hex(h) {

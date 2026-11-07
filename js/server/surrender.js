@@ -52,7 +52,7 @@ P.india_surrender = {
     prompt() {
         if (G.active_stack.length) {
             prompt(`India Surrender: Emergency move P${G.active_stack[0]}.`)
-            L.hex_to_retreat.forEach(u => action_hex(u))
+            L.hex_to_retreat.forEach(action_hex)
 
             var piece = pieces[G.active_stack[0]]
             if (piece.service === "army" || piece.service === "navy" || piece.service === "us") {
@@ -62,7 +62,7 @@ P.india_surrender = {
             }
         } else if (L.unit_to_retreat.length) {
             prompt(`India Surrender: Choose unit to emergency move.`)
-            L.unit_to_retreat.forEach(u => action_unit(u))
+            L.unit_to_retreat.forEach(action_unit)
         }
         if (!G.active_stack.length && (!L.unit_to_retreat.length ||
             array_count(L.unit_to_retreat,

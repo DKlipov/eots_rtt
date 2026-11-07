@@ -1212,7 +1212,7 @@ P.operation_z_pbm = {
     inactive: "return units",
     prompt() {
         prompt(`Operation Z: Choose destination for post battle movement.`)
-        L.allowed_hexes.forEach(h => action_hex(h))
+        L.allowed_hexes.forEach(action_hex)
     },
     action_hex(h) {
         push_undo()
