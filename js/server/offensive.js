@@ -1996,7 +1996,7 @@ P.define_intelligence_condition = {
         var success = roll_intelligence_dice()
         if (success) {
             G.offensive.intelligence = INTERCEPT
-            log(`#IIntelligence => ${get_named_intelligence(G.offensive.intelligence)}`)
+            log(`#IIntelligence to ${get_named_intelligence(G.offensive.intelligence)}`)
         }
         L.rolled = 1
         if (success || !get_hand(G.active).includes(JN_25_SPECIAL)) {

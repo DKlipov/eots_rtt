@@ -710,7 +710,7 @@ function play_reaction(c) {
     play_event(c)
     if (cards[c].intelligence && G.offensive.intelligence !== AMBUSH && G.offensive.intelligence !== cards[c].intelligence) {
         G.offensive.intelligence = cards[c].intelligence
-        log(`#IIntelligence => ${get_named_intelligence(G.offensive.intelligence)}`)
+        log(`#IIntelligence to ${get_named_intelligence(G.offensive.intelligence)}`)
     }
 }
 

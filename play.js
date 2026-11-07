@@ -9158,7 +9158,7 @@ function move_units(units, path) {
 }
 
 function zoi_crossed() {
-    log("#IIntelligence rolls -2!")
+    log("#IIntelligence rolls -2")
     G.offensive.zoi_intelligence_modifier = 1
 }
 
@@ -13328,6 +13328,9 @@ const ICONS = {
 
 function escape_text(text) {
     text = escape_typography(text)
+
+    text = text.replace(/<=/g, "\u2264")
+    text = text.replace(/>=/g, "\u2265")
 
     text = text.replace(/\^(.*?)\|(.*?)\^/g, escape_list)
 

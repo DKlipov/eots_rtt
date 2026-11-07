@@ -185,6 +185,9 @@ const ICONS = {
 function escape_text(text) {
     text = escape_typography(text)
 
+    text = text.replace(/<=/g, "\u2264")
+    text = text.replace(/>=/g, "\u2265")
+
     text = text.replace(/\^(.*?)\|(.*?)\^/g, escape_list)
 
     text = escape_icon(text, /\b[BRW]\d\b/g, ICONS)

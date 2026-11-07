@@ -9163,7 +9163,7 @@ function move_units(units, path) {
 }
 
 function zoi_crossed() {
-    log("#IIntelligence rolls -2!")
+    log("#IIntelligence rolls -2")
     G.offensive.zoi_intelligence_modifier = 1
 }
 
@@ -12734,7 +12734,7 @@ P.define_intelligence_condition = {
         var success = roll_intelligence_dice()
         if (success) {
             G.offensive.intelligence = INTERCEPT
-            log(`#IIntelligence => ${get_named_intelligence(G.offensive.intelligence)}`)
+            log(`#IIntelligence to ${get_named_intelligence(G.offensive.intelligence)}`)
         }
         L.rolled = 1
         if (success || !get_hand(G.active).includes(JN_25_SPECIAL)) {
@@ -18337,7 +18337,7 @@ function play_reaction(c) {
     play_event(c)
     if (cards[c].intelligence && G.offensive.intelligence !== AMBUSH && G.offensive.intelligence !== cards[c].intelligence) {
         G.offensive.intelligence = cards[c].intelligence
-        log(`#IIntelligence => ${get_named_intelligence(G.offensive.intelligence)}`)
+        log(`#IIntelligence to ${get_named_intelligence(G.offensive.intelligence)}`)
     }
 }
 
