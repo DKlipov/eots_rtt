@@ -8959,7 +8959,7 @@ function target_in_battle_range(range, location, targets) {
 function is_overstack(hex, unit, multip = 1) {
     var piece = pieces[unit]
     fill_overstack(piece.faction)
-    var overstack = L.overstack[hex]
+    var overstack = G.overstack_cache[hex]
     var multiplier = ((G.location[unit] === hex || G.location[piece.pair] === hex) ? 0 : 1) * multip
     if (hex === CHINA_BOX && piece.b29) {
         var count = 0
@@ -8980,26 +8980,26 @@ function is_overstack(hex, unit, multip = 1) {
 }
 
 function fill_overstack(faction) {
-    if (L.overstack && L.overstack[0] === faction) {
+    if (G.overstack_cache && G.overstack_cache[0] === faction) {
         return
     }
-    L.overstack = []
-    L.overstack[0] = faction
+    G.overstack_cache = []
+    G.overstack_cache[0] = faction
     for (var i = 0; i <= LAST_BOARD_HEX; i++) {
-        L.overstack[i] = 0
+        G.overstack_cache[i] = 0
     }
-    L.overstack[CHINA_BOX] = 2
+    G.overstack_cache[CHINA_BOX] = 2
     for_each_unit((u, piece, location) => {
         if (piece.faction !== faction) {
             return
         }
         var pair_location = G.location[pieces[u].pair]
         if (location <= LAST_BOARD_HEX && piece.class === "hq") {
-            L.overstack[location] |= 1
+            G.overstack_cache[location] |= 1
         } else if (location <= LAST_BOARD_HEX && piece.class === "naval") {
-            L.overstack[location] += (1 << 7)
+            G.overstack_cache[location] += (1 << 7)
         } else if (location === CHINA_BOX || (location <= LAST_BOARD_HEX && (piece.type !== "lrb" || pair_location !== location))) {
-            L.overstack[location] += (1 << 1)
+            G.overstack_cache[location] += (1 << 1)
         }
     })
 }
@@ -9028,7 +9028,6 @@ function init_overstack_check(ignore_movable, faction) {
             }
         })
     }
-    fill_overstack(faction)
     var result = count_units_stacking(faction)
     map_for_each(positions, (u, l) => G.location[u] = l)
     return result
@@ -9036,15 +9035,16 @@ function init_overstack_check(ignore_movable, faction) {
 
 
 function count_units_stacking(faction) {
+    fill_overstack(faction)
     L.allowed_units = []
     L.ground_units = []
     var overstack_naval = []
     var overstack_land = []
     for (var i = 0; i < LAST_BOARD_HEX; i++) {
-        if ((L.overstack[i] % (1 << 7)) > 7) {
+        if ((G.overstack_cache[i] % (1 << 7)) > 7) {
             set_add(overstack_land, i)
         }
-        if ((L.overstack[i] >> 7) > 6) {
+        if ((G.overstack_cache[i] >> 7) > 6) {
             set_add(overstack_naval, i)
         }
     }
@@ -9243,11 +9243,11 @@ function set_location(unit, location, no_logs) {
     }
     var pair_location = G.location[pieces[unit].pair]
     var size = get_overstack_size(unit)
-    if (L.overstack && (prev_location <= LAST_BOARD_HEX || prev_location === CHINA_BOX) && pair_location !== prev_location) {
-        L.overstack[prev_location] -= size
+    if (G.overstack_cache && (prev_location <= LAST_BOARD_HEX || prev_location === CHINA_BOX) && pair_location !== prev_location) {
+        G.overstack_cache[prev_location] -= size
     }
-    if (L.overstack && (location <= LAST_BOARD_HEX || location === CHINA_BOX) && pair_location !== location) {
-        L.overstack[location] += size
+    if (G.overstack_cache && (location <= LAST_BOARD_HEX || location === CHINA_BOX) && pair_location !== location) {
+        G.overstack_cache[location] += size
     }
     G.location[unit] = location
 }
@@ -16292,7 +16292,8 @@ function check_fuel_shortage_data() {
             }
         }
     }
-    var over = L.target ? L.overstack[L.target] : 0
+    fill_overstack(JP)
+    var over = L.target ? G.overstack_cache[L.target] : 0
     if (array_count(L.moved, u => pieces[u].class === "naval") < 4 &&
         array_count(G.active_stack, u => pieces[u].class === "naval") < (6 - (over >> 7))) {
         var non_selected = !G.active_stack.length
@@ -16322,7 +16323,7 @@ function check_fuel_shortage_data() {
         var hq = (G.active_stack.includes(HQ_YAMAMOTO) || G.active_stack.includes(HQ_OZAWA)) + 0
         var ships_count = G.active_stack.length - hq
         L.ports.forEach(h => {
-            var over = L.overstack[h]
+            var over = G.overstack_cache[h]
             var hex_ship_count = over >> 7
             if (G.supply_cache[h] & HEX_TEMP_FLAG1
                 && (!hq || (over & 1) === 0)
@@ -17719,6 +17720,7 @@ function on_setup(scenario, options) {
     G.surrender[nations.MARSHALL.id] = true //only nation under JP control
     G.b29u = 0
     G.supply_cache = []
+    G.supply_cache_id = 0
     G.control = [0, 0, 0, 0, 0]
     for (var i = 0; i < CHINA_BOX; i++) {
         G.supply_cache[i] = 0
@@ -17789,7 +17791,6 @@ function create_view(sherlock) {
     V.control = G.control
     V.oos = G.oos
     V.b29u = G.b29u
-    V.supply_cache = G.supply_cache
     V.hand = []
     V.pow = G.pow
     V.future_offensive = [-1, -1]
@@ -17944,8 +17945,8 @@ function eliminate(unit, no_log = false) {
     }
     var size = get_overstack_size(unit)
     var location = G.location[unit]
-    if (L.overstack && (location <= LAST_BOARD_HEX || location === CHINA_BOX)) {
-        L.overstack[location] -= size
+    if (G.overstack_cache && (location <= LAST_BOARD_HEX || location === CHINA_BOX)) {
+        G.overstack_cache[location] -= size
     }
     if (piece.class === "hq" && !piece.notreplaceable) {
         displace_to_turn(unit, 1)
@@ -20579,6 +20580,10 @@ function copy_state() {
         v = G[k]
         if (k === "undo")
             continue
+        if (k === "supply_cache")
+            continue
+        if (k === "overstack_cache")
+            continue
         else if (k === "redo")
             continue
         else if (k === "persisted_undo")
@@ -20623,7 +20628,15 @@ function restore_state(state) {
         state.redo = G.redo
         state.persisted_undo = G.persisted_undo
         state.prepared_undo = G.prepared_undo
+        var supply = 1
+        if (state.supply_cache_id === G.supply_cache_id) {
+            state.supply_cache = G.supply_cache
+            supply = 0
+        }
         G = state
+        if(supply){
+            check_supply()
+        }
     }
 }
 

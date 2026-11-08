@@ -96,6 +96,7 @@ function on_setup(scenario, options) {
     G.surrender[nations.MARSHALL.id] = true //only nation under JP control
     G.b29u = 0
     G.supply_cache = []
+    G.supply_cache_id = 0
     G.control = [0, 0, 0, 0, 0]
     for (var i = 0; i < CHINA_BOX; i++) {
         G.supply_cache[i] = 0
@@ -166,7 +167,6 @@ function create_view(sherlock) {
     V.control = G.control
     V.oos = G.oos
     V.b29u = G.b29u
-    V.supply_cache = G.supply_cache
     V.hand = []
     V.pow = G.pow
     V.future_offensive = [-1, -1]
@@ -321,8 +321,8 @@ function eliminate(unit, no_log = false) {
     }
     var size = get_overstack_size(unit)
     var location = G.location[unit]
-    if (L.overstack && (location <= LAST_BOARD_HEX || location === CHINA_BOX)) {
-        L.overstack[location] -= size
+    if (G.overstack_cache && (location <= LAST_BOARD_HEX || location === CHINA_BOX)) {
+        G.overstack_cache[location] -= size
     }
     if (piece.class === "hq" && !piece.notreplaceable) {
         displace_to_turn(unit, 1)

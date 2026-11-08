@@ -1251,7 +1251,8 @@ function check_fuel_shortage_data() {
             }
         }
     }
-    var over = L.target ? L.overstack[L.target] : 0
+    fill_overstack(JP)
+    var over = L.target ? G.overstack_cache[L.target] : 0
     if (array_count(L.moved, u => pieces[u].class === "naval") < 4 &&
         array_count(G.active_stack, u => pieces[u].class === "naval") < (6 - (over >> 7))) {
         var non_selected = !G.active_stack.length
@@ -1281,7 +1282,7 @@ function check_fuel_shortage_data() {
         var hq = (G.active_stack.includes(HQ_YAMAMOTO) || G.active_stack.includes(HQ_OZAWA)) + 0
         var ships_count = G.active_stack.length - hq
         L.ports.forEach(h => {
-            var over = L.overstack[h]
+            var over = G.overstack_cache[h]
             var hex_ship_count = over >> 7
             if (G.supply_cache[h] & HEX_TEMP_FLAG1
                 && (!hq || (over & 1) === 0)

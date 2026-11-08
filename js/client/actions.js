@@ -23,6 +23,12 @@ function check_supply() {
         client_original_oos = G.oos
         client_original_br = G.burma_road
     }
+    if(!G.supply_cache){
+        G.supply_cache = []
+        for (var i = 0; i < CHINA_BOX; i++) {
+            G.supply_cache[i] = 0
+        }
+    }
     basic_check_supply()
     G.client_supply = 1
 }

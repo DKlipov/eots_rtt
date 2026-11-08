@@ -8954,7 +8954,7 @@ function target_in_battle_range(range, location, targets) {
 function is_overstack(hex, unit, multip = 1) {
     var piece = pieces[unit]
     fill_overstack(piece.faction)
-    var overstack = L.overstack[hex]
+    var overstack = G.overstack_cache[hex]
     var multiplier = ((G.location[unit] === hex || G.location[piece.pair] === hex) ? 0 : 1) * multip
     if (hex === CHINA_BOX && piece.b29) {
         var count = 0
@@ -8975,26 +8975,26 @@ function is_overstack(hex, unit, multip = 1) {
 }
 
 function fill_overstack(faction) {
-    if (L.overstack && L.overstack[0] === faction) {
+    if (G.overstack_cache && G.overstack_cache[0] === faction) {
         return
     }
-    L.overstack = []
-    L.overstack[0] = faction
+    G.overstack_cache = []
+    G.overstack_cache[0] = faction
     for (var i = 0; i <= LAST_BOARD_HEX; i++) {
-        L.overstack[i] = 0
+        G.overstack_cache[i] = 0
     }
-    L.overstack[CHINA_BOX] = 2
+    G.overstack_cache[CHINA_BOX] = 2
     for_each_unit((u, piece, location) => {
         if (piece.faction !== faction) {
             return
         }
         var pair_location = G.location[pieces[u].pair]
         if (location <= LAST_BOARD_HEX && piece.class === "hq") {
-            L.overstack[location] |= 1
+            G.overstack_cache[location] |= 1
         } else if (location <= LAST_BOARD_HEX && piece.class === "naval") {
-            L.overstack[location] += (1 << 7)
+            G.overstack_cache[location] += (1 << 7)
         } else if (location === CHINA_BOX || (location <= LAST_BOARD_HEX && (piece.type !== "lrb" || pair_location !== location))) {
-            L.overstack[location] += (1 << 1)
+            G.overstack_cache[location] += (1 << 1)
         }
     })
 }
@@ -9023,7 +9023,6 @@ function init_overstack_check(ignore_movable, faction) {
             }
         })
     }
-    fill_overstack(faction)
     var result = count_units_stacking(faction)
     map_for_each(positions, (u, l) => G.location[u] = l)
     return result
@@ -9031,15 +9030,16 @@ function init_overstack_check(ignore_movable, faction) {
 
 
 function count_units_stacking(faction) {
+    fill_overstack(faction)
     L.allowed_units = []
     L.ground_units = []
     var overstack_naval = []
     var overstack_land = []
     for (var i = 0; i < LAST_BOARD_HEX; i++) {
-        if ((L.overstack[i] % (1 << 7)) > 7) {
+        if ((G.overstack_cache[i] % (1 << 7)) > 7) {
             set_add(overstack_land, i)
         }
-        if ((L.overstack[i] >> 7) > 6) {
+        if ((G.overstack_cache[i] >> 7) > 6) {
             set_add(overstack_naval, i)
         }
     }
@@ -9238,11 +9238,11 @@ function set_location(unit, location, no_logs) {
     }
     var pair_location = G.location[pieces[unit].pair]
     var size = get_overstack_size(unit)
-    if (L.overstack && (prev_location <= LAST_BOARD_HEX || prev_location === CHINA_BOX) && pair_location !== prev_location) {
-        L.overstack[prev_location] -= size
+    if (G.overstack_cache && (prev_location <= LAST_BOARD_HEX || prev_location === CHINA_BOX) && pair_location !== prev_location) {
+        G.overstack_cache[prev_location] -= size
     }
-    if (L.overstack && (location <= LAST_BOARD_HEX || location === CHINA_BOX) && pair_location !== location) {
-        L.overstack[location] += size
+    if (G.overstack_cache && (location <= LAST_BOARD_HEX || location === CHINA_BOX) && pair_location !== location) {
+        G.overstack_cache[location] += size
     }
     G.location[unit] = location
 }
@@ -11244,6 +11244,12 @@ function check_supply() {
     if (!G.client_supply) {
         client_original_oos = G.oos
         client_original_br = G.burma_road
+    }
+    if(!G.supply_cache){
+        G.supply_cache = []
+        for (var i = 0; i < CHINA_BOX; i++) {
+            G.supply_cache[i] = 0
+        }
     }
     basic_check_supply()
     G.client_supply = 1

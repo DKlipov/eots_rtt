@@ -615,6 +615,10 @@ function copy_state() {
         v = G[k]
         if (k === "undo")
             continue
+        if (k === "supply_cache")
+            continue
+        if (k === "overstack_cache")
+            continue
         else if (k === "redo")
             continue
         else if (k === "persisted_undo")
@@ -659,7 +663,15 @@ function restore_state(state) {
         state.redo = G.redo
         state.persisted_undo = G.persisted_undo
         state.prepared_undo = G.prepared_undo
+        var supply = 1
+        if (state.supply_cache_id === G.supply_cache_id) {
+            state.supply_cache = G.supply_cache
+            supply = 0
+        }
         G = state
+        if(supply){
+            check_supply()
+        }
     }
 }
 
