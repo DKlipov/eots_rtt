@@ -2517,33 +2517,24 @@ P.jp_cv_reassign = {
             return
         } else {
             G.active = JP
-            L.stage = 0
-            L.hits = 0
         }
     },
     inactive: "use range advantage",
     prompt() {
-        if (L.stage === 0) {
-            prompt(`Range Advantage: You may transfer one carrier step.`) // XXX
-            L.to_damage.forEach(u => {
-                if (L.to_repair.length > 2 || !map_has(L.to_repair, u))
-                    action_unit(u)
-            })
-            if (L.hits > 0) {
-                button("next")
-            } else {
-                button("skip")
+        prompt(`Range Advantage: You may transfer one carrier step.`)
+        L.to_damage.forEach(u => {
+            if (L.to_repair.length > 2 || !map_has(L.to_repair, u))
+                action_unit(u)
+        })
+        if (!L.to_damage.length) {
+            for (var i = 0; i < L.to_repair.length; i += 2) {
+                action_unit(L.to_repair[i])
             }
-
-        } else {
-            prompt(`Range Advantage: Add carrier ${L.hits} steps.`)
-            if (L.hits === 0) {
+            if (L.to_repair.length === 0) {
                 button("done")
-            } else {
-                for (var i = 0; i < L.to_repair.length; i += 2) {
-                    action_unit(L.to_repair[i])
-                }
             }
+        } else {
+            button("skip")
         }
     },
     unit(u) {
@@ -2552,37 +2543,25 @@ P.jp_cv_reassign = {
             L.logged = 1
             log("Japanese naval aircraft range advantage:")
         }
-        if (L.stage === 0) {
-            L.hits += 1
+        if (set_has(L.to_damage, u)) {
+            damage_unit(u)
             map_delete(L.to_repair, u)
-            if (set_has(G.reduced, u)) {
-                eliminate(u)
-                set_delete(L.to_damage, u)
-            } else {
-                damage_unit(u)
-            }
-            if (L.hits >= Math.min(get_hits_count(L.to_repair), L.to_damage.map(u => set_has(G.reduced, u) ? 1 : 2).reduce((a, b) => a + b, 0))) {
-                L.stage = 1
-            }
+            L.to_damage = []
+            return
+        }
+        L.to_repair=[]
+        if (unit_on_board(u)) {
+            set_delete(G.reduced, u)
+            log(`>${unit_get_log_str(u)} to full strength.`)
         } else {
-            L.hits -= 1
-            if (unit_on_board(u)) {
-                set_delete(G.reduced, u)
-                map_delete(L.to_repair, u)
-                log(`>${unit_get_log_str(u)} to full strength.`)
-            } else {
-                var location = G.offensive.battle.battle_hex
-                var path = map_get(G.offensive.paths, u)
-                if (path) {
-                    location = path[path.length - 1]
-                }
-                set_location(u, location)
-                set_add(G.reduced, u)
-                G.active_stack = []
-                if (map_get(L.to_repair, u, 3) === 3) {
-                    map_delete(L.to_repair, u)
-                }
+            var location = G.offensive.battle.battle_hex
+            var path = map_get(G.offensive.paths, u)
+            if (path) {
+                location = path[path.length - 1]
             }
+            set_location(u, location)
+            set_add(G.reduced, u)
+            G.active_stack = []
         }
     },
     done() {
@@ -2593,10 +2572,6 @@ P.jp_cv_reassign = {
         push_undo()
         end()
     },
-    next() {
-        push_undo()
-        L.stage = 1
-    }
 }
 
 function get_ground_bomb_units() {

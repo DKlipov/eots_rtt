@@ -151,7 +151,7 @@ function on_update_local_actions() {
             && G.actions
             && G.actions["no_move"]
             && !map_has(L.allowed_hexes, G.location[G.active_stack[0]])) {
-            G.actions["no_move"] = 0
+            // G.actions["no_move"] = 0
         } else if (G.active_stack.length
             && G.actions
             && G.actions["no_move"]
