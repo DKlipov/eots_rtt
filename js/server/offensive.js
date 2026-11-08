@@ -6,6 +6,11 @@ function offensive_prompt(msg) {
         V.prompt = `OC: ${ops} Ops. ${msg}`
 }
 
+P.event_then_offensive_sequence = script(`
+    eval { play_event(L.c) }
+    goto offensive_sequence
+`)
+
 P.offensive_sequence = script(`
     set G.offensive.stage ATTACK_STAGE
     eval {
@@ -1910,9 +1915,8 @@ P.cancel_offensive = {
         G.offensive.cancelled = {}
         G.offensive.cancelled.active_units = G.offensive.active_units
         G.active = JP
-        play_event(reaction_card)
         log(`${card_get_log_str(offensive_card)} discarded.`)
-        goto("default_event")
+        goto("play_default_event", { c: reaction_card })
     }
 }
 

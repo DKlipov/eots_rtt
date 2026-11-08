@@ -12634,7 +12634,6 @@ function action_menu(menu, action_list) {
     var x = 0
     for (var action of action_list)
         x += action_menu_item(action)
-    console.log("action options: " + x)
     $("#"+menu).hidden = (x === 0)
 }
 

@@ -170,12 +170,10 @@ P.offensive_segment_card_action = {
         push_undo()
         log_offensive_card()
         if (cards[L.c].type === MILITARY) {
-            play_event(L.c)
-            goto("offensive_sequence")
+            goto("event_then_offensive_sequence", { c: L.c })
         } else {
             G.offensive.offensive_card = L.c
-            play_event(G.offensive.offensive_card)
-            goto("default_event")
+            goto("play_default_event", { c: G.offensive.offensive_card })
         }
     },
     discard() {
@@ -287,8 +285,7 @@ P.future_offensive = {
             log(`#J${card_get_log_str(G.future_offensive[G.active])} (FO)`)
         else
             log(`#A${card_get_log_str(G.future_offensive[G.active])} (FO)`)
-        play_event(G.future_offensive[G.active])
-        goto("offensive_sequence")
+        goto("event_then_offensive_sequence", { c: G.future_offensive[G.active] })
     },
     skip() {
         if (!L.impossible)

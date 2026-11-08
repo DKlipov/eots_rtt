@@ -634,7 +634,7 @@ P.draw_from_discard = {
     },
     skip() {
         push_undo()
-        log(`${side_get_log_str(G.active)} did not use card discard and draw bonus.`)
+        log(`${side_get_log_str(G.active)} did not use discard and draw bonus.`)
         end()
     },
     card(c) {

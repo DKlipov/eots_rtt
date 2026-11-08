@@ -358,24 +358,29 @@ function get_year_season() {
     return SEASONS[d]
 }
 
-P.default_event = function () {
-    if (cards[G.offensive.offensive_card].isr_rivalry) {
-        set_inter_service(1 - cards[G.offensive.offensive_card].faction, 1)
+P.play_default_event = script(`
+    eval {
+        play_event(L.c)
     }
-    if (cards[G.offensive.offensive_card].isr_agreement) {
-        set_inter_service(cards[G.offensive.offensive_card].faction, 0)
+    eval {
+        if (cards[G.offensive.offensive_card].isr_rivalry) {
+            set_inter_service(1 - cards[G.offensive.offensive_card].faction, 1)
+        }
+        if (cards[G.offensive.offensive_card].isr_agreement) {
+            set_inter_service(cards[G.offensive.offensive_card].faction, 0)
+        }
+        if (cards[G.offensive.offensive_card].pw) {
+            change_political_will(cards[G.offensive.offensive_card].pw, cards[G.offensive.offensive_card].name)
+        }
+        if (cards[G.offensive.offensive_card].wie) {
+            change_wie(cards[G.offensive.offensive_card].wie[get_year() - 1942], cards[G.offensive.offensive_card].cause)
+        }
+        if (cards[G.offensive.offensive_card].china) {
+            update_china_status(cards[G.offensive.offensive_card].china)
+        }
     }
-    if (cards[G.offensive.offensive_card].pw) {
-        change_political_will(cards[G.offensive.offensive_card].pw, cards[G.offensive.offensive_card].name)
-    }
-    if (cards[G.offensive.offensive_card].wie) {
-        change_wie(cards[G.offensive.offensive_card].wie[get_year() - 1942], cards[G.offensive.offensive_card].cause)
-    }
-    if (cards[G.offensive.offensive_card].china) {
-        update_china_status(cards[G.offensive.offensive_card].china)
-    }
-    goto("end_action")
-}
+    goto end_action
+`)
 
 function set_inter_service(faction, rivalry) {
     if (G.inter_service[faction] && !rivalry) {
