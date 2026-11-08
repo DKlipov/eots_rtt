@@ -15717,7 +15717,7 @@ P.draw_from_discard = {
     },
     skip() {
         push_undo()
-        log(`${side_get_log_str(G.active)} did not use card discard and draw bonus.`)
+        log(`${side_get_log_str(G.active)} did not use discard and draw bonus.`)
         end()
     },
     card(c) {
@@ -20681,7 +20681,8 @@ function restore_state(state) {
             supply = 0
         }
         G = state
-        if(supply){
+        if (supply) {
+            G.supply_cache = new Array(CHINA_BOX).fill(0)
             check_supply()
         }
     }

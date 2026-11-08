@@ -669,7 +669,8 @@ function restore_state(state) {
             supply = 0
         }
         G = state
-        if(supply){
+        if (supply) {
+            G.supply_cache = new Array(CHINA_BOX).fill(0)
             check_supply()
         }
     }
