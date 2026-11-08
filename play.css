@@ -127,23 +127,6 @@ button#hqr_isolation_button:disabled
 
 /* ICONS */
 
-/*
-.xdice { background-size: 150px 15px; }
-.xdice.d0 { background-position: 0 0 }
-.xdice.d1 { background-position: -15px 0; }
-.xdice.d2 { background-position: -30px 0; }
-.xdice.d3 { background-position: -45px 0; }
-.xdice.d4 { background-position: -60px 0; }
-.xdice.d5 { background-position: -75px 0; }
-.xdice.d6 { background-position: -90px 0; }
-.xdice.d7 { background-position: -105px 0; }
-.xdice.d8 { background-position: -120px 0; }
-.xdice.d9 { background-position: -135px 0; }
-
-.xdice.R { background-image: url(images/d10r.svg); }
-.xdice.B { background-image: url(images/d10b.svg); }
-*/
-
 .xdice {
     display: inline-block;
     margin: 0 2px 0 0;
