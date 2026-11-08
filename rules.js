@@ -7023,7 +7023,7 @@ const events = {
     },
     JAPAN_LACK_OF_RESOURCES: {
         id: 4,
-        cause: "Japan control less than 3 resource",
+        cause: "Japan controls fewer than 3 resource hexes",
         pw: 3,
     },
     STRAT_BOMBING: {
@@ -10944,7 +10944,7 @@ P.choose_hq = {
         if (L.possible_units.length === 1) {
             this.choose(L.possible_units[0])
         } else if (!L.possible_units.length) {
-            log(`No hq could be selected.`)
+            log(`No available HQ.`)
         }
     },
     inactive: "choose HQ",
@@ -12230,7 +12230,7 @@ P.retro_disengagement = {
     skip() {
         push_undo()
         var units = format_details(L.allowed_units.length + " units", L.allowed_units.map(u => set_has(G.reduced, u) ? `(${unit_get_log_str(u)})` : unit_get_log_str(u)))
-        log(`${units} skipped disengagement.`)
+        log(`${units} did not disengage.`)
         this.next_disengagement()
     },
     reset_state() {
@@ -13126,7 +13126,7 @@ function get_battle_modifiers(faction) {
     battle.roll_modifiers = 0
     if (battle.ground_stage && is_col_tsuji_applied(faction)) {
         battle.roll_modifiers = 4
-        log(`>>+4 Col.Tsuji.`)
+        log(`>>+4 Col. Tsuji.`)
     } else if (battle.ground_stage) {
         battle.roll_modifiers = get_ground_roll_modifiers(faction)
     } else {
@@ -13145,7 +13145,7 @@ P.execute_attack = function () {
         end()
         return
     }
-    log(`>${side_get_log_str(faction)} fire (${battle.strength[faction]}).`)
+    log(`>${side_get_log_str(faction)} fired (${battle.strength[faction]}).`)
     battle.roll[faction] = random(10)
     clear_undo()
     get_battle_modifiers(faction)
@@ -13211,7 +13211,7 @@ function battle_prompt(msg) {
     if (G.offensive.battle.ground_stage)
         V.prompt = "Ground combat in H" + G.offensive.battle.battle_hex + ": " + msg
     else
-        V.prompt = "Air/naval combat in H" + G.offensive.battle.battle_hex + ": " + msg
+        V.prompt = "Air-naval combat in H" + G.offensive.battle.battle_hex + ": " + msg
 }
 
 P.apply_hits = {
@@ -13551,7 +13551,7 @@ P.broken_aa = {
             set_delete(battle.ground[G.offensive.attacker], u)
             set_add(G.offensive.ground_pbm, u)
         })
-        log("Amphibious Assault failed due to lack of naval escort.")
+        log("Amphibious assault failed due to lack of naval escort.")
         if (G.async) {
             L.allowed_units.forEach(u => this.unit(u))
             this.done()
@@ -13726,7 +13726,7 @@ function prepare_battle() {
     log(`Defender: ${log_in_battle_units(1 - attacker)}.`)
     if (battle.air_naval[JP].length && (battle.air_naval[AP].length || battle.ground[AP].length)
         || battle.air_naval[AP].length && (battle.air_naval[JP].length || battle.ground[JP].length)) {
-        log(`Air Naval combat:`)
+        log(`Air-naval combat:`)
     }
 }
 
@@ -13831,7 +13831,7 @@ P.retreat = {
     },
     action_hex(hex) {
         if (ground_move_denied(hex)) {
-            log(`${pieces[G.active_stack[0]]} retreat to restricted area`)
+            log(`${pieces[G.active_stack[0]]} retreat to restricted area.`)
             eliminate(G.active_stack[0])
         } else {
             set_location(G.active_stack[0], hex, true)
@@ -15716,7 +15716,7 @@ P.draw_from_discard = {
     },
     skip() {
         push_undo()
-        log(`${side_get_log_str(G.active)} skip replace card option.`)
+        log(`${side_get_log_str(G.active)} did not use card discard and draw bonus.`)
         end()
     },
     card(c) {
@@ -16011,7 +16011,7 @@ P.kamikaze_attack = {
         push_undo()
         if (L.stage === 1) {
             var location = G.location[u]
-            log(`${unit_get_log_str(u)} launch kamikaze attack.`)
+            log(`${unit_get_log_str(u)} launched kamikaze attack.`)
             damage_unit(u)
             L.allowed_units = []
             var hexes_range = in_range_on_map(location, pieces[u].ebr, G.offensive.kamikaze, JP)
@@ -16256,7 +16256,7 @@ P.attack_b29_base = {
         log(`Japan attacked B29 base:`)
         var roll = random(10)
         L.hits = roll <= 4
-        log(`${roll} - ${L.hits ? "success" : "No effect"}`)
+        log(`${roll} - ${L.hits ? "success" : "no effect"}`)
         clear_undo()
         if (!L.hits) {
             end()
@@ -16941,7 +16941,7 @@ P.skip_bombing = {
     skip() {
         push_undo()
         G.active = AP
-        log("Skip bombing: No unit damaged.")
+        log("Skip bombing: No units damaged.")
         end()
     },
     done() {
@@ -17343,7 +17343,7 @@ P.place_14_air = {
     },
     eliminate() {
         push_undo()
-        log(`No valid hex to place.`)
+        log(`Could not place 14th AF air unit.`)
         eliminate_permanently(AP_AIR_14)
         end()
     }
@@ -17428,7 +17428,7 @@ cards[find_card(AP, 60)].can_play = function () {
 
 function discard_random_card(faction) {
     if (!G.hand[faction].length) {
-        log(`${side_get_log_str(faction)} hand is empty, could not discard random card.`)
+        log(`${side_get_log_str(faction)} hand was empty; could not discard random card.`)
         return
     }
     var i = G.hand[faction][random(G.hand[faction].length)]
@@ -17759,10 +17759,8 @@ function on_setup(scenario, options) {
     G.surrender = Array(Object.keys(nations).length).fill(0)
     G.surrender[nations.MARSHALL.id] = 1 //only nation under JP control
     G.b29u = 0
-
     G.control = bit_init(get_map_control_bits())
     G.control.fill(~0) // initialize to all AP control
-
     G.supply_cache = Array(CHINA_BOX).fill(0)
     G.supply_cache_id = 0
     G.pow = 0
@@ -18056,12 +18054,12 @@ function set_inter_service(faction, rivalry) {
 
 function reshuffle() {
     if (G.discard[AP].includes(SOVIET_INVADE)) {
-        log(`Allied deck reshuffled due to Soviet invasion discarded.`)
+        log(`Allied deck reshuffled due to ${card_get_log_str(SOVIET_INVADE)}.`)
         G.draw[AP].push(...G.discard[AP])
         G.discard[AP] = []
     }
     if (G.discard[JP].includes(TOJO_RESIGNS)) {
-        log(`Japanese deck reshuffled due to Tojo resign discarded.`)
+        log(`Japanese deck reshuffled due to ${card_get_log_str(TOJO_RESIGNS)}.`)
         G.draw[JP].push(...G.discard[JP])
         G.discard[JP] = []
     }
@@ -18172,7 +18170,7 @@ function change_political_will(diff, cause) {
 
 function change_wie(diff, cause) {
     if (diff === undefined) {
-        log(`No WIE changed.`)
+        log(`No change to WiE.`)
         return
     }
     G.wie = Math.max(G.wie + diff, 0)
@@ -18180,7 +18178,7 @@ function change_wie(diff, cause) {
     if (diff > 0) {
         diff = "+" + diff
     }
-    log(`WIE to ${get_wie_level()} (${3 - G.wie}), ${cause} (${diff}).`)
+    log(`WiE to ${get_wie_level()} (${3 - G.wie}), ${cause} (${diff}).`)
 }
 
 
@@ -18232,7 +18230,7 @@ function unit_on_board(unit) {
 
 function into_turn_draw(faction) {
     if (G.draw_counter[faction] >= 3) {
-        log(`${side_get_log_str(faction)} has drawn 3 cards already, draw skipped.`)
+        log(`${side_get_log_str(faction)} has already drawn 3 cards; draw skipped.`)
         return
     }
     G.draw_counter[faction]++
@@ -18436,7 +18434,7 @@ function bombing(u, close_air_base) {
     var success = result < success_rate
     var damaged = result >= 9 && !close_air_base
     var modifier = 0
-    log(`${unit_get_log_str(u)} strategic bombing (${close_air_base ? "Air" : "No air"} base withing range of Tokyo):`)
+    log(`${unit_get_log_str(u)} strategic bombing (${close_air_base ? "Air" : "No air"} base within range of Tokyo):`)
     if (is_event_active(events.INTERCEPTORS) && !close_air_base) {
         log(`+1 High altitude interceptors.`)
         modifier++
@@ -19471,7 +19469,7 @@ function deal_cards() {
     if (G.wie >= 10) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`Allied draw reduced by 1 due to War in Europe at Level 4.`)
+        log(`Allied draw reduced by 1 due to War in Europe at level 4.`)
     }
     ap_cards = Math.max(ap_cards, 4)
     G.passes[AP] = Math.min(G.passes[AP], 2)

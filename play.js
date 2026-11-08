@@ -7018,7 +7018,7 @@ const events = {
     },
     JAPAN_LACK_OF_RESOURCES: {
         id: 4,
-        cause: "Japan control less than 3 resource",
+        cause: "Japan controls fewer than 3 resource hexes",
         pw: 3,
     },
     STRAT_BOMBING: {
@@ -13419,6 +13419,7 @@ function escape_text(text) {
     text = escape_tip_light(text, /u(\d+)/g, "tip utip_jp", "unit", UNIT_NAMES)
     text = escape_tip_light(text, /U(\d+)/g, "tip utip_ap", "unit", UNIT_NAMES)
 
+    // TODO: more phrases need to be turned to singular form here
     text = text.replace(/\b1 passes/g, "1 pass")
     text = text.replace(/\b1 cards/g, "1 card")
     text = text.replace(/\b1 hexes/g, "1 hex")

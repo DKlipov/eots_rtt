@@ -389,12 +389,12 @@ function set_inter_service(faction, rivalry) {
 
 function reshuffle() {
     if (G.discard[AP].includes(SOVIET_INVADE)) {
-        log(`Allied deck reshuffled due to Soviet invasion discarded.`)
+        log(`Allied deck reshuffled due to ${card_get_log_str(SOVIET_INVADE)}.`)
         G.draw[AP].push(...G.discard[AP])
         G.discard[AP] = []
     }
     if (G.discard[JP].includes(TOJO_RESIGNS)) {
-        log(`Japanese deck reshuffled due to Tojo resign discarded.`)
+        log(`Japanese deck reshuffled due to ${card_get_log_str(TOJO_RESIGNS)}.`)
         G.draw[JP].push(...G.discard[JP])
         G.discard[JP] = []
     }
@@ -505,7 +505,7 @@ function change_political_will(diff, cause) {
 
 function change_wie(diff, cause) {
     if (diff === undefined) {
-        log(`No WIE changed.`)
+        log(`No change to WiE.`)
         return
     }
     G.wie = Math.max(G.wie + diff, 0)
@@ -513,7 +513,7 @@ function change_wie(diff, cause) {
     if (diff > 0) {
         diff = "+" + diff
     }
-    log(`WIE to ${get_wie_level()} (${3 - G.wie}), ${cause} (${diff}).`)
+    log(`WiE to ${get_wie_level()} (${3 - G.wie}), ${cause} (${diff}).`)
 }
 
 
@@ -565,7 +565,7 @@ function unit_on_board(unit) {
 
 function into_turn_draw(faction) {
     if (G.draw_counter[faction] >= 3) {
-        log(`${side_get_log_str(faction)} has drawn 3 cards already, draw skipped.`)
+        log(`${side_get_log_str(faction)} has already drawn 3 cards; draw skipped.`)
         return
     }
     G.draw_counter[faction]++
@@ -769,7 +769,7 @@ function bombing(u, close_air_base) {
     var success = result < success_rate
     var damaged = result >= 9 && !close_air_base
     var modifier = 0
-    log(`${unit_get_log_str(u)} strategic bombing (${close_air_base ? "Air" : "No air"} base withing range of Tokyo):`)
+    log(`${unit_get_log_str(u)} strategic bombing (${close_air_base ? "Air" : "No air"} base within range of Tokyo):`)
     if (is_event_active(events.INTERCEPTORS) && !close_air_base) {
         log(`+1 High altitude interceptors.`)
         modifier++

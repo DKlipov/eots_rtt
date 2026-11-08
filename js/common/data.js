@@ -237,7 +237,7 @@ const events = {
     },
     JAPAN_LACK_OF_RESOURCES: {
         id: 4,
-        cause: "Japan control less than 3 resource",
+        cause: "Japan controls fewer than 3 resource hexes",
         pw: 3,
     },
     STRAT_BOMBING: {

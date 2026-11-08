@@ -887,7 +887,7 @@ function deal_cards() {
     if (G.wie >= 10) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`Allied draw reduced by 1 due to War in Europe at Level 4.`)
+        log(`Allied draw reduced by 1 due to War in Europe at level 4.`)
     }
     ap_cards = Math.max(ap_cards, 4)
     G.passes[AP] = Math.min(G.passes[AP], 2)

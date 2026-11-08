@@ -142,7 +142,7 @@ P.choose_hq = {
         if (L.possible_units.length === 1) {
             this.choose(L.possible_units[0])
         } else if (!L.possible_units.length) {
-            log(`No hq could be selected.`)
+            log(`No available HQ.`)
         }
     },
     inactive: "choose HQ",
@@ -1428,7 +1428,7 @@ P.retro_disengagement = {
     skip() {
         push_undo()
         var units = format_details(L.allowed_units.length + " units", L.allowed_units.map(u => set_has(G.reduced, u) ? `(${unit_get_log_str(u)})` : unit_get_log_str(u)))
-        log(`${units} skipped disengagement.`)
+        log(`${units} did not disengage.`)
         this.next_disengagement()
     },
     reset_state() {
@@ -2324,7 +2324,7 @@ function get_battle_modifiers(faction) {
     battle.roll_modifiers = 0
     if (battle.ground_stage && is_col_tsuji_applied(faction)) {
         battle.roll_modifiers = 4
-        log(`>>+4 Col.Tsuji.`)
+        log(`>>+4 Col. Tsuji.`)
     } else if (battle.ground_stage) {
         battle.roll_modifiers = get_ground_roll_modifiers(faction)
     } else {
@@ -2343,7 +2343,7 @@ P.execute_attack = function () {
         end()
         return
     }
-    log(`>${side_get_log_str(faction)} fire (${battle.strength[faction]}).`)
+    log(`>${side_get_log_str(faction)} fired (${battle.strength[faction]}).`)
     battle.roll[faction] = random(10)
     clear_undo()
     get_battle_modifiers(faction)
@@ -2409,7 +2409,7 @@ function battle_prompt(msg) {
     if (G.offensive.battle.ground_stage)
         V.prompt = "Ground combat in H" + G.offensive.battle.battle_hex + ": " + msg
     else
-        V.prompt = "Air/naval combat in H" + G.offensive.battle.battle_hex + ": " + msg
+        V.prompt = "Air-naval combat in H" + G.offensive.battle.battle_hex + ": " + msg
 }
 
 P.apply_hits = {
@@ -2749,7 +2749,7 @@ P.broken_aa = {
             set_delete(battle.ground[G.offensive.attacker], u)
             set_add(G.offensive.ground_pbm, u)
         })
-        log("Amphibious Assault failed due to lack of naval escort.")
+        log("Amphibious assault failed due to lack of naval escort.")
         if (G.async) {
             L.allowed_units.forEach(u => this.unit(u))
             this.done()
@@ -2924,7 +2924,7 @@ function prepare_battle() {
     log(`Defender: ${log_in_battle_units(1 - attacker)}.`)
     if (battle.air_naval[JP].length && (battle.air_naval[AP].length || battle.ground[AP].length)
         || battle.air_naval[AP].length && (battle.air_naval[JP].length || battle.ground[JP].length)) {
-        log(`Air Naval combat:`)
+        log(`Air-naval combat:`)
     }
 }
 
@@ -3029,7 +3029,7 @@ P.retreat = {
     },
     action_hex(hex) {
         if (ground_move_denied(hex)) {
-            log(`${pieces[G.active_stack[0]]} retreat to restricted area`)
+            log(`${pieces[G.active_stack[0]]} retreat to restricted area.`)
             eliminate(G.active_stack[0])
         } else {
             set_location(G.active_stack[0], hex, true)

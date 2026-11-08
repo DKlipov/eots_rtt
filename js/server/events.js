@@ -634,7 +634,7 @@ P.draw_from_discard = {
     },
     skip() {
         push_undo()
-        log(`${side_get_log_str(G.active)} skip replace card option.`)
+        log(`${side_get_log_str(G.active)} did not use card discard and draw bonus.`)
         end()
     },
     card(c) {
@@ -929,7 +929,7 @@ P.kamikaze_attack = {
         push_undo()
         if (L.stage === 1) {
             var location = G.location[u]
-            log(`${unit_get_log_str(u)} launch kamikaze attack.`)
+            log(`${unit_get_log_str(u)} launched kamikaze attack.`)
             damage_unit(u)
             L.allowed_units = []
             var hexes_range = in_range_on_map(location, pieces[u].ebr, G.offensive.kamikaze, JP)
@@ -1174,7 +1174,7 @@ P.attack_b29_base = {
         log(`Japan attacked B29 base:`)
         var roll = random(10)
         L.hits = roll <= 4
-        log(`${roll} - ${L.hits ? "success" : "No effect"}`)
+        log(`${roll} - ${L.hits ? "success" : "no effect"}`)
         clear_undo()
         if (!L.hits) {
             end()
@@ -1859,7 +1859,7 @@ P.skip_bombing = {
     skip() {
         push_undo()
         G.active = AP
-        log("Skip bombing: No unit damaged.")
+        log("Skip bombing: No units damaged.")
         end()
     },
     done() {
@@ -2261,7 +2261,7 @@ P.place_14_air = {
     },
     eliminate() {
         push_undo()
-        log(`No valid hex to place.`)
+        log(`Could not place 14th AF air unit.`)
         eliminate_permanently(AP_AIR_14)
         end()
     }
@@ -2346,7 +2346,7 @@ cards[find_card(AP, 60)].can_play = function () {
 
 function discard_random_card(faction) {
     if (!G.hand[faction].length) {
-        log(`${side_get_log_str(faction)} hand is empty, could not discard random card.`)
+        log(`${side_get_log_str(faction)} hand was empty; could not discard random card.`)
         return
     }
     var i = G.hand[faction][random(G.hand[faction].length)]
