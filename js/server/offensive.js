@@ -1916,7 +1916,7 @@ P.cancel_offensive = {
         G.offensive.cancelled.active_units = G.offensive.active_units
         G.active = JP
         log(`${card_get_log_str(offensive_card)} discarded.`)
-        goto("play_default_event", { c: reaction_card })
+        goto("play_default_event", {c: reaction_card})
     }
 }
 
@@ -1979,6 +1979,8 @@ P.define_intelligence_condition = {
     },
     skip() {
         push_undo()
+        if (cards[G.offensive.offensive_card].intelligence)
+            log("Intelligence stay surprise.")
         if (L.cancel) {
             L.cancel = false
         } else {
@@ -2553,7 +2555,7 @@ P.jp_cv_reassign = {
             L.to_damage = []
             return
         }
-        L.to_repair=[]
+        L.to_repair = []
         if (unit_on_board(u)) {
             set_delete(G.reduced, u)
             log(`>${unit_get_log_str(u)} to full strength.`)
