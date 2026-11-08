@@ -35,6 +35,11 @@ body.hide-pieces .marker:not(.control) { display: none }
 
 /* SPECIAL BUTTONS */
 
+#card_menu_jp { display: none }
+#card_menu_ap { display: none }
+body.Japan #card_menu_jp { display: block }
+body.Allies #card_menu_ap { display: block }
+
 button#to_unit_button {
     background-color: #90ee90;
     border-color: #bbffbb #58b55a #58b55a #bbffbb;

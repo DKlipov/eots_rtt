@@ -39,6 +39,7 @@
                 <li><a href="info/cards.html?faction=jp" target="_blank" id="jp_deck_link">Japanese Deck</a>
             </menu>
         </details>
+        <button onclick="toggle_markers_and_pieces()"><img src="/images/earth-asia-oceania.svg"></button>
         <details id="info_menu">
             <summary><img src="/images/all-seeing-eye.svg"></summary>
             <menu>
@@ -58,7 +59,17 @@
                 <li onclick="menu_show_unit_supply()"> Show <u>s</u>upply lines
             </menu>
         </details>
-        <button onclick="toggle_markers_and_pieces()"><img src="/images/earth-asia-oceania.svg"></button>
+        <details id="extra_card_action_menu" hidden>
+            <summary><img id="card_menu_jp" src="images/card_menu_jp.png"><img id="card_menu_ap" src="images/card_menu_ap.png"></summary>
+            <menu>
+                <li id="menu_displace_hq" onclick="send_action('displace_hq')"> Withdraw HQ
+                <li id="menu_return_hq" onclick="send_action('return_hq')"> Return HQ
+                <li id="menu_jarhat" onclick="send_action('jarhat')"> Jarhat road
+                <li id="menu_imphal" onclick="send_action('imphal')"> Imphal road
+                <li id="menu_ledo" onclick="send_action('ledo')"> Ledo road
+                <li id="menu_discard" onclick="send_action('discard')"> Discard
+            </menu>
+        </details>
     </div>
 </header>
 

@@ -169,6 +169,25 @@ function update_role_info(who) {
     roles[who].stat.textContent = escape_text(text)
 }
 
+function action_menu_item(action) {
+    var menu = $("#menu_" + action)
+    if (V.actions && action in V.actions) {
+        menu.hidden = false
+        menu.classList.toggle("disabled", view.actions[action] === 0)
+        return 1
+    } else {
+        menu.hidden = true
+        return 0
+    }
+}
+
+function action_menu(menu, action_list) {
+    var x = 0
+    for (var action of action_list)
+        x += action_menu_item(action)
+    $("#"+menu).hidden = (x === 0)
+}
+
 function on_update() {
     begin_update()
 
@@ -420,6 +439,17 @@ function on_update() {
         P[LOCAL_STATUS].on_update()
     }
 
+    // HIDDEN IN A MENU BUTTONS
+
+    action_menu("extra_card_action_menu", [
+        "displace_hq",
+        "return_hq",
+        "jarhat",
+        "imphal",
+        "ledo",
+        "discard"
+    ])
+
     // BUTTONS
 
     action_button("play_card", "Choose card")
@@ -440,17 +470,18 @@ function on_update() {
     action_button("displace", "Displace")
     action_button("divisions_button", "Reduce divisions track")
 
-
-    action_button("displace_hq", "Withdraw HQ")
-    action_button("return_hq", "Early HQ Return")
     action_button("inter_service", "Remove Inter-Service Rivalry")
     action_button("china_offensive", "China Offensive")
     action_button("future_offensive", "Future Offensive")
+
+    /*
+    action_button("displace_hq", "Withdraw HQ")
+    action_button("return_hq", "Early HQ Return")
     action_button("jarhat", "Jarhat road")
     action_button("imphal", "Imphal road")
     action_button("ledo", "Ledo road")
     action_button("discard", "Discard")
-
+    */
 
     action_button("all", "Choose all")
     action_button("pass", "Pass")
