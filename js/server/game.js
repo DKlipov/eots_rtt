@@ -96,11 +96,9 @@ function on_setup(scenario, options) {
     G.surrender[nations.MARSHALL.id] = true //only nation under JP control
     G.b29u = 0
     G.supply_cache = []
-    for (var i = 0; i < LAST_BOARD_HEX; i++) {
+    G.control = [0, 0, 0, 0, 0]
+    for (var i = 0; i < CHINA_BOX; i++) {
         G.supply_cache[i] = 0
-        if (create_controllable_hex(i)) {
-            G.supply_cache[i] += HEX_CONTROLLABLE
-        }
     }
     G.pow = 0
     G.captured_once = []
@@ -129,18 +127,6 @@ function on_setup(scenario, options) {
     }
 
     scenario_data().setup(options)
-}
-
-function create_controllable_hex(hex) {
-    var sid = G.sid
-    var map_data = get_map_data(hex)
-    return map_data.named || hex === WEST_HONSHU
-        || hex === KWAI_BRIDGE && !is_event_active(events.KWAI_RIVER_BRIDGE)// && !is_event_active(events.KWAI_RIVER_BRIDGE)
-        || hex === KWAI_BRIDGE_1 && !is_event_active(events.KWAI_RIVER_BRIDGE)// && !is_event_active(events.KWAI_RIVER_BRIDGE)
-        || hex === CHINA_BOX
-        || hex === ATTU && sid === YEAR_1942_SCENARIO
-        // || map_data.region === "AMandates" && (sid === YEAR_1943_SCENARIO || sid === YEAR_1942_1943_SCENARIO)// && G.surrender[nations.AUSTRALIAN_MANDATES.id]
-        || sid === BURMA_SCENARIO && map_data.region === "Burma" // need to check non named hexes for 17.11.23
 }
 
 function get_garrison_count() {
@@ -177,6 +163,7 @@ function create_view(sherlock) {
 
     V.non_control = G.non_control
     V.capture = G.capture
+    V.control = G.control
     V.oos = G.oos
     V.b29u = G.b29u
     V.supply_cache = G.supply_cache
@@ -376,16 +363,16 @@ function get_year_season() {
 
 P.default_event = function () {
     if (cards[G.offensive.offensive_card].isr_rivalry) {
-        set_inter_service(1-cards[G.offensive.offensive_card].faction,1)
+        set_inter_service(1 - cards[G.offensive.offensive_card].faction, 1)
     }
     if (cards[G.offensive.offensive_card].isr_agreement) {
-        set_inter_service(cards[G.offensive.offensive_card].faction,0)
+        set_inter_service(cards[G.offensive.offensive_card].faction, 0)
     }
     if (cards[G.offensive.offensive_card].pw) {
         change_political_will(cards[G.offensive.offensive_card].pw, cards[G.offensive.offensive_card].name)
     }
     if (cards[G.offensive.offensive_card].wie) {
-        change_wie(cards[G.offensive.offensive_card].wie[get_year()-1942], cards[G.offensive.offensive_card].cause)
+        change_wie(cards[G.offensive.offensive_card].wie[get_year() - 1942], cards[G.offensive.offensive_card].cause)
     }
     if (cards[G.offensive.offensive_card].china) {
         update_china_status(cards[G.offensive.offensive_card].china)
@@ -628,7 +615,7 @@ function commit_into_turn_draw() {
     resolve_into_turn_draw(AP)
     G.offensive.draw[AP].forEach(c => G.hand[AP].push(c))
     G.offensive.draw[JP].forEach(c => G.hand[JP].push(c))
-    G.offensive.draw = [[],[]]
+    G.offensive.draw = [[], []]
 }
 
 function capture_hex(hex, side = G.active, no_log = false) {
@@ -636,7 +623,8 @@ function capture_hex(hex, side = G.active, no_log = false) {
         log(`Tokyo express marker removed.`)
         G.events[events.TOKYO_EXPRESS.id] = 0
     }
-    if (hex > LAST_BOARD_HEX || !is_controllable_hex(hex)) {
+    var controllable = is_controllable_hex(hex)
+    if (hex > LAST_BOARD_HEX || !controllable) {
         return
     }
     if (G.non_control) {
@@ -644,13 +632,17 @@ function capture_hex(hex, side = G.active, no_log = false) {
         if (!no_log) {
             log(`Allies captured ${int_to_hex(hex)}.`)
         }
+        return;
     }
+    var b = controllable % 31
+    var a = (controllable - b) / 31
     var md = get_map_data(hex)
-    if (side && !is_space_controlled(hex, AP)) {
+    var control = G.control[a]
+    if (side && (control & (1 << b))) {
         if (!no_log) {
             log(`Allies captured ${hex_get_log_str(hex)}.`)
         }
-        G.supply_cache[hex] -= JP_CONTROLLED
+        G.control[a] -= (1 << b)
         if (md.region === "NIndia") {
             india_stable()
         } else if (md.city === JAPANESE_CITY) {
@@ -659,12 +651,11 @@ function capture_hex(hex, side = G.active, no_log = false) {
         if (md.resource) {
             check_jp_resources_event()
         }
-    } else if (!side && !is_space_controlled(hex, JP)) {
+    } else if (!side && !(control & (1 << b))) {
         if (!no_log) {
-
             log(`Japan captured ${hex_get_log_str(hex)}.`)
         }
-        G.supply_cache[hex] += JP_CONTROLLED
+        G.control[a] |= (1 << b)
     } else {
         return
     }

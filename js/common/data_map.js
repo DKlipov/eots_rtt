@@ -1410,6 +1410,33 @@ var S_P_first_hex = []
 
     map_set(AIRFIELD_LINKS, CHINA_BOX, [JARHAT, 1, DACCA, 1, LEDO, 1])
 
+
+    function is_controllable_hex(hex, map_data, sid) {
+        return map_data.named || hex === WEST_HONSHU
+            || hex === KWAI_BRIDGE
+            || hex === KWAI_BRIDGE_1
+            || hex === ATTU && sid === FULL_CAMPAIGN_SCENARIO
+            || sid === BURMA_SCENARIO && map_data.region === "Burma"
+    }
+
+    var control = 0
+    MAP_DATA.forEach((data, id) => {
+        if (is_controllable_hex(id, data, FULL_CAMPAIGN_SCENARIO)) {
+            data.controllable = control++
+        }
+    })
+    control = 0
+    S_P_MAP_DATA.forEach((data, id) => {
+        if (is_controllable_hex(id, data, SOUTH_PACIFIC_SCENARIO)) {
+            data.controllable = control++
+        }
+    })
+    control = 0
+    B_F_W_MAP_DATA.forEach((data, id) => {
+        if (is_controllable_hex(id, data, BURMA_SCENARIO)) {
+            data.controllable = control++
+        }
+    })
 })()
 
 function non_playable_hex(id) {

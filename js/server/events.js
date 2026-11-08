@@ -356,8 +356,6 @@ cards[find_card(JP, 18)].can_play = function () {
 
 cards[find_card(JP, 18)].event = function () {
     check_event(events.KWAI_RIVER_BRIDGE)
-    G.supply_cache[KWAI_BRIDGE] -= HEX_CONTROLLABLE
-    G.supply_cache[KWAI_BRIDGE_1] -= HEX_CONTROLLABLE
 }
 
 cards[find_card(JP, 20)].before_commit_offensive = function () {

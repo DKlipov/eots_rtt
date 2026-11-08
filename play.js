@@ -116,8 +116,6 @@ const JOINT_SUPPLIED_HEX = 1 << 19
 const US_SUPPLIED_HEX = 1 << 20
 const JP_SUPPLY_AIRFIELD = 1 << 21
 const AP_SUPPLY_AIRFIELD = 1 << 22
-const JP_CONTROLLED = 1 << 23
-const HEX_CONTROLLABLE = 1 << 24
 const HEX_TEMP_FLAG1 = 1 << 25
 const HEX_TEMP_FLAG2 = 1 << 26
 const HEX_TEMP_FLAG3 = 1 << 27
@@ -127,11 +125,11 @@ const JP_UNITS = JP_AIR_UNITS | JP_GROUND_UNITS | JP_NAVAL_UNITS | JP_HQ_UNITS
 const AP_UNITS = JP_UNITS << 1
 const JP_GA_UNITS = JP_AIR_UNITS | JP_GROUND_UNITS
 const JP_GAH_UNITS = JP_AIR_UNITS | JP_GROUND_UNITS | JP_HQ_UNITS
-const NON_SUPPLY_MASK = [...Array(9).keys()].reduce((a, b) => a + Math.pow(2, b + 6), 0) | JP_CONTROLLED | HEX_CONTROLLABLE
-const CLEAN_UNITS_MASK = [...Array(26).keys()].filter(a => a < 6 || a > 13).reduce((a, b) => a + Math.pow(2, b), 0) | JP_CONTROLLED | HEX_CONTROLLABLE
-const CLEAN_ATTACK_ZONE_MASK = [...Array(26).keys()].reduce((a, b) => a + Math.pow(2, b - 1), 0) | JP_CONTROLLED | HEX_CONTROLLABLE
+const NON_SUPPLY_MASK = [...Array(9).keys()].reduce((a, b) => a + Math.pow(2, b + 6), 0)
+const CLEAN_UNITS_MASK = [...Array(26).keys()].filter(a => a < 6 || a > 13).reduce((a, b) => a + Math.pow(2, b), 0)
+const CLEAN_ATTACK_ZONE_MASK = [...Array(26).keys()].reduce((a, b) => a + Math.pow(2, b - 1), 0)
 const AP_SUPPLIED_HEX = (BR_SUPPLIED_HEX | JOINT_SUPPLIED_HEX | US_SUPPLIED_HEX)
-const CLEAN_ALL_MASK = JP_CONTROLLED | HEX_CONTROLLABLE
+const CLEAN_ALL_MASK = 0
 
 const LAST_BOARD_HEX = 1478
 const NON_PLACED_BOX = 1481
@@ -6650,6 +6648,33 @@ var S_P_first_hex = []
 
     map_set(AIRFIELD_LINKS, CHINA_BOX, [JARHAT, 1, DACCA, 1, LEDO, 1])
 
+
+    function is_controllable_hex(hex, map_data, sid) {
+        return map_data.named || hex === WEST_HONSHU
+            || hex === KWAI_BRIDGE
+            || hex === KWAI_BRIDGE_1
+            || hex === ATTU && sid === FULL_CAMPAIGN_SCENARIO
+            || sid === BURMA_SCENARIO && map_data.region === "Burma"
+    }
+
+    var control = 0
+    MAP_DATA.forEach((data, id) => {
+        if (is_controllable_hex(id, data, FULL_CAMPAIGN_SCENARIO)) {
+            data.controllable = control++
+        }
+    })
+    control = 0
+    S_P_MAP_DATA.forEach((data, id) => {
+        if (is_controllable_hex(id, data, SOUTH_PACIFIC_SCENARIO)) {
+            data.controllable = control++
+        }
+    })
+    control = 0
+    B_F_W_MAP_DATA.forEach((data, id) => {
+        if (is_controllable_hex(id, data, BURMA_SCENARIO)) {
+            data.controllable = control++
+        }
+    })
 })()
 
 function non_playable_hex(id) {
@@ -8111,22 +8136,18 @@ function get_ground_move_cost(from, to, faction) {
 }
 
 function is_controllable_hex(hex) {
-    return G.supply_cache[hex] & HEX_CONTROLLABLE
+    return get_map_data(hex).controllable
 }
 
 function is_space_controlled(hex, faction) {
-    if (G.control) {
-        var mask = ~(JP_CONTROLLED | HEX_CONTROLLABLE)
-        clear_supply_cache(mask)
-        G.control.forEach(h => G.supply_cache[h] |= JP_CONTROLLED)
-        for (var i = 0; i < LAST_BOARD_HEX; i++) {
-            if (create_controllable_hex(i)) {
-                G.supply_cache[i] |= HEX_CONTROLLABLE
-            }
-        }
-        G.control = null
+    var controllable = get_map_data(hex).controllable
+    if (!controllable) {
+        return
     }
-    return (!(G.supply_cache[hex] & JP_CONTROLLED) == faction) && (!G.non_control || !set_has(G.non_control, hex))
+    var b = controllable % 31
+    var a = (controllable - b) / 31
+    var control = G.control[a]
+    return (faction && !(control & (1 << b)) || !faction && (control & (1 << b)))
 }
 
 
@@ -12394,10 +12415,29 @@ function get_control_marker(h) {
     }
 }
 
+function is_show_control_hex(hex) {
+    if (hex === KWAI_BRIDGE) {
+        return G.sid === BURMA_SCENARIO || !is_event_active(events.KWAI_RIVER_BRIDGE)
+    }else if (hex === KWAI_BRIDGE_1) {
+        return !is_event_active(events.KWAI_RIVER_BRIDGE)
+    } else if (hex === ATTU) {
+        return G.sid === YEAR_1942_SCENARIO
+    }
+    return get_map_data(hex).controllable
+}
+
+function is_controllable_hex(hex, map_data, sid) {
+    return map_data.named || hex === WEST_HONSHU
+        || hex === KWAI_BRIDGE
+        || hex === KWAI_BRIDGE_1
+        || hex === ATTU && sid === FULL_CAMPAIGN_SCENARIO
+        || sid === BURMA_SCENARIO && map_data.region === "Burma"
+}
+
 function should_show_hex_control(i, all_control, vassal_control) {
     var hn = HEX_BY_NATION[i]
     var cont = is_space_controlled(i, JP) ? JP : AP
-    if ((cont === AP && set_has(G.capture, i) && !all_control) || !(G.supply_cache[i] & HEX_CONTROLLABLE))
+    if ((cont === AP && set_has(G.capture, i) && !all_control) || !is_show_control_hex(i))
         return false
     var default_condition =
         (hn >= 0 && G.surrender[HEX_BY_NATION[i]] > 0 == cont) || (hn === -1 && cont === AP) || (hn < -1 && cont === JP)

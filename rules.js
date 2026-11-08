@@ -121,8 +121,6 @@ const JOINT_SUPPLIED_HEX = 1 << 19
 const US_SUPPLIED_HEX = 1 << 20
 const JP_SUPPLY_AIRFIELD = 1 << 21
 const AP_SUPPLY_AIRFIELD = 1 << 22
-const JP_CONTROLLED = 1 << 23
-const HEX_CONTROLLABLE = 1 << 24
 const HEX_TEMP_FLAG1 = 1 << 25
 const HEX_TEMP_FLAG2 = 1 << 26
 const HEX_TEMP_FLAG3 = 1 << 27
@@ -132,11 +130,11 @@ const JP_UNITS = JP_AIR_UNITS | JP_GROUND_UNITS | JP_NAVAL_UNITS | JP_HQ_UNITS
 const AP_UNITS = JP_UNITS << 1
 const JP_GA_UNITS = JP_AIR_UNITS | JP_GROUND_UNITS
 const JP_GAH_UNITS = JP_AIR_UNITS | JP_GROUND_UNITS | JP_HQ_UNITS
-const NON_SUPPLY_MASK = [...Array(9).keys()].reduce((a, b) => a + Math.pow(2, b + 6), 0) | JP_CONTROLLED | HEX_CONTROLLABLE
-const CLEAN_UNITS_MASK = [...Array(26).keys()].filter(a => a < 6 || a > 13).reduce((a, b) => a + Math.pow(2, b), 0) | JP_CONTROLLED | HEX_CONTROLLABLE
-const CLEAN_ATTACK_ZONE_MASK = [...Array(26).keys()].reduce((a, b) => a + Math.pow(2, b - 1), 0) | JP_CONTROLLED | HEX_CONTROLLABLE
+const NON_SUPPLY_MASK = [...Array(9).keys()].reduce((a, b) => a + Math.pow(2, b + 6), 0)
+const CLEAN_UNITS_MASK = [...Array(26).keys()].filter(a => a < 6 || a > 13).reduce((a, b) => a + Math.pow(2, b), 0)
+const CLEAN_ATTACK_ZONE_MASK = [...Array(26).keys()].reduce((a, b) => a + Math.pow(2, b - 1), 0)
 const AP_SUPPLIED_HEX = (BR_SUPPLIED_HEX | JOINT_SUPPLIED_HEX | US_SUPPLIED_HEX)
-const CLEAN_ALL_MASK = JP_CONTROLLED | HEX_CONTROLLABLE
+const CLEAN_ALL_MASK = 0
 
 const LAST_BOARD_HEX = 1478
 const NON_PLACED_BOX = 1481
@@ -6655,6 +6653,33 @@ var S_P_first_hex = []
 
     map_set(AIRFIELD_LINKS, CHINA_BOX, [JARHAT, 1, DACCA, 1, LEDO, 1])
 
+
+    function is_controllable_hex(hex, map_data, sid) {
+        return map_data.named || hex === WEST_HONSHU
+            || hex === KWAI_BRIDGE
+            || hex === KWAI_BRIDGE_1
+            || hex === ATTU && sid === FULL_CAMPAIGN_SCENARIO
+            || sid === BURMA_SCENARIO && map_data.region === "Burma"
+    }
+
+    var control = 0
+    MAP_DATA.forEach((data, id) => {
+        if (is_controllable_hex(id, data, FULL_CAMPAIGN_SCENARIO)) {
+            data.controllable = control++
+        }
+    })
+    control = 0
+    S_P_MAP_DATA.forEach((data, id) => {
+        if (is_controllable_hex(id, data, SOUTH_PACIFIC_SCENARIO)) {
+            data.controllable = control++
+        }
+    })
+    control = 0
+    B_F_W_MAP_DATA.forEach((data, id) => {
+        if (is_controllable_hex(id, data, BURMA_SCENARIO)) {
+            data.controllable = control++
+        }
+    })
 })()
 
 function non_playable_hex(id) {
@@ -8116,22 +8141,18 @@ function get_ground_move_cost(from, to, faction) {
 }
 
 function is_controllable_hex(hex) {
-    return G.supply_cache[hex] & HEX_CONTROLLABLE
+    return get_map_data(hex).controllable
 }
 
 function is_space_controlled(hex, faction) {
-    if (G.control) {
-        var mask = ~(JP_CONTROLLED | HEX_CONTROLLABLE)
-        clear_supply_cache(mask)
-        G.control.forEach(h => G.supply_cache[h] |= JP_CONTROLLED)
-        for (var i = 0; i < LAST_BOARD_HEX; i++) {
-            if (create_controllable_hex(i)) {
-                G.supply_cache[i] |= HEX_CONTROLLABLE
-            }
-        }
-        G.control = null
+    var controllable = get_map_data(hex).controllable
+    if (!controllable) {
+        return
     }
-    return (!(G.supply_cache[hex] & JP_CONTROLLED) == faction) && (!G.non_control || !set_has(G.non_control, hex))
+    var b = controllable % 31
+    var a = (controllable - b) / 31
+    var control = G.control[a]
+    return (faction && !(control & (1 << b)) || !faction && (control & (1 << b)))
 }
 
 
@@ -15376,8 +15397,6 @@ cards[find_card(JP, 18)].can_play = function () {
 
 cards[find_card(JP, 18)].event = function () {
     check_event(events.KWAI_RIVER_BRIDGE)
-    G.supply_cache[KWAI_BRIDGE] -= HEX_CONTROLLABLE
-    G.supply_cache[KWAI_BRIDGE_1] -= HEX_CONTROLLABLE
 }
 
 cards[find_card(JP, 20)].before_commit_offensive = function () {
@@ -17700,11 +17719,9 @@ function on_setup(scenario, options) {
     G.surrender[nations.MARSHALL.id] = true //only nation under JP control
     G.b29u = 0
     G.supply_cache = []
-    for (var i = 0; i < LAST_BOARD_HEX; i++) {
+    G.control = [0, 0, 0, 0, 0]
+    for (var i = 0; i < CHINA_BOX; i++) {
         G.supply_cache[i] = 0
-        if (create_controllable_hex(i)) {
-            G.supply_cache[i] += HEX_CONTROLLABLE
-        }
     }
     G.pow = 0
     G.captured_once = []
@@ -17733,18 +17750,6 @@ function on_setup(scenario, options) {
     }
 
     scenario_data().setup(options)
-}
-
-function create_controllable_hex(hex) {
-    var sid = G.sid
-    var map_data = get_map_data(hex)
-    return map_data.named || hex === WEST_HONSHU
-        || hex === KWAI_BRIDGE && !is_event_active(events.KWAI_RIVER_BRIDGE)// && !is_event_active(events.KWAI_RIVER_BRIDGE)
-        || hex === KWAI_BRIDGE_1 && !is_event_active(events.KWAI_RIVER_BRIDGE)// && !is_event_active(events.KWAI_RIVER_BRIDGE)
-        || hex === CHINA_BOX
-        || hex === ATTU && sid === YEAR_1942_SCENARIO
-        // || map_data.region === "AMandates" && (sid === YEAR_1943_SCENARIO || sid === YEAR_1942_1943_SCENARIO)// && G.surrender[nations.AUSTRALIAN_MANDATES.id]
-        || sid === BURMA_SCENARIO && map_data.region === "Burma" // need to check non named hexes for 17.11.23
 }
 
 function get_garrison_count() {
@@ -17781,6 +17786,7 @@ function create_view(sherlock) {
 
     V.non_control = G.non_control
     V.capture = G.capture
+    V.control = G.control
     V.oos = G.oos
     V.b29u = G.b29u
     V.supply_cache = G.supply_cache
@@ -17980,16 +17986,16 @@ function get_year_season() {
 
 P.default_event = function () {
     if (cards[G.offensive.offensive_card].isr_rivalry) {
-        set_inter_service(1-cards[G.offensive.offensive_card].faction,1)
+        set_inter_service(1 - cards[G.offensive.offensive_card].faction, 1)
     }
     if (cards[G.offensive.offensive_card].isr_agreement) {
-        set_inter_service(cards[G.offensive.offensive_card].faction,0)
+        set_inter_service(cards[G.offensive.offensive_card].faction, 0)
     }
     if (cards[G.offensive.offensive_card].pw) {
         change_political_will(cards[G.offensive.offensive_card].pw, cards[G.offensive.offensive_card].name)
     }
     if (cards[G.offensive.offensive_card].wie) {
-        change_wie(cards[G.offensive.offensive_card].wie[get_year()-1942], cards[G.offensive.offensive_card].cause)
+        change_wie(cards[G.offensive.offensive_card].wie[get_year() - 1942], cards[G.offensive.offensive_card].cause)
     }
     if (cards[G.offensive.offensive_card].china) {
         update_china_status(cards[G.offensive.offensive_card].china)
@@ -18232,7 +18238,7 @@ function commit_into_turn_draw() {
     resolve_into_turn_draw(AP)
     G.offensive.draw[AP].forEach(c => G.hand[AP].push(c))
     G.offensive.draw[JP].forEach(c => G.hand[JP].push(c))
-    G.offensive.draw = [[],[]]
+    G.offensive.draw = [[], []]
 }
 
 function capture_hex(hex, side = G.active, no_log = false) {
@@ -18240,7 +18246,8 @@ function capture_hex(hex, side = G.active, no_log = false) {
         log(`Tokyo express marker removed.`)
         G.events[events.TOKYO_EXPRESS.id] = 0
     }
-    if (hex > LAST_BOARD_HEX || !is_controllable_hex(hex)) {
+    var controllable = is_controllable_hex(hex)
+    if (hex > LAST_BOARD_HEX || !controllable) {
         return
     }
     if (G.non_control) {
@@ -18248,13 +18255,17 @@ function capture_hex(hex, side = G.active, no_log = false) {
         if (!no_log) {
             log(`Allies captured ${int_to_hex(hex)}.`)
         }
+        return;
     }
+    var b = controllable % 31
+    var a = (controllable - b) / 31
     var md = get_map_data(hex)
-    if (side && !is_space_controlled(hex, AP)) {
+    var control = G.control[a]
+    if (side && (control & (1 << b))) {
         if (!no_log) {
             log(`Allies captured ${hex_get_log_str(hex)}.`)
         }
-        G.supply_cache[hex] -= JP_CONTROLLED
+        G.control[a] -= (1 << b)
         if (md.region === "NIndia") {
             india_stable()
         } else if (md.city === JAPANESE_CITY) {
@@ -18263,12 +18274,11 @@ function capture_hex(hex, side = G.active, no_log = false) {
         if (md.resource) {
             check_jp_resources_event()
         }
-    } else if (!side && !is_space_controlled(hex, JP)) {
+    } else if (!side && !(control & (1 << b))) {
         if (!no_log) {
-
             log(`Japan captured ${hex_get_log_str(hex)}.`)
         }
-        G.supply_cache[hex] += JP_CONTROLLED
+        G.control[a] |= (1 << b)
     } else {
         return
     }
@@ -18689,8 +18699,6 @@ function setup_scenario_burma() {
     //port routes.
     G.events[events.JARHAT_ROAD.id] = 1
     G.events[events.HUMP.id] = 1 //Burma Road: Hump Closed
-    cards[find_card(JP, 18)].event()
-    G.supply_cache[KWAI_BRIDGE] += HEX_CONTROLLABLE
     G.events[events.KWAI_RIVER_BRIDGE.id] = 2
     G.events[events.DOOLITLE] = 2// 17.11.22. Doolittle Raid has occurred meeting the condition for the Doolittle Reprisal card.
 

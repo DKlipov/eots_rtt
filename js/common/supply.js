@@ -749,22 +749,18 @@ function get_ground_move_cost(from, to, faction) {
 }
 
 function is_controllable_hex(hex) {
-    return G.supply_cache[hex] & HEX_CONTROLLABLE
+    return get_map_data(hex).controllable
 }
 
 function is_space_controlled(hex, faction) {
-    if (G.control) {
-        var mask = ~(JP_CONTROLLED | HEX_CONTROLLABLE)
-        clear_supply_cache(mask)
-        G.control.forEach(h => G.supply_cache[h] |= JP_CONTROLLED)
-        for (var i = 0; i < LAST_BOARD_HEX; i++) {
-            if (create_controllable_hex(i)) {
-                G.supply_cache[i] |= HEX_CONTROLLABLE
-            }
-        }
-        G.control = null
+    var controllable = get_map_data(hex).controllable
+    if (!controllable) {
+        return
     }
-    return (!(G.supply_cache[hex] & JP_CONTROLLED) == faction) && (!G.non_control || !set_has(G.non_control, hex))
+    var b = controllable % 31
+    var a = (controllable - b) / 31
+    var control = G.control[a]
+    return (faction && !(control & (1 << b)) || !faction && (control & (1 << b)))
 }
 
 

@@ -13,10 +13,29 @@ function get_control_marker(h) {
     }
 }
 
+function is_show_control_hex(hex) {
+    if (hex === KWAI_BRIDGE) {
+        return G.sid === BURMA_SCENARIO || !is_event_active(events.KWAI_RIVER_BRIDGE)
+    }else if (hex === KWAI_BRIDGE_1) {
+        return !is_event_active(events.KWAI_RIVER_BRIDGE)
+    } else if (hex === ATTU) {
+        return G.sid === YEAR_1942_SCENARIO
+    }
+    return get_map_data(hex).controllable
+}
+
+function is_controllable_hex(hex, map_data, sid) {
+    return map_data.named || hex === WEST_HONSHU
+        || hex === KWAI_BRIDGE
+        || hex === KWAI_BRIDGE_1
+        || hex === ATTU && sid === FULL_CAMPAIGN_SCENARIO
+        || sid === BURMA_SCENARIO && map_data.region === "Burma"
+}
+
 function should_show_hex_control(i, all_control, vassal_control) {
     var hn = HEX_BY_NATION[i]
     var cont = is_space_controlled(i, JP) ? JP : AP
-    if ((cont === AP && set_has(G.capture, i) && !all_control) || !(G.supply_cache[i] & HEX_CONTROLLABLE))
+    if ((cont === AP && set_has(G.capture, i) && !all_control) || !is_show_control_hex(i))
         return false
     var default_condition =
         (hn >= 0 && G.surrender[HEX_BY_NATION[i]] > 0 == cont) || (hn === -1 && cont === AP) || (hn < -1 && cont === JP)

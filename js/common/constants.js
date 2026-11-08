@@ -105,8 +105,6 @@ const JOINT_SUPPLIED_HEX = 1 << 19
 const US_SUPPLIED_HEX = 1 << 20
 const JP_SUPPLY_AIRFIELD = 1 << 21
 const AP_SUPPLY_AIRFIELD = 1 << 22
-const JP_CONTROLLED = 1 << 23
-const HEX_CONTROLLABLE = 1 << 24
 const HEX_TEMP_FLAG1 = 1 << 25
 const HEX_TEMP_FLAG2 = 1 << 26
 const HEX_TEMP_FLAG3 = 1 << 27
@@ -116,11 +114,11 @@ const JP_UNITS = JP_AIR_UNITS | JP_GROUND_UNITS | JP_NAVAL_UNITS | JP_HQ_UNITS
 const AP_UNITS = JP_UNITS << 1
 const JP_GA_UNITS = JP_AIR_UNITS | JP_GROUND_UNITS
 const JP_GAH_UNITS = JP_AIR_UNITS | JP_GROUND_UNITS | JP_HQ_UNITS
-const NON_SUPPLY_MASK = [...Array(9).keys()].reduce((a, b) => a + Math.pow(2, b + 6), 0) | JP_CONTROLLED | HEX_CONTROLLABLE
-const CLEAN_UNITS_MASK = [...Array(26).keys()].filter(a => a < 6 || a > 13).reduce((a, b) => a + Math.pow(2, b), 0) | JP_CONTROLLED | HEX_CONTROLLABLE
-const CLEAN_ATTACK_ZONE_MASK = [...Array(26).keys()].reduce((a, b) => a + Math.pow(2, b - 1), 0) | JP_CONTROLLED | HEX_CONTROLLABLE
+const NON_SUPPLY_MASK = [...Array(9).keys()].reduce((a, b) => a + Math.pow(2, b + 6), 0)
+const CLEAN_UNITS_MASK = [...Array(26).keys()].filter(a => a < 6 || a > 13).reduce((a, b) => a + Math.pow(2, b), 0)
+const CLEAN_ATTACK_ZONE_MASK = [...Array(26).keys()].reduce((a, b) => a + Math.pow(2, b - 1), 0)
 const AP_SUPPLIED_HEX = (BR_SUPPLIED_HEX | JOINT_SUPPLIED_HEX | US_SUPPLIED_HEX)
-const CLEAN_ALL_MASK = JP_CONTROLLED | HEX_CONTROLLABLE
+const CLEAN_ALL_MASK = 0
 
 const LAST_BOARD_HEX = 1478
 const NON_PLACED_BOX = 1481
