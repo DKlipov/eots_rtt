@@ -1,7 +1,6 @@
-<div id="South Pacific" class="scenario_info">
-
+<div data-scenario="South Pacific" hidden>
+    <p>
     Small introductory and tournament scenario, uses the South Pacific mini-map, four game turns long.
-    <hr>
     <p>
     The scenario focuses on the Allied drives up the Solomon Islands and New Guinea. The game features a damaged but
     still powerful Imperial Japanese Navy (IJN) poised to slow and potentially stop the Allied advance. The game starts
@@ -13,25 +12,29 @@
     For new players to Empire of the Sun, this one is recommended to start with when learning the game. Second
     would be the 1943 scenario (17.3) and the last is the 1942 Shortened Campaign (17.8).
 </div>
-<div id="1942 One Year Scenario" class="scenario_info">
+
+<div data-scenario="1942 One Year Scenario" hidden>
 
     This scenario is three game turns long (only covering the turns in 1942) and begins on game turn 2 at the beginning
     of the Offensives Phase. The game is concluded at the end of game turn 4 and victory is determined by the VP schedule outlined in the rulebook.
 </div>
-<div id="1943 One Year Scenario" class="scenario_info">
+
+<div data-scenario="1943 One Year Scenario" hidden>
 
     The 1943 scenario has become the main tournament scenario as player statistics indicate that it is very balanced. Good one to learn the game.
-    <hr>
+    <p>
     This scenario is three game turns long (only covering the turns in 1943) and begins on game turn 5 at the beginning
     of the Offensives Phase. The game is concluded at the end of game turn 7 and victory is determined by the VP schedule outlined in the rulebook.
 </div>
-<div id="1944 One Year Scenario" class="scenario_info">
+
+<div data-scenario="1944 One Year Scenario" hidden>
 
     This scenario is three game turns long (only covering the turns in 1944) and begins on game turn 8 at the beginning
     of the Offensives Phase. The game is concluded at the end of game
     turn 10 and victory is determined by the VP schedule outlined in the rulebook.
 </div>
-<div id="1941-1945 (The Full Campaign)" class="scenario_info">
+
+<div data-scenario="1941-1945 (The Full Campaign)" hidden>
 
     This is the Full Campaign, which includes the December 1941 mini-turn as outlined in 17.1 of the rulebook. Victory
     is determined as defined in 16.0 of the rulebook.
@@ -39,61 +42,68 @@
     It is recommended before tackling the Full Campaign that players have already played the South Pacific scenario, the
     1943 yearly scenario and the 1942 Shortened Campaign (in that order) at least once.
 </div>
-<div id="1942-1945 (The Shortened Campaign)" class="scenario_info">
+
+<div data-scenario="1942-1945 (The Shortened Campaign)" hidden>
 
     This scenario starts as if for the 1942 Scenario (17.2) and uses all of the setup requirements of that scenario, but
     plays the rest of war, using the Campaign Scenario (17.1) conditions and length for everything else. It is
     essentially the Full Campaign without the December 1941 mini-turn and is commonly used in tournament play. Victory
     is determined as defined in 16.0 of the rulebook.
 </div>
-<div id="1943-1945 (The Even Shorter Campaign)" class="scenario_info">
+
+<div data-scenario="1943-1945 (The Even Shorter Campaign)" hidden>
 
     This scenario starts as if for the 1943 Scenario (17.3) and uses all of the setup requirements of that scenario, but
     plays the rest of war, using the Campaign Scenario (17.1) conditions and length for everything else. Victory is
     determined as defined in 16.0 of the rulebook.
 </div>
-<div id="1942-1943 Two Year Scenario" class="scenario_info">
+
+<div data-scenario="1942-1943 Two Year Scenario" hidden>
 
     This scenario uses the starting conditions of the 1942 yearly scenario, but plays through to turn 7. It uses the
     1943 VP schedule to determine victory.
 </div>
-<div id="1943-1944 Two Year Scenario" class="scenario_info">
+
+<div data-scenario="1943-1944 Two Year Scenario" hidden>
 
     This scenario uses the starting conditions of the 1943 yearly scenario, but plays through to turn 10. It uses the
     1944 VP schedule to determine victory.
 </div>
-<div id="1942-1944 Three Year Scenario" class="scenario_info">
 
+<div data-scenario="1942-1944 Three Year Scenario" hidden>
+    <p>
     This scenario uses the starting conditions of the 1942 yearly scenario, but plays through to turn 10. It uses the
     1944 VP schedule to determine victory.
 </div>
-<div id="Burma: The Forgotten War, 1943-1944" class="scenario_info">
+
+<div data-scenario="Burma: The Forgotten War, 1943-1944" hidden>
+    <p>
     Small introductory scenario, uses the Burma mini-map, four game turns long.
-    <hr>
+    <p>
     This scenario examines Burma, the lowest priority Allied theater.
     The scenario begins on turn 6 with each side receiving a reduced hand of cards. On turns 7, 8, and 9, each side
     begins with a base of four cards that can be reduced for both sides by a variety of reasons specific to a particular
     session of the scenario.
 </div>
-<div id="hist_hand">
-    <p>
-        <label><input type="checkbox" value="true" name="historical" id="historical" checked>Use historical japanese
-            hand.</label>
-</div>
-<hr>
+
+<p id="hist_hand" hidden>
+<label><input type="checkbox" value="true" name="historical" id="historical" checked>Use historical Japanese hand.</label>
+
+<p>
 <label><input type="checkbox" name="expert" id="async">Expert mode (automate some actions)</label> (<a href="/empire-of-the-sun/info/expert.html">what is this?</a>)
 
 <script>
-    var scenario = document.querySelector("select[name='scenario']");
+    var scenario = document.querySelector("select[name='scenario']")
     scenario.onchange = function (evt) {
-        document.querySelectorAll(".scenario_info").forEach(e => e.hidden = true);
-        document.getElementById(scenario.value).hidden = false;
+        document.querySelectorAll("[data-scenario]").forEach(div => {
+            div.hidden = (div.dataset.scenario !== scenario.value)
+        })
         if (scenario.value.indexOf("1942") >= 0 || scenario.value.indexOf("1941") >= 0) {
-            document.querySelector("#hist_hand").hidden = false;
+            document.querySelector("#hist_hand").hidden = false
         } else {
             document.querySelector("#historical").checked = false
-            document.querySelector("#hist_hand").hidden = true;
+            document.querySelector("#hist_hand").hidden = true
         }
     }
-    scenario.onchange();
+    scenario.onchange()
 </script>
