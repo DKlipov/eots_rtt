@@ -63,8 +63,7 @@ function setup_jp_unit(piece, hex_id, reduced = false) {
 
 function on_setup(scenario, options) {
 
-    G.scenario = scenario
-    G.sid = SCENARIO_DATA.find(s => s.name === G.scenario).id//scenario id
+    G.sid = SCENARIO_DATA.find(s => s.name === scenario).id
     G.active = JP
     G.redo_count = 0
     G.turn = 1
@@ -81,7 +80,7 @@ function on_setup(scenario, options) {
     G.burma_road = 0
     G.political_will = 0
 
-    G.location = []
+    G.location = [0]
     G.reduced = []
     G.oos = []
     G.reinforcements = [0, 0]
@@ -92,15 +91,12 @@ function on_setup(scenario, options) {
     G.events = []
     G.not_delayed = []
     Object.keys(events).forEach(k => G.events[events[k].id] = 0)
-    G.surrender = [...Array(Object.keys(nations).length).keys()].map(i => 0)
-    G.surrender[nations.MARSHALL.id] = true //only nation under JP control
+    G.surrender = Array(Object.keys(nations).length).fill(0)
+    G.surrender[nations.MARSHALL.id] = 1 //only nation under JP control
     G.b29u = 0
-    G.supply_cache = []
-    G.supply_cache_id = 0
     G.control = bit_init(get_map_control_bits())
-    for (var i = 0; i < CHINA_BOX; i++) {
-        G.supply_cache[i] = 0
-    }
+    G.supply_cache = Array(CHINA_BOX).fill(0)
+    G.supply_cache_id = 0
     G.pow = 0
     G.captured_once = []
 
