@@ -250,3 +250,26 @@ function get_wie_level() {
         return "Level 4"
     }
 }
+
+// Bit flags. bits = "array" of dwords e.g. G.my_bits. index = which bit are we setting, bool_value = true or false
+function bit_set(bits, index, bool_value) {
+    var w = index >> 5
+    var b = index & 31
+    var m = 1 << b
+    if (bool_value) {
+        bits[w] |= m
+    } else {
+        bits[w] &= ~m
+    }
+}
+
+function bit_get(bits, index) {
+    var w = index >> 5
+    var b = index & 31
+    return ((bits[w] >> b) & 1)
+}
+
+// Initializes bitflag field, given the maximum number of bits possible
+function bit_init(total_bits) {
+    return new Array((total_bits + 31) >> 5).fill(0)
+}

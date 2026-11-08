@@ -6490,6 +6490,19 @@ var sp_map = [
 const GARRISONED_CITY = map.filter(h => h.city > CITY).map(h => hex_to_int(h.id))
 const RESOURCE_HEX = map.filter(h => h.resource).map(h => hex_to_int(h.id))
 
+var MAP_CONTROL_BITS = 0
+var S_P_MAP_CONTROL_BITS = 0
+var B_F_W_MAP_CONTROL_BITS = 0
+
+function get_map_control_bits() {
+    if (G.sid === SOUTH_PACIFIC_SCENARIO) {
+        return S_P_MAP_CONTROL_BITS
+    } else if (G.sid === BURMA_SCENARIO) {
+        return B_F_W_MAP_CONTROL_BITS
+    }
+    return MAP_CONTROL_BITS
+}
+
 function get_map_data(hex) {
     if (G.sid === SOUTH_PACIFIC_SCENARIO) {
         return S_P_MAP_DATA[hex]
@@ -6654,7 +6667,7 @@ var S_P_first_hex = []
     map_set(AIRFIELD_LINKS, CHINA_BOX, [JARHAT, 1, DACCA, 1, LEDO, 1])
 
 
-    function is_controllable_hex(hex, map_data, sid) {
+    function is_controllable_hex_for_map(hex, map_data, sid) {
         return map_data.named || hex === WEST_HONSHU
             || hex === KWAI_BRIDGE
             || hex === KWAI_BRIDGE_1
@@ -6662,22 +6675,28 @@ var S_P_first_hex = []
             || sid === BURMA_SCENARIO && map_data.region === "Burma"
     }
 
-    var control = 0
+    MAP_CONTROL_BITS = 0
     MAP_DATA.forEach((data, id) => {
-        if (is_controllable_hex(id, data, FULL_CAMPAIGN_SCENARIO)) {
-            data.controllable = control++
+        if (is_controllable_hex_for_map(id, data, FULL_CAMPAIGN_SCENARIO)) {
+            data.control_bit = MAP_CONTROL_BITS++
+        } else {
+            data.control_bit = -1
         }
     })
-    control = 0
+    S_P_MAP_CONTROL_BITS = 0
     S_P_MAP_DATA.forEach((data, id) => {
-        if (is_controllable_hex(id, data, SOUTH_PACIFIC_SCENARIO)) {
-            data.controllable = control++
+        if (is_controllable_hex_for_map(id, data, SOUTH_PACIFIC_SCENARIO)) {
+            data.control_bit = S_P_MAP_CONTROL_BITS++
+        } else {
+            data.control_bit = -1
         }
     })
-    control = 0
+    B_F_W_MAP_CONTROL_BITS = 0
     B_F_W_MAP_DATA.forEach((data, id) => {
-        if (is_controllable_hex(id, data, BURMA_SCENARIO)) {
-            data.controllable = control++
+        if (is_controllable_hex_for_map(id, data, BURMA_SCENARIO)) {
+            data.control_bit = B_F_W_MAP_CONTROL_BITS++
+        } else {
+            data.control_bit = -1
         }
     })
 })()
@@ -7386,6 +7405,29 @@ function get_wie_level() {
     } else if (G.wie <= 10) {
         return "Level 4"
     }
+}
+
+// Bit flags. bits = "array" of dwords e.g. G.my_bits. index = which bit are we setting, bool_value = true or false
+function bit_set(bits, index, bool_value) {
+    var w = index >> 5
+    var b = index & 31
+    var m = 1 << b
+    if (bool_value) {
+        bits[w] |= m
+    } else {
+        bits[w] &= ~m
+    }
+}
+
+function bit_get(bits, index) {
+    var w = index >> 5
+    var b = index & 31
+    return ((bits[w] >> b) & 1)
+}
+
+// Initializes bitflag field, given the maximum number of bits possible
+function bit_init(total_bits) {
+    return new Array((total_bits + 31) >> 5).fill(0)
 }
 
 /* }}} */
@@ -8141,20 +8183,16 @@ function get_ground_move_cost(from, to, faction) {
 }
 
 function is_controllable_hex(hex) {
-    return get_map_data(hex).controllable
+    return get_map_data(hex).control_bit >= 0
 }
 
 function is_space_controlled(hex, faction) {
-    var controllable = get_map_data(hex).controllable
-    if (!controllable) {
-        return
+    var bit = get_map_data(hex).control_bit
+    if (bit < 0) {
+        return false
     }
-    var b = controllable % 31
-    var a = (controllable - b) / 31
-    var control = G.control[a]
-    return (faction && !(control & (1 << b)) || !faction && (control & (1 << b)))
+    return bit_get(G.control, bit) === faction
 }
-
 
 function is_faction_units(hex, faction) {
     return G.supply_cache[hex] & JP_UNITS << faction
@@ -17721,7 +17759,7 @@ function on_setup(scenario, options) {
     G.b29u = 0
     G.supply_cache = []
     G.supply_cache_id = 0
-    G.control = [0, 0, 0, 0, 0]
+    G.control = bit_init(get_map_control_bits())
     for (var i = 0; i < CHINA_BOX; i++) {
         G.supply_cache[i] = 0
     }
@@ -18247,26 +18285,29 @@ function capture_hex(hex, side = G.active, no_log = false) {
         log(`Tokyo express marker removed.`)
         G.events[events.TOKYO_EXPRESS.id] = 0
     }
-    var controllable = is_controllable_hex(hex)
-    if (hex > LAST_BOARD_HEX || !controllable) {
+    if (hex > LAST_BOARD_HEX) {
         return
     }
+
+    var md = get_map_data(hex)
+    if (md.control_bit < 0) {
+        return
+    }
+
     if (G.non_control) {
         set_delete(G.non_control, hex)
         if (!no_log) {
             log(`Allies captured ${int_to_hex(hex)}.`)
         }
-        return;
+        return
     }
-    var b = controllable % 31
-    var a = (controllable - b) / 31
-    var md = get_map_data(hex)
-    var control = G.control[a]
-    if (side && (control & (1 << b))) {
+
+    var control = bit_get(G.control, md.control_bit)
+    if (side === AP && control === JP) {
+        bit_set(G.control, md.control_bit, AP)
         if (!no_log) {
             log(`Allies captured ${hex_get_log_str(hex)}.`)
         }
-        G.control[a] -= (1 << b)
         if (md.region === "NIndia") {
             india_stable()
         } else if (md.city === JAPANESE_CITY) {
@@ -18275,11 +18316,11 @@ function capture_hex(hex, side = G.active, no_log = false) {
         if (md.resource) {
             check_jp_resources_event()
         }
-    } else if (!side && !(control & (1 << b))) {
+    } else if (side === JP && control === AP) {
+        bit_set(G.control, md.control_bit, JP)
         if (!no_log) {
             log(`Japan captured ${hex_get_log_str(hex)}.`)
         }
-        G.control[a] |= (1 << b)
     } else {
         return
     }

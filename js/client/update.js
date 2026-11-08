@@ -21,7 +21,7 @@ function is_show_control_hex(hex) {
     } else if (hex === ATTU) {
         return G.sid === YEAR_1942_SCENARIO
     }
-    return get_map_data(hex).controllable
+    return get_map_data(hex).control_bit >= 0
 }
 
 function is_controllable_hex(hex, map_data, sid) {

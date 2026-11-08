@@ -1247,6 +1247,19 @@ var sp_map = [
 const GARRISONED_CITY = map.filter(h => h.city > CITY).map(h => hex_to_int(h.id))
 const RESOURCE_HEX = map.filter(h => h.resource).map(h => hex_to_int(h.id))
 
+var MAP_CONTROL_BITS = 0
+var S_P_MAP_CONTROL_BITS = 0
+var B_F_W_MAP_CONTROL_BITS = 0
+
+function get_map_control_bits() {
+    if (G.sid === SOUTH_PACIFIC_SCENARIO) {
+        return S_P_MAP_CONTROL_BITS
+    } else if (G.sid === BURMA_SCENARIO) {
+        return B_F_W_MAP_CONTROL_BITS
+    }
+    return MAP_CONTROL_BITS
+}
+
 function get_map_data(hex) {
     if (G.sid === SOUTH_PACIFIC_SCENARIO) {
         return S_P_MAP_DATA[hex]
@@ -1411,7 +1424,7 @@ var S_P_first_hex = []
     map_set(AIRFIELD_LINKS, CHINA_BOX, [JARHAT, 1, DACCA, 1, LEDO, 1])
 
 
-    function is_controllable_hex(hex, map_data, sid) {
+    function is_controllable_hex_for_map(hex, map_data, sid) {
         return map_data.named || hex === WEST_HONSHU
             || hex === KWAI_BRIDGE
             || hex === KWAI_BRIDGE_1
@@ -1419,22 +1432,28 @@ var S_P_first_hex = []
             || sid === BURMA_SCENARIO && map_data.region === "Burma"
     }
 
-    var control = 0
+    MAP_CONTROL_BITS = 0
     MAP_DATA.forEach((data, id) => {
-        if (is_controllable_hex(id, data, FULL_CAMPAIGN_SCENARIO)) {
-            data.controllable = control++
+        if (is_controllable_hex_for_map(id, data, FULL_CAMPAIGN_SCENARIO)) {
+            data.control_bit = MAP_CONTROL_BITS++
+        } else {
+            data.control_bit = -1
         }
     })
-    control = 0
+    S_P_MAP_CONTROL_BITS = 0
     S_P_MAP_DATA.forEach((data, id) => {
-        if (is_controllable_hex(id, data, SOUTH_PACIFIC_SCENARIO)) {
-            data.controllable = control++
+        if (is_controllable_hex_for_map(id, data, SOUTH_PACIFIC_SCENARIO)) {
+            data.control_bit = S_P_MAP_CONTROL_BITS++
+        } else {
+            data.control_bit = -1
         }
     })
-    control = 0
+    B_F_W_MAP_CONTROL_BITS = 0
     B_F_W_MAP_DATA.forEach((data, id) => {
-        if (is_controllable_hex(id, data, BURMA_SCENARIO)) {
-            data.controllable = control++
+        if (is_controllable_hex_for_map(id, data, BURMA_SCENARIO)) {
+            data.control_bit = B_F_W_MAP_CONTROL_BITS++
+        } else {
+            data.control_bit = -1
         }
     })
 })()

@@ -6485,6 +6485,19 @@ var sp_map = [
 const GARRISONED_CITY = map.filter(h => h.city > CITY).map(h => hex_to_int(h.id))
 const RESOURCE_HEX = map.filter(h => h.resource).map(h => hex_to_int(h.id))
 
+var MAP_CONTROL_BITS = 0
+var S_P_MAP_CONTROL_BITS = 0
+var B_F_W_MAP_CONTROL_BITS = 0
+
+function get_map_control_bits() {
+    if (G.sid === SOUTH_PACIFIC_SCENARIO) {
+        return S_P_MAP_CONTROL_BITS
+    } else if (G.sid === BURMA_SCENARIO) {
+        return B_F_W_MAP_CONTROL_BITS
+    }
+    return MAP_CONTROL_BITS
+}
+
 function get_map_data(hex) {
     if (G.sid === SOUTH_PACIFIC_SCENARIO) {
         return S_P_MAP_DATA[hex]
@@ -6649,7 +6662,7 @@ var S_P_first_hex = []
     map_set(AIRFIELD_LINKS, CHINA_BOX, [JARHAT, 1, DACCA, 1, LEDO, 1])
 
 
-    function is_controllable_hex(hex, map_data, sid) {
+    function is_controllable_hex_for_map(hex, map_data, sid) {
         return map_data.named || hex === WEST_HONSHU
             || hex === KWAI_BRIDGE
             || hex === KWAI_BRIDGE_1
@@ -6657,22 +6670,28 @@ var S_P_first_hex = []
             || sid === BURMA_SCENARIO && map_data.region === "Burma"
     }
 
-    var control = 0
+    MAP_CONTROL_BITS = 0
     MAP_DATA.forEach((data, id) => {
-        if (is_controllable_hex(id, data, FULL_CAMPAIGN_SCENARIO)) {
-            data.controllable = control++
+        if (is_controllable_hex_for_map(id, data, FULL_CAMPAIGN_SCENARIO)) {
+            data.control_bit = MAP_CONTROL_BITS++
+        } else {
+            data.control_bit = -1
         }
     })
-    control = 0
+    S_P_MAP_CONTROL_BITS = 0
     S_P_MAP_DATA.forEach((data, id) => {
-        if (is_controllable_hex(id, data, SOUTH_PACIFIC_SCENARIO)) {
-            data.controllable = control++
+        if (is_controllable_hex_for_map(id, data, SOUTH_PACIFIC_SCENARIO)) {
+            data.control_bit = S_P_MAP_CONTROL_BITS++
+        } else {
+            data.control_bit = -1
         }
     })
-    control = 0
+    B_F_W_MAP_CONTROL_BITS = 0
     B_F_W_MAP_DATA.forEach((data, id) => {
-        if (is_controllable_hex(id, data, BURMA_SCENARIO)) {
-            data.controllable = control++
+        if (is_controllable_hex_for_map(id, data, BURMA_SCENARIO)) {
+            data.control_bit = B_F_W_MAP_CONTROL_BITS++
+        } else {
+            data.control_bit = -1
         }
     })
 })()
@@ -7381,6 +7400,29 @@ function get_wie_level() {
     } else if (G.wie <= 10) {
         return "Level 4"
     }
+}
+
+// Bit flags. bits = "array" of dwords e.g. G.my_bits. index = which bit are we setting, bool_value = true or false
+function bit_set(bits, index, bool_value) {
+    var w = index >> 5
+    var b = index & 31
+    var m = 1 << b
+    if (bool_value) {
+        bits[w] |= m
+    } else {
+        bits[w] &= ~m
+    }
+}
+
+function bit_get(bits, index) {
+    var w = index >> 5
+    var b = index & 31
+    return ((bits[w] >> b) & 1)
+}
+
+// Initializes bitflag field, given the maximum number of bits possible
+function bit_init(total_bits) {
+    return new Array((total_bits + 31) >> 5).fill(0)
 }
 
 /* }}} */
@@ -8136,20 +8178,16 @@ function get_ground_move_cost(from, to, faction) {
 }
 
 function is_controllable_hex(hex) {
-    return get_map_data(hex).controllable
+    return get_map_data(hex).control_bit >= 0
 }
 
 function is_space_controlled(hex, faction) {
-    var controllable = get_map_data(hex).controllable
-    if (!controllable) {
-        return
+    var bit = get_map_data(hex).control_bit
+    if (bit < 0) {
+        return false
     }
-    var b = controllable % 31
-    var a = (controllable - b) / 31
-    var control = G.control[a]
-    return (faction && !(control & (1 << b)) || !faction && (control & (1 << b)))
+    return bit_get(G.control, bit) === faction
 }
-
 
 function is_faction_units(hex, faction) {
     return G.supply_cache[hex] & JP_UNITS << faction
@@ -12429,7 +12467,7 @@ function is_show_control_hex(hex) {
     } else if (hex === ATTU) {
         return G.sid === YEAR_1942_SCENARIO
     }
-    return get_map_data(hex).controllable
+    return get_map_data(hex).control_bit >= 0
 }
 
 function is_controllable_hex(hex, map_data, sid) {

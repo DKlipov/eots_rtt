@@ -97,7 +97,7 @@ function on_setup(scenario, options) {
     G.b29u = 0
     G.supply_cache = []
     G.supply_cache_id = 0
-    G.control = [0, 0, 0, 0, 0]
+    G.control = bit_init(get_map_control_bits())
     for (var i = 0; i < CHINA_BOX; i++) {
         G.supply_cache[i] = 0
     }
@@ -623,26 +623,29 @@ function capture_hex(hex, side = G.active, no_log = false) {
         log(`Tokyo express marker removed.`)
         G.events[events.TOKYO_EXPRESS.id] = 0
     }
-    var controllable = is_controllable_hex(hex)
-    if (hex > LAST_BOARD_HEX || !controllable) {
+    if (hex > LAST_BOARD_HEX) {
         return
     }
+
+    var md = get_map_data(hex)
+    if (md.control_bit < 0) {
+        return
+    }
+
     if (G.non_control) {
         set_delete(G.non_control, hex)
         if (!no_log) {
             log(`Allies captured ${int_to_hex(hex)}.`)
         }
-        return;
+        return
     }
-    var b = controllable % 31
-    var a = (controllable - b) / 31
-    var md = get_map_data(hex)
-    var control = G.control[a]
-    if (side && (control & (1 << b))) {
+
+    var control = bit_get(G.control, md.control_bit)
+    if (side === AP && control === JP) {
+        bit_set(G.control, md.control_bit, AP)
         if (!no_log) {
             log(`Allies captured ${hex_get_log_str(hex)}.`)
         }
-        G.control[a] -= (1 << b)
         if (md.region === "NIndia") {
             india_stable()
         } else if (md.city === JAPANESE_CITY) {
@@ -651,11 +654,11 @@ function capture_hex(hex, side = G.active, no_log = false) {
         if (md.resource) {
             check_jp_resources_event()
         }
-    } else if (!side && !(control & (1 << b))) {
+    } else if (side === JP && control === AP) {
+        bit_set(G.control, md.control_bit, JP)
         if (!no_log) {
             log(`Japan captured ${hex_get_log_str(hex)}.`)
         }
-        G.control[a] |= (1 << b)
     } else {
         return
     }
