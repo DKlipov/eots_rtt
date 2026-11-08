@@ -7444,6 +7444,7 @@ function check_supplied_hexes(faction) {
 }
 
 function basic_check_supply() {
+    G.supply_cache_id++
     L.supply = {}
     clear_supply_cache(CLEAN_ALL_MASK)
     G.burma_road = 0
@@ -7478,6 +7479,7 @@ function basic_check_supply() {
 }
 
 function fast_check_supply() {
+    G.supply_cache_id++
     L.supply = {}
     clear_supply_cache(CLEAN_ALL_MASK)
     for_each_unit_on_map(mark_unit)
@@ -7522,6 +7524,7 @@ function remove_zoi(hex) {
 }
 
 function check_units() {
+    G.supply_cache_id++
     clear_supply_cache(CLEAN_ALL_MASK)
     for_each_unit_on_map(mark_unit)
     place_virtual_units()

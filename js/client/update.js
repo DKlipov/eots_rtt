@@ -24,14 +24,6 @@ function is_show_control_hex(hex) {
     return get_map_data(hex).control_bit >= 0
 }
 
-function is_controllable_hex(hex, map_data, sid) {
-    return map_data.named || hex === WEST_HONSHU
-        || hex === KWAI_BRIDGE
-        || hex === KWAI_BRIDGE_1
-        || hex === ATTU && sid === FULL_CAMPAIGN_SCENARIO
-        || sid === BURMA_SCENARIO && map_data.region === "Burma"
-}
-
 function should_show_hex_control(i, all_control, vassal_control) {
     var hn = HEX_BY_NATION[i]
     var cont = is_space_controlled(i, JP) ? JP : AP

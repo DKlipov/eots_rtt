@@ -7439,6 +7439,7 @@ function check_supplied_hexes(faction) {
 }
 
 function basic_check_supply() {
+    G.supply_cache_id++
     L.supply = {}
     clear_supply_cache(CLEAN_ALL_MASK)
     G.burma_road = 0
@@ -7473,6 +7474,7 @@ function basic_check_supply() {
 }
 
 function fast_check_supply() {
+    G.supply_cache_id++
     L.supply = {}
     clear_supply_cache(CLEAN_ALL_MASK)
     for_each_unit_on_map(mark_unit)
@@ -7517,6 +7519,7 @@ function remove_zoi(hex) {
 }
 
 function check_units() {
+    G.supply_cache_id++
     clear_supply_cache(CLEAN_ALL_MASK)
     for_each_unit_on_map(mark_unit)
     place_virtual_units()
@@ -12468,14 +12471,6 @@ function is_show_control_hex(hex) {
         return G.sid === YEAR_1942_SCENARIO
     }
     return get_map_data(hex).control_bit >= 0
-}
-
-function is_controllable_hex(hex, map_data, sid) {
-    return map_data.named || hex === WEST_HONSHU
-        || hex === KWAI_BRIDGE
-        || hex === KWAI_BRIDGE_1
-        || hex === ATTU && sid === FULL_CAMPAIGN_SCENARIO
-        || sid === BURMA_SCENARIO && map_data.region === "Burma"
 }
 
 function should_show_hex_control(i, all_control, vassal_control) {
