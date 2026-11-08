@@ -271,5 +271,5 @@ function bit_get(bits, index) {
 
 // Initializes bitflag field, given the maximum number of bits possible
 function bit_init(total_bits) {
-    return new Array((total_bits + 31) >> 5).fill(~0)
+    return new Array((total_bits + 31) >> 5).fill(0)
 }

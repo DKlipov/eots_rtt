@@ -95,6 +95,7 @@ function on_setup(scenario, options) {
     G.surrender[nations.MARSHALL.id] = 1 //only nation under JP control
     G.b29u = 0
     G.control = bit_init(get_map_control_bits())
+    G.control.fill(~0) // initialize to all AP control
     G.supply_cache = Array(CHINA_BOX).fill(0)
     G.supply_cache_id = 0
     G.pow = 0
