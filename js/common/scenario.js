@@ -633,13 +633,16 @@ function victory_south_pacific() {
 }
 
 function is_space_controlled_originally(hex, faction) {
-    return (!(G.original_control[hex] & JP_CONTROLLED) == faction) && (!G.non_control || !set_has(G.non_control, hex))
+    var bit = get_map_data(hex).control_bit
+    if (bit < 0) {
+        return false
+    }
+    return bit_get(G.original_control, bit) === faction
 }
 
 function set_supply_control() {
     var data = scenario_data()
-    G.original_control = G.supply_cache
-    G.supply_cache = object_copy(G.supply_cache)
+    G.original_control = G.control.slice()
     basic_check_supply()
     L.supply = {}
     HQ_LIST.forEach(hq => {
@@ -653,22 +656,22 @@ function set_supply_control() {
     if (G.burma_road < 2) {
         mark_hexes_supplied_kunming()
     }
-    for (var i = 0; i < data.original_control.length; i += 2) {
-        var hex = data.original_control[i]
-        var orig = data.original_control[i + 1]
-        var supply = is_space_controlled(hex, JP) ? JP_SUPPLIED_HEX : AP_SUPPLIED_HEX
-        if (!(G.supply_cache[hex] & supply)) {
-            G.supply_cache[hex] &= ~JP_CONTROLLED
-            if (orig) {
-                G.supply_cache[hex] |= JP_CONTROLLED
-            }
+    for (var i = 1; i < LAST_BOARD_HEX; i++) {
+        if (!is_controllable_hex(i)) {
+            continue
+        }
+        var control_bit = get_map_data(i).control_bit
+        var orig = bit_get(data.original_control, control_bit)
+        var supply = is_space_controlled(i, JP) ? JP_SUPPLIED_HEX : AP_SUPPLIED_HEX
+        if (!(G.supply_cache[i] & supply)) {
+            bit_set(G.control, control_bit, orig ? AP : JP)
         }
     }
     L.supply = 0
 }
 
 function restore_original_control() {
-    G.supply_cache = G.original_control
+    G.control = G.original_control
     delete G.original_control
 }
 

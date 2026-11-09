@@ -1078,12 +1078,7 @@ function setup_original_control() {
             log: []
         }
         on_setup(s.name, {})
-        s.original_control = []
-        for (var i = 1; i < LAST_BOARD_HEX; i++) {
-            if (is_controllable_hex(i)) {
-                map_set(s.original_control, i, is_space_controlled(i, JP))
-            }
-        }
+        s.original_control = G.control
     })
     G = null
 }
