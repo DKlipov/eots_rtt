@@ -670,8 +670,11 @@ function restore_state(state) {
         }
         G = state
         if (supply) {
-            G.supply_cache = new Array(CHINA_BOX).fill(0)
-            check_supply()
+            if (G.supply_mode) {
+                check_supplied_hexes(G.supply_mode - 1)
+            } else {
+                check_supply()
+            }
         }
     }
 }

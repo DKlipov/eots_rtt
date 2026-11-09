@@ -384,10 +384,10 @@ P.play_default_event = script(`
 
 function set_inter_service(faction, rivalry) {
     if (G.inter_service[faction] && !rivalry) {
-        log(`${side_get_log_str(faction)} inter-service agreement.`)
+        log(`${side_get_log_str(faction)} Inter-Service agreement.`)
         G.inter_service[faction] = 0
     } else if (!G.inter_service[faction] && rivalry) {
-        log(`${side_get_log_str(faction)} inter-service rivalry active.`)
+        log(`${side_get_log_str(faction)} Inter-Service rivalry active.`)
         G.inter_service[faction] = 1
     }
 }

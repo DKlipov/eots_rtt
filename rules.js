@@ -2025,7 +2025,7 @@ var pieces = [
         id: "mississippi",
         "faction": AP,
         "name": "Mississippi",
-        "short": "Miss.",
+        "short": "Miss",
         "counter": "blue unit big_units_blue big unit_ix_6",
         "class": "naval",
         "type": "bb",
@@ -2157,7 +2157,7 @@ var pieces = [
         id: "mass",
         "faction": AP,
         "name": "Massachusetts",
-        "short": "Mass.",
+        "short": "Mass",
         "counter": "blue unit big_units_blue big unit_ix_12",
         "class": "naval",
         "type": "bb",
@@ -7441,12 +7441,14 @@ function check_supplied_hexes(faction) {
         mark_hexes_supplied_kunming()
     }
     L.supply = 0
+    G.supply_mode = faction + 1
 }
 
 function basic_check_supply() {
     G.supply_cache_id++
+    G.supply_mode = 0
     L.supply = {}
-    clear_supply_cache(CLEAN_ALL_MASK)
+    G.supply_cache = new Array(CHINA_BOX).fill(0)
     G.burma_road = 0
     for_each_unit_on_map(mark_unit)
     place_virtual_units()
@@ -7480,13 +7482,19 @@ function basic_check_supply() {
 
 function fast_check_supply() {
     G.supply_cache_id++
+    G.supply_mode = 0
+    var oos = G.oos
+    if (L.oos) {
+        oos = oos.slice()
+        L.oos.forEach(u => set_add(oos, u))
+    }
     L.supply = {}
-    clear_supply_cache(CLEAN_ALL_MASK)
+    G.supply_cache = new Array(CHINA_BOX).fill(0)
     for_each_unit_on_map(mark_unit)
     place_virtual_units()
     check_infrastructure()
-    for_each_unit_on_map((i, p) => set_zoi(i, p, [G.oos, G.oos]))
-    indian_zoi_hack((i, p) => set_zoi(i, p, [G.oos, G.oos]))
+    for_each_unit_on_map((i, p) => set_zoi(i, p, [oos, oos]))
+    indian_zoi_hack((i, p) => set_zoi(i, p, [oos, oos]))
     if (G.sid === SOUTH_PACIFIC_SCENARIO && G.turn === 3) {
         var mask = G.supply_cache[TRUK] & JP_UNITS
         G.supply_cache[TRUK] ^= (mask)
@@ -7524,8 +7532,9 @@ function remove_zoi(hex) {
 }
 
 function check_units() {
+    G.supply_mode = 0
     G.supply_cache_id++
-    clear_supply_cache(CLEAN_ALL_MASK)
+    G.supply_cache = new Array(CHINA_BOX).fill(0)
     for_each_unit_on_map(mark_unit)
     place_virtual_units()
     check_infrastructure()
@@ -8075,7 +8084,7 @@ function mark_supplied_hexes(faction) {
         if (G.location[hq] >= LAST_BOARD_HEX) {
             return
         }
-        if (piece.faction === faction && !set_has(G.oos, hq)) {
+        if (piece.faction === faction && !set_has(G.oos, hq) && (!L.oos || !set_has(L.oos, hq))) {
             mark_hexes_supplied_from([hq], unit_or_airfield)
         }
     })
@@ -8085,7 +8094,7 @@ function mark_supplied_hexes(faction) {
 function mark_supply_eligable_ports(faction) {
     var hq = HQ_LIST.filter(hq => {
         var piece = pieces[hq]
-        return (piece.faction === faction && G.location[hq] < LAST_BOARD_HEX)
+        return (piece.faction === faction && G.location[hq] < LAST_BOARD_HEX && (!L.oos || !set_has(L.oos, hq)))
     })
     mark_supply_ports_oversea(hq)
     mark_supply_ports_overland(hq)
@@ -9026,7 +9035,7 @@ function fill_overstack(faction) {
     }
     G.overstack_cache = []
     G.overstack_cache[0] = faction
-    for (var i = 0; i <= LAST_BOARD_HEX; i++) {
+    for (var i = 1; i <= LAST_BOARD_HEX; i++) {
         G.overstack_cache[i] = 0
     }
     G.overstack_cache[CHINA_BOX] = 2
@@ -10380,7 +10389,12 @@ function sent_to_europe(u) {
 
 function get_unit_reinforcement_hexes(u) {
     if (L.oos) {
-        G.oos = L.oos
+        G.oos = L.oos.slice()
+        L.oos.forEach(u => {
+            if (pieces[u].class === "hq") {
+                G.supply_cache[G.location[u]] |= pieces[u].supply
+            }
+        })
     }
     var piece = pieces[u]
     var faction = piece.faction
@@ -10411,7 +10425,7 @@ function get_unit_reinforcement_hexes(u) {
 
 function get_hq_reinforcement_hexes() {
     if (L.oos) {
-        G.oos = L.oos
+        G.oos = L.oos.slice()
     }
     var result = []
     const faction = G.active
@@ -10485,7 +10499,7 @@ P.reinforcement_segment = {
     _begin() {
         L.logged = 0
         check_supplied_hexes(G.active)
-        L.oos = object_copy(G.oos)
+        L.oos = G.oos.slice()
         if (G.wie <= 7 && G.active === AP && G.sid !== BURMA_SCENARIO) {
             change_asp(AP, 1)
         } else if (G.active === AP && G.wie >= 7) {
@@ -10621,6 +10635,7 @@ P.reinforcement_segment = {
         }
         set_delete(L.unit_reinforcement, G.active_stack[0])
         set_location(G.active_stack[0], hex)
+        set_add(L.oos, G.active_stack[0])
         if (pieces[G.active_stack[0]].class === "hq") {
             set_delete(L.allowed_hexes, hex)
             G.supply_cache[hex] |= pieces[G.active_stack[0]].supply
@@ -10657,7 +10672,7 @@ P.replacement_segment = {
             G.reinforcements[AIR_REP] += L.replacement_points[AIR_REP]
         }
         check_supplied_hexes(G.active)
-        L.oos = object_copy(G.oos)
+        L.oos = G.oos.slice()
         if (L.scheduled_points) {
             scenario_data().replacement_points()
         }
@@ -10774,6 +10789,7 @@ P.replacement_segment = {
             log(`>${unit_get_log_str(u)} to full strength.`)
         } else {
             set_add(G.reduced, u)
+            set_add(L.oos, u)
             G.active_stack = [u]
             G.location[u] = get_service_reinf_hex()
             set_add(L.returned, u)
@@ -18055,10 +18071,10 @@ P.play_default_event = script(`
 
 function set_inter_service(faction, rivalry) {
     if (G.inter_service[faction] && !rivalry) {
-        log(`${side_get_log_str(faction)} inter-service agreement.`)
+        log(`${side_get_log_str(faction)} Inter-Service agreement.`)
         G.inter_service[faction] = 0
     } else if (!G.inter_service[faction] && rivalry) {
-        log(`${side_get_log_str(faction)} inter-service rivalry active.`)
+        log(`${side_get_log_str(faction)} Inter-Service rivalry active.`)
         G.inter_service[faction] = 1
     }
 }
@@ -20682,8 +20698,11 @@ function restore_state(state) {
         }
         G = state
         if (supply) {
-            G.supply_cache = new Array(CHINA_BOX).fill(0)
-            check_supply()
+            if (G.supply_mode) {
+                check_supplied_hexes(G.supply_mode - 1)
+            } else {
+                check_supply()
+            }
         }
     }
 }

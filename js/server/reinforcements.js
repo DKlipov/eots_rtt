@@ -49,7 +49,12 @@ function sent_to_europe(u) {
 
 function get_unit_reinforcement_hexes(u) {
     if (L.oos) {
-        G.oos = L.oos
+        G.oos = L.oos.slice()
+        L.oos.forEach(u => {
+            if (pieces[u].class === "hq") {
+                G.supply_cache[G.location[u]] |= pieces[u].supply
+            }
+        })
     }
     var piece = pieces[u]
     var faction = piece.faction
@@ -80,7 +85,7 @@ function get_unit_reinforcement_hexes(u) {
 
 function get_hq_reinforcement_hexes() {
     if (L.oos) {
-        G.oos = L.oos
+        G.oos = L.oos.slice()
     }
     var result = []
     const faction = G.active
@@ -154,7 +159,7 @@ P.reinforcement_segment = {
     _begin() {
         L.logged = 0
         check_supplied_hexes(G.active)
-        L.oos = object_copy(G.oos)
+        L.oos = G.oos.slice()
         if (G.wie <= 7 && G.active === AP && G.sid !== BURMA_SCENARIO) {
             change_asp(AP, 1)
         } else if (G.active === AP && G.wie >= 7) {
@@ -290,6 +295,7 @@ P.reinforcement_segment = {
         }
         set_delete(L.unit_reinforcement, G.active_stack[0])
         set_location(G.active_stack[0], hex)
+        set_add(L.oos, G.active_stack[0])
         if (pieces[G.active_stack[0]].class === "hq") {
             set_delete(L.allowed_hexes, hex)
             G.supply_cache[hex] |= pieces[G.active_stack[0]].supply
@@ -326,7 +332,7 @@ P.replacement_segment = {
             G.reinforcements[AIR_REP] += L.replacement_points[AIR_REP]
         }
         check_supplied_hexes(G.active)
-        L.oos = object_copy(G.oos)
+        L.oos = G.oos.slice()
         if (L.scheduled_points) {
             scenario_data().replacement_points()
         }
@@ -443,6 +449,7 @@ P.replacement_segment = {
             log(`>${unit_get_log_str(u)} to full strength.`)
         } else {
             set_add(G.reduced, u)
+            set_add(L.oos, u)
             G.active_stack = [u]
             G.location[u] = get_service_reinf_hex()
             set_add(L.returned, u)

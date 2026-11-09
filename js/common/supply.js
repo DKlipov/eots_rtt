@@ -7,12 +7,14 @@ function check_supplied_hexes(faction) {
         mark_hexes_supplied_kunming()
     }
     L.supply = 0
+    G.supply_mode = faction + 1
 }
 
 function basic_check_supply() {
     G.supply_cache_id++
+    G.supply_mode = 0
     L.supply = {}
-    clear_supply_cache(CLEAN_ALL_MASK)
+    G.supply_cache = new Array(CHINA_BOX).fill(0)
     G.burma_road = 0
     for_each_unit_on_map(mark_unit)
     place_virtual_units()
@@ -46,13 +48,19 @@ function basic_check_supply() {
 
 function fast_check_supply() {
     G.supply_cache_id++
+    G.supply_mode = 0
+    var oos = G.oos
+    if (L.oos) {
+        oos = oos.slice()
+        L.oos.forEach(u => set_add(oos, u))
+    }
     L.supply = {}
-    clear_supply_cache(CLEAN_ALL_MASK)
+    G.supply_cache = new Array(CHINA_BOX).fill(0)
     for_each_unit_on_map(mark_unit)
     place_virtual_units()
     check_infrastructure()
-    for_each_unit_on_map((i, p) => set_zoi(i, p, [G.oos, G.oos]))
-    indian_zoi_hack((i, p) => set_zoi(i, p, [G.oos, G.oos]))
+    for_each_unit_on_map((i, p) => set_zoi(i, p, [oos, oos]))
+    indian_zoi_hack((i, p) => set_zoi(i, p, [oos, oos]))
     if (G.sid === SOUTH_PACIFIC_SCENARIO && G.turn === 3) {
         var mask = G.supply_cache[TRUK] & JP_UNITS
         G.supply_cache[TRUK] ^= (mask)
@@ -90,8 +98,9 @@ function remove_zoi(hex) {
 }
 
 function check_units() {
+    G.supply_mode = 0
     G.supply_cache_id++
-    clear_supply_cache(CLEAN_ALL_MASK)
+    G.supply_cache = new Array(CHINA_BOX).fill(0)
     for_each_unit_on_map(mark_unit)
     place_virtual_units()
     check_infrastructure()
@@ -641,7 +650,7 @@ function mark_supplied_hexes(faction) {
         if (G.location[hq] >= LAST_BOARD_HEX) {
             return
         }
-        if (piece.faction === faction && !set_has(G.oos, hq)) {
+        if (piece.faction === faction && !set_has(G.oos, hq) && (!L.oos || !set_has(L.oos, hq))) {
             mark_hexes_supplied_from([hq], unit_or_airfield)
         }
     })
@@ -651,7 +660,7 @@ function mark_supplied_hexes(faction) {
 function mark_supply_eligable_ports(faction) {
     var hq = HQ_LIST.filter(hq => {
         var piece = pieces[hq]
-        return (piece.faction === faction && G.location[hq] < LAST_BOARD_HEX)
+        return (piece.faction === faction && G.location[hq] < LAST_BOARD_HEX && (!L.oos || !set_has(L.oos, hq)))
     })
     mark_supply_ports_oversea(hq)
     mark_supply_ports_overland(hq)

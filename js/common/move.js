@@ -705,7 +705,7 @@ function fill_overstack(faction) {
     }
     G.overstack_cache = []
     G.overstack_cache[0] = faction
-    for (var i = 0; i <= LAST_BOARD_HEX; i++) {
+    for (var i = 1; i <= LAST_BOARD_HEX; i++) {
         G.overstack_cache[i] = 0
     }
     G.overstack_cache[CHINA_BOX] = 2
