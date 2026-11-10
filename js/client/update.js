@@ -468,11 +468,11 @@ function on_update() {
     action_button("con_eliminate", "Eliminate")
     action_button("stop", "Stop")
     action_button("displace", "Displace")
-    action_button("divisions_button", "Reduce divisions track")
+    action_button("divisions_button", "Reduce divisions track")//Looks to long for button. "Reduce div"?
 
-    action_button("inter_service", "Remove Inter-Service Rivalry")
+    action_button("inter_service", "Remove ISR")
     action_button("china_offensive", "China Offensive")
-    action_button("future_offensive", "Future Offensive")
+    action_button("future_offensive", "FO")
 
     /*
     action_button("displace_hq", "Withdraw HQ")
