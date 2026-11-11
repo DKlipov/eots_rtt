@@ -734,7 +734,7 @@ function setup_scenario_south_pacific() {
     })
     G.surrender[nations.NEW_GUINEA.id] = 0
     var ap_controlled = [5808, 3823, 4024, 4828]
-    ap_controlled.forEach(h => capture_hex(hex_to_int(h), h))
+    ap_controlled.forEach(h => capture_hex(hex_to_int(h), AP))
     capture_hex(hex_to_int(4719), JP)
     capture_hex(hex_to_int(3017), JP)
     G.reduced = []

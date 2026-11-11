@@ -12699,14 +12699,14 @@ P.cancel_offensive = {
             button("done")
             return
         }
-        var cards = 0
+        var card_n = 0
         get_hand(G.active).forEach(c => {
             if (cards[c].type === CANCEL && cards[c].can_play()) {
                 action_card(c)
-                cards++
+                card_n++
             }
         })
-        if(cards===0){
+        if(card_n===0){
             offensive_prompt(`You may cancel the offensive (Not possible).`)
         }
         button("skip")
@@ -19350,7 +19350,7 @@ function setup_scenario_south_pacific() {
     })
     G.surrender[nations.NEW_GUINEA.id] = 0
     var ap_controlled = [5808, 3823, 4024, 4828]
-    ap_controlled.forEach(h => capture_hex(hex_to_int(h), h))
+    ap_controlled.forEach(h => capture_hex(hex_to_int(h), AP))
     capture_hex(hex_to_int(4719), JP)
     capture_hex(hex_to_int(3017), JP)
     G.reduced = []
