@@ -1878,10 +1878,16 @@ P.cancel_offensive = {
             button("done")
             return
         }
+        var cards = 0
         get_hand(G.active).forEach(c => {
-            if (cards[c].type === CANCEL && cards[c].can_play())
+            if (cards[c].type === CANCEL && cards[c].can_play()) {
                 action_card(c)
+                cards++
+            }
         })
+        if(cards===0){
+            offensive_prompt(`You may cancel the offensive (Not possible).`)
+        }
         button("skip")
     },
     skip() {

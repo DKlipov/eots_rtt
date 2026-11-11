@@ -12699,10 +12699,16 @@ P.cancel_offensive = {
             button("done")
             return
         }
+        var cards = 0
         get_hand(G.active).forEach(c => {
-            if (cards[c].type === CANCEL && cards[c].can_play())
+            if (cards[c].type === CANCEL && cards[c].can_play()) {
                 action_card(c)
+                cards++
+            }
         })
+        if(cards===0){
+            offensive_prompt(`You may cancel the offensive (Not possible).`)
+        }
         button("skip")
     },
     skip() {
@@ -14674,7 +14680,7 @@ P.attrition = {
     },
     inactive: "apply attrition losses",
     prompt() {
-        prompt(`Attrition: Reduce or eliminate ground and air units that are out of supply.`)
+        prompt(`Attrition: Reduce or eliminate ground and air units that are out of supply${(L.unit_to_attrition.length ? "" : " (Done)")}.`)
         if (!L.unit_to_attrition.length) {
             button("done")
         }
