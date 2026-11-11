@@ -273,3 +273,16 @@ function bit_get(bits, index) {
 function bit_init(total_bits) {
     return new Array((total_bits + 31) >> 5).fill(0)
 }
+
+
+function array_equals(a, b) {
+    if (a.length !== b.length) {
+        return false
+    }
+    for (var i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) {
+            return false
+        }
+    }
+    return true
+}

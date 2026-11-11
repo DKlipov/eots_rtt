@@ -7425,6 +7425,18 @@ function bit_init(total_bits) {
     return new Array((total_bits + 31) >> 5).fill(0)
 }
 
+
+function array_equals(a, b) {
+    if (a.length !== b.length) {
+        return false
+    }
+    for (var i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) {
+            return false
+        }
+    }
+    return true
+}
 /* }}} */
 /* {{{ js/common/supply.js */
 function check_supplied_hexes(faction) {
@@ -11338,18 +11350,6 @@ function menu_measure_range() {
     P.measure_range._begin()
     update_header()
     on_update()
-}
-
-function array_equals(a, b) {
-    if (a.length !== b.length) {
-        return false
-    }
-    for (var i = 0; i < a.length; i++) {
-        if (a[i] !== b[i]) {
-            return false
-        }
-    }
-    return true
 }
 
 function end_local_status() {
