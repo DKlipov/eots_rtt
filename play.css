@@ -142,10 +142,11 @@ button#hqr_isolation_button:disabled
     line-height: 12px;
     border: 1px solid #444;
     font-weight: bold;
+    font-style: italic;
 }
 
-.xdice.ap { background-color: lightblue; }
-.xdice.jp { background-color: pink; }
+#log .xdice.ap { background-color: #122E81;color: white;border-color:#021768;  }
+#log .xdice.jp { background-color: #B6050F;color: white;border-color:#710009; }
 
 /* INFO DIALOGS */
 
