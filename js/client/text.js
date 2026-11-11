@@ -189,6 +189,7 @@ function escape_text(text) {
     text = escape_tip_light(text, /H(\d+)/g, "tip htip", "action_hex", HEX_NAMES)
     text = escape_tip_light(text, /u(\d+)/g, "tip utip_jp", "unit", UNIT_NAMES)
     text = escape_tip_light(text, /U(\d+)/g, "tip utip_ap", "unit", UNIT_NAMES)
+    text = escape_tip_light(text, /P(\d+)/g, "tip utip", "unit", UNIT_NAMES)
 
     // TODO: more phrases need to be turned to singular form here
     text = text.replace(/\b1 passes/g, "1 pass")

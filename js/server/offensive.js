@@ -3153,7 +3153,7 @@ P.emergency_move = {
                 button("no_move")
             }
         } else if (L.unit_to_retreat.length) {
-            prompt(`Emergency Movement: Units must make an emergency move.`)
+            prompt(`Emergency Movement: ${units_str(L.unit_to_retreat)} must make an emergency move.`)
             L.unit_to_retreat.forEach(action_unit)
             if (!L.unit_to_retreat.find(u => !is_space_controlled(G.location[u], pieces[u].faction))) {
                 button("done")

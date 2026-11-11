@@ -720,15 +720,16 @@ function get_named_intelligence(int) {
     }
 }
 
-function play_event(c) {
+function play_event(c, log_name) {
     var faction = cards[c].faction
+    log_name = log_name || (![POLITICAL, RESOURCE].includes(cards[c].type))
     if (G.future_offensive[faction] === c) {
         log(`Revealed FO card.`)
     }
     if (cards[c].type === MILITARY) {
         log(`Played for ${cards[c].ops} EC.`)
     } else {
-        log(`Played for event.`)
+        log(`Played${(log_name ? " " + card_get_log_str(c) : "")} for event.`)
     }
 
     if (cards[c].draw) {

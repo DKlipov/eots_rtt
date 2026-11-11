@@ -624,10 +624,10 @@ P.draw_from_discard = {
             return
         }
         if (L.card) {
-            v.prompt += `Take a card from the discard pile.`
+            V.prompt += `Take a card from the discard pile.`
             G.discard[G.active].forEach(action_card)
         } else {
-            v.prompt += `You may discard a card to replace it with a card from the discard pile.`
+            V.prompt += `You may discard a card to replace it with a card from the discard pile.`
             L.cards.forEach(action_card)
             button("skip")
         }

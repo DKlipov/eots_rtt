@@ -13974,7 +13974,7 @@ P.emergency_move = {
                 button("no_move")
             }
         } else if (L.unit_to_retreat.length) {
-            prompt(`Emergency Movement: Units must make an emergency move.`)
+            prompt(`Emergency Movement: ${units_str(L.unit_to_retreat)} must make an emergency move.`)
             L.unit_to_retreat.forEach(action_unit)
             if (!L.unit_to_retreat.find(u => !is_space_controlled(G.location[u], pieces[u].faction))) {
                 button("done")
@@ -15728,10 +15728,10 @@ P.draw_from_discard = {
             return
         }
         if (L.card) {
-            v.prompt += `Take a card from the discard pile.`
+            V.prompt += `Take a card from the discard pile.`
             G.discard[G.active].forEach(action_card)
         } else {
-            v.prompt += `You may discard a card to replace it with a card from the discard pile.`
+            V.prompt += `You may discard a card to replace it with a card from the discard pile.`
             L.cards.forEach(action_card)
             button("skip")
         }
@@ -18407,15 +18407,16 @@ function get_named_intelligence(int) {
     }
 }
 
-function play_event(c) {
+function play_event(c, log_name) {
     var faction = cards[c].faction
+    log_name = log_name || (![POLITICAL, RESOURCE].includes(cards[c].type))
     if (G.future_offensive[faction] === c) {
         log(`Revealed FO card.`)
     }
     if (cards[c].type === MILITARY) {
         log(`Played for ${cards[c].ops} EC.`)
     } else {
-        log(`Played for event.`)
+        log(`Played${(log_name ? " " + card_get_log_str(c) : "")} for event.`)
     }
 
     if (cards[c].draw) {
@@ -19929,7 +19930,7 @@ P.arcadia = {
     event() {
         push_undo()
         G.offensive.offensive_card = find_card(AP, 4)
-        play_event(G.offensive.offensive_card)
+        play_event(G.offensive.offensive_card, true)
     },
     done() {
         end()
