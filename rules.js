@@ -14885,10 +14885,10 @@ P.offensive_segment_card_action = {
         push_undo()
         log_offensive_card()
         if (cards[L.c].type === MILITARY) {
-            goto("event_then_offensive_sequence", { c: L.c })
+            goto("event_then_offensive_sequence", {c: L.c})
         } else {
             G.offensive.offensive_card = L.c
-            goto("play_default_event", { c: G.offensive.offensive_card })
+            goto("play_default_event", {c: G.offensive.offensive_card})
         }
     },
     discard() {
@@ -14989,10 +14989,19 @@ P.future_offensive = {
     inactive: "play future offensive card",
     prompt() {
         prompt("Initiative Segment: You may play your future offensives card to go first.")
+        if (L.pass) {
+            button("end_action")
+            return
+        }
         V.selected_card = G.future_offensive[G.active]
-        if (!L.impossible)
+        if (!L.impossible) {
             button("event")
+            action_card(V.selected_card)
+        }
         button("skip")
+    },
+    card(c) {
+        this.event()
     },
     event() {
         push_undo()
@@ -15000,9 +15009,18 @@ P.future_offensive = {
             log(`#J${card_get_log_str(G.future_offensive[G.active])} (FO)`)
         else
             log(`#A${card_get_log_str(G.future_offensive[G.active])} (FO)`)
-        goto("event_then_offensive_sequence", { c: G.future_offensive[G.active] })
+        goto("event_then_offensive_sequence", {c: G.future_offensive[G.active]})
     },
     skip() {
+        if (L.impossible) {
+            this.end_action()
+            return
+        } else {
+            push_undo()
+            L.pass = 1
+        }
+    },
+    end_action() {
         if (!L.impossible)
             log(`${side_get_log_str(G.active)} did not play FO card.`)
         end()
