@@ -1,10 +1,9 @@
 function with_state_as_G(state, apply) {
     var actual_g = G
     G = state
-    G = state
-    // G.active = actual_g.active
     var log = G.log
     G.log = []
+    check_supply()
     var result = apply()
     G.log = log
     G = actual_g

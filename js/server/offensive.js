@@ -1380,7 +1380,7 @@ P.retro_disengagement = {
             var allowed_units = []
             var allowed_hexes = []
             with_state_as_G(undo_stack[G.offensive.disengagement[L.next_d]], () => {
-                allowed_units = get_disengagement_units(L.L.active)
+                allowed_units = get_disengagement_units(G.L.L.active)//L not updated after reset state. Should be G.L to check actual object
                 if (allowed_units) {
                     allowed_hexes = compute_ground_disengagement(allowed_units[0])
                 }

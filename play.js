@@ -11310,7 +11310,7 @@ function check_supply() {
         client_original_oos = G.oos
         client_original_br = G.burma_road
     }
-    if(!G.supply_cache){
+    if (!G.supply_cache) {
         G.supply_cache = []
         for (var i = 0; i < CHINA_BOX; i++) {
             G.supply_cache[i] = 0
@@ -11476,7 +11476,18 @@ P.check_unit_supply = {
             "done": 1,
         }
         if (LOCAL_STATE.unit) {
-            LOCAL_STATE.prompt = "Showing P" + LOCAL_STATE.unit + " supply lines."
+            if (LOCAL_STATE.unit && G.location[LOCAL_STATE.unit] <= LAST_BOARD_HEX) {
+                LOCAL_STATE.supply = with_unmodified_supply(() => supply_query(LOCAL_STATE.unit))
+            } else {
+                LOCAL_STATE.supply = 0
+            }
+            var state = " (Could not be supplied)"
+            if (LOCAL_STATE.supply && LOCAL_STATE.supply.oos && Object.keys(LOCAL_STATE.supply.path).length > 0) {
+                state = " (Out of supply)"
+            } else if (LOCAL_STATE.supply && Object.keys(LOCAL_STATE.supply.path).length > 0) {
+                state = ""
+            }
+            LOCAL_STATE.prompt = `Showing P${LOCAL_STATE.unit} supply lines${state}.`
         } else {
             LOCAL_STATE.prompt = "Select a unit to show supply lines."
         }
@@ -11499,11 +11510,11 @@ P.check_unit_supply = {
         on_update()
     },
     on_update() {
-        if (!LOCAL_STATE.unit || G.location[LOCAL_STATE.unit] > LAST_BOARD_HEX && G.location[LOCAL_STATE.unit] !== CHINA_BOX) {
+        if (!LOCAL_STATE.supply) {
             canvas_hide()
             return
         }
-        var result = with_unmodified_supply(() => supply_query(LOCAL_STATE.unit))
+        var result = LOCAL_STATE.supply
         canvas_show()
         canvas_draw_supply(result)
         if (LOCAL_STATE.unit && LOCAL_STATE.unit !== CHINA_BOX) {
@@ -11802,8 +11813,12 @@ var send_action = proxy_send_action
 
 function with_unmodified_supply(R) {
     var cache = object_copy(G.supply_cache)
+    var control = object_copy(G.control)
+    var oos = object_copy(G.oos)
     var result = R()
     G.supply_cache = cache
+    G.control = control
+    G.oos = oos
     return result
 }
 
@@ -11823,9 +11838,7 @@ function supply_query(unit) {
     clear_supply_cache(CLEAN_ALL_MASK)
     if (result.oos) {
         G.oos = []
-        for (var i = 1; i < LAST_BOARD_HEX; i++) {
-            G.supply_cache[i] = piece.faction ? (G.supply_cache[i] & ~JP_CONTROLLED) : (G.supply_cache[i] | JP_CONTROLLED)
-        }
+        G.control.fill(piece.faction ? ~0 : 0)
     }
     for_each_unit_on_map((i, p) => (!result.oos || p.faction === piece.faction) ? mark_unit(i, p) : null)
     place_virtual_units()
@@ -11922,8 +11935,7 @@ function hq_supply_zone(unit) {
 function trace_kunming(result) {
     if (G.burma_road === 0 || result.oos) {
         if (result.oos) {
-            var uncontrol = ~JP_CONTROLLED
-            clear_supply_cache(uncontrol)
+            G.control.fill(~0)
         }
         check_burma_road()
         result.path.to_source = retrace_supply_path(L.supply.queue[L.supply.queue.length - 1])

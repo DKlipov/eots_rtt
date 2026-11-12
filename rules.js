@@ -10318,10 +10318,9 @@ function map_for_each(map, f) {
 function with_state_as_G(state, apply) {
     var actual_g = G
     G = state
-    G = state
-    // G.active = actual_g.active
     var log = G.log
     G.log = []
+    check_supply()
     var result = apply()
     G.log = log
     G = actual_g
@@ -12213,7 +12212,7 @@ P.retro_disengagement = {
             var allowed_units = []
             var allowed_hexes = []
             with_state_as_G(undo_stack[G.offensive.disengagement[L.next_d]], () => {
-                allowed_units = get_disengagement_units(L.L.active)
+                allowed_units = get_disengagement_units(G.L.L.active)//L not updated after reset state. Should be G.L to check actual object
                 if (allowed_units) {
                     allowed_hexes = compute_ground_disengagement(allowed_units[0])
                 }
@@ -20716,12 +20715,10 @@ function restore_state(state) {
             supply = 0
         }
         G = state
-        if (supply) {
-            if (G.supply_mode) {
-                check_supplied_hexes(G.supply_mode - 1)
-            } else {
-                check_supply()
-            }
+        if (supply && G.supply_mode) {
+            check_supplied_hexes(G.supply_mode - 1)
+        } else if (supply) {
+            check_supply()
         }
     }
 }

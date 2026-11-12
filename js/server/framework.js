@@ -669,12 +669,10 @@ function restore_state(state) {
             supply = 0
         }
         G = state
-        if (supply) {
-            if (G.supply_mode) {
-                check_supplied_hexes(G.supply_mode - 1)
-            } else {
-                check_supply()
-            }
+        if (supply && G.supply_mode) {
+            check_supplied_hexes(G.supply_mode - 1)
+        } else if (supply) {
+            check_supply()
         }
     }
 }
