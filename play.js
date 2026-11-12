@@ -11481,13 +11481,13 @@ P.check_unit_supply = {
             } else {
                 LOCAL_STATE.supply = 0
             }
-            var state = " (Could not be supplied)"
             if (LOCAL_STATE.supply && LOCAL_STATE.supply.oos && Object.keys(LOCAL_STATE.supply.path).length > 0) {
-                state = " (Out of supply)"
+                LOCAL_STATE.prompt = `P${LOCAL_STATE.unit} is out of supply.`
             } else if (LOCAL_STATE.supply && Object.keys(LOCAL_STATE.supply.path).length > 0) {
-                state = ""
+                LOCAL_STATE.prompt = `Showing P${LOCAL_STATE.unit} supply lines.`
+            } else {
+                LOCAL_STATE.prompt = `P${LOCAL_STATE.unit} can not be supplied.`
             }
-            LOCAL_STATE.prompt = `Showing P${LOCAL_STATE.unit} supply lines${state}.`
         } else {
             LOCAL_STATE.prompt = "Select a unit to show supply lines."
         }

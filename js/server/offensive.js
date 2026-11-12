@@ -1885,8 +1885,8 @@ P.cancel_offensive = {
                 card_n++
             }
         })
-        if(card_n===0){
-            offensive_prompt(`You may cancel the offensive (Not possible).`)
+        if (card_n === 0) {
+            offensive_prompt(`You don't have any cards that can cancel the offensive.`)
         }
         button("skip")
     },
@@ -1986,7 +1986,7 @@ P.define_intelligence_condition = {
     skip() {
         push_undo()
         if (cards[G.offensive.offensive_card].intelligence)
-            log("Intelligence stay surprise.")
+            log("Intelligence condition stayed at surprise.")
         if (L.cancel) {
             L.cancel = false
         } else {

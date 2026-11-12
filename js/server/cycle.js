@@ -453,11 +453,13 @@ P.attrition = {
     },
     inactive: "apply attrition losses",
     prompt() {
-        prompt(`Attrition: Reduce or eliminate ground and air units that are out of supply${(L.unit_to_attrition.length ? "" : " (Done)")}.`)
         if (!L.unit_to_attrition.length) {
+            prompt(`Attrition: Done.`)
             button("done")
+        } else {
+            prompt(`Attrition: Reduce or eliminate ground and air units that are out of supply.`)
+            L.unit_to_attrition.forEach(action_unit)
         }
-        L.unit_to_attrition.forEach(action_unit)
     },
     unit(u) {
         if (set_has(G.reduced, u)) {

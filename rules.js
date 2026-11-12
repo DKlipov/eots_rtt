@@ -12717,8 +12717,8 @@ P.cancel_offensive = {
                 card_n++
             }
         })
-        if(card_n===0){
-            offensive_prompt(`You may cancel the offensive (Not possible).`)
+        if (card_n === 0) {
+            offensive_prompt(`You don't have any cards that can cancel the offensive.`)
         }
         button("skip")
     },
@@ -12818,7 +12818,7 @@ P.define_intelligence_condition = {
     skip() {
         push_undo()
         if (cards[G.offensive.offensive_card].intelligence)
-            log("Intelligence stay surprise.")
+            log("Intelligence condition stayed at surprise.")
         if (L.cancel) {
             L.cancel = false
         } else {
@@ -14691,11 +14691,13 @@ P.attrition = {
     },
     inactive: "apply attrition losses",
     prompt() {
-        prompt(`Attrition: Reduce or eliminate ground and air units that are out of supply${(L.unit_to_attrition.length ? "" : " (Done)")}.`)
         if (!L.unit_to_attrition.length) {
+            prompt(`Attrition: Done.`)
             button("done")
+        } else {
+            prompt(`Attrition: Reduce or eliminate ground and air units that are out of supply.`)
+            L.unit_to_attrition.forEach(action_unit)
         }
-        L.unit_to_attrition.forEach(action_unit)
     },
     unit(u) {
         if (set_has(G.reduced, u)) {
