@@ -130,6 +130,12 @@ button#hqr_isolation_button:disabled
 
 .utip, .htip { white-space: pre; }
 
+body[data-monochrome=true] {
+    & #log .htip,
+    & #log .utip_jp,
+    & #log .utip_ap { color: black; }
+}
+
 /* ICONS */
 
 .xdice {

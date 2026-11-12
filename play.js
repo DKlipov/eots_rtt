@@ -10950,6 +10950,7 @@ function on_init(scenario, game_options, static_view) {
     init_preference_checkbox("road_markers", true)
     init_preference_checkbox("vassal_control", false)
     init_preference_checkbox("flat", false, flush_counter_size_cache)
+    init_preference_checkbox("monochrome", false)
 
     create_window("window_cards_jp", "Japanese Event Cards", update_window_cards_jp)
     create_window("window_cards_ap", "Allied Event Cards", update_window_cards_ap)
