@@ -10521,7 +10521,7 @@ P.reinforcement_segment = {
             log(`War in Europe prevented Allies from amphibious shipping reinforcements.`)
         }
         if (G.active === AP && (is_event_active(events.PANAMA_CANAL) === G.turn - 1) && G.wie < 3) {
-            log(`Allied reinforcements delayed due to Panama canal attack.`)
+            log(`Allies reinforcements delayed due to Panama canal attack.`)
         }
         L.hq_reinforcement = []
         L.unit_reinforcement = []
@@ -10563,10 +10563,10 @@ P.reinforcement_segment = {
             L.allowed_hexes = get_hq_reinforcement_hexes()
         }
         if (delayed_units) {
-            log(`Allied reinforcements delayed.`)
+            log(`Allies reinforcements delayed.`)
         }
         update_reinf_active()
-        if (L.hq_reinforcement.length === 0 && L.unit_reinforcement.length === 0) {
+        if (L.hq_reinforcement.length === 0 && L.unit_reinforcement.length === 0 && !L.europe.length) {
             log("No possible reinforcements.")
             end()
             return
@@ -10617,7 +10617,7 @@ P.reinforcement_segment = {
         }
     },
     roll() {
-        log(`Sent to Europe, ${wie_roll_result()}(WIE)${G.inter_service[AP] ? " +1(ISR)" : ""}:`)
+        log(`Sent to Europe, ${wie_roll_result()} (WIE)${G.inter_service[AP] ? " +1 (ISR)" : ""}:`)
         if (L.europe1.length) {
             L.europe = L.europe1
         }
@@ -18277,12 +18277,12 @@ function change_wie(diff, cause) {
 
 function displace_to_turn(unit, turns, not_delayed) {
     if (pieces[unit].notreplaceable && unit_on_board(unit)) {
-        log(`${unit_get_log_str(unit)} not replaceable, could not be displaced to turn box.`)
+        log(`>${unit_get_log_str(unit)} not replaceable, could not be displaced to turn box.`)
         eliminate(unit)
         return
     }
     if (G.turn + turns > 12 || G.sid === SOUTH_PACIFIC_SCENARIO && G.turn + turns > 6 || G.sid === BURMA_SCENARIO && G.turn + turns > 9) {
-        log(`${unit_get_log_str(unit)} should be displaced to turn box ${G.turn + turns} but permanently eliminated instead.`)
+        log(`>>${unit_get_log_str(unit)} should be displaced to turn box ${G.turn + turns} but permanently eliminated instead.`)
         if (pieces[unit].class === "hq") {
             set_location(unit, TURN_BOX + 13)
         } else {

@@ -524,12 +524,12 @@ function change_wie(diff, cause) {
 
 function displace_to_turn(unit, turns, not_delayed) {
     if (pieces[unit].notreplaceable && unit_on_board(unit)) {
-        log(`${unit_get_log_str(unit)} not replaceable, could not be displaced to turn box.`)
+        log(`>${unit_get_log_str(unit)} not replaceable, could not be displaced to turn box.`)
         eliminate(unit)
         return
     }
     if (G.turn + turns > 12 || G.sid === SOUTH_PACIFIC_SCENARIO && G.turn + turns > 6 || G.sid === BURMA_SCENARIO && G.turn + turns > 9) {
-        log(`${unit_get_log_str(unit)} should be displaced to turn box ${G.turn + turns} but permanently eliminated instead.`)
+        log(`>>${unit_get_log_str(unit)} should be displaced to turn box ${G.turn + turns} but permanently eliminated instead.`)
         if (pieces[unit].class === "hq") {
             set_location(unit, TURN_BOX + 13)
         } else {
