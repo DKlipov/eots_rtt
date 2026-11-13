@@ -8132,7 +8132,7 @@ function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
     for_each_unit_on_map((i, p) => both_sides_zoi || p.faction === faction ? set_zoi(i, p, oos_units) : null)
     indian_zoi_hack((i, p) => both_sides_zoi || p.faction === faction ? set_zoi(i, p, oos_units) : null)
     mark_supply_eligable_ports(faction)
-    var size = array_count(oos_units[faction], u => pieces[u].zoi_generator)
+    var prev = oos_units[faction].filter(u => pieces[u].zoi_generator)
     oos_units[faction] = []
     var hqs = HQ_LIST.filter(hq => {
         var piece = pieces[hq]
@@ -8171,7 +8171,11 @@ function check_faction_supply_not_changed(faction, both_sides_zoi, oos_units) {
     if (faction === AP && G.burma_road < 2) {
         check_burma_road()
     }
-    return array_count(oos_units[faction], u => pieces[u].zoi_generator) === size && burma === G.burma_road
+    var result = array_equals(oos_units[faction].filter(u => pieces[u].zoi_generator), prev) && burma === G.burma_road
+    if (!result && faction === AP) {
+        oos_units[JP] = []
+    }
+    return result
 }
 
 function get_ground_mp_cost(from, to, faction) {
@@ -10989,6 +10993,9 @@ P.choose_hq = {
         if (!L.possible_units.length) {
             button("skip")
         }
+        if (!globalThis.RTT_FUZZER && is_event_offensive(GENERAL_ADACHI)) {
+            action("activate", 1)
+        }
     },
     skip() {
         push_undo()
@@ -11293,6 +11300,10 @@ function log_units_activated() {
     }
 }
 
+function is_event_offensive(event) {
+    return G.offensive.active_cards[0] === event && G.offensive.type === EC && G.active === cards[event].faction
+}
+
 P.activate_units = {
     _begin() {
         if (G.active === G.offensive.attacker && G.offensive.type === EC && cards[G.offensive.offensive_card].hq) {
@@ -11309,6 +11320,7 @@ P.activate_units = {
         }
         var piece = pieces[hq]
         L.supply = {}
+        check_supply()
         if ((piece.service === "joint" || piece.service === "us") && !check_hq_in_supply(hq, piece, US_SUPPLIED_HEX)) {
             L.joint_disadvantage = 1
             log("-1 activation (US Line of Communication).")
@@ -11345,11 +11357,20 @@ P.activate_units = {
             L.allowed_units.forEach(action_unit)
         }
         if (!globalThis.RTT_FUZZER) {
-            G.offensive.active_units[G.active].forEach(u => unselect_unit(u))
+            if (is_event_offensive(GENERAL_ADACHI)) {
+                action("activate", 1)
+            } else {
+                G.offensive.active_units[G.active].forEach(u => unselect_unit(u))
+            }
         }
 
     },
     update_possible_units() {
+        if (is_event_offensive(GENERAL_ADACHI)) {
+            var hq = G.offensive.active_hq[G.active]
+            check_supply()
+            L.possible_units = get_activatable_units(hq, pieces[hq].supply)
+        }
         L.allowed_units = L.possible_units.filter(u => !set_has(G.offensive.active_units[G.active], u))
         L.hq_bonus = pieces[G.offensive.active_hq[G.active]].cm
         if (L.joint_disadvantage) {
@@ -12417,7 +12438,7 @@ P.declare_battle_hexes = {
     inactive: "assign units to battle",
     prompt() {
         if (G.active_stack.length === 0) {
-            offensive_prompt(`Assign units to battles.`)
+            offensive_prompt(`Assign units to battle.`)
             L.possible_units.forEach(action_unit)
             button("skip")
         } else {
@@ -19933,7 +19954,7 @@ P.arcadia = {
             prompt(`Setup: You may take and declare C${c} as one of your five card draws.`)
             V.selected_card = c
             button("hold")
-            button("discard")
+            button("skip")
         } else {
             if (G.hand[AP].includes(c)) {
                 prompt(`Setup: You may play C${c} now.`)
@@ -19952,7 +19973,7 @@ P.arcadia = {
             draw_card(AP)
         }
     },
-    discard() {
+    skip() {
         G.hand[AP] = []
         G.draw[AP].push(find_card(AP, 4))
         log(`Allies drew 5 random cards.`)
@@ -19970,9 +19991,6 @@ P.arcadia = {
         play_event(G.offensive.offensive_card, true)
     },
     done() {
-        end()
-    },
-    skip() {
         end()
     }
 }

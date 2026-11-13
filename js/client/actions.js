@@ -480,6 +480,16 @@ function try_to_avoid_zoi(hex) {
 }
 
 function proxy_send_action(a, b) {
+    if (G.actions && G.actions.activate && a === "unit") {
+        if (pieces[b].class === "hq") {
+            G.offensive.active_hq[G.active] = b
+        } else if (set_has(G.offensive.active_units[G.active], b)) {
+            set_delete(G.offensive.active_units[G.active], b)
+        } else {
+            set_add(G.offensive.active_units[G.active], b)
+        }
+    }
+
     if (G.actions && G.actions.move && a === "action_hex") {
         var path = map_get(L.allowed_hexes, b)
         if (path) {

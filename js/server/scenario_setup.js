@@ -1286,7 +1286,7 @@ P.arcadia = {
             prompt(`Setup: You may take and declare C${c} as one of your five card draws.`)
             V.selected_card = c
             button("hold")
-            button("discard")
+            button("skip")
         } else {
             if (G.hand[AP].includes(c)) {
                 prompt(`Setup: You may play C${c} now.`)
@@ -1305,7 +1305,7 @@ P.arcadia = {
             draw_card(AP)
         }
     },
-    discard() {
+    skip() {
         G.hand[AP] = []
         G.draw[AP].push(find_card(AP, 4))
         log(`Allies drew 5 random cards.`)
@@ -1323,9 +1323,6 @@ P.arcadia = {
         play_event(G.offensive.offensive_card, true)
     },
     done() {
-        end()
-    },
-    skip() {
         end()
     }
 }
