@@ -10996,9 +10996,6 @@ P.choose_hq = {
         if (!L.possible_units.length) {
             button("skip")
         }
-        if (!globalThis.RTT_FUZZER && is_event_offensive(GENERAL_ADACHI)) {
-            action("activate", 1)
-        }
     },
     skip() {
         push_undo()
@@ -11360,20 +11357,11 @@ P.activate_units = {
             L.allowed_units.forEach(action_unit)
         }
         if (!globalThis.RTT_FUZZER) {
-            if (is_event_offensive(GENERAL_ADACHI)) {
-                action("activate", 1)
-            } else {
-                G.offensive.active_units[G.active].forEach(u => unselect_unit(u))
-            }
+            G.offensive.active_units[G.active].forEach(u => unselect_unit(u))
         }
 
     },
     update_possible_units() {
-        if (is_event_offensive(GENERAL_ADACHI)) {
-            var hq = G.offensive.active_hq[G.active]
-            check_supply()
-            L.possible_units = get_activatable_units(hq, pieces[hq].supply)
-        }
         L.allowed_units = L.possible_units.filter(u => !set_has(G.offensive.active_units[G.active], u))
         L.hq_bonus = pieces[G.offensive.active_hq[G.active]].cm
         if (L.joint_disadvantage) {
