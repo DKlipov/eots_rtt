@@ -3158,7 +3158,7 @@ P.emergency_move = {
         if (!L.unit_to_retreat.length) {
             goto("check_overstacking")
         } else {
-            log("Emergency moved:")
+            L.logged = 0
         }
     },
     inactive: "execute emergency move",
@@ -3188,6 +3188,10 @@ P.emergency_move = {
     },
     eliminate() {
         push_undo()
+        if (!L.logged) {
+            log("Emergency moved:")
+            L.logged = 1
+        }
         eliminate(G.active_stack[0])
         G.active_stack = []
     },
@@ -3199,6 +3203,10 @@ P.emergency_move = {
     },
     action_hex(hex) {
         push_undo()
+        if (!L.logged) {
+            log("Emergency moved:")
+            L.logged = 1
+        }
         set_location(G.active_stack[0], hex)
         G.active_stack = []
     },

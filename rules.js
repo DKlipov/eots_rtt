@@ -13994,7 +13994,7 @@ P.emergency_move = {
         if (!L.unit_to_retreat.length) {
             goto("check_overstacking")
         } else {
-            log("Emergency moved:")
+            L.logged = 0
         }
     },
     inactive: "execute emergency move",
@@ -14024,6 +14024,10 @@ P.emergency_move = {
     },
     eliminate() {
         push_undo()
+        if (!L.logged) {
+            log("Emergency moved:")
+            L.logged = 1
+        }
         eliminate(G.active_stack[0])
         G.active_stack = []
     },
@@ -14035,6 +14039,10 @@ P.emergency_move = {
     },
     action_hex(hex) {
         push_undo()
+        if (!L.logged) {
+            log("Emergency moved:")
+            L.logged = 1
+        }
         set_location(G.active_stack[0], hex)
         G.active_stack = []
     },
@@ -19945,12 +19953,13 @@ P.scenario_1942 = script(`
 
 P.arcadia = {
     _begin() {
-        draw_specific_card(find_card(AP, 4))
+        G.offensive.active_cards = [find_card(AP, 4)]
+        G.offensive.draw[AP] = [-1, -1, -1, -1, -1]
     },
     inactive: "apply card effect",
     prompt() {
         var c = find_card(AP, 4)
-        if (G.hand[AP].length === 1) {
+        if (G.hand[AP].length === 0) {
             prompt(`Setup: You may take and declare C${c} as one of your five card draws.`)
             V.selected_card = c
             button("hold")
@@ -19958,6 +19967,7 @@ P.arcadia = {
         } else {
             if (G.hand[AP].includes(c)) {
                 prompt(`Setup: You may play C${c} now.`)
+                action_card(c)
                 button("event")
                 button("skip")
             } else {
@@ -19968,14 +19978,21 @@ P.arcadia = {
     },
     hold() {
         clear_undo()
+        G.offensive.active_cards = []
+        G.offensive.draw[AP] = []
+        draw_specific_card(find_card(AP, 4))
         log(`Allies took ${card_get_log_str(find_card(AP, 4))} + 4 random cards.`)
         while (G.hand[AP].length < 5) {
             draw_card(AP)
         }
     },
     skip() {
-        G.hand[AP] = []
-        G.draw[AP].push(find_card(AP, 4))
+        if(G.hand[AP].length){
+            end()
+            return
+        }
+        G.offensive.active_cards = []
+        G.offensive.draw[AP] = []
         log(`Allies drew 5 random cards.`)
         clear_undo()
         while (G.hand[AP].length < 5) {
@@ -19984,6 +20001,9 @@ P.arcadia = {
         if (G.hand[AP].indexOf(find_card(AP, 4)) < 0) {
             end()
         }
+    },
+    card(){
+        this.event()
     },
     event() {
         push_undo()
@@ -20007,6 +20027,7 @@ P.japan_init_1942 = {
             draw_hist_cards()
             delete G.options['historical']
         }
+        log(`Japan drew 7 random cards.`)
         while (G.hand[JP].length < 7) {
             draw_card(JP)
         }
