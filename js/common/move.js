@@ -242,7 +242,10 @@ function compute_air_move_hexes() {
             fields_queue = []
         }
     }
-    map_delete(L.allowed_hexes, location)
+    if (is_space_controlled(location, G.active)) {
+        map_set(L.allowed_hexes, location, [0, 1, move_data.location])
+    }
+    // map_delete(L.allowed_hexes, location)
     if (check_china_box_restricted()) {
         map_delete(L.allowed_hexes, CHINA_BOX)
     }

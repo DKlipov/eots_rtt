@@ -8583,7 +8583,10 @@ function compute_air_move_hexes() {
             fields_queue = []
         }
     }
-    map_delete(L.allowed_hexes, location)
+    if (is_space_controlled(location, G.active)) {
+        map_set(L.allowed_hexes, location, [0, 1, move_data.location])
+    }
+    // map_delete(L.allowed_hexes, location)
     if (check_china_box_restricted()) {
         map_delete(L.allowed_hexes, CHINA_BOX)
     }
@@ -11437,12 +11440,12 @@ function on_update_local_actions() {
             && G.actions
             && G.actions["no_move"]
             && !map_has(L.allowed_hexes, G.location[G.active_stack[0]])) {
-            // G.actions["no_move"] = 0
+            delete G.actions["no_move"]
         } else if (G.active_stack.length
             && G.actions
-            && G.actions["no_move"]
             && map_has(L.allowed_hexes, G.location[G.active_stack[0]])) {
             map_delete(L.allowed_hexes, G.location[G.active_stack[0]])
+            G.actions["no_move"] = 1
         }
         map_for_each(L.allowed_hexes, h => set_add(G.actions.action_hex, h))
     }

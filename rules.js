@@ -8588,7 +8588,10 @@ function compute_air_move_hexes() {
             fields_queue = []
         }
     }
-    map_delete(L.allowed_hexes, location)
+    if (is_space_controlled(location, G.active)) {
+        map_set(L.allowed_hexes, location, [0, 1, move_data.location])
+    }
+    // map_delete(L.allowed_hexes, location)
     if (check_china_box_restricted()) {
         map_delete(L.allowed_hexes, CHINA_BOX)
     }
@@ -11414,6 +11417,9 @@ P.activate_units = {
 }
 
 function could_unit_stop_here(u) {
+    if (G.offensive.stage === POST_BATTLE_STAGE) {
+        return false
+    }
     var piece = pieces[u]
     if (piece.class === "air") {
         return true
@@ -11423,10 +11429,7 @@ function could_unit_stop_here(u) {
 }
 
 function could_stack_stop_here() {
-    if (L.move_data.is_air_present || G.active_stack.length <= 0) {
-        return true
-    }
-    if (L.move_data.is_ground_present && G.offensive.stage === POST_BATTLE_STAGE) {
+    if (G.offensive.stage === POST_BATTLE_STAGE) {
         return false
     }
     if (L.move_data.is_ground_present && !L.move_data.is_naval_present) {
@@ -11440,7 +11443,7 @@ function could_stack_stop_here() {
 }
 
 function could_air_stop_here() {
-    if (!L.move_data.is_air_present || G.active_stack.length <= 0) {
+    if (!L.move_data.is_air_present || G.active_stack.length <= 0 || G.offensive.stage === POST_BATTLE_STAGE) {
         return false
     }
     var location = G.location[G.active_stack[0]]
@@ -11476,7 +11479,7 @@ const ALWAYS_SHOW_BUTTONS = ["no_move", "con_eliminate"]
 function get_move_buttons() {
     var result = []
     var eliminate_p = G.offensive.stage === POST_BATTLE_STAGE && L.allowed_hexes.length === 0 && G.active_stack.length === 1
-    var no_move_p = could_stack_stop_here() || could_air_stop_here()
+    var no_move_p = could_air_stop_here() || could_stack_stop_here()
     if (G.offensive.stage === ATTACK_STAGE && pieces[G.active_stack[0]].parenthetical && L.move_type === ANY_MOVE) {
         result.push("extended_air")
     }
@@ -11492,7 +11495,7 @@ function get_move_buttons() {
     if (L.move_type === GROUND_MOVE && map_get(G.offensive.paths, G.active_stack[0], [0]).length > 3) {
         result.push("stop")
     }
-    if ((no_move_p) && (L.move_type === ANY_MOVE && !L.spec_move)) {
+    if ((L.move_type === ANY_MOVE && !L.spec_move)) {
         result.push("no_move")
     }
     if (G.offensive.stage === ATTACK_STAGE && L.move_data.location && get_map_data(L.move_data.location).coastal
@@ -11602,7 +11605,14 @@ P.move_offensive_units = {
     },
     inactive: "move units",
     prompt() {
-        offensive_prompt(`Move units (${L.max_movable - L.movable_units.length}/${L.max_movable}).`)
+        if(G.active_stack.length){
+            offensive_prompt(`Move ${units_str(G.active_stack)}.`)
+        }else if(G.offensive.stage===POST_BATTLE_STAGE){
+            offensive_prompt(`Post battle move: ${units_str(L.movable_units)} must make an PBM.`)
+        }else{
+            offensive_prompt(`Move units (${L.max_movable - L.movable_units.length}/${L.max_movable}).`)
+        }
+
         if (G.active_stack.length === 0 &&
             (G.offensive.stage === ATTACK_STAGE
                 || G.offensive.stage === POST_BATTLE_STAGE && !G.active_stack.length && !L.movable_units.some(u => !could_unit_stop_here(u))
