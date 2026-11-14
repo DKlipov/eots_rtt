@@ -17852,7 +17852,7 @@ function on_setup(scenario, options) {
     G.pow = 0
     G.captured_once = []
 
-    if (options.expert) {
+    if (options.express) {
         G.async = 1
     }
     for (var i = 1; i < LAST_BOARD_HEX; i++) {
