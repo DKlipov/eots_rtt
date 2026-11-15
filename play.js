@@ -9088,12 +9088,12 @@ function init_overstack_check(ignore_movable, faction) {
             var pbm_impossible = (path & STRAT_MOVE) || piece.class === "ground"
             if (!pbm_impossible) {
                 map_set(positions, u, G.location[u])
-                G.location[u] = NON_PLACED_BOX
+                set_location(u, NON_PLACED_BOX, true)
             }
         })
     }
     var result = count_units_stacking(faction)
-    map_for_each(positions, (u, l) => G.location[u] = l)
+    map_for_each(positions, (u, l) => set_location(u, l, true))
     return result
 }
 
