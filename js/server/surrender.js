@@ -41,8 +41,8 @@ P.india_surrender = {
         }
         if (G.sid === BURMA_SCENARIO) {
             var vp = get_victory()
-            log("#GVP Scoring")
-            vp.text.forEach(t => log(t))
+            log("Scoring:")
+            vp.text.forEach(t => log(">" + t))
             log(`#GTotal VP: ${vp.vp}`)
             finish(JP, "Japanese Victory - India Surrender.")
             return

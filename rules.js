@@ -10063,8 +10063,8 @@ function victory_check() {
     }
     var vp = get_victory()
     if (scenario_data().last_turn <= G.turn && G.turn < 12) {
-        log("#GVP Scoring")
-        vp.text.forEach(t => log(t))
+        log("Scoring:")
+        vp.text.forEach(t => log(">" + t))
         log(`#GTotal VP: ${vp.vp}`)
     }
     if (scenario_data().last_turn <= G.turn) {
@@ -11992,7 +11992,7 @@ P.check_overstacking = {
         L.hexes = []
         L.allowed_units.forEach(u => set_add(L.hexes, G.location[u]))
         if (L.allowed_units.length) {
-            log(`#G${side_get_log_str(G.active)} checked stacking`)
+            log(`${side_get_log_str(G.active)} fulfill stacking limits:`)
         }
     },
     inactive: "check stacking",
@@ -12758,7 +12758,7 @@ P.cancel_offensive = {
     },
     card(c) {
         push_undo()
-        log("#GCancel offensive")
+        log("#GOffensive cancelled")
         if (G.active === AP) {
             end()
             play_event(c)
@@ -14137,8 +14137,8 @@ P.india_surrender = {
         }
         if (G.sid === BURMA_SCENARIO) {
             var vp = get_victory()
-            log("#GVP Scoring")
-            vp.text.forEach(t => log(t))
+            log("Scoring:")
+            vp.text.forEach(t => log(">" + t))
             log(`#GTotal VP: ${vp.vp}`)
             finish(JP, "Japanese Victory - India Surrender.")
             return
@@ -18298,7 +18298,7 @@ function displace_to_turn(unit, turns, not_delayed) {
         return
     }
     if (G.turn + turns > 12 || G.sid === SOUTH_PACIFIC_SCENARIO && G.turn + turns > 6 || G.sid === BURMA_SCENARIO && G.turn + turns > 9) {
-        log(`>>${unit_get_log_str(unit)} should be displaced to turn box ${G.turn + turns} but permanently eliminated instead.`)
+        log(`>${unit_get_log_str(unit)} should be displaced to turn box ${G.turn + turns} but permanently eliminated instead.`)
         if (pieces[unit].class === "hq") {
             set_location(unit, TURN_BOX + 13)
         } else {

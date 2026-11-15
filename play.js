@@ -10058,8 +10058,8 @@ function victory_check() {
     }
     var vp = get_victory()
     if (scenario_data().last_turn <= G.turn && G.turn < 12) {
-        log("#GVP Scoring")
-        vp.text.forEach(t => log(t))
+        log("Scoring:")
+        vp.text.forEach(t => log(">" + t))
         log(`#GTotal VP: ${vp.vp}`)
     }
     if (scenario_data().last_turn <= G.turn) {

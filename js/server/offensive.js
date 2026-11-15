@@ -1153,7 +1153,7 @@ P.check_overstacking = {
         L.hexes = []
         L.allowed_units.forEach(u => set_add(L.hexes, G.location[u]))
         if (L.allowed_units.length) {
-            log(`#G${side_get_log_str(G.active)} checked stacking`)
+            log(`${side_get_log_str(G.active)} fulfill stacking limits:`)
         }
     },
     inactive: "check stacking",
@@ -1919,7 +1919,7 @@ P.cancel_offensive = {
     },
     card(c) {
         push_undo()
-        log("#GCancel offensive")
+        log("#GOffensive cancelled")
         if (G.active === AP) {
             end()
             play_event(c)
