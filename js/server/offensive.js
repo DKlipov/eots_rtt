@@ -2745,12 +2745,16 @@ P.apply_naval_winner = function () {
         log(`${attacker_win ? "Attacker" : "Defender"} won battle (${attacker_power} - ${defender_power}) ${!air_cover ? "no attacker CV or air" : ""}.`)
     }
     if (!attacker_win) {
+        var units = []
         battle.amph_ground.forEach(u => {
-            set_delete(battle.ground[G.offensive.attacker], u)
+            if (set_has(battle.ground[G.offensive.attacker], u)) {
+                set_delete(battle.ground[G.offensive.attacker], u)
+                set_add(units, u)
+            }
             set_add(G.offensive.ground_pbm, u)
         })
-        if (battle.amph_ground.length) {
-            log(`${format_details(battle.amph_ground.length + " units", format_units(battle.amph_ground))} could not participate ground combat.`)
+        if (units.length) {
+            log(`${units_str(units)} could not participate ground combat.`)
         }
     }
     end()
