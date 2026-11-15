@@ -11420,6 +11420,9 @@ function could_stack_stop_here() {
     if (G.offensive.stage === POST_BATTLE_STAGE) {
         return false
     }
+    if (L.move_data.is_air_present) {
+        return could_air_stop_here()
+    }
     if (L.move_data.is_ground_present && !L.move_data.is_naval_present) {
         return true
     }
@@ -11467,7 +11470,7 @@ const ALWAYS_SHOW_BUTTONS = ["no_move", "con_eliminate"]
 function get_move_buttons() {
     var result = []
     var eliminate_p = G.offensive.stage === POST_BATTLE_STAGE && L.allowed_hexes.length === 0 && G.active_stack.length === 1
-    var no_move_p = could_air_stop_here() || could_stack_stop_here()
+    var no_move_p = could_stack_stop_here()
     if (G.offensive.stage === ATTACK_STAGE && pieces[G.active_stack[0]].parenthetical && L.move_type === ANY_MOVE) {
         result.push("extended_air")
     }
@@ -11593,11 +11596,11 @@ P.move_offensive_units = {
     },
     inactive: "move units",
     prompt() {
-        if(G.active_stack.length){
+        if (G.active_stack.length) {
             offensive_prompt(`Move ${units_str(G.active_stack)}.`)
-        }else if(G.offensive.stage===POST_BATTLE_STAGE){
+        } else if (G.offensive.stage === POST_BATTLE_STAGE) {
             offensive_prompt(`Post battle move: ${units_str(L.movable_units)} must make an PBM.`)
-        }else{
+        } else {
             offensive_prompt(`Move units (${L.max_movable - L.movable_units.length}/${L.max_movable}).`)
         }
 
@@ -11894,6 +11897,10 @@ P.choose_attack_hex = {
         })
         var battle_range = L.L.L.move_data.battle_range
         var path = map_get(G.offensive.paths, G.active_stack[0], [0, 0, 0])
+        if (L.L.L.move_data.is_air_present && path[2] === path[path.length - 1]) {
+            end()
+            return
+        }
         var moved_to_bh = set_has(G.offensive.battle_hexes, hex) && !set_has(G.offensive.battle_hexes, path[2])
         var distant_attack =
             (battle_range || escort)
