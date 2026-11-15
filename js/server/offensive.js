@@ -765,9 +765,10 @@ P.move_offensive_units = {
             offensive_prompt(`Move units (${L.max_movable - L.movable_units.length}/${L.max_movable}).`)
         }
 
-        if (G.active_stack.length === 0 &&
+        if (G.active_stack.length === 0 && G.offensive.stage === POST_BATTLE_STAGE) {
+            button("skip_pbm")
+        } else if (G.active_stack.length === 0 &&
             (G.offensive.stage === ATTACK_STAGE
-                || G.offensive.stage === POST_BATTLE_STAGE && !G.active_stack.length && !L.movable_units.some(u => !could_unit_stop_here(u))
                 || G.offensive.stage === REACTION_STAGE && !G.active_stack.length && !L.movable_units.some(u => !set_has(G.offensive.battle_hexes, G.location[u]))
             )) {
             if (L.movable_units.length) {
@@ -987,6 +988,9 @@ P.move_offensive_units = {
     },
     no_move() {
         call("move_to", {hex: G.location[G.active_stack[0]]})
+    },
+    skip_pbm() {
+        this.skip()
     },
     skip() {
         push_undo()

@@ -486,6 +486,7 @@ function on_update() {
     action_button("all", "Choose all")
     action_button("pass", "Pass")
     action_button("skip", "Skip")
+    action_button("skip_pbm", "Skip")
     action_button("range", "Range")
 
     action_button("confirm", "Confirm")

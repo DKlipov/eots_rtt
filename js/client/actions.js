@@ -121,6 +121,15 @@ function apply_pbm_restrictions() {
         L.allowed_hexes = result
 }
 
+function could_unit_stop(u) {
+    var piece = pieces[u]
+    var loc = G.location[u]
+    if (piece.class === "air") {
+        return is_space_controlled(loc, piece.faction) && get_map_data(loc).port
+    }
+    return is_space_controlled(loc, piece.faction) && get_map_data(loc).port
+}
+
 function on_update_local_actions() {
     document.getElementById("measure").replaceChildren()
 
@@ -153,6 +162,19 @@ function on_update_local_actions() {
             G.actions["no_move"] = 1
         }
         map_for_each(L.allowed_hexes, h => set_add(G.actions.action_hex, h))
+    }
+    if (G.actions && G.actions.skip_pbm) {
+        var active = G.offensive.active_units[G.active]
+        G.offensive.active_units[G.active] = []
+        var un_supply = 0
+        with_unmodified_supply(() => {
+            check_supply()
+            un_supply = active.find(u => set_has(G.oos, u))
+        })
+        G.offensive.active_units[G.active] = active
+        if (un_supply || G.actions.unit.find(u => pieces[u].class === "ground" || !could_unit_stop(u))) {
+            delete G.actions["skip_pbm"]
+        }
     }
 
     document.body.classList.remove("hex-clickable")
@@ -480,7 +502,7 @@ function try_to_avoid_zoi(hex) {
 }
 
 function proxy_send_action(a, b) {
-    if (a === "unit" &&pieces[b].class === "hq" &&pieces[b].faction===JP && G.offensive.active_cards[0]===GENERAL_ADACHI) {
+    if (a === "unit" && pieces[b].class === "hq" && pieces[b].faction === JP && G.offensive.active_cards[0] === GENERAL_ADACHI) {
         G.offensive.active_hq[JP] = b
     }
 
