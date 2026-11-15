@@ -6984,7 +6984,7 @@ const nations = {
         id: 12,
         pw: 2,
         counter: counters.china_surrender,
-        counter_hex: KUNMING,
+        counter_hex: int_to_hex(KUNMING),
         statuses: ["Stable Front", "Unstable Front", "Major Breakthrough", "Threat to Chunking", "Chunking Falls", "Government Collapsed"],
         name: "China",
         no_full_control: true,
@@ -18285,6 +18285,9 @@ function change_wie(diff, cause) {
 
 
 function displace_to_turn(unit, turns, not_delayed) {
+    if (pieces[unit].b29) {
+        turns = 1
+    }
     if (pieces[unit].notreplaceable && unit_on_board(unit)) {
         log(`>${unit_get_log_str(unit)} not replaceable, could not be displaced to turn box.`)
         eliminate(unit)

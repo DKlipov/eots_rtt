@@ -523,6 +523,9 @@ function change_wie(diff, cause) {
 
 
 function displace_to_turn(unit, turns, not_delayed) {
+    if (pieces[unit].b29) {
+        turns = 1
+    }
     if (pieces[unit].notreplaceable && unit_on_board(unit)) {
         log(`>${unit_get_log_str(unit)} not replaceable, could not be displaced to turn box.`)
         eliminate(unit)

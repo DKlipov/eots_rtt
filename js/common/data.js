@@ -198,7 +198,7 @@ const nations = {
         id: 12,
         pw: 2,
         counter: counters.china_surrender,
-        counter_hex: KUNMING,
+        counter_hex: int_to_hex(KUNMING),
         statuses: ["Stable Front", "Unstable Front", "Major Breakthrough", "Threat to Chunking", "Chunking Falls", "Government Collapsed"],
         name: "China",
         no_full_control: true,
