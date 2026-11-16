@@ -11992,7 +11992,7 @@ P.check_overstacking = {
         L.hexes = []
         L.allowed_units.forEach(u => set_add(L.hexes, G.location[u]))
         if (L.allowed_units.length) {
-            log(`${side_get_log_str(G.active)} removed overstacked units:`)
+            log(`${side_get_log_str(G.active)} displaced overstacked units:`)//could be elliminated or displaced to turn track
         }
     },
     inactive: "check stacking",
