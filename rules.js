@@ -8216,7 +8216,7 @@ function is_controllable_hex(hex) {
 
 function is_space_controlled(hex, faction) {
     var bit = get_map_data(hex).control_bit
-    if (bit < 0) {
+    if (bit < 0 || G.non_control && G.non_control.includes(hex)) {
         return false
     }
     return bit_get(G.control, bit) === faction
@@ -14147,15 +14147,17 @@ P.india_surrender = {
     inactive: "execute India surrender sequence",
     prompt() {
         if (G.active_stack.length) {
-            prompt(`India Surrender: Emergency move P${G.active_stack[0]}.`)
+            var text = `Emergency move P${G.active_stack[0]}`
             L.hex_to_retreat.forEach(action_hex)
 
             var piece = pieces[G.active_stack[0]]
             if (piece.service === "army" || piece.service === "navy" || piece.service === "us") {
                 button("no_move")
             } else if (!L.hex_to_retreat.length) {
+                text = `Eliminate P${G.active_stack[0]}`
                 button("eliminate")
             }
+            prompt(`India Surrender: ${text}.`)
         } else if (L.unit_to_retreat.length) {
             prompt(`India Surrender: Choose unit to emergency move.`)
             L.unit_to_retreat.forEach(action_unit)
@@ -14204,6 +14206,8 @@ P.india_surrender = {
     },
     done() {
         push_undo()
+        check_units()
+        change_political_will(-2, `India Revolts!`)
         this.update_control()
         end()
     }
@@ -18403,7 +18407,7 @@ function capture_hex(hex, side = G.active, no_log = false) {
         return
     }
 
-    if (G.non_control) {
+    if (G.non_control && G.non_control.includes(hex)) {
         set_delete(G.non_control, hex)
         if (!no_log) {
             log(`Allies captured ${int_to_hex(hex)}.`)

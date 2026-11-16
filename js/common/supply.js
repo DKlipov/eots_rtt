@@ -770,7 +770,7 @@ function is_controllable_hex(hex) {
 
 function is_space_controlled(hex, faction) {
     var bit = get_map_data(hex).control_bit
-    if (bit < 0) {
+    if (bit < 0 || G.non_control && G.non_control.includes(hex)) {
         return false
     }
     return bit_get(G.control, bit) === faction

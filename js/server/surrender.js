@@ -51,15 +51,17 @@ P.india_surrender = {
     inactive: "execute India surrender sequence",
     prompt() {
         if (G.active_stack.length) {
-            prompt(`India Surrender: Emergency move P${G.active_stack[0]}.`)
+            var text = `Emergency move P${G.active_stack[0]}`
             L.hex_to_retreat.forEach(action_hex)
 
             var piece = pieces[G.active_stack[0]]
             if (piece.service === "army" || piece.service === "navy" || piece.service === "us") {
                 button("no_move")
             } else if (!L.hex_to_retreat.length) {
+                text = `Eliminate P${G.active_stack[0]}`
                 button("eliminate")
             }
+            prompt(`India Surrender: ${text}.`)
         } else if (L.unit_to_retreat.length) {
             prompt(`India Surrender: Choose unit to emergency move.`)
             L.unit_to_retreat.forEach(action_unit)
@@ -108,6 +110,8 @@ P.india_surrender = {
     },
     done() {
         push_undo()
+        check_units()
+        change_political_will(-2, `India Revolts!`)
         this.update_control()
         end()
     }

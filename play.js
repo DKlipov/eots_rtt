@@ -8211,7 +8211,7 @@ function is_controllable_hex(hex) {
 
 function is_space_controlled(hex, faction) {
     var bit = get_map_data(hex).control_bit
-    if (bit < 0) {
+    if (bit < 0 || G.non_control && G.non_control.includes(hex)) {
         return false
     }
     return bit_get(G.control, bit) === faction
@@ -12546,7 +12546,7 @@ function is_show_control_hex(hex) {
 function should_show_hex_control(i, all_control, vassal_control) {
     var hn = HEX_BY_NATION[i]
     var cont = is_space_controlled(i, JP) ? JP : AP
-    if ((cont === AP && set_has(G.capture, i) && !all_control) || !is_show_control_hex(i))
+    if ((cont === AP && set_has(G.capture, i) && !all_control) || !is_show_control_hex(i) || G.non_control && G.non_control.includes(i))
         return false
     var default_condition =
         (hn >= 0 && G.surrender[HEX_BY_NATION[i]] > 0 == cont) || (hn === -1 && cont === AP) || (hn < -1 && cont === JP)

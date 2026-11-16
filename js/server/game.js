@@ -637,7 +637,7 @@ function capture_hex(hex, side = G.active, no_log = false) {
         return
     }
 
-    if (G.non_control) {
+    if (G.non_control && G.non_control.includes(hex)) {
         set_delete(G.non_control, hex)
         if (!no_log) {
             log(`Allies captured ${int_to_hex(hex)}.`)
