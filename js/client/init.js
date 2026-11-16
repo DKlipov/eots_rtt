@@ -416,7 +416,13 @@ function on_init(scenario, game_options, static_view) {
             sort: sort_unit_stack
         })
     }
-    define_stack("s-loc", CHINA_BOX, map_layout.box_air_unit_in_china, {...TRACK_STACK_PARAMS, sort: sort_unit_stack})
+    // define_stack("s-loc", CHINA_BOX,
+    //     map_layout.box_air_unit_in_china,
+    //     ...TRACK_STACK_PARAMS,
+    //     sort_unit_stack,
+    //     0.22,
+    // )
+    define_stack("s-loc", CHINA_BOX, map_layout.box_air_unit_in_china, {...TRACK_STACK_PARAMS, sort: sort_unit_stack, gravity_x: 0.22})
 
     define_space("action_hex", CHINA_BOX, map_layout.box_air_unit_in_china, "china_box")
         .tooltip("China Box")
