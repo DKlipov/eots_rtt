@@ -125,7 +125,7 @@ function could_unit_stop(u) {
     var piece = pieces[u]
     var loc = G.location[u]
     if (piece.class === "air") {
-        return is_space_controlled(loc, piece.faction) && get_map_data(loc).port
+        return is_space_controlled(loc, piece.faction) && get_map_data(loc).airfield
     }
     return is_space_controlled(loc, piece.faction) && get_map_data(loc).port
 }
@@ -169,7 +169,7 @@ function on_update_local_actions() {
         var un_supply = 0
         with_unmodified_supply(() => {
             check_supply()
-            un_supply = active.find(u => set_has(G.oos, u))
+            un_supply = G.actions.unit.find(u => set_has(G.oos, u))
         })
         G.offensive.active_units[G.active] = active
         if (un_supply || G.actions.unit.find(u => pieces[u].class === "ground" || !could_unit_stop(u))) {
