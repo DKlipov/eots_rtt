@@ -440,23 +440,23 @@ function track_event(event) {
     return true
 }
 
-function check_occupation(apply_pw = false) {
+function check_occupation(apply_pw = false, turn) {
     check_units()
-    check_occupation_region(events.ALASKA_OCCUPATION, apply_pw)
-    check_occupation_region(events.HAWAII_OCCUPATION, apply_pw)
+    check_occupation_region(events.ALASKA_OCCUPATION, apply_pw, turn)
+    check_occupation_region(events.HAWAII_OCCUPATION, apply_pw, turn)
 }
 
-function check_occupation_region(event, apply_pw = false) {
+function check_occupation_region(event, apply_pw = false, turn) {
     var result = event.keys.some(k => is_faction_units(hex_to_int(k), JP))
     var map_value = G.events[event.id]
-    var occupied_for = (G.turn - map_value) + 1
+    var occupied_for = (turn - map_value) + 1
     if (!result && map_value > 0 && occupied_for <= event.turns_to_control) {
         G.events[event.id] = 0
         log(`Timer to ${event.cause} reset.`)
     } else if (apply_pw && result && map_value && occupied_for === event.turns_to_control) {
         change_political_will(event.pw, event.cause)
     } else if (result && map_value <= 0) {
-        G.events[event.id] = G.turn
+        G.events[event.id] = turn
         log(`Started ${event.cause}.`)
     }
 }

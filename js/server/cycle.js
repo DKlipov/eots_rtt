@@ -324,7 +324,7 @@ P.political_will_segment = function () {
     if (!events.ALLIED_NATIONS_SURRENDERS.nations.some(n => !G.surrender[n])) {
         check_event(events.ALLIED_NATIONS_SURRENDERS)
     }
-    check_occupation(true)
+    check_occupation(true, G.turn)
     check_jp_resources_event()
     check_naval_situation()
     check_progress_of_war()
@@ -382,7 +382,7 @@ P.attrition_phase = script(`
     call attrition
     eval {
         check_supply()
-        check_occupation()
+        check_occupation(false,G.turn+1)
     }
     set G.active AP
     call attrition

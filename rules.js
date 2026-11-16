@@ -14608,7 +14608,7 @@ P.political_will_segment = function () {
     if (!events.ALLIED_NATIONS_SURRENDERS.nations.some(n => !G.surrender[n])) {
         check_event(events.ALLIED_NATIONS_SURRENDERS)
     }
-    check_occupation(true)
+    check_occupation(true, G.turn)
     check_jp_resources_event()
     check_naval_situation()
     check_progress_of_war()
@@ -14666,7 +14666,7 @@ P.attrition_phase = script(`
     call attrition
     eval {
         check_supply()
-        check_occupation()
+        check_occupation(false,G.turn+1)
     }
     set G.active AP
     call attrition
@@ -15001,7 +15001,7 @@ P.offensive_segment_card_action = {
 
 
 function end_of_offensive_check() {
-    check_occupation()
+    check_occupation(false, G.turn)
     commit_into_turn_draw()
 }
 
@@ -18208,23 +18208,23 @@ function track_event(event) {
     return true
 }
 
-function check_occupation(apply_pw = false) {
+function check_occupation(apply_pw = false, turn) {
     check_units()
-    check_occupation_region(events.ALASKA_OCCUPATION, apply_pw)
-    check_occupation_region(events.HAWAII_OCCUPATION, apply_pw)
+    check_occupation_region(events.ALASKA_OCCUPATION, apply_pw, turn)
+    check_occupation_region(events.HAWAII_OCCUPATION, apply_pw, turn)
 }
 
-function check_occupation_region(event, apply_pw = false) {
+function check_occupation_region(event, apply_pw = false, turn) {
     var result = event.keys.some(k => is_faction_units(hex_to_int(k), JP))
     var map_value = G.events[event.id]
-    var occupied_for = (G.turn - map_value) + 1
+    var occupied_for = (turn - map_value) + 1
     if (!result && map_value > 0 && occupied_for <= event.turns_to_control) {
         G.events[event.id] = 0
         log(`Timer to ${event.cause} reset.`)
     } else if (apply_pw && result && map_value && occupied_for === event.turns_to_control) {
         change_political_will(event.pw, event.cause)
     } else if (result && map_value <= 0) {
-        G.events[event.id] = G.turn
+        G.events[event.id] = turn
         log(`Started ${event.cause}.`)
     }
 }

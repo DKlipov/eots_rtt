@@ -238,7 +238,7 @@ P.offensive_segment_card_action = {
 
 
 function end_of_offensive_check() {
-    check_occupation()
+    check_occupation(false, G.turn)
     commit_into_turn_draw()
 }
 
