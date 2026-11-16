@@ -166,7 +166,7 @@ P.reinforcement_segment = {
             log(`War in Europe prevented Allies from amphibious shipping reinforcements.`)
         }
         if (G.active === AP && (is_event_active(events.PANAMA_CANAL) === G.turn - 1) && G.wie < 3) {
-            log(`Allies reinforcements delayed due to Panama canal attack.`)
+            log(`Allied reinforcements delayed due to Panama canal attack.`)
         }
         L.hq_reinforcement = []
         L.unit_reinforcement = []
@@ -208,7 +208,7 @@ P.reinforcement_segment = {
             L.allowed_hexes = get_hq_reinforcement_hexes()
         }
         if (delayed_units) {
-            log(`Allies reinforcements delayed.`)
+            log(`Allied reinforcements delayed.`)
         }
         update_reinf_active()
         if (L.hq_reinforcement.length === 0 && L.unit_reinforcement.length === 0 && !L.europe.length) {

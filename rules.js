@@ -10524,7 +10524,7 @@ P.reinforcement_segment = {
             log(`War in Europe prevented Allies from amphibious shipping reinforcements.`)
         }
         if (G.active === AP && (is_event_active(events.PANAMA_CANAL) === G.turn - 1) && G.wie < 3) {
-            log(`Allies reinforcements delayed due to Panama canal attack.`)
+            log(`Allied reinforcements delayed due to Panama canal attack.`)
         }
         L.hq_reinforcement = []
         L.unit_reinforcement = []
@@ -10566,7 +10566,7 @@ P.reinforcement_segment = {
             L.allowed_hexes = get_hq_reinforcement_hexes()
         }
         if (delayed_units) {
-            log(`Allies reinforcements delayed.`)
+            log(`Allied reinforcements delayed.`)
         }
         update_reinf_active()
         if (L.hq_reinforcement.length === 0 && L.unit_reinforcement.length === 0 && !L.europe.length) {
@@ -11599,7 +11599,7 @@ P.move_offensive_units = {
         if (G.active_stack.length) {
             offensive_prompt(`Move ${units_str(G.active_stack)}.`)
         } else if (G.offensive.stage === POST_BATTLE_STAGE) {
-            offensive_prompt(`Post battle move: ${units_str(L.movable_units)} must make an PBM.`)
+            offensive_prompt(`${units_str(L.movable_units)} must make a post battle move.`)
         } else {
             offensive_prompt(`Move units (${L.max_movable - L.movable_units.length}/${L.max_movable}).`)
         }
@@ -11992,7 +11992,7 @@ P.check_overstacking = {
         L.hexes = []
         L.allowed_units.forEach(u => set_add(L.hexes, G.location[u]))
         if (L.allowed_units.length) {
-            log(`${side_get_log_str(G.active)} fulfill stacking limits:`)
+            log(`${side_get_log_str(G.active)} removed overstacked units:`)
         }
     },
     inactive: "check stacking",
@@ -13597,7 +13597,7 @@ P.apply_naval_winner = function () {
             set_add(G.offensive.ground_pbm, u)
         })
         if (units.length) {
-            log(`${units_str(units)} could not participate ground combat.`)
+            log(`${units_str(units)} could not participate in ground combat.`)
         }
     }
     end()
