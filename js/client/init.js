@@ -479,6 +479,17 @@ function on_init(scenario, game_options, static_view) {
             .tip_magic(focus_unit)
             .tooltip(format_unit_tooltip)
     }
+    // Garrisons
+    for (let i = 1; i < 16; ++i) {
+        define_piece("garrison", i * 4, "jp " + pieces[JP_GARRISON_JP].counter)
+            .tip_magic(() => focus_unit(JP_GARRISON_JP))
+            .tooltip(() => format_unit_tooltip(JP_GARRISON_JP))
+        for (let j = 1; j < 4; ++j) {
+            define_piece("garrison", i * 4 + j, "jp " + pieces[JP_GARRISON_CN[0]].counter)
+                .tip_magic(() => focus_unit(JP_GARRISON_CN[0]))
+                .tooltip(() => format_unit_tooltip(JP_GARRISON_CN[0]))
+        }
+    }
 
     // Cards
     for (let i = 1; i < cards.length; ++i) {
@@ -565,63 +576,63 @@ window.addEventListener("keydown", function (event) {
         return
     console.log("key", event.key)
     switch (event.key) {
-    case "i":
-        toggle_preference_checkbox("show_zoi")
-        event.preventDefault()
-        break
-    case "m":
-        toggle_preference_checkbox("show_paths")
-        event.preventDefault()
-        break
+        case "i":
+            toggle_preference_checkbox("show_zoi")
+            event.preventDefault()
+            break
+        case "m":
+            toggle_preference_checkbox("show_paths")
+            event.preventDefault()
+            break
 
-    case "a":
-        toggle_window('window_cards_ap')
-        event.preventDefault()
-        break
-    case "j":
-        toggle_window('window_cards_jp')
-        event.preventDefault()
-        break
-    case "p":
-        toggle_window('window_pw')
-        event.preventDefault()
-        break
-    case "v":
-        toggle_window('window_vp')
-        event.preventDefault()
-        break
-    case "e":
-        toggle_window('window_eliminated')
-        event.preventDefault()
-        break
+        case "a":
+            toggle_window('window_cards_ap')
+            event.preventDefault()
+            break
+        case "j":
+            toggle_window('window_cards_jp')
+            event.preventDefault()
+            break
+        case "p":
+            toggle_window('window_pw')
+            event.preventDefault()
+            break
+        case "v":
+            toggle_window('window_vp')
+            event.preventDefault()
+            break
+        case "e":
+            toggle_window('window_eliminated')
+            event.preventDefault()
+            break
 
-    case "Escape":
-        end_local_status()
-        break
-    case "d":
-        menu_measure_distance()
-        event.preventDefault()
-        break
-    case "r":
-        menu_measure_range()
-        event.preventDefault()
-        break
-    case "h":
-        menu_show_hq_range()
-        event.preventDefault()
-        break
-    case "s":
-        menu_show_unit_supply()
-        event.preventDefault()
-        break
+        case "Escape":
+            end_local_status()
+            break
+        case "d":
+            menu_measure_distance()
+            event.preventDefault()
+            break
+        case "r":
+            menu_measure_range()
+            event.preventDefault()
+            break
+        case "h":
+            menu_show_hq_range()
+            event.preventDefault()
+            break
+        case "s":
+            menu_show_unit_supply()
+            event.preventDefault()
+            break
 
-    case "l":
-        toggle_log()
-        event.preventDefault()
-        break
-    case "z":
-        toggle_zoom()
-        event.preventDefault()
-        break
+        case "l":
+            toggle_log()
+            event.preventDefault()
+            break
+        case "z":
+            toggle_zoom()
+            event.preventDefault()
+            break
     }
 })

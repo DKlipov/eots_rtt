@@ -16,7 +16,7 @@ function get_control_marker(h) {
 function is_show_control_hex(hex) {
     if (hex === KWAI_BRIDGE) {
         return G.sid === BURMA_SCENARIO || !is_event_active(events.KWAI_RIVER_BRIDGE)
-    }else if (hex === KWAI_BRIDGE_1) {
+    } else if (hex === KWAI_BRIDGE_1) {
         return !is_event_active(events.KWAI_RIVER_BRIDGE)
     } else if (hex === ATTU) {
         return G.sid === YEAR_1942_SCENARIO
@@ -185,7 +185,7 @@ function action_menu(menu, action_list) {
     var x = 0
     for (var action of action_list)
         x += action_menu_item(action)
-    $("#"+menu).hidden = (x === 0)
+    $("#" + menu).hidden = (x === 0)
 }
 
 function on_update() {
@@ -252,10 +252,14 @@ function on_update() {
 
     // GARRISONS
     map_for_each(G.garrison, (h, count) => {
+        var index = G.offensive.battle_names.indexOf(h) + 1
         if (count === 0)
-            populate_generic("s-loc", h, "unit " + pieces[JP_GARRISON_JP].counter, 1)
-        else
-            populate_generic("s-loc", h, "unit " + pieces[JP_GARRISON_CN[0]].counter, count)
+            populate("s-loc", h, "garrison", index * 4)
+        else {
+            for (var j = 1; j < 4; ++j) {
+                populate("s-loc", h, "garrison", index * 4 + j)
+            }
+        }
     })
 
     // ROADS

@@ -11144,6 +11144,17 @@ function on_init(scenario, game_options, static_view) {
             .tip_magic(focus_unit)
             .tooltip(format_unit_tooltip)
     }
+    // Garrisons
+    for (let i = 1; i < 16; ++i) {
+        define_piece("garrison", i * 4, "jp " + pieces[JP_GARRISON_JP].counter)
+            .tip_magic(() => focus_unit(JP_GARRISON_JP))
+            .tooltip(() => format_unit_tooltip(JP_GARRISON_JP))
+        for (let j = 1; j < 4; ++j) {
+            define_piece("garrison", i * 4 + j, "jp " + pieces[JP_GARRISON_CN[0]].counter)
+                .tip_magic(() => focus_unit(JP_GARRISON_CN[0]))
+                .tooltip(() => format_unit_tooltip(JP_GARRISON_CN[0]))
+        }
+    }
 
     // Cards
     for (let i = 1; i < cards.length; ++i) {
@@ -11230,64 +11241,64 @@ window.addEventListener("keydown", function (event) {
         return
     console.log("key", event.key)
     switch (event.key) {
-    case "i":
-        toggle_preference_checkbox("show_zoi")
-        event.preventDefault()
-        break
-    case "m":
-        toggle_preference_checkbox("show_paths")
-        event.preventDefault()
-        break
+        case "i":
+            toggle_preference_checkbox("show_zoi")
+            event.preventDefault()
+            break
+        case "m":
+            toggle_preference_checkbox("show_paths")
+            event.preventDefault()
+            break
 
-    case "a":
-        toggle_window('window_cards_ap')
-        event.preventDefault()
-        break
-    case "j":
-        toggle_window('window_cards_jp')
-        event.preventDefault()
-        break
-    case "p":
-        toggle_window('window_pw')
-        event.preventDefault()
-        break
-    case "v":
-        toggle_window('window_vp')
-        event.preventDefault()
-        break
-    case "e":
-        toggle_window('window_eliminated')
-        event.preventDefault()
-        break
+        case "a":
+            toggle_window('window_cards_ap')
+            event.preventDefault()
+            break
+        case "j":
+            toggle_window('window_cards_jp')
+            event.preventDefault()
+            break
+        case "p":
+            toggle_window('window_pw')
+            event.preventDefault()
+            break
+        case "v":
+            toggle_window('window_vp')
+            event.preventDefault()
+            break
+        case "e":
+            toggle_window('window_eliminated')
+            event.preventDefault()
+            break
 
-    case "Escape":
-        end_local_status()
-        break
-    case "d":
-        menu_measure_distance()
-        event.preventDefault()
-        break
-    case "r":
-        menu_measure_range()
-        event.preventDefault()
-        break
-    case "h":
-        menu_show_hq_range()
-        event.preventDefault()
-        break
-    case "s":
-        menu_show_unit_supply()
-        event.preventDefault()
-        break
+        case "Escape":
+            end_local_status()
+            break
+        case "d":
+            menu_measure_distance()
+            event.preventDefault()
+            break
+        case "r":
+            menu_measure_range()
+            event.preventDefault()
+            break
+        case "h":
+            menu_show_hq_range()
+            event.preventDefault()
+            break
+        case "s":
+            menu_show_unit_supply()
+            event.preventDefault()
+            break
 
-    case "l":
-        toggle_log()
-        event.preventDefault()
-        break
-    case "z":
-        toggle_zoom()
-        event.preventDefault()
-        break
+        case "l":
+            toggle_log()
+            event.preventDefault()
+            break
+        case "z":
+            toggle_zoom()
+            event.preventDefault()
+            break
     }
 })
 
@@ -12523,7 +12534,7 @@ function get_control_marker(h) {
 function is_show_control_hex(hex) {
     if (hex === KWAI_BRIDGE) {
         return G.sid === BURMA_SCENARIO || !is_event_active(events.KWAI_RIVER_BRIDGE)
-    }else if (hex === KWAI_BRIDGE_1) {
+    } else if (hex === KWAI_BRIDGE_1) {
         return !is_event_active(events.KWAI_RIVER_BRIDGE)
     } else if (hex === ATTU) {
         return G.sid === YEAR_1942_SCENARIO
@@ -12692,7 +12703,7 @@ function action_menu(menu, action_list) {
     var x = 0
     for (var action of action_list)
         x += action_menu_item(action)
-    $("#"+menu).hidden = (x === 0)
+    $("#" + menu).hidden = (x === 0)
 }
 
 function on_update() {
@@ -12759,10 +12770,14 @@ function on_update() {
 
     // GARRISONS
     map_for_each(G.garrison, (h, count) => {
+        var index = G.offensive.battle_names.indexOf(h) + 1
         if (count === 0)
-            populate_generic("s-loc", h, "unit " + pieces[JP_GARRISON_JP].counter, 1)
-        else
-            populate_generic("s-loc", h, "unit " + pieces[JP_GARRISON_CN[0]].counter, count)
+            populate("s-loc", h, "garrison", index * 4)
+        else {
+            for (var j = 1; j < 4; ++j) {
+                populate("s-loc", h, "garrison", index * 4 + j)
+            }
+        }
     })
 
     // ROADS
