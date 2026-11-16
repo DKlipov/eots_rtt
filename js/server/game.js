@@ -505,7 +505,7 @@ function change_political_will(diff, cause) {
     if (diff > 0) {
         diff = "+" + diff
     }
-    log(`>PW to ${G.political_will} (${diff}) - ${cause}.`)
+    log(`PW to ${G.political_will} (${diff}) - ${cause}.`)
 }
 
 function change_wie(diff, cause) {
