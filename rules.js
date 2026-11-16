@@ -18284,7 +18284,7 @@ function change_wie(diff, cause) {
     if (diff > 0) {
         diff = "+" + diff
     }
-    log(`WiE to ${get_wie_level()} (${3 - G.wie}), ${cause} (${-diff}).`)
+    log(`WiE to ${get_wie_level()} (${3 - G.wie}), ${cause} (${diff<0?"+":""}${-diff}).`)
 }
 
 
