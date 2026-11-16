@@ -505,7 +505,7 @@ function change_political_will(diff, cause) {
     if (diff > 0) {
         diff = "+" + diff
     }
-    log(`PW to ${G.political_will} (${diff}) - ${cause}.`)
+    log(`>PW to ${G.political_will} (${diff}) - ${cause}.`)
 }
 
 function change_wie(diff, cause) {
@@ -518,7 +518,7 @@ function change_wie(diff, cause) {
     if (diff > 0) {
         diff = "+" + diff
     }
-    log(`WiE to ${get_wie_level()} (${3 - G.wie}), ${cause} (${diff<0?"+":""}${-diff}).`)
+    log(`WiE to ${get_wie_level()} (${3 - G.wie}), ${cause} (${diff < 0 ? "+" : ""}${-diff}).`)
 }
 
 
@@ -809,7 +809,7 @@ function change_asp(faction, count) {
         G.asp[faction][0] += count
     }
     if (size !== G.asp[faction][0]) {
-        log(`${side_get_log_str(faction)} ASP changed to ${G.asp[faction][0]} (${count}).`)
+        log(`${(count < 0) ? ">" : ""}${side_get_log_str(faction)} ASP changed to ${G.asp[faction][0]} (${count}).`)
     }
 }
 

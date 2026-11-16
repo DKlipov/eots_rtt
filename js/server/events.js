@@ -2351,7 +2351,7 @@ function discard_random_card(faction) {
     }
     var i = G.hand[faction][random(G.hand[faction].length)]
     discard_card(i)
-    log(`${card_get_log_str(i)} discarded.`)
+    log(`>${card_get_log_str(i)} discarded.`)
     if (i === TOJO_RESIGNS && G.turn >= 8) {
         cards[i].event()
     }

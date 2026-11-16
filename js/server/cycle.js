@@ -86,10 +86,10 @@ P.submarine_warfare = {
         }
         if (success && escort === 4) {
             G.events[events.JP_ESCORTS.id] = G.turn + (2 << 4)
-            log(`Escort reduced to +2.`)
+            log(`>Escort reduced to +2.`)
         } else if (success && escort) {
             G.events[events.JP_ESCORTS.id] = 0
-            log(`Escort reduced to 0.`)
+            log(`>Escort reduced to 0.`)
         }
         clear_undo()
         end()

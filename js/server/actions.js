@@ -374,9 +374,7 @@ function get_allowed_actions(num) {
     var card = cards[num]
     var result = []
 
-    if (!card.reshuffle) {
-        result.push("discard")
-    }
+    result.push("discard")
     if (num === TOJO_RESIGNS && G.turn >= 8 || num === SOVIET_INVADE && card.can_play()) {
         return ["event"]
     }

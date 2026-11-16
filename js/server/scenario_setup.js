@@ -869,29 +869,31 @@ function deal_cards() {
         ap_cards = 6
         G.passes[AP] = 1
     }
+    var ap = []
     if (G.surrender[nations.CHINA.id]) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`Allied draw reduced by 1 due to China's surrender.`)
+        ap.push(`Allied draw reduced by 1 due to China's surrender.`)
     }
     if (G.surrender[nations.INDIA.id]) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`Allied draw reduced by 1 due to India's surrender.`)
+        ap.push(`Allied draw reduced by 1 due to India's surrender.`)
     }
     if (G.surrender[nations.AUSTRALIA.id]) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`Allied draw reduced by 1 due to Australia's surrender.`)
+        ap.push(`Allied draw reduced by 1 due to Australia's surrender.`)
     }
     if (G.wie >= 10) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`Allied draw reduced by 1 due to War in Europe at level 4.`)
+        ap.push(`Allied draw reduced by 1 due to War in Europe at level 4.`)
     }
     ap_cards = Math.max(ap_cards, 4)
     G.passes[AP] = Math.min(G.passes[AP], 2)
     log(`Allies drew ${ap_cards} cards.`)
+    ap.forEach(l => log(">" + l))
     if (G.passes[AP]) {
         log(`Allies received ${G.passes[AP]} passes.`)
     }
@@ -920,9 +922,11 @@ function S_P_deal_cards() {
     if (G.surrender[nations.CHINA.id]) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`Allied draw reduced by 1 due to China's surrender.`)
     }
     log(`Allies drew ${ap_cards} cards.`)
+    if (G.surrender[nations.CHINA.id]) {
+        log(`>Allied draw reduced by 1 due to China's surrender.`)
+    }
     if (G.passes[AP]) {
         log(`Allies receive ${G.passes[AP]} passes.`)
     }
@@ -948,15 +952,16 @@ function B_F_W_deal_cards() {
 
     let ap_cards = 4
     G.passes[AP] = 0
+    var ap = []
     if (G.surrender[nations.CHINA.id]) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`Allied draw reduced by 1 due to China's surrender.`)
+        ap.push(`Allied draw reduced by 1 due to China's surrender.`)
     }
     if (G.surrender[nations.INDIA.id]) {
         ap_cards -= 1
         G.passes[AP]++
-        log(`Allied draw reduced by 1 due to India surrender.`)
+        ap.push(`Allied draw reduced by 1 due to India surrender.`)
     }
     if (ap_cards === 4 && is_space_controlled(hex_to_int(2006), AP) && is_space_controlled(hex_to_int(2105), AP)
         && is_space_controlled(hex_to_int(2205), AP)) {
@@ -968,10 +973,11 @@ function B_F_W_deal_cards() {
         if (!success) {
             ap_cards -= 1
             G.passes[AP]++
-            log(`Allied draw reduced by 1 due to Diverted Logistics.`)
+            ap.push(`Allied draw reduced by 1 due to Diverted Logistics.`)
         }
     }
     log(`Allies drew ${ap_cards} cards.`)
+    ap.forEach(l => log(">" + l))
     if (G.passes[AP]) {
         log(`Allies received ${G.passes[AP]} passes.`)
     }
@@ -1311,7 +1317,7 @@ P.arcadia = {
         }
     },
     skip() {
-        if(G.hand[AP].length){
+        if (G.hand[AP].length) {
             end()
             return
         }
@@ -1326,7 +1332,7 @@ P.arcadia = {
             end()
         }
     },
-    card(){
+    card() {
         this.event()
     },
     event() {
