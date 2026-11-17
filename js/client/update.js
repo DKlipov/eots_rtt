@@ -470,6 +470,7 @@ function on_update() {
     action_button("no_move", "No move")
     action_button("eliminate", "Eliminate")
     action_button("con_eliminate", "Eliminate")
+    action_button("eliminate_pbm", "Eliminate")
     action_button("stop", "Stop")
     action_button("displace", "Displace")
     action_button("divisions_button", "Reduce divisions track")//Looks to long for button. "Reduce div"?

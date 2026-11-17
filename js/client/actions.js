@@ -176,6 +176,11 @@ function on_update_local_actions() {
             delete G.actions["skip_pbm"]
         }
     }
+    if (G.actions && G.actions.eliminate_pbm) {
+        if (G.actions.action_hex && G.actions.action_hex.length > 0) {
+            delete G.actions["eliminate_pbm"]
+        }
+    }
 
     document.body.classList.remove("hex-clickable")
 

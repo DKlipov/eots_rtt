@@ -11654,6 +11654,9 @@ P.move_offensive_units = {
         //     action_hex(L.allowed_hexes[i])
         // }
         button("move")
+        if (G.active_stack.length > 0 && G.offensive.stage === POST_BATTLE_STAGE) {
+            button("eliminate_pbm")
+        }
         if (L.move_data.is_air_present && !set_has(G.offensive.battle_hexes, L.move_data.location)) {
             get_air_attack_hex().forEach(h => {
                 action_hex(h)
@@ -11673,8 +11676,11 @@ P.move_offensive_units = {
         G.offensive.organic.pop()
         L.move_data = get_move_data()
     },
+    eliminate_pbm() {
+        this.con_eliminate()
+        this._resume()
+    },
     con_eliminate() {
-        push_undo()
         G.active_stack.forEach(u => eliminate(u))
         G.active_stack = []
     },
