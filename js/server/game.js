@@ -302,9 +302,10 @@ function draw_specific_card(card) {
 }
 
 function eliminate_permanently(unit) {
-    if (G.location[unit] !== PERM_ELIMINATED && G.location[unit] !== NOT_USED) {
-        log(`${unit_get_log_str(unit)} removed from game.`)
+    if (G.location[unit] === PERM_ELIMINATED || G.location[unit] === NOT_USED) {
+        return
     }
+    log(`${unit_get_log_str(unit)} removed from game.`)
     set_location(unit, PERM_ELIMINATED)
     set_delete(G.reduced, unit)
     set_delete(G.oos, unit)

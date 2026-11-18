@@ -20,7 +20,6 @@ P.china_offensive = {
         button("roll")
     },
     roll() {
-        log(`Japan started China offensive.`)
         if (!CLIENT_SIDE_SUPPLY) {
             check_supply()
         }

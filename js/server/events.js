@@ -1070,9 +1070,7 @@ cards[find_card(JP, 64)].event = function () {
 
 P.halsey_typhoon = {
     _begin() {
-        console.log("begin")
         L.allowed_units = []
-        console.log(G.offensive.cancelled.active_units[AP].map(u => pieces[u].name))
         G.offensive.cancelled.active_units[AP].forEach(u => {
             if (unit_on_board(u) && (pieces[u].type === "ca" || pieces[u].type === "dd") && !set_has(G.reduced, u)) {
                 set_add(L.allowed_units, u)
