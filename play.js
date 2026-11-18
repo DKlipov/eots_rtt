@@ -12090,21 +12090,23 @@ function get_china_info() {
     var mods = get_china_offensive_modifiers()
     var info = []
     var draw = draw_list()
-    var count_jp = array_count(draw[JP], c => cards[c].china)
-    var count_ap = array_count(draw[AP], c => cards[c].china)
+    var count_jp = draw[JP].filter(c => cards[c].china)
+    var count_ap = draw[AP].filter(c => cards[c].china)
     if (!surrender) {
         info.push(`Offensive ${(G.turn - offensive > 1) ? "" : "not "}possible${offensive > 0 ? ". Last launched turn " + offensive : ""}.`)
         mods.log.forEach(line => {
-            line = line.replace(/^[%&>]./g, "") // remove log formatting codes
+            line = line.replace(/^[%&]./g, "") // remove log formatting codes
+            line = line.replace(/^>?/g, "") // remove log formatting codes
             line = line.replace(/^>>?/g, "") // remove log formatting codes
             info.push(line)
         })
-        info.push(`Not played Japanese cards to China Government Front Status: ${count_jp}.`)
-        info.push(`Not played Allied cards to China Government Front Status: ${count_ap}.`)
+
+        info.push(`Not played Japanese cards to China Government Front Status: ${format_details(count_jp.length + " cards", count_jp.map(card_get_log_str))}.`)
+        info.push(`Not played Allied cards to China Government Front Status: ${format_details(count_ap.length + " cards", count_ap.map(card_get_log_str))}.`)
     }
     return {
         id, control: surrender ? JP : AP, info,
-        status: `(${G.events[events.CHINA_STATUS.id] + 1}/5) ${nations.CHINA.statuses[G.events[events.CHINA_STATUS.id]]}.`
+        status: `(${Math.min(G.events[events.CHINA_STATUS.id] + 1, 5)}/5) ${nations.CHINA.statuses[G.events[events.CHINA_STATUS.id]]}.`
     }
 }
 
@@ -12236,9 +12238,7 @@ function print_naval_situation(text) {
         if (list.length === 0)
             text.push("<dd>" + label + " eliminated (-1 PW)")
         else {
-            text.push(`<dd>${list.length} ${label}`)
-            if (list.length <= 3)
-                text.push("<dd>" + escape_text(list.map(unit_get_log_str).join(", ")))
+            text.push(`<dd>${label}: ${escape_text(units_str(list))}`)
         }
     }
 
@@ -12511,7 +12511,8 @@ function print_battle_box(text, faction, cf, rm, units, log) {
 
     if (log.length > 0) {
         for (var line of log) {
-            line = line.replace(/^[%&>]./g, "") // remove log formatting codes
+            line = line.replace(/^[%&]./g, "") // remove log formatting codes
+            line = line.replace(/^>?/g, "") // remove log formatting codes
             line = line.replace(/^>>?/g, "") // remove log formatting codes
             text.push("<dt>" + escape_text(line))
         }
