@@ -141,7 +141,7 @@ P.coastal_artillery = {
     unit(u) {
         push_undo()
         log(`>>${unit_get_log_str(u)} hit by coastal defence.`)
-        damage_unit(u,true)
+        damage_unit(u, true)
         end()
     }
 }
@@ -598,7 +598,7 @@ cards[find_card(JP, 32)].before_battle_roll = function (faction) {
 }
 
 cards[find_card(JP, 33)].event = function () {
-    call("draw_from_discard", { active_card: find_card(JP, 33) })
+    call("draw_from_discard", {active_card: find_card(JP, 33)})
 }
 
 P.draw_from_discard = {
@@ -1070,25 +1070,40 @@ cards[find_card(JP, 64)].event = function () {
 
 P.halsey_typhoon = {
     _begin() {
+        console.log("begin")
         L.allowed_units = []
+        console.log(G.offensive.cancelled.active_units[AP].map(u => pieces[u].name))
         G.offensive.cancelled.active_units[AP].forEach(u => {
             if (unit_on_board(u) && (pieces[u].type === "ca" || pieces[u].type === "dd") && !set_has(G.reduced, u)) {
                 set_add(L.allowed_units, u)
             }
         })
-        if (L.allowed_units.length <= 0) {
-            end()
-        }
     },
     inactive: "apply card effect",
     prompt() {
+        if (L.done) {
+            prompt(`Halsey's Typhoon: Done.`)
+            button("done")
+            return
+        }
+        if (L.allowed_units.length === 0) {
+            prompt(`Halsey's Typhoon: No active CA or DD naval units.`)
+            button("skip")
+            return
+        }
         prompt(`Halsey's Typhoon: Reduce one activated full strength Allied CA or DD naval unit.`)
         L.allowed_units.forEach(action_unit)
+    },
+    skip() {
+        end()
     },
     unit(u) {
         push_undo()
         log(`Halsey\`s Typhoon: ${unit_get_log_str(u)}.`)
         damage_unit(u)
+        L.done = 1
+    },
+    done() {
         end()
     }
 }
@@ -1608,7 +1623,7 @@ cards[find_card(AP, 9)].before_commit_offensive = function () {
 }
 
 cards[find_card(AP, 10)].event = function () {
-    call("draw_from_discard", { active_card: find_card(AP, 10) })
+    call("draw_from_discard", {active_card: find_card(AP, 10)})
 }
 
 only_one_ground_unit(find_card(AP, 13))
@@ -2272,7 +2287,7 @@ cards[find_card(AP, 51)].before_unit_activation = function () {
 }
 
 cards[find_card(AP, 52)].event = function () {
-    call("draw_from_discard", { active_card: find_card(AP, 52) })
+    call("draw_from_discard", {active_card: find_card(AP, 52)})
 }
 
 cards[find_card(AP, 55)].before_battle_roll = function (faction) {
