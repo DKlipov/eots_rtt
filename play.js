@@ -10502,7 +10502,7 @@ const LAYOUT = {
         "track_political_will": [731,732,517,64],
         "track_wie": [871,590,377,45],
         "track_strat_record": [779,672,467,53],
-        "box_eliminated": [306,29,200,50],
+        "box_eliminated": [30,29,200,50],
         "label_singapore": [496,781,64,17],
         "box_ap_reinf": [823,583,45,45],
         "box_jp_reinf": [34,34,45,45],

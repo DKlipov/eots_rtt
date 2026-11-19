@@ -308,8 +308,12 @@ P.reinforcement_segment = {
             log(`${G.active ? "Allied" : "Japanese"} reinforcements:`)
             L.logged = 1
         }
-        set_location(G.active_stack[0], DELAYED_BOX)
-        log(`${unit_get_log_str(G.active_stack[0])} voluntary delayed to next turn.`)
+        if (G.sid === BURMA_SCENARIO) {
+            displace_to_turn(G.active_stack[0], 1, false)
+        } else {
+            set_location(G.active_stack[0], DELAYED_BOX)
+            log(`${unit_get_log_str(G.active_stack[0])} voluntary delayed to next turn.`)
+        }
         if (could_sent_to_europe(G.active_stack[0])) {
             set_add(L.europe1, G.active_stack[0])
         }
