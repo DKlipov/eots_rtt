@@ -892,6 +892,9 @@ function deal_cards() {
     }
     ap_cards = Math.max(ap_cards, 4)
     G.passes[AP] = Math.min(G.passes[AP], 2)
+    if (G.turn === 2) {
+        return
+    }
     log(`Allies drew ${ap_cards} cards.`)
     ap.forEach(l => log(">" + l))
     if (G.passes[AP]) {
@@ -1312,6 +1315,7 @@ P.arcadia = {
         G.offensive.draw[AP] = []
         draw_specific_card(find_card(AP, 4))
         log(`Allies took ${card_get_log_str(find_card(AP, 4))} + 4 random cards.`)
+        log(`Allies received 2 passes.`)
         while (G.hand[AP].length < 5) {
             draw_card(AP)
         }
@@ -1324,6 +1328,7 @@ P.arcadia = {
         G.offensive.active_cards = []
         G.offensive.draw[AP] = []
         log(`Allies drew 5 random cards.`)
+        log(`Allies received 2 passes.`)
         clear_undo()
         while (G.hand[AP].length < 5) {
             draw_card(AP)

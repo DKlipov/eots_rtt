@@ -7385,6 +7385,10 @@ function units_str(units) {
     return format_details(`${unit_get_log_str(units[0])} with ${units.length - 1} units`, format_units(units))
 }
 
+function hexes_str(units) {
+    return format_details(`${hex_get_log_str(units[0])} and ${units.length - 1} hexes`, format_hexes(units))
+}
+
 function scenario_data() {
     return SCENARIO_DATA[G.sid]
 }
@@ -11605,7 +11609,7 @@ P.move_offensive_units = {
         } else if (G.offensive.stage === POST_BATTLE_STAGE) {
             offensive_prompt(`${units_str(L.movable_units)} must make a post battle move.`)
         } else {
-            offensive_prompt(`Move units (${L.max_movable - L.movable_units.length}/${L.max_movable}).`)
+            offensive_prompt(`Move ${units_str(L.movable_units)}.`)
         }
 
         if (G.active_stack.length === 0 && G.offensive.stage === POST_BATTLE_STAGE) {
@@ -12457,11 +12461,11 @@ P.declare_battle_hexes = {
     inactive: "assign units to battle",
     prompt() {
         if (G.active_stack.length === 0) {
-            offensive_prompt(`Assign units to battle.`)
+            offensive_prompt(`Assign ${units_str(L.possible_units)} to battle.`)
             L.possible_units.forEach(action_unit)
             button("skip")
         } else {
-            offensive_prompt(`Assign P${G.active_stack[0]} to a battle.`)
+            offensive_prompt(`Select battle hex for P${G.active_stack[0]}.`)
             L.actual_hexes.forEach(action_hex)
         }
     },
@@ -12533,7 +12537,7 @@ P.assign_escort = {
     inactive: "assign escorts",
     prompt() {
         if (G.active_stack.length === 0) {
-            offensive_prompt(`Assign escort units to battles.`)
+            offensive_prompt(`Assign escort ${units_str(L.possible_units)}.`)
             L.possible_units.forEach(action_unit)
         } else {
             offensive_prompt(`Assign escort P${G.active_stack[0]} to a battle.`)
@@ -12703,7 +12707,7 @@ P.special_reaction = {
     },
     inactive: "roll to special reaction",
     prompt() {
-        offensive_prompt(`Special Reaction: You may attempt to create additional battle hexes.`)
+        offensive_prompt(`Special Reaction: You may attempt to create additional battle hexes, ${hexes_str(L.possible_hexes)}.`)
         button("skip")
         L.possible_hexes.forEach(action_hex)
     },
@@ -13261,7 +13265,7 @@ P.choose_battle = {
     },
     inactive: "choose battle hex",
     prompt() {
-        prompt(`Choose next battle to resolve.`)
+        prompt(`Choose next battle to resolve: ${hexes_str(G.offensive.battle_hexes)}.`)
         G.offensive.battle_hexes.forEach(b => {
             action_hex(b)
         })
@@ -13681,7 +13685,7 @@ P.broken_organic = {
     inactive: "organic transport units eliminated",
     prompt() {
         L.allowed_units.forEach(action_unit)
-        prompt(`Organic naval transport eliminated: Eliminate transported units.`)
+        prompt(`Organic naval transport eliminated: Eliminate transported ${units_str(L.allowed_units)}.`)
         if (!L.allowed_units.length) {
             button("done")
         }
@@ -14247,7 +14251,7 @@ function set_control_over_nation(nation, only_ground = true) {
             continue
         }
         var no_enemy_units = (only_ground && !is_faction_ground_units(i, 1 - faction)) || !is_faction_units(i, 1 - faction)
-        var control_changed = is_controllable_hex(i) && no_enemy_units
+        var control_changed = is_controllable_hex(i) && no_enemy_units && !is_space_controlled(i, faction)
         if (control_changed) {
             capture_hex(i, faction, true)
             captured.push(i)
@@ -19609,6 +19613,9 @@ function deal_cards() {
     }
     ap_cards = Math.max(ap_cards, 4)
     G.passes[AP] = Math.min(G.passes[AP], 2)
+    if (G.turn === 2) {
+        return
+    }
     log(`Allies drew ${ap_cards} cards.`)
     ap.forEach(l => log(">" + l))
     if (G.passes[AP]) {
@@ -20029,6 +20036,7 @@ P.arcadia = {
         G.offensive.draw[AP] = []
         draw_specific_card(find_card(AP, 4))
         log(`Allies took ${card_get_log_str(find_card(AP, 4))} + 4 random cards.`)
+        log(`Allies received 2 passes.`)
         while (G.hand[AP].length < 5) {
             draw_card(AP)
         }
@@ -20041,6 +20049,7 @@ P.arcadia = {
         G.offensive.active_cards = []
         G.offensive.draw[AP] = []
         log(`Allies drew 5 random cards.`)
+        log(`Allies received 2 passes.`)
         clear_undo()
         while (G.hand[AP].length < 5) {
             draw_card(AP)

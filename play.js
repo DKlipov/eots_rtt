@@ -7380,6 +7380,10 @@ function units_str(units) {
     return format_details(`${unit_get_log_str(units[0])} with ${units.length - 1} units`, format_units(units))
 }
 
+function hexes_str(units) {
+    return format_details(`${hex_get_log_str(units[0])} and ${units.length - 1} hexes`, format_hexes(units))
+}
+
 function scenario_data() {
     return SCENARIO_DATA[G.sid]
 }

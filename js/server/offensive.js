@@ -762,7 +762,7 @@ P.move_offensive_units = {
         } else if (G.offensive.stage === POST_BATTLE_STAGE) {
             offensive_prompt(`${units_str(L.movable_units)} must make a post battle move.`)
         } else {
-            offensive_prompt(`Move units (${L.max_movable - L.movable_units.length}/${L.max_movable}).`)
+            offensive_prompt(`Move ${units_str(L.movable_units)}.`)
         }
 
         if (G.active_stack.length === 0 && G.offensive.stage === POST_BATTLE_STAGE) {
@@ -1614,11 +1614,11 @@ P.declare_battle_hexes = {
     inactive: "assign units to battle",
     prompt() {
         if (G.active_stack.length === 0) {
-            offensive_prompt(`Assign units to battle.`)
+            offensive_prompt(`Assign ${units_str(L.possible_units)} to battle.`)
             L.possible_units.forEach(action_unit)
             button("skip")
         } else {
-            offensive_prompt(`Assign P${G.active_stack[0]} to a battle.`)
+            offensive_prompt(`Select battle hex for P${G.active_stack[0]}.`)
             L.actual_hexes.forEach(action_hex)
         }
     },
@@ -1690,7 +1690,7 @@ P.assign_escort = {
     inactive: "assign escorts",
     prompt() {
         if (G.active_stack.length === 0) {
-            offensive_prompt(`Assign escort units to battles.`)
+            offensive_prompt(`Assign escort ${units_str(L.possible_units)}.`)
             L.possible_units.forEach(action_unit)
         } else {
             offensive_prompt(`Assign escort P${G.active_stack[0]} to a battle.`)
@@ -1860,7 +1860,7 @@ P.special_reaction = {
     },
     inactive: "roll to special reaction",
     prompt() {
-        offensive_prompt(`Special Reaction: You may attempt to create additional battle hexes.`)
+        offensive_prompt(`Special Reaction: You may attempt to create additional battle hexes, ${hexes_str(L.possible_hexes)}.`)
         button("skip")
         L.possible_hexes.forEach(action_hex)
     },
@@ -2418,7 +2418,7 @@ P.choose_battle = {
     },
     inactive: "choose battle hex",
     prompt() {
-        prompt(`Choose next battle to resolve.`)
+        prompt(`Choose next battle to resolve: ${hexes_str(G.offensive.battle_hexes)}.`)
         G.offensive.battle_hexes.forEach(b => {
             action_hex(b)
         })
@@ -2838,7 +2838,7 @@ P.broken_organic = {
     inactive: "organic transport units eliminated",
     prompt() {
         L.allowed_units.forEach(action_unit)
-        prompt(`Organic naval transport eliminated: Eliminate transported units.`)
+        prompt(`Organic naval transport eliminated: Eliminate transported ${units_str(L.allowed_units)}.`)
         if (!L.allowed_units.length) {
             button("done")
         }
