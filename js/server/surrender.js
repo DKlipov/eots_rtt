@@ -141,7 +141,7 @@ function set_control_over_nation(nation, only_ground = true) {
             continue
         }
         var no_enemy_units = (only_ground && !is_faction_ground_units(i, 1 - faction)) || !is_faction_units(i, 1 - faction)
-        var control_changed = is_controllable_hex(i) && no_enemy_units
+        var control_changed = is_controllable_hex(i) && no_enemy_units && !is_space_controlled(i, faction)
         if (control_changed) {
             capture_hex(i, faction, true)
             captured.push(i)
