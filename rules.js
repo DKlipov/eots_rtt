@@ -11911,7 +11911,7 @@ P.choose_attack_hex = {
         })
         var battle_range = L.L.L.move_data.battle_range
         var path = map_get(G.offensive.paths, G.active_stack[0], [0, 0, 0])
-        if (L.L.L.move_data.is_air_present && path[2] === path[path.length - 1]) {
+        if (L.L.L.move_data.is_air_present && path[2] === path[path.length - 1] && G.offensive.stage !== REACTION_STAGE) {
             end()
             return
         }
@@ -11938,9 +11938,9 @@ P.choose_attack_hex = {
     prompt() {
         var could_pass = could_stack_stop_here() && G.offensive.stage === ATTACK_STAGE
         if (!L.move_data.battle_range) {
-            offensive_prompt(`Assign units to escort (defense strength only).`)
+            offensive_prompt(`Assign ${units_str(G.active_stack)} to escort (defense strength only).`)
         } else {
-            offensive_prompt(`Assign units to battle.`)
+            offensive_prompt(`Assign ${units_str(G.active_stack)} to battle.`)
             if (!could_pass && G.offensive.stage === REACTION_STAGE && L.allowed_hexes.length === 0)
                 V.prompt += " (Reaction units must be assigned to battle)."
         }
@@ -14469,7 +14469,7 @@ P.offensive_phase = script(`
         if (G.hand[G.active].length > 0){
             call offensive_segment
         } else {
-            log (side_get_log_str(G.offensive.attacker)+" have no cards in hand.")
+            log ("#"+(side === AP ? "A" : "J")+"Passed(have no cards in hand).")
         }
         eval {
             end_of_offensive_check()
