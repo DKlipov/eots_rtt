@@ -8499,8 +8499,8 @@ function compute_barges_pbm() {
     var retreat_target = 0
     map_for_each(G.offensive.paths, (u, p) => {
         if (p[0] & BARGES_MOVE) {
-            path = p
-            retreat_target = path[path.length - 2]
+            path = [p[0], p[1], G.location[G.active_stack[0]]]
+            retreat_target = p[p.length - 2]
         }
     })
     path.push(retreat_target)
@@ -8645,7 +8645,7 @@ function compute_ground_naval_move_hexes() {
         }
         mt = NAVAL_MOVE
         if (L.move_type & BARGES_MOVE) {
-            mt |= BARGES_MOVE
+            mt |= BARGES_MOVE | AMPH_MOVE
         }
         if (L.avoid_zoi) {
             zoi_mask |= JP_ZOI << (1 - G.active)
