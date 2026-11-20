@@ -14008,6 +14008,7 @@ P.emergency_move = {
                 return
             }
             if (piece.class === "hq") {
+                this.do_log()
                 eliminate(u)
                 hq_disp++
             } else {
@@ -14049,12 +14050,15 @@ P.emergency_move = {
             button("done")
         }
     },
-    eliminate() {
-        push_undo()
+    do_log(){
         if (!L.logged) {
-            log("Emergency moved:")
+            log("Emergency move:")
             L.logged = 1
         }
+    },
+    eliminate() {
+        push_undo()
+        this.do_log()
         eliminate(G.active_stack[0])
         G.active_stack = []
     },
@@ -14066,10 +14070,7 @@ P.emergency_move = {
     },
     action_hex(hex) {
         push_undo()
-        if (!L.logged) {
-            log("Emergency moved:")
-            L.logged = 1
-        }
+        this.do_log()
         set_location(G.active_stack[0], hex)
         G.active_stack = []
     },
