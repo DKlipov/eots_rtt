@@ -412,12 +412,6 @@ body.Allies #jp_hand { grid-row: 3; }
     line-height: 10px;
 }
 
-/* STACK SHADOW */
-
-.stack.shadow:before {
-    XXX-border-radius: 8px;
-}
-
 /* UNITS & MARKERS */
 
 .unit, .marker {
