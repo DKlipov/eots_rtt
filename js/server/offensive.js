@@ -1986,7 +1986,7 @@ P.define_intelligence_condition = {
             var card = cards[c]
             if ((card.type === INTELLIGENCE || card.type === COUNTER_OFFENSIVE && G.offensive.counter_offensive_card <= 0)
                 && card.can_play())
-                cards.push(c)
+                prepared_cards.push(c)
         })
         if (!G.offensive.battle_hexes.length) {
             offensive_prompt(msg)
