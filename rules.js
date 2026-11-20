@@ -20102,7 +20102,7 @@ P.japan_init_1942 = {
     inactive: "choose card",
     prompt() {
         var c = find_card(JP, 47)
-        prompt(`Setup: You may discard one card to draw ${c}.`)
+        prompt(`Setup: You may discard one card to draw C${c}.`)
         if (G.hand[JP].includes(c)) {
             button("done")
         } else {

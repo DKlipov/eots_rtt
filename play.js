@@ -12975,6 +12975,7 @@ function on_update() {
     // HIDDEN IN A MENU BUTTONS
 
     action_menu("extra_card_action_menu", [
+        "china_offensive",
         "displace_hq",
         "return_hq",
         "jarhat",
@@ -13005,10 +13006,10 @@ function on_update() {
     action_button("divisions_button", "Reduce divisions track")//Looks to long for button. "Reduce div"?
 
     action_button("inter_service", "Remove ISR")
-    action_button("china_offensive", "China Offensive")
     action_button("future_offensive", "FO")
 
     /*
+    action_button("china_offensive", "China Offensive")
     action_button("displace_hq", "Withdraw HQ")
     action_button("return_hq", "Early HQ Return")
     action_button("jarhat", "Jarhat road")
