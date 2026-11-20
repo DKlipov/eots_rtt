@@ -1860,7 +1860,7 @@ P.special_reaction = {
     },
     inactive: "roll to special reaction",
     prompt() {
-        offensive_prompt(`Special Reaction: You may attempt to create additional battle hexes, ${hexes_str(L.possible_hexes)}.`)
+        offensive_prompt(`Special Reaction: You may attempt to create additional battle hexes in ${hexes_str(L.possible_hexes)}.`)
         button("skip")
         L.possible_hexes.forEach(action_hex)
     },
@@ -1996,7 +1996,7 @@ P.define_intelligence_condition = {
         if (G.offensive.type === EC && cards[G.offensive.offensive_card].intelligence && !L.card && !L.rolled) {
             button("skip")
             if (cards.length === 0) {
-                msg = `Have no reaction cards to change the offensive's intelligence condition.`
+                msg = `You have no reaction cards to change the offensive's intelligence condition.`
             }
         } else if ((G.offensive.type === OC || !cards[G.offensive.offensive_card].intelligence)
             && G.offensive.intelligence === SURPRISE && !L.rolled) {

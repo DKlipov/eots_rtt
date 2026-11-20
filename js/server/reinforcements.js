@@ -312,7 +312,7 @@ P.reinforcement_segment = {
             displace_to_turn(G.active_stack[0], 1, false)
         } else {
             set_location(G.active_stack[0], DELAYED_BOX)
-            log(`${unit_get_log_str(G.active_stack[0])} voluntary delayed to next turn.`)
+            log(`${unit_get_log_str(G.active_stack[0])} voluntarily delayed to next turn.`)
         }
         if (could_sent_to_europe(G.active_stack[0])) {
             set_add(L.europe1, G.active_stack[0])

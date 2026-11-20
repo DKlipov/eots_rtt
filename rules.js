@@ -10674,7 +10674,7 @@ P.reinforcement_segment = {
             displace_to_turn(G.active_stack[0], 1, false)
         } else {
             set_location(G.active_stack[0], DELAYED_BOX)
-            log(`${unit_get_log_str(G.active_stack[0])} voluntary delayed to next turn.`)
+            log(`${unit_get_log_str(G.active_stack[0])} voluntarily delayed to next turn.`)
         }
         if (could_sent_to_europe(G.active_stack[0])) {
             set_add(L.europe1, G.active_stack[0])
@@ -12707,7 +12707,7 @@ P.special_reaction = {
     },
     inactive: "roll to special reaction",
     prompt() {
-        offensive_prompt(`Special Reaction: You may attempt to create additional battle hexes, ${hexes_str(L.possible_hexes)}.`)
+        offensive_prompt(`Special Reaction: You may attempt to create additional battle hexes in ${hexes_str(L.possible_hexes)}.`)
         button("skip")
         L.possible_hexes.forEach(action_hex)
     },
@@ -12843,7 +12843,7 @@ P.define_intelligence_condition = {
         if (G.offensive.type === EC && cards[G.offensive.offensive_card].intelligence && !L.card && !L.rolled) {
             button("skip")
             if (cards.length === 0) {
-                msg = `Have no reaction cards to change the offensive's intelligence condition.`
+                msg = `You have no reaction cards to change the offensive's intelligence condition.`
             }
         } else if ((G.offensive.type === OC || !cards[G.offensive.offensive_card].intelligence)
             && G.offensive.intelligence === SURPRISE && !L.rolled) {
@@ -14481,7 +14481,7 @@ P.offensive_phase = script(`
         if (G.hand[G.active].length > 0){
             call offensive_segment
         } else {
-            log ("#"+(side === AP ? "A" : "J")+"Passed(have no cards in hand).")
+            log ("#"+(side === AP ? "A" : "J")+"Passed (no cards in hand).")
         }
         eval {
             end_of_offensive_check()
