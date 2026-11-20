@@ -1,4 +1,4 @@
-var pieces = [
+const pieces = [
     {},
     {
         id: "army_jp_g_mainland",
@@ -3254,3 +3254,7 @@ function get_unit_supply_type(piece) {
     }
     throw new Error("Invalid piece supply: " + piece.name)
 }
+
+// freeze static data to prevent accidental changes
+Object.freeze(pieces)
+pieces.forEach(x => Object.freeze(x))

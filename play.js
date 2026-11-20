@@ -191,7 +191,7 @@ const CHINA_COAST = [2508, 2609, 2709, 2809, 2908, 3007, 3105, 3104, 3305, 3306]
 /* }}} */
 /* {{{ js/common/data.js */
 /* {{{ js/common/data_pieces.js */
-var pieces = [
+const pieces = [
     {},
     {
         id: "army_jp_g_mainland",
@@ -3448,9 +3448,13 @@ function get_unit_supply_type(piece) {
     throw new Error("Invalid piece supply: " + piece.name)
 }
 
+// freeze static data to prevent accidental changes
+Object.freeze(pieces)
+pieces.forEach(x => Object.freeze(x))
+
 /* }}} */
 /* {{{ js/common/data_cards.js */
-var cards = [
+const cards = [
     {},
     {
         "num": 1,
@@ -5234,6 +5238,10 @@ function find_card(faction, num) {
     throw new Error(`Missed card ${faction} ${num}`)
 }
 
+// freeze static data to prevent accidental changes
+Object.freeze(cards)
+cards.forEach(x => Object.freeze(x))
+
 /* }}} */
 /* {{{ js/common/data_map.js */
 //hex data
@@ -5259,7 +5267,7 @@ const UNPLAYABLE_LAND = 16
 
 //Hex sides
 //N,NE,SE,S,SW,NW
-var map = [
+const map = [
     {id: 1004, terrain: OCEAN, edges: [0, 1, 1, 1, 0, 0]},
     {id: 1103, terrain: OCEAN, edges: [0, 0, 1, 1, 1, 0], supply_source: JOINT_SUPPLIED_HEX},
     {id: 1204, terrain: OCEAN, edges: [0, 1, 1, 1, 1, 1], supply_source: JOINT_SUPPLIED_HEX},
@@ -6431,7 +6439,7 @@ var map = [
     {id: 4900, region: "Oceania", terrain: OCEAN, edges: [0, 1, 1, 1, 1, 1]},
 ]
 
-var sp_map = [
+const sp_map = [
     {id: 3017, edges: [0, 1, 1, 1, 0, 0], top: true},
     {id: 3116, edges: [0, 0, 1, 1, 1, 0], top: true},
     {id: 3217, edges: [0, 1, 1, 1, 1, 1], top: true},
@@ -6677,7 +6685,10 @@ var S_P_first_hex = []
         } else {
             data.control_bit = -1
         }
+	Object.freeze(data)
     })
+    Object.freeze(MAP_DATA)
+
     S_P_MAP_CONTROL_BITS = 0
     S_P_MAP_DATA.forEach((data, id) => {
         if (is_controllable_hex_for_map(id, data, SOUTH_PACIFIC_SCENARIO)) {
@@ -6685,7 +6696,10 @@ var S_P_first_hex = []
         } else {
             data.control_bit = -1
         }
+	Object.freeze(data)
     })
+    Object.freeze(S_P_MAP_DATA)
+
     B_F_W_MAP_CONTROL_BITS = 0
     B_F_W_MAP_DATA.forEach((data, id) => {
         if (is_controllable_hex_for_map(id, data, BURMA_SCENARIO)) {
@@ -6693,7 +6707,9 @@ var S_P_first_hex = []
         } else {
             data.control_bit = -1
         }
+	Object.freeze(data)
     })
+    Object.freeze(B_F_W_MAP_DATA)
 })()
 
 function non_playable_hex(id) {

@@ -21,7 +21,7 @@ const UNPLAYABLE_LAND = 16
 
 //Hex sides
 //N,NE,SE,S,SW,NW
-var map = [
+const map = [
     {id: 1004, terrain: OCEAN, edges: [0, 1, 1, 1, 0, 0]},
     {id: 1103, terrain: OCEAN, edges: [0, 0, 1, 1, 1, 0], supply_source: JOINT_SUPPLIED_HEX},
     {id: 1204, terrain: OCEAN, edges: [0, 1, 1, 1, 1, 1], supply_source: JOINT_SUPPLIED_HEX},
@@ -1193,7 +1193,7 @@ var map = [
     {id: 4900, region: "Oceania", terrain: OCEAN, edges: [0, 1, 1, 1, 1, 1]},
 ]
 
-var sp_map = [
+const sp_map = [
     {id: 3017, edges: [0, 1, 1, 1, 0, 0], top: true},
     {id: 3116, edges: [0, 0, 1, 1, 1, 0], top: true},
     {id: 3217, edges: [0, 1, 1, 1, 1, 1], top: true},
@@ -1439,7 +1439,10 @@ var S_P_first_hex = []
         } else {
             data.control_bit = -1
         }
+	Object.freeze(data)
     })
+    Object.freeze(MAP_DATA)
+
     S_P_MAP_CONTROL_BITS = 0
     S_P_MAP_DATA.forEach((data, id) => {
         if (is_controllable_hex_for_map(id, data, SOUTH_PACIFIC_SCENARIO)) {
@@ -1447,7 +1450,10 @@ var S_P_first_hex = []
         } else {
             data.control_bit = -1
         }
+	Object.freeze(data)
     })
+    Object.freeze(S_P_MAP_DATA)
+
     B_F_W_MAP_CONTROL_BITS = 0
     B_F_W_MAP_DATA.forEach((data, id) => {
         if (is_controllable_hex_for_map(id, data, BURMA_SCENARIO)) {
@@ -1455,7 +1461,9 @@ var S_P_first_hex = []
         } else {
             data.control_bit = -1
         }
+	Object.freeze(data)
     })
+    Object.freeze(B_F_W_MAP_DATA)
 })()
 
 function non_playable_hex(id) {
