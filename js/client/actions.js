@@ -96,7 +96,8 @@ function pbm_supply_check(hex) {
 }
 
 function apply_pbm_restrictions() {
-    if (G.offensive.stage !== POST_BATTLE_STAGE || G.active_stack.length === 0 || L.allowed_hexes.length === 0) {
+    if (G.offensive.stage !== POST_BATTLE_STAGE || G.active_stack.length === 0 || L.allowed_hexes.length === 0
+        || G.active === G.offensive.attacker) {
         return
     }
     check_supplied_hexes(pieces[G.active_stack[0]].faction)
