@@ -782,9 +782,7 @@ P.move_offensive_units = {
             L.movable_units.forEach(action_unit)
         } else {
             var buttons = get_move_buttons()
-            if (array_count(buttons, b => !ALWAYS_SHOW_BUTTONS.includes(b)) > 3 && !L.spec_move) {
-                button("advanced_move")
-            } else if (buttons.length) {
+            if (buttons.length) {
                 buttons.forEach(b => button(b))
             }
             buttons.forEach(b => {

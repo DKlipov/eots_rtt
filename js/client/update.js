@@ -299,7 +299,7 @@ function on_update() {
             eliminated.push(u)
         } else if (location > TURN_BOX) {
             populate("turn", turn, "unit", u)
-            update_keyword("unit", u, set_has(G.reduced, u))
+            update_keyword("unit", u, "reduced", set_has(G.reduced, u))
         } else if (location === ELIMINATED_BOX && (!pieces[u].notreplaceable || is_action("unit", u))) {
             eliminated.push(u)
         } else if (location === DELAYED_BOX) {

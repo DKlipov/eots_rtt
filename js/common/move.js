@@ -329,8 +329,8 @@ function compute_ground_naval_move_hexes() {
     if ((L.move_data.move_type & GROUND_MOVE) && (L.move_type !== AMPH_MOVE)) {
         compute_ground_move_hexes()
     }
-    if (G.offensive.stage !== POST_BATTLE_STAGE) {
-        map_delete(L.allowed_hexes, location)
+    if (G.offensive.stage === ATTACK_STAGE) {
+        map_set(L.allowed_hexes, location, [0, 1, move_data.location])
     }
 
     //restore original supply map if it was temporaly changed

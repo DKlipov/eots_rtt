@@ -8690,8 +8690,8 @@ function compute_ground_naval_move_hexes() {
     if ((L.move_data.move_type & GROUND_MOVE) && (L.move_type !== AMPH_MOVE)) {
         compute_ground_move_hexes()
     }
-    if (G.offensive.stage !== POST_BATTLE_STAGE) {
-        map_delete(L.allowed_hexes, location)
+    if (G.offensive.stage === ATTACK_STAGE) {
+        map_set(L.allowed_hexes, location, [0, 1, move_data.location])
     }
 
     //restore original supply map if it was temporaly changed
@@ -12845,7 +12845,7 @@ function on_update() {
             eliminated.push(u)
         } else if (location > TURN_BOX) {
             populate("turn", turn, "unit", u)
-            update_keyword("unit", u, set_has(G.reduced, u))
+            update_keyword("unit", u, "reduced", set_has(G.reduced, u))
         } else if (location === ELIMINATED_BOX && (!pieces[u].notreplaceable || is_action("unit", u))) {
             eliminated.push(u)
         } else if (location === DELAYED_BOX) {
