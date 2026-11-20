@@ -14481,7 +14481,7 @@ P.offensive_phase = script(`
         if (G.hand[G.active].length > 0){
             call offensive_segment
         } else {
-            log ("#"+(side === AP ? "A" : "J")+"Passed (no cards in hand).")
+            log ("#"+(G.active === AP ? "A" : "J")+"Passed (no cards in hand).")
         }
         eval {
             end_of_offensive_check()
