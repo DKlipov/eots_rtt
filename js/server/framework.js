@@ -39,6 +39,10 @@ function action(action, argument) {
 }
 
 function finish(result, message) {
+    delete G.redo
+    delete G.persisted_undo
+    delete G.prepared_undo
+    delete G.undo
     G.active = -1
     G.result = ROLES[result] ?? result
     G.L = L = {message}
