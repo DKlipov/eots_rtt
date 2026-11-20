@@ -1981,7 +1981,7 @@ P.define_intelligence_condition = {
     inactive: "react",
     prompt() {
         var msg = `You may attempt to change the offensive's intelligence condition.`
-        var cards = []
+        var prepared_cards = []
         get_hand(G.active).forEach(c => {
             var card = cards[c]
             if ((card.type === INTELLIGENCE || card.type === COUNTER_OFFENSIVE && G.offensive.counter_offensive_card <= 0)
@@ -1995,7 +1995,7 @@ P.define_intelligence_condition = {
         }
         if (G.offensive.type === EC && cards[G.offensive.offensive_card].intelligence && !L.card && !L.rolled) {
             button("skip")
-            if (cards.length === 0) {
+            if (prepared_cards.length === 0) {
                 msg = `You have no reaction cards to change the offensive's intelligence condition.`
             }
         } else if ((G.offensive.type === OC || !cards[G.offensive.offensive_card].intelligence)
@@ -2007,7 +2007,7 @@ P.define_intelligence_condition = {
             return
         }
         if (!L.rolled) {
-            cards.forEach(action_card)
+            prepared_cards.forEach(action_card)
         } else if (get_hand(R).includes(JN_25_SPECIAL)) {
             action_card(JN_25_SPECIAL)
         }
