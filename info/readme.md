@@ -10,15 +10,22 @@
 
 ----
 
-## Offensive Unit Activation & Movement
+## Card actions
 
 Select a highlighted card and choose a play option button in the upper
 right taskbar. To start building an Offensive, choose an HQ and activate
 & move units from there.
 
+Some rare used actions e.g. HQ withdrawal, HQ return, discard, build CBI,
+Chinese offensive do not visible by default. To conduct that select card
+from your hand, click a small offensive card icon on top menu bar and
+select required action.
+
+## Offensive Unit Activation & Movement
+
 When activating units, you click to add them or click them again to
-remove them. Clicking the undo button will step you back to the Choose
-HQ step.
+remove them. Clicking the undo button will step you back to the "Choose
+HQ" step.
 
 With unit movement, it is not required to count hexes or legs (in the
 case of air units) to move a unit on the board. The module will
