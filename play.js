@@ -11407,7 +11407,8 @@ function pbm_supply_check(hex) {
 }
 
 function apply_pbm_restrictions() {
-    if (G.offensive.stage !== POST_BATTLE_STAGE || G.active_stack.length === 0 || L.allowed_hexes.length === 0) {
+    if (G.offensive.stage !== POST_BATTLE_STAGE || G.active_stack.length === 0 || L.allowed_hexes.length === 0
+        || G.active === G.offensive.attacker) {
         return
     }
     check_supplied_hexes(pieces[G.active_stack[0]].faction)
@@ -13271,9 +13272,38 @@ const supply_types = [
     "to_hq", // to in-supply HQ (last point in path is HQ)
 ]
 
+function same_direction(arr, index) {
+    if (arr.length <= index + 2) {
+        return false
+    }
+    var a1 = hex_center(arr[index])
+    var a2 = hex_center(arr[index + 1])
+    var a3 = hex_center(arr[index + 2])
+    return a1[0] - a2[0] === a2[0] - a3[0] && a1[1] - a2[1] === a2[1] - a3[1]
+}
+
+function check_collisions(supply_data) {
+    var dots = []
+    var result = false
+    supply_types.forEach((type, index) => {
+        var v = supply_data.path[type]
+        if (!v || v.length < 3) return
+        for (var j = 1; j < v.length - 1; j++) {
+            if (set_has(dots, v[j])) {
+                result = true
+                return
+            }
+            set_add(dots, v[j])
+        }
+    })
+    return result
+}
+
 function canvas_draw_supply(supply_data) {
     canvas_clear_paths()
 
+    var collisisons = check_collisions(supply_data)
+console.log(collisisons)
     supply_types.forEach((type, index) => {
         var lines = []
         var dots = []
@@ -13281,13 +13311,34 @@ function canvas_draw_supply(supply_data) {
         if (!v || v.length < 2) return
         var start = hex_center(v[0])
         var finish = null
-        var d_base = (index - 1.5) * 6
+        var d_base = collisisons ? (index - 1.5) * 6 : 0
         for (var j = 1; j < v.length; j++) {
             if (v[j - 1] === v[j]) continue
             start = hex_center(v[j - 1])
             finish = hex_center(v[j])
             var d = d_base
-            lines.push([type, supply_data.oos, (j > 1 ? d : 0) + start[0], start[1], (j < v.length - 1 ? d : 0) + finish[0], finish[1]])
+            if (v.length === 2) {
+                lines.push([type, supply_data.oos, start[0], start[1], finish[0], finish[1]])
+            } else if (j === 1 && same_direction(v, 0)) {
+                var x1 = (finish[0] - start[0]) / 2
+                var y1 = (finish[1] - start[1]) / 2
+                lines.push([type, supply_data.oos, start[0], start[1], d + finish[0] - x1, finish[1] - y1])
+                start = [finish[0] - x1, finish[1] - y1]
+                lines.push([type, supply_data.oos, d + start[0], start[1], d + finish[0], finish[1]])
+            } else if (j === 1) {
+                lines.push([type, supply_data.oos, start[0], start[1], d + finish[0], finish[1]])
+            } else if (j === v.length - 1 && same_direction(v, v.length - 3)) {
+                var x1 = (finish[0] - start[0]) / 2
+                var y1 = (finish[1] - start[1]) / 2
+                lines.push([type, supply_data.oos, d + start[0] + x1, start[1] + y1, finish[0], finish[1]])
+                finish = [finish[0] - x1, finish[1] - y1]
+                lines.push([type, supply_data.oos, d + start[0], start[1], d + finish[0], finish[1]])
+            } else if (j === v.length - 1) {
+                lines.push([type, supply_data.oos, d + start[0], start[1], finish[0], finish[1]])
+            } else {
+                lines.push([type, supply_data.oos, d + start[0], start[1], d + finish[0], finish[1]])
+            }
+
         }
         if (v.length >= 2 && v[0] !== v[1]) {
             dots.push([type, index, ...hex_center(v[0])])
@@ -13312,7 +13363,7 @@ function canvas_draw_supply(supply_data) {
         CANVAS_CTX.setLineDash([])
         for (var [type, d, x1, y1] of dots) {
             CANVAS_CTX.beginPath()
-            CANVAS_CTX.arc(x1, y1, 8-d*2, 0, 2 * Math.PI)
+            CANVAS_CTX.arc(x1, y1, 4, 0, 2 * Math.PI)
             CANVAS_CTX.stroke()
         }
 
@@ -13336,7 +13387,7 @@ function canvas_draw_supply(supply_data) {
             CANVAS_CTX.strokeStyle = supply_stroke[type]
             CANVAS_CTX.fillStyle = supply_fill[type]
             CANVAS_CTX.beginPath()
-            CANVAS_CTX.arc(x1, y1, 8-d*2, 0, 2 * Math.PI)
+            CANVAS_CTX.arc(x1, y1, 4, 0, 2 * Math.PI)
             CANVAS_CTX.fill()
             CANVAS_CTX.stroke()
         }
