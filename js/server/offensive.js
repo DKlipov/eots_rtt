@@ -1980,27 +1980,34 @@ P.define_intelligence_condition = {
     },
     inactive: "react",
     prompt() {
-        offensive_prompt(`You may attempt to change the offensive's intelligence condition.`)
+        var msg = `You may attempt to change the offensive's intelligence condition.`
+        var cards = []
+        get_hand(G.active).forEach(c => {
+            var card = cards[c]
+            if ((card.type === INTELLIGENCE || card.type === COUNTER_OFFENSIVE && G.offensive.counter_offensive_card <= 0)
+                && card.can_play())
+                cards.push(c)
+        })
         if (!G.offensive.battle_hexes.length) {
+            offensive_prompt(msg)
             button("done")
             return
         }
         if (G.offensive.type === EC && cards[G.offensive.offensive_card].intelligence && !L.card && !L.rolled) {
             button("skip")
+            if (cards.length === 0) {
+                msg = `Have no reaction cards to change the offensive's intelligence condition.`
+            }
         } else if ((G.offensive.type === OC || !cards[G.offensive.offensive_card].intelligence)
             && G.offensive.intelligence === SURPRISE && !L.rolled) {
             button("roll")
         }
+        offensive_prompt(msg)
         if (G.offensive.offensive_card === CARRIER_RAID && G.offensive.type === EC) {
             return
         }
         if (!L.rolled) {
-            get_hand(G.active).forEach(c => {
-                var card = cards[c]
-                if ((card.type === INTELLIGENCE || card.type === COUNTER_OFFENSIVE && G.offensive.counter_offensive_card <= 0)
-                    && card.can_play())
-                    action_card(c)
-            })
+            cards.forEach(action_card)
         } else if (get_hand(R).includes(JN_25_SPECIAL)) {
             action_card(JN_25_SPECIAL)
         }
@@ -3203,7 +3210,7 @@ P.emergency_move = {
             button("done")
         }
     },
-    do_log(){
+    do_log() {
         if (!L.logged) {
             log("Emergency move:")
             L.logged = 1
