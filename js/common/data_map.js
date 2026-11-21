@@ -1364,8 +1364,8 @@ var S_P_first_hex = []
         edges_int: MAP_DATA[OAHU].edges_int
     }
 
-    B_F_W_MAP_DATA[CHINA_BOX] = MAP_DATA[CHINA_BOX]
-    S_P_MAP_DATA[CHINA_BOX] = MAP_DATA[CHINA_BOX]
+    B_F_W_MAP_DATA[CHINA_BOX] = Object.assign({},MAP_DATA[CHINA_BOX])
+    S_P_MAP_DATA[CHINA_BOX] = Object.assign({},MAP_DATA[CHINA_BOX])
     S_P_MAP_DATA[OAHU] = Object.assign({}, MAP_DATA[OAHU])
     S_P_MAP_DATA[OAHU].supply_source = JOINT_SUPPLIED_HEX | US_SUPPLIED_HEX
     S_P_MAP_DATA[OAHU].nh = []

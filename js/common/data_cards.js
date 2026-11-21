@@ -1781,7 +1781,3 @@ function find_card(faction, num) {
     }
     throw new Error(`Missed card ${faction} ${num}`)
 }
-
-// freeze static data to prevent accidental changes
-Object.freeze(cards)
-cards.forEach(x => Object.freeze(x))

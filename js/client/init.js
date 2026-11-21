@@ -564,6 +564,8 @@ function on_init(scenario, game_options, static_view) {
         if (event.counter)
             define_marker("event-marker", event.id, event.counter)
                 .tooltip(event.name)
+
+    freeze_all()
 }
 
 // KEYBOARD SHORTCUTS

@@ -25,3 +25,5 @@ function check_supply() {
 /** import server/query.js */
 /** import server/scenario_setup.js */
 /** import server/framework.js */
+
+freeze_all()

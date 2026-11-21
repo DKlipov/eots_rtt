@@ -3453,9 +3453,7 @@ function get_unit_supply_type(piece) {
     throw new Error("Invalid piece supply: " + piece.name)
 }
 
-// freeze static data to prevent accidental changes
-Object.freeze(pieces)
-pieces.forEach(x => Object.freeze(x))
+
 
 /* }}} */
 /* {{{ js/common/data_cards.js */
@@ -5243,10 +5241,6 @@ function find_card(faction, num) {
     throw new Error(`Missed card ${faction} ${num}`)
 }
 
-// freeze static data to prevent accidental changes
-Object.freeze(cards)
-cards.forEach(x => Object.freeze(x))
-
 /* }}} */
 /* {{{ js/common/data_map.js */
 //hex data
@@ -6615,8 +6609,8 @@ var S_P_first_hex = []
         edges_int: MAP_DATA[OAHU].edges_int
     }
 
-    B_F_W_MAP_DATA[CHINA_BOX] = MAP_DATA[CHINA_BOX]
-    S_P_MAP_DATA[CHINA_BOX] = MAP_DATA[CHINA_BOX]
+    B_F_W_MAP_DATA[CHINA_BOX] = Object.assign({},MAP_DATA[CHINA_BOX])
+    S_P_MAP_DATA[CHINA_BOX] = Object.assign({},MAP_DATA[CHINA_BOX])
     S_P_MAP_DATA[OAHU] = Object.assign({}, MAP_DATA[OAHU])
     S_P_MAP_DATA[OAHU].supply_source = JOINT_SUPPLIED_HEX | US_SUPPLIED_HEX
     S_P_MAP_DATA[OAHU].nh = []
@@ -7189,15 +7183,15 @@ function for_each_card(apply) {
     }
 }
 
-function format_cards(cards, sep=", ") {
+function format_cards(cards, sep = ", ") {
     return cards.map(card_get_log_str).join(sep)
 }
 
-function format_units(units, sep=", ") {
+function format_units(units, sep = ", ") {
     return units.map(unit_get_log_str).join(sep)
 }
 
-function format_hexes(hexes, sep=", ") {
+function format_hexes(hexes, sep = ", ") {
     return hexes.map(hex_get_log_str).join(sep)
 }
 
@@ -7213,18 +7207,30 @@ function get_direction(from, to) {
     var x = ((from) % 29)
     var d = ((from - x) / 29) & 1
     switch (from - to + 30 + d * 10) {
-    case 31: return 0
-    case 2: return 1
-    case 1: return 2
-    case 29: return 3
-    case 59: return 4
-    case 60: return 5
-    case 41: return 0
-    case 11: return 1
-    case 10: return 2
-    case 39: return 3
-    case 68: return 4
-    case 69: return 5
+        case 31:
+            return 0
+        case 2:
+            return 1
+        case 1:
+            return 2
+        case 29:
+            return 3
+        case 59:
+            return 4
+        case 60:
+            return 5
+        case 41:
+            return 0
+        case 11:
+            return 1
+        case 10:
+            return 2
+        case 39:
+            return 3
+        case 68:
+            return 4
+        case 69:
+            return 5
     }
     return 0
 }
@@ -7461,6 +7467,15 @@ function array_equals(a, b) {
         }
     }
     return true
+}
+
+function freeze_all() {
+    // freeze static data to prevent accidental changes
+    Object.freeze(cards)
+    cards.forEach(x => Object.freeze(x))
+    // freeze static data to prevent accidental changes
+    Object.freeze(pieces)
+    pieces.forEach(x => Object.freeze(x))
 }
 /* }}} */
 /* {{{ js/common/supply.js */
@@ -20926,5 +20941,7 @@ function shuffle_bigint(list) {
 }
 
 /* }}} */
+
+freeze_all()
 
 //# sourceMappingURL=rules.js.map
