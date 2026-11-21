@@ -16099,6 +16099,9 @@ function set_kamikaze_able_battles() {
 P.kamikaze_attack = {
     _begin() {
         check_units()
+        if (!G.offensive.kamikaze) {
+            set_kamikaze_able_battles()
+        }
         L.allowed_units = []
         for_each_unit_on_map((u, piece, location) => {
             if (piece.faction === JP && piece.class === "air" && G.offensive.kamikaze.some(bh => get_distance(bh, location) <= piece.ebr)) {
