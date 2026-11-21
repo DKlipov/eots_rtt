@@ -12539,7 +12539,7 @@ P.declare_battle_hexes = {
 
 P.assign_escort = {
     _begin() {
-        if (G.offensive.stage !== ATTACK_STAGE) {
+        if (G.offensive.stage === POST_BATTLE_STAGE) {
             end()
             return
         }
