@@ -10692,6 +10692,7 @@ P.reinforcement_segment = {
         if (pieces[G.active_stack[0]].class === "hq") {
             set_delete(L.allowed_hexes, hex)
             G.supply_cache[hex] |= pieces[G.active_stack[0]].supply
+            G.supply_cache_id++
         }
         update_reinf_active()
     },
