@@ -9332,6 +9332,7 @@ function get_move_type(type) {
 
 
 function set_location(unit, location, no_logs) {
+    var faction = pieces[unit].faction
     var prev_location = G.location[unit]
     var prev_out = prev_location > LAST_BOARD_HEX && prev_location !== CHINA_BOX
     var current_on_map = location <= LAST_BOARD_HEX || location === CHINA_BOX
@@ -9342,13 +9343,17 @@ function set_location(unit, location, no_logs) {
     }
     var pair_location = G.location[pieces[unit].pair]
     var size = get_overstack_size(unit)
-    if (G.overstack_cache && (prev_location <= LAST_BOARD_HEX || prev_location === CHINA_BOX) && pair_location !== prev_location) {
+    if (is_overstack_cache_init(faction) && (prev_location <= LAST_BOARD_HEX || prev_location === CHINA_BOX) && pair_location !== prev_location) {
         G.overstack_cache[prev_location] -= size
     }
-    if (G.overstack_cache && (location <= LAST_BOARD_HEX || location === CHINA_BOX) && pair_location !== location) {
+    if (is_overstack_cache_init(faction) && (location <= LAST_BOARD_HEX || location === CHINA_BOX) && pair_location !== location) {
         G.overstack_cache[location] += size
     }
     G.location[unit] = location
+}
+
+function is_overstack_cache_init(faction) {
+    return G.overstack_cache && G.overstack_cache[0] === faction
 }
 
 /* }}} */

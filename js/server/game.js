@@ -319,7 +319,7 @@ function eliminate(unit, no_log = false) {
     }
     var size = get_overstack_size(unit)
     var location = G.location[unit]
-    if (G.overstack_cache && (location <= LAST_BOARD_HEX || location === CHINA_BOX)) {
+    if (is_overstack_cache_init(piece.faction) && (location <= LAST_BOARD_HEX || location === CHINA_BOX)) {
         G.overstack_cache[location] -= size
     }
     if (piece.class === "hq" && !piece.notreplaceable) {
