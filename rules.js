@@ -14798,7 +14798,7 @@ P.attrition = {
             prompt(`Attrition: Done.`)
             button("done")
         } else {
-            prompt(`Attrition: Reduce or eliminate ground and air units that are out of supply.`)
+            prompt(`Attrition: Reduce or eliminate ${units_str(L.unit_to_attrition)} that are out of supply.`)
             L.unit_to_attrition.forEach(action_unit)
         }
     },
