@@ -13636,6 +13636,8 @@ P.apply_naval_winner = function () {
     var attacker_units = battle.air_naval[G.offensive.attacker].filter(u => unit_on_board(u))
     var defender_units = battle.air_naval[1 - G.offensive.attacker].filter(u => unit_on_board(u))
     G.offensive.battle = object_copy(battle)
+    var l = G.log
+    G.log = []
     prepare_attack(AP)
     get_battle_modifiers(AP)
     prepare_attack(JP)
@@ -13643,7 +13645,7 @@ P.apply_naval_winner = function () {
     var attacker_power = G.offensive.battle.strength[G.offensive.attacker]
     var defender_power = G.offensive.battle.strength[1 - G.offensive.attacker]
     G.offensive.battle = battle
-
+    G.log = l
     var air_cover = attacker_units.find(u => pieces[u].br) || !defender_units.find(u => pieces[u].br)
     var attacker_win = attacker_power > defender_power && air_cover || defender_power === 0
     if (battle.amph_ground.length) {
@@ -14367,13 +14369,13 @@ P.strategic_phase = script(`
     call submarine_warfare
     call strategic_bombing
     if (G.turn === 2){
-        call arcadia
         if (G.options && G.options.historical) {
             eval {
                 draw_hist_cards()
                 delete G.options['historical']
             }
         }
+        call arcadia
     }
     eval {
         scenario_data().deal_cards()

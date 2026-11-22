@@ -20,13 +20,13 @@ P.strategic_phase = script(`
     call submarine_warfare
     call strategic_bombing
     if (G.turn === 2){
-        call arcadia
         if (G.options && G.options.historical) {
             eval {
                 draw_hist_cards()
                 delete G.options['historical']
             }
         }
+        call arcadia
     }
     eval {
         scenario_data().deal_cards()
