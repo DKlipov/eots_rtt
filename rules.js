@@ -13635,8 +13635,14 @@ P.apply_naval_winner = function () {
     }
     var attacker_units = battle.air_naval[G.offensive.attacker].filter(u => unit_on_board(u))
     var defender_units = battle.air_naval[1 - G.offensive.attacker].filter(u => unit_on_board(u))
-    var attacker_power = sum_combat_factor(attacker_units)
-    var defender_power = sum_combat_factor(defender_units)
+    G.offensive.battle = object_copy(battle)
+    prepare_attack(AP)
+    get_battle_modifiers(AP)
+    prepare_attack(JP)
+    get_battle_modifiers(JP)
+    var attacker_power = G.offensive.battle.strength[G.offensive.attacker]
+    var defender_power = G.offensive.battle.strength[1 - G.offensive.attacker]
+    G.offensive.battle = battle
 
     var air_cover = attacker_units.find(u => pieces[u].br) || !defender_units.find(u => pieces[u].br)
     var attacker_win = attacker_power > defender_power && air_cover || defender_power === 0
