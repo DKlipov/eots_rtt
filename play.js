@@ -11946,8 +11946,9 @@ function supply_query(unit) {
     L.supply_ports = L.supply
     L.supply = {queue: []}
     mark_supply_ports_overland(hq)
-    L.supply_ports.queue.push(...L.supply.queue)
-    L.supply_ports.retracing.push(...L.supply.retracing)
+    L.supply.queue.push(...L.supply_ports.queue)
+    L.supply.retracing.push(...L.supply_ports.retracing)
+    L.supply_ports = L.supply
     L.supply = {queue: []}
     if (unit === CHINA_BOX) {
         trace_kunming(result)
