@@ -12415,7 +12415,7 @@ function remove_battle_hex_without_def(loc) {
     if (set_has(G.offensive.battle_hexes, loc) && !(G.supply_cache[loc] & (non_ground << defender)) && !get_garrison(loc).length) {
         set_delete(G.offensive.battle_hexes, loc)
     }
-    if (!is_faction_units(1 - G.offensive.attacker)) {
+    if (!is_faction_units(loc, 1 - G.offensive.attacker)) {
         capture_hex(loc, G.offensive.attacker)
     }
 }
