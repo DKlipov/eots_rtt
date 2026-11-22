@@ -14361,13 +14361,13 @@ P.strategic_phase = script(`
     call submarine_warfare
     call strategic_bombing
     if (G.turn === 2){
+        call arcadia
         if (G.options && G.options.historical) {
             eval {
                 draw_hist_cards()
                 delete G.options['historical']
             }
         }
-        call arcadia
     }
     eval {
         scenario_data().deal_cards()
@@ -19611,7 +19611,9 @@ function deal_cards() {
     if (G.strategic_warfare) {
         jp_cards = Math.max(jp_cards - G.strategic_warfare, 4)
     }
-    log(`Japan drew ${jp_cards} cards ${source}.`)
+    if (!G.hand[JP].length) {
+        log(`Japan drew ${jp_cards} cards ${source}.`)
+    }
     G.passes[JP] = 0
     if (jp_cards === 6) {
         G.passes[JP] = 1
@@ -20128,8 +20130,9 @@ P.japan_init_1942 = {
         if (G.options && G.options.historical) {
             draw_hist_cards()
             delete G.options['historical']
+        } else {
+            log(`Japan drew 7 random cards.`)
         }
-        log(`Japan drew 7 random cards.`)
         while (G.hand[JP].length < 7) {
             draw_card(JP)
         }
