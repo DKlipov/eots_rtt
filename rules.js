@@ -4284,6 +4284,7 @@ const cards = [
         "oc": 3,
         "remove": true,
         "reshuffle": true,
+        "china": -2,
         "name": "Soviet Invade Manchuria",
     },
     {
