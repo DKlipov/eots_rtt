@@ -16743,7 +16743,7 @@ P.submarine_attack = {
     },
     inactive: "apply card effect",
     prompt() {
-        prompt(`Submarine Attack: Lose ${L.hits} naval steps.`)
+        prompt(`Submarine Attack: Lose ${L.hits} naval steps. Remaining units: ${units_str(L.allowed_units)}.`)
         if (L.allowed_units.length === 0 || L.hits <= 0) {
             button("done")
         } else {
