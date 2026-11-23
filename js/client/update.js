@@ -413,7 +413,7 @@ function on_update() {
         if (Array.isArray(v)) {
             v.forEach((val) => {
                 if (val >= first_turn && val <= last_turn) {
-                    populate("turn", val, "turn-marker" + i, val)
+                    populate("turn", val, "turn-marker-multiple", val + i * 12)
                 }
             })
         } else if (v >= first_turn && v <= last_turn) {

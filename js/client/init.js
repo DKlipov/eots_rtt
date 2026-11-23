@@ -417,7 +417,11 @@ function on_init(scenario, game_options, static_view) {
         })
     }
 
-    define_stack("s-loc", CHINA_BOX, map_layout.box_air_unit_in_china, {...TRACK_STACK_PARAMS, sort: sort_unit_stack, gravity_x: 0.22})
+    define_stack("s-loc", CHINA_BOX, map_layout.box_air_unit_in_china, {
+        ...TRACK_STACK_PARAMS,
+        sort: sort_unit_stack,
+        gravity_x: 0.22
+    })
 
     define_space("action_hex", CHINA_BOX, map_layout.box_air_unit_in_china, "china_box")
         .tooltip("China Box")
@@ -554,8 +558,8 @@ function on_init(scenario, game_options, static_view) {
     TURN_MARKERS.forEach(function (m, i) {
         define_marker("turn-marker", i, m.counter).tooltip(m.tooltip)
         if (m.multiple) {
-            for (var j = 0; j < 12; j++) {
-                define_marker("turn-marker" + i, j, m.counter).tooltip(m.tooltip)
+            for (var j = 0; j <= 12; j++) {
+                define_marker("turn-marker-multiple", j + i * 12, m.counter).tooltip(m.tooltip)
             }
         }
     })
