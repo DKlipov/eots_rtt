@@ -887,7 +887,7 @@ P.kamikaze_attack = {
             prompt(`Kamikaze Attack: Choose Japanese air unit.`)
             L.allowed_units.forEach(action_unit)
         } else {
-            prompt(`Kamikaze Attack: Eliminate ${L.hits} Allied naval steps.`)
+            prompt(`Kamikaze Attack: Assign ${L.hits} step losses to ${units_str(L.allowed_units)}.`)
             var has_non_damaged = []
             L.allowed_units.forEach(u => {
                 if (!set_has(G.reduced, u)) {
@@ -1492,7 +1492,7 @@ P.submarine_attack = {
     },
     inactive: "apply card effect",
     prompt() {
-        prompt(`Submarine Attack: Lose ${L.hits} naval steps. Remaining units: ${units_str(L.allowed_units)}.`)
+        prompt(`Submarine Attack: Assign ${L.hits} step losses to ${units_str(L.allowed_units)}.`)
         if (L.allowed_units.length === 0 || L.hits <= 0) {
             button("done")
         } else {
