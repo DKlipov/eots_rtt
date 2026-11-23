@@ -3112,6 +3112,7 @@ P.retreat = {
 }
 
 function select_retreat_hex() {
+    check_units()
     L.hex_to_retreat = []
     var u = G.active_stack[0]
     var location = G.location[u]
