@@ -1492,12 +1492,13 @@ P.submarine_attack = {
     },
     inactive: "apply card effect",
     prompt() {
-        prompt(`Submarine Attack: Assign ${L.hits} step losses to ${units_str(L.allowed_units)}.`)
         if (L.allowed_units.length === 0 || L.hits <= 0) {
+            prompt(`Submarine Attack: Done.`)
             button("done")
-        } else {
-            L.allowed_units.forEach(action_unit)
+            return
         }
+        prompt(`Submarine Attack: Assign ${L.hits} step losses to ${units_str(L.allowed_units)}.`)
+        L.allowed_units.forEach(action_unit)
     },
     unit(u) {
         push_undo()
