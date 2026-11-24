@@ -109,7 +109,7 @@ function get_hq_reinforcement_hexes() {
         const MD = get_map_data(item)
         const overland = overland_set[item] & 1
         const non_neutral_zoi_s = has_non_n_zoi(item, 1 - faction)
-        const enemy_port_s = (MD.port && is_space_controlled(item, 1 - faction))
+        const friendly_port_s = supply_port(item,faction)
         const occupied_land_s = G.supply_cache[item] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[item] & JP_GAH_UNITS << faction)
         const oversea = overland_set[item] & 2
         for (var j = 0; j < nh_list.length; j++) {
@@ -118,14 +118,14 @@ function get_hq_reinforcement_hexes() {
                 continue
             }
             var reachable = false
-            const enemy_port = enemy_port_s || (MD.port && is_space_controlled(nh, 1 - faction))
+            const friendly_port = friendly_port_s || supply_port(nh,faction)
             const occupied_land = occupied_land_s || G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
-            if (!(overland_set[nh] & 1) && (overland || (MD.port && !enemy_port)) && MD.edges_int & GROUND << 5 * j && !occupied_land) {
+            if (!(overland_set[nh] & 1) && (overland || friendly_port) && MD.edges_int & GROUND << 5 * j && !occupied_land) {
                 reachable = true
                 overland_set[nh] |= 1
             }
             const non_neutral_zoi = non_neutral_zoi_s || has_non_n_zoi(nh, 1 - faction)
-            if (!(overland_set[nh] & 2) && (oversea || (MD.port && !enemy_port)) && MD.edges_int & WATER << 5 * j && !non_neutral_zoi) {
+            if (!(overland_set[nh] & 2) && (oversea || friendly_port) && MD.edges_int & WATER << 5 * j && !non_neutral_zoi) {
                 reachable = true
                 overland_set[nh] |= 2
             }

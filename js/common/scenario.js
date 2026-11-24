@@ -281,7 +281,7 @@ function check_supply_line(hex1, hex2, faction) {
         const MD = get_map_data(item)
         const overland = set_has(overland_set, item)
         const non_neutral_zoi_s = (G.supply_cache[item] & JP_ZOI << (1 - faction) && !(G.supply_cache[item] & JP_ZOI_NTRL << (1 - faction)))
-        const enemy_port_s = (MD.port && is_space_controlled(item, 1 - faction))
+        const friendly_port_s = supply_port(item, faction)
         const occupied_land_s = G.supply_cache[item] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[item] & JP_GAH_UNITS << faction)
         const oversea = set_has(oversea_set, item)
         for (let j = 0; j < nh_list.length; j++) {
@@ -290,14 +290,14 @@ function check_supply_line(hex1, hex2, faction) {
                 continue
             }
             var reachable = false
-            const enemy_port = enemy_port_s || (MD.port && is_space_controlled(nh, 1 - faction))
+            const friendly_port = friendly_port_s || supply_port(nh, faction)
             const occupied_land = occupied_land_s || G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
-            if (!set_has(overland_set, nh) && (overland || (MD.port && !enemy_port)) && MD.edges_int & GROUND << 5 * j && !occupied_land) {
+            if (!set_has(overland_set, nh) && (overland || friendly_port) && MD.edges_int & GROUND << 5 * j && !occupied_land) {
                 reachable = true
                 set_add(overland_set, nh)
             }
             const non_neutral_zoi = non_neutral_zoi_s || G.supply_cache[nh] & JP_ZOI << (1 - faction) && !(G.supply_cache[nh] & JP_ZOI_NTRL << (1 - faction))
-            if (!set_has(oversea_set, nh) && (oversea || (MD.port && !enemy_port)) && MD.edges_int & WATER << 5 * j && !non_neutral_zoi) {
+            if (!set_has(oversea_set, nh) && (oversea || friendly_port) && MD.edges_int & WATER << 5 * j && !non_neutral_zoi) {
                 reachable = true
                 set_add(oversea_set, nh)
             }
