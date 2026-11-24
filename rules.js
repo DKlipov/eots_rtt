@@ -16149,6 +16149,11 @@ P.kamikaze_attack = {
             button("skip")
             return
         }
+        if (L.allowed_units.length <= 0 || L.hits <= 0) {
+            prompt(`Kamikaze Attack: Done.`)
+            button("done")
+            return;
+        }
         if (L.stage === 1) {
             prompt(`Kamikaze Attack: Choose Japanese air unit.`)
             L.allowed_units.forEach(action_unit)
@@ -16171,9 +16176,6 @@ P.kamikaze_attack = {
                 action_card(SHO_GO)
                 button("bonus")
             }
-        }
-        if (L.allowed_units.length <= 0 || L.hits <= 0) {
-            button("done")
         }
     },
     skip() {
