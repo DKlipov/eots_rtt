@@ -160,7 +160,7 @@ function on_update_local_actions() {
             && G.actions
             && map_has(L.allowed_hexes, G.location[G.active_stack[0]])) {
             map_delete(L.allowed_hexes, G.location[G.active_stack[0]])
-            G.actions["no_move"] = 1
+            // G.actions["no_move"] = 1
         }
         map_for_each(L.allowed_hexes, h => set_add(G.actions.action_hex, h))
     }
