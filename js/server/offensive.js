@@ -2229,7 +2229,7 @@ function fill_hit_able_units(faction) {
         if (!could_be_damaged) {
             continue
         }
-        if (loss_factor <= hit_limit && (critical || reduced_status === 0 || piece.one_step && battle.ground_stage)) {
+        if (loss_factor <= hit_limit && (critical || reduced_status === 0)) {
             map_set(result, unit, loss_factor)
         } else if (loss_factor <= hit_limit) {
             map_set(reduced, unit, loss_factor)
