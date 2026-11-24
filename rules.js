@@ -7958,7 +7958,7 @@ function unit_or_airfield(location, faction) {
     return is_faction_units(location, faction) || get_map_data(location).airfield
 }
 
-function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
+function mark_hexes_supplied_from(hq_list, is_check_supply_space, stage = 0) {
     if (!hq_list.length) {
         return
     }
@@ -7966,8 +7966,8 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
     const faction = pieces[hq_list[0]].faction
     var second_ports = []
     var overland_ports = []
-    const oversea_set = pre_cache ? pre_cache.oversea_set : []
-    const overland_set = pre_cache ? pre_cache.overland_set : []
+    const oversea_set = []
+    const overland_set = []
     L.supply.oversea_set = oversea_set
     L.supply.overland_set = overland_set
     overland_set[LAST_BOARD_HEX] = 100
@@ -7985,6 +7985,9 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
         L.supply.queue.push(location)
         L.supply.retracing.push(location)
     })
+    if (![0, 1, 4].includes(stage)) {
+        i = L.supply.queue.length
+    }
     for (; i < L.supply.queue.length; i++) {
         let item = L.supply.queue[i]
         let nh_list = get_near_hexes(item)
@@ -8011,18 +8014,21 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
             }
             overland_set[nh] = (distance)
 
-            if (!(G.supply_cache[nh] & extended_supply_type) && is_check_supply_space(nh, faction) && supply_source_in_range(nh, faction)) {
+            if (!(G.supply_cache[nh] & extended_supply_type) && is_check_supply_space(nh, faction)
+                && [0, 1].includes(stage)
+                && supply_source_in_range(nh, faction)) {
                 G.supply_cache[nh] = G.supply_cache[nh] | supply_type
             }
         }
     }
     hq_list.forEach(hq => {
-        var piece = pieces[hq]
         var location = G.location[hq]
         L.supply.queue.push(location)
         L.supply.retracing.push(location)
     })
-
+    if (![0, 2, 3].includes(stage)) {
+        i = L.supply.queue.length
+    }
     for (; i < L.supply.queue.length; i++) {
         let item = L.supply.queue[i]
         const MD = get_map_data(item)
@@ -8061,7 +8067,9 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
     }
     overland_ports.forEach(k => L.supply.queue.push(k))
     overland_ports.forEach(k => L.supply.retracing.push(0))
-
+    if (![0, 3].includes(stage)) {
+        i = L.supply.queue.length
+    }
     for (; i < L.supply.queue.length; i++) {
         let item = L.supply.queue[i]
         let nh_list = get_near_hexes(item)
@@ -8089,6 +8097,9 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
     }
     second_ports.forEach(h => L.supply.queue.push(h))
     second_ports.forEach(h => L.supply.retracing.push(0))
+    if (![0, 4].includes(stage)) {
+        i = L.supply.queue.length
+    }
     for (; i < L.supply.queue.length; i++) {
         let item = L.supply.queue[i]
         let nh_list = get_near_hexes(item)

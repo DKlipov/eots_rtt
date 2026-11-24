@@ -7953,7 +7953,7 @@ function unit_or_airfield(location, faction) {
     return is_faction_units(location, faction) || get_map_data(location).airfield
 }
 
-function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
+function mark_hexes_supplied_from(hq_list, is_check_supply_space, stage = 0) {
     if (!hq_list.length) {
         return
     }
@@ -7961,8 +7961,8 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
     const faction = pieces[hq_list[0]].faction
     var second_ports = []
     var overland_ports = []
-    const oversea_set = pre_cache ? pre_cache.oversea_set : []
-    const overland_set = pre_cache ? pre_cache.overland_set : []
+    const oversea_set = []
+    const overland_set = []
     L.supply.oversea_set = oversea_set
     L.supply.overland_set = overland_set
     overland_set[LAST_BOARD_HEX] = 100
@@ -7980,6 +7980,9 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
         L.supply.queue.push(location)
         L.supply.retracing.push(location)
     })
+    if (![0, 1, 4].includes(stage)) {
+        i = L.supply.queue.length
+    }
     for (; i < L.supply.queue.length; i++) {
         let item = L.supply.queue[i]
         let nh_list = get_near_hexes(item)
@@ -8006,18 +8009,21 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
             }
             overland_set[nh] = (distance)
 
-            if (!(G.supply_cache[nh] & extended_supply_type) && is_check_supply_space(nh, faction) && supply_source_in_range(nh, faction)) {
+            if (!(G.supply_cache[nh] & extended_supply_type) && is_check_supply_space(nh, faction)
+                && [0, 1].includes(stage)
+                && supply_source_in_range(nh, faction)) {
                 G.supply_cache[nh] = G.supply_cache[nh] | supply_type
             }
         }
     }
     hq_list.forEach(hq => {
-        var piece = pieces[hq]
         var location = G.location[hq]
         L.supply.queue.push(location)
         L.supply.retracing.push(location)
     })
-
+    if (![0, 2, 3].includes(stage)) {
+        i = L.supply.queue.length
+    }
     for (; i < L.supply.queue.length; i++) {
         let item = L.supply.queue[i]
         const MD = get_map_data(item)
@@ -8056,7 +8062,9 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
     }
     overland_ports.forEach(k => L.supply.queue.push(k))
     overland_ports.forEach(k => L.supply.retracing.push(0))
-
+    if (![0, 3].includes(stage)) {
+        i = L.supply.queue.length
+    }
     for (; i < L.supply.queue.length; i++) {
         let item = L.supply.queue[i]
         let nh_list = get_near_hexes(item)
@@ -8084,6 +8092,9 @@ function mark_hexes_supplied_from(hq_list, is_check_supply_space, pre_cache) {
     }
     second_ports.forEach(h => L.supply.queue.push(h))
     second_ports.forEach(h => L.supply.retracing.push(0))
+    if (![0, 4].includes(stage)) {
+        i = L.supply.queue.length
+    }
     for (; i < L.supply.queue.length; i++) {
         let item = L.supply.queue[i]
         let nh_list = get_near_hexes(item)
@@ -11969,19 +11980,25 @@ function supply_query(unit) {
             return
         }
         mark_hexes_supplied_from([hq], l => l === location)
-        if (G.supply_cache[location] & piece.supply) {
-            result.hq = hq
-            L.supply.queue = L.supply.queue.slice(0, L.supply.queue.indexOf(location) + 1)
-            result.path.to_hq = retrace_supply_path(location)
-            if (L.supply.port_queue) {
-                L.supply.queue = L.supply.port_queue
-                L.supply.retracing = L.supply.port_retracing
-                result.path.to_port = retrace_supply_path(L.supply.queue[L.supply.queue.length - 1])
-                result.supply_port = result.path.to_port[0]
-                L.supply.queue = L.supply_ports.queue
-                L.supply.retracing = L.supply_ports.retracing
-                result.path.from_port = retrace_supply_path(result.supply_port)
-            }
+        if (!(G.supply_cache[location] & piece.supply)) {
+            return;
+        }
+        G.supply_cache[location] &= ~piece.supply
+        var supply_priority = [2, 1, 4, 3]
+        for (var i = 0; i < supply_priority.length && !(G.supply_cache[location] & piece.supply); i++) {
+            L.supply = {queue: []}
+            mark_hexes_supplied_from([hq], l => l === location, supply_priority[i])
+        }
+        result.hq = hq
+        result.path.to_hq = retrace_supply_path(location)
+        if (L.supply.port_queue) {
+            L.supply.queue = L.supply.port_queue
+            L.supply.retracing = L.supply.port_retracing
+            result.path.to_port = retrace_supply_path(L.supply.queue[L.supply.queue.length - 1])
+            result.supply_port = result.path.to_port[0]
+            L.supply.queue = L.supply_ports.queue
+            L.supply.retracing = L.supply_ports.retracing
+            result.path.from_port = retrace_supply_path(result.supply_port)
         }
     })
     L.supply = {queue: []}

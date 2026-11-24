@@ -615,19 +615,25 @@ function supply_query(unit) {
             return
         }
         mark_hexes_supplied_from([hq], l => l === location)
-        if (G.supply_cache[location] & piece.supply) {
-            result.hq = hq
-            L.supply.queue = L.supply.queue.slice(0, L.supply.queue.indexOf(location) + 1)
-            result.path.to_hq = retrace_supply_path(location)
-            if (L.supply.port_queue) {
-                L.supply.queue = L.supply.port_queue
-                L.supply.retracing = L.supply.port_retracing
-                result.path.to_port = retrace_supply_path(L.supply.queue[L.supply.queue.length - 1])
-                result.supply_port = result.path.to_port[0]
-                L.supply.queue = L.supply_ports.queue
-                L.supply.retracing = L.supply_ports.retracing
-                result.path.from_port = retrace_supply_path(result.supply_port)
-            }
+        if (!(G.supply_cache[location] & piece.supply)) {
+            return;
+        }
+        G.supply_cache[location] &= ~piece.supply
+        var supply_priority = [2, 1, 4, 3]
+        for (var i = 0; i < supply_priority.length && !(G.supply_cache[location] & piece.supply); i++) {
+            L.supply = {queue: []}
+            mark_hexes_supplied_from([hq], l => l === location, supply_priority[i])
+        }
+        result.hq = hq
+        result.path.to_hq = retrace_supply_path(location)
+        if (L.supply.port_queue) {
+            L.supply.queue = L.supply.port_queue
+            L.supply.retracing = L.supply.port_retracing
+            result.path.to_port = retrace_supply_path(L.supply.queue[L.supply.queue.length - 1])
+            result.supply_port = result.path.to_port[0]
+            L.supply.queue = L.supply_ports.queue
+            L.supply.retracing = L.supply_ports.retracing
+            result.path.from_port = retrace_supply_path(result.supply_port)
         }
     })
     L.supply = {queue: []}
