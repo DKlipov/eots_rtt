@@ -5315,7 +5315,7 @@ const map = [
     {id: 3702, terrain: OCEAN, edges: [1, 1, 1, 1, 1, 0]},
     {id: 3701, terrain: OCEAN, edges: [1, 1, 1, 1, 0, 0]},
     {id: 3700, terrain: OCEAN, edges: [0, 1, 1, 1, 0, 0]},
-    {id: 1005, name: "Maldive Is.", region: "Maldive", airfield: true, port: true, terrain: OPEN, island: true},
+    {id: 1005, name: "Maldive Is.", region: "Maldives", airfield: true, port: true, terrain: OPEN, island: true},
     {
         id: 1307,
         name: "Colombo",
@@ -10377,7 +10377,7 @@ function map_for_each(map, f) {
 /* {{{ js/client/utils.js */
 /* MISC CLIENT STUFF */
 
-const BR_REGIONS = ["India", "Ceylon", "NIndia", "Burma", "Siam", "Malaya", "Sumatra", "Indochina", "IChina", "Maldive"]
+const BR_REGIONS = ["India", "Ceylon", "NIndia", "Burma", "Siam", "Malaya", "Sumatra", "Indochina", "IChina", "Maldives"]
 const BR_NATIONS = [-3, nations.AUSTRALIA.id, nations.BURMA.id, nations.MALAYA.id]
 const JP_REGIONS = ["JMandates", "Korea", "Manchuria", "China", "Formosa", "Indochina", "Caroline", "Japan", "Marshall"]
 
@@ -13482,7 +13482,7 @@ const DIGIT_SUPERSCRIPT = [
 ]
 const REGION_MAP = {
     "Ceylon": "Ceylon",
-    "Maldive": "Maldive",
+    "Maldives": "Maldives",
     "Sumatra": "Sumatra (DEI)",
     "NIndia": "North India",
     "Java": "Java (DEI)",

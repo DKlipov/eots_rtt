@@ -74,7 +74,7 @@ const map = [
     {id: 3702, terrain: OCEAN, edges: [1, 1, 1, 1, 1, 0]},
     {id: 3701, terrain: OCEAN, edges: [1, 1, 1, 1, 0, 0]},
     {id: 3700, terrain: OCEAN, edges: [0, 1, 1, 1, 0, 0]},
-    {id: 1005, name: "Maldive Is.", region: "Maldive", airfield: true, port: true, terrain: OPEN, island: true},
+    {id: 1005, name: "Maldive Is.", region: "Maldives", airfield: true, port: true, terrain: OPEN, island: true},
     {
         id: 1307,
         name: "Colombo",
