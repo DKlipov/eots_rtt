@@ -15160,7 +15160,7 @@ P.future_offensive = {
         }
     },
     end_action() {
-        log(`${(G.active === JP)?"#J":"#A"}${side_get_log_str(G.active)} did not play FO card.`)
+        log(`${(G.active === JP)?"#J":"#A"}${side_get_log_str(G.active)} did not play FO card`)
         end()
     },
 }
