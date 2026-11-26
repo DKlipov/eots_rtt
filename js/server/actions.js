@@ -66,12 +66,15 @@ P.return_hq = {
     },
     prompt() {
         if (!G.active_stack.length) {
-            prompt(`Choose an HQ to return.`)
+            var hqs=[]
             HQ_LIST.forEach(u => {
                 if (G.location[u] > TURN_BOX && pieces[u].faction === R) {
-                    action_unit(u)
+                    hqs.push(u)
                 }
             })
+            hqs.forEach(action_unit)
+            prompt(`Choose an HQ to return: ${units_str(hqs)}.`)
+
         } else {
             prompt(`Return ${unit_get_log_str(G.active_stack[0])} to a friendly controlled port.`)
             G.allowed_hexes.forEach(action_hex)

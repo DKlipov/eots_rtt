@@ -5341,7 +5341,7 @@ const map = [
         terrain: MIXED,
         edges: [3, 1, 1, 1, 1, 3]
     },
-    {id: 1208, terrain: MIXED, edges: [1, 3, 3, 1, 1, 1]},
+    {id: 1208, region: "Ceylon", terrain: MIXED, edges: [1, 3, 3, 1, 1, 1]},
     {id: 1206, region: "India", terrain: OPEN, edges: [1, 0, 3, 1, 1, 1]},
     {id: 1306, region: "India", terrain: OPEN, edges: [0, 3, 1, 1, 1, 3]},
     {
@@ -14915,12 +14915,15 @@ P.return_hq = {
     },
     prompt() {
         if (!G.active_stack.length) {
-            prompt(`Choose an HQ to return.`)
+            var hqs=[]
             HQ_LIST.forEach(u => {
                 if (G.location[u] > TURN_BOX && pieces[u].faction === R) {
-                    action_unit(u)
+                    hqs.push(u)
                 }
             })
+            hqs.forEach(action_unit)
+            prompt(`Choose an HQ to return: ${units_str(hqs)}.`)
+
         } else {
             prompt(`Return ${unit_get_log_str(G.active_stack[0])} to a friendly controlled port.`)
             G.allowed_hexes.forEach(action_hex)

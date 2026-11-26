@@ -5336,7 +5336,7 @@ const map = [
         terrain: MIXED,
         edges: [3, 1, 1, 1, 1, 3]
     },
-    {id: 1208, terrain: MIXED, edges: [1, 3, 3, 1, 1, 1]},
+    {id: 1208, region: "Ceylon", terrain: MIXED, edges: [1, 3, 3, 1, 1, 1]},
     {id: 1206, region: "India", terrain: OPEN, edges: [1, 0, 3, 1, 1, 1]},
     {id: 1306, region: "India", terrain: OPEN, edges: [0, 3, 1, 1, 1, 3]},
     {
