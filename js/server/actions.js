@@ -66,7 +66,7 @@ P.return_hq = {
     },
     prompt() {
         if (!G.active_stack.length) {
-            var hqs=[]
+            var hqs = []
             HQ_LIST.forEach(u => {
                 if (G.location[u] > TURN_BOX && pieces[u].faction === R) {
                     hqs.push(u)
@@ -309,8 +309,7 @@ P.future_offensive = {
         }
     },
     end_action() {
-        if (!L.impossible)
-            log(`${side_get_log_str(G.active)} did not play FO card.`)
+        log(`${(G.active === JP)?"#J":"#A"}${side_get_log_str(G.active)} did not play FO card.`)
         end()
     },
 }
