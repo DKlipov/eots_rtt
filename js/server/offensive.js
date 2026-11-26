@@ -2807,7 +2807,7 @@ P.broken_aa = {
             set_delete(battle.ground[G.offensive.attacker], u)
             set_add(G.offensive.ground_pbm, u)
         })
-        log("Amphibious assault failed due to lack of naval escort.")
+        log(">Amphibious assault failed due to lack of naval escort.")
         if (G.async) {
             L.allowed_units.forEach(u => this.unit(u))
             this.done()

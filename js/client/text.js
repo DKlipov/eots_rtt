@@ -15,7 +15,8 @@ const DIGIT_SUPERSCRIPT = [
     "\u207E",
 ]
 const REGION_MAP = {
-    "Ceylon": "Indian Isl.",
+    "Ceylon": "Ceylon",
+    "Maldive": "Maldive",
     "Sumatra": "Sumatra (DEI)",
     "NIndia": "North India",
     "Java": "Java (DEI)",

@@ -109,7 +109,7 @@ function get_hq_reinforcement_hexes() {
         const MD = get_map_data(item)
         const overland = overland_set[item] & 1
         const non_neutral_zoi_s = has_non_n_zoi(item, 1 - faction)
-        const friendly_port_s = supply_port(item,faction)
+        const friendly_port_s = supply_port(item, faction)
         const occupied_land_s = G.supply_cache[item] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[item] & JP_GAH_UNITS << faction)
         const oversea = overland_set[item] & 2
         for (var j = 0; j < nh_list.length; j++) {
@@ -118,7 +118,7 @@ function get_hq_reinforcement_hexes() {
                 continue
             }
             var reachable = false
-            const friendly_port = friendly_port_s || supply_port(nh,faction)
+            const friendly_port = friendly_port_s || supply_port(nh, faction)
             const occupied_land = occupied_land_s || G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
             if (!(overland_set[nh] & 1) && (overland || friendly_port) && MD.edges_int & GROUND << 5 * j && !occupied_land) {
                 reachable = true
@@ -370,10 +370,14 @@ P.replacement_segment = {
         var not_used_unground = L.divisions_used <= 0 || L.replacement_points[GROUND_REP] <= 0
         if (G.active_stack.length > 0) {
             prompt(`Replacements: Place ${unit_get_log_str(G.active_stack[0])}.`)
-            if (not_used_unground)
+            if (!not_used_unground)
                 V.prompt += " Ground replacements should be spent."
 
             L.allowed_hexes.forEach(action_hex)
+            if (L.allowed_hexes.length === 0) {
+                V.prompt += " No valid placement hex exists."
+                return
+            }
             ru.forEach(u => {
                 if (G.location[u] === ELIMINATED_BOX)
                     action_unit(u)

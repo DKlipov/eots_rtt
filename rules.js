@@ -5320,7 +5320,7 @@ const map = [
     {id: 3702, terrain: OCEAN, edges: [1, 1, 1, 1, 1, 0]},
     {id: 3701, terrain: OCEAN, edges: [1, 1, 1, 1, 0, 0]},
     {id: 3700, terrain: OCEAN, edges: [0, 1, 1, 1, 0, 0]},
-    {id: 1005, name: "Maldive Is.", region: "Ceylon", airfield: true, port: true, terrain: OPEN, island: true},
+    {id: 1005, name: "Maldive Is.", region: "Maldive", airfield: true, port: true, terrain: OPEN, island: true},
     {
         id: 1307,
         name: "Colombo",
@@ -6409,9 +6409,9 @@ const map = [
     {id: 3814, name: "Guam", airfield: true, region: "Oceania", terrain: MIXED, island: true},
     {id: 4612, name: "Wake", airfield: true, region: "Oceania", terrain: ATOLL},
     {id: 5108, name: "Midway", airfield: true, region: "Oceania", terrain: ATOLL},
-    {id: 5708, name: "Kauai", airfield: true, region: "Oceania", terrain: MIXED, island: true},
-    {id: 5808, name: "Oahu", city: CITY, airfield: true, port: true, region: "Oceania", terrain: MIXED, island: true},
-    {id: 5908, name: "Hilo", city: CITY, airfield: true, region: "Oceania", terrain: MIXED, island: true},
+    {id: 5708, name: "Kauai", airfield: true, region: "Hawaii", terrain: MIXED, island: true},
+    {id: 5808, name: "Oahu", city: CITY, airfield: true, port: true, region: "Hawaii", terrain: MIXED, island: true},
+    {id: 5908, name: "Hilo", city: CITY, airfield: true, region: "Hawaii", terrain: MIXED, island: true},
     {id: 4200, region: "Oceania", terrain: OCEAN, edges: [0, 0, 1, 1, 0, 0]},
     {id: 4100, region: "Oceania", terrain: OCEAN, edges: [0, 0, 1, 1, 1, 1]},
     {id: 4600, name: "Attu/Kiska", region: "Alaska", terrain: MIXED, island: true},
@@ -10523,7 +10523,7 @@ function get_hq_reinforcement_hexes() {
         const MD = get_map_data(item)
         const overland = overland_set[item] & 1
         const non_neutral_zoi_s = has_non_n_zoi(item, 1 - faction)
-        const friendly_port_s = supply_port(item,faction)
+        const friendly_port_s = supply_port(item, faction)
         const occupied_land_s = G.supply_cache[item] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[item] & JP_GAH_UNITS << faction)
         const oversea = overland_set[item] & 2
         for (var j = 0; j < nh_list.length; j++) {
@@ -10532,7 +10532,7 @@ function get_hq_reinforcement_hexes() {
                 continue
             }
             var reachable = false
-            const friendly_port = friendly_port_s || supply_port(nh,faction)
+            const friendly_port = friendly_port_s || supply_port(nh, faction)
             const occupied_land = occupied_land_s || G.supply_cache[nh] & JP_GAH_UNITS << (1 - faction) && !(G.supply_cache[nh] & JP_GAH_UNITS << faction)
             if (!(overland_set[nh] & 1) && (overland || friendly_port) && MD.edges_int & GROUND << 5 * j && !occupied_land) {
                 reachable = true
@@ -10784,10 +10784,14 @@ P.replacement_segment = {
         var not_used_unground = L.divisions_used <= 0 || L.replacement_points[GROUND_REP] <= 0
         if (G.active_stack.length > 0) {
             prompt(`Replacements: Place ${unit_get_log_str(G.active_stack[0])}.`)
-            if (not_used_unground)
+            if (!not_used_unground)
                 V.prompt += " Ground replacements should be spent."
 
             L.allowed_hexes.forEach(action_hex)
+            if (L.allowed_hexes.length === 0) {
+                V.prompt += " No valid placement hex exists."
+                return
+            }
             ru.forEach(u => {
                 if (G.location[u] === ELIMINATED_BOX)
                     action_unit(u)
@@ -13707,7 +13711,7 @@ P.broken_aa = {
             set_delete(battle.ground[G.offensive.attacker], u)
             set_add(G.offensive.ground_pbm, u)
         })
-        log("Amphibious assault failed due to lack of naval escort.")
+        log(">Amphibious assault failed due to lack of naval escort.")
         if (G.async) {
             L.allowed_units.forEach(u => this.unit(u))
             this.done()
@@ -14925,7 +14929,7 @@ P.return_hq = {
     unit(u) {
         push_undo()
         G.active_stack = [u]
-        var allied_regions = ["Australia", "AMandates", "India", "NIndia", "Ceylon"]
+        var allied_regions = ["Australia", "AMandates", "India", "NIndia", "Ceylon", "Hawaii"]
         G.allowed_hexes = get_unit_reinforcement_hexes(u).filter(h => {
             var piece = pieces[u]
             var region = get_map_data(h).region

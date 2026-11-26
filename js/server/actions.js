@@ -80,7 +80,7 @@ P.return_hq = {
     unit(u) {
         push_undo()
         G.active_stack = [u]
-        var allied_regions = ["Australia", "AMandates", "India", "NIndia", "Ceylon"]
+        var allied_regions = ["Australia", "AMandates", "India", "NIndia", "Ceylon", "Hawaii"]
         G.allowed_hexes = get_unit_reinforcement_hexes(u).filter(h => {
             var piece = pieces[u]
             var region = get_map_data(h).region
