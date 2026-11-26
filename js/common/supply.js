@@ -68,6 +68,8 @@ function fast_check_supply() {
         var mask = G.supply_cache[SINGAPORE] & JP_UNITS
         G.supply_cache[SINGAPORE] ^= (mask)
     }
+    mark_supply_eligable_ports(AP)
+    mark_supply_eligable_ports(JP)
     L.supply = 0
 }
 

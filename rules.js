@@ -7550,6 +7550,8 @@ function fast_check_supply() {
         var mask = G.supply_cache[SINGAPORE] & JP_UNITS
         G.supply_cache[SINGAPORE] ^= (mask)
     }
+    mark_supply_eligable_ports(AP)
+    mark_supply_eligable_ports(JP)
     L.supply = 0
 }
 
@@ -14966,6 +14968,7 @@ P.offensive_segment = {
         if (G.active === AP) {
             G.offensive.weather_rollback = copy_state()
         }
+        check_supply()
     },
     inactive: "play a card",
     prompt() {
@@ -15203,22 +15206,6 @@ function get_infrastructure_actions() {
         return ["imphal"]
     }
     return []
-}
-
-function get_event_infrastructure_actions() {
-    if (!is_event_active(events.JARHAT_ROAD) && is_space_controlled(JARHAT,) && !is_faction_units(JARHAT, JP)) {
-        return ["jarhat"]
-    } else if (is_faction_units(JARHAT, JP)) {
-        return []
-    }
-    var result = []
-    if (!is_event_active(events.LEDO_ROAD) && !is_faction_units(LEDO, JP)) {
-        result.push("ledo")
-    }
-    if (!is_event_active(events.IMPHAL_ROAD) && !is_faction_units(IMPHAL, JP)) {
-        result.push("imphal")
-    }
-    return result
 }
 
 function get_allowed_actions(num) {
