@@ -10786,8 +10786,6 @@ P.replacement_segment = {
         var not_used_unground = L.divisions_used <= 0 || L.replacement_points[GROUND_REP] <= 0
         if (G.active_stack.length > 0) {
             prompt(`Replacements: Place ${unit_get_log_str(G.active_stack[0])}.`)
-            if (!not_used_unground)
-                V.prompt += " Ground replacements should be spent."
 
             L.allowed_hexes.forEach(action_hex)
             if (L.allowed_hexes.length === 0) {
@@ -10818,6 +10816,9 @@ P.replacement_segment = {
             prompt(`Replacements: Done.`)
         else
             prompt(`Replacements: Reinforce ${print_reinforcements()}.`)
+
+        if (!not_used_unground)
+            V.prompt += " Ground replacements should be spent."
         ru.forEach(action_unit)
 
     },
