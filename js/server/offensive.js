@@ -792,7 +792,7 @@ P.move_offensive_units = {
             if (G.offensive.stage === ATTACK_STAGE && pieces[G.active_stack[0]].class === "air") {
                 action_box(TURN_BOX + G.turn + 1)
             }
-            if (G.offensive.stage === ATTACK_STAGE && G.offensive.organic.length > 0) {
+            if (G.offensive.stage === ATTACK_STAGE && G.offensive.organic.length > 0 && G.active_stack.find(u=>G.offensive.organic.includes(u))) {
                 button("no_organic")
             }
             let loc = G.location[G.active_stack[0]]
