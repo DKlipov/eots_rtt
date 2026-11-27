@@ -45,7 +45,7 @@ P.offensive_sequence = script(`
     set G.offensive.stage BATTLE_STAGE
     call apply_attack_reaction
     call broken_organic
-    if (G.offensive.active_hq[G.active]) {
+    if (G.offensive.active_hq[1-G.offensive.attacker] && G.active === (1-G.offensive.attacker)) {
         call commit_offensive
     }
     
@@ -792,7 +792,7 @@ P.move_offensive_units = {
             if (G.offensive.stage === ATTACK_STAGE && pieces[G.active_stack[0]].class === "air") {
                 action_box(TURN_BOX + G.turn + 1)
             }
-            if (G.offensive.stage === ATTACK_STAGE && G.offensive.organic.length > 0 && G.active_stack.find(u=>G.offensive.organic.includes(u))) {
+            if (G.offensive.stage === ATTACK_STAGE && G.offensive.organic.length > 0 && G.active_stack.find(u => G.offensive.organic.includes(u))) {
                 button("no_organic")
             }
             let loc = G.location[G.active_stack[0]]
@@ -2116,7 +2116,9 @@ P.apply_attack_reaction = {
         }
         if (!L.allowed_cards.length) {
             this.done()
+            return
         }
+        G.active = 1 - G.offensive.attacker
     },
     inactive: "apply reaction cards",
     prompt() {
@@ -2851,9 +2853,12 @@ P.broken_organic = {
     inactive: "organic transport units eliminated",
     prompt() {
         L.allowed_units.forEach(action_unit)
-        prompt(`Organic naval transport eliminated: Eliminate transported ${units_str(L.allowed_units)}.`)
+        prompt(`Organic naval transport eliminated: `)
         if (!L.allowed_units.length) {
+            V.prompt += "Done."
             button("done")
+        } else {
+            V.prompt += `Eliminate transported ${units_str(L.allowed_units)}.`
         }
     },
     unit(unit) {

@@ -1512,7 +1512,6 @@ P.submarine_attack = {
         L.hits -= 1
     },
     done() {
-        G.active = cards[L.card].faction
         end()
     }
 }
