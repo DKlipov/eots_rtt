@@ -7746,10 +7746,10 @@ function set_zoi(i, piece, oos_units) {
     }
 }
 
-function check_hq_in_supply(hq, piece, supply) {
+function check_hq_in_supply(hq, piece, supply, enforced_trace = false) {
     const faction = piece.faction
     const location = G.location[hq]
-    if (location < LAST_BOARD_HEX && G.offensive.active_hq.includes(hq)) {
+    if (location < LAST_BOARD_HEX && !enforced_trace && G.offensive.active_hq.includes(hq)) {
         return true
     }
     L.supply.retracing = [location]
@@ -11387,11 +11387,11 @@ P.activate_units = {
             return
         }
         var piece = pieces[hq]
-        L.supply = {}
         check_supply()
-        if ((piece.service === "joint" || piece.service === "us") && !check_hq_in_supply(hq, piece, US_SUPPLIED_HEX)) {
+        L.supply = {}
+        if ((piece.service === "joint" || piece.service === "us") && !check_hq_in_supply(hq, piece, US_SUPPLIED_HEX, true)) {
             L.joint_disadvantage = 1
-            log("-1 activation (US Line of Communication).")
+            log(">-1 activation (US Line of Communication).")
         }
         L.supply = 0
         L.possible_units = get_activatable_units(hq, pieces[hq].supply)

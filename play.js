@@ -7741,10 +7741,10 @@ function set_zoi(i, piece, oos_units) {
     }
 }
 
-function check_hq_in_supply(hq, piece, supply) {
+function check_hq_in_supply(hq, piece, supply, enforced_trace = false) {
     const faction = piece.faction
     const location = G.location[hq]
-    if (location < LAST_BOARD_HEX && G.offensive.active_hq.includes(hq)) {
+    if (location < LAST_BOARD_HEX && !enforced_trace && G.offensive.active_hq.includes(hq)) {
         return true
     }
     L.supply.retracing = [location]
@@ -12011,7 +12011,7 @@ function supply_query(unit) {
     if (result.hq) {
         var sh = G.offensive.active_hq
         G.offensive.active_hq = []
-        check_hq_in_supply(result.hq, pieces[result.hq], piece.faction === AP ? JOINT_SUPPLIED_HEX : JP_SUPPLIED_HEX)
+        check_hq_in_supply(result.hq, pieces[result.hq], piece.faction === AP ? JOINT_SUPPLIED_HEX : JP_SUPPLIED_HEX, true)
         G.offensive.active_hq = sh
         if (L.supply.queue.length) {
             result.path.to_source = retrace_supply_path(L.supply.queue[L.supply.queue.length - 1])
